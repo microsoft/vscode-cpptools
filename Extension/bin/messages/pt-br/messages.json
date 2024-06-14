@@ -3585,5 +3585,21 @@
     "falha na chamada para std::meta::substitute (para %r)",
     "o valor de reflexão refere-se à entidade inativa",
     "uma expressão splice deve unir um valor constante, uma variável ou uma função",
-    "uma splice de acesso de membro deve corresponder a um membro de dados ou uma função membro"
+    "uma splice de acesso de membro deve corresponder a um membro de dados ou uma função membro",
+    "membro %nd não é um membro direto ou indireto de %t",
+    "o nome %sq não designa um caractere Unicode conhecido",
+    "escape de caractere Unicode nomeado não finalizado",
+    "o caractere não pode aparecer em um nome Unicode",
+    "escape de caractere Unicode nomeado vazio",
+    "esperava um '[:'",
+    "esperava um ':]'",
+    "uma expressão lambda não pode ser 'mutável' e 'static'",
+    "uma expressão lambda 'static' não é padrão",
+    "uma expressão lambda 'static' deve ter uma especificação de captura vazia",
+    "Unidade de cabeçalho EDG IFC",
+    "EDG IFC",
+    "não foi possível criar uma unidade de cabeçalho para a unidade de tradução atual",
+    "a unidade de tradução atual usa um ou mais recursos que não podem ser gravados atualmente em uma unidade de cabeçalho",
+    "'explicit(bool)' é um recurso do C++20",
+    "um nome de módulo deve ser especificado para o mapa do arquivo de módulo que faz referência ao arquivo %sq"
 ]

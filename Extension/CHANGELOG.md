@@ -1,37 +1,24 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.20.4: March 2, 2024
+## Version 1.21.0: June 13, 2024
 ### Bug Fixes
-* Fix a couple crashes.
+* Stop logging file watch events for excluded files. [#11455](https://github.com/microsoft/vscode-cpptools/issues/11455)
+* Fix handling of `-isystem` and `-iquote` for IntelliSense configuration. [#12207](https://github.com/microsoft/vscode-cpptools/issues/12207)
+* Fix doxygen comment generation when `/**` comments are used. [#12249](https://github.com/microsoft/vscode-cpptools/issues/12249)
+* Fix a code analysis crash on Linux if the message is too long. [#12285](https://github.com/microsoft/vscode-cpptools/issues/12285)
+* Fix a regression with cl.exe system include path detection. [#12293](https://github.com/microsoft/vscode-cpptools/issues/12293)
+* Fix handling of doxygen comment blocks with `*//*` in them. [#12316](https://github.com/microsoft/vscode-cpptools/issues/12316)
+* Fix a crash during IntelliSense process shutdown. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
+* Update the default clang/gcc versions used for IntelliSense if an unknown version is found.
+* Update clang-format and clang-tidy from 18.1.2 to 18.1.7 (for the bug fixes).
 
-## Version 1.20.3: April 30, 2024
-### Enhancement
-* Log `cpptools` and `cpptool-srv` crash call stacks in the 'C/C++ Crash Call Stacks' Output channel for bug reporting (on x64 Linux and x64/arm64 Mac).
-
-### Bug Fixes
-* Fix directories being incorrectly recursively traversed in certain cases. [#11993](https://github.com/microsoft/vscode-cpptools/issues/11993)
-* Fix a crash during startup. [#12237](https://github.com/microsoft/vscode-cpptools/issues/12237)
-* Fix IntelliSense configuration on Windows ARM64. [#12253](https://github.com/microsoft/vscode-cpptools/issues/12253)
-
-## Version 1.20.2: April 22, 2024
-### Bug Fixes
-* Fix non-existent relative path variables not showing a warning in `c_cpp_properties.json` (and other related issues). [#12089](https://github.com/microsoft/vscode-cpptools/issues/12089)
-* Fix duplicate URIs in calls to provideConfigurations. [#12177](https://github.com/microsoft/vscode-cpptools/issues/12177)
-* Fix a crash and deadlock with a high `C_Cpp.loggingLevel`. [#12194](https://github.com/microsoft/vscode-cpptools/issues/12194)
-* Fix handling of `-iquote` for code analysis and `#include` completions. [#12198](https://github.com/microsoft/vscode-cpptools/issues/12198)
-
-## Version 1.20.1: April 9, 2024
-### Bug Fixes
-* Fix 'Add #include' code actions for code scoped by a namespace or class. [#11541](https://github.com/microsoft/vscode-cpptools/issues/11541)
-* Fix the IntelliSense server not starting when a completion, signature help, or document highlight occurs from external commands. [#12143](https://github.com/microsoft/vscode-cpptools/issues/12143)
-* Fix the IntelliSense configuration not falling back to the `c_cpp_properties.json` configuration for a file not handled by a configuration provider. [#12144](https://github.com/microsoft/vscode-cpptools/issues/12144)
-
-## Version 1.20.0: March 26, 2024
+## Version 1.20.5: May 6, 2024
 ### Enhancements
 * Add support for C++ modules IFC version 0.43. [#10843](https://github.com/microsoft/vscode-cpptools/issues/10843)
 * Add support for `${userHome}` in `c_cpp_properties.json`. [#11756](https://github.com/microsoft/vscode-cpptools/issues/11756)
 * Reduce the default max workspace symbol search results and add `C_Cpp.maxSymbolSearchResults`. [PR #12131](https://github.com/microsoft/vscode-cpptools/pull/12131)
 * Update `clang-format`/`clang-tidy` to 18.1.2. [PR #12135](https://github.com/microsoft/vscode-cpptools/pull/12135)
+* Log `cpptools` and `cpptools-srv` crash call stacks in the 'C/C++ Crash Call Stacks' Output channel for bug reporting (on x64 Linux and x64/arm64 Mac).
 * Increase the fuzzy symbol character limit from 16 to 28.
 * Update the IntelliSense engine.
 
@@ -39,15 +26,25 @@
 * Fix an IntelliSense parsing issue. [#6183](https://github.com/microsoft/vscode-cpptools/issues/6183)
 * Fix 'Copy Declaration / Definition' code not being formatted. [#10956](https://github.com/microsoft/vscode-cpptools/issues/10956)
 * Fix semantic colorization of certain macro arguments. [#11416](https://github.com/microsoft/vscode-cpptools/issues/11416)
+* Fix 'Add #include' code actions for code scoped by a namespace or class. [#11541](https://github.com/microsoft/vscode-cpptools/issues/11541)
 * Fix 'Create Declaration / Definition' not working if the cursor isn't on the function name. [#11834](https://github.com/microsoft/vscode-cpptools/issues/11834)
 * Fix duplicate 'Add #include' code actions. [#11989](https://github.com/microsoft/vscode-cpptools/issues/11989)
+* Fix directories being incorrectly recursively traversed in certain cases. [#11993](https://github.com/microsoft/vscode-cpptools/issues/11993)
 * Fix `forcedInclude` resolution for relative paths. [PR #12035](https://github.com/microsoft/vscode-cpptools/pull/12035)
 * Fix 'Add Configuration...' in `launch.json` when `editor.suggest.showSnippets` is `false`. [#12059](https://github.com/microsoft/vscode-cpptools/issues/12059)
 * Fix `c_cpp_properties.json` warnings for `includePath`s with `**` wildcard glob patterns. [#12070](https://github.com/microsoft/vscode-cpptools/issues/12070)
+* Fix non-existent relative path variables not showing a warning in `c_cpp_properties.json` (and other related issues). [#12089](https://github.com/microsoft/vscode-cpptools/issues/12089)
 * Fix call stacks for `cpptools` and `cpptools-srv` not being available on Linux. [#12091](https://github.com/microsoft/vscode-cpptools/issues/12091)
 * Fix IntelliSense processes shutting down immediately if not enough memory is detected. [#12126](https://github.com/microsoft/vscode-cpptools/issues/12126)
 * Fix code analysis aborting after encountering an excluded file (instead of just skipping it). [#12127](https://github.com/microsoft/vscode-cpptools/issues/12127)
 * Fix `"Cannot open source"` errors on missing includes not appearing if `C_Cpp.errorSquiggles` is `enabled`. [#12134](https://github.com/microsoft/vscode-cpptools/issues/12134)
+* Fix the IntelliSense server not starting when a completion, signature help, or document highlight occurs from external commands. [#12143](https://github.com/microsoft/vscode-cpptools/issues/12143)
+* Fix the IntelliSense configuration not falling back to the `c_cpp_properties.json` configuration for a file not handled by a configuration provider. [#12144](https://github.com/microsoft/vscode-cpptools/issues/12144)
+* Fix duplicate URIs in calls to provideConfigurations. [#12177](https://github.com/microsoft/vscode-cpptools/issues/12177)
+* Fix a crash and deadlock with a high `C_Cpp.loggingLevel`. [#12194](https://github.com/microsoft/vscode-cpptools/issues/12194)
+* Fix handling of `-iquote` for code analysis and `#include` completions. [#12198](https://github.com/microsoft/vscode-cpptools/issues/12198)
+* Fix a crash during startup. [#12237](https://github.com/microsoft/vscode-cpptools/issues/12237)
+* Fix IntelliSense configuration on Windows ARM64. [#12253](https://github.com/microsoft/vscode-cpptools/issues/12253)
 * Fix a `cpptools` process crash and deadlock during shutdown.
 
 ## Version 1.19.9: March 20, 2024

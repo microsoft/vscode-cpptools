@@ -33,3 +33,18 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
 ```
 * The first parameter to localize should be a unique key for that string, not used by any other call to localize() in the file unless representing the same string.  The second parameter is the string to localize.  Both of these parameters must be string literals.  Tokens such as {0} and {1} are supported in the localizable string, with replacement values passed as additional parameters to localize().
+
+## Contributor License Agreement
+
+This project welcomes contributions and suggestions. Most contributions require you to
+agree to a Contributor License Agreement (CLA) declaring that you have the right to,
+and actually do, grant us the rights to use your contribution. For details, visit
+https://cla.microsoft.com.
+
+When you submit a pull request, a CLA-bot will automatically determine whether you need
+to provide a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the
+instructions provided by the bot. You will only need to do this once across all repositories using our CLA.
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
+or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.

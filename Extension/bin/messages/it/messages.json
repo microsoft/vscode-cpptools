@@ -3585,5 +3585,21 @@
     "chiamata a std::meta::substitute (per %r) non riuscita",
     "il valore di reflection fa riferimento all'entità inattiva",
     "una giunzione di espressione deve creare una giunzione di un valore costante, una variabile o una funzione",
-    "una splice di accesso a un membro deve creare una splice di un membro dati o di una funzione membro"
+    "una splice di accesso a un membro deve creare una splice di un membro dati o di una funzione membro",
+    "il membro %nd non è un membro diretto o indiretto di %t",
+    "il nome %sq non definisce un carattere Unicode noto",
+    "carattere di escape Unicode senza terminazione",
+    "il carattere non può essere visualizzato in un nome Unicode",
+    "carattere di escape Unicode vuoto",
+    "è previsto un '[:'",
+    "è previsto un ':]'",
+    "un'espressione lambda non può essere sia 'mutable' sia 'static'",
+    "espressione lambda 'static' non conforme allo standard",
+    "un'espressione lambda 'static' deve avere una specifica di acquisizione vuota",
+    "Unità di intestazione IFC EDG",
+    "EDG IFC",
+    "Non è possibile creare un'unità di intestazione per l'unità di conversione corrente",
+    "l'unità di conversione corrente utilizza una o più funzionalità che attualmente non possono essere scritte in un'unità di intestazione",
+    "'explicit(bool)' è una funzionalità di C++20",
+    "è necessario specificare un nome modulo per la mappa dei file del modulo che fa riferimento al file %sq"
 ]
