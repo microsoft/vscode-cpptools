@@ -3600,6 +3600,5 @@
     "EDG IFC",
     "no se pudo crear una unidad de encabezado para la unidad de traducción actual",
     "la unidad de traducción actual usa una o varias características que no se pueden escribir actualmente en una unidad de encabezado",
-    "'explicit(bool)' es una característica de C++20",
-    "se debe especificar un nombre de módulo para la asignación de archivos de módulo que hace referencia al archivo %sq"
+    "'explicit(bool)' es una característica de C++20"
 ]
