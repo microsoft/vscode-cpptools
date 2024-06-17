@@ -3600,6 +3600,5 @@
     "EDG IFC",
     "Non è possibile creare un'unità di intestazione per l'unità di conversione corrente",
     "l'unità di conversione corrente utilizza una o più funzionalità che attualmente non possono essere scritte in un'unità di intestazione",
-    "'explicit(bool)' è una funzionalità di C++20",
-    "è necessario specificare un nome modulo per la mappa dei file del modulo che fa riferimento al file %sq"
+    "'explicit(bool)' è una funzionalità di C++20"
 ]
