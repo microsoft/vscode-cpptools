@@ -3600,6 +3600,5 @@
     "EDG IFC",
     "pro aktuální jednotku překladu se nepovedlo vytvořit jednotku hlavičky",
     "aktuální jednotka překladu používá jednu nebo více funkcí, které se v tuto chvíli nedají zapsat do jednotky hlavičky",
-    "explicit(bool) je funkcí C++20",
-    "musí být zadán název modulu pro mapování souboru modulu odkazující na soubor %sq"
+    "explicit(bool) je funkcí C++20"
 ]

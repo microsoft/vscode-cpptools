@@ -3600,6 +3600,5 @@
     "EDG IFC",
     "geçerli çeviri birimi için bir başlık birimi oluşturulamadı",
     "mevcut çeviri birimi şu anda bir başlık birimine yazılamayan bir veya daha fazla özellik kullanıyorsa",
-    "'explicit(bool)' bir C++20 özelliğidir",
-    "%sq dosyasına başvuran modül dosyası eşlemesi için bir modül adı belirtilmelidir"
+    "'explicit(bool)' bir C++20 özelliğidir"
 ]
