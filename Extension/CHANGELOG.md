@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.21.0: June 13, 2024
+## Version 1.21.0: June 17, 2024
 ### Bug Fixes
 * Stop logging file watch events for excluded files. [#11455](https://github.com/microsoft/vscode-cpptools/issues/11455)
 * Fix handling of `-isystem` and `-iquote` for IntelliSense configuration. [#12207](https://github.com/microsoft/vscode-cpptools/issues/12207)
