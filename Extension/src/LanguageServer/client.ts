@@ -533,13 +533,11 @@ interface DidChangeActiveEditorParams {
     selection?: Range;
 }
 
-interface GetIncludesParams
-{
+interface GetIncludesParams {
     maxDepth: number;
 }
 
-interface GetIncludesResult
-{
+interface GetIncludesResult {
     includedFiles: string[];
 }
 
@@ -1274,7 +1272,7 @@ export class DefaultClient implements Client {
                 this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, this.codeFoldingProvider);
 
                 const settings: CppSettings = new CppSettings();
-                if (settings.enhancedColorization && semanticTokensLegend) {
+                if (settings.enhancedColorizationEnabled && semanticTokensLegend) {
                     this.semanticTokensProvider = new SemanticTokensProvider();
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                 }
@@ -1324,7 +1322,7 @@ export class DefaultClient implements Client {
         const result: WorkspaceFolderSettingsParams = {
             uri: workspaceFolderUri?.toString(),
             intelliSenseEngine: settings.intelliSenseEngine,
-            intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
+            intelliSenseEngineFallback: settings.intelliSenseEngineFallbackEnabled,
             autocomplete: settings.autocomplete,
             autocompleteAddParentheses: settings.autocompleteAddParentheses,
             errorSquiggles: settings.errorSquiggles,
@@ -1351,9 +1349,6 @@ export class DefaultClient implements Client {
             clangTidyHeaderFilter: settings.clangTidyHeaderFilter !== null ? util.resolveVariables(settings.clangTidyHeaderFilter, this.AdditionalEnvironment) : null,
             clangTidyArgs: util.resolveVariablesArray(settings.clangTidyArgs, this.AdditionalEnvironment),
             clangTidyUseBuildPath: settings.clangTidyUseBuildPath,
-            clangTidyFixWarnings: settings.clangTidyFixWarnings,
-            clangTidyFixErrors: settings.clangTidyFixErrors,
-            clangTidyFixNotes: settings.clangTidyFixNotes,
             clangTidyChecksEnabled: settings.clangTidyChecksEnabled,
             clangTidyChecksDisabled: settings.clangTidyChecksDisabled,
             markdownInComments: settings.markdownInComments,
@@ -1448,6 +1443,7 @@ export class DefaultClient implements Client {
     private getAllSettings(): SettingsParams {
         const workspaceSettings: CppSettings = new CppSettings();
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
+        console.log(workspaceOtherSettings.editorTabSize);
         const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = this.getAllWorkspaceFolderSettings();
         return {
             filesAssociations: workspaceOtherSettings.filesAssociations,
@@ -1461,8 +1457,8 @@ export class DefaultClient implements Client {
             workspaceSymbols: workspaceSettings.workspaceSymbols,
             simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
             intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
-            experimentalFeatures: workspaceSettings.experimentalFeatures,
-            enhancedColorization: workspaceSettings.enhancedColorization,
+            experimentalFeaturesEnabled: workspaceSettings.experimentalFeaturesEnabled,
+            enhancedColorizationEnabled: workspaceSettings.enhancedColorizationEnabled,
             intellisenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
             intellisenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
             referencesMaxConcurrentThreads: workspaceSettings.referencesMaxConcurrentThreads,
@@ -1634,7 +1630,7 @@ export class DefaultClient implements Client {
                 }
                 const settings: CppSettings = new CppSettings();
                 if (changedSettings.enhancedColorization) {
-                    if (settings.enhancedColorization && semanticTokensLegend) {
+                    if (settings.enhancedColorizationEnabled && semanticTokensLegend) {
                         this.semanticTokensProvider = new SemanticTokensProvider();
                         this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                     } else if (this.semanticTokensProviderDisposable) {
@@ -2100,7 +2096,7 @@ export class DefaultClient implements Client {
             result = "timeout";
             if (!requestFile) {
                 const settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.configurationWarnings && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+                if (settings.configurationWarningsEnabled && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                     const dismiss: string = localize("dismiss.button", "Dismiss");
                     const disable: string = localize("disable.warnings.button", "Disable Warnings");
                     const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
@@ -3472,8 +3468,7 @@ export class DefaultClient implements Client {
         }
 
         let formatParams: FormatParams | undefined;
-        if (cppSettings.useVcFormat(editor.document))
-        {
+        if (cppSettings.useVcFormat(editor.document)) {
             const editorConfigSettings: any = getEditorConfigSettings(uri.fsPath);
             formatParams = {
                 editorConfigSettings: editorConfigSettings,
