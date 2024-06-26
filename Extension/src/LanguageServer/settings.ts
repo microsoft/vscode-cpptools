@@ -14,7 +14,7 @@ import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
-import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArrayOfString, isBoolean, isNumber, isString, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
+import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isString, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
 import { isWindows } from '../constants';
 import { DefaultClient, cachedEditorConfigLookups, cachedEditorConfigSettings, hasTrustedCompilerPaths } from './client';
 import { clients } from './extension';
@@ -322,10 +322,10 @@ export class CppSettings extends Settings {
     // TODO: Persist the lowercasing of enum values.
     private getAsString(settingName: string): string {
         const value: any | undefined = super.Section.get(settingName);
-        if (isString(value)) {
+        if (this.isValidEnum(settingName, value)) {
             return value;
-        } else if (this.isValidEnum(settingName, value)) {
-
+        } else if (isString(value)) {
+            return value;
         }
         const setting = getRawSetting("C_Cpp." + settingName);
         return setting.default;
@@ -340,27 +340,38 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
+    // TODO: Add a boolean for enums that we don't want to validate.
     private getAsArrayOfStrings(settingName: string): string[] {
+        const setting = getRawSetting("C_Cpp." + settingName);
         const value: any | undefined | null = super.Section.get(settingName);
+        // TODO: Validate that the array is an array of enums before an array of strings.
         if (isArrayOfString(value)) {
+            if (setting.items.enum !== undefined){
+                if (!value.every(x => this.validateEnum(setting.items.enum, x))){
+                    return setting.default;
+                } else {
+                    return value;
+                }
+            }
             return value;
         }
-        const setting = getRawSetting("C_Cpp." + settingName);
         return setting.default;
     }
 
     private isValidEnum(settingName: string, value: any): boolean {
         const setting = getRawSetting("C_Cpp." + settingName);
-        for (let i: number = 0; i < setting.enum.length; i++) {
-            if (value.toLowerCase() == setting.enum[i]) {
-                return true;
-            }
+        if (this.validateEnum(setting.enum, value)){
+            return value;
+        }
+        return setting.default;
+    }
+
+    private validateEnum(enumDescription: any, value: any){
+        if (isArray(enumDescription) && enumDescription.length > 0){
+            return enumDescription.some(x => x.toLowerCase() === value.toLowerCase());
         }
         return false;
     }
-
-    // TODO: Create a isValidEnum(setting, value) function, use this function in getAsString to remove the getAsEnum function and a getAsEnumArray() to get the enumArray if it is there. Use C_Cpp.codeAnalysis.clangTidy.checks.enabled as a test case.
-
 
     public get maxConcurrentThreads(): number | undefined | null {
         return this.getAsNumber("maxConcurrentThreads");
