@@ -59,7 +59,7 @@ async function initVcpkgDatabase(): Promise<VcpkgDatabase> {
         try {
             const data = await zip.entryData('VCPkgHeadersDatabase.txt');
             // Strip '\r' and '\n' from the end of each line if they exist.
-            let lines = data.toString().split('\n');
+            const lines = data.toString().split('\n');
             lines.forEach(line => {
                 const portFilePair: string[] = line.split(':');
                 if (portFilePair.length !== 2) {
@@ -72,7 +72,7 @@ async function initVcpkgDatabase(): Promise<VcpkgDatabase> {
                 if (!database[relativeHeader]) {
                     database[relativeHeader] = [];
                 }
-                
+
                 database[relativeHeader].push(portName);
             });
         } catch {
