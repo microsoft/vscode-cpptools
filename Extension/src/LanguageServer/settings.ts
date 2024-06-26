@@ -25,7 +25,7 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface Excludes {
-    [key: string]: boolean | { when: string };
+    [key: string]: (boolean | { when: string });
 }
 
 export interface WorkspaceFolderSettingsParams {
@@ -381,10 +381,15 @@ export class CppSettings extends Settings {
     public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return this.getAsNumber("codeAnalysis.maxConcurrentThreads"); }
     public get codeAnalysisMaxMemory(): number | undefined | null { return this.getAsNumber("codeAnalysis.maxMemory"); }
     public get codeAnalysisUpdateDelay(): number | undefined { return this.getAsNumber("codeAnalysis.updateDelay"); }
-    public get codeAnalysisExclude(): vscode.WorkspaceConfiguration | undefined { 
-        const value = super.Section.get<vscode.WorkspaceConfiguration>("codeAnalysis.exclude"); 
-        console.log(value); console.log(value?.key); 
-        return typeof value?.key === "string" ? value : undefined; 
+    public get codeAnalysisExclude(): Excludes | undefined { 
+        let value = super.Section.get<Excludes>("codeAnalysis.exclude"); 
+        if (value === undefined) { return undefined; }
+        for (let key of Object.keys(value)) {
+            if (typeof key === "string" && typeof value[key] === "boolean") {
+                return value;
+            }
+        }
+        return undefined;
     }
     public get codeAnalysisRunAutomatically(): boolean | undefined { return this.getAsBoolean("codeAnalysis.runAutomatically"); }
     public get codeAnalysisRunOnBuild(): boolean | undefined { return this.getAsBoolean("codeAnalysis.runOnBuild"); }
@@ -443,8 +448,13 @@ export class CppSettings extends Settings {
     public get renameRequiresIdentifier(): boolean | undefined { return this.getAsBoolean("renameRequiresIdentifier"); }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { 
         const value = super.Section.get<vscode.WorkspaceConfiguration>("files.exclude");
-        console.log(value?.Object); if (value) { return value; } 
-        return undefined; 
+        if (value === undefined) { return undefined; }
+        for (let key of Object.keys(value)) {
+            if (typeof key === "string" && typeof value[key] === "boolean") {
+                return value;
+            }
+        }
+        return undefined;
     }
     public get defaultIncludePath(): string[] | undefined { return this.getAsArrayOfStrings("default.includePath"); }
     public get defaultDefines(): string[] | undefined { return this.getAsArrayOfStrings("default.defines"); }
@@ -487,8 +497,16 @@ export class CppSettings extends Settings {
     public get defaultLimitSymbolsToIncludedHeaders(): boolean | undefined { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
     public get defaultSystemIncludePath(): string[] | undefined { return this.getAsArrayOfStrings("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean | undefined { return this.getAsBoolean("default.enableConfigurationSquiggles"); }
-    // TODO Ask Sean about validating this setting.
-    public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
+    public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { 
+        const value = super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); 
+        if (value === undefined) { return undefined; }
+        for (let key of Object.keys(value)) {
+            if (typeof key === "string" && typeof value[key] === "string") {
+                return value;
+            }
+        }
+        return undefined;
+    }
     public get useBacktickCommandSubstitution(): boolean | undefined { return this.getAsBoolean("debugger.useBacktickCommandSubstitution"); }
     public get codeFoldingEnabled(): boolean {return this.getAsBoolean("codeFolding.enabled"); }
     public get caseSensitiveFileSupport(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport") === "enabled"; }

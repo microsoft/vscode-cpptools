@@ -530,9 +530,13 @@
                         "minimum": 500,
                         "maximum": 3000
                     },
-                    "C_Cpp.codeFolding.enabled": {
-                        "type": "boolean",
-                        "default": false,
+                    "C_Cpp.codeFolding": {
+                        "type": "string",
+                        "enum": [
+                            "enabled",
+                            "disabled"
+                        ],
+                        "default": "enabled",
                         "description": "%c_cpp.configuration.codeFolding.description%",
                         "scope": "window"
                     },
@@ -548,9 +552,13 @@
                         "markdownDescription": "%c_cpp.configuration.suggestSnippets.markdownDescription%",
                         "scope": "resource"
                     },
-                    "C_Cpp.enhancedColorization.enabled": {
-                        "type": "boolean",
-                        "default": false,
+                    "C_Cpp.enhancedColorization": {
+                        "type": "string",
+                        "enum": [
+                            "enabled",
+                            "disabled"
+                        ],
+                        "default": "enabled",
                         "markdownDescription": "%c_cpp.configuration.enhancedColorization.markdownDescription%",
                         "scope": "window"
                     },
@@ -691,7 +699,6 @@
                     },
                     "C_Cpp.default.forcedInclude": {
                         "type": "array",
-                        "default": "undefined",
                         "items": {
                             "type": "string"
                         },
@@ -870,9 +877,13 @@
                         "markdownDescription": "%c_cpp.configuration.default.dotConfig.markdownDescription%",
                         "scope": "resource"
                     },
-                    "C_Cpp.configurationWarnings.enabled": {
-                        "type": "boolean",
-                        "default": false,
+                    "C_Cpp.configurationWarnings": {
+                        "type": "string",
+                        "enum": [
+                            "enabled",
+                            "disabled"
+                        ],
+                        "default": "enabled",
                         "description": "%c_cpp.configuration.configurationWarnings.description%",
                         "scope": "resource"
                     },
@@ -904,9 +915,13 @@
                         ],
                         "scope": "resource"
                     },
-                    "C_Cpp.intelliSenseEngineFallback.enabled": {
-                        "type": "boolean",
-                        "default": false,
+                    "C_Cpp.intelliSenseEngineFallback": {
+                        "type": "string",
+                        "enum": [
+                            "enabled",
+                            "disabled"
+                        ],
+                        "default": "disabled",
                         "markdownDescription": "%c_cpp.configuration.intelliSenseEngineFallback.markdownDescription%",
                         "scope": "resource"
                     },
@@ -3177,7 +3192,7 @@
                             "null"
                         ],
                         "markdownDescription": "%c_cpp.configuration.intelliSense.maxCachedProcesses.markdownDescription%",
-                        "default": 128,
+                        "default": null,
                         "minimum": 2,
                         "maximum": 128,
                         "scope": "machine"
@@ -3188,7 +3203,7 @@
                             "null"
                         ],
                         "markdownDescription": "%c_cpp.configuration.intelliSense.maxMemory.markdownDescription%",
-                        "default": 65536,
+                        "default": null,
                         "minimum": 256,
                         "maximum": 65536,
                         "scope": "machine"
