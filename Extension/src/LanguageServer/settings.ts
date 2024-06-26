@@ -318,12 +318,10 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
-    // TODO: Determine the behavior of settings that don't have default values set. Generally, they should return undefined.
-    // TODO: Persist the lowercasing of enum values.
     private getAsString(settingName: string): string {
         const value: any | undefined = super.Section.get(settingName);
         if (this.isValidEnum(settingName, value)) {
-            return value;
+            return value.toLowerCase(); // Return enum values in lowercase.
         } else if (isString(value)) {
             return value;
         }
@@ -340,11 +338,9 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
-    // TODO: Add a boolean for enums that we don't want to validate.
     private getAsArrayOfStrings(settingName: string): string[] {
         const setting = getRawSetting("C_Cpp." + settingName);
         const value: any | undefined | null = super.Section.get(settingName);
-        // TODO: Validate that the array is an array of enums before an array of strings.
         if (isArrayOfString(value)) {
             if (setting.items.enum !== undefined){
                 if (!value.every(x => this.validateEnum(setting.items.enum, x))){
@@ -373,313 +369,92 @@ export class CppSettings extends Settings {
         return false;
     }
 
-    public get maxConcurrentThreads(): number | undefined | null {
-        return this.getAsNumber("maxConcurrentThreads");
+    public get maxConcurrentThreads(): number | undefined | null { return this.getAsNumber("maxConcurrentThreads"); }
+    public get maxMemory(): number | undefined | null { return this.getAsNumber("maxMemory"); }
+    public get maxSymbolSearchResults(): number | undefined { return this.getAsNumber("maxSymbolSearchResults"); }
+    public get maxCachedProcesses(): number | undefined | null { return this.getAsNumber("maxCachedProcesses"); }
+    public get intelliSenseMaxCachedProcesses(): number | undefined | null { return this.getAsNumber("intelliSense.maxCachedProcesses"); }
+    public get intelliSenseMaxMemory(): number | undefined | null { return this.getAsNumber("intelliSense.maxMemory"); }
+    public get referencesMaxConcurrentThreads(): number | undefined | null { return this.getAsNumber("references.maxConcurrentThreads"); }
+    public get referencesMaxCachedProcesses(): number | undefined | null { return this.getAsNumber("references.maxCachedProcesses"); }
+    public get referencesMaxMemory(): number | undefined | null { return this.getAsNumber("references.maxMemory"); }
+    public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return this.getAsNumber("codeAnalysis.maxConcurrentThreads"); }
+    public get codeAnalysisMaxMemory(): number | undefined | null { return this.getAsNumber("codeAnalysis.maxMemory"); }
+    public get codeAnalysisUpdateDelay(): number | undefined { return this.getAsNumber("codeAnalysis.updateDelay"); }
+    public get codeAnalysisExclude(): vscode.WorkspaceConfiguration | undefined { 
+        const value = super.Section.get<vscode.WorkspaceConfiguration>("codeAnalysis.exclude"); 
+        console.log(value); console.log(value?.key); 
+        return typeof value?.key === "string" ? value : undefined; 
     }
-
-    public get maxMemory(): number | undefined | null {
-        return this.getAsNumber("maxMemory");
+    public get codeAnalysisRunAutomatically(): boolean | undefined { return this.getAsBoolean("codeAnalysis.runAutomatically"); }
+    public get codeAnalysisRunOnBuild(): boolean | undefined { return this.getAsBoolean("codeAnalysis.runOnBuild"); }
+    public get clangTidyEnabled(): boolean | undefined { return this.getAsBoolean("codeAnalysis.clangTidy.enabled"); }
+    public get clangTidyConfig(): string | undefined { return this.getAsString("codeAnalysis.clangTidy.config"); }
+    public get clangTidyFallbackConfig(): string | undefined { return this.getAsString("codeAnalysis.clangTidy.fallbackConfig"); }
+    public get clangTidyHeaderFilter(): string | undefined | null { return this.getAsString("codeAnalysis.clangTidy.headerFilter"); }
+    public get clangTidyArgs(): string[] | undefined { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.args"); }
+    public get clangTidyUseBuildPath(): boolean | undefined { return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath"); }
+    public get clangTidyChecksEnabled(): string[] | undefined { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.enabled"); }
+    public get clangTidyChecksDisabled(): string[] | undefined { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.disabled"); }
+    public get clangTidyCodeActionShowDisable(): boolean | undefined { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.showDisable"); }
+    public get clangTidyCodeActionShowClear(): string { return this.getAsString("codeAnalysis.clangTidy.codeAction.showClear"); }
+    public get clangTidyCodeActionShowDocumentation(): boolean | undefined { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.showDocumentation"); }
+    public get clangTidyCodeActionFormatFixes(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.formatFixes") ?? true; }
+    public addClangTidyChecksDisabled(value: string): void { 
+        const checks: string[] | undefined = this.clangTidyChecksDisabled; 
+        if (checks === undefined) { return; } checks.push(value); 
+        void super.Section.update("codeAnalysis.clangTidy.checks.disabled", checks, vscode.ConfigurationTarget.WorkspaceFolder); 
     }
-
-    public get maxSymbolSearchResults(): number | undefined {
-        return this.getAsNumber("maxSymbolSearchResults");
+    public get clangFormatStyle(): string | undefined { return this.getAsString("clang_format_style"); }
+    public get clangFormatFallbackStyle(): string | undefined { return this.getAsString("clang_format_fallbackStyle"); }
+    public get clangFormatSortIncludes(): boolean | undefined | null { return this.getAsBoolean("clang_format_sortIncludes"); }
+    public get experimentalFeaturesEnabled(): boolean | undefined { return this.getAsBoolean("experimentalFeatures.enabled"); }
+    public get suggestSnippets(): boolean | undefined { return this.getAsBoolean("suggestSnippets"); }
+    public get intelliSenseEngine(): string | undefined { return this.getAsString("intelliSenseEngine"); }
+    public get intelliSenseEngineFallbackEnabled(): boolean | undefined { return this.getAsBoolean("intelliSenseEngineFallback.enabled"); }
+    public get intelliSenseCachePath(): string | undefined { return this.getAsString("intelliSenseEngine"); }
+    public get intelliSenseCacheSize(): number | undefined { return this.getAsNumber("intelliSenseCachePath"); }
+    public get intelliSenseMemoryLimit(): number | undefined { return this.getAsNumber("intelliSenseMemoryLimit"); }
+    public get intelliSenseUpdateDelay(): number | undefined { return this.getAsNumber("intelliSenseUpdateDelay"); }
+    public get errorSquiggles(): string | undefined { return this.getAsString("errorSquiggles"); }
+    public get inactiveRegionOpacity(): number | undefined { return this.getAsNumber("inactiveRegionOpacity"); }
+    public get inactiveRegionForegroundColor(): string | undefined { return this.getAsString("inactiveRegionForegroundColor"); }
+    public get inactiveRegionBackgroundColor(): string | undefined { return this.getAsString("inactiveRegionBackgroundColor"); }
+    public get autocomplete(): string | undefined { return this.getAsString("autocomplete"); }
+    public get autocompleteAddParentheses(): boolean | undefined { return this.getAsBoolean("autocompleteAddParentheses"); }
+    public get loggingLevel(): string | undefined { return this.getAsString("loggingLevel"); }
+    public get autoAddFileAssociations(): boolean | undefined { return this.getAsBoolean("autoAddFileAssociations"); }
+    public get workspaceParsingPriority(): string | undefined { return this.getAsString("workspaceParsingPriority"); }
+    public get workspaceSymbols(): string | undefined { return this.getAsString("workspaceSymbols"); }
+    public get exclusionPolicy(): string | undefined { return this.getAsString("exclusionPolicy"); }
+    public get refactoringIncludeHeader(): string | undefined { return this.getAsString("refactoring.includeHeader"); }
+    public get simplifyStructuredComments(): boolean | undefined { return this.getAsBoolean("simplifyStructuredComments"); }
+    public get doxygenGeneratedCommentStyle(): string | undefined { return this.getAsString("doxygen.generatedStyle"); }
+    public get doxygenGenerateOnType(): boolean | undefined { return this.getAsBoolean("doxygen.generateOnType"); }
+    public get commentContinuationPatterns(): (string | CommentPattern)[] | undefined { 
+        const value = super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); 
+        if (Array.isArray(value)) { return value; } return undefined; 
     }
-
-    public get maxCachedProcesses(): number | undefined | null {
-        return this.getAsNumber("maxCachedProcesses");
-    }
-
-    public get intelliSenseMaxCachedProcesses(): number | undefined | null {
-        return this.getAsNumber("intelliSense.maxCachedProcesses");
-    }
-
-    public get intelliSenseMaxMemory(): number | undefined | null {
-        return this.getAsNumber("intelliSense.maxMemory");
-    }
-
-    public get referencesMaxConcurrentThreads(): number | undefined | null {
-        return this.getAsNumber("references.maxConcurrentThreads");
-    }
-
-    public get referencesMaxCachedProcesses(): number | undefined | null {
-        return this.getAsNumber("references.maxCachedProcesses");
-    }
-
-    public get referencesMaxMemory(): number | undefined | null {
-        return this.getAsNumber("references.maxMemory");
-    }
-
-    public get codeAnalysisMaxConcurrentThreads(): number | undefined | null {
-        return this.getAsNumber("codeAnalysis.maxConcurrentThreads");
-    }
-
-    public get codeAnalysisMaxMemory(): number | undefined | null {
-        return this.getAsNumber("codeAnalysis.maxMemory");
-    }
-
-    public get codeAnalysisUpdateDelay(): number | undefined {
-        return this.getAsNumber("codeAnalysis.updateDelay");
-    }
-
-    public get codeAnalysisExclude(): vscode.WorkspaceConfiguration | undefined {
-        const value = super.Section.get<vscode.WorkspaceConfiguration>("codeAnalysis.exclude");
-        console.log(value);
-        console.log(value?.key);
-        return typeof value?.key === "string" ? value : undefined;
-    }
-
-    public get codeAnalysisRunAutomatically(): boolean | undefined {
-        return this.getAsBoolean("codeAnalysis.runAutomatically");
-    }
-
-    public get codeAnalysisRunOnBuild(): boolean | undefined {
-        return this.getAsBoolean("codeAnalysis.runOnBuild");
-    }
-
-    public get clangTidyEnabled(): boolean | undefined {
-        return this.getAsBoolean("codeAnalysis.clangTidy.enabled");
-    }
-
-    public get clangTidyConfig(): string | undefined {
-        return this.getAsString("codeAnalysis.clangTidy.config");
-    }
-
-    public get clangTidyFallbackConfig(): string | undefined {
-        return this.getAsString("codeAnalysis.clangTidy.fallbackConfig");
-    }
-
-    public get clangTidyHeaderFilter(): string | undefined | null {
-        return this.getAsString("codeAnalysis.clangTidy.headerFilter");
-    }
-
-    public get clangTidyArgs(): string[] | undefined {
-        return this.getAsArrayOfStrings("codeAnalysis.clangTidy.args");
-    }
-
-    public get clangTidyUseBuildPath(): boolean | undefined {
-        return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath");
-    }
-
-    public get clangTidyChecksEnabled(): string[] | undefined {
-        return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.enabled");
-    }
-
-    public get clangTidyChecksDisabled(): string[] | undefined {
-        return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.disabled");
-    }
-
-    public get clangTidyCodeActionShowDisable(): boolean | undefined {
-        return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.showDisable");
-    }
-
-    public get clangTidyCodeActionShowClear(): string {
-        return this.getAsString("codeAnalysis.clangTidy.codeAction.showClear");
-    }
-    public get clangTidyCodeActionShowDocumentation(): boolean | undefined {
-        return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.showDocumentation");
-    }
-
-    public get clangTidyCodeActionFormatFixes(): boolean {
-        return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.formatFixes") ?? true;
-    }
-
-    // TODO
-    public addClangTidyChecksDisabled(value: string): void {
-        const checks: string[] | undefined = this.clangTidyChecksDisabled;
-        if (checks === undefined) {
-            return;
-        }
-        checks.push(value);
-        void super.Section.update("codeAnalysis.clangTidy.checks.disabled", checks, vscode.ConfigurationTarget.WorkspaceFolder);
-    }
-
-    public get clangFormatStyle(): string | undefined {
-        return this.getAsString("clang_format_style");
-    }
-
-    public get clangFormatFallbackStyle(): string | undefined {
-        return this.getAsString("clang_format_fallbackStyle");
-    }
-
-    public get clangFormatSortIncludes(): boolean | undefined | null {
-        return this.getAsBoolean("clang_format_sortIncludes");
-    }
-
-    // TODO: Refactor experimentalFeatures to experimentalFeaturesEnabled which is a boolean value in packagae.json.
-    public get experimentalFeaturesEnabled(): boolean | undefined {
-        return this.getAsBoolean("experimentalFeatures.enabled");
-    }
-
-    public get suggestSnippets(): boolean | undefined {
-        return this.getAsBoolean("suggestSnippets");
-    }
-
-    public get intelliSenseEngine(): string | undefined {
-        return this.getAsString("intelliSenseEngine");
-    }
-
-    public get intelliSenseEngineFallbackEnabled(): boolean | undefined {
-        return this.getAsBoolean("intelliSenseEngineFallback.enabled");
-    }
-
-    public get intelliSenseCachePath(): string | undefined {
-        return this.getAsString("intelliSenseEngine");
-    }
-
-    public get intelliSenseCacheSize(): number | undefined {
-        return this.getAsNumber("intelliSenseCachePath");
-    }
-
-    public get intelliSenseMemoryLimit(): number | undefined {
-        return this.getAsNumber("intelliSenseMemoryLimit");
-    }
-
-    public get intelliSenseUpdateDelay(): number | undefined {
-        return this.getAsNumber("intelliSenseUpdateDelay");
-    }
-
-    public get errorSquiggles(): string | undefined {
-        return this.getAsString("errorSquiggles");
-    }
-
-    public get inactiveRegionOpacity(): number | undefined {
-        return this.getAsNumber("inactiveRegionOpacity");
-
-    }
-
-    public get inactiveRegionForegroundColor(): string | undefined {
-        return this.getAsString("inactiveRegionForegroundColor");
-    }
-
-    public get inactiveRegionBackgroundColor(): string | undefined {
-        return this.getAsString("inactiveRegionBackgroundColor");
-    }
-
-    public get autocomplete(): string | undefined {
-        return this.getAsString("autocomplete");
-    }
-
-    public get autocompleteAddParentheses(): boolean | undefined {
-        return this.getAsBoolean("autocompleteAddParentheses");
-    }
-
-    public get loggingLevel(): string | undefined {
-        return this.getAsString("loggingLevel");
-    }
-
-    public get autoAddFileAssociations(): boolean | undefined {
-        return this.getAsBoolean("autoAddFileAssociations");
-    }
-
-    public get workspaceParsingPriority(): string | undefined {
-        return this.getAsString("workspaceParsingPriority");
-    }
-
-    public get workspaceSymbols(): string | undefined {
-        return this.getAsString("workspaceSymbols");
-    }
-
-    public get exclusionPolicy(): string | undefined {
-        return this.getAsString("exclusionPolicy");
-    }
-
-    public get refactoringIncludeHeader(): string | undefined {
-        return this.getAsString("refactoring.includeHeader");
-    }
-
-    public get simplifyStructuredComments(): boolean | undefined {
-        return this.getAsBoolean("simplifyStructuredComments");
-
-    }
-
-    public get doxygenGeneratedCommentStyle(): string | undefined {
-        return this.getAsString("doxygen.generatedStyle");
-    }
-
-    public get doxygenGenerateOnType(): boolean | undefined {
-        return this.getAsBoolean("doxygen.generateOnType");
-    }
-    /* TODO Use*/
-    public get commentContinuationPatterns(): (string | CommentPattern)[] | undefined {
-        const value = super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns");
-        if (Array.isArray(value)) {
-            return value;
-        }
-        return undefined;
-    }
-
-    public get configurationWarningsEnabled(): boolean | undefined {
-        return this.getAsBoolean("configurationWarnings.enabled");
-    }
-
-    public get preferredPathSeparator(): string | undefined {
-        return this.getAsString("preferredPathSeparator");
-    }
-
-    public get updateChannel(): string | undefined {
-        return this.getAsString("updateChannel");
-    }
-
-    public get vcpkgEnabled(): boolean | undefined {
-        return this.getAsBoolean("vcpkg.enabled");
-    }
-
-    public get addNodeAddonIncludePaths(): boolean | undefined {
-        return this.getAsBoolean("addNodeAddonIncludePaths");
-    }
-
-    public get renameRequiresIdentifier(): boolean | undefined {
-        return this.getAsBoolean("renameRequiresIdentifier");
-    }
-
-    // TODO
-    public get filesExclude(): vscode.WorkspaceConfiguration | undefined {
+    public get configurationWarningsEnabled(): boolean | undefined { return this.getAsBoolean("configurationWarnings.enabled"); }
+    public get preferredPathSeparator(): string | undefined { return this.getAsString("preferredPathSeparator"); }
+    public get updateChannel(): string | undefined { return this.getAsString("updateChannel"); }
+    public get vcpkgEnabled(): boolean | undefined { return this.getAsBoolean("vcpkg.enabled"); }
+    public get addNodeAddonIncludePaths(): boolean | undefined { return this.getAsBoolean("addNodeAddonIncludePaths"); }
+    public get renameRequiresIdentifier(): boolean | undefined { return this.getAsBoolean("renameRequiresIdentifier"); }
+    public get filesExclude(): vscode.WorkspaceConfiguration | undefined { 
         const value = super.Section.get<vscode.WorkspaceConfiguration>("files.exclude");
-        if (value) {
-            return value;
-        }
-        return undefined;
+        console.log(value?.Object); if (value) { return value; } 
+        return undefined; 
     }
-
-    public get defaultIncludePath(): string[] | undefined {
-        return this.getAsArrayOfStrings("default.includePath");
-    }
-
-    public get defaultDefines(): string[] | undefined {
-        return this.getAsArrayOfStrings("default.defines");
-    }
-
-    public get defaultDotconfig(): string | undefined {
-        return this.getAsString("default.dotConfig");
-    }
-
-    public get defaultMacFrameworkPath(): string[] | undefined {
-        return this.getAsArrayOfStrings("default.macFrameworkPath");
-    }
-
-    public get defaultWindowsSdkVersion(): string | undefined {
-        return this.getAsString("default.windowsSdkVersion");
-    }
-
-    public get defaultCompileCommands(): string | undefined {
-        return this.getAsString("default.compileCommands");
-    }
-
-    public get defaultForcedInclude(): string[] | undefined {
-        return this.getAsArrayOfStrings("default.forcedInclude");
-    }
-
-    public get defaultIntelliSenseMode(): string | undefined {
-        const value = this.getAsString("default.intelliSenseMode");
-        if (value) {
-            return value;
-        }
-        return undefined;
-    }
-
-    public get defaultCompilerPath(): string | undefined {
-        return this.getAsString("default.compilerPath") ?? undefined;
-    }
+    public get defaultIncludePath(): string[] | undefined { return this.getAsArrayOfStrings("default.includePath"); }
+    public get defaultDefines(): string[] | undefined { return this.getAsArrayOfStrings("default.defines"); }
+    public get defaultDotconfig(): string | undefined { return this.getAsString("default.dotConfig"); }
+    public get defaultMacFrameworkPath(): string[] | undefined { return this.getAsArrayOfStrings("default.macFrameworkPath"); }
+    public get defaultWindowsSdkVersion(): string | undefined { return this.getAsString("default.windowsSdkVersion"); }
+    public get defaultCompileCommands(): string | undefined { return this.getAsString("default.compileCommands"); }
+    public get defaultForcedInclude(): string[] | undefined { return this.getAsArrayOfStrings("default.forcedInclude"); }
+    public get defaultIntelliSenseMode(): string | undefined { return this.getAsString("default.intelliSenseMode"); }
+    public get defaultCompilerPath(): string | undefined { return this.getAsString("default.compilerPath") ?? undefined; }
 
 
     public set defaultCompilerPath(value: string | undefined) {
@@ -715,9 +490,7 @@ export class CppSettings extends Settings {
     // TODO Ask Sean about validating this setting.
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return this.getAsBoolean("debugger.useBacktickCommandSubstitution"); }
-    public get codeFoldingEnabled(): boolean {
-        return this.getAsBoolean("codeFolding.enabled");
-    }
+    public get codeFoldingEnabled(): boolean {return this.getAsBoolean("codeFolding.enabled"); }
     public get caseSensitiveFileSupport(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport") === "enabled"; }
     public get doxygenSectionTags(): string[] | undefined { return this.getAsArrayOfStrings("doxygen.sectionTags"); }
     public get hover(): string | undefined { return this.getAsString("hover"); }
