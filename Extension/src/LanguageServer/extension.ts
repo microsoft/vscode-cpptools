@@ -58,7 +58,11 @@ async function initVcpkgDatabase(): Promise<VcpkgDatabase> {
         const zip = new StreamZip.async({ file: util.getExtensionFilePath('VCPkgHeadersDatabase.zip') });
         try {
             const data = await zip.entryData('VCPkgHeadersDatabase.txt');
-            const lines = data.toString().split('\n');
+            // Strip '\r' and '\n' from the end of each line if they exist.
+            let lines = data.toString().split('\r\n');
+            if (lines.length === 1) {
+                lines =  data.toString().split('\n');
+            }
             lines.forEach(line => {
                 const portFilePair: string[] = line.split(':');
                 if (portFilePair.length !== 2) {
@@ -71,7 +75,6 @@ async function initVcpkgDatabase(): Promise<VcpkgDatabase> {
                 if (!database[relativeHeader]) {
                     database[relativeHeader] = [];
                 }
-
                 database[relativeHeader].push(portName);
             });
         } catch {
@@ -106,10 +109,11 @@ async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number)
     if (!matches || !matches.length || !matches.groups) {
         return [];
     }
-    const missingHeader: string = matches.groups.includeFile.replace(/\//g, '\\');
+    const missingHeader: string = matches.groups.includeFile.replace(/[\\\/]/g, '\\');
 
     let portsWithHeader: string[] | undefined;
     const vcpkgDb: VcpkgDatabase = await vcpkgDbPromise;
+    console.log("vcpkgDb: " + JSON.stringify(vcpkgDb));
     if (vcpkgDb) {
         portsWithHeader = vcpkgDb[missingHeader];
     }
