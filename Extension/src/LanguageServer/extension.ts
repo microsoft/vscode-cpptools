@@ -61,7 +61,7 @@ async function initVcpkgDatabase(): Promise<VcpkgDatabase> {
             // Strip '\r' and '\n' from the end of each line if they exist.
             let lines = data.toString().split('\r\n');
             if (lines.length === 1) {
-                lines =  data.toString().split('\n');
+                lines = data.toString().split('\n');
             }
             lines.forEach(line => {
                 const portFilePair: string[] = line.split(':');
