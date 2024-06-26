@@ -113,7 +113,6 @@ async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number)
 
     let portsWithHeader: string[] | undefined;
     const vcpkgDb: VcpkgDatabase = await vcpkgDbPromise;
-    console.log("vcpkgDb: " + JSON.stringify(vcpkgDb));
     if (vcpkgDb) {
         portsWithHeader = vcpkgDb[missingHeader];
     }
