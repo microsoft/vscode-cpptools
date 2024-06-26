@@ -58,7 +58,6 @@ async function initVcpkgDatabase(): Promise<VcpkgDatabase> {
         const zip = new StreamZip.async({ file: util.getExtensionFilePath('VCPkgHeadersDatabase.zip') });
         try {
             const data = await zip.entryData('VCPkgHeadersDatabase.txt');
-            // Strip '\r' and '\n' from the end of each line if they exist.
             const lines = data.toString().split('\n');
             lines.forEach(line => {
                 const portFilePair: string[] = line.split(':');
