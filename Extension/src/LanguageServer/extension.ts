@@ -66,7 +66,7 @@ async function initVcpkgDatabase(): Promise<VcpkgDatabase> {
                 }
 
                 const portName: string = portFilePair[0];
-                const relativeHeader: string = portFilePair[1];
+                const relativeHeader: string = portFilePair[1].trimEnd();
 
                 if (!database[relativeHeader]) {
                     database[relativeHeader] = [];
