@@ -3600,5 +3600,6 @@
     "EDG IFC",
     "impossible de créer une unité d’en-tête pour l’unité de traduction actuelle",
     "l’unité de traduction actuelle utilise une ou plusieurs fonctionnalités qui ne peuvent actuellement pas être écrites dans une unité d’en-tête",
-    "'explicit(bool)' est une fonctionnalité C++20"
+    "'explicit(bool)' est une fonctionnalité C++20",
+    "un nom de module doit être spécifié pour la carte de fichiers de module référençant le fichier %sq"
 ]

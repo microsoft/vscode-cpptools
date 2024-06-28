@@ -3600,5 +3600,6 @@
     "EDG IFC",
     "não foi possível criar uma unidade de cabeçalho para a unidade de tradução atual",
     "a unidade de tradução atual usa um ou mais recursos que não podem ser gravados atualmente em uma unidade de cabeçalho",
-    "'explicit(bool)' é um recurso do C++20"
+    "'explicit(bool)' é um recurso do C++20",
+    "um nome de módulo deve ser especificado para o mapa do arquivo de módulo que faz referência ao arquivo %sq"
 ]
