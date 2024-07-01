@@ -2093,7 +2093,7 @@ export class DefaultClient implements Client {
         try {
             const configs: SourceFileConfigurationItem[] | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
             if (configs && configs.length > 0) {
-                this.sendCustomConfigurations(configs, provider.version, requestFile != undefined);
+                this.sendCustomConfigurations(configs, provider.version, requestFile !== undefined);
             } else {
                 result = "noConfigurations";
             }
@@ -3086,8 +3086,9 @@ export class DefaultClient implements Client {
             workspaceFolderUri: this.RootUri?.toString()
         };
 
-        if (wasRequested)
+        if (wasRequested) {
             void this.languageClient.sendNotification(CustomConfigurationHighPriorityNotification, params).catch(logAndReturn.undefined);
+        }
         void this.languageClient.sendNotification(CustomConfigurationNotification, params).catch(logAndReturn.undefined);
     }
 
