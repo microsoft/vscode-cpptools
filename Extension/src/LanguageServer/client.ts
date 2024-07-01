@@ -577,6 +577,7 @@ const DidChangeTextEditorSelectionNotification: NotificationType<Range> = new No
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams> = new NotificationType<FolderSelectedSettingParams>('cpptools/didChangeSelectedSetting');
 const IntervalTimerNotification: NotificationType<void> = new NotificationType<void>('cpptools/onIntervalTimer');
+const CustomConfigurationHighPriorityNotification: NotificationType<CustomConfigurationParams> = new NotificationType<CustomConfigurationParams>('cpptools/didChangeCustomConfigurationHighPriority');
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams> = new NotificationType<CustomConfigurationParams>('cpptools/didChangeCustomConfiguration');
 const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams> = new NotificationType<CustomBrowseConfigurationParams>('cpptools/didChangeCustomBrowseConfiguration');
 const ClearCustomConfigurationsNotification: NotificationType<WorkspaceFolderParams> = new NotificationType<WorkspaceFolderParams>('cpptools/clearCustomConfigurations');
@@ -3085,6 +3086,7 @@ export class DefaultClient implements Client {
             workspaceFolderUri: this.RootUri?.toString()
         };
 
+        void this.languageClient.sendNotification(CustomConfigurationHighPriorityNotification, params).catch(logAndReturn.undefined);
         void this.languageClient.sendNotification(CustomConfigurationNotification, params).catch(logAndReturn.undefined);
     }
 
