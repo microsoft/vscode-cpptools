@@ -2093,7 +2093,7 @@ export class DefaultClient implements Client {
         try {
             const configs: SourceFileConfigurationItem[] | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
             if (configs && configs.length > 0) {
-                this.sendCustomConfigurations(configs, provider.version);
+                this.sendCustomConfigurations(configs, provider.version, requestFile != undefined);
             } else {
                 result = "noConfigurations";
             }
@@ -3020,7 +3020,7 @@ export class DefaultClient implements Client {
             util.isOptionalArrayOfString(input.configuration.forcedInclude);
     }
 
-    private sendCustomConfigurations(configs: any, providerVersion: Version): void {
+    private sendCustomConfigurations(configs: any, providerVersion: Version, wasRequested: boolean): void {
         // configs is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
         if (!configs || !(configs instanceof Array)) {
             console.warn("discarding invalid SourceFileConfigurationItems[]: " + configs);
@@ -3086,7 +3086,8 @@ export class DefaultClient implements Client {
             workspaceFolderUri: this.RootUri?.toString()
         };
 
-        void this.languageClient.sendNotification(CustomConfigurationHighPriorityNotification, params).catch(logAndReturn.undefined);
+        if (wasRequested)
+            void this.languageClient.sendNotification(CustomConfigurationHighPriorityNotification, params).catch(logAndReturn.undefined);
         void this.languageClient.sendNotification(CustomConfigurationNotification, params).catch(logAndReturn.undefined);
     }
 
