@@ -81,9 +81,9 @@ export function getExperimentationService(): Promise<IExperimentationService> | 
 
 export async function isExperimentEnabled(experimentName: string): Promise<boolean> {
     const experimentEnabled: string | undefined = new CppSettings().experimentalFeatures;
-    if (experimentEnabled == "enabled") {
+    if (experimentEnabled === "enabled") {
         return true;
-    } else if (experimentEnabled == "disabled") {
+    } else if (experimentEnabled === "disabled") {
         return false;
     }
     const experimentationService: IExperimentationService | undefined = await getExperimentationService();

@@ -1203,7 +1203,7 @@ export class DefaultClient implements Client {
 
         try {
             let isFirstClient: boolean = false;
-            if (firstClientStarted == undefined || languageClientCrashedNeedsRestart) {
+            if (firstClientStarted === undefined || languageClientCrashedNeedsRestart) {
                 if (languageClientCrashedNeedsRestart) {
                     languageClientCrashedNeedsRestart = false;
                     // if we're recovering, the isStarted needs to be reset.
