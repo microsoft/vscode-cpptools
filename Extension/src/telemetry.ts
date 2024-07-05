@@ -80,8 +80,11 @@ export function getExperimentationService(): Promise<IExperimentationService> | 
 }
 
 export async function isExperimentEnabled(experimentName: string): Promise<boolean> {
-    if (new CppSettings().experimentalFeatures) {
+    const experimentEnabled: string | undefined = new CppSettings().experimentalFeatures;
+    if (experimentEnabled == "enabled") {
         return true;
+    } else if (experimentEnabled == "disabled") {
+        return false;
     }
     const experimentationService: IExperimentationService | undefined = await getExperimentationService();
     const isEnabled: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", experimentName);

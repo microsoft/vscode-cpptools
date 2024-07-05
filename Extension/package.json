@@ -3264,10 +3264,11 @@
                     "C_Cpp.experimentalFeatures": {
                         "type": "string",
                         "enum": [
+                            "default",
                             "enabled",
                             "disabled"
                         ],
-                        "default": "disabled",
+                        "default": "default",
                         "description": "%c_cpp.configuration.experimentalFeatures.description%",
                         "scope": "window"
                     },

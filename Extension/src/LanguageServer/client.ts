@@ -314,7 +314,6 @@ export interface GetDocumentSymbolRequestParams {
 
 export interface WorkspaceSymbolParams extends WorkspaceFolderParams {
     query: string;
-    experimentEnabled: boolean;
 }
 
 export enum SymbolScope {
@@ -1204,7 +1203,7 @@ export class DefaultClient implements Client {
 
         try {
             let isFirstClient: boolean = false;
-            if (!languageClient || languageClientCrashedNeedsRestart) {
+            if (firstClientStarted == undefined || languageClientCrashedNeedsRestart) {
                 if (languageClientCrashedNeedsRestart) {
                     languageClientCrashedNeedsRestart = false;
                     // if we're recovering, the isStarted needs to be reset.
@@ -1446,7 +1445,7 @@ export class DefaultClient implements Client {
         return workspaceFolderSettingsParams;
     }
 
-    private getAllSettings(): SettingsParams {
+    private async getAllSettings(): Promise<SettingsParams> {
         const workspaceSettings: CppSettings = new CppSettings();
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
         const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = this.getAllWorkspaceFolderSettings();
@@ -1462,7 +1461,7 @@ export class DefaultClient implements Client {
             workspaceSymbols: workspaceSettings.workspaceSymbols,
             simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
             intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
-            experimentalFeatures: workspaceSettings.experimentalFeatures,
+            experimentalFeatures: await telemetry.isExperimentEnabled("CppTools2"),
             enhancedColorization: workspaceSettings.enhancedColorization,
             intellisenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
             intellisenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
@@ -1541,7 +1540,7 @@ export class DefaultClient implements Client {
             resetDatabase: resetDatabase,
             edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", getLocaleId()),
             localizedStrings: localizedStrings,
-            settings: this.getAllSettings()
+            settings: await this.getAllSettings()
         };
 
         this.loggingLevel = util.getNumericLoggingLevel(cppInitializationParams.settings.loggingLevel);
@@ -1607,7 +1606,7 @@ export class DefaultClient implements Client {
     public async sendDidChangeSettings(): Promise<void> {
         // Send settings json to native side
         await this.ready;
-        await this.languageClient.sendNotification(DidChangeSettingsNotification, this.getAllSettings());
+        await this.languageClient.sendNotification(DidChangeSettingsNotification, await this.getAllSettings());
     }
 
     public async onDidChangeSettings(_event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> {

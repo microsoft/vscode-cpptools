@@ -353,7 +353,7 @@ export class CppSettings extends Settings {
     public get clangFormatStyle(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("clang_format_style")); }
     public get clangFormatFallbackStyle(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("clang_format_fallbackStyle")); }
     public get clangFormatSortIncludes(): boolean | undefined | null { return super.Section.get<boolean | null>("clang_format_sortIncludes"); }
-    public get experimentalFeatures(): boolean | undefined { return super.Section.get<string>("experimentalFeatures")?.toLowerCase() === "enabled"; }
+    public get experimentalFeatures(): string | undefined { return super.Section.get<string>("experimentalFeatures")?.toLowerCase(); }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
     public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine")?.toLowerCase(); }
     public get intelliSenseEngineFallback(): boolean | undefined { return super.Section.get<string>("intelliSenseEngineFallback")?.toLowerCase() === "enabled"; }
