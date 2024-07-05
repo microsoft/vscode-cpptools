@@ -70,7 +70,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     util.checkDistro(info);
     await checkVsixCompatibility();
     LanguageServer.UpdateInsidersAccess();
-    await LanguageServer.preReleaseCheck();
+
+    const ignoreRecommendations: boolean | undefined = vscode.workspace.getConfiguration("extensions", null).get<boolean>("ignoreRecommendations");
+    if (ignoreRecommendations !== true) {
+        await LanguageServer.preReleaseCheck();
+    }
 
     const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
     let isOldMacOs: boolean = false;
