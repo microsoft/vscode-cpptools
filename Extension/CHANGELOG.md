@@ -1,5 +1,26 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.21.1: July 8, 2024
+### Enhancements
+* Add a `default` value for the `C_Cpp.experimentalFeatures` setting (enabling the `disabled` value to work). [#12163](https://github.com/microsoft/vscode-cpptools/issues/12163)
+* Add `see` and `sa` to the `C_Cpp.doxygen.sectionTags` setting. [#12384](https://github.com/microsoft/vscode-cpptools/issues/12384)
+* Update the vcpkg header database. [PR #12430](https://github.com/microsoft/vscode-cpptools/pull/12430)
+* Disable the pre-release prompt if the `extensions.ignoreRecommendations` setting is `true`. [#12438](https://github.com/microsoft/vscode-cpptools/issues/12438)
+* Setting `C_Cpp.experimentalFeatures` to `enabled` will switch to an alternative workspace symbol search implementation. [#12448](https://github.com/microsoft/vscode-cpptools/issues/12448)
+* Various IntelliSense engine updates/fixes.
+
+### Bug Fixes
+* Fix a tag parser performance regression, currently only when `C_Cpp.experimentalFeatures` is `enabled`. [#12292](https://github.com/microsoft/vscode-cpptools/issues/12292)
+* Fix code analysis, find all references, and rename from getting the wrong configuration for non-open files on the first run when using a configuration provider. [#12313](https://github.com/microsoft/vscode-cpptools/issues/12313)
+* Fix potential crashes. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
+* Fix the language status not showing it's busy while the tag parser is initializing. [#12403](https://github.com/microsoft/vscode-cpptools/issues/12403)
+* Fix the vcpkg code action not appearing for missing headers available via vcpkg. [#12413](https://github.com/microsoft/vscode-cpptools/issues/12413)
+* Fix custom configurations sometimes not getting used. [PR #12427](https://github.com/microsoft/vscode-cpptools/pull/12427)
+* Fix a code analysis error when using gcc 14. [#12428](https://github.com/microsoft/vscode-cpptools/issues/12428)
+* Fix colorization, inactive regions and inlay hints getting cleared when an update is pending.
+* Fix a potential deadlock when configured using compile commands.
+* Fix semantic tokens transiently being placed in the wrong location.
+
 ## Version 1.21.0: June 17, 2024
 ### Bug Fixes
 * Stop logging file watch events for excluded files. [#11455](https://github.com/microsoft/vscode-cpptools/issues/11455)
