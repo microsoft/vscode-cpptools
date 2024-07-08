@@ -333,13 +333,15 @@ export class CppSettings extends Settings {
         const value: any | undefined | null = super.Section.get(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
 
-        if (isNumber(value) && (value >= setting.minimum && value <= setting.maximum)) {
+        if (isNumber(value) && (value >= setting.minimum && value <= setting.maximum)) { // Check if the value is within the valid range.
             return value;
         }
 
         return setting.default;
     }
 
+    // This helper function returns the value of a setting as an array of strings with proper type validation.
+    // Additionally, it checks for valid enum values if an array of enums is detected.
     private getAsArrayOfStrings(settingName: string): string[] {
         const setting = getRawSetting("C_Cpp." + settingName);
         const value: any | undefined | null = super.Section.get(settingName);
@@ -356,6 +358,7 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
+    // This helper function returns the value of a setting as a key-value object with proper type validation.
     private getAsKeyValueObject(settingName: string, keyType: string, valueType: string): any {
         const setting = getRawSetting("C_Cpp." + settingName);
         const value: any = super.Section.get(settingName);
@@ -365,6 +368,7 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
+    // This helper function validates whether the given value is a valid enum value for the given setting.
     private isValidEnum(settingName: string, value: any): boolean {
         const setting = getRawSetting("C_Cpp." + settingName);
         if (this.validateEnum(setting.enum, value)) {
@@ -373,6 +377,8 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
+    // This helper function validates whether the given object is a valid mapping of key and value type. 
+    // EX: {"key": true, "key2": false} should return true for keyType = string and valueType = boolean.
     private isValidMapping(value: any, keyType: string, valueType: string): boolean {
         if (value === undefined || value === null) { return false; }
         for (const key of Object.keys(value)) {
@@ -383,6 +389,7 @@ export class CppSettings extends Settings {
         return true;
     }
 
+    // This helper function checks a given enum value against a list of valid enum values from package.json.
     private validateEnum(enumDescription: any, value: any) {
         if (isArray(enumDescription) && enumDescription.length > 0) {
             return enumDescription.some(x => x.toLowerCase() === value.toLowerCase());
@@ -390,27 +397,13 @@ export class CppSettings extends Settings {
         return false;
     }
 
-    public get maxConcurrentThreads(): number | undefined | null {
-        return this.getAsNumber("maxConcurrentThreads");
-    }
-    public get maxMemory(): number | undefined | null {
-        return this.getAsNumber("maxMemory");
-    }
-    public get maxSymbolSearchResults(): number | undefined {
-        return this.getAsNumber("maxSymbolSearchResults");
-    }
-    public get maxCachedProcesses(): number | undefined | null {
-        return this.getAsNumber("maxCachedProcesses");
-    }
-    public get intelliSenseMaxCachedProcesses(): number | undefined | null {
-        return this.getAsNumber("intelliSense.maxCachedProcesses");
-    }
-    public get intelliSenseMaxMemory(): number | undefined | null {
-        return this.getAsNumber("intelliSense.maxMemory");
-    }
-    public get referencesMaxConcurrentThreads(): number | undefined | null {
-        return this.getAsNumber("references.maxConcurrentThreads");
-    }
+    public get maxConcurrentThreads(): number | undefined | null { return this.getAsNumber("maxConcurrentThreads"); }
+    public get maxMemory(): number | undefined | null { return this.getAsNumber("maxMemory"); }
+    public get maxSymbolSearchResults(): number | undefined { return this.getAsNumber("maxSymbolSearchResults"); }
+    public get maxCachedProcesses(): number | undefined | null { return this.getAsNumber("maxCachedProcesses"); }
+    public get intelliSenseMaxCachedProcesses(): number | undefined | null { return this.getAsNumber("intelliSense.maxCachedProcesses"); }
+    public get intelliSenseMaxMemory(): number | undefined | null { return this.getAsNumber("intelliSense.maxMemory"); }
+    public get referencesMaxConcurrentThreads(): number | undefined | null { return this.getAsNumber("references.maxConcurrentThreads"); }
     public get referencesMaxCachedProcesses(): number | undefined | null { return this.getAsNumber("references.maxCachedProcesses"); }
     public get referencesMaxMemory(): number | undefined | null { return this.getAsNumber("references.maxMemory"); }
     public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return this.getAsNumber("codeAnalysis.maxConcurrentThreads"); }
@@ -470,6 +463,7 @@ export class CppSettings extends Settings {
             return value;
         }
 
+        // To validate the types of the array of comment patterns, we need to check each property of the object specifically. This cannot be generalized.
         if (value.every(x => typeof x === "object" && typeof x.begin === "string" && typeof x.continue === "string")) {
             return value;
         }
@@ -938,6 +932,7 @@ export class OtherSettings {
         return defaultNumber;
     }
 
+    // All default values are obtained from the VS Code settings UI. Please update the default values as needed.
     public get editorTabSize(): number | undefined { return this.getAsNumber("editor", "tabSize", this.resource, 4); }
     public get editorInsertSpaces(): boolean | undefined { return this.getVSCodeSettingAsBoolean("editor", "insertSpaces", this.resource, true); } 
     public get editorAutoClosingBrackets(): string | undefined { return this.getVSCodeSettingAsString("editor", "autoClosingBrackets", this.resource, "languageDefined"); }
