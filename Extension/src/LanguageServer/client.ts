@@ -1461,7 +1461,7 @@ export class DefaultClient implements Client {
             workspaceSymbols: workspaceSettings.workspaceSymbols,
             simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
             intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
-            experimentalFeatures: await telemetry.isExperimentEnabled("CppTools2"),
+            experimentalFeatures: await telemetry.isExperimentEnabled("CppTools1"),
             enhancedColorization: workspaceSettings.enhancedColorization,
             intellisenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
             intellisenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
