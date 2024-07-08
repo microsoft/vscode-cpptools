@@ -377,7 +377,7 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
-    // This helper function validates whether the given object is a valid mapping of key and value type. 
+    // This helper function validates whether the given object is a valid mapping of key and value type.
     // EX: {"key": true, "key2": false} should return true for keyType = string and valueType = boolean.
     private isValidMapping(value: any, keyType: string, valueType: string): boolean {
         if (value === undefined || value === null) { return false; }
@@ -934,7 +934,7 @@ export class OtherSettings {
 
     // All default values are obtained from the VS Code settings UI. Please update the default values as needed.
     public get editorTabSize(): number | undefined { return this.getAsNumber("editor", "tabSize", this.resource, 4); }
-    public get editorInsertSpaces(): boolean | undefined { return this.getVSCodeSettingAsBoolean("editor", "insertSpaces", this.resource, true); } 
+    public get editorInsertSpaces(): boolean | undefined { return this.getVSCodeSettingAsBoolean("editor", "insertSpaces", this.resource, true); }
     public get editorAutoClosingBrackets(): string | undefined { return this.getVSCodeSettingAsString("editor", "autoClosingBrackets", this.resource, "languageDefined"); }
     public get filesEncoding(): string | undefined { return this.getVSCodeSettingAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }, "UTF-8"); }
     public get filesAssociations(): any { const value = vscode.workspace.getConfiguration("files").get("associations"); return value; }
