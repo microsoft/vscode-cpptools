@@ -1272,7 +1272,7 @@ export class DefaultClient implements Client {
                 this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, this.codeFoldingProvider);
 
                 const settings: CppSettings = new CppSettings();
-                if (settings.enhancedColorizationEnabled && semanticTokensLegend) {
+                if (settings.enhancedColorization && semanticTokensLegend) {
                     this.semanticTokensProvider = new SemanticTokensProvider();
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                 }
@@ -1322,7 +1322,7 @@ export class DefaultClient implements Client {
         const result: WorkspaceFolderSettingsParams = {
             uri: workspaceFolderUri?.toString(),
             intelliSenseEngine: settings.intelliSenseEngine,
-            intelliSenseEngineFallback: settings.intelliSenseEngineFallbackEnabled,
+            intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
             autocomplete: settings.autocomplete,
             autocompleteAddParentheses: settings.autocompleteAddParentheses,
             errorSquiggles: settings.errorSquiggles,
@@ -1457,8 +1457,8 @@ export class DefaultClient implements Client {
             workspaceSymbols: workspaceSettings.workspaceSymbols,
             simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
             intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
-            experimentalFeaturesEnabled: workspaceSettings.experimentalFeaturesEnabled,
-            enhancedColorizationEnabled: workspaceSettings.enhancedColorizationEnabled,
+            experimentalFeatures: workspaceSettings.experimentalFeatures,
+            enhancedColorization: workspaceSettings.enhancedColorization,
             intellisenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
             intellisenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
             referencesMaxConcurrentThreads: workspaceSettings.referencesMaxConcurrentThreads,
@@ -1630,7 +1630,7 @@ export class DefaultClient implements Client {
                 }
                 const settings: CppSettings = new CppSettings();
                 if (changedSettings.enhancedColorization) {
-                    if (settings.enhancedColorizationEnabled && semanticTokensLegend) {
+                    if (settings.enhancedColorization && semanticTokensLegend) {
                         this.semanticTokensProvider = new SemanticTokensProvider();
                         this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                     } else if (this.semanticTokensProviderDisposable) {
@@ -2096,7 +2096,7 @@ export class DefaultClient implements Client {
             result = "timeout";
             if (!requestFile) {
                 const settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.configurationWarningsEnabled && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+                if (settings.configurationWarnings && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                     const dismiss: string = localize("dismiss.button", "Dismiss");
                     const disable: string = localize("disable.warnings.button", "Disable Warnings");
                     const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
@@ -2166,7 +2166,7 @@ export class DefaultClient implements Client {
 
     public getVcpkgEnabled(): Promise<boolean> {
         const cppSettings: CppSettings = new CppSettings(this.RootUri);
-        return Promise.resolve(!!cppSettings.vcpkgEnabled);
+        return Promise.resolve(!!cppSettings.vcpkg);
     }
 
     public async getKnownCompilers(): Promise<configs.KnownCompiler[] | undefined> {
