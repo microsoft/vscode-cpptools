@@ -1,16 +1,17 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.21.1: July 8, 2024
+## Version 1.21.1: July 9, 2024
 ### Enhancements
 * Add a `default` value for the `C_Cpp.experimentalFeatures` setting (enabling the `disabled` value to work). [#12163](https://github.com/microsoft/vscode-cpptools/issues/12163)
 * Add `see` and `sa` to the `C_Cpp.doxygen.sectionTags` setting. [#12384](https://github.com/microsoft/vscode-cpptools/issues/12384)
 * Update the vcpkg header database. [PR #12430](https://github.com/microsoft/vscode-cpptools/pull/12430)
 * Disable the pre-release prompt if the `extensions.ignoreRecommendations` setting is `true`. [#12438](https://github.com/microsoft/vscode-cpptools/issues/12438)
-* Setting `C_Cpp.experimentalFeatures` to `enabled` will switch to an alternative workspace symbol search implementation. [#12448](https://github.com/microsoft/vscode-cpptools/issues/12448)
+* Switch to an alternative workspace symbol search implementation by default (unless `C_Cpp.experimentalFeatures` is `enabled`). [#12448](https://github.com/microsoft/vscode-cpptools/issues/12448)
 * Various IntelliSense engine updates/fixes.
 
 ### Bug Fixes
-* Fix a tag parser performance regression, currently only when `C_Cpp.experimentalFeatures` is `enabled`. [#12292](https://github.com/microsoft/vscode-cpptools/issues/12292)
+* Fix a crash if the Ryzen 3000 doesn't have updated drivers. [#12201](https://github.com/microsoft/vscode-cpptools/issues/12201)
+* Fix a tag parser performance regression (except when `C_Cpp.experimentalFeatures` is `enabled`). [#12292](https://github.com/microsoft/vscode-cpptools/issues/12292)
 * Fix code analysis, find all references, and rename from getting the wrong configuration for non-open files on the first run when using a configuration provider. [#12313](https://github.com/microsoft/vscode-cpptools/issues/12313)
 * Fix potential crashes. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
 * Fix the language status not showing it's busy while the tag parser is initializing. [#12403](https://github.com/microsoft/vscode-cpptools/issues/12403)
