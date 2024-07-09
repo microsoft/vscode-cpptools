@@ -1443,7 +1443,6 @@ export class DefaultClient implements Client {
     private getAllSettings(): SettingsParams {
         const workspaceSettings: CppSettings = new CppSettings();
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
-        console.log(workspaceOtherSettings.editorTabSize);
         const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = this.getAllWorkspaceFolderSettings();
         return {
             filesAssociations: workspaceOtherSettings.filesAssociations,

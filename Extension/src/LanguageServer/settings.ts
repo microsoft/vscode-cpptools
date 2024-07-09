@@ -426,7 +426,10 @@ export class CppSettings extends Settings {
     public get clangTidyCodeActionFormatFixes(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.formatFixes") ?? true; }
     public addClangTidyChecksDisabled(value: string): void {
         const checks: string[] | undefined = this.clangTidyChecksDisabled;
-        if (checks === undefined) { return; } checks.push(value);
+        if (checks === undefined) { 
+            return;
+        } 
+        checks.push(value);
         void super.Section.update("codeAnalysis.clangTidy.checks.disabled", checks, vscode.ConfigurationTarget.WorkspaceFolder);
     }
     public get clangFormatStyle(): string | undefined { return this.getAsString("clang_format_style"); }
@@ -533,7 +536,7 @@ export class CppSettings extends Settings {
     public get inlayHintsReferenceOperator(): boolean { return this.getAsBoolean("inlayHints.referenceOperator.enabled"); }
     public get inlayHintsReferenceOperatorShowSpace(): boolean { return this.getAsBoolean("inlayHints.referenceOperator.showSpace"); }
     public get enhancedColorization(): boolean { return this.getAsString("enhancedColorization") === "enabled" && this.intelliSenseEngine === "default" && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast"; }
-    public get formattingEngine(): string | undefined { return this.getAsString("formatting")?.toLowerCase(); }
+    public get formattingEngine(): string | undefined { return this.getAsString("formatting"); }
     public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
     public get vcFormatIndentMultiLineRelativeTo(): string {
         // These strings have default values in package.json, so should never be undefined.
