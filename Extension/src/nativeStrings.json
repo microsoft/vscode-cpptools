@@ -214,6 +214,7 @@
         "text": "Returns:",
         "hint": "This label is for the return value description for a function. Usage example: 'Returns: Area of a shape.'"
     },
+    "sa_label": "See also:",
     "since_label": "Since:",
     "template_parameters_label": "Template Parameters:",
     "test_label": "Test:",
