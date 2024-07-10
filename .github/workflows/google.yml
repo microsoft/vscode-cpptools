@@ -17,7 +17,7 @@ on:
   push:
     branches: [ "smp73se" ]
 
-env:
+env:azure-functions-python-3
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GAR_LOCATION: us-central1 # TODO: update region of the Artifact Registry
   GKE_CLUSTER: cluster-1    # TODO: update to cluster name
