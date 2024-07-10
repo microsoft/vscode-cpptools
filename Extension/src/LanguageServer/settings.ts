@@ -333,22 +333,32 @@ export class CppSettings extends Settings {
         const value: any | undefined | null = super.Section.get(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
 
-        if (isNumber(value) && (value >= setting.minimum && value <= setting.maximum)) { // Check if the value is within the valid range.
-            return value;
-        }
+        if (isNumber(value)) {
+            if (setting.minimum !== undefined && setting.maximum !== undefined) { 
+                if (value >= setting.minimum && value <= setting.maximum) { // Check if the value is within the valid range.
+                    return value;
+                }
+            } else {
+                return value;
+            }
+        }   
 
         return setting.default;
     }
 
     // This helper function returns the value of a setting as an array of strings with proper type validation.
     // Additionally, it checks for valid enum values if an array of enums is detected.
-    private getAsArrayOfStrings(settingName: string): string[] {
+    private getAsArrayOfStrings(settingName: string, allowUndefinedEnums: boolean = false): string[] {
         const setting = getRawSetting("C_Cpp." + settingName);
         const value: any | undefined | null = super.Section.get(settingName);
         if (isArrayOfString(value)) {
             if (setting.items.enum !== undefined) {
                 if (!value.every(x => this.validateEnum(setting.items.enum, x))) {
-                    return setting.default;
+                    if (allowUndefinedEnums) {
+                        return value
+                    } else {
+                        return setting.default;
+                    }
                 } else {
                     return value;
                 }
@@ -360,11 +370,11 @@ export class CppSettings extends Settings {
 
     // This helper function returns the value of a setting as a key-value object with proper type validation.
     private getAsKeyValueObject(settingName: string, keyType: string, valueType: string): any {
-        const setting = getRawSetting("C_Cpp." + settingName);
         const value: any = super.Section.get(settingName);
         if (this.isValidMapping(value, keyType, valueType)) {
             return value;
         }
+        const setting = getRawSetting("C_Cpp." + settingName);
         return setting.default;
     }
 
@@ -397,6 +407,14 @@ export class CppSettings extends Settings {
         return false;
     }
 
+    private isArrayOfCommentContinuationPatterns(x: any): x is (string | CommentPattern)[] {
+        return isArray(x) && x.every(y => isString(y) || this.isCommentPattern(y));
+      }
+       
+    private isCommentPattern(x: any): x is CommentPattern {
+        return isString(x.begin) && isString(x.continue);
+    }
+
     public get maxConcurrentThreads(): number | undefined | null { return this.getAsNumber("maxConcurrentThreads"); }
     public get maxMemory(): number | undefined | null { return this.getAsNumber("maxMemory"); }
     public get maxSymbolSearchResults(): number | undefined { return this.getAsNumber("maxSymbolSearchResults"); }
@@ -418,8 +436,8 @@ export class CppSettings extends Settings {
     public get clangTidyHeaderFilter(): string | undefined | null { return this.getAsString("codeAnalysis.clangTidy.headerFilter"); }
     public get clangTidyArgs(): string[] | undefined { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.args"); }
     public get clangTidyUseBuildPath(): boolean | undefined { return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath"); }
-    public get clangTidyChecksEnabled(): string[] | undefined { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.enabled"); }
-    public get clangTidyChecksDisabled(): string[] | undefined { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.disabled"); }
+    public get clangTidyChecksEnabled(): string[] | undefined { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.enabled", true); }
+    public get clangTidyChecksDisabled(): string[] | undefined { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.disabled", true); }
     public get clangTidyCodeActionShowDisable(): boolean | undefined { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.showDisable"); }
     public get clangTidyCodeActionShowClear(): string { return this.getAsString("codeAnalysis.clangTidy.codeAction.showClear"); }
     public get clangTidyCodeActionShowDocumentation(): boolean | undefined { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.showDocumentation"); }
@@ -462,12 +480,7 @@ export class CppSettings extends Settings {
         // eslint-disable-next-line no-extra-parens
         const value = super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns");
         if (value === undefined) { return undefined; }
-        if (isArrayOfString(value)) {
-            return value;
-        }
-
-        // To validate the types of the array of comment patterns, we need to check each property of the object specifically. This cannot be generalized.
-        if (value.every(x => typeof x === "object" && typeof x.begin === "string" && typeof x.continue === "string")) {
+        if (isArrayOfString(value) || this.isArrayOfCommentContinuationPatterns(value)) {
             return value;
         }
         return undefined;
@@ -927,7 +940,7 @@ export class OtherSettings {
         return defaultBoolean;
     }
 
-    private getAsNumber(setting: string, configuration: string, resource: any, defaultNumber?: number): number | undefined {
+    private getVSCodeSettingAsNumber(setting: string, configuration: string, resource: any, defaultNumber?: number): number | undefined {
         const value = vscode.workspace.getConfiguration(configuration, resource).get<number>(setting);
         if (isNumber(value)) {
             return value;
@@ -936,7 +949,7 @@ export class OtherSettings {
     }
 
     // All default values are obtained from the VS Code settings UI. Please update the default values as needed.
-    public get editorTabSize(): number | undefined { return this.getAsNumber("editor", "tabSize", this.resource, 4); }
+    public get editorTabSize(): number | undefined { return this.getVSCodeSettingAsNumber("editor", "tabSize", this.resource, 4); }
     public get editorInsertSpaces(): boolean | undefined { return this.getVSCodeSettingAsBoolean("editor", "insertSpaces", this.resource, true); }
     public get editorAutoClosingBrackets(): string | undefined { return this.getVSCodeSettingAsString("editor", "autoClosingBrackets", this.resource, "languageDefined"); }
     public get filesEncoding(): string | undefined { return this.getVSCodeSettingAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }, "UTF-8"); }
