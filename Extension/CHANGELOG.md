@@ -18,8 +18,8 @@
 * Fix the vcpkg code action not appearing for missing headers available via vcpkg. [#12413](https://github.com/microsoft/vscode-cpptools/issues/12413)
 * Fix custom configurations sometimes not getting used. [PR #12427](https://github.com/microsoft/vscode-cpptools/pull/12427)
 * Fix a code analysis error when using gcc 14. [#12428](https://github.com/microsoft/vscode-cpptools/issues/12428)
-* Fix one cause of colorization, inactive regions, and inlay hints getting cleared when an update is pending.
-* Fix one cause of semantic tokens transiently being placed in the wrong location.
+* Fix a cause of colorization, inactive regions, and inlay hints getting cleared when an update is pending.
+* Fix a cause of semantic tokens transiently being placed in the wrong location.
 * Fix a potential deadlock when configured using compile commands.
 
 ## Version 1.21.0: June 17, 2024
