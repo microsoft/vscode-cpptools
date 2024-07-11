@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.21.1: July 9, 2024
+## Version 1.21.1: July 11, 2024
 ### Enhancements
 * Add a `default` value for the `C_Cpp.experimentalFeatures` setting (enabling the `disabled` value to work). [#12163](https://github.com/microsoft/vscode-cpptools/issues/12163)
 * Add `see` and `sa` to the `C_Cpp.doxygen.sectionTags` setting. [#12384](https://github.com/microsoft/vscode-cpptools/issues/12384)
@@ -11,6 +11,7 @@
 
 ### Bug Fixes
 * Fix a crash if the Ryzen 3000 doesn't have updated drivers. [#12201](https://github.com/microsoft/vscode-cpptools/issues/12201)
+* Fix relative paths in `compile_commands.json` to be relative to the `compile_commands.json`'s directory. [#12290](https://github.com/microsoft/vscode-cpptools/issues/12290)
 * Fix a tag parser performance regression (except when `C_Cpp.experimentalFeatures` is `enabled`). [#12292](https://github.com/microsoft/vscode-cpptools/issues/12292)
 * Fix code analysis, find all references, and rename from getting the wrong configuration for non-open files on the first run when using a configuration provider. [#12313](https://github.com/microsoft/vscode-cpptools/issues/12313)
 * Fix potential crashes. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
@@ -19,8 +20,9 @@
 * Fix custom configurations sometimes not getting used. [PR #12427](https://github.com/microsoft/vscode-cpptools/pull/12427)
 * Fix a code analysis error when using gcc 14. [#12428](https://github.com/microsoft/vscode-cpptools/issues/12428)
 * Fix colorization, inactive regions and inlay hints getting cleared when an update is pending.
-* Fix a potential deadlock when configured using compile commands.
 * Fix semantic tokens transiently being placed in the wrong location.
+* Fix a potential deadlock when configured using compile commands.
+* Fix a case in which document symbols could be randomly missing.
 
 ## Version 1.21.0: June 17, 2024
 ### Bug Fixes
