@@ -310,7 +310,7 @@ export class CppSettings extends Settings {
     }
 
     private getAsBoolean(settingName: string): boolean {
-        const value: any | undefined = super.Section.get(settingName);
+        const value: any = super.Section.get(settingName);
         if (isBoolean(value)) {
             return value;
         }
@@ -318,10 +318,12 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
+    // This helper function returns the value of a setting as a string with proper type validation.
+    // Additionally, it checks for valid enum values if an enum is detected. It will return enums as lowrcase strings.
     private getAsString(settingName: string): string {
-        const value: any | undefined = super.Section.get(settingName);
+        const value: any = super.Section.get(settingName);
         if (this.isValidEnum(settingName, value)) {
-            return value.toLowerCase(); // Return enum values in lowercase.
+            return value.toLowerCase();
         } else if (isString(value)) {
             return value;
         }
@@ -330,18 +332,18 @@ export class CppSettings extends Settings {
     }
 
     private getAsNumber(settingName: string): number {
-        const value: any | undefined | null = super.Section.get(settingName);
+        const value: any = super.Section.get(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
 
         if (isNumber(value)) {
-            if (setting.minimum !== undefined && setting.maximum !== undefined) { 
+            if (setting.minimum !== undefined && setting.maximum !== undefined) {
                 if (value >= setting.minimum && value <= setting.maximum) { // Check if the value is within the valid range.
                     return value;
                 }
             } else {
                 return value;
             }
-        }   
+        }
 
         return setting.default;
     }
@@ -349,18 +351,14 @@ export class CppSettings extends Settings {
     // This helper function returns the value of a setting as an array of strings with proper type validation.
     // Additionally, it checks for valid enum values if an array of enums is detected.
     private getAsArrayOfStrings(settingName: string, allowUndefinedEnums: boolean = false): string[] {
+        const value: any = super.Section.get(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
-        const value: any | undefined | null = super.Section.get(settingName);
         if (isArrayOfString(value)) {
-            if (setting.items.enum !== undefined) {
-                if (!value.every(x => this.validateEnum(setting.items.enum, x))) {
-                    if (allowUndefinedEnums) {
-                        return value
-                    } else {
+            if (!allowUndefinedEnums) {
+                if (setting.items.enum !== undefined) {
+                    if (!value.every(x => this.validateEnum(setting.items.enum, x))) {
                         return setting.default;
                     }
-                } else {
-                    return value;
                 }
             }
             return value;
@@ -378,6 +376,23 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
+    // This helper function validates whether the given object is a valid mapping of key and value type.
+    // EX: {"key": true, "key2": false} should return true for keyType = string and valueType = boolean.
+    private isValidMapping(value: any, keyType: string, valueType: string): boolean {
+        if (value === undefined || value === null) {
+            return false;
+        }
+        return Object.entries(value).every(([key, val]) => typeof key === keyType && typeof val === valueType);
+    }
+
+    // This helper function checks a given enum value against a list of valid enum values from package.json.
+    private validateEnum(enumDescription: any, value: any): boolean {
+        if (isArray(enumDescription) && enumDescription.length > 0) {
+            return enumDescription.some(x => x.toLowerCase() === value.toLowerCase());
+        }
+        return false;
+    }
+
     // This helper function validates whether the given value is a valid enum value for the given setting.
     private isValidEnum(settingName: string, value: any): boolean {
         const setting = getRawSetting("C_Cpp." + settingName);
@@ -387,30 +402,10 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
-    // This helper function validates whether the given object is a valid mapping of key and value type.
-    // EX: {"key": true, "key2": false} should return true for keyType = string and valueType = boolean.
-    private isValidMapping(value: any, keyType: string, valueType: string): boolean {
-        if (value === undefined || value === null) { return false; }
-        for (const key of Object.keys(value)) {
-            if (typeof key !== keyType && typeof value[key] !== valueType) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // This helper function checks a given enum value against a list of valid enum values from package.json.
-    private validateEnum(enumDescription: any, value: any) {
-        if (isArray(enumDescription) && enumDescription.length > 0) {
-            return enumDescription.some(x => x.toLowerCase() === value.toLowerCase());
-        }
-        return false;
-    }
-
     private isArrayOfCommentContinuationPatterns(x: any): x is (string | CommentPattern)[] {
         return isArray(x) && x.every(y => isString(y) || this.isCommentPattern(y));
-      }
-       
+    }
+
     private isCommentPattern(x: any): x is CommentPattern {
         return isString(x.begin) && isString(x.continue);
     }
@@ -444,9 +439,9 @@ export class CppSettings extends Settings {
     public get clangTidyCodeActionFormatFixes(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.formatFixes") ?? true; }
     public addClangTidyChecksDisabled(value: string): void {
         const checks: string[] | undefined = this.clangTidyChecksDisabled;
-        if (checks === undefined) { 
+        if (checks === undefined) {
             return;
-        } 
+        }
         checks.push(value);
         void super.Section.update("codeAnalysis.clangTidy.checks.disabled", checks, vscode.ConfigurationTarget.WorkspaceFolder);
     }
@@ -924,44 +919,49 @@ export class OtherSettings {
         this.resource = resource;
     }
 
-    private getVSCodeSettingAsString(setting: string, configuration: string, resource: any, defaultString?: string): string | undefined {
-        const value = vscode.workspace.getConfiguration(configuration, resource).get<string>(setting);
+    private getVSCodeSettingAsString(setting: string, configuration: string, resource: any): string | undefined {
+        const fullConfiguration = vscode.workspace.getConfiguration(setting, resource);
+        const value = fullConfiguration.get<string>(configuration);
         if (isString(value)) {
             return value;
         }
-        return defaultString;
+        const config = fullConfiguration.inspect<string>(configuration);
+        return config?.defaultValue;
     }
 
-    private getVSCodeSettingAsBoolean(setting: string, configuration: string, resource: any, defaultBoolean?: boolean): boolean | undefined {
-        const value = vscode.workspace.getConfiguration(configuration, resource).get<boolean>(setting);
+    private getVSCodeSettingAsBoolean(setting: string, configuration: string, resource: any): boolean | undefined {
+        const fullConfiguration = vscode.workspace.getConfiguration(setting, resource);
+        const value = fullConfiguration.get<boolean>(configuration);
         if (isBoolean(value)) {
             return value;
         }
-        return defaultBoolean;
+        const config = fullConfiguration.inspect<boolean>(configuration);
+        return config?.defaultValue;
     }
 
-    private getVSCodeSettingAsNumber(setting: string, configuration: string, resource: any, defaultNumber?: number): number | undefined {
-        const value = vscode.workspace.getConfiguration(configuration, resource).get<number>(setting);
+    private getVSCodeSettingAsNumber(setting: string, configuration: string, resource: any): number | undefined {
+        const fullConfiguration = vscode.workspace.getConfiguration(setting, resource);
+        const value = fullConfiguration.get<number>(configuration);
         if (isNumber(value)) {
             return value;
         }
-        return defaultNumber;
-    }
+        const config = fullConfiguration.inspect<number>(configuration);
+        return config?.defaultValue; }
 
     // All default values are obtained from the VS Code settings UI. Please update the default values as needed.
-    public get editorTabSize(): number | undefined { return this.getVSCodeSettingAsNumber("editor", "tabSize", this.resource, 4); }
-    public get editorInsertSpaces(): boolean | undefined { return this.getVSCodeSettingAsBoolean("editor", "insertSpaces", this.resource, true); }
-    public get editorAutoClosingBrackets(): string | undefined { return this.getVSCodeSettingAsString("editor", "autoClosingBrackets", this.resource, "languageDefined"); }
-    public get filesEncoding(): string | undefined { return this.getVSCodeSettingAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }, "UTF-8"); }
+    public get editorTabSize(): number | undefined { return this.getVSCodeSettingAsNumber("editor", "tabSize", this.resource); }
+    public get editorInsertSpaces(): boolean | undefined { return this.getVSCodeSettingAsBoolean("editor", "insertSpaces", this.resource); }
+    public get editorAutoClosingBrackets(): string | undefined { return this.getVSCodeSettingAsString("editor", "autoClosingBrackets", this.resource); }
+    public get filesEncoding(): string | undefined { return this.getVSCodeSettingAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }); }
     public get filesAssociations(): any { const value = vscode.workspace.getConfiguration("files").get("associations"); return value; }
     public set filesAssociations(value: any) { void vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace); }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
-    public get filesAutoSaveAfterDelay(): boolean { return this.getVSCodeSettingAsString("files", "autoSave", this.resource, "off") === "afterDelay"; }
-    public get editorInlayHintsEnabled(): boolean { return this.getVSCodeSettingAsString("editor.inlayHints", "enabled", this.resource, "on") !== "off"; }
+    public get filesAutoSaveAfterDelay(): boolean { return this.getVSCodeSettingAsString("files", "autoSave", this.resource) === "afterDelay"; }
+    public get editorInlayHintsEnabled(): boolean { return this.getVSCodeSettingAsString("editor.inlayHints", "enabled", this.resource) !== "off"; }
     public get editorParameterHintsEnabled(): boolean | undefined { return this.getVSCodeSettingAsBoolean("editor.parameterHints", "enabled", this.resource); }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
-    public get workbenchSettingsEditor(): string | undefined { return this.getVSCodeSettingAsString("workbench.settings", "editor", this.resource, "ui"); }
-    public get colorTheme(): string | undefined { return this.getVSCodeSettingAsString("workbench", "colorTheme", this.resource, "Dark Modern"); }
+    public get workbenchSettingsEditor(): string | undefined { return this.getVSCodeSettingAsString("workbench.settings", "editor", this.resource); }
+    public get colorTheme(): string | undefined { return this.getVSCodeSettingAsString("workbench", "colorTheme", this.resource); }
 
     public getCustomColorToken(colorTokenName: string): string | undefined { return this.getVSCodeSettingAsString("editor.tokenColorCustomizations", colorTokenName, this.resource); }
     public getCustomThemeSpecificColorToken(themeName: string, colorTokenName: string): string | undefined { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<string>(colorTokenName); }
