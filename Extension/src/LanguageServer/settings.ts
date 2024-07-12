@@ -442,7 +442,7 @@ export class CppSettings extends Settings {
     public get experimentalFeatures(): boolean { return this.getAsString("experimentalFeatures").toLowerCase() === "enabled"; }
     public get suggestSnippets(): boolean { return this.getAsBoolean("suggestSnippets"); }
     public get intelliSenseEngine(): string { return this.getAsString("intelliSenseEngine"); }
-    public get intelliSenseEngineFallback(): boolean { return this.getAsString("intelliSenseEngineFallback") === "enabled"; }
+    public get intelliSenseEngineFallback(): boolean { return this.getAsString("intelliSenseEngineFallback").toLowerCase() === "enabled"; }
     public get intelliSenseCachePath(): string { return this.getAsString("intelliSenseCachePath"); }
     public get intelliSenseCacheSize(): number { return this.getAsNumber("intelliSenseCacheSize"); }
     public get intelliSenseMemoryLimit(): number { return this.getAsNumber("intelliSenseMemoryLimit"); }
@@ -474,7 +474,7 @@ export class CppSettings extends Settings {
     public get isConfigurationWarningsEnabled(): boolean { return this.getAsString("configurationWarnings").toLowerCase() === "enabled"; }
     public get preferredPathSeparator(): string { return this.getAsString("preferredPathSeparator"); }
     public get updateChannel(): string { return this.getAsString("updateChannel"); }
-    public get isVcpkgEnabled(): boolean { return this.getAsString("vcpkg") === "enabled"; }
+    public get isVcpkgEnabled(): boolean { return this.getAsString("vcpkg").toLowerCase() === "enabled"; }
     public get addNodeAddonIncludePaths(): boolean { return this.getAsBoolean("addNodeAddonIncludePaths"); }
     public get renameRequiresIdentifier(): boolean { return this.getAsBoolean("renameRequiresIdentifier"); }
     public get filesExclude(): Excludes {return this.getAsKeyValueObject("files.exclude", "string", "boolean");}
@@ -520,8 +520,8 @@ export class CppSettings extends Settings {
     public get defaultEnableConfigurationSquiggles(): boolean { return this.getAsBoolean("default.enableConfigurationSquiggles"); }
     public get defaultCustomConfigurationVariables(): { [key: string]: string } {return this.getAsKeyValueObject("default.customConfigurationVariables", "string", "string");}
     public get useBacktickCommandSubstitution(): boolean { return this.getAsBoolean("debugger.useBacktickCommandSubstitution"); }
-    public get codeFolding(): boolean {return this.getAsString("codeFolding.enabled") === "enabled"; }
-    public get isCaseSensitiveFileSupportEnabled(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport") === "enabled"; }
+    public get codeFolding(): boolean {return this.getAsString("codeFolding").toLowerCase() === "enabled"; }
+    public get isCaseSensitiveFileSupportEnabled(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport").toLowerCase() === "enabled"; }
     public get doxygenSectionTags(): string[] { return this.getAsArrayOfStrings("doxygen.sectionTags"); }
     public get hover(): string { return this.getAsString("hover"); }
     public get markdownInComments(): string { return this.getAsString("markdownInComments"); }
@@ -533,7 +533,7 @@ export class CppSettings extends Settings {
     public get inlayHintsParameterNamesHideLeadingUnderscores(): boolean { return this.getAsBoolean("inlayHints.parameterNames.hideLeadingUnderscores"); }
     public get inlayHintsReferenceOperator(): boolean { return this.getAsBoolean("inlayHints.referenceOperator.enabled"); }
     public get inlayHintsReferenceOperatorShowSpace(): boolean { return this.getAsBoolean("inlayHints.referenceOperator.showSpace"); }
-    public get isEnhancedColorizationEnabled(): boolean { return this.getAsString("enhancedColorization") === "enabled" && this.intelliSenseEngine === "default" && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast"; }
+    public get isEnhancedColorizationEnabled(): boolean { return this.getAsString("enhancedColorization").toLowerCase() === "enabled" && this.intelliSenseEngine === "default" && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast"; }
     public get formattingEngine(): string { return this.getAsString("formatting"); }
     public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
     public get vcFormatIndentMultiLineRelativeTo(): string {return this.getAsString("vcFormat.indent.multiLineRelativeTo");}
