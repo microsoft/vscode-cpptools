@@ -3600,5 +3600,6 @@
     "EDG IFC",
     "für die aktuelle Übersetzungseinheit konnte keine Headereinheit erstellt werden",
     "Die aktuelle Übersetzungseinheit verwendet mindestens ein Feature, das derzeit nicht in eine Headereinheit geschrieben werden kann",
-    "\"explicit(bool)\" ist ein C++20-Feature"
+    "\"explicit(bool)\" ist ein C++20-Feature",
+    "Für die Moduldateizuordnung, die auf die Datei \"%sq\" verweist, muss ein Modulname angegeben werden."
 ]
