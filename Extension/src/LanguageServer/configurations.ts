@@ -2006,6 +2006,7 @@ export class CppProperties {
             }
 
             // Escape the path string for literal use in a regular expression
+            // Need to escape any quotes to match the original text
             let escapedPath: string = curPath.replace(/"/g, '\\"');
             escapedPath = escapedPath.replace(/[-\"\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
