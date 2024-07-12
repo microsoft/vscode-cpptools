@@ -91,6 +91,10 @@ export class LanguageStatusUI {
     constructor() {
         this.intelliSenseStatusItem = this.createIntelliSenseStatusItem();
         this.tagParseStatusItem = this.createTagParseStatusItem();
+
+        // The tag parser is always busy when initializing.
+        // The detail text says "Initializing..." until the tag parser is ready.
+        this.tagParseStatusItem.busy = true;
         this.codeAnalysisStatusItem = this.createCodeAnalysisStatusItem();
 
         this.referencesStatusBarItem = this.createReferencesStatusBarItem();

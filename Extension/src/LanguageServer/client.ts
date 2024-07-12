@@ -577,6 +577,7 @@ const DidChangeTextEditorSelectionNotification: NotificationType<Range> = new No
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams> = new NotificationType<FolderSelectedSettingParams>('cpptools/didChangeSelectedSetting');
 const IntervalTimerNotification: NotificationType<void> = new NotificationType<void>('cpptools/onIntervalTimer');
+const CustomConfigurationHighPriorityNotification: NotificationType<CustomConfigurationParams> = new NotificationType<CustomConfigurationParams>('cpptools/didChangeCustomConfigurationHighPriority');
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams> = new NotificationType<CustomConfigurationParams>('cpptools/didChangeCustomConfiguration');
 const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams> = new NotificationType<CustomBrowseConfigurationParams>('cpptools/didChangeCustomBrowseConfiguration');
 const ClearCustomConfigurationsNotification: NotificationType<WorkspaceFolderParams> = new NotificationType<WorkspaceFolderParams>('cpptools/clearCustomConfigurations');
@@ -1203,7 +1204,7 @@ export class DefaultClient implements Client {
 
         try {
             let isFirstClient: boolean = false;
-            if (!languageClient || languageClientCrashedNeedsRestart) {
+            if (firstClientStarted === undefined || languageClientCrashedNeedsRestart) {
                 if (languageClientCrashedNeedsRestart) {
                     languageClientCrashedNeedsRestart = false;
                     // if we're recovering, the isStarted needs to be reset.
@@ -2092,7 +2093,7 @@ export class DefaultClient implements Client {
         try {
             const configs: SourceFileConfigurationItem[] | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
             if (configs && configs.length > 0) {
-                this.sendCustomConfigurations(configs, provider.version);
+                this.sendCustomConfigurations(configs, provider.version, requestFile !== undefined);
             } else {
                 result = "noConfigurations";
             }
@@ -3019,7 +3020,7 @@ export class DefaultClient implements Client {
             util.isOptionalArrayOfString(input.configuration.forcedInclude);
     }
 
-    private sendCustomConfigurations(configs: any, providerVersion: Version): void {
+    private sendCustomConfigurations(configs: any, providerVersion: Version, wasRequested: boolean): void {
         // configs is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
         if (!configs || !(configs instanceof Array)) {
             console.warn("discarding invalid SourceFileConfigurationItems[]: " + configs);
@@ -3085,6 +3086,9 @@ export class DefaultClient implements Client {
             workspaceFolderUri: this.RootUri?.toString()
         };
 
+        if (wasRequested) {
+            void this.languageClient.sendNotification(CustomConfigurationHighPriorityNotification, params).catch(logAndReturn.undefined);
+        }
         void this.languageClient.sendNotification(CustomConfigurationNotification, params).catch(logAndReturn.undefined);
     }
 
