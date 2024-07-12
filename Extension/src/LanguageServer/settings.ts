@@ -319,7 +319,7 @@ export class CppSettings extends Settings {
     }
 
     // This helper function returns the value of a setting as a string with proper type validation.
-    // Additionally, it checks for valid enum values if an enum is detected. It will return enums as lowrcase strings.
+    // Additionally, it checks for valid enum values if an enum is detected.
     private getAsString(settingName: string): string {
         const value: any = super.Section.get(settingName);
         if (this.isValidEnum(settingName, value)) {
