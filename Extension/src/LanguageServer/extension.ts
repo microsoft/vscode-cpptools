@@ -14,8 +14,10 @@ import * as vscode from 'vscode';
 import { Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
+import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
+import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
@@ -35,14 +37,16 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
 
-let prevCrashFile: string;
+let prevMacCrashFile: string;
+let prevCppCrashFile: string;
+let prevCppCrashCallStackData: string = "";
 export let clients: ClientCollection;
 let activeDocument: vscode.TextDocument | undefined;
 let ui: LanguageStatusUI;
 const disposables: vscode.Disposable[] = [];
 const commandDisposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
-let intervalTimer: NodeJS.Timer;
+let intervalTimer: NodeJS.Timeout;
 let codeActionProvider: vscode.Disposable;
 export const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
 
@@ -62,7 +66,7 @@ async function initVcpkgDatabase(): Promise<VcpkgDatabase> {
                 }
 
                 const portName: string = portFilePair[0];
-                const relativeHeader: string = portFilePair[1];
+                const relativeHeader: string = portFilePair[1].trimEnd();
 
                 if (!database[relativeHeader]) {
                     database[relativeHeader] = [];
@@ -143,8 +147,6 @@ function sendActivationTelemetry(): void {
  * activate: set up the extension for language services
  */
 export async function activate(): Promise<void> {
-
-    console.log("activating extension");
     sendActivationTelemetry();
     const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
     if (checkForConflictingExtensions.Value) {
@@ -156,7 +158,6 @@ export async function activate(): Promise<void> {
         }
     }
 
-    console.log("starting language server");
     clients = new ClientCollection();
     ui = getUI();
 
@@ -402,6 +403,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? () => onExtractToFunction(true, false) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : () => Promise.resolve()));
 }
 
 function onDisabledCommand() {
@@ -915,15 +917,15 @@ function onShowRefCommand(arg?: TreeNode): void {
 
 function reportMacCrashes(): void {
     if (process.platform === "darwin") {
-        prevCrashFile = "";
+        prevMacCrashFile = "";
         const home: string = os.homedir();
         const crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err) => {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
                 // If the directory isn't there, we have a problem...
-                crashObject["fs.stat: err.code"] = err.code;
-                telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
+                crashObject["errCode"] = err.code;
+                telemetry.logLanguageServerEvent("MacCrash", crashObject);
                 return;
             }
 
@@ -933,10 +935,10 @@ function reportMacCrashes(): void {
                     if (event !== "rename") {
                         return;
                     }
-                    if (!filename || filename === prevCrashFile) {
+                    if (!filename || filename === prevMacCrashFile) {
                         return;
                     }
-                    prevCrashFile = filename;
+                    prevMacCrashFile = filename;
                     if (!filename.startsWith("cpptools")) {
                         return;
                     }
@@ -959,17 +961,85 @@ function reportMacCrashes(): void {
     }
 }
 
-let previousMacCrashData: string;
-let previousMacCrashCount: number = 0;
+export function usesCrashHandler(): boolean {
+    if (os.platform() === "darwin") {
+        if (os.arch() === "arm64") {
+            return true;
+        } else {
+            const releaseParts: string[] = os.release().split(".");
+            if (releaseParts.length >= 1) {
+                // Avoid potentially intereferring with the older macOS crash handler.
+                return parseInt(releaseParts[0]) >= 19;
+            }
+            return true;
+        }
+    }
+    return os.platform() !== "win32" && os.arch() === "x64";
+}
 
-function logMacCrashTelemetry(data: string): void {
+export function watchForCrashes(crashDirectory: string): void {
+    if (crashDirectory !== "") {
+        prevCppCrashFile = "";
+        fs.stat(crashDirectory, (err) => {
+            const crashObject: Record<string, string> = {};
+            if (err?.code) {
+                // If the directory isn't there, we have a problem...
+                crashObject["errCode"] = err.code;
+                telemetry.logLanguageServerEvent("CppCrash", crashObject);
+                return;
+            }
+
+            // vscode.workspace.createFileSystemWatcher only works in workspace folders.
+            try {
+                fs.watch(crashDirectory, (event, filename) => {
+                    if (event !== "rename") {
+                        return;
+                    }
+                    if (!filename || filename === prevCppCrashFile) {
+                        return;
+                    }
+                    prevCppCrashFile = filename;
+                    if (!filename.startsWith("cpptools")) {
+                        return;
+                    }
+                    const crashDate: Date = new Date();
+
+                    // Wait 5 seconds to allow time for the crash log to finish being written.
+                    setTimeout(() => {
+                        fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
+                            void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
+                        });
+                    }, 5000);
+                });
+            } catch (e) {
+                // The file watcher limit is hit (may not be possible on Mac, but just in case).
+            }
+        });
+    }
+}
+
+let previousCrashData: string;
+let previousCrashCount: number = 0;
+
+function logCrashTelemetry(data: string, type: string, offsetData?: string): void {
     const crashObject: Record<string, string> = {};
     const crashCountObject: Record<string, number> = {};
     crashObject.CrashingThreadCallStack = data;
-    previousMacCrashCount = data === previousMacCrashData ? previousMacCrashCount + 1 : 0;
-    previousMacCrashData = data;
-    crashCountObject.CrashCount = previousMacCrashCount;
-    telemetry.logLanguageServerEvent("MacCrash", crashObject, crashCountObject);
+    if (offsetData !== undefined) {
+        crashObject.CrashingThreadCallStackOffsets = offsetData;
+    }
+    previousCrashCount = data === previousCrashData ? previousCrashCount + 1 : 0;
+    previousCrashData = data;
+    crashCountObject.CrashCount = previousCrashCount + 1;
+    telemetry.logLanguageServerEvent(type, crashObject, crashCountObject);
+}
+
+function logMacCrashTelemetry(data: string): void {
+    logCrashTelemetry(data, "MacCrash");
+}
+
+function logCppCrashTelemetry(data: string, offsetData?: string): void {
+    logCrashTelemetry(data, "CppCrash", offsetData);
 }
 
 function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
@@ -996,7 +1066,11 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
         const dynamicLoadErrorEnd: string = "\n\n";
         const endDynamicLoadError: number = data.indexOf(dynamicLoadErrorEnd, startDynamicLoadError);
         if (endDynamicLoadError >= 0) {
-            dynamicLoadError = data.substring(startDynamicLoadError, endDynamicLoadError) + "\n\n";
+            dynamicLoadError = data.substring(startDynamicLoadError, endDynamicLoadError);
+            if (dynamicLoadError.includes("/")) {
+                dynamicLoadError = "<dyld error>";
+            }
+            dynamicLoadError += "\n\n";
         }
     }
 
@@ -1047,7 +1121,11 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
         if (!line.includes(".dylib") && !line.includes("???")) {
             line = line.replace(/^\d+\s+/, ""); // Remove <numbers><spaces> from the start of the line.
             line = line.replace(/std::__1::/g, "std::"); // __1:: is not helpful.
-            data += line + "\n";
+            if (line.includes("/")) {
+                data += "<path>\n";
+            } else {
+                data += line + "\n";
+            }
         }
     });
     data = data.trimRight();
@@ -1062,9 +1140,135 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
+async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
+    if (err) {
+        if (err.code === "ENOENT") {
+            return; // ignore known issue
+        }
+        return logCppCrashTelemetry("readFile: " + err.code);
+    }
+
+    const lines: string[] = data.split("\n");
+    let addressData: string = ".\n.";
+    const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
+    const telemetryHeader: string = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
+    const filtPath: string | null = which.sync("c++filt", { nothrow: true });
+    const isMac: boolean = process.platform === "darwin";
+    const startStr: string = isMac ? " _" : "<";
+    const offsetStr: string = isMac ? " + " : "+";
+    const endOffsetStr: string = isMac ? " " : " <";
+    const dotStr: string = "\n…";
+    let signalType: string;
+    if (lines[0].startsWith("SIG")) {
+        signalType = lines[0];
+    } else {
+        // The signal type may fail to be written.
+        signalType = "SIG-??\n"; // Intentionally different from SIG-? from cpptools.
+    }
+    let crashCallStack: string = "";
+    let validFrameFound: boolean = false;
+    for (let lineNum: number = 0; lineNum < lines.length - 3; ++lineNum) { // skip last lines
+        const line: string = lines[lineNum];
+        const startPos: number = line.indexOf(startStr);
+        if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
+            if (!validFrameFound) {
+                continue; // Skip extra … at the start.
+            }
+            crashCallStack += dotStr;
+            const startAddressPos: number = line.indexOf("0x");
+            const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
+            addressData += "\n";
+            if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
+                addressData += "Unexpected offset";
+            } else {
+                addressData += line.substring(startAddressPos, endAddressPos);
+            }
+            continue;
+        }
+        const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
+        if (offsetPos === -1) {
+            crashCallStack += "\nMissing offsetStr";
+            addressData += "\n";
+            continue; // unexpected
+        }
+        const startPos2: number = startPos + 1;
+        let funcStr: string = line.substring(startPos2, offsetPos);
+        if (filtPath && filtPath.length !== 0) {
+            let ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, ["--no-strip-underscore", funcStr], undefined, true).catch(logAndReturn.undefined);
+            if (ret?.output === funcStr) {
+                ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
+            }
+            if (ret !== undefined && ret.succeeded) {
+                funcStr = ret.output;
+                funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
+                funcStr = funcStr.replace(/std::basic_/g, "std::");
+                funcStr = funcStr.replace(/ >/g, ">");
+                funcStr = funcStr.replace(/, std::(?:allocator|char_traits)<char>/g, "");
+                funcStr = funcStr.replace(/<char>/g, "");
+                funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
+            }
+        }
+        if (funcStr.includes("/")) {
+            funcStr = "<func>";
+        } else if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
+            continue; // Skip these on early frames.
+        }
+        validFrameFound = true;
+        crashCallStack += "\n";
+        addressData += "\n";
+        crashCallStack += funcStr + offsetStr;
+        const offsetPos2: number = offsetPos + offsetStr.length;
+        if (isMac) {
+            const pendingOffset: string = line.substring(offsetPos2);
+            if (!pendingOffset.includes("/")) {
+                crashCallStack += pendingOffset;
+            }
+            const startAddressPos: number = line.indexOf("0x");
+            if (startAddressPos === -1 || startAddressPos >= startPos) {
+                // unexpected
+                crashCallStack += "<Missing 0x>";
+                continue;
+            }
+            addressData += `${line.substring(startAddressPos, startPos)}`;
+        } else {
+            const endPos: number = line.indexOf(">", offsetPos2);
+            if (endPos === -1) {
+                crashCallStack += "<Missing > >";
+                continue; // unexpected
+            }
+            const pendingOffset: string = line.substring(offsetPos2, endPos);
+            if (!pendingOffset.includes("/")) {
+                crashCallStack += pendingOffset;
+            }
+        }
+    }
+
+    if (crashCallStack !== prevCppCrashCallStackData) {
+        prevCppCrashCallStackData = crashCallStack;
+
+        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+        if (lines.length >= 6 && util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
+            const out: vscode.OutputChannel = getCrashCallStacksChannel();
+            out.appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}`);
+        }
+    }
+
+    data = telemetryHeader + signalType + crashCallStack;
+
+    if (data.length > 8192) { // The API has an 8k limit.
+        data = data.substring(0, 8191) + "…";
+    }
+
+    logCppCrashTelemetry(data, addressData);
+
+    await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
+    if (crashFile === "cpptools.txt") {
+        void util.deleteDirectory(crashDirectory).catch(logAndReturn.undefined);
+    }
+}
+
 export function deactivate(): Thenable<void> {
     clients.timeTelemetryCollector.clear();
-    console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
     commandDisposables.forEach(d => d.dispose());
@@ -1169,4 +1373,9 @@ export async function preReleaseCheck(): Promise<void> {
             });
         }
     }
+}
+
+export async function getIncludes(maxDepth: number): Promise<any> {
+    const includes = await clients.ActiveClient.getIncludes(maxDepth);
+    return includes;
 }

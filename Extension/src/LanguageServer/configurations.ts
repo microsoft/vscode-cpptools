@@ -289,8 +289,6 @@ export class CppProperties {
                 }
             }
         });
-
-        this.handleConfigurationChange();
     }
     public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
         this.defaultCompilerPath = compilerDefaults.trustedCompilerFound ? compilerDefaults.compilerPath : null;
@@ -427,6 +425,11 @@ export class CppProperties {
         result["workspaceFolderBasename"] = this.rootUri ? path.basename(this.rootUri.fsPath) : "";
         result["execPath"] = process.execPath;
         result["pathSeparator"] = (os.platform() === 'win32') ? "\\" : "/";
+        result["/"] = (os.platform() === 'win32') ? "\\" : "/";
+        result["userHome"] = os.homedir();
+        if (util.getVcpkgRoot()) {
+            result["vcpkgRoot"] = util.getVcpkgRoot();
+        }
         return result;
     }
 
@@ -755,7 +758,7 @@ export class CppProperties {
         return result;
     }
 
-    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, glob: boolean = false): string[] {
+    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true, glob: boolean = false): string[] {
         const resolvedVariables: string[] = [];
         if (paths === undefined) {
             return resolvedVariables;
@@ -767,7 +770,7 @@ export class CppProperties {
                 // Do not futher try to resolve a "${env:VAR}"
                 resolvedVariables.push(resolvedVariable);
             } else {
-                const entries: string[] = resolvedVariable.split(path.delimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
+                const entries: string[] = resolvedVariable.split(path.delimiter).map(e => glob ? this.resolvePath(e, false, assumeRelative) : e).filter(e => e);
                 resolvedVariables.push(...entries);
             }
         });
@@ -806,8 +809,11 @@ export class CppProperties {
             if (isGlobPattern) {
                 // fastGlob silently strips non-found paths. Limit that behavior to dynamic paths only.
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
-                    fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
+                    fastGlob.sync(normalized, { onlyDirectories: true, cwd, suppressErrors: true, deep: 15 }) : [res];
                 resolvedGlob.push(...matches.map(s => s + suffix));
+                if (resolvedGlob.length === 0) {
+                    resolvedGlob.push(normalized);
+                }
             } else {
                 resolvedGlob.push(normalized + suffix);
             }
@@ -835,12 +841,12 @@ export class CppProperties {
         return property;
     }
 
-    private updateConfigurationPathsArray(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] | undefined {
+    private updateConfigurationPathsArray(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true): string[] | undefined {
         if (paths) {
-            return this.resolveAndSplit(paths, defaultValue, env, true);
+            return this.resolveAndSplit(paths, defaultValue, env, assumeRelative, true);
         }
         if (!paths && defaultValue) {
-            return this.resolveAndSplit(defaultValue, [], env, true);
+            return this.resolveAndSplit(defaultValue, [], env, assumeRelative, true);
         }
         return paths;
     }
@@ -931,7 +937,7 @@ export class CppProperties {
 
             configuration.macFrameworkPath = this.updateConfigurationStringArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
-            configuration.forcedInclude = this.updateConfigurationPathsArray(configuration.forcedInclude, settings.defaultForcedInclude, env);
+            configuration.forcedInclude = this.updateConfigurationPathsArray(configuration.forcedInclude, settings.defaultForcedInclude, env, false);
             configuration.compileCommands = this.updateConfigurationString(configuration.compileCommands, settings.defaultCompileCommands, env);
             configuration.compilerArgs = this.updateConfigurationStringArray(configuration.compilerArgs, settings.defaultCompilerArgs, env);
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
@@ -1091,7 +1097,7 @@ export class CppProperties {
             }
 
             if (configuration.forcedInclude) {
-                configuration.forcedInclude = configuration.forcedInclude.map((path: string) => this.resolvePath(path));
+                configuration.forcedInclude = configuration.forcedInclude.map((path: string) => this.resolvePath(path, true, false));
             }
 
             if (configuration.includePath) {
@@ -1105,7 +1111,7 @@ export class CppProperties {
         }
     }
 
-    private compileCommandsFileWatcherTimer?: NodeJS.Timer;
+    private compileCommandsFileWatcherTimer?: NodeJS.Timeout;
     private compileCommandsFileWatcherFiles: Set<string> = new Set<string>();
 
     // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
@@ -1253,11 +1259,28 @@ export class CppProperties {
         }
     }
 
+    private trimPathWhitespace(paths: string[] | undefined): string[] | undefined {
+        if (paths === undefined) {
+            return undefined;
+        }
+        const trimmedPaths = [];
+        for (const value of paths) {
+            const fullPath = this.resolvePath(value);
+            if (fs.existsSync(fullPath.trim()) && !fs.existsSync(fullPath)) {
+                trimmedPaths.push(value.trim());
+            } else {
+                trimmedPaths.push(value);
+            }
+        }
+        return trimmedPaths;
+    }
+
     private saveConfigurationUI(): void {
         this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
         if (this.settingsPanel && this.configurationJson) {
             const config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
             this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex] = config;
+            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex].includePath = this.trimPathWhitespace(this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex].includePath);
             this.settingsPanel.updateErrors(this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
             this.writeToJson();
         }
@@ -1493,7 +1516,7 @@ export class CppProperties {
         return success;
     }
 
-    private resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true): string {
+    private resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true, assumeRelative: boolean = true): string {
         if (!input_path || input_path === "${default}") {
             return "";
         }
@@ -1510,17 +1533,25 @@ export class CppProperties {
                 result = result.replace("${workspaceRoot}", this.rootUri.fsPath);
             }
         }
-        if (result.includes("${vcpkgRoot}") && util.getVcpkgRoot()) {
-            result = result.replace("${vcpkgRoot}", util.getVcpkgRoot());
-        }
+
         if (replaceAsterisks && result.includes("*")) {
             result = result.replace(/\*/g, "");
         }
 
-        // Make sure all paths result to an absolute path.
-        // Do not add the root path to an unresolved env variable.
-        if (!result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
-            result = path.join(this.rootUri.fsPath, result);
+        if (assumeRelative) {
+            let quoted = false;
+            if (result.startsWith('"') && result.endsWith('"')) {
+                quoted = true;
+                result = result.slice(1, -1);
+            }
+            // Make sure all paths result to an absolute path.
+            // Do not add the root path to an unresolved env variable.
+            if (!result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
+                result = path.join(this.rootUri.fsPath, result);
+            }
+            if (quoted) {
+                result = `"${result}"`;
+            }
         }
 
         return result;
@@ -1536,9 +1567,15 @@ export class CppProperties {
 
         // Check if config name is unique.
         errors.name = this.isConfigNameUnique(config.name);
-
+        let resolvedCompilerPath: string | undefined;
         // Validate compilerPath
-        let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath);
+        if (config.compilerPath) {
+            resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true }) ?? undefined;
+        }
+
+        if (resolvedCompilerPath === undefined) {
+            resolvedCompilerPath = this.resolvePath(config.compilerPath);
+        }
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
         if (resolvedCompilerPath
@@ -1608,7 +1645,7 @@ export class CppProperties {
         errors.browsePath = this.validatePath(config.browse ? config.browse.path : undefined);
 
         // Validate files
-        errors.forcedInclude = this.validatePath(config.forcedInclude, {isDirectory: false, skipRelativePaths: true});
+        errors.forcedInclude = this.validatePath(config.forcedInclude, {isDirectory: false, assumeRelative: false});
         errors.compileCommands = this.validatePath(config.compileCommands, {isDirectory: false});
         errors.dotConfig = this.validatePath(config.dotConfig, {isDirectory: false});
         errors.databaseFilename = this.validatePath(config.browse ? config.browse.databaseFilename : undefined, {isDirectory: false});
@@ -1624,7 +1661,7 @@ export class CppProperties {
         return errors;
     }
 
-    private validatePath(input: string | string[] | undefined, {isDirectory = true, skipRelativePaths = false, globPaths = false} = {}): string | undefined {
+    private validatePath(input: string | string[] | undefined, {isDirectory = true, assumeRelative = true, globPaths = false} = {}): string | undefined {
         if (!input) {
             return undefined;
         }
@@ -1640,7 +1677,7 @@ export class CppProperties {
         }
 
         // Resolve and split any environment variables
-        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, globPaths);
+        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, assumeRelative, globPaths);
 
         for (const p of paths) {
             let pathExists: boolean = true;
@@ -1651,7 +1688,7 @@ export class CppProperties {
 
             // Check if resolved path exists
             if (!fs.existsSync(resolvedPath)) {
-                if (skipRelativePaths && !path.isAbsolute(resolvedPath)) {
+                if (assumeRelative && !path.isAbsolute(resolvedPath)) {
                     continue;
                 } else if (!this.rootUri) {
                     pathExists = false;
@@ -1809,9 +1846,9 @@ export class CppProperties {
             curText = curText.substring(0, nextNameStart2);
         }
         if (this.prevSquiggleMetrics.get(currentConfiguration.name) === undefined) {
-            this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 });
+            this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0 });
         }
-        const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
+        const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0 };
         const isWindows: boolean = os.platform() === 'win32';
 
         // TODO: Add other squiggles.
@@ -1838,7 +1875,7 @@ export class CppProperties {
         }
 
         // Check for path-related squiggles.
-        let paths: string[] = [];
+        const paths: string[] = [];
         let compilerPath: string | undefined;
         for (const pathArray of [ currentConfiguration.browse ? currentConfiguration.browse.path : undefined,
             currentConfiguration.includePath, currentConfiguration.macFrameworkPath ]) {
@@ -1866,10 +1903,7 @@ export class CppProperties {
             compilerPath = currentConfiguration.compilerPath;
         }
 
-        // Resolve and split any environment variables
-        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
-        compilerPath = util.resolveVariables(compilerPath, this.ExtendedEnvironment).trim();
-        compilerPath = this.resolvePath(compilerPath);
+        compilerPath = this.resolvePath(compilerPath).trim();
 
         // Get the start/end for properties that are file-only.
         const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
@@ -1932,8 +1966,7 @@ export class CppProperties {
         let dotConfigMessage: string | undefined;
 
         dotConfigPath = currentConfiguration.dotConfig;
-        dotConfigPath = util.resolveVariables(dotConfigPath, this.ExtendedEnvironment).trim();
-        dotConfigPath = this.resolvePath(dotConfigPath);
+        dotConfigPath = this.resolvePath(dotConfigPath).trim();
         // does not try resolve if the dotConfig property is empty
         dotConfigPath = dotConfigPath !== '' ? dotConfigPath : undefined;
 
@@ -1972,35 +2005,65 @@ export class CppProperties {
                 continue;
             }
 
-            let resolvedPath: string = this.resolvePath(curPath);
-            if (!resolvedPath) {
-                continue;
-            }
-            let pathExists: boolean = true;
-            if (this.rootUri) {
-                const checkPathExists: any = util.checkPathExistsSync(resolvedPath, this.rootUri.fsPath + path.sep, isWindows, false);
-                pathExists = checkPathExists.pathExists;
-                resolvedPath = checkPathExists.path;
-            }
-            // Normalize path separators.
-            if (path.sep === "/") {
-                resolvedPath = resolvedPath.replace(/\\/g, path.sep);
-            } else {
-                resolvedPath = resolvedPath.replace(/\//g, path.sep);
-            }
-
-            // Iterate through the text and apply squiggles.
-
             // Escape the path string for literal use in a regular expression
             // Need to escape any quotes to match the original text
-            let escapedPath: string = curPath.replace(/\"/g, '\\\"');
+            let escapedPath: string = curPath.replace(/"/g, '\\"');
             escapedPath = escapedPath.replace(/[-\"\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
             // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
             // and extend that pattern to the next quote before and next quote after it.
             const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
             const configMatches: string[] | null = curText.match(pattern);
-            if (configMatches) {
+
+            const expandedPaths: string[] = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, true);
+            const incorrectExpandedPaths: string[] = [];
+
+            if (expandedPaths.length <= 0) {
+                continue;
+            }
+
+            if (this.rootUri) {
+                for (const [index, expandedPath] of expandedPaths.entries()) {
+                    if (expandedPath.includes("${workspaceFolder}")) {
+                        expandedPaths[index] = this.resolvePath(expandedPath, false);
+                    } else {
+                        expandedPaths[index] = this.resolvePath(expandedPath);
+                    }
+
+                    const checkPathExists: any = util.checkPathExistsSync(expandedPaths[index], this.rootUri.fsPath + path.sep, isWindows, false);
+                    if (!checkPathExists.pathExists) {
+                        // If there are multiple paths, store any non-existing paths to squiggle later on.
+                        incorrectExpandedPaths.push(expandedPaths[index]);
+                    }
+                }
+            }
+
+            const pathExists: boolean = incorrectExpandedPaths.length === 0;
+
+            for (const [index, expandedPath] of expandedPaths.entries()) {
+                // Normalize path separators.
+                if (path.sep === "/") {
+                    expandedPaths[index] = expandedPath.replace(/\\/g, path.sep);
+                } else {
+                    expandedPaths[index] = expandedPath.replace(/\//g, path.sep);
+                }
+            }
+
+            // Iterate through the text and apply squiggles.
+
+            let globPath: boolean = false;
+            const asteriskPosition = curPath.indexOf("*");
+            if (asteriskPosition !== -1) {
+                if (asteriskPosition !== curPath.length - 1 && asteriskPosition !== curPath.length - 2) {
+                    globPath = true;
+                } else if (asteriskPosition === curPath.length - 2) {
+                    if (curPath[asteriskPosition + 1] !== '*') {
+                        globPath = true;
+                    }
+                }
+            }
+
+            if (configMatches && !globPath) {
                 let curOffset: number = 0;
                 let endOffset: number = 0;
                 for (const curMatch of configMatches) {
@@ -2009,29 +2072,57 @@ export class CppProperties {
                     if (curOffset >= compilerPathStart && curOffset <= compilerPathEnd) {
                         continue;
                     }
-                    let message: string;
+                    let message: string = "";
                     if (!pathExists) {
                         if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd
-                                && !path.isAbsolute(resolvedPath)) {
+                                && !path.isAbsolute(expandedPaths[0])) {
                             continue; // Skip the error, because it could be resolved recursively.
                         }
-                        message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
+                        let badPath = "";
+                        if (incorrectExpandedPaths.length > 0) {
+                            badPath = incorrectExpandedPaths.map(s => `"${s}"`).join(', ');
+                        } else {
+                            badPath = `"${expandedPaths[0]}"`;
+                        }
+                        message = localize('cannot.find2', "Cannot find {0}", badPath);
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
                         // Check for file versus path mismatches.
                         if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
-                                (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
-                            if (util.checkFileExistsSync(resolvedPath)) {
-                                continue;
+                                    (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
+                            if (expandedPaths.length > 1) {
+                                message = localize("multiple.paths.not.allowed", "Multiple paths are not allowed.");
+                                newSquiggleMetrics.MultiplePathsNotAllowed++;
+                            } else {
+                                const resolvedPath = this.resolvePath(expandedPaths[0]);
+                                if (util.checkFileExistsSync(resolvedPath)) {
+                                    continue;
+                                }
+
+                                message = localize("path.is.not.a.file", "Path is not a file: {0}", expandedPaths[0]);
+                                newSquiggleMetrics.PathNotAFile++;
                             }
-                            message = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedPath);
-                            newSquiggleMetrics.PathNotAFile++;
                         } else {
-                            if (util.checkDirectoryExistsSync(resolvedPath)) {
+                            const mismatchedPaths: string[] = [];
+                            for (const expandedPath of expandedPaths) {
+                                const resolvedPath = this.resolvePath(expandedPath);
+                                if (!util.checkDirectoryExistsSync(resolvedPath)) {
+                                    mismatchedPaths.push(expandedPath);
+                                }
+                            }
+
+                            let badPath = "";
+                            if (mismatchedPaths.length > 1) {
+                                badPath = mismatchedPaths.map(s => `"${s}"`).join(', ');
+                                message = localize('paths.are.not.directories', "Paths are not directories: {0}", badPath);
+                                newSquiggleMetrics.PathNotADirectory++;
+                            } else if (mismatchedPaths.length === 1) {
+                                badPath = `"${mismatchedPaths[0]}"`;
+                                message = localize('path.is.not.a.directory', "Path is not a directory: {0}", badPath);
+                                newSquiggleMetrics.PathNotADirectory++;
+                            } else {
                                 continue;
                             }
-                            message = localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
-                            newSquiggleMetrics.PathNotADirectory++;
                         }
                     }
                     const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
@@ -2051,7 +2142,7 @@ export class CppProperties {
                         endOffset = curOffset + curMatch.length;
                         let message: string;
                         if (!pathExists) {
-                            message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
+                            message = localize('cannot.find2', "Cannot find \"{0}\".", expandedPaths[0]);
                             newSquiggleMetrics.PathNonExistent++;
                             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                                 new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
@@ -2086,6 +2177,9 @@ export class CppProperties {
         }
         if (newSquiggleMetrics.CompilerModeMismatch !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.CompilerModeMismatch) {
             changedSquiggleMetrics.CompilerModeMismatch = newSquiggleMetrics.CompilerModeMismatch;
+        }
+        if (newSquiggleMetrics.MultiplePathsNotAllowed !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.MultiplePathsNotAllowed) {
+            changedSquiggleMetrics.MultiplePathsNotAllowed = newSquiggleMetrics.MultiplePathsNotAllowed;
         }
         if (Object.keys(changedSquiggleMetrics).length > 0) {
             telemetry.logLanguageServerEvent("ConfigSquiggles", undefined, changedSquiggleMetrics);

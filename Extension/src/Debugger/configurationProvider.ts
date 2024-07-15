@@ -413,7 +413,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (buildTasks.length !== 0) {
             configs = (await Promise.all(buildTasks.map<Promise<CppDebugConfiguration | undefined>>(async task => {
                 const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
-                const compilerPath: string = definition.command;
+                const compilerPath: string = util.isString(definition.command) ? definition.command : definition.command.value;
                 // Filter out the tasks that has an invalid compiler path.
                 const compilerPathExists: boolean = path.isAbsolute(compilerPath) ?
                     // Absolute path, just check if it exists
@@ -1162,16 +1162,16 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
 
 class WindowsConfigurationProvider extends DefaultConfigurationProvider {
     private executable: string = "a.exe";
-    private pipeProgram: string = "<" + localize("path.to.pipe.program", "full path to pipe program such as {0}", "plink.exe").replace(/\"/g, "\\\"") + ">";
+    private pipeProgram: string = "<" + localize("path.to.pipe.program", "full path to pipe program such as {0}", "plink.exe").replace(/"/g, '') + ">";
     private MIMode: string = 'gdb';
     private setupCommandsBlock: string = `"setupCommands": [
     {
-        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/\"/g, "\\\"")}",
+        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/"/g, '')}",
         "text": "-enable-pretty-printing",
         "ignoreFailures": true
     },
     {
-        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
+        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/"/g, '')}",
         "text": "-gdb-set disassembly-flavor intel",
         "ignoreFailures": true
     }
@@ -1205,12 +1205,12 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
     private MIMode: string = 'gdb';
     private setupCommandsBlock: string = `"setupCommands": [
     {
-        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/\"/g, "\\\"")}",
+        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/"/g, '')}",
         "text": "-enable-pretty-printing",
         "ignoreFailures": true
     },
     {
-        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
+        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/"/g, '')}",
         "text": "-gdb-set disassembly-flavor intel",
         "ignoreFailures": true
     }
@@ -1228,7 +1228,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
 }
 
 function convertConfigurationSnippetToCompletionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
-    const item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
+    const item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Module);
 
     item.insertText = snippet.bodyText;
 

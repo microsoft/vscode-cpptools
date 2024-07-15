@@ -66,7 +66,7 @@ export function activate(): void {
             const packageInfo: IPackageInfo = getPackageInfo();
             if (packageInfo) {
                 const targetPopulation: TargetPopulation = util.getCppToolsTargetPopulation();
-                experimentationTelemetry = new ExperimentationTelemetry(new TelemetryReporter(packageInfo.name, packageInfo.version, appInsightsKey));
+                experimentationTelemetry = new ExperimentationTelemetry(new TelemetryReporter(appInsightsKey));
                 initializationPromise = getExperimentationServiceAsync(packageInfo.name, packageInfo.version, targetPopulation, experimentationTelemetry, util.extensionContext.globalState);
             }
         }
@@ -79,9 +79,7 @@ export function getExperimentationService(): Promise<IExperimentationService> | 
     return initializationPromise;
 }
 
-// @ts-expect-error The function isExperimentEnabled will be used for future experiments.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function isExperimentEnabled(experimentName: string): Promise<boolean> {
+export async function isExperimentEnabled(experimentName: string): Promise<boolean> {
     if (new CppSettings().experimentalFeatures) {
         return true;
     }

@@ -270,7 +270,8 @@ gulp.task("translations-import", (done) => {
         let id = language.transifexId || language.id;
         return gulp.src(path.join(options.location, id, translationProjectName, `${translationExtensionName}.xlf`))
             .pipe(nls.prepareJsonFiles())
-            .pipe(gulp.dest(path.join("./i18n", language.folderName)));
+            .pipe(gulp.dest(path.join("./i18n", language.folderName)))
+            .pipe(es.wait()); // This is required or it gives `this.pipeTo.end is not a function`.
     }))
         .pipe(es.wait(() => {
             done();

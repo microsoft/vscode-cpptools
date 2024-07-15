@@ -1,0 +1,117 @@
+name: $(date:yyyyMMdd)$(rev:.r)
+trigger:
+  branches:
+    include:
+    - main
+    - release
+
+schedules:
+- cron: 30 5 * * 0
+  branches:
+    include:
+    - main
+  always: true
+
+resources:
+  repositories:
+  - repository: MicroBuildTemplate
+    type: git
+    name: 1ESPipelineTemplates/MicroBuildTemplate
+    ref: refs/tags/release
+
+variables:
+- name: Codeql.Enabled
+  value: true
+- name: Codeql.Language
+  value: javascript
+
+extends:
+  template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
+  parameters:
+    pool:
+      name: AzurePipelines-EO
+      image: AzurePipelinesWindows2022compliantGPT
+      os: windows
+    sdl:
+      sourceAnalysisPool:
+        name: AzurePipelines-EO
+        image: AzurePipelinesWindows2022compliantGPT
+        os: windows
+      tsa:
+        enabled: true
+        config:
+          tsaVersion: TsaV2
+          codebase: NewOrUpdate
+          codebaseName: vscode-cpptools
+          tsaStamp: $(TsaProjectName)
+          tsaEnvironment: PROD
+          notificationAliases: $(TsaNotificationAlias)
+          codebaseAdmins: $(TsaCodebaseAdmins)
+          instanceUrl: $(TsaInstanceUrl)
+          projectName: $(TsaProjectName)
+          areaPath: $(TsaAreaPath)
+          iterationPath: $(TsaIterationPath)
+          alltools: true
+          repositoryName: vscode-cpptools
+      policheck:
+        enabled: true
+    featureFlags:
+      autoBaseline: false
+
+    stages:
+    - stage: build
+      jobs:
+      - job: Phase_1
+        displayName: Build cpptools.vsix
+        timeoutInMinutes: 60
+        cancelTimeoutInMinutes: 1
+        templateContext:
+          outputs:
+          - output: pipelineArtifact
+            displayName: 'cpptools.vsix'
+            condition: succeeded()
+            targetPath: $(Build.ArtifactStagingDirectory)\Extension
+            artifactName: cpptools.vsix
+
+        steps:
+        - checkout: self
+
+        - task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
+          displayName: Use Yarn 1.x
+
+        - task: UseNode@1
+          displayName: Use Node 16.x
+          inputs:
+            version: 16.x
+
+        - task: CmdLine@2
+          displayName: Delete .npmrc if it exists
+          inputs:
+            script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
+
+        - task: Npm@0
+          name: NpmInstall_2
+          displayName: Install vsce
+          inputs:
+            arguments: --global @vscode/vsce
+
+        - task: CmdLine@1
+          name: ProcessRunner_11
+          displayName: Create Extension Staging Directory
+          inputs:
+            filename: mkdir
+            arguments: $(Build.ArtifactStagingDirectory)\Extension
+
+        - task: CmdLine@1
+          name: ProcessRunner_12
+          displayName: Run VSCE to package vsix
+          inputs:
+            filename: vsce
+            arguments: package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
+            workingFolder: $(Build.SourcesDirectory)\Extension
+
+        - task: Npm@0
+          displayName: Uninstall vsce
+          inputs:
+            command: uninstall
+            arguments: --global @vscode/vsce

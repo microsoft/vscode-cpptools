@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
+import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
@@ -141,6 +142,7 @@ export interface SettingsParams {
     maxConcurrentThreads: number | null | undefined;
     maxCachedProcesses: number | null | undefined;
     maxMemory: number | null | undefined;
+    maxSymbolSearchResults: number | undefined;
     loggingLevel: string | undefined;
     workspaceParsingPriority: string | undefined;
     workspaceSymbols: string | undefined;
@@ -278,7 +280,7 @@ export class CppSettings extends Settings {
                 let clangVersion: string;
                 try {
                     const exePath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
-                    const output: string[] = execSync(`${exePath} --version`).toString().split(" ");
+                    const output: string[] = execSync(quote([exePath, '--version'])).toString().split(" ");
                     if (output.length < 3 || output[0] !== clangStr || output[1] !== "version" || !semver.valid(output[2])) {
                         if (output.length === 3) {
                             return path;
@@ -312,6 +314,7 @@ export class CppSettings extends Settings {
 
     public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }
     public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
+    public get maxSymbolSearchResults(): number | undefined { return super.Section.get<number>("maxSymbolSearchResults"); }
     public get maxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("maxCachedProcesses"); }
     public get intelliSenseMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxCachedProcesses"); }
     public get intelliSenseMaxMemory(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxMemory"); }

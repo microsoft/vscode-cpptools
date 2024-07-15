@@ -11,6 +11,8 @@ on:
 jobs:
   main:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v2
@@ -22,7 +24,7 @@ jobs:
           readonly: ${{ github.event.inputs.readonly }}
           labels: more info needed
           ignoreLabels: debugger,internal
-          closeDays: 60
+          closeDays: 30
           closeComment: "This issue has been closed because it needs more information and has not had recent activity."
-          pingDays: 80
+          pingDays: 14
           pingComment: "Hey @${assignee}, this issue might need further attention.\n\n@${author}, you can help us out by closing this issue if the problem no longer exists, or adding more information."
