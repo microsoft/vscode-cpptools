@@ -333,7 +333,7 @@ export function isArrayOfString(input: any): input is string[] {
     return isArray(input) && input.every(isString);
 }
 
-// This helper function validates whether the given object is a valid mapping of key and value type.
+// Validates whether the given object is a valid mapping of key and value type.
 // EX: {"key": true, "key2": false} should return true for keyType = string and valueType = boolean.
 export function isValidMapping(value: any, keyType: string, valueType: string): boolean {
     if (value === undefined || value === null) {
@@ -1775,8 +1775,7 @@ export function buildShellCommandLine(originalCommand: CommandString, command: C
 
     let commandLine = result.join(' ');
     // There are special rules quoted command line in cmd.exe
-    if (isWindows)
-    {
+    if (isWindows) {
         commandLine = `chcp 65001>nul && ${commandLine}`;
         if (commandQuoted && argQuoted) {
             commandLine = '"' + commandLine + '"';

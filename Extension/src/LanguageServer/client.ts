@@ -2166,7 +2166,7 @@ export class DefaultClient implements Client {
 
     public getVcpkgEnabled(): Promise<boolean> {
         const cppSettings: CppSettings = new CppSettings(this.RootUri);
-        return Promise.resolve(!!cppSettings.isVcpkgEnabled);
+        return Promise.resolve(cppSettings.isVcpkgEnabled);
     }
 
     public async getKnownCompilers(): Promise<configs.KnownCompiler[] | undefined> {
