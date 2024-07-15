@@ -30,131 +30,131 @@ export interface Excludes {
 
 export interface WorkspaceFolderSettingsParams {
     uri: string | undefined;
-    intelliSenseEngine: string | undefined;
-    intelliSenseEngineFallback: boolean | undefined;
-    autocomplete: string | undefined;
-    autocompleteAddParentheses: boolean | undefined;
-    errorSquiggles: string | undefined;
-    exclusionPolicy: string | undefined;
-    preferredPathSeparator: string | undefined;
-    intelliSenseCachePath: string | undefined;
-    intelliSenseCacheSize: number | undefined;
-    intelliSenseMemoryLimit: number | undefined;
-    dimInactiveRegions: boolean | undefined;
-    suggestSnippets: boolean | undefined;
-    legacyCompilerArgsBehavior: boolean | undefined;
-    defaultSystemIncludePath: string[] | undefined;
-    cppFilesExclude: Excludes | undefined;
-    clangFormatPath: string | undefined;
+    intelliSenseEngine: string;
+    intelliSenseEngineFallback: boolean;
+    autocomplete: string;
+    autocompleteAddParentheses: boolean;
+    errorSquiggles: string;
+    exclusionPolicy: string;
+    preferredPathSeparator: string;
+    intelliSenseCachePath: string;
+    intelliSenseCacheSize: number;
+    intelliSenseMemoryLimit: number;
+    dimInactiveRegions: boolean;
+    suggestSnippets: boolean;
+    legacyCompilerArgsBehavior: boolean;
+    defaultSystemIncludePath: string[];
+    cppFilesExclude: Excludes;
+    clangFormatPath: string;
     clangFormatStyle: string | undefined;
-    clangFormatFallbackStyle: string | undefined;
-    clangFormatSortIncludes: boolean | undefined | null;
-    codeAnalysisRunAutomatically: boolean | undefined;
-    codeAnalysisExclude: Excludes | undefined;
-    clangTidyEnabled: boolean | undefined;
-    clangTidyPath: string | undefined;
-    clangTidyConfig: string | undefined;
-    clangTidyFallbackConfig: string | undefined;
-    clangTidyHeaderFilter: string | undefined | null;
-    clangTidyArgs: string[] | undefined;
-    clangTidyUseBuildPath: boolean | undefined;
-    clangTidyChecksEnabled: string[] | undefined;
-    clangTidyChecksDisabled: string[] | undefined;
-    hover: string | undefined;
-    markdownInComments: string | undefined;
-    vcFormatIndentBraces: boolean | undefined;
-    vcFormatIndentMultiLineRelativeTo: string | undefined;
-    vcFormatIndentWithinParentheses: string | undefined;
+    clangFormatFallbackStyle: string;
+    clangFormatSortIncludes: boolean | null;
+    codeAnalysisRunAutomatically: boolean;
+    codeAnalysisExclude: Excludes;
+    clangTidyEnabled: boolean;
+    clangTidyPath: string;
+    clangTidyConfig: string;
+    clangTidyFallbackConfig: string;
+    clangTidyHeaderFilter: string | null;
+    clangTidyArgs: string[];
+    clangTidyUseBuildPath: boolean;
+    clangTidyChecksEnabled: string[];
+    clangTidyChecksDisabled: string[];
+    hover: string;
+    markdownInComments: string;
+    vcFormatIndentBraces: boolean;
+    vcFormatIndentMultiLineRelativeTo: string;
+    vcFormatIndentWithinParentheses: string;
     vcFormatIndentPreserveWithinParentheses: boolean;
-    vcFormatIndentCaseLabels: boolean | undefined;
-    vcFormatIndentCaseContents: boolean | undefined;
-    vcFormatIndentCaseContentsWhenBlock: boolean | undefined;
-    vcFormatIndentLambdaBracesWhenParameter: boolean | undefined;
-    vcFormatIndentGotoLabels: string | undefined;
-    vcFormatIndentPreprocessor: string | undefined;
-    vcFormatIndentAccesSpecifiers: boolean | undefined;
-    vcFormatIndentNamespaceContents: boolean | undefined;
-    vcFormatIndentPreserveComments: boolean | undefined;
-    vcFormatNewLineScopeBracesOnSeparateLines: boolean | undefined;
-    vcFormatNewLineBeforeOpenBraceNamespace: string | undefined;
-    vcFormatNewLineBeforeOpenBraceType: string | undefined;
-    vcFormatNewLineBeforeOpenBraceFunction: string | undefined;
-    vcFormatNewLineBeforeOpenBraceBlock: string | undefined;
-    vcFormatNewLineBeforeOpenBraceLambda: string | undefined;
-    vcFormatNewLineBeforeCatch: boolean | undefined;
-    vcFormatNewLineBeforeElse: boolean | undefined;
-    vcFormatNewLineBeforeWhileInDoWhile: boolean | undefined;
-    vcFormatNewLineCloseBraceSameLineEmptyType: boolean | undefined;
-    vcFormatNewLineCloseBraceSameLineEmptyFunction: boolean | undefined;
-    vcFormatSpaceWithinParameterListParentheses: boolean | undefined;
-    vcFormatSpaceBetweenEmptyParameterListParentheses: boolean | undefined;
-    vcFormatSpaceAfterKeywordsInControlFlowStatements: boolean | undefined;
-    vcFormatSpaceWithinControlFlowStatementParentheses: boolean | undefined;
-    vcFormatSpaceBeforeLambdaOpenParenthesis: boolean | undefined;
-    vcFormatSpaceWithinCastParentheses: boolean | undefined;
-    vcFormatSpaceAfterCastCloseParenthesis: boolean | undefined;
-    vcFormatSpaceWithinExpressionParentheses: boolean | undefined;
-    vcFormatSpaceBeforeBlockOpenBrace: boolean | undefined;
-    vcFormatSpaceBetweenEmptyBraces: boolean | undefined;
-    vcFormatSpaceBeforeInitializerListOpenBrace: boolean | undefined;
-    vcFormatSpaceWithinInitializerListBraces: boolean | undefined;
-    vcFormatSpacePreserveInInitializerList: boolean | undefined;
-    vcFormatSpaceBeforeOpenSquareBracket: boolean | undefined;
-    vcFormatSpaceWithinSquareBrackets: boolean | undefined;
-    vcFormatSpaceBeforeEmptySquareBrackets: boolean | undefined;
-    vcFormatSpaceBetweenEmptySquareBrackets: boolean | undefined;
-    vcFormatSpaceGroupSquareBrackets: boolean | undefined;
-    vcFormatSpaceWithinLambdaBrackets: boolean | undefined;
-    vcFormatSpaceBetweenEmptyLambdaBrackets: boolean | undefined;
-    vcFormatSpaceBeforeComma: boolean | undefined;
-    vcFormatSpaceAfterComma: boolean | undefined;
-    vcFormatSpaceRemoveAroundMemberOperators: boolean | undefined;
-    vcFormatSpaceBeforeInheritanceColon: boolean | undefined;
-    vcFormatSpaceBeforeConstructorColon: boolean | undefined;
-    vcFormatSpaceRemoveBeforeSemicolon: boolean | undefined;
-    vcFormatSpaceInsertAfterSemicolon: boolean | undefined;
-    vcFormatSpaceRemoveAroundUnaryOperator: boolean | undefined;
-    vcFormatSpaceBeforeFunctionOpenParenthesis: string | undefined;
-    vcFormatSpaceAroundBinaryOperator: string | undefined;
-    vcFormatSpaceAroundAssignmentOperator: string | undefined;
-    vcFormatSpacePointerReferenceAlignment: string | undefined;
-    vcFormatSpaceAroundTernaryOperator: string | undefined;
-    vcFormatWrapPreserveBlocks: string | undefined;
-    doxygenGenerateOnType: boolean | undefined;
-    doxygenGeneratedStyle: string | undefined;
-    doxygenSectionTags: string[] | undefined;
-    filesExclude: Excludes | undefined;
-    filesAutoSaveAfterDelay: boolean | undefined;
-    filesEncoding: string | undefined;
+    vcFormatIndentCaseLabels: boolean;
+    vcFormatIndentCaseContents: boolean;
+    vcFormatIndentCaseContentsWhenBlock: boolean;
+    vcFormatIndentLambdaBracesWhenParameter: boolean;
+    vcFormatIndentGotoLabels: string;
+    vcFormatIndentPreprocessor: string;
+    vcFormatIndentAccesSpecifiers: boolean;
+    vcFormatIndentNamespaceContents: boolean;
+    vcFormatIndentPreserveComments: boolean;
+    vcFormatNewLineScopeBracesOnSeparateLines: boolean;
+    vcFormatNewLineBeforeOpenBraceNamespace: string;
+    vcFormatNewLineBeforeOpenBraceType: string;
+    vcFormatNewLineBeforeOpenBraceFunction: string;
+    vcFormatNewLineBeforeOpenBraceBlock: string;
+    vcFormatNewLineBeforeOpenBraceLambda: string;
+    vcFormatNewLineBeforeCatch: boolean;
+    vcFormatNewLineBeforeElse: boolean;
+    vcFormatNewLineBeforeWhileInDoWhile: boolean;
+    vcFormatNewLineCloseBraceSameLineEmptyType: boolean;
+    vcFormatNewLineCloseBraceSameLineEmptyFunction: boolean;
+    vcFormatSpaceWithinParameterListParentheses: boolean;
+    vcFormatSpaceBetweenEmptyParameterListParentheses: boolean;
+    vcFormatSpaceAfterKeywordsInControlFlowStatements: boolean;
+    vcFormatSpaceWithinControlFlowStatementParentheses: boolean;
+    vcFormatSpaceBeforeLambdaOpenParenthesis: boolean;
+    vcFormatSpaceWithinCastParentheses: boolean;
+    vcFormatSpaceAfterCastCloseParenthesis: boolean;
+    vcFormatSpaceWithinExpressionParentheses: boolean;
+    vcFormatSpaceBeforeBlockOpenBrace: boolean;
+    vcFormatSpaceBetweenEmptyBraces: boolean;
+    vcFormatSpaceBeforeInitializerListOpenBrace: boolean;
+    vcFormatSpaceWithinInitializerListBraces: boolean;
+    vcFormatSpacePreserveInInitializerList: boolean;
+    vcFormatSpaceBeforeOpenSquareBracket: boolean;
+    vcFormatSpaceWithinSquareBrackets: boolean;
+    vcFormatSpaceBeforeEmptySquareBrackets: boolean;
+    vcFormatSpaceBetweenEmptySquareBrackets: boolean;
+    vcFormatSpaceGroupSquareBrackets: boolean;
+    vcFormatSpaceWithinLambdaBrackets: boolean;
+    vcFormatSpaceBetweenEmptyLambdaBrackets: boolean;
+    vcFormatSpaceBeforeComma: boolean;
+    vcFormatSpaceAfterComma: boolean;
+    vcFormatSpaceRemoveAroundMemberOperators: boolean;
+    vcFormatSpaceBeforeInheritanceColon: boolean;
+    vcFormatSpaceBeforeConstructorColon: boolean;
+    vcFormatSpaceRemoveBeforeSemicolon: boolean;
+    vcFormatSpaceInsertAfterSemicolon: boolean;
+    vcFormatSpaceRemoveAroundUnaryOperator: boolean;
+    vcFormatSpaceBeforeFunctionOpenParenthesis: string;
+    vcFormatSpaceAroundBinaryOperator: string;
+    vcFormatSpaceAroundAssignmentOperator: string;
+    vcFormatSpacePointerReferenceAlignment: string;
+    vcFormatSpaceAroundTernaryOperator: string;
+    vcFormatWrapPreserveBlocks: string;
+    doxygenGenerateOnType: boolean;
+    doxygenGeneratedStyle: string;
+    doxygenSectionTags: string[];
+    filesExclude: Excludes;
+    filesAutoSaveAfterDelay: boolean;
+    filesEncoding: string;
     searchExclude: Excludes | undefined;
-    editorAutoClosingBrackets: string | undefined;
-    editorInlayHintsEnabled: boolean | undefined;
-    editorParameterHintsEnabled: boolean | undefined;
-    refactoringIncludeHeader: string | undefined;
+    editorAutoClosingBrackets: string;
+    editorInlayHintsEnabled: boolean;
+    editorParameterHintsEnabled: boolean;
+    refactoringIncludeHeader: string;
 }
 
 export interface SettingsParams {
-    filesAssociations: { [key: string]: string } | undefined;
-    workspaceFallbackEncoding: string | undefined;
-    maxConcurrentThreads: number | null | undefined;
-    maxCachedProcesses: number | null | undefined;
-    maxMemory: number | null | undefined;
-    maxSymbolSearchResults: number | undefined;
-    loggingLevel: string | undefined;
-    workspaceParsingPriority: string | undefined;
-    workspaceSymbols: string | undefined;
-    simplifyStructuredComments: boolean | undefined;
-    intelliSenseUpdateDelay: number | undefined;
-    experimentalFeatures: boolean | undefined;
-    enhancedColorization: boolean | undefined;
-    intellisenseMaxCachedProcesses: number | null | undefined;
-    intellisenseMaxMemory: number | null | undefined;
-    referencesMaxConcurrentThreads: number | null | undefined;
-    referencesMaxCachedProcesses: number | null | undefined;
-    referencesMaxMemory: number | null | undefined;
-    codeAnalysisMaxConcurrentThreads: number | null | undefined;
-    codeAnalysisMaxMemory: number | null | undefined;
-    codeAnalysisUpdateDelay: number | undefined;
+    filesAssociations: { [key: string]: string };
+    workspaceFallbackEncoding: string;
+    maxConcurrentThreads: number | null;
+    maxCachedProcesses: number | null;
+    maxMemory: number | null;
+    maxSymbolSearchResults: number;
+    loggingLevel: string;
+    workspaceParsingPriority: string;
+    workspaceSymbols: string;
+    simplifyStructuredComments: boolean;
+    intelliSenseUpdateDelay: number;
+    experimentalFeatures: boolean;
+    enhancedColorization: boolean;
+    intellisenseMaxCachedProcesses: number | null;
+    intellisenseMaxMemory: number | null;
+    referencesMaxConcurrentThreads: number | null;
+    referencesMaxCachedProcesses: number | null;
+    referencesMaxMemory: number | null;
+    codeAnalysisMaxConcurrentThreads: number | null;
+    codeAnalysisMaxMemory: number | null;
+    codeAnalysisUpdateDelay: number;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
 }
 
@@ -856,34 +856,55 @@ export class OtherSettings {
         this.resource = resource;
     }
 
-    private getVSCodeSettingAsString(settingName: string, setting: string, resource: any, defaultString?: string): string | undefined {
+    private getVSCodeSettingAsString(settingName: string, setting: string, resource: any): string;
+    private getVSCodeSettingAsString(settingName: string, setting: string, resource: any, defaultString: string): string;
+    private getVSCodeSettingAsString(settingName: string, setting: string, resource: any, defaultString: string = ''): string {
         const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
         const value = fullConfiguration.get<string>(setting);
+
         if (isString(value)) {
             return value;
         }
+
         const config = fullConfiguration.inspect<string>(setting);
-        return config?.defaultValue ?? defaultString;
+
+        if (config?.defaultValue !== undefined) {
+            return config.defaultValue;
+        }
+
+        return defaultString;
     }
 
-    private getVSCodeSettingAsBoolean(settingName: string, setting: string, resource: any, defaultBoolean?: boolean): boolean | undefined {
+    private getVSCodeSettingAsBoolean(settingName: string, setting: string, resource: any): boolean;
+    private getVSCodeSettingAsBoolean(settingName: string, setting: string, resource: any, defaultBoolean: boolean): boolean;
+    private getVSCodeSettingAsBoolean(settingName: string, setting: string, resource: any, defaultBoolean: boolean = false): boolean {
         const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
         const value = fullConfiguration.get<boolean>(setting);
         if (isBoolean(value)) {
             return value;
         }
         const config = fullConfiguration.inspect<boolean>(setting);
-        return config?.defaultValue ?? defaultBoolean;
+        if (config?.defaultValue !== undefined) {
+            return config.defaultValue;
+        }
+
+        return defaultBoolean;
     }
 
-    private getVSCodeSettingAsNumber(settingName: string, setting: string, resource: any, defaultNumber?: number): number | undefined {
+    private getVSCodeSettingAsNumber(settingName: string, setting: string, resource: any): number;
+    private getVSCodeSettingAsNumber(settingName: string, setting: string, resource: any, defaultNumber: number): number;
+    private getVSCodeSettingAsNumber(settingName: string, setting: string, resource: any, defaultNumber: number = 0): number {
         const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
         const value = fullConfiguration.get<number>(setting);
         if (isNumber(value)) {
             return value;
         }
         const config = fullConfiguration.inspect<number>(setting);
-        return config?.defaultValue ?? defaultNumber;
+        if (config?.defaultValue !== undefined) {
+            return config.defaultValue;
+        }
+
+        return defaultNumber;
     }
 
     private getVSCodeSettingAsKeyValueObject(settingName: string, setting: string, keyType: string, valueType: string, resource?: any): any {
@@ -897,18 +918,18 @@ export class OtherSettings {
     }
 
     // All default values are obtained from the VS Code settings UI. Please update the default values as needed.
-    public get editorTabSize(): number | undefined { return this.getVSCodeSettingAsNumber("editor", "tabSize", this.resource, 4); }
-    public get editorInsertSpaces(): boolean | undefined { return this.getVSCodeSettingAsBoolean("editor", "insertSpaces", this.resource); }
-    public get editorAutoClosingBrackets(): string | undefined { return this.getVSCodeSettingAsString("editor", "autoClosingBrackets", this.resource); }
-    public get filesEncoding(): string | undefined { return this.getVSCodeSettingAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }); }
+    public get editorTabSize(): number { return this.getVSCodeSettingAsNumber("editor", "tabSize", this.resource, 4); }
+    public get editorInsertSpaces(): boolean { return this.getVSCodeSettingAsBoolean("editor", "insertSpaces", this.resource); }
+    public get editorAutoClosingBrackets(): string { return this.getVSCodeSettingAsString("editor", "autoClosingBrackets", this.resource); }
+    public get filesEncoding(): string { return this.getVSCodeSettingAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }); }
     public get filesAssociations(): any { return this.getVSCodeSettingAsKeyValueObject("files", "associations", "string", "string"); }
     public set filesAssociations(value: any) { void vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace); }
-    public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return this.getVSCodeSettingAsKeyValueObject("files", "exclude", "string", "boolean", this.resource); }
+    public get filesExclude(): vscode.WorkspaceConfiguration { return this.getVSCodeSettingAsKeyValueObject("files", "exclude", "string", "boolean", this.resource); }
     public get filesAutoSaveAfterDelay(): boolean { return this.getVSCodeSettingAsString("files", "autoSave", this.resource) === "afterDelay"; }
     public get editorInlayHintsEnabled(): boolean { return this.getVSCodeSettingAsString("editor.inlayHints", "enabled", this.resource) !== "off"; }
-    public get editorParameterHintsEnabled(): boolean | undefined { return this.getVSCodeSettingAsBoolean("editor.parameterHints", "enabled", this.resource); }
+    public get editorParameterHintsEnabled(): boolean { return this.getVSCodeSettingAsBoolean("editor.parameterHints", "enabled", this.resource); }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
-    public get workbenchSettingsEditor(): string | undefined { return this.getVSCodeSettingAsString("workbench.settings", "editor", this.resource); }
+    public get workbenchSettingsEditor(): string { return this.getVSCodeSettingAsString("workbench.settings", "editor", this.resource); }
 }
 
 function mapIndentationReferenceToEditorConfig(value: string | undefined): string {
