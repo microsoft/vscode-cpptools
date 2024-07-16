@@ -865,12 +865,7 @@ export class OtherSettings {
         }
 
         const config = fullConfiguration.inspect<string>(setting);
-
-        if (config?.defaultValue !== undefined) {
-            return config.defaultValue;
-        }
-
-        return defaultString;
+        return config?.defaultValue ?? defaultString;
     }
 
     private getVSCodeSettingAsBoolean(settingName: string, setting: string, resource: any, defaultBoolean: boolean = false): boolean {
@@ -880,11 +875,7 @@ export class OtherSettings {
             return value;
         }
         const config = fullConfiguration.inspect<boolean>(setting);
-        if (config?.defaultValue !== undefined) {
-            return config.defaultValue;
-        }
-
-        return defaultBoolean;
+        return config?.defaultValue ?? defaultBoolean;
     }
 
     private getVSCodeSettingAsNumber(settingName: string, setting: string, resource: any, defaultNumber: number = 0): number {
@@ -894,11 +885,7 @@ export class OtherSettings {
             return value;
         }
         const config = fullConfiguration.inspect<number>(setting);
-        if (config?.defaultValue !== undefined) {
-            return config.defaultValue;
-        }
-
-        return defaultNumber;
+        return config?.defaultValue ?? defaultNumber;
     }
 
     private getVSCodeSettingAsKeyValueObject(settingName: string, setting: string, keyType: string, valueType: string, resource?: any): any {

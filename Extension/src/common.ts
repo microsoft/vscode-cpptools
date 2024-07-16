@@ -335,11 +335,11 @@ export function isArrayOfString(input: any): input is string[] {
 
 // Validates whether the given object is a valid mapping of key and value type.
 // EX: {"key": true, "key2": false} should return true for keyType = string and valueType = boolean.
-export function isValidMapping(value: any, keyType: string, valueType: string): boolean {
-    if (value === undefined || value === null) {
-        return false;
+export function isValidMapping(value: any, keyType: string, valueType: string): value is object {
+    if (isObject(value)) {
+        return Object.entries(value).every(([key, val]) => typeof key === keyType && typeof val === valueType);
     }
-    return Object.entries(value).every(([key, val]) => typeof key === keyType && typeof val === valueType);
+    return false;
 }
 
 export function isOptionalArrayOfString(input: any): input is string[] | undefined {
