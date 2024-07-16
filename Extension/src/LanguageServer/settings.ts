@@ -856,8 +856,6 @@ export class OtherSettings {
         this.resource = resource;
     }
 
-    private getVSCodeSettingAsString(settingName: string, setting: string, resource: any): string;
-    private getVSCodeSettingAsString(settingName: string, setting: string, resource: any, defaultString: string): string;
     private getVSCodeSettingAsString(settingName: string, setting: string, resource: any, defaultString: string = ''): string {
         const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
         const value = fullConfiguration.get<string>(setting);
@@ -875,8 +873,6 @@ export class OtherSettings {
         return defaultString;
     }
 
-    private getVSCodeSettingAsBoolean(settingName: string, setting: string, resource: any): boolean;
-    private getVSCodeSettingAsBoolean(settingName: string, setting: string, resource: any, defaultBoolean: boolean): boolean;
     private getVSCodeSettingAsBoolean(settingName: string, setting: string, resource: any, defaultBoolean: boolean = false): boolean {
         const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
         const value = fullConfiguration.get<boolean>(setting);
@@ -891,8 +887,6 @@ export class OtherSettings {
         return defaultBoolean;
     }
 
-    private getVSCodeSettingAsNumber(settingName: string, setting: string, resource: any): number;
-    private getVSCodeSettingAsNumber(settingName: string, setting: string, resource: any, defaultNumber: number): number;
     private getVSCodeSettingAsNumber(settingName: string, setting: string, resource: any, defaultNumber: number = 0): number {
         const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
         const value = fullConfiguration.get<number>(setting);
