@@ -908,7 +908,7 @@ export class OtherSettings {
     public get filesExclude(): vscode.WorkspaceConfiguration { return this.getVSCodeSettingAsKeyValueObject("files", "exclude", "string", "boolean", this.resource); }
     public get filesAutoSaveAfterDelay(): boolean { return this.getVSCodeSettingAsString("files", "autoSave", this.resource, "off") === "afterDelay"; }
     public get editorInlayHintsEnabled(): boolean { return this.getVSCodeSettingAsString("editor.inlayHints", "enabled", this.resource, "on") !== "off"; }
-    public get editorParameterHintsEnabled(): boolean { return this.getVSCodeSettingAsBoolean("editor.parameterHints", "enabled", this.resource , true); }
+    public get editorParameterHintsEnabled(): boolean { return this.getVSCodeSettingAsBoolean("editor.parameterHints", "enabled", this.resource, true); }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
     public get workbenchSettingsEditor(): string { return this.getVSCodeSettingAsString("workbench.settings", "editor", this.resource, "ui"); }
 }
