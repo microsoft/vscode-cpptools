@@ -856,7 +856,7 @@ export class OtherSettings {
         this.resource = resource;
     }
 
-    private getVSCodeSettingAsString(settingName: string, setting: string, resource: any, defaultString: string = ''): string {
+    private getVSCodeSettingAsString(settingName: string, setting: string, resource: any, defaultString: string): string {
         const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
         const value = fullConfiguration.get<string>(setting);
 
@@ -868,7 +868,7 @@ export class OtherSettings {
         return config?.defaultValue ?? defaultString;
     }
 
-    private getVSCodeSettingAsBoolean(settingName: string, setting: string, resource: any, defaultBoolean: boolean = false): boolean {
+    private getVSCodeSettingAsBoolean(settingName: string, setting: string, resource: any, defaultBoolean: boolean): boolean {
         const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
         const value = fullConfiguration.get<boolean>(setting);
         if (isBoolean(value)) {
@@ -878,7 +878,7 @@ export class OtherSettings {
         return config?.defaultValue ?? defaultBoolean;
     }
 
-    private getVSCodeSettingAsNumber(settingName: string, setting: string, resource: any, defaultNumber: number = 0): number {
+    private getVSCodeSettingAsNumber(settingName: string, setting: string, resource: any, defaultNumber: number): number {
         const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
         const value = fullConfiguration.get<number>(setting);
         if (isNumber(value)) {
@@ -900,17 +900,17 @@ export class OtherSettings {
 
     // All default values are obtained from the VS Code settings UI. Please update the default values as needed.
     public get editorTabSize(): number { return this.getVSCodeSettingAsNumber("editor", "tabSize", this.resource, 4); }
-    public get editorInsertSpaces(): boolean { return this.getVSCodeSettingAsBoolean("editor", "insertSpaces", this.resource); }
-    public get editorAutoClosingBrackets(): string { return this.getVSCodeSettingAsString("editor", "autoClosingBrackets", this.resource); }
-    public get filesEncoding(): string { return this.getVSCodeSettingAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }); }
+    public get editorInsertSpaces(): boolean { return this.getVSCodeSettingAsBoolean("editor", "insertSpaces", this.resource, true); }
+    public get editorAutoClosingBrackets(): string { return this.getVSCodeSettingAsString("editor", "autoClosingBrackets", this.resource, "languageDefined"); }
+    public get filesEncoding(): string { return this.getVSCodeSettingAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }, "utf8"); }
     public get filesAssociations(): any { return this.getVSCodeSettingAsKeyValueObject("files", "associations", "string", "string"); }
     public set filesAssociations(value: any) { void vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace); }
     public get filesExclude(): vscode.WorkspaceConfiguration { return this.getVSCodeSettingAsKeyValueObject("files", "exclude", "string", "boolean", this.resource); }
-    public get filesAutoSaveAfterDelay(): boolean { return this.getVSCodeSettingAsString("files", "autoSave", this.resource) === "afterDelay"; }
-    public get editorInlayHintsEnabled(): boolean { return this.getVSCodeSettingAsString("editor.inlayHints", "enabled", this.resource) !== "off"; }
-    public get editorParameterHintsEnabled(): boolean { return this.getVSCodeSettingAsBoolean("editor.parameterHints", "enabled", this.resource); }
+    public get filesAutoSaveAfterDelay(): boolean { return this.getVSCodeSettingAsString("files", "autoSave", this.resource, "off") === "afterDelay"; }
+    public get editorInlayHintsEnabled(): boolean { return this.getVSCodeSettingAsString("editor.inlayHints", "enabled", this.resource, "on") !== "off"; }
+    public get editorParameterHintsEnabled(): boolean { return this.getVSCodeSettingAsBoolean("editor.parameterHints", "enabled", this.resource , true); }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
-    public get workbenchSettingsEditor(): string { return this.getVSCodeSettingAsString("workbench.settings", "editor", this.resource); }
+    public get workbenchSettingsEditor(): string { return this.getVSCodeSettingAsString("workbench.settings", "editor", this.resource, "ui"); }
 }
 
 function mapIndentationReferenceToEditorConfig(value: string | undefined): string {
