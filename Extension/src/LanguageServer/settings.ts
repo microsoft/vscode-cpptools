@@ -28,6 +28,10 @@ export interface Excludes {
     [key: string]: (boolean | { when: string });
 }
 
+export interface Associations {
+    [key: string]: string;
+}
+
 export interface WorkspaceFolderSettingsParams {
     uri: string | undefined;
     intelliSenseEngine: string;
@@ -134,7 +138,7 @@ export interface WorkspaceFolderSettingsParams {
 }
 
 export interface SettingsParams {
-    filesAssociations: { [key: string]: string };
+    filesAssociations: Associations;
     workspaceFallbackEncoding: string;
     maxConcurrentThreads: number | null;
     maxCachedProcesses: number | null;
@@ -349,8 +353,11 @@ export class CppSettings extends Settings {
             return null;
         }
         const setting = getRawSetting("C_Cpp." + settingName);
+        if (value === null){
+            return setting.default;
+        }
         // Validates the value is a number and falls within the specified range. Allows for undefined maximum or minimum values.
-        if ((isNumber(value) || value === null) && (setting.minimum === undefined || value >= setting.minimum) && (setting.maximum === undefined || value <= setting.maximum)) {
+        if (isNumber(value) && (setting.minimum === undefined || value >= setting.minimum) && (setting.maximum === undefined || value <= setting.maximum)) {
             return value;
         }
         return setting.default;
@@ -373,14 +380,22 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
-    // Returns the value of a setting as a key-value object with proper type validation.
-    private getAsKeyValueObject(settingName: string, keyType: string, valueType: string): any {
+    private getAsExcludes(settingName: string): Excludes {
         const value: any = super.Section.get(settingName);
-        if (isValidMapping(value, keyType, valueType)) {
-            return value;
+        if (isValidMapping(value, 'string', 'boolean')) {
+            return value as Excludes;
         }
         const setting = getRawSetting("C_Cpp." + settingName);
-        return setting.default;
+        return setting.default as Excludes;
+    }
+
+    private getAsAssociations(settingName: string): Associations {
+        const value: any = super.Section.get(settingName);
+        if (isValidMapping(value, 'string', 'string')) {
+            return value as Associations;
+        }
+        const setting = getRawSetting("C_Cpp." + settingName);
+        return setting.default as Associations;
     }
 
     // Checks a given enum value against a list of valid enum values from package.json.
@@ -420,7 +435,7 @@ export class CppSettings extends Settings {
     public get codeAnalysisMaxConcurrentThreads(): number | null { return this.getAsNumber("codeAnalysis.maxConcurrentThreads", true); }
     public get codeAnalysisMaxMemory(): number | null { return this.getAsNumber("codeAnalysis.maxMemory", true); }
     public get codeAnalysisUpdateDelay(): number { return this.getAsNumber("codeAnalysis.updateDelay"); }
-    public get codeAnalysisExclude(): Excludes { return this.getAsKeyValueObject("codeAnalysis.exclude", "string", "boolean"); }
+    public get codeAnalysisExclude(): Excludes { return this.getAsExcludes("codeAnalysis.exclude"); }
     public get codeAnalysisRunAutomatically(): boolean { return this.getAsBoolean("codeAnalysis.runAutomatically"); }
     public get codeAnalysisRunOnBuild(): boolean { return this.getAsBoolean("codeAnalysis.runOnBuild"); }
     public get clangTidyEnabled(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.enabled"); }
@@ -484,7 +499,7 @@ export class CppSettings extends Settings {
     public get isVcpkgEnabled(): boolean { return this.getAsString("vcpkg").toLowerCase() === "enabled"; }
     public get addNodeAddonIncludePaths(): boolean { return this.getAsBoolean("addNodeAddonIncludePaths"); }
     public get renameRequiresIdentifier(): boolean { return this.getAsBoolean("renameRequiresIdentifier"); }
-    public get filesExclude(): Excludes { return this.getAsKeyValueObject("files.exclude", "string", "boolean"); }
+    public get filesExclude(): Excludes { return this.getAsExcludes("files.exclude"); }
     public get defaultIncludePath(): string[] { return this.getAsArrayOfStrings("default.includePath"); }
     public get defaultDefines(): string[] { return this.getAsArrayOfStrings("default.defines"); }
     public get defaultDotconfig(): string { return this.getAsString("default.dotConfig"); }
@@ -525,7 +540,7 @@ export class CppSettings extends Settings {
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
     public get defaultSystemIncludePath(): string[] { return this.getAsArrayOfStrings("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean { return this.getAsBoolean("default.enableConfigurationSquiggles"); }
-    public get defaultCustomConfigurationVariables(): { [key: string]: string } { return this.getAsKeyValueObject("default.customConfigurationVariables", "string", "string"); }
+    public get defaultCustomConfigurationVariables(): Associations { return this.getAsAssociations("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean { return this.getAsBoolean("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return this.getAsString("codeFolding").toLowerCase() === "enabled"; }
     public get isCaseSensitiveFileSupportEnabled(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport").toLowerCase() === "enabled"; }
@@ -835,17 +850,6 @@ export class CppSettings extends Settings {
     }
 }
 
-export interface TextMateRuleSettings {
-    foreground?: string;
-    background?: string;
-    fontStyle?: string;
-}
-
-export interface TextMateRule {
-    scope: string[];
-    settings: TextMateRuleSettings;
-}
-
 export class OtherSettings {
     private resource: vscode.Uri | undefined;
 
@@ -856,61 +860,71 @@ export class OtherSettings {
         this.resource = resource;
     }
 
-    private getVSCodeSettingAsString(settingName: string, setting: string, resource: any, defaultString: string): string {
-        const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
-        const value = fullConfiguration.get<string>(setting);
+    private getAsString(sectionName: string, settingName: string, resource: any, defaultString: string): string {
+        const fullConfiguration = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = fullConfiguration.get<string>(settingName);
 
         if (isString(value)) {
             return value;
         }
 
-        const config = fullConfiguration.inspect<string>(setting);
-        return config?.defaultValue ?? defaultString;
+        const section = fullConfiguration.inspect<string>(settingName);
+        return section ?.defaultValue ?? defaultString;
     }
 
-    private getVSCodeSettingAsBoolean(settingName: string, setting: string, resource: any, defaultBoolean: boolean): boolean {
-        const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
-        const value = fullConfiguration.get<boolean>(setting);
+    private getAsBoolean(sectionName: string, settingName: string, resource: any, defaultBoolean: boolean): boolean {
+        const fullConfiguration = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = fullConfiguration.get<boolean>(settingName);
         if (isBoolean(value)) {
             return value;
         }
-        const config = fullConfiguration.inspect<boolean>(setting);
-        return config?.defaultValue ?? defaultBoolean;
+        const section = fullConfiguration.inspect<boolean>(settingName);
+        return section ?.defaultValue ?? defaultBoolean;
     }
 
-    private getVSCodeSettingAsNumber(settingName: string, setting: string, resource: any, defaultNumber: number): number {
-        const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
-        const value = fullConfiguration.get<number>(setting);
+    private getAsNumber(sectionName: string, settingName: string, resource: any, defaultNumber: number): number {
+        const fullConfiguration = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = fullConfiguration.get<number>(settingName);
         if (isNumber(value)) {
             return value;
         }
-        const config = fullConfiguration.inspect<number>(setting);
-        return config?.defaultValue ?? defaultNumber;
+        const section = fullConfiguration.inspect<number>(settingName);
+        return section ?.defaultValue ?? defaultNumber;
     }
 
-    private getVSCodeSettingAsKeyValueObject(settingName: string, setting: string, keyType: string, valueType: string, resource?: any): any {
-        const fullConfiguration = vscode.workspace.getConfiguration(settingName, resource);
-        const value = fullConfiguration.get<any>(setting);
-        if (isValidMapping(value, keyType, valueType)) {
-            return value;
+    private getAsAssociations(sectionName: string, settingName: string, resource?: any): Associations {
+        const fullConfiguration = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = fullConfiguration.get<any>(settingName);
+        if (isValidMapping(value, 'string', 'string')) {
+            return value as Associations;
         }
-        const config = fullConfiguration.inspect<any>(setting);
-        return config?.defaultValue;
+        const section = fullConfiguration.inspect<any>(settingName);
+        return section ?.defaultValue as Associations;
+    }
+
+    private getAsExcludes(sectionName: string, settingName: string, resource?: any): Excludes {
+        const fullConfiguration = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = fullConfiguration.get<any>(settingName);
+        if (isValidMapping(value, 'string', 'boolean')) {
+            return value as Excludes;
+        }
+        const section = fullConfiguration.inspect<any>(settingName);
+        return section ?.defaultValue as Excludes;
     }
 
     // All default values are obtained from the VS Code settings UI. Please update the default values as needed.
-    public get editorTabSize(): number { return this.getVSCodeSettingAsNumber("editor", "tabSize", this.resource, 4); }
-    public get editorInsertSpaces(): boolean { return this.getVSCodeSettingAsBoolean("editor", "insertSpaces", this.resource, true); }
-    public get editorAutoClosingBrackets(): string { return this.getVSCodeSettingAsString("editor", "autoClosingBrackets", this.resource, "languageDefined"); }
-    public get filesEncoding(): string { return this.getVSCodeSettingAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }, "utf8"); }
-    public get filesAssociations(): any { return this.getVSCodeSettingAsKeyValueObject("files", "associations", "string", "string"); }
+    public get editorTabSize(): number { return this.getAsNumber("editor", "tabSize", this.resource, 4); }
+    public get editorInsertSpaces(): boolean { return this.getAsBoolean("editor", "insertSpaces", this.resource, true); }
+    public get editorAutoClosingBrackets(): string { return this.getAsString("editor", "autoClosingBrackets", this.resource, "languageDefined"); }
+    public get filesEncoding(): string { return this.getAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }, "utf8"); }
+    public get filesAssociations(): Associations { return this.getAsAssociations("files", "associations"); }
     public set filesAssociations(value: any) { void vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace); }
-    public get filesExclude(): vscode.WorkspaceConfiguration { return this.getVSCodeSettingAsKeyValueObject("files", "exclude", "string", "boolean", this.resource); }
-    public get filesAutoSaveAfterDelay(): boolean { return this.getVSCodeSettingAsString("files", "autoSave", this.resource, "off") === "afterDelay"; }
-    public get editorInlayHintsEnabled(): boolean { return this.getVSCodeSettingAsString("editor.inlayHints", "enabled", this.resource, "on") !== "off"; }
-    public get editorParameterHintsEnabled(): boolean { return this.getVSCodeSettingAsBoolean("editor.parameterHints", "enabled", this.resource, true); }
+    public get filesExclude(): Excludes { return this.getAsExcludes("files", "exclude", this.resource); }
+    public get filesAutoSaveAfterDelay(): boolean { return this.getAsString("files", "autoSave", this.resource, "off") === "afterDelay"; }
+    public get editorInlayHintsEnabled(): boolean { return this.getAsString("editor.inlayHints", "enabled", this.resource, "on") !== "off"; }
+    public get editorParameterHintsEnabled(): boolean { return this.getAsBoolean("editor.parameterHints", "enabled", this.resource, true); }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
-    public get workbenchSettingsEditor(): string { return this.getVSCodeSettingAsString("workbench.settings", "editor", this.resource, "ui"); }
+    public get workbenchSettingsEditor(): string { return this.getAsString("workbench.settings", "editor", this.resource, "ui"); }
 }
 
 function mapIndentationReferenceToEditorConfig(value: string | undefined): string {
