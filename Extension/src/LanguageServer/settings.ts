@@ -353,7 +353,7 @@ export class CppSettings extends Settings {
             return null;
         }
         const setting = getRawSetting("C_Cpp." + settingName);
-        if (value === null){
+        if (value === null) {
             return setting.default;
         }
         // Validates the value is a number and falls within the specified range. Allows for undefined maximum or minimum values.
