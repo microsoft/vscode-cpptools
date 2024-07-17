@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.21.1: July 15, 2024
+## Version 1.21.2: July 18, 2024
 ### Enhancements
 * Add `see` and `sa` to the `C_Cpp.doxygen.sectionTags` setting. [#12384](https://github.com/microsoft/vscode-cpptools/issues/12384)
 * Update the vcpkg header database. [PR #12430](https://github.com/microsoft/vscode-cpptools/pull/12430)
@@ -9,30 +9,27 @@
 * Various IntelliSense engine updates/fixes.
 
 ### Bug Fixes
+* Stop logging file watch events for excluded files. [#11455](https://github.com/microsoft/vscode-cpptools/issues/11455)
 * Fix a crash if the Ryzen 3000 doesn't have updated drivers. [#12201](https://github.com/microsoft/vscode-cpptools/issues/12201)
+* Fix handling of `-isystem` and `-iquote` for IntelliSense configuration. [#12207](https://github.com/microsoft/vscode-cpptools/issues/12207)
+* Fix doxygen comment generation when `/**` comments are used. [#12249](https://github.com/microsoft/vscode-cpptools/issues/12249)
+* Fix a code analysis crash on Linux if the message is too long. [#12285](https://github.com/microsoft/vscode-cpptools/issues/12285)
 * Fix relative paths in `compile_commands.json` to be relative to the `compile_commands.json`'s directory. [#12290](https://github.com/microsoft/vscode-cpptools/issues/12290)
 * Fix a tag parser performance regression. [#12292](https://github.com/microsoft/vscode-cpptools/issues/12292)
+* Fix a regression with cl.exe system include path detection. [#12293](https://github.com/microsoft/vscode-cpptools/issues/12293)
 * Fix code analysis, find all references, and rename from getting the wrong configuration for non-open files on the first run when using a configuration provider. [#12313](https://github.com/microsoft/vscode-cpptools/issues/12313)
-* Fix potential crashes. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
+* Fix handling of doxygen comment blocks with `*//*` in them. [#12316](https://github.com/microsoft/vscode-cpptools/issues/12316)
+* Fix potential crashes during IntelliSense process shutdown. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
 * Fix the language status not showing it's busy while the tag parser is initializing. [#12403](https://github.com/microsoft/vscode-cpptools/issues/12403)
 * Fix the vcpkg code action not appearing for missing headers available via vcpkg. [#12413](https://github.com/microsoft/vscode-cpptools/issues/12413)
 * Fix custom configurations sometimes not getting used. [PR #12427](https://github.com/microsoft/vscode-cpptools/pull/12427)
 * Fix a code analysis error when using gcc 14. [#12428](https://github.com/microsoft/vscode-cpptools/issues/12428)
+* Fix warning notification showing when `C_Cpp.getIncludes` is disabled. [PR #12470](https://github.com/microsoft/vscode-cpptools/pull/12470)
 * Fix a cause of colorization, inactive regions, and inlay hints getting cleared when an update is pending.
-* Fix a cause of semantic tokens transiently being placed in the wrong location.
-* Fix a potential deadlock when configured using compile commands.
-
-## Version 1.21.0: June 17, 2024
-### Bug Fixes
-* Stop logging file watch events for excluded files. [#11455](https://github.com/microsoft/vscode-cpptools/issues/11455)
-* Fix handling of `-isystem` and `-iquote` for IntelliSense configuration. [#12207](https://github.com/microsoft/vscode-cpptools/issues/12207)
-* Fix doxygen comment generation when `/**` comments are used. [#12249](https://github.com/microsoft/vscode-cpptools/issues/12249)
-* Fix a code analysis crash on Linux if the message is too long. [#12285](https://github.com/microsoft/vscode-cpptools/issues/12285)
-* Fix a regression with cl.exe system include path detection. [#12293](https://github.com/microsoft/vscode-cpptools/issues/12293)
-* Fix handling of doxygen comment blocks with `*//*` in them. [#12316](https://github.com/microsoft/vscode-cpptools/issues/12316)
-* Fix a crash during IntelliSense process shutdown. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
 * Update the default clang/gcc versions used for IntelliSense if an unknown version is found.
+* Fix a cause of semantic tokens transiently being placed in the wrong location.
 * Update clang-format and clang-tidy from 18.1.2 to 18.1.7 (for the bug fixes).
+* Fix a potential deadlock when configured using compile commands.
 
 ## Version 1.20.5: May 6, 2024
 ### Enhancements
