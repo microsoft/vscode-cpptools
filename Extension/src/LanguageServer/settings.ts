@@ -356,8 +356,14 @@ export class CppSettings extends Settings {
         if (value === null) {
             return setting.default;
         }
-        // Validates the value is a number and falls within the specified range. Allows for undefined maximum or minimum values.
-        if (isNumber(value) && (setting.minimum === undefined || value >= setting.minimum) && (setting.maximum === undefined || value <= setting.maximum)) {
+        // Validates the value is a number and clamps it to the specified range. Allows for undefined maximum or minimum values.
+        if (isNumber(value)) {
+            if (setting.minimum !== undefined && value < setting.minimum) {
+                return setting.minimum;
+            }
+            if (setting.maximum !== undefined && value > setting.maximum) {
+                return setting.maximum;
+            }
             return value;
         }
         return setting.default;
@@ -380,8 +386,13 @@ export class CppSettings extends Settings {
         return setting.default;
     }
 
-    private getAsExcludes(settingName: string): Excludes {
+    private getAsExcludes(settingName: string): Excludes;
+    private getAsExcludes(settingName: string, allowNull: boolean): Excludes | null;
+    private getAsExcludes(settingName: string, allowNull: boolean = false): Excludes | null {
         const value: any = super.Section.get(settingName);
+        if (allowNull && value === null) {
+            return null;
+        }
         if (isValidMapping(value, 'string', 'boolean')) {
             return value as Excludes;
         }
@@ -389,8 +400,13 @@ export class CppSettings extends Settings {
         return setting.default as Excludes;
     }
 
-    private getAsAssociations(settingName: string): Associations {
+    private getAsAssociations(settingName: string): Associations;
+    private getAsAssociations(settingName: string, allowNull: boolean): Associations | null;
+    private getAsAssociations(settingName: string, allowNull: boolean = false): Associations | null {
         const value: any = super.Section.get(settingName);
+        if (allowNull && value === null) {
+            return null;
+        }
         if (isValidMapping(value, 'string', 'string')) {
             return value as Associations;
         }
@@ -426,11 +442,11 @@ export class CppSettings extends Settings {
     public get maxConcurrentThreads(): number | null { return this.getAsNumber("maxConcurrentThreads", true); }
     public get maxMemory(): number | null { return this.getAsNumber("maxMemory", true); }
     public get maxSymbolSearchResults(): number { return this.getAsNumber("maxSymbolSearchResults"); }
-    public get maxCachedProcesses(): number { return this.getAsNumber("maxCachedProcesses"); }
+    public get maxCachedProcesses(): number | null { return this.getAsNumber("maxCachedProcesses", true); }
     public get intelliSenseMaxCachedProcesses(): number | null { return this.getAsNumber("intelliSense.maxCachedProcesses", true); }
     public get intelliSenseMaxMemory(): number | null { return this.getAsNumber("intelliSense.maxMemory", true); }
     public get referencesMaxConcurrentThreads(): number | null { return this.getAsNumber("references.maxConcurrentThreads", true); }
-    public get referencesMaxCachedProcesses(): number { return this.getAsNumber("references.maxCachedProcesses"); }
+    public get referencesMaxCachedProcesses(): number | null { return this.getAsNumber("references.maxCachedProcesses", true); }
     public get referencesMaxMemory(): number | null { return this.getAsNumber("references.maxMemory", true); }
     public get codeAnalysisMaxConcurrentThreads(): number | null { return this.getAsNumber("codeAnalysis.maxConcurrentThreads", true); }
     public get codeAnalysisMaxMemory(): number | null { return this.getAsNumber("codeAnalysis.maxMemory", true); }
@@ -508,7 +524,7 @@ export class CppSettings extends Settings {
     public get defaultCompileCommands(): string { return this.getAsString("default.compileCommands"); }
     public get defaultForcedInclude(): string[] { return this.getAsArrayOfStrings("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string { return this.getAsString("default.intelliSenseMode"); }
-    public get defaultCompilerPath(): string { return this.getAsString("default.compilerPath") ?? undefined; }
+    public get defaultCompilerPath(): string | null { return this.getAsString("default.compilerPath", true) ?? null; }
 
     public set defaultCompilerPath(value: string) {
         const defaultCompilerPathStr: string = "default.compilerPath";
@@ -535,12 +551,12 @@ export class CppSettings extends Settings {
     public get defaultCppStandard(): string { return this.getAsString("default.cppStandard"); }
     public get defaultConfigurationProvider(): string { return this.getAsString("default.configurationProvider"); }
     public get defaultMergeConfigurations(): boolean { return this.getAsBoolean("default.mergeConfigurations"); }
-    public get defaultBrowsePath(): string[] { return this.getAsArrayOfStrings("default.browse.path") ?? undefined; }
+    public get defaultBrowsePath(): string[] | null { return this.getAsArrayOfStrings("default.browse.path", true); }
     public get defaultDatabaseFilename(): string { return this.getAsString("default.browse.databaseFilename"); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
     public get defaultSystemIncludePath(): string[] { return this.getAsArrayOfStrings("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean { return this.getAsBoolean("default.enableConfigurationSquiggles"); }
-    public get defaultCustomConfigurationVariables(): Associations { return this.getAsAssociations("default.customConfigurationVariables"); }
+    public get defaultCustomConfigurationVariables(): Associations | null { return this.getAsAssociations("default.customConfigurationVariables", true); }
     public get useBacktickCommandSubstitution(): boolean { return this.getAsBoolean("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return this.getAsString("codeFolding").toLowerCase() === "enabled"; }
     public get isCaseSensitiveFileSupportEnabled(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport").toLowerCase() === "enabled"; }
@@ -860,60 +876,65 @@ export class OtherSettings {
         this.resource = resource;
     }
 
-    private getAsString(sectionName: string, settingName: string, resource: any, defaultString: string): string {
-        const fullConfiguration = vscode.workspace.getConfiguration(sectionName, resource);
-        const value = fullConfiguration.get<string>(settingName);
-
+    private getAsString(sectionName: string, settingName: string, resource: any, defaultValue: string): string {
+        const section = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = section.get<string>(settingName);
         if (isString(value)) {
             return value;
         }
-
-        const section = fullConfiguration.inspect<string>(settingName);
-        return section ?.defaultValue ?? defaultString;
+        const setting = section.inspect<string>(settingName);
+        return setting?.defaultValue ?? defaultValue;
     }
 
-    private getAsBoolean(sectionName: string, settingName: string, resource: any, defaultBoolean: boolean): boolean {
-        const fullConfiguration = vscode.workspace.getConfiguration(sectionName, resource);
-        const value = fullConfiguration.get<boolean>(settingName);
+    private getAsBoolean(sectionName: string, settingName: string, resource: any, defaultValue: boolean): boolean {
+        const section = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = section.get<boolean>(settingName);
         if (isBoolean(value)) {
             return value;
         }
-        const section = fullConfiguration.inspect<boolean>(settingName);
-        return section ?.defaultValue ?? defaultBoolean;
+        const setting = section.inspect<boolean>(settingName);
+        return setting?.defaultValue ?? defaultValue;
     }
 
-    private getAsNumber(sectionName: string, settingName: string, resource: any, defaultNumber: number): number {
-        const fullConfiguration = vscode.workspace.getConfiguration(sectionName, resource);
-        const value = fullConfiguration.get<number>(settingName);
+    private getAsNumber(sectionName: string, settingName: string, resource: any, defaultValue: number, minimum?: number, maximum?: number): number {
+        const section = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = section.get<number>(settingName);
+        // Validates the value is a number and clamps it to the specified range. Allows for undefined maximum or minimum values.
         if (isNumber(value)) {
+            if (minimum !== undefined && value < minimum) {
+                return minimum;
+            }
+            if (maximum !== undefined && value > maximum) {
+                return maximum;
+            }
             return value;
         }
-        const section = fullConfiguration.inspect<number>(settingName);
-        return section ?.defaultValue ?? defaultNumber;
+        const setting = section.inspect<number>(settingName);
+        return setting?.defaultValue ?? defaultValue;
     }
 
     private getAsAssociations(sectionName: string, settingName: string, resource?: any): Associations {
-        const fullConfiguration = vscode.workspace.getConfiguration(sectionName, resource);
-        const value = fullConfiguration.get<any>(settingName);
+        const section = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = section.get<any>(settingName);
         if (isValidMapping(value, 'string', 'string')) {
             return value as Associations;
         }
-        const section = fullConfiguration.inspect<any>(settingName);
-        return section ?.defaultValue as Associations;
+        const setting = section.inspect<any>(settingName);
+        return setting?.defaultValue as Associations;
     }
 
     private getAsExcludes(sectionName: string, settingName: string, resource?: any): Excludes {
-        const fullConfiguration = vscode.workspace.getConfiguration(sectionName, resource);
-        const value = fullConfiguration.get<any>(settingName);
+        const section = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = section.get<any>(settingName);
         if (isValidMapping(value, 'string', 'boolean')) {
             return value as Excludes;
         }
-        const section = fullConfiguration.inspect<any>(settingName);
-        return section ?.defaultValue as Excludes;
+        const setting = section.inspect<any>(settingName);
+        return setting?.defaultValue as Excludes;
     }
 
     // All default values are obtained from the VS Code settings UI. Please update the default values as needed.
-    public get editorTabSize(): number { return this.getAsNumber("editor", "tabSize", this.resource, 4); }
+    public get editorTabSize(): number { return this.getAsNumber("editor", "tabSize", this.resource, 4, 1); }
     public get editorInsertSpaces(): boolean { return this.getAsBoolean("editor", "insertSpaces", this.resource, true); }
     public get editorAutoClosingBrackets(): string { return this.getAsString("editor", "autoClosingBrackets", this.resource, "languageDefined"); }
     public get filesEncoding(): string { return this.getAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }, "utf8"); }
@@ -923,7 +944,7 @@ export class OtherSettings {
     public get filesAutoSaveAfterDelay(): boolean { return this.getAsString("files", "autoSave", this.resource, "off") === "afterDelay"; }
     public get editorInlayHintsEnabled(): boolean { return this.getAsString("editor.inlayHints", "enabled", this.resource, "on") !== "off"; }
     public get editorParameterHintsEnabled(): boolean { return this.getAsBoolean("editor.parameterHints", "enabled", this.resource, true); }
-    public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
+    public get searchExclude(): Excludes { return this.getAsExcludes("search", "exclude", this.resource); }
     public get workbenchSettingsEditor(): string { return this.getAsString("workbench.settings", "editor", this.resource, "ui"); }
 }
 
