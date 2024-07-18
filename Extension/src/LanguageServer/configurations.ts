@@ -1539,10 +1539,18 @@ export class CppProperties {
         }
 
         if (assumeRelative) {
+            let quoted = false;
+            if (result.startsWith('"') && result.endsWith('"')) {
+                quoted = true;
+                result = result.slice(1, -1);
+            }
             // Make sure all paths result to an absolute path.
             // Do not add the root path to an unresolved env variable.
             if (!result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
                 result = path.join(this.rootUri.fsPath, result);
+            }
+            if (quoted) {
+                result = `"${result}"`;
             }
         }
 
