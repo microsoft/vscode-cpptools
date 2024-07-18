@@ -71,7 +71,7 @@ export interface Configuration {
     cStandardIsExplicit?: boolean;
     cppStandard?: string;
     cppStandardIsExplicit?: boolean;
-    includePath?: string[];
+    includePath?: string[] | null;
     macFrameworkPath?: string[];
     windowsSdkVersion?: string;
     dotConfig?: string;
@@ -80,7 +80,7 @@ export interface Configuration {
     intelliSenseModeIsExplicit?: boolean;
     compileCommandsInCppPropertiesJson?: string;
     compileCommands?: string;
-    forcedInclude?: string[];
+    forcedInclude?: string[] | null;
     configurationProviderInCppPropertiesJson?: string;
     configurationProvider?: string;
     mergeConfigurations?: boolean;
@@ -102,7 +102,7 @@ export interface ConfigurationErrors {
 }
 
 export interface Browse {
-    path?: string[];
+    path?: string[] | null;
     limitSymbolsToIncludedHeaders?: boolean | string;
     databaseFilename?: string;
 }
@@ -618,7 +618,7 @@ export class CppProperties {
                 if (config.includePath === undefined) {
                     config.includePath = ["${default}"];
                 }
-                config.includePath.splice(config.includePath.length, 0, path);
+                config.includePath?.splice(config.includePath.length, 0, path);
                 this.writeToJson();
             }
             // Any time parsePropertiesFile is called, configurationJson gets
@@ -711,7 +711,7 @@ export class CppProperties {
         this.onSelectionChanged();
     }
 
-    private resolveDefaults(entries: string[], defaultValue?: string[]): string[] {
+    private resolveDefaults(entries: string[], defaultValue?: string[] | null): string[] {
         let result: string[] = [];
         entries.forEach(entry => {
             if (entry === "${default}") {
@@ -727,7 +727,7 @@ export class CppProperties {
         return result;
     }
 
-    private resolveDefaultsDictionary(entries: { [key: string]: string }, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } {
+    private resolveDefaultsDictionary(entries: { [key: string]: string }, defaultValue: { [key: string]: string } | undefined | null, env: Environment): { [key: string]: string } {
         const result: { [key: string]: string } = {};
         for (const property in entries) {
             if (property === "${default}") {
@@ -758,9 +758,9 @@ export class CppProperties {
         return result;
     }
 
-    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true, glob: boolean = false): string[] {
+    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined | null, env: Environment, assumeRelative: boolean = true, glob: boolean = false): string[] {
         const resolvedVariables: string[] = [];
-        if (paths === undefined) {
+        if (paths === undefined || paths === null) {
             return resolvedVariables;
         }
         paths = this.resolveDefaults(paths, defaultValue);
@@ -841,7 +841,7 @@ export class CppProperties {
         return property;
     }
 
-    private updateConfigurationPathsArray(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true): string[] | undefined {
+    private updateConfigurationPathsArray(paths: string[] | undefined | null, defaultValue: string[] | undefined | null, env: Environment, assumeRelative: boolean = true): string[] | undefined | null {
         if (paths) {
             return this.resolveAndSplit(paths, defaultValue, env, assumeRelative, true);
         }
@@ -876,7 +876,7 @@ export class CppProperties {
         return property;
     }
 
-    private updateConfigurationStringDictionary(property: { [key: string]: string } | undefined, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } | undefined {
+    private updateConfigurationStringDictionary(property: { [key: string]: string } | undefined | null, defaultValue: { [key: string]: string } | undefined | null, env: Environment): { [key: string]: string } | undefined {
         if (!property || Object.keys(property).length === 0) {
             property = defaultValue;
         }
@@ -921,7 +921,7 @@ export class CppProperties {
             configuration.configurationProviderInCppPropertiesJson = configuration.configurationProvider;
             configuration.includePath = this.updateConfigurationPathsArray(configuration.includePath, settings.defaultIncludePath, env);
             // in case includePath is reset below
-            const origIncludePath: string[] | undefined = configuration.includePath;
+            const origIncludePath: string[] | undefined | null = configuration.includePath;
             if (userSettings.addNodeAddonIncludePaths) {
                 const includePath: string[] = origIncludePath || [];
                 configuration.includePath = includePath.concat(this.nodeAddonIncludes.filter(i => includePath.indexOf(i) < 0));
@@ -987,8 +987,8 @@ export class CppProperties {
                 }
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
-                if (configuration.compilerPath === "${default}") {
-                    configuration.compilerPath = settings.defaultCompilerPath ?? undefined;
+                if (configuration.compilerPath === "${default}" && settings.defaultCompilerPath) {
+                    configuration.compilerPath = settings.defaultCompilerPath;
                 }
                 if (configuration.compilerPath === null) {
                     configuration.compilerPath = undefined;
@@ -1001,9 +1001,8 @@ export class CppProperties {
                 }
             }
 
-            if (settings.defaultCustomConfigurationVariables !== null) {
-                configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
-            }
+            configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
+
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
             if (!configuration.browse) {
@@ -1025,9 +1024,8 @@ export class CppProperties {
                     configuration.browse.path = ["${workspaceFolder}"];
                 }
             } else {
-                if (settings.defaultBrowsePath) {
-                    configuration.browse.path = this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
-                }
+                configuration.browse.path = this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
+
             }
 
             configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationStringOrBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
@@ -1263,8 +1261,8 @@ export class CppProperties {
         }
     }
 
-    private trimPathWhitespace(paths: string[] | undefined): string[] | undefined {
-        if (paths === undefined) {
+    private trimPathWhitespace(paths: string[] | undefined | null): string[] | undefined {
+        if (paths === undefined || paths === null) {
             return undefined;
         }
         const trimmedPaths = [];
@@ -1665,7 +1663,7 @@ export class CppProperties {
         return errors;
     }
 
-    private validatePath(input: string | string[] | undefined, { isDirectory = true, assumeRelative = true, globPaths = false } = {}): string | undefined {
+    private validatePath(input: string | string[] | undefined | null, { isDirectory = true, assumeRelative = true, globPaths = false } = {}): string | undefined {
         if (!input) {
             return undefined;
         }
