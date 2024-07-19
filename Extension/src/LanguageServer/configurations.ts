@@ -594,7 +594,7 @@ export class CppProperties {
             configuration.intelliSenseMode === "${default}") {
             return "";
         }
-        const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath ?? undefined );
+        const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath ?? undefined);
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
 
@@ -1004,7 +1004,7 @@ export class CppProperties {
                 }
             }
 
-            configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);       
+            configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
             if (!configuration.browse) {
@@ -1881,7 +1881,7 @@ export class CppProperties {
         const paths: string[] = [];
         let compilerPath: string | undefined;
         for (const pathArray of [currentConfiguration.browse ? currentConfiguration.browse.path : undefined,
-            currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
+        currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
             if (pathArray) {
                 for (const curPath of pathArray) {
                     paths.push(`${curPath}`);
