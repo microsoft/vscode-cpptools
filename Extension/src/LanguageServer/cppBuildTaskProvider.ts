@@ -98,7 +98,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         // Get user compiler path.
         const userCompilerPathAndArgs: util.CompilerPathAndArgs | undefined = await activeClient.getCurrentCompilerPathAndArgs();
-        let userCompilerPath: string | undefined;
+        let userCompilerPath: string | undefined | null;
         if (userCompilerPathAndArgs) {
             userCompilerPath = userCompilerPathAndArgs.compilerPath;
             if (userCompilerPath && userCompilerPathAndArgs.compilerName) {

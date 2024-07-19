@@ -50,7 +50,7 @@ export interface WorkspaceFolderSettingsParams {
     defaultSystemIncludePath: string[];
     cppFilesExclude: Excludes;
     clangFormatPath: string;
-    clangFormatStyle: string | undefined;
+    clangFormatStyle: string;
     clangFormatFallbackStyle: string;
     clangFormatSortIncludes: boolean | null;
     codeAnalysisRunAutomatically: boolean;
@@ -130,7 +130,7 @@ export interface WorkspaceFolderSettingsParams {
     filesExclude: Excludes;
     filesAutoSaveAfterDelay: boolean;
     filesEncoding: string;
-    searchExclude: Excludes | undefined;
+    searchExclude: Excludes;
     editorAutoClosingBrackets: string;
     editorInlayHintsEnabled: boolean;
     editorParameterHintsEnabled: boolean;

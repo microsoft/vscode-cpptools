@@ -1338,7 +1338,7 @@ export class DefaultClient implements Client {
             defaultSystemIncludePath: settings.defaultSystemIncludePath,
             cppFilesExclude: settings.filesExclude,
             clangFormatPath: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
-            clangFormatStyle: settings.clangFormatStyle ? util.resolveVariables(settings.clangFormatStyle, this.AdditionalEnvironment) : undefined,
+            clangFormatStyle: util.resolveVariables(settings.clangFormatStyle, this.AdditionalEnvironment),
             clangFormatFallbackStyle: settings.clangFormatFallbackStyle,
             clangFormatSortIncludes: settings.clangFormatSortIncludes,
             codeAnalysisRunAutomatically: settings.codeAnalysisRunAutomatically,
@@ -3052,7 +3052,7 @@ export class DefaultClient implements Client {
                         providerVersion < Version.v6,
                         itemConfig.compilerPath,
                         util.isArrayOfString(itemConfig.compilerArgs) ? itemConfig.compilerArgs : undefined);
-                    itemConfig.compilerPath = compilerPathAndArgs.compilerPath;
+                    itemConfig.compilerPath = compilerPathAndArgs.compilerPath ?? undefined;
                     if (itemConfig.compilerPath !== undefined) {
                         void this.addTrustedCompiler(itemConfig.compilerPath).catch(logAndReturn.undefined);
                     }
@@ -3156,7 +3156,7 @@ export class DefaultClient implements Client {
                     providerVersion < Version.v6,
                     sanitized.compilerPath,
                     util.isArrayOfString(sanitized.compilerArgs) ? sanitized.compilerArgs : undefined);
-                sanitized.compilerPath = compilerPathAndArgs.compilerPath;
+                sanitized.compilerPath = compilerPathAndArgs.compilerPath ?? undefined;
                 if (sanitized.compilerPath !== undefined) {
                     void this.addTrustedCompiler(sanitized.compilerPath).catch(logAndReturn.undefined);
                 }

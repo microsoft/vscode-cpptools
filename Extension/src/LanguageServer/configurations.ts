@@ -62,8 +62,8 @@ export interface ConfigurationJson {
 
 export interface Configuration {
     name: string;
-    compilerPathInCppPropertiesJson?: string;
-    compilerPath?: string;
+    compilerPathInCppPropertiesJson?: string | null;
+    compilerPath?: string | null;
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
     compilerArgsLegacy?: string[];
@@ -71,7 +71,7 @@ export interface Configuration {
     cStandardIsExplicit?: boolean;
     cppStandard?: string;
     cppStandardIsExplicit?: boolean;
-    includePath?: string[] | null;
+    includePath?: string[];
     macFrameworkPath?: string[];
     windowsSdkVersion?: string;
     dotConfig?: string;
@@ -594,7 +594,7 @@ export class CppProperties {
             configuration.intelliSenseMode === "${default}") {
             return "";
         }
-        const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath);
+        const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath ?? undefined );
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
 
@@ -618,7 +618,7 @@ export class CppProperties {
                 if (config.includePath === undefined) {
                     config.includePath = ["${default}"];
                 }
-                config.includePath?.splice(config.includePath.length, 0, path);
+                config.includePath.splice(config.includePath.length, 0, path);
                 this.writeToJson();
             }
             // Any time parsePropertiesFile is called, configurationJson gets
@@ -841,7 +841,10 @@ export class CppProperties {
         return property;
     }
 
-    private updateConfigurationPathsArray(paths: string[] | undefined | null, defaultValue: string[] | undefined | null, env: Environment, assumeRelative: boolean = true): string[] | undefined | null {
+    private updateConfigurationPathsArray(paths: string[] | undefined | null, defaultValue: string[] | undefined | null, env: Environment, assumeRelative: boolean = true): string[] | undefined {
+        if (paths === null) {
+            return undefined;
+        }
         if (paths) {
             return this.resolveAndSplit(paths, defaultValue, env, assumeRelative, true);
         }
@@ -921,7 +924,7 @@ export class CppProperties {
             configuration.configurationProviderInCppPropertiesJson = configuration.configurationProvider;
             configuration.includePath = this.updateConfigurationPathsArray(configuration.includePath, settings.defaultIncludePath, env);
             // in case includePath is reset below
-            const origIncludePath: string[] | undefined | null = configuration.includePath;
+            const origIncludePath: string[] | undefined = configuration.includePath;
             if (userSettings.addNodeAddonIncludePaths) {
                 const includePath: string[] = origIncludePath || [];
                 configuration.includePath = includePath.concat(this.nodeAddonIncludes.filter(i => includePath.indexOf(i) < 0));
@@ -987,7 +990,7 @@ export class CppProperties {
                 }
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
-                if (configuration.compilerPath === "${default}" && settings.defaultCompilerPath) {
+                if (configuration.compilerPath === "${default}") {
                     configuration.compilerPath = settings.defaultCompilerPath;
                 }
                 if (configuration.compilerPath === null) {
@@ -1001,8 +1004,7 @@ export class CppProperties {
                 }
             }
 
-            configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
-
+            configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);       
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
             if (!configuration.browse) {
@@ -1025,7 +1027,6 @@ export class CppProperties {
                 }
             } else {
                 configuration.browse.path = this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
-
             }
 
             configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationStringOrBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
@@ -1261,7 +1262,7 @@ export class CppProperties {
         }
     }
 
-    private trimPathWhitespace(paths: string[] | undefined | null): string[] | undefined {
+    private trimPathWhitespace(paths: string[] | undefined): string[] | undefined {
         if (paths === undefined || paths === null) {
             return undefined;
         }
@@ -1576,7 +1577,7 @@ export class CppProperties {
         }
 
         if (resolvedCompilerPath === undefined) {
-            resolvedCompilerPath = this.resolvePath(config.compilerPath);
+            resolvedCompilerPath = this.resolvePath(config.compilerPath ?? undefined);
         }
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
@@ -1591,7 +1592,7 @@ export class CppProperties {
             const compilerPathNeedsQuotes: boolean =
                 (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0) &&
                 !resolvedCompilerPath.startsWith('"') &&
-                compilerPathAndArgs.compilerPath !== undefined &&
+                compilerPathAndArgs.compilerPath !== undefined && compilerPathAndArgs.compilerPath !== null &&
                 compilerPathAndArgs.compilerPath.includes(" ");
 
             const compilerPathErrors: string[] = [];
@@ -1600,7 +1601,7 @@ export class CppProperties {
             }
 
             // Get compiler path without arguments before checking if it exists
-            resolvedCompilerPath = compilerPathAndArgs.compilerPath;
+            resolvedCompilerPath = compilerPathAndArgs.compilerPath ?? undefined;
             if (resolvedCompilerPath) {
                 let pathExists: boolean = true;
                 const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
