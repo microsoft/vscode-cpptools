@@ -80,7 +80,7 @@ export interface Configuration {
     intelliSenseModeIsExplicit?: boolean;
     compileCommandsInCppPropertiesJson?: string;
     compileCommands?: string;
-    forcedInclude?: string[] | null;
+    forcedInclude?: string[];
     configurationProviderInCppPropertiesJson?: string;
     configurationProvider?: string;
     mergeConfigurations?: boolean;
