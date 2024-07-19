@@ -1881,7 +1881,7 @@ export class CppProperties {
         const paths: string[] = [];
         let compilerPath: string | undefined;
         for (const pathArray of [currentConfiguration.browse ? currentConfiguration.browse.path : undefined,
-        currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
+            currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
             if (pathArray) {
                 for (const curPath of pathArray) {
                     paths.push(`${curPath}`);
