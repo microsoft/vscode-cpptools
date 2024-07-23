@@ -316,7 +316,7 @@ export class CppSettings extends Settings {
     private getAsBoolean(settingName: string): boolean;
     private getAsBoolean(settingName: string, allowNull: boolean): boolean | null;
     private getAsBoolean(settingName: string, allowNull: boolean = false): boolean | null {
-        const value: any = super.Section.get(settingName);
+        const value: any = super.Section.get<boolean | null>(settingName);
         if (allowNull && value === null) {
             return null;
         }
@@ -331,7 +331,7 @@ export class CppSettings extends Settings {
     private getAsString(settingName: string): string;
     private getAsString(settingName: string, allowNull: boolean): string | null;
     private getAsString(settingName: string, allowNull: boolean = false): string | null {
-        const value: any = super.Section.get(settingName);
+        const value: any = super.Section.get<string | null>(settingName);
         if (allowNull && value === null) {
             return null;
         }
@@ -348,7 +348,7 @@ export class CppSettings extends Settings {
     private getAsNumber(settingName: string): number;
     private getAsNumber(settingName: string, allowNull: boolean): number | null;
     private getAsNumber(settingName: string, allowNull: boolean = false): number | null {
-        const value: any = super.Section.get(settingName);
+        const value: any = super.Section.get<number | null>(settingName);
         if (allowNull && value === null) {
             return null;
         }
@@ -403,7 +403,7 @@ export class CppSettings extends Settings {
     private getAsAssociations(settingName: string): Associations;
     private getAsAssociations(settingName: string, allowNull: boolean): Associations | null;
     private getAsAssociations(settingName: string, allowNull: boolean = false): Associations | null {
-        const value: any = super.Section.get(settingName);
+        const value: any = super.Section.get<Associations | null>(settingName);
         if (allowNull && value === null) {
             return null;
         }
@@ -457,7 +457,7 @@ export class CppSettings extends Settings {
     public get clangTidyEnabled(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.enabled"); }
     public get clangTidyConfig(): string { return this.getAsString("codeAnalysis.clangTidy.config"); }
     public get clangTidyFallbackConfig(): string { return this.getAsString("codeAnalysis.clangTidy.fallbackConfig"); }
-    public get clangTidyHeaderFilter(): string | null { return this.getAsString("codeAnalysis.clangTidy.headerFilter", true); }
+    public get clangTidyHeaderFilter(): string | undefined { return this.getAsString("codeAnalysis.clangTidy.headerFilter", true) ?? undefined; }
     public get clangTidyArgs(): string[] { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.args"); }
     public get clangTidyUseBuildPath(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath"); }
     public get clangTidyChecksEnabled(): string[] { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.enabled", true); }
@@ -524,7 +524,7 @@ export class CppSettings extends Settings {
     public get defaultCompileCommands(): string { return this.getAsString("default.compileCommands"); }
     public get defaultForcedInclude(): string[] { return this.getAsArrayOfStrings("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string { return this.getAsString("default.intelliSenseMode"); }
-    public get defaultCompilerPath(): string | null { return this.getAsString("default.compilerPath", true) ?? null; }
+    public get defaultCompilerPath(): string | undefined { return this.getAsString("default.compilerPath", true) ?? undefined; }
 
     public set defaultCompilerPath(value: string) {
         const defaultCompilerPathStr: string = "default.compilerPath";
@@ -551,12 +551,12 @@ export class CppSettings extends Settings {
     public get defaultCppStandard(): string { return this.getAsString("default.cppStandard"); }
     public get defaultConfigurationProvider(): string { return this.getAsString("default.configurationProvider"); }
     public get defaultMergeConfigurations(): boolean { return this.getAsBoolean("default.mergeConfigurations"); }
-    public get defaultBrowsePath(): string[] | null { return this.getAsArrayOfStrings("default.browse.path", true); }
+    public get defaultBrowsePath(): string[] { return this.getAsArrayOfStrings("default.browse.path", true); }
     public get defaultDatabaseFilename(): string { return this.getAsString("default.browse.databaseFilename"); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
     public get defaultSystemIncludePath(): string[] { return this.getAsArrayOfStrings("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean { return this.getAsBoolean("default.enableConfigurationSquiggles"); }
-    public get defaultCustomConfigurationVariables(): Associations | null { return this.getAsAssociations("default.customConfigurationVariables", true); }
+    public get defaultCustomConfigurationVariables(): Associations | undefined { return this.getAsAssociations("default.customConfigurationVariables", true) ?? undefined; }
     public get useBacktickCommandSubstitution(): boolean { return this.getAsBoolean("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return this.getAsString("codeFolding").toLowerCase() === "enabled"; }
     public get isCaseSensitiveFileSupportEnabled(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport").toLowerCase() === "enabled"; }

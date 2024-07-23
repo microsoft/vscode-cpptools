@@ -62,8 +62,8 @@ export interface ConfigurationJson {
 
 export interface Configuration {
     name: string;
-    compilerPathInCppPropertiesJson?: string | null;
-    compilerPath?: string | null;
+    compilerPathInCppPropertiesJson?: string;
+    compilerPath?: string;
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
     compilerArgsLegacy?: string[];
@@ -102,7 +102,7 @@ export interface ConfigurationErrors {
 }
 
 export interface Browse {
-    path?: string[] | null;
+    path?: string[];
     limitSymbolsToIncludedHeaders?: boolean | string;
     databaseFilename?: string;
 }
@@ -594,7 +594,7 @@ export class CppProperties {
             configuration.intelliSenseMode === "${default}") {
             return "";
         }
-        const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath ?? undefined);
+        const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath);
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
 
@@ -711,7 +711,7 @@ export class CppProperties {
         this.onSelectionChanged();
     }
 
-    private resolveDefaults(entries: string[], defaultValue?: string[] | null): string[] {
+    private resolveDefaults(entries: string[], defaultValue?: string[]): string[] {
         let result: string[] = [];
         entries.forEach(entry => {
             if (entry === "${default}") {
@@ -727,7 +727,7 @@ export class CppProperties {
         return result;
     }
 
-    private resolveDefaultsDictionary(entries: { [key: string]: string }, defaultValue: { [key: string]: string } | undefined | null, env: Environment): { [key: string]: string } {
+    private resolveDefaultsDictionary(entries: { [key: string]: string }, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } {
         const result: { [key: string]: string } = {};
         for (const property in entries) {
             if (property === "${default}") {
@@ -758,9 +758,9 @@ export class CppProperties {
         return result;
     }
 
-    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined | null, env: Environment, assumeRelative: boolean = true, glob: boolean = false): string[] {
+    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true, glob: boolean = false): string[] {
         const resolvedVariables: string[] = [];
-        if (paths === undefined || paths === null) {
+        if (paths === undefined) {
             return resolvedVariables;
         }
         paths = this.resolveDefaults(paths, defaultValue);
@@ -841,10 +841,7 @@ export class CppProperties {
         return property;
     }
 
-    private updateConfigurationPathsArray(paths: string[] | undefined | null, defaultValue: string[] | undefined | null, env: Environment, assumeRelative: boolean = true): string[] | undefined {
-        if (paths === null) {
-            return undefined;
-        }
+    private updateConfigurationPathsArray(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true): string[] | undefined {
         if (paths) {
             return this.resolveAndSplit(paths, defaultValue, env, assumeRelative, true);
         }
@@ -879,7 +876,7 @@ export class CppProperties {
         return property;
     }
 
-    private updateConfigurationStringDictionary(property: { [key: string]: string } | undefined | null, defaultValue: { [key: string]: string } | undefined | null, env: Environment): { [key: string]: string } | undefined {
+    private updateConfigurationStringDictionary(property: { [key: string]: string } | undefined, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } | undefined {
         if (!property || Object.keys(property).length === 0) {
             property = defaultValue;
         }
@@ -1263,7 +1260,7 @@ export class CppProperties {
     }
 
     private trimPathWhitespace(paths: string[] | undefined): string[] | undefined {
-        if (paths === undefined || paths === null) {
+        if (paths === undefined) {
             return undefined;
         }
         const trimmedPaths = [];
@@ -1577,7 +1574,7 @@ export class CppProperties {
         }
 
         if (resolvedCompilerPath === undefined) {
-            resolvedCompilerPath = this.resolvePath(config.compilerPath ?? undefined);
+            resolvedCompilerPath = this.resolvePath(config.compilerPath);
         }
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
@@ -1592,7 +1589,7 @@ export class CppProperties {
             const compilerPathNeedsQuotes: boolean =
                 (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0) &&
                 !resolvedCompilerPath.startsWith('"') &&
-                compilerPathAndArgs.compilerPath !== undefined && compilerPathAndArgs.compilerPath !== null &&
+                compilerPathAndArgs.compilerPath !== undefined &&
                 compilerPathAndArgs.compilerPath.includes(" ");
 
             const compilerPathErrors: string[] = [];
@@ -1601,7 +1598,7 @@ export class CppProperties {
             }
 
             // Get compiler path without arguments before checking if it exists
-            resolvedCompilerPath = compilerPathAndArgs.compilerPath ?? undefined;
+            resolvedCompilerPath = compilerPathAndArgs.compilerPath;
             if (resolvedCompilerPath) {
                 let pathExists: boolean = true;
                 const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
@@ -1664,7 +1661,7 @@ export class CppProperties {
         return errors;
     }
 
-    private validatePath(input: string | string[] | undefined | null, { isDirectory = true, assumeRelative = true, globPaths = false } = {}): string | undefined {
+    private validatePath(input: string | string[] | undefined, { isDirectory = true, assumeRelative = true, globPaths = false } = {}): string | undefined {
         if (!input) {
             return undefined;
         }
@@ -1881,7 +1878,7 @@ export class CppProperties {
         const paths: string[] = [];
         let compilerPath: string | undefined;
         for (const pathArray of [currentConfiguration.browse ? currentConfiguration.browse.path : undefined,
-            currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
+        currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
             if (pathArray) {
                 for (const curPath of pathArray) {
                     paths.push(`${curPath}`);
