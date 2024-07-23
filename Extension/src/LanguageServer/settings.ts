@@ -312,132 +312,6 @@ export class CppSettings extends Settings {
         }
         return path;
     }
-    // Returns the value of a setting as a boolean with proper type validation.
-    private getAsBoolean(settingName: string): boolean;
-    private getAsBoolean(settingName: string, allowNull: boolean): boolean | null;
-    private getAsBoolean(settingName: string, allowNull: boolean = false): boolean | null {
-        const value: any = super.Section.get<boolean | null>(settingName);
-        if (allowNull && value === null) {
-            return null;
-        }
-        if (isBoolean(value)) {
-            return value;
-        }
-        const setting = getRawSetting("C_Cpp." + settingName);
-        return setting.default;
-    }
-
-    // Returns the value of a setting as a string with proper type validation and checks for valid enum values.
-    private getAsString(settingName: string): string;
-    private getAsString(settingName: string, allowNull: boolean): string | null;
-    private getAsString(settingName: string, allowNull: boolean = false): string | null {
-        const value: any = super.Section.get<string | null>(settingName);
-        if (allowNull && value === null) {
-            return null;
-        }
-        if (this.isValidEnum(settingName, value)) {
-            return value;
-        } else if (isString(value)) {
-            return value;
-        }
-        const setting = getRawSetting("C_Cpp." + settingName);
-        return setting.default;
-    }
-
-    // Returns the value of a setting as a number with proper type validation and checks if value falls within the specified range.
-    private getAsNumber(settingName: string): number;
-    private getAsNumber(settingName: string, allowNull: boolean): number | null;
-    private getAsNumber(settingName: string, allowNull: boolean = false): number | null {
-        const value: any = super.Section.get<number | null>(settingName);
-        if (allowNull && value === null) {
-            return null;
-        }
-        const setting = getRawSetting("C_Cpp." + settingName);
-        if (value === null) {
-            return setting.default;
-        }
-        // Validates the value is a number and clamps it to the specified range. Allows for undefined maximum or minimum values.
-        if (isNumber(value)) {
-            if (setting.minimum !== undefined && value < setting.minimum) {
-                return setting.minimum;
-            }
-            if (setting.maximum !== undefined && value > setting.maximum) {
-                return setting.maximum;
-            }
-            return value;
-        }
-        return setting.default;
-    }
-
-    // Returns the value of a setting as an array of strings with proper type validation and checks for valid enum values.
-    private getAsArrayOfStrings(settingName: string, allowUndefinedEnums: boolean = false): string[] {
-        const value: any = super.Section.get(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName);
-        if (isArrayOfString(value)) {
-            if (!allowUndefinedEnums) {
-                if (setting.items.enum !== undefined) {
-                    if (!value.every(x => this.validateEnum(setting.items.enum, x))) {
-                        return setting.default;
-                    }
-                }
-            }
-            return value;
-        }
-        return setting.default;
-    }
-
-    private getAsExcludes(settingName: string): Excludes;
-    private getAsExcludes(settingName: string, allowNull: boolean): Excludes | null;
-    private getAsExcludes(settingName: string, allowNull: boolean = false): Excludes | null {
-        const value: any = super.Section.get(settingName);
-        if (allowNull && value === null) {
-            return null;
-        }
-        if (isValidMapping(value, 'string', 'boolean')) {
-            return value as Excludes;
-        }
-        const setting = getRawSetting("C_Cpp." + settingName);
-        return setting.default as Excludes;
-    }
-
-    private getAsAssociations(settingName: string): Associations;
-    private getAsAssociations(settingName: string, allowNull: boolean): Associations | null;
-    private getAsAssociations(settingName: string, allowNull: boolean = false): Associations | null {
-        const value: any = super.Section.get<Associations | null>(settingName);
-        if (allowNull && value === null) {
-            return null;
-        }
-        if (isValidMapping(value, 'string', 'string')) {
-            return value as Associations;
-        }
-        const setting = getRawSetting("C_Cpp." + settingName);
-        return setting.default as Associations;
-    }
-
-    // Checks a given enum value against a list of valid enum values from package.json.
-    private validateEnum(enumDescription: any, value: any): boolean {
-        if (isArray(enumDescription) && enumDescription.length > 0) {
-            return enumDescription.some(x => x.toLowerCase() === value.toLowerCase());
-        }
-        return false;
-    }
-
-    // Validates whether the given value is a valid enum value for the given setting.
-    private isValidEnum(settingName: string, value: any): boolean {
-        const setting = getRawSetting("C_Cpp." + settingName);
-        if (this.validateEnum(setting.enum, value)) {
-            return value;
-        }
-        return setting.default;
-    }
-
-    private isArrayOfCommentContinuationPatterns(x: any): x is (string | CommentPattern)[] {
-        return isArray(x) && x.every(y => isString(y) || this.isCommentPattern(y));
-    }
-
-    private isCommentPattern(x: any): x is CommentPattern {
-        return isString(x.begin) && isString(x.continue);
-    }
 
     public get maxConcurrentThreads(): number | null { return this.getAsNumber("maxConcurrentThreads", true); }
     public get maxMemory(): number | null { return this.getAsNumber("maxMemory", true); }
@@ -633,6 +507,133 @@ export class CppSettings extends Settings {
     public get vcFormatWrapPreserveBlocks(): string { return this.getAsString("vcFormat.wrap.preserveBlocks"); }
     public get dimInactiveRegions(): boolean { return this.getAsBoolean("dimInactiveRegions") && this.intelliSenseEngine === "default" && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast"; }
     public get sshTargetsView(): string { return this.getAsString("sshTargetsView"); }
+
+    // Returns the value of a setting as a boolean with proper type validation.
+    private getAsBoolean(settingName: string): boolean;
+    private getAsBoolean(settingName: string, allowNull: boolean): boolean | null;
+    private getAsBoolean(settingName: string, allowNull: boolean = false): boolean | null {
+        const value: any = super.Section.get<boolean | null>(settingName);
+        if (allowNull && value === null) {
+            return null;
+        }
+        if (isBoolean(value)) {
+            return value;
+        }
+        const setting = getRawSetting("C_Cpp." + settingName);
+        return setting.default;
+    }
+
+    // Returns the value of a setting as a string with proper type validation and checks for valid enum values.
+    private getAsString(settingName: string): string;
+    private getAsString(settingName: string, allowNull: boolean): string | null;
+    private getAsString(settingName: string, allowNull: boolean = false): string | null {
+        const value: any = super.Section.get<string | null>(settingName);
+        if (allowNull && value === null) {
+            return null;
+        }
+        if (this.isValidEnum(settingName, value)) {
+            return value;
+        } else if (isString(value)) {
+            return value;
+        }
+        const setting = getRawSetting("C_Cpp." + settingName);
+        return setting.default;
+    }
+
+    // Returns the value of a setting as a number with proper type validation and checks if value falls within the specified range.
+    private getAsNumber(settingName: string): number;
+    private getAsNumber(settingName: string, allowNull: boolean): number | null;
+    private getAsNumber(settingName: string, allowNull: boolean = false): number | null {
+        const value: any = super.Section.get<number | null>(settingName);
+        if (allowNull && value === null) {
+            return null;
+        }
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (value === null) {
+            return setting.default;
+        }
+        // Validates the value is a number and clamps it to the specified range. Allows for undefined maximum or minimum values.
+        if (isNumber(value)) {
+            if (setting.minimum !== undefined && value < setting.minimum) {
+                return setting.minimum;
+            }
+            if (setting.maximum !== undefined && value > setting.maximum) {
+                return setting.maximum;
+            }
+            return value;
+        }
+        return setting.default;
+    }
+
+    // Returns the value of a setting as an array of strings with proper type validation and checks for valid enum values.
+    private getAsArrayOfStrings(settingName: string, allowUndefinedEnums: boolean = false): string[] {
+        const value: any = super.Section.get(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (isArrayOfString(value)) {
+            if (!allowUndefinedEnums) {
+                if (setting.items.enum !== undefined) {
+                    if (!value.every(x => this.validateEnum(setting.items.enum, x))) {
+                        return setting.default;
+                    }
+                }
+            }
+            return value;
+        }
+        return setting.default;
+    }
+
+    private getAsExcludes(settingName: string): Excludes;
+    private getAsExcludes(settingName: string, allowNull: boolean): Excludes | null;
+    private getAsExcludes(settingName: string, allowNull: boolean = false): Excludes | null {
+        const value: any = super.Section.get(settingName);
+        if (allowNull && value === null) {
+            return null;
+        }
+        if (isValidMapping(value, 'string', 'boolean')) {
+            return value as Excludes;
+        }
+        const setting = getRawSetting("C_Cpp." + settingName);
+        return setting.default as Excludes;
+    }
+
+    private getAsAssociations(settingName: string): Associations;
+    private getAsAssociations(settingName: string, allowNull: boolean): Associations | null;
+    private getAsAssociations(settingName: string, allowNull: boolean = false): Associations | null {
+        const value: any = super.Section.get<Associations | null>(settingName);
+        if (allowNull && value === null) {
+            return null;
+        }
+        if (isValidMapping(value, 'string', 'string')) {
+            return value as Associations;
+        }
+        const setting = getRawSetting("C_Cpp." + settingName);
+        return setting.default as Associations;
+    }
+
+    // Checks a given enum value against a list of valid enum values from package.json.
+    private validateEnum(enumDescription: any, value: any): boolean {
+        if (isArray(enumDescription) && enumDescription.length > 0) {
+            return enumDescription.some(x => x.toLowerCase() === value.toLowerCase());
+        }
+        return false;
+    }
+
+    // Validates whether the given value is a valid enum value for the given setting.
+    private isValidEnum(settingName: string, value: any): boolean {
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (this.validateEnum(setting.enum, value)) {
+            return value;
+        }
+        return setting.default;
+    }
+
+    private isArrayOfCommentContinuationPatterns(x: any): x is (string | CommentPattern)[] {
+        return isArray(x) && x.every(y => isString(y) || this.isCommentPattern(y));
+    }
+
+    private isCommentPattern(x: any): x is CommentPattern {
+        return isString(x.begin) && isString(x.continue);
+    }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
         const value: string = this.getAsString(name);
