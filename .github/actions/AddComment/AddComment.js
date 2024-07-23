@@ -4,13 +4,14 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddCommentAndLabel = void 0;
+exports.AddComment = void 0;
 const ActionBase_1 = require("../common/ActionBase");
 const utils_1 = require("../common/utils");
-class AddCommentAndLabel extends ActionBase_1.ActionBase {
-    constructor(github, afterDays, labels, addComment, addLabels, removeLabels, setMilestoneId, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes, involves) {
+class AddComment extends ActionBase_1.ActionBase {
+    constructor(github, createdAfter, afterDays, labels, addComment, addLabels, removeLabels, setMilestoneId, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes, involves) {
         super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes, involves);
         this.github = github;
+        this.createdAfter = createdAfter;
         this.afterDays = afterDays;
         this.addComment = addComment;
         this.addLabels = addLabels;
@@ -18,8 +19,10 @@ class AddCommentAndLabel extends ActionBase_1.ActionBase {
         this.setMilestoneId = setMilestoneId;
     }
     async run() {
-        const afterTimestamp = (0, utils_1.daysAgoToHumanReadbleDate)(this.afterDays);
-        const query = this.buildQuery((this.afterDays ? `updated:<${afterTimestamp} ` : "") + "is:open is:unlocked");
+        const updatedTimestamp = this.afterDays ? (0, utils_1.daysAgoToHumanReadbleDate)(this.afterDays) : undefined;
+        const query = this.buildQuery((updatedTimestamp ? `updated:<${updatedTimestamp} ` : "") +
+            (this.createdAfter ? `created:>${this.createdAfter} ` : "") +
+            "is:open is:unlocked");
         const addLabelsSet = this.addLabels ? this.addLabels.split(',') : [];
         const removeLabelsSet = this.removeLabels ? this.removeLabels.split(',') : [];
         for await (const page of this.github.query({ q: query })) {
@@ -63,5 +66,5 @@ class AddCommentAndLabel extends ActionBase_1.ActionBase {
         }
     }
 }
-exports.AddCommentAndLabel = AddCommentAndLabel;
-//# sourceMappingURL=AddCommentAndLabel.js.map
+exports.AddComment = AddComment;
+//# sourceMappingURL=AddComment.js.map

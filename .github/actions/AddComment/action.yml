@@ -4,9 +4,12 @@ inputs:
   token:
     description: GitHub token with issue, comment, and label read/write permissions
     default: ${{ github.token }}
+  createdAfter:
+    description: Creation date after which to be considered.
+    required: false
   afterDays:
     description: Days to wait before performing this action (may be 0).
-    required: true
+    required: false
   addComment:
     description: Comment to add
   labels:

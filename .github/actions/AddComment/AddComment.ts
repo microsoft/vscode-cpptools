@@ -7,9 +7,10 @@ import { GitHub } from '../api/api';
 import { ActionBase } from '../common/ActionBase';
 import { daysAgoToHumanReadbleDate, daysAgoToTimestamp, safeLog } from '../common/utils';
 
-export class AddCommentAndLabel extends ActionBase {
+export class AddComment extends ActionBase {
 	constructor(
 		private github: GitHub,
+		private createdAfter: string,
 		private afterDays: number,
 		labels: string,
 		private addComment: string,
@@ -24,15 +25,16 @@ export class AddCommentAndLabel extends ActionBase {
 		minimumVotes?: number,
 		maximumVotes?: number,
 		involves?: string
-	)
-	{
+	) {
 		super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes, involves);
 	}
 
 	async run() {
-		const afterTimestamp = daysAgoToHumanReadbleDate(this.afterDays);
-
-		const query = this.buildQuery((this.afterDays ? `updated:<${afterTimestamp} ` : "") + "is:open is:unlocked");
+		const updatedTimestamp = this.afterDays ? daysAgoToHumanReadbleDate(this.afterDays) : undefined;
+		const query = this.buildQuery(
+			(updatedTimestamp ? `updated:<${updatedTimestamp} ` : "") +
+			(this.createdAfter ? `created:>${this.createdAfter} ` : "") +
+			"is:open is:unlocked");
 
 		const addLabelsSet = this.addLabels ? this.addLabels.split(',') : [];
 		const removeLabelsSet = this.removeLabels ? this.removeLabels.split(',') : [];

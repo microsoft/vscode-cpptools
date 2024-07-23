@@ -5,15 +5,16 @@
 
 import { OctoKit } from '../api/octokit'
 import { getInput, getRequiredInput } from '../common/utils'
-import { AddCommentAndLabel } from './AddCommentAndLabel'
+import { AddComment } from './AddComment'
 import { Action } from '../common/Action'
 
-class AddCommentAndLabelAction extends Action {
-	id = 'AddCommentAndLabel';
+class AddCommentAction extends Action {
+	id = 'AddComment';
 
 	async onTriggered(github: OctoKit) {
-		await new AddCommentAndLabel(
+		await new AddComment(
 			github,
+			getInput('createdAfter') || undefined,
 			+(getInput('afterDays') || 0),
 			getRequiredInput('labels'),
 			getInput('addComment') || '',
@@ -32,4 +33,4 @@ class AddCommentAndLabelAction extends Action {
 	}
 }
 
-new AddCommentAndLabelAction().run(); // eslint-disable-line
+new AddCommentAction().run(); // eslint-disable-line
