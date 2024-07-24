@@ -1,6 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.21.2: July 18, 2024
+## Version 1.21.3: July 24, 2024
+* Fix a crash on Linux ARM OS's. [#12497](https://github.com/microsoft/vscode-cpptools/issues/12497)
+
+## Version 1.21.2: July 12, 2024
 ### Enhancements
 * Add `see` and `sa` to the `C_Cpp.doxygen.sectionTags` setting. [#12384](https://github.com/microsoft/vscode-cpptools/issues/12384)
 * Update the vcpkg header database. [PR #12430](https://github.com/microsoft/vscode-cpptools/pull/12430)
