@@ -1,5 +1,8 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.21.4: July 25, 2024
+* Re-enable compatibility with VS Code 1.67.0 (instead of 1.82.0). [#12507](https://github.com/microsoft/vscode-cpptools/issues/12507)
+
 ## Version 1.21.3: July 24, 2024
 * Fix a crash on Linux ARM OS's. [#12497](https://github.com/microsoft/vscode-cpptools/issues/12497)
 
