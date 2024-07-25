@@ -683,7 +683,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
-semver 7.6.2 - ISC
+semver 7.6.3 - ISC
 https://github.com/npm/node-semver#readme
 
 Copyright Isaac Z. Schlueter
@@ -762,12 +762,83 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/applicationinsights-channel-js 3.2.2 - MIT
+@microsoft/1ds-core-js 4.3.0 - MIT
+https://github.com/microsoft/ApplicationInsights-JS#readme
+
+copyright Microsoft 2018
+Copyright (c) Microsoft Corporation
+Copyright (c) Microsoft and contributors
+Copyright (c) NevWare21 Solutions LLC and contributors
+
+The MIT License (MIT)
+
+Copyright (c) Microsoft Corporation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+@microsoft/1ds-post-js 4.3.0 - MIT
+https://github.com/microsoft/ApplicationInsights-JS#readme
+
+copyright Microsoft 2018
+copyright Microsoft 2020
+copyright Microsoft 2018-2020
+copyright Microsoft 2022 Simple
+Copyright (c) Microsoft Corporation
+Copyright (c) Microsoft and contributors
+Copyright (c) NevWare21 Solutions LLC and contributors
+
+The MIT License (MIT)
+
+Copyright (c) Microsoft Corporation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+@microsoft/applicationinsights-channel-js 3.3.0 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 Copyright (c) Microsoft Corporation
 Copyright (c) Microsoft and contributors
-Copyright (c) NevWare21 and contributors
+Copyright (c) NevWare21 Solutions LLC and contributors
 
 The MIT License (MIT)
 
@@ -796,12 +867,12 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/applicationinsights-common 3.2.2 - MIT
+@microsoft/applicationinsights-common 3.3.0 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 Copyright (c) Microsoft Corporation
 Copyright (c) Microsoft and contributors
-Copyright (c) NevWare21 and contributors
+Copyright (c) NevWare21 Solutions LLC and contributors
 
 The MIT License (MIT)
 
@@ -830,12 +901,12 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/applicationinsights-core-js 3.2.2 - MIT
+@microsoft/applicationinsights-core-js 3.3.0 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 Copyright (c) Microsoft Corporation
 Copyright (c) Microsoft and contributors
-Copyright (c) NevWare21 and contributors
+Copyright (c) NevWare21 Solutions LLC and contributors
 
 The MIT License (MIT)
 
@@ -869,6 +940,40 @@ https://github.com/microsoft/ApplicationInsights-JS/tree/main/tools/shims
 
 Copyright (c) Microsoft Corporation
 Copyright (c) Microsoft and contributors
+
+The MIT License (MIT)
+
+Copyright (c) Microsoft Corporation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+@microsoft/applicationinsights-web-basic 3.3.0 - MIT
+https://github.com/microsoft/ApplicationInsights-JS#readme
+
+Copyright (c) Microsoft Corporation
+Copyright (c) Microsoft and contributors
+Copyright (c) NevWare21 Solutions LLC and contributors
 
 The MIT License (MIT)
 
@@ -931,17 +1036,17 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@nevware21/ts-async 0.5.1 - MIT
+@nevware21/ts-async 0.5.2 - MIT
 https://github.com/nevware21/ts-async
 
-Copyright (c) 2022 Nevware21
-Copyright (c) 2023 Nevware21
-Copyright (c) 2024 Nevware21
-Copyright (c) NevWare21 and contributors
+Copyright (c) 2022 NevWare21 Solutions LLC
+Copyright (c) 2023 NevWare21 Solutions LLC
+Copyright (c) 2024 NevWare21 Solutions LLC
+Copyright (c) NevWare21 Solutions LLC and contributors
 
 MIT License
 
-Copyright (c) 2022 Nevware21
+Copyright (c) 2022 NevWare21 Solutions LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -966,18 +1071,17 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@nevware21/ts-utils 0.11.2 - MIT
+@nevware21/ts-utils 0.11.3 - MIT
 https://github.com/nevware21/ts-utils
 
-Copyright (c) 2022 NevWare21
-Copyright (c) 2022 Nevware21
-Copyright (c) 2023 Nevware21
-Copyright (c) 2024 Nevware21
-Copyright (c) NevWare21 and contributors
+Copyright (c) 2022 NevWare21 Solutions LLC
+Copyright (c) 2023 NevWare21 Solutions LLC
+Copyright (c) 2024 NevWare21 Solutions LLC
+Copyright (c) NevWare21 Solutions LLC and contributors
 
 MIT License
 
-Copyright (c) 2022 NevWare21
+Copyright (c) 2022 NevWare21 Solutions LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1403,7 +1507,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------------------------
 
-comment-json 4.2.3 - MIT
+comment-json 4.2.4 - MIT
 https://github.com/kaelzhang/node-comment-json#readme
 
 Copyright (c) 2013 kaelzhang
@@ -1487,6 +1591,38 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+debug 4.3.4 - MIT
+https://github.com/debug-js/debug#readme
+
+Copyright (c) 2018-2021 Josh Junon
+Copyright (c) 2014-2017 TJ Holowaychuk <tj@vision-media.ca>
+
+(The MIT License)
+
+Copyright (c) 2014-2017 TJ Holowaychuk <tj@vision-media.ca>
+Copyright (c) 2018-2021 Josh Junon
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the 'Software'), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial
+portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 
 
 ---------------------------------------------------------
@@ -1871,6 +2007,38 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
+ms 2.1.2 - MIT
+https://github.com/zeit/ms#readme
+
+Copyright (c) 2016 Zeit, Inc.
+
+The MIT License (MIT)
+
+Copyright (c) 2016 Zeit, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
 node-fetch 2.7.0 - MIT
 https://github.com/bitinn/node-fetch
 
@@ -1907,6 +2075,7 @@ SOFTWARE.
 node-loader 2.0.0 - MIT
 https://github.com/webpack-contrib/node-loader
 
+Copyright JS Foundation and other contributors
 
 Copyright JS Foundation and other contributors
 
@@ -2395,7 +2564,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-jsonrpc 8.2.0 - MIT
+vscode-jsonrpc 8.1.0 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
 Copyright (c) Microsoft Corporation
@@ -2417,7 +2586,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-languageclient 9.0.1 - MIT
+vscode-languageclient 8.1.0 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
 Copyright (c) Microsoft Corporation
@@ -2439,7 +2608,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-languageserver-protocol 3.17.5 - MIT
+vscode-languageserver-protocol 3.17.3 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
 Copyright (c) Microsoft Corporation
@@ -2462,7 +2631,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-languageserver-types 3.17.5 - MIT
+vscode-languageserver-types 3.17.3 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
 Copyright (c) Microsoft Corporation
