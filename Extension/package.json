@@ -825,7 +825,7 @@
                     "C_Cpp.default.browse.path": {
                         "oneOf": [
                             {
-                                "type": "string"
+                                "type": "array"
                             },
                             {
                                 "type": null
