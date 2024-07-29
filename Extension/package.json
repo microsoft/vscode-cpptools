@@ -823,7 +823,14 @@
                         "scope": "resource"
                     },
                     "C_Cpp.default.browse.path": {
-                        "type": "array",
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": null
+                            }
+                        ],
                         "items": {
                             "type": "string"
                         },
