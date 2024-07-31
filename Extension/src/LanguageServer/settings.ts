@@ -186,18 +186,18 @@ class Settings {
     public getArrayOfStringsWithUndefinedDefault(section: string, allowNull: boolean = false): string[] | undefined | null {
         const info: any = this.settings.inspect<string[]>(section);
         if (info.workspaceFolderValue !== undefined) {
-            if ((allowNull && info.workspaceFolderValue == null) || isArrayOfString(info.workspaceFolderValue)) {
+            if ((allowNull && info.workspaceFolderValue === null) || isArrayOfString(info.workspaceFolderValue)) {
                 return info.workspaceFolderValue;
             }
         }
 
-        if ((allowNull && info.workspaceValue == null) || info.workspaceValue !== undefined) {
+        if ((allowNull && info.workspaceValue === null) || info.workspaceValue !== undefined) {
             if (isArrayOfString(info.workspaceValue)) {
                 return info.workspaceValue;
             }
-        } 
+        }
 
-        if ((allowNull && info.globalValue == null) || info.globalValue !== undefined) {
+        if ((allowNull && info.globalValue === null) || info.globalValue !== undefined) {
             if (isArrayOfString(info.globalValue)) {
                 return info.globalValue;
             }
@@ -212,7 +212,7 @@ class Settings {
             if (isString(info.workspaceFolderValue)) {
                 return info.workspaceFolderValue;
             }
-        } 
+        }
 
         if (info.workspaceValue !== undefined) {
             if (isString(info.workspaceValue)) {
