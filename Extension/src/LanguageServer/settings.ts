@@ -204,7 +204,7 @@ class Settings {
         return undefined;
     }
 
-    public getStringwithUndefinedDefault(section: string): string | undefined {
+    public getStringWithUndefinedDefault(section: string): string | undefined {
         const info: any = this.settings.inspect<string>(section);
 
         if (info.workspaceFolderValue !== undefined) {
