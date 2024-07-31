@@ -185,18 +185,19 @@ class Settings {
     public getArrayOfStringsWithUndefinedDefault(section: string, allowNull: boolean): string[] | undefined | null;
     public getArrayOfStringsWithUndefinedDefault(section: string, allowNull: boolean = false): string[] | undefined | null {
         const info: any = this.settings.inspect<string[]>(section);
-        if (allowNull && info === null) {
-            return null;
-        }
         if (info.workspaceFolderValue !== undefined) {
-            if (isArrayOfString(info.workspaceFolderValue)) {
+            if ((allowNull && info.workspaceFolderValue == null) || isArrayOfString(info.workspaceFolderValue)) {
                 return info.workspaceFolderValue;
             }
-        } else if (info.workspaceValue !== undefined) {
+        }
+
+        if ((allowNull && info.workspaceValue == null) || info.workspaceValue !== undefined) {
             if (isArrayOfString(info.workspaceValue)) {
                 return info.workspaceValue;
             }
-        } else if (info.globalValue !== undefined) {
+        } 
+
+        if ((allowNull && info.globalValue == null) || info.globalValue !== undefined) {
             if (isArrayOfString(info.globalValue)) {
                 return info.globalValue;
             }
@@ -211,11 +212,15 @@ class Settings {
             if (isString(info.workspaceFolderValue)) {
                 return info.workspaceFolderValue;
             }
-        } else if (info.workspaceValue !== undefined) {
+        } 
+
+        if (info.workspaceValue !== undefined) {
             if (isString(info.workspaceValue)) {
                 return info.workspaceValue;
             }
-        } else if (info.globalValue !== undefined) {
+        }
+
+        if (info.globalValue !== undefined) {
             if (isString(info.globalValue)) {
                 return info.globalValue;
             }
@@ -340,7 +345,7 @@ export class CppSettings extends Settings {
     public get clangTidyEnabled(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.enabled"); }
     public get clangTidyConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.config")); }
     public get clangTidyFallbackConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.fallbackConfig")); }
-    public get clangTidyHeaderFilter(): string | undefined { return this.getAsStringOrUndefined("codeAnalysis.clangTidy.headerFilter") ?? undefined; }
+    public get clangTidyHeaderFilter(): string | undefined { return this.getAsStringOrUndefined("codeAnalysis.clangTidy.headerFilter"); }
     public get clangTidyArgs(): string[] { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.args"); }
     public get clangTidyUseBuildPath(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath"); }
     public get clangTidyChecksEnabled(): string[] { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.enabled", true); }
@@ -520,9 +525,6 @@ export class CppSettings extends Settings {
     // Returns the value of a setting as a string with proper type validation and checks for valid enum values while returning an undefined value if neccessary.
     private getAsStringOrUndefined(settingName: string): string | undefined {
         const value: any = super.Section.get<string | null>(settingName);
-        if (value === undefined) {
-            return undefined;
-        }
         if (this.isValidEnum(settingName, value)) {
             return value;
         } else if (isString(value)) {
@@ -536,9 +538,6 @@ export class CppSettings extends Settings {
     // Returns the value of a setting as a boolean with proper type validation and checks for valid enum values while returning an undefined value if neccessary.
     private getAsBooleanOrUndefined(settingName: string): boolean | undefined {
         const value: any = super.Section.get<boolean | null>(settingName);
-        if (value === undefined) {
-            return undefined;
-        }
         if (isBoolean(value)) {
             return value;
         } else {

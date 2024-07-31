@@ -823,18 +823,14 @@
                         "scope": "resource"
                     },
                     "C_Cpp.default.browse.path": {
-                        "oneOf": [
-                            {
-                                "type": "array",
-                                "items": {
-                                    "type": "string"
-                                },
-                                "uniqueItems": true
-                            },
-                            {
-                                "type": null
-                            }
+                        "type": [
+                            "array",
+                            "null"
                         ],
+                        "items": {
+                            "type": "string"
+                        },
+                        "uniqueItems": true,
                         "default": null,
                         "markdownDescription": "%c_cpp.configuration.default.browse.path.markdownDescription%",
                         "scope": "machine-overridable"
