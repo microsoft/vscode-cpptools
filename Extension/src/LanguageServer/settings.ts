@@ -32,6 +32,7 @@ export interface Associations {
     [key: string]: string;
 }
 
+// Settings that can be undefined have default values assigned in the native code or are meant to return undefined.
 export interface WorkspaceFolderSettingsParams {
     uri: string | undefined;
     intelliSenseEngine: string;
@@ -41,24 +42,24 @@ export interface WorkspaceFolderSettingsParams {
     errorSquiggles: string;
     exclusionPolicy: string;
     preferredPathSeparator: string;
-    intelliSenseCachePath: string;
+    intelliSenseCachePath: string | undefined;
     intelliSenseCacheSize: number;
     intelliSenseMemoryLimit: number;
     dimInactiveRegions: boolean;
     suggestSnippets: boolean;
     legacyCompilerArgsBehavior: boolean;
-    defaultSystemIncludePath: string[];
+    defaultSystemIncludePath: string[] | undefined;
     cppFilesExclude: Excludes;
-    clangFormatPath: string;
+    clangFormatPath: string | undefined;
     clangFormatStyle: string;
-    clangFormatFallbackStyle: string;
+    clangFormatFallbackStyle: string | undefined;
     clangFormatSortIncludes: boolean | null;
     codeAnalysisRunAutomatically: boolean;
     codeAnalysisExclude: Excludes;
     clangTidyEnabled: boolean;
-    clangTidyPath: string;
-    clangTidyConfig: string;
-    clangTidyFallbackConfig: string;
+    clangTidyPath: string | undefined;
+    clangTidyConfig: string | undefined;
+    clangTidyFallbackConfig: string | undefined;
     clangTidyHeaderFilter: string | null;
     clangTidyArgs: string[];
     clangTidyUseBuildPath: boolean;
@@ -179,43 +180,51 @@ class Settings {
 
     protected get Section(): vscode.WorkspaceConfiguration { return this.settings; }
 
-    protected getWithFallback<T>(section: string, deprecatedSection: string): T {
-        const info: any = this.settings.inspect<T>(section);
+    // If the setting has an undefined default, look for the workspaceFolder, workspace and global values as well.
+    public getArrayOfStringsWithUndefinedDefault(section: string): string[] | undefined;
+    public getArrayOfStringsWithUndefinedDefault(section: string, allowNull: boolean): string[] | undefined | null;
+    public getArrayOfStringsWithUndefinedDefault(section: string, allowNull: boolean = false): string[] | undefined | null {
+        const info: any = this.settings.inspect<string[]>(section);
+        if (allowNull && info === null) {
+            return null;
+        }
         if (info.workspaceFolderValue !== undefined) {
-            return info.workspaceFolderValue;
+            if (isArrayOfString(info.workspaceFolderValue)) {
+                return info.workspaceFolderValue;
+            }
         } else if (info.workspaceValue !== undefined) {
-            return info.workspaceValue;
+            if (isArrayOfString(info.workspaceValue)) {
+                return info.workspaceValue;
+            }
         } else if (info.globalValue !== undefined) {
-            return info.globalValue;
+            if (isArrayOfString(info.globalValue)) {
+                return info.globalValue;
+            }
         }
-        const value: T | undefined = this.settings.get<T>(deprecatedSection);
-        if (value !== undefined) {
-            return value;
-        }
-        return info.defaultValue;
+        return undefined;
     }
 
-    protected getWithNullAsUndefined<T>(section: string): T | undefined {
-        const result: T | undefined | null = this.settings.get<T>(section);
-        if (result === null) {
-            return undefined;
-        }
-        return result;
-    }
+    public getStringwithUndefinedDefault(section: string): string | undefined {
+        const info: any = this.settings.inspect<string>(section);
 
-    public getWithUndefinedDefault<T>(section: string): T | undefined {
-        const info: any = this.settings.inspect<T>(section);
         if (info.workspaceFolderValue !== undefined) {
-            return info.workspaceFolderValue;
+            if (isString(info.workspaceFolderValue)) {
+                return info.workspaceFolderValue;
+            }
         } else if (info.workspaceValue !== undefined) {
-            return info.workspaceValue;
+            if (isString(info.workspaceValue)) {
+                return info.workspaceValue;
+            }
         } else if (info.globalValue !== undefined) {
-            return info.globalValue;
+            if (isString(info.globalValue)) {
+                return info.globalValue;
+            }
         }
         return undefined;
     }
 }
 
+// If a setting is undefined, a blank string, or null, return undefined instead.
 function changeBlankStringToUndefined(input: string | undefined): string | undefined {
     // Although null is not a valid type, user could enter a null anyway.
     return (input === undefined || input === null || input.trim() === "") ? undefined : input;
@@ -329,9 +338,9 @@ export class CppSettings extends Settings {
     public get codeAnalysisRunAutomatically(): boolean { return this.getAsBoolean("codeAnalysis.runAutomatically"); }
     public get codeAnalysisRunOnBuild(): boolean { return this.getAsBoolean("codeAnalysis.runOnBuild"); }
     public get clangTidyEnabled(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.enabled"); }
-    public get clangTidyConfig(): string { return this.getAsString("codeAnalysis.clangTidy.config"); }
-    public get clangTidyFallbackConfig(): string { return this.getAsString("codeAnalysis.clangTidy.fallbackConfig"); }
-    public get clangTidyHeaderFilter(): string | undefined { return this.getAsString("codeAnalysis.clangTidy.headerFilter", true) ?? undefined; }
+    public get clangTidyConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.config")); }
+    public get clangTidyFallbackConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.fallbackConfig")); }
+    public get clangTidyHeaderFilter(): string | undefined { return this.getAsStringOrUndefined("codeAnalysis.clangTidy.headerFilter") ?? undefined; }
     public get clangTidyArgs(): string[] { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.args"); }
     public get clangTidyUseBuildPath(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath"); }
     public get clangTidyChecksEnabled(): string[] { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.enabled", true); }
@@ -348,21 +357,21 @@ export class CppSettings extends Settings {
         checks.push(value);
         void super.Section.update("codeAnalysis.clangTidy.checks.disabled", checks, vscode.ConfigurationTarget.WorkspaceFolder);
     }
-    public get clangFormatStyle(): string { return this.getAsString("clang_format_style"); }
-    public get clangFormatFallbackStyle(): string { return this.getAsString("clang_format_fallbackStyle"); }
+    public get clangFormatStyle(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("clang_format_style")); }
+    public get clangFormatFallbackStyle(): string | undefined { return changeBlankStringToUndefined(this.getAsString("clang_format_fallbackStyle")); }
     public get clangFormatSortIncludes(): boolean | null { return this.getAsBoolean("clang_format_sortIncludes", true); }
     public get experimentalFeatures(): boolean { return this.getAsString("experimentalFeatures").toLowerCase() === "enabled"; }
     public get suggestSnippets(): boolean { return this.getAsBoolean("suggestSnippets"); }
     public get intelliSenseEngine(): string { return this.getAsString("intelliSenseEngine"); }
     public get intelliSenseEngineFallback(): boolean { return this.getAsString("intelliSenseEngineFallback").toLowerCase() === "enabled"; }
-    public get intelliSenseCachePath(): string { return this.getAsString("intelliSenseCachePath"); }
+    public get intelliSenseCachePath(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("intelliSenseCachePath")); }
     public get intelliSenseCacheSize(): number { return this.getAsNumber("intelliSenseCacheSize"); }
     public get intelliSenseMemoryLimit(): number { return this.getAsNumber("intelliSenseMemoryLimit"); }
     public get intelliSenseUpdateDelay(): number { return this.getAsNumber("intelliSenseUpdateDelay"); }
     public get errorSquiggles(): string { return this.getAsString("errorSquiggles"); }
     public get inactiveRegionOpacity(): number { return this.getAsNumber("inactiveRegionOpacity"); }
-    public get inactiveRegionForegroundColor(): string { return this.getAsString("inactiveRegionForegroundColor"); }
-    public get inactiveRegionBackgroundColor(): string { return this.getAsString("inactiveRegionBackgroundColor"); }
+    public get inactiveRegionForegroundColor(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("inactiveRegionForegroundColor")); }
+    public get inactiveRegionBackgroundColor(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("inactiveRegionBackgroundColor")); }
     public get autocomplete(): string { return this.getAsString("autocomplete"); }
     public get autocompleteAddParentheses(): boolean { return this.getAsBoolean("autocompleteAddParentheses"); }
     public get loggingLevel(): string { return this.getAsString("loggingLevel"); }
@@ -390,15 +399,15 @@ export class CppSettings extends Settings {
     public get addNodeAddonIncludePaths(): boolean { return this.getAsBoolean("addNodeAddonIncludePaths"); }
     public get renameRequiresIdentifier(): boolean { return this.getAsBoolean("renameRequiresIdentifier"); }
     public get filesExclude(): Excludes { return this.getAsExcludes("files.exclude"); }
-    public get defaultIncludePath(): string[] { return this.getAsArrayOfStrings("default.includePath"); }
-    public get defaultDefines(): string[] { return this.getAsArrayOfStrings("default.defines"); }
-    public get defaultDotconfig(): string { return this.getAsString("default.dotConfig"); }
-    public get defaultMacFrameworkPath(): string[] { return this.getAsArrayOfStrings("default.macFrameworkPath"); }
-    public get defaultWindowsSdkVersion(): string { return this.getAsString("default.windowsSdkVersion"); }
-    public get defaultCompileCommands(): string { return this.getAsString("default.compileCommands"); }
-    public get defaultForcedInclude(): string[] { return this.getAsArrayOfStrings("default.forcedInclude"); }
-    public get defaultIntelliSenseMode(): string { return this.getAsString("default.intelliSenseMode"); }
-    public get defaultCompilerPath(): string | undefined { return this.getAsString("default.compilerPath", true) ?? undefined; }
+    public get defaultIncludePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.includePath"); }
+    public get defaultDefines(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.defines"); }
+    public get defaultDotconfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.dotConfig")); }
+    public get defaultMacFrameworkPath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.macFrameworkPath"); }
+    public get defaultWindowsSdkVersion(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.windowsSdkVersion")); }
+    public get defaultCompileCommands(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.compileCommands")); }
+    public get defaultForcedInclude(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.forcedInclude"); }
+    public get defaultIntelliSenseMode(): string | undefined { return this.getAsStringOrUndefined("default.intelliSenseMode"); }
+    public get defaultCompilerPath(): string | undefined { return this.getAsStringOrUndefined("default.compilerPath"); }
 
     public set defaultCompilerPath(value: string) {
         const defaultCompilerPathStr: string = "default.compilerPath";
@@ -420,15 +429,15 @@ export class CppSettings extends Settings {
             });
         }
     }
-    public get defaultCompilerArgs(): string[] { return this.getAsArrayOfStrings("default.compilerArgs"); }
+    public get defaultCompilerArgs(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.compilerArgs"); }
     public get defaultCStandard(): string { return this.getAsString("default.cStandard"); }
     public get defaultCppStandard(): string { return this.getAsString("default.cppStandard"); }
-    public get defaultConfigurationProvider(): string { return this.getAsString("default.configurationProvider"); }
-    public get defaultMergeConfigurations(): boolean { return this.getAsBoolean("default.mergeConfigurations"); }
-    public get defaultBrowsePath(): string[] { return this.getAsArrayOfStrings("default.browse.path", true); }
-    public get defaultDatabaseFilename(): string { return this.getAsString("default.browse.databaseFilename"); }
+    public get defaultConfigurationProvider(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.configurationProvider")); }
+    public get defaultMergeConfigurations(): boolean | undefined { return this.getAsBooleanOrUndefined("default.mergeConfigurations"); }
+    public get defaultBrowsePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.browse.path"); }
+    public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.browse.databaseFilename")); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
-    public get defaultSystemIncludePath(): string[] { return this.getAsArrayOfStrings("default.systemIncludePath"); }
+    public get defaultSystemIncludePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean { return this.getAsBoolean("default.enableConfigurationSquiggles"); }
     public get defaultCustomConfigurationVariables(): Associations | undefined { return this.getAsAssociations("default.customConfigurationVariables", true) ?? undefined; }
     public get useBacktickCommandSubstitution(): boolean { return this.getAsBoolean("debugger.useBacktickCommandSubstitution"); }
@@ -507,6 +516,35 @@ export class CppSettings extends Settings {
     public get vcFormatWrapPreserveBlocks(): string { return this.getAsString("vcFormat.wrap.preserveBlocks"); }
     public get dimInactiveRegions(): boolean { return this.getAsBoolean("dimInactiveRegions") && this.intelliSenseEngine === "default" && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast"; }
     public get sshTargetsView(): string { return this.getAsString("sshTargetsView"); }
+
+    // Returns the value of a setting as a string with proper type validation and checks for valid enum values while returning an undefined value if neccessary.
+    private getAsStringOrUndefined(settingName: string): string | undefined {
+        const value: any = super.Section.get<string | null>(settingName);
+        if (value === undefined) {
+            return undefined;
+        }
+        if (this.isValidEnum(settingName, value)) {
+            return value;
+        } else if (isString(value)) {
+            return value;
+        } else {
+            return undefined;
+        }
+
+    }
+
+    // Returns the value of a setting as a boolean with proper type validation and checks for valid enum values while returning an undefined value if neccessary.
+    private getAsBooleanOrUndefined(settingName: string): boolean | undefined {
+        const value: any = super.Section.get<boolean | null>(settingName);
+        if (value === undefined) {
+            return undefined;
+        }
+        if (isBoolean(value)) {
+            return value;
+        } else {
+            return undefined;
+        }
+    }
 
     // Returns the value of a setting as a boolean with proper type validation.
     private getAsBoolean(settingName: string): boolean;

@@ -6,8 +6,7 @@ import * as vscode from 'vscode';
 import { ManualPromise } from '../../Utility/Async/manualPromise';
 import { CppSettings } from '../settings';
 
-interface FileData
-{
+interface FileData {
     version: number;
     promise: ManualPromise<vscode.InlayHint[]>;
     typeHints: CppInlayHint[];
@@ -204,7 +203,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
     private resolveTypeHints(settings: CppSettings, hints: CppInlayHint[]): vscode.InlayHint[] {
         const resolvedHints: vscode.InlayHint[] = [];
         for (const hint of hints) {
-            const showOnLeft: boolean = settings.inlayHintsAutoDeclarationTypesShowOnLeft && hint.identifierLength > 0;
+            const showOnLeft: boolean | undefined = settings.inlayHintsAutoDeclarationTypesShowOnLeft && hint.identifierLength > 0;
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(hint.line, hint.character +
                     (showOnLeft ? 0 : hint.identifierLength)),
