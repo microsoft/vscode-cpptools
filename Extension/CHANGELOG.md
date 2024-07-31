@@ -1,6 +1,19 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.21.2: July 18, 2024
+## Version 1.21.5: July 31, 2024
+### Bug Fixes
+* Fix clang-format and clang-tidy not working on Windows 10. [#12289](https://github.com/microsoft/vscode-cpptools/issues/12289)
+* Fix a crash with cpptools-srv on certain macOS versions. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
+* Fix cpptools crashing on macOS Big Sur or older. [#12511](https://github.com/microsoft/vscode-cpptools/issues/12511)
+* Fix debugging on Windows ARM64. [#12520](https://github.com/microsoft/vscode-cpptools/issues/12520)
+
+## Version 1.21.4: July 25, 2024
+* Re-enable compatibility with VS Code 1.67.0 (instead of 1.82.0). [#12507](https://github.com/microsoft/vscode-cpptools/issues/12507)
+
+## Version 1.21.3: July 24, 2024
+* Fix a crash on Linux ARM OS's. [#12497](https://github.com/microsoft/vscode-cpptools/issues/12497)
+
+## Version 1.21.2: July 12, 2024
 ### Enhancements
 * Add `see` and `sa` to the `C_Cpp.doxygen.sectionTags` setting. [#12384](https://github.com/microsoft/vscode-cpptools/issues/12384)
 * Update the vcpkg header database. [PR #12430](https://github.com/microsoft/vscode-cpptools/pull/12430)
