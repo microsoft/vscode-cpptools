@@ -214,11 +214,9 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     return;
                 }
             } else if (command.command === "C_Cpp.ExtractToFunction" ||
-                command.command === "C_Cpp.ExtractToMemberFunction") {
+                command.command === "C_Cpp.ExtractToMemberFunction" ||
+                command.command === "C_Cpp.ExtractToFreeFunction") {
                 codeActionKind = CodeActionProvider.extractToFunctionKind;
-            } else if (command.command === "C_Cpp.ExtractToFreeFunction") {
-                // TODO: https://github.com/microsoft/vscode-cpptools/issues/11473 needs to be fixed.
-                return;
             } else if (command.command === "C_Cpp.ExpandSelection") {
                 codeActionKind = CodeActionProvider.expandSelectionKind;
             }
