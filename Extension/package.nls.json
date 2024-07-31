@@ -813,6 +813,12 @@
     },
     "c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription": "Enable pre-v1.10.0 behavior for how shell escaping is handled in compiler arg settings. Shell escaping is no longer expected or supported by default in arg arrays starting in v1.10.0.",
     "c_cpp.configuration.legacyCompilerArgsBehavior.deprecationMessage": "This setting is temporary to support transitioning to corrected behavior in v1.10.0.",
+    "c_cpp.configuration.recursiveIncludesMaxDepth.markdownDescription": {
+        "message": "Specifies the maximum depth that recursive includes (include paths ending with `/**`) will be resolved.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.sshTargetsView.description": "Controls whether the SSH Targets view is visible. By default, enable the view when an SSH command is invoked.",
     "c_cpp.contributes.views.cppReferencesView.title": "C/C++: Other references results",
     "c_cpp.contributes.views.sshTargetsView.title": {

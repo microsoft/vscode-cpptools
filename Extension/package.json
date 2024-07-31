@@ -966,6 +966,13 @@
                             ]
                         },
                         "scope": "resource"
+                    },
+                    "C_Cpp.recursiveIncludesMaxDepth": {
+                        "type:": "number",
+                        "default": 25,
+                        "markdownDescription": "%c_cpp.configuration.recursiveIncludesMaxDepth.markdownDescription%",
+                        "scope": "resource",
+                        "minimum": 1
                     }
                 }
             },

@@ -134,6 +134,7 @@ export interface WorkspaceFolderSettingsParams {
     editorInlayHintsEnabled: boolean | undefined;
     editorParameterHintsEnabled: boolean | undefined;
     refactoringIncludeHeader: string | undefined;
+    recursiveIncludesMaxDepth: number | undefined;
 }
 
 export interface SettingsParams {
@@ -432,6 +433,7 @@ export class CppSettings extends Settings {
     public get hover(): string | undefined { return super.Section.get<string>("hover"); }
     public get markdownInComments(): string | undefined { return super.Section.get<string>("markdownInComments"); }
     public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
+    public get recursiveIncludesMaxDepth(): number | undefined { return super.Section.get<number>("recursiveIncludesMaxDepth"); }
 
     public get inlayHintsAutoDeclarationTypes(): boolean {
         return super.Section.get<boolean>("inlayHints.autoDeclarationTypes.enabled") === true;
