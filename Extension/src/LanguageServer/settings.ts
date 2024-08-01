@@ -53,7 +53,7 @@ export interface WorkspaceFolderSettingsParams {
     clangFormatPath: string | undefined;
     clangFormatStyle: string;
     clangFormatFallbackStyle: string | undefined;
-    clangFormatSortIncludes: boolean | null;
+    clangFormatSortIncludes: boolean | undefined;
     codeAnalysisRunAutomatically: boolean;
     codeAnalysisExclude: Excludes;
     clangTidyEnabled: boolean;
@@ -185,22 +185,17 @@ class Settings {
     public getArrayOfStringsWithUndefinedDefault(section: string, allowNull: boolean): string[] | undefined | null;
     public getArrayOfStringsWithUndefinedDefault(section: string, allowNull: boolean = false): string[] | undefined | null {
         const info: any = this.settings.inspect<string[]>(section);
-        if (info.workspaceFolderValue !== undefined) {
-            if ((allowNull && info.workspaceFolderValue === null) || isArrayOfString(info.workspaceFolderValue)) {
-                return info.workspaceFolderValue;
-            }
+
+        if ((allowNull && info.workspaceFolderValue === null) || isArrayOfString(info.workspaceFolderValue)) {
+            return info.workspaceFolderValue;
         }
 
-        if ((allowNull && info.workspaceValue === null) || info.workspaceValue !== undefined) {
-            if (isArrayOfString(info.workspaceValue)) {
-                return info.workspaceValue;
-            }
+        if ((allowNull && info.workspaceValue === null) || isArrayOfString(info.workspaceValue)) {
+            return info.workspaceValue;
         }
 
-        if ((allowNull && info.globalValue === null) || info.globalValue !== undefined) {
-            if (isArrayOfString(info.globalValue)) {
-                return info.globalValue;
-            }
+        if ((allowNull && info.globalValue === null) || isArrayOfString(info.globalValue)) {
+            return info.globalValue;
         }
         return undefined;
     }
@@ -208,22 +203,16 @@ class Settings {
     public getStringWithUndefinedDefault(section: string): string | undefined {
         const info: any = this.settings.inspect<string>(section);
 
-        if (info.workspaceFolderValue !== undefined) {
-            if (isString(info.workspaceFolderValue)) {
-                return info.workspaceFolderValue;
-            }
+        if (isString(info.workspaceFolderValue)) {
+            return info.workspaceFolderValue;
         }
 
-        if (info.workspaceValue !== undefined) {
-            if (isString(info.workspaceValue)) {
-                return info.workspaceValue;
-            }
+        if (isString(info.workspaceValue)) {
+            return info.workspaceValue;
         }
 
-        if (info.globalValue !== undefined) {
-            if (isString(info.globalValue)) {
-                return info.globalValue;
-            }
+        if (isString(info.globalValue)) {
+            return info.globalValue;
         }
         return undefined;
     }
@@ -364,7 +353,7 @@ export class CppSettings extends Settings {
     }
     public get clangFormatStyle(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("clang_format_style")); }
     public get clangFormatFallbackStyle(): string | undefined { return changeBlankStringToUndefined(this.getAsString("clang_format_fallbackStyle")); }
-    public get clangFormatSortIncludes(): boolean | null { return this.getAsBoolean("clang_format_sortIncludes", true); }
+    public get clangFormatSortIncludes(): boolean | undefined { return this.getAsBooleanOrUndefined("clang_format_sortIncludes"); }
     public get experimentalFeatures(): boolean { return this.getAsString("experimentalFeatures").toLowerCase() === "enabled"; }
     public get suggestSnippets(): boolean { return this.getAsBoolean("suggestSnippets"); }
     public get intelliSenseEngine(): string { return this.getAsString("intelliSenseEngine"); }
@@ -522,20 +511,24 @@ export class CppSettings extends Settings {
     public get dimInactiveRegions(): boolean { return this.getAsBoolean("dimInactiveRegions") && this.intelliSenseEngine === "default" && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast"; }
     public get sshTargetsView(): string { return this.getAsString("sshTargetsView"); }
 
-    // Returns the value of a setting as a string with proper type validation and checks for valid enum values while returning an undefined value if neccessary.
+    // Returns the value of a setting as a string with proper type validation and checks for valid enum values while returning an undefined value if necessary.
     private getAsStringOrUndefined(settingName: string): string | undefined {
         const value: any = super.Section.get<string | null>(settingName);
-        if (this.isValidEnum(settingName, value)) {
-            return value;
-        } else if (isString(value)) {
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (setting.enum !== undefined) {
+            if (this.isValidEnum(setting.enum, value)) {
+                return value;
+            }
+            return setting.default;
+        }
+        if (isString(value)) {
             return value;
         } else {
             return undefined;
         }
-
     }
 
-    // Returns the value of a setting as a boolean with proper type validation and checks for valid enum values while returning an undefined value if neccessary.
+    // Returns the value of a setting as a boolean with proper type validation and checks for valid enum values while returning an undefined value if necessary.
     private getAsBooleanOrUndefined(settingName: string): boolean | undefined {
         const value: any = super.Section.get<boolean | null>(settingName);
         if (isBoolean(value)) {
@@ -568,12 +561,16 @@ export class CppSettings extends Settings {
         if (allowNull && value === null) {
             return null;
         }
-        if (this.isValidEnum(settingName, value)) {
-            return value;
-        } else if (isString(value)) {
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (setting.enum !== undefined) {
+            if (this.isValidEnum(setting.enum, value)) {
+                return value;
+            }
+            return setting.default;
+        }
+        if (isString(value)) {
             return value;
         }
-        const setting = getRawSetting("C_Cpp." + settingName);
         return setting.default;
     }
 
@@ -609,7 +606,7 @@ export class CppSettings extends Settings {
         if (isArrayOfString(value)) {
             if (!allowUndefinedEnums) {
                 if (setting.items.enum !== undefined) {
-                    if (!value.every(x => this.validateEnum(setting.items.enum, x))) {
+                    if (!value.every(x => this.isValidEnum(setting.items.enum, x))) {
                         return setting.default;
                     }
                 }
@@ -648,20 +645,11 @@ export class CppSettings extends Settings {
     }
 
     // Checks a given enum value against a list of valid enum values from package.json.
-    private validateEnum(enumDescription: any, value: any): boolean {
+    private isValidEnum(enumDescription: any, value: any): boolean {
         if (isArray(enumDescription) && enumDescription.length > 0) {
             return enumDescription.some(x => x.toLowerCase() === value.toLowerCase());
         }
         return false;
-    }
-
-    // Validates whether the given value is a valid enum value for the given setting.
-    private isValidEnum(settingName: string, value: any): boolean {
-        const setting = getRawSetting("C_Cpp." + settingName);
-        if (this.validateEnum(setting.enum, value)) {
-            return value;
-        }
-        return setting.default;
     }
 
     private isArrayOfCommentContinuationPatterns(x: any): x is (string | CommentPattern)[] {

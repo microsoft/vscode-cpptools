@@ -823,10 +823,7 @@
                         "scope": "resource"
                     },
                     "C_Cpp.default.browse.path": {
-                        "type": [
-                            "array",
-                            "null"
-                        ],
+                        "type": "array",
                         "items": {
                             "type": "string"
                         },
