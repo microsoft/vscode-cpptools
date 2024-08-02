@@ -25,4 +25,4 @@ jobs:
           labels: bug,debugger
           ignoreLabels: "investigate: costing,investigate,external,by design,question,more info needed,language service,internal"
           createdAfter: "2024-07-22"
-          addComment: "Thank you for reporting this issue. We’ll let you know if we need more information to investigate it. Additionally, if you're working with GDB/LLDB, remember that the code is open source at https://github.com/microsoft/MIEngine/wiki/Contributing-Code . Your contributions are always welcome and appreciated."
+          addComment: "Thank you for reporting this issue. We’ll let you know if we need more information to investigate it. Additionally, if you're working with GDB/LLDB, please note that the code is open source at https://github.com/microsoft/MIEngine/wiki/Contributing-Code . Your contributions are always welcome and appreciated."
