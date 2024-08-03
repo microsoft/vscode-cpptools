@@ -1,5 +1,8 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.21.6: August 5, 2024
+* Fix a cpptools-srv crash on shutdown. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
+
 ## Version 1.21.5: July 31, 2024
 ### Bug Fixes
 * Fix clang-format and clang-tidy not working on Windows 10. [#12289](https://github.com/microsoft/vscode-cpptools/issues/12289)
