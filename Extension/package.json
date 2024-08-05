@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.21.0-main",
+    "version": "1.21.6-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -5988,18 +5988,21 @@
         "configurationDefaults": {
             "[cpp]": {
                 "editor.wordBasedSuggestions": "off",
-                "editor.suggest.insertMode": "replace",
-                "editor.semanticHighlighting.enabled": true
+                "editor.semanticHighlighting.enabled": true,
+                "editor.stickyScroll.defaultModel": "foldingProviderModel",
+                "editor.suggest.insertMode": "replace"
             },
             "[cuda-cpp]": {
                 "editor.wordBasedSuggestions": "off",
-                "editor.suggest.insertMode": "replace",
-                "editor.semanticHighlighting.enabled": true
+                "editor.semanticHighlighting.enabled": true,
+                "editor.stickyScroll.defaultModel": "foldingProviderModel",
+                "editor.suggest.insertMode": "replace"
             },
             "[c]": {
                 "editor.wordBasedSuggestions": "off",
-                "editor.suggest.insertMode": "replace",
-                "editor.semanticHighlighting.enabled": true
+                "editor.semanticHighlighting.enabled": true,
+                "editor.stickyScroll.defaultModel": "foldingProviderModel",
+                "editor.suggest.insertMode": "replace"
             }
         },
         "semanticTokenTypes": [
@@ -6545,7 +6548,7 @@
         "ssh-config": "^4.4.4",
         "tmp": "^0.2.3",
         "vscode-cpptools": "^6.1.0",
-        "vscode-languageclient": "^9.0.1",
+        "vscode-languageclient": "^8.1.0",
         "vscode-nls": "^5.2.0",
         "vscode-tas-client": "^0.1.84",
         "which": "^2.0.2"
