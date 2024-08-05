@@ -543,6 +543,21 @@ interface GetIncludesResult
     includedFiles: string[];
 }
 
+interface ShowOTFDocsParams
+{
+    content: string;
+}
+
+interface ShowOTFDocsResult
+{
+    hoverPos: Position;
+}
+
+interface GetOTFDocsInfoResult
+{
+    content: string;
+}
+
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
@@ -562,6 +577,8 @@ const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Posit
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
 const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
+const GetOTFDocsInfoRequest: RequestType<void, GetOTFDocsInfoResult, void> = new RequestType<void, GetOTFDocsInfoResult, void>('cpptools/getOTFDocsInfo');
+const ShowOTFDocsRequest: RequestType<ShowOTFDocsParams, ShowOTFDocsResult, void> = new RequestType<ShowOTFDocsParams, ShowOTFDocsResult, void>('cpptools/showOTFDocs');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
@@ -792,6 +809,8 @@ export interface Client {
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
     getIncludes(maxDepth: number): Promise<GetIncludesResult>;
+    showOTFDocs(content: string): Promise<ShowOTFDocsResult>;
+    getOTFDocsInfo(): Promise<GetOTFDocsInfoResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -1582,6 +1601,9 @@ export class DefaultClient implements Client {
                     // We manually restart the language server so tell the LanguageClient not to do it automatically for us.
                     return { action: CloseAction.DoNotRestart, message };
                 }
+            },
+            markdown: {
+                isTrusted: true
             }
 
             // TODO: should I set the output channel? Does this sort output between servers?
@@ -3978,6 +4000,17 @@ export class DefaultClient implements Client {
         compilerDefaults = await this.requestCompiler(path);
         DebugConfigurationProvider.ClearDetectedBuildTasks();
     }
+
+    public async showOTFDocs(content: string): Promise<ShowOTFDocsResult> {
+        const params: ShowOTFDocsParams = {content: content};
+        await this.ready;
+        return this.languageClient.sendRequest(ShowOTFDocsRequest, params);
+    }
+
+    public async getOTFDocsInfo(): Promise<GetOTFDocsInfoResult> {
+        await this.ready;
+        return this.languageClient.sendRequest(GetOTFDocsInfoRequest, null);
+    }
 }
 
 function getLanguageServerFileName(): string {
@@ -4090,4 +4123,6 @@ class NullClient implements Client {
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
     getIncludes(): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
+    showOTFDocs(content: string): Promise<ShowOTFDocsResult> { return Promise.resolve({} as ShowOTFDocsResult); }
+    getOTFDocsInfo(): Promise<GetOTFDocsInfoResult> { return Promise.resolve({} as GetOTFDocsInfoResult); }
 }
