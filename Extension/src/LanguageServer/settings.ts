@@ -16,6 +16,7 @@ import * as nls from 'vscode-nls';
 import * as which from 'which';
 import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
 import { isWindows } from '../constants';
+import * as telemetry from '../telemetry';
 import { DefaultClient, cachedEditorConfigLookups, cachedEditorConfigSettings, hasTrustedCompilerPaths } from './client';
 import { clients } from './extension';
 import { CommentPattern } from './languageConfig';
@@ -330,7 +331,7 @@ export class CppSettings extends Settings {
     public get codeAnalysisUpdateDelay(): number { return this.getAsNumber("codeAnalysis.updateDelay"); }
     public get codeAnalysisExclude(): Excludes { return this.getAsExcludes("codeAnalysis.exclude"); }
     public get codeAnalysisRunAutomatically(): boolean { return this.getAsBoolean("codeAnalysis.runAutomatically"); }
-    public get codeAnalysisRunOnBuild(): boolean { return this.getAsBoolean("codeAnalysis.runOnBuild"); }
+    public get codeAnalysisRunOnBuild(): boolean | undefined { return false; } // return this.getAsBoolean("codeAnalysis.runOnBuild");
     public get clangTidyEnabled(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.enabled"); }
     public get clangTidyConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.config")); }
     public get clangTidyFallbackConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.fallbackConfig")); }
@@ -379,7 +380,7 @@ export class CppSettings extends Settings {
     public get doxygenGenerateOnType(): boolean { return this.getAsBoolean("doxygen.generateOnType"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] {
         // eslint-disable-next-line no-extra-parens
-        const value = super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns");
+        const value: any = super.Section.get<(any)[]>("commentContinuationPatterns");
         if (this.isArrayOfCommentContinuationPatterns(value)) {
             return value;
         }
@@ -448,7 +449,11 @@ export class CppSettings extends Settings {
     public get inlayHintsParameterNamesHideLeadingUnderscores(): boolean { return this.getAsBoolean("inlayHints.parameterNames.hideLeadingUnderscores"); }
     public get inlayHintsReferenceOperator(): boolean { return this.getAsBoolean("inlayHints.referenceOperator.enabled"); }
     public get inlayHintsReferenceOperatorShowSpace(): boolean { return this.getAsBoolean("inlayHints.referenceOperator.showSpace"); }
-    public get isEnhancedColorizationEnabled(): boolean { return this.getAsString("enhancedColorization").toLowerCase() === "enabled" && this.intelliSenseEngine === "default" && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast"; }
+    public get isEnhancedColorizationEnabled(): boolean {
+        return this.getAsString("enhancedColorization").toLowerCase() === "enabled"
+            && this.intelliSenseEngine === "default"
+            && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
+    }
     public get formattingEngine(): string { return this.getAsString("formatting"); }
     public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
     public get vcFormatIndentMultiLineRelativeTo(): string { return this.getAsString("vcFormat.indent.multiLineRelativeTo"); }
@@ -508,12 +513,15 @@ export class CppSettings extends Settings {
     public get vcFormatSpacePointerReferenceAlignment(): string { return this.getAsString("vcFormat.space.pointerReferenceAlignment"); }
     public get vcFormatSpaceAroundTernaryOperator(): string { return this.getAsString("vcFormat.space.aroundTernaryOperator"); }
     public get vcFormatWrapPreserveBlocks(): string { return this.getAsString("vcFormat.wrap.preserveBlocks"); }
-    public get dimInactiveRegions(): boolean { return this.getAsBoolean("dimInactiveRegions") && this.intelliSenseEngine === "default" && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast"; }
+    public get dimInactiveRegions(): boolean {
+        return this.getAsBoolean("dimInactiveRegions")
+            && this.intelliSenseEngine === "default" && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
+    }
     public get sshTargetsView(): string { return this.getAsString("sshTargetsView"); }
 
     // Returns the value of a setting as a string with proper type validation and checks for valid enum values while returning an undefined value if necessary.
     private getAsStringOrUndefined(settingName: string): string | undefined {
-        const value: any = super.Section.get<string | null>(settingName);
+        const value: any = super.Section.get<any>(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
         if (setting.enum !== undefined) {
             if (this.isValidEnum(setting.enum, value)) {
@@ -530,7 +538,7 @@ export class CppSettings extends Settings {
 
     // Returns the value of a setting as a boolean with proper type validation and checks for valid enum values while returning an undefined value if necessary.
     private getAsBooleanOrUndefined(settingName: string): boolean | undefined {
-        const value: any = super.Section.get<boolean | null>(settingName);
+        const value: any = super.Section.get<any>(settingName);
         if (isBoolean(value)) {
             return value;
         } else {
@@ -542,7 +550,7 @@ export class CppSettings extends Settings {
     private getAsBoolean(settingName: string): boolean;
     private getAsBoolean(settingName: string, allowNull: boolean): boolean | null;
     private getAsBoolean(settingName: string, allowNull: boolean = false): boolean | null {
-        const value: any = super.Section.get<boolean | null>(settingName);
+        const value: any = super.Section.get<any>(settingName);
         if (allowNull && value === null) {
             return null;
         }
@@ -557,12 +565,16 @@ export class CppSettings extends Settings {
     private getAsString(settingName: string): string;
     private getAsString(settingName: string, allowNull: boolean): string | null;
     private getAsString(settingName: string, allowNull: boolean = false): string | null {
-        const value: any = super.Section.get<string | null>(settingName);
+        const value: any = super.Section.get<any>(settingName);
         if (allowNull && value === null) {
             return null;
         }
         const setting = getRawSetting("C_Cpp." + settingName);
+
         if (setting.enum !== undefined) {
+            if (settingName === "loggingLevel" && isNumber(Number(value)) && Number(value) >= 0) {
+                return value;
+            }
             if (this.isValidEnum(setting.enum, value)) {
                 return value;
             }
@@ -578,14 +590,11 @@ export class CppSettings extends Settings {
     private getAsNumber(settingName: string): number;
     private getAsNumber(settingName: string, allowNull: boolean): number | null;
     private getAsNumber(settingName: string, allowNull: boolean = false): number | null {
-        const value: any = super.Section.get<number | null>(settingName);
+        const value: any = super.Section.get<any>(settingName);
         if (allowNull && value === null) {
             return null;
         }
         const setting = getRawSetting("C_Cpp." + settingName);
-        if (value === null) {
-            return setting.default;
-        }
         // Validates the value is a number and clamps it to the specified range. Allows for undefined maximum or minimum values.
         if (isNumber(value)) {
             if (setting.minimum !== undefined && value < setting.minimum) {
@@ -623,7 +632,7 @@ export class CppSettings extends Settings {
         if (allowNull && value === null) {
             return null;
         }
-        if (isValidMapping(value, 'string', 'boolean')) {
+        if (isValidMapping(value, (key) => typeof key === 'string', (val) => typeof val === 'boolean')) {
             return value as Excludes;
         }
         const setting = getRawSetting("C_Cpp." + settingName);
@@ -633,11 +642,11 @@ export class CppSettings extends Settings {
     private getAsAssociations(settingName: string): Associations;
     private getAsAssociations(settingName: string, allowNull: boolean): Associations | null;
     private getAsAssociations(settingName: string, allowNull: boolean = false): Associations | null {
-        const value: any = super.Section.get<Associations | null>(settingName);
+        const value: any = super.Section.get<any>(settingName);
         if (allowNull && value === null) {
             return null;
         }
-        if (isValidMapping(value, 'string', 'string')) {
+        if (isValidMapping(value, (key) => typeof key === 'string', (val) => typeof val === 'string')) {
             return value as Associations;
         }
         const setting = getRawSetting("C_Cpp." + settingName);
@@ -904,27 +913,70 @@ export class OtherSettings {
 
     private getAsString(sectionName: string, settingName: string, resource: any, defaultValue: string): string {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
-        const value = section.get<string>(settingName);
+        if (section === undefined || section === null) {
+            const message = "Configuration not found";
+            const record: Record<string, string> = {
+                [sectionName + "." + settingName]: message
+            };
+
+            telemetry.logLanguageServerEvent("settingsValidation", record);
+        }
+        const value = section.get<any>(settingName);
         if (isString(value)) {
             return value;
         }
-        const setting = section.inspect<string>(settingName);
-        return setting?.defaultValue ?? defaultValue;
+        const setting = section.inspect<any>(settingName);
+
+        if (setting?.defaultValue === undefined || setting.defaultValue === null) {
+            const message = "Default value not found.";
+            const record: Record<string, string> = {
+                [sectionName + "." + settingName]: message
+            };
+
+            telemetry.logLanguageServerEvent("settingsValidation", record);
+            return defaultValue;
+        }
+        return setting.defaultValue;
     }
 
     private getAsBoolean(sectionName: string, settingName: string, resource: any, defaultValue: boolean): boolean {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
-        const value = section.get<boolean>(settingName);
+        if (section === undefined || section === null) {
+            const message = "Configuration not found";
+            const record: Record<string, string> = {
+                [sectionName + "." + settingName]: message
+            };
+
+            telemetry.logLanguageServerEvent("settingsValidation", record);
+        }
+        const value = section.get<any>(settingName);
         if (isBoolean(value)) {
             return value;
         }
-        const setting = section.inspect<boolean>(settingName);
-        return setting?.defaultValue ?? defaultValue;
+        const setting = section.inspect<any>(settingName);
+        if (setting?.defaultValue === undefined || setting.defaultValue === null) {
+            const message = "Default value not found.";
+            const record: Record<string, string> = {
+                [sectionName + "." + settingName]: message
+            };
+
+            telemetry.logLanguageServerEvent("settingsValidation", record);
+            return defaultValue;
+        }
+        return setting.defaultValue;
     }
 
     private getAsNumber(sectionName: string, settingName: string, resource: any, defaultValue: number, minimum?: number, maximum?: number): number {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
-        const value = section.get<number>(settingName);
+        if (section === undefined || section === null) {
+            const message = "Configuration not found";
+            const record: Record<string, string> = {
+                [sectionName + "." + settingName]: message
+            };
+
+            telemetry.logLanguageServerEvent("settingsValidation", record);
+        }
+        const value = section.get<any>(settingName);
         // Validates the value is a number and clamps it to the specified range. Allows for undefined maximum or minimum values.
         if (isNumber(value)) {
             if (minimum !== undefined && value < minimum) {
@@ -935,27 +987,68 @@ export class OtherSettings {
             }
             return value;
         }
-        const setting = section.inspect<number>(settingName);
-        return setting?.defaultValue ?? defaultValue;
+        const setting = section.inspect<any>(settingName);
+        if (setting?.defaultValue === undefined || setting.defaultValue === null) {
+            const message = "Default value not found.";
+            const record: Record<string, string> = {
+                [sectionName + "." + settingName]: message
+            };
+
+            telemetry.logLanguageServerEvent("settingsValidation", record);
+            return defaultValue;
+        }
+        return setting.defaultValue;
     }
 
     private getAsAssociations(sectionName: string, settingName: string, resource?: any): Associations {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
+        if (section === undefined || section === null) {
+            const message = "Configuration not found";
+            const record: Record<string, string> = {
+                [sectionName + "." + settingName]: message
+            };
+
+            telemetry.logLanguageServerEvent("settingsValidation", record);
+        }
         const value = section.get<any>(settingName);
-        if (isValidMapping(value, 'string', 'string')) {
+        if (isValidMapping(value, (key) => typeof key === 'string', (val) => typeof val === 'string')) {
             return value as Associations;
         }
         const setting = section.inspect<any>(settingName);
+        if (setting?.defaultValue === undefined || setting.defaultValue === null) {
+            const message = "Default value not found.";
+            const record: Record<string, string> = {
+                [sectionName + "." + settingName]: message
+            };
+
+            telemetry.logLanguageServerEvent("settingsValidation", record);
+        }
         return setting?.defaultValue as Associations;
     }
 
     private getAsExcludes(sectionName: string, settingName: string, resource?: any): Excludes {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
+        if (section === undefined || section === null) {
+            const message = "Configuration not found";
+            const record: Record<string, string> = {
+                [sectionName + "." + settingName]: message
+            };
+
+            telemetry.logLanguageServerEvent("settingsValidation", record);
+        }
         const value = section.get<any>(settingName);
-        if (isValidMapping(value, 'string', 'boolean')) {
+        if (isValidMapping(value, (key) => typeof key === 'string', (val) => typeof val === 'boolean')) {
             return value as Excludes;
         }
         const setting = section.inspect<any>(settingName);
+        if (setting?.defaultValue === undefined || setting.defaultValue === null) {
+            const message = "Default value not found.";
+            const record: Record<string, string> = {
+                [sectionName + "." + settingName]: message
+            };
+
+            telemetry.logLanguageServerEvent("settingsValidation", record);
+        }
         return setting?.defaultValue as Excludes;
     }
 
