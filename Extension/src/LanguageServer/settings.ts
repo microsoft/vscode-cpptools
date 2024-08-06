@@ -925,9 +925,6 @@ export class OtherSettings {
 
     private getAsString(sectionName: string, settingName: string, resource: any, defaultValue: string): string {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
-        if (section === undefined || section === null) {
-            this.logSettingTelemetry(sectionName, settingName, "setting does not exist'");
-        }
         const value = section.get<any>(settingName);
         if (isString(value)) {
             return value;
@@ -943,9 +940,6 @@ export class OtherSettings {
 
     private getAsBoolean(sectionName: string, settingName: string, resource: any, defaultValue: boolean): boolean {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
-        if (section === undefined || section === null) {
-            this.logSettingTelemetry(sectionName, settingName, "setting does not exist'");
-        }
         const value = section.get<any>(settingName);
         if (isBoolean(value)) {
             return value;
@@ -960,9 +954,6 @@ export class OtherSettings {
 
     private getAsNumber(sectionName: string, settingName: string, resource: any, defaultValue: number, minimum?: number, maximum?: number): number {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
-        if (section === undefined || section === null) {
-            this.logSettingTelemetry(sectionName, settingName, "setting does not exist'");
-        }
         const value = section.get<any>(settingName);
         // Validates the value is a number and clamps it to the specified range. Allows for undefined maximum or minimum values.
         if (isNumber(value)) {
@@ -984,9 +975,6 @@ export class OtherSettings {
 
     private getAsAssociations(sectionName: string, settingName: string, resource?: any): Associations {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
-        if (section === undefined || section === null) {
-            this.logSettingTelemetry(sectionName, settingName, "setting does not exist'");
-        }
         const value = section.get<any>(settingName);
         if (isValidMapping(value, isString, isString)) {
             return value as Associations;
@@ -1000,9 +988,6 @@ export class OtherSettings {
 
     private getAsExcludes(sectionName: string, settingName: string, resource?: any): Excludes {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
-        if (section === undefined || section === null) {
-            this.logSettingTelemetry(sectionName, settingName, "setting does not exist'");
-        }
         const value = section.get<any>(settingName);
         if (isValidMapping(value, isString, (val) => typeof val === 'boolean' || isValidWhenObject(val))) {
             return value as Excludes;
