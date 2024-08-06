@@ -14,7 +14,7 @@ import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
-import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getNumericLoggingLevel, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
+import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
 import { isWindows } from '../constants';
 import * as telemetry from '../telemetry';
 import { DefaultClient, cachedEditorConfigLookups, cachedEditorConfigSettings, hasTrustedCompilerPaths } from './client';
@@ -580,7 +580,7 @@ export class CppSettings extends Settings {
         const setting = getRawSetting("C_Cpp." + settingName);
 
         if (setting.enum !== undefined) {
-            if (getNumericLoggingLevel(value) >= 0) {
+            if (settingName === "loggingLevel" && isNumber(Number(value)) && Number(value) >= 0) {
                 return value;
             }
             if (this.isValidEnum(setting.enum, value)) {
@@ -640,7 +640,7 @@ export class CppSettings extends Settings {
         if (allowNull && value === null) {
             return null;
         }
-        if (isValidMapping(value, isString, (val) => typeof val === 'boolean' || isValidWhenObject(val))) {
+        if (isValidMapping(value, isString, (val) => isBoolean(val) || isValidWhenObject(val))) {
             return value as Excludes;
         }
         const setting = getRawSetting("C_Cpp." + settingName);
@@ -919,7 +919,7 @@ export class OtherSettings {
         this.resource = resource;
     }
 
-    private logSettingTelemetry(sectionName: string, settingName: string, error: string): void {
+    private logValidationError(sectionName: string, settingName: string, error: string): void {
         telemetry.logLanguageServerEvent("settingsValidation", { setting: sectionName + '.' + settingName, error });
     }
 
@@ -932,7 +932,7 @@ export class OtherSettings {
         const setting = section.inspect<any>(settingName);
 
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
-            this.logSettingTelemetry(sectionName, settingName, "no default value");
+            this.logValidationError(sectionName, settingName, "no default value");
             return defaultValue;
         }
         return setting.defaultValue;
@@ -946,7 +946,7 @@ export class OtherSettings {
         }
         const setting = section.inspect<any>(settingName);
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
-            this.logSettingTelemetry(sectionName, settingName, "no default value");
+            this.logValidationError(sectionName, settingName, "no default value");
             return defaultValue;
         }
         return setting.defaultValue;
@@ -967,7 +967,7 @@ export class OtherSettings {
         }
         const setting = section.inspect<any>(settingName);
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
-            this.logSettingTelemetry(sectionName, settingName, "no default value");
+            this.logValidationError(sectionName, settingName, "no default value");
             return defaultValue;
         }
         return setting.defaultValue;
@@ -981,7 +981,7 @@ export class OtherSettings {
         }
         const setting = section.inspect<any>(settingName);
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
-            this.logSettingTelemetry(sectionName, settingName, "no default value");
+            this.logValidationError(sectionName, settingName, "no default value");
         }
         return setting?.defaultValue as Associations;
     }
@@ -989,12 +989,12 @@ export class OtherSettings {
     private getAsExcludes(sectionName: string, settingName: string, resource?: any): Excludes {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
         const value = section.get<any>(settingName);
-        if (isValidMapping(value, isString, (val) => typeof val === 'boolean' || isValidWhenObject(val))) {
+        if (isValidMapping(value, isString, (val) => isBoolean(val) || isValidWhenObject(val))) {
             return value as Excludes;
         }
         const setting = section.inspect<any>(settingName);
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
-            this.logSettingTelemetry(sectionName, settingName, "no default value");
+            this.logValidationError(sectionName, settingName, "no default value");
         }
         return setting?.defaultValue as Excludes;
     }
