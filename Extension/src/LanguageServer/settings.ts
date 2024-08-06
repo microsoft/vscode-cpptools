@@ -52,7 +52,7 @@ export interface WorkspaceFolderSettingsParams {
     defaultSystemIncludePath: string[] | undefined;
     cppFilesExclude: Excludes;
     clangFormatPath: string | undefined;
-    clangFormatStyle: string;
+    clangFormatStyle: string | undefined;
     clangFormatFallbackStyle: string | undefined;
     clangFormatSortIncludes: boolean | undefined;
     codeAnalysisRunAutomatically: boolean;
