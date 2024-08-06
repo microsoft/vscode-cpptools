@@ -203,7 +203,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
     private resolveTypeHints(settings: CppSettings, hints: CppInlayHint[]): vscode.InlayHint[] {
         const resolvedHints: vscode.InlayHint[] = [];
         for (const hint of hints) {
-            const showOnLeft: boolean | undefined = settings.inlayHintsAutoDeclarationTypesShowOnLeft && hint.identifierLength > 0;
+            const showOnLeft: boolean = settings.inlayHintsAutoDeclarationTypesShowOnLeft && hint.identifierLength > 0;
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(hint.line, hint.character +
                     (showOnLeft ? 0 : hint.identifierLength)),

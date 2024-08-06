@@ -14,7 +14,7 @@ import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
-import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
+import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getNumericLoggingLevel, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
 import { isWindows } from '../constants';
 import * as telemetry from '../telemetry';
 import { DefaultClient, cachedEditorConfigLookups, cachedEditorConfigSettings, hasTrustedCompilerPaths } from './client';
@@ -166,6 +166,15 @@ export interface SettingsParams {
 
 function getTarget(): vscode.ConfigurationTarget {
     return vscode.workspace.workspaceFolders ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
+}
+
+function isValidWhenObject(obj: unknown): obj is { when: string } {
+    return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'when' in obj &&
+        typeof (obj as { when: unknown }).when === 'string'
+    );
 }
 
 class Settings {
@@ -379,8 +388,7 @@ export class CppSettings extends Settings {
     public get doxygenGeneratedCommentStyle(): string { return this.getAsString("doxygen.generatedStyle"); }
     public get doxygenGenerateOnType(): boolean { return this.getAsBoolean("doxygen.generateOnType"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] {
-        // eslint-disable-next-line no-extra-parens
-        const value: any = super.Section.get<(any)[]>("commentContinuationPatterns");
+        const value: any = super.Section.get<any>("commentContinuationPatterns");
         if (this.isArrayOfCommentContinuationPatterns(value)) {
             return value;
         }
@@ -572,7 +580,7 @@ export class CppSettings extends Settings {
         const setting = getRawSetting("C_Cpp." + settingName);
 
         if (setting.enum !== undefined) {
-            if (settingName === "loggingLevel" && isNumber(Number(value)) && Number(value) >= 0) {
+            if (getNumericLoggingLevel(value) >= 0) {
                 return value;
             }
             if (this.isValidEnum(setting.enum, value)) {
@@ -632,7 +640,7 @@ export class CppSettings extends Settings {
         if (allowNull && value === null) {
             return null;
         }
-        if (isValidMapping(value, (key) => typeof key === 'string', (val) => typeof val === 'boolean')) {
+        if (isValidMapping(value, isString, (val) => typeof val === 'boolean' || isValidWhenObject(val))) {
             return value as Excludes;
         }
         const setting = getRawSetting("C_Cpp." + settingName);
@@ -646,7 +654,7 @@ export class CppSettings extends Settings {
         if (allowNull && value === null) {
             return null;
         }
-        if (isValidMapping(value, (key) => typeof key === 'string', (val) => typeof val === 'string')) {
+        if (isValidMapping(value, isString, isString)) {
             return value as Associations;
         }
         const setting = getRawSetting("C_Cpp." + settingName);
@@ -911,15 +919,14 @@ export class OtherSettings {
         this.resource = resource;
     }
 
+    private logSettingTelemetry(sectionName: string, settingName: string, error: string): void {
+        telemetry.logLanguageServerEvent("settingsValidation", { setting: sectionName + '.' + settingName, error });
+    }
+
     private getAsString(sectionName: string, settingName: string, resource: any, defaultValue: string): string {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
         if (section === undefined || section === null) {
-            const message = "Configuration not found";
-            const record: Record<string, string> = {
-                [sectionName + "." + settingName]: message
-            };
-
-            telemetry.logLanguageServerEvent("settingsValidation", record);
+            this.logSettingTelemetry(sectionName, settingName, "setting does not exist'");
         }
         const value = section.get<any>(settingName);
         if (isString(value)) {
@@ -928,12 +935,7 @@ export class OtherSettings {
         const setting = section.inspect<any>(settingName);
 
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
-            const message = "Default value not found.";
-            const record: Record<string, string> = {
-                [sectionName + "." + settingName]: message
-            };
-
-            telemetry.logLanguageServerEvent("settingsValidation", record);
+            this.logSettingTelemetry(sectionName, settingName, "no default value");
             return defaultValue;
         }
         return setting.defaultValue;
@@ -942,12 +944,7 @@ export class OtherSettings {
     private getAsBoolean(sectionName: string, settingName: string, resource: any, defaultValue: boolean): boolean {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
         if (section === undefined || section === null) {
-            const message = "Configuration not found";
-            const record: Record<string, string> = {
-                [sectionName + "." + settingName]: message
-            };
-
-            telemetry.logLanguageServerEvent("settingsValidation", record);
+            this.logSettingTelemetry(sectionName, settingName, "setting does not exist'");
         }
         const value = section.get<any>(settingName);
         if (isBoolean(value)) {
@@ -955,12 +952,7 @@ export class OtherSettings {
         }
         const setting = section.inspect<any>(settingName);
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
-            const message = "Default value not found.";
-            const record: Record<string, string> = {
-                [sectionName + "." + settingName]: message
-            };
-
-            telemetry.logLanguageServerEvent("settingsValidation", record);
+            this.logSettingTelemetry(sectionName, settingName, "no default value");
             return defaultValue;
         }
         return setting.defaultValue;
@@ -969,12 +961,7 @@ export class OtherSettings {
     private getAsNumber(sectionName: string, settingName: string, resource: any, defaultValue: number, minimum?: number, maximum?: number): number {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
         if (section === undefined || section === null) {
-            const message = "Configuration not found";
-            const record: Record<string, string> = {
-                [sectionName + "." + settingName]: message
-            };
-
-            telemetry.logLanguageServerEvent("settingsValidation", record);
+            this.logSettingTelemetry(sectionName, settingName, "setting does not exist'");
         }
         const value = section.get<any>(settingName);
         // Validates the value is a number and clamps it to the specified range. Allows for undefined maximum or minimum values.
@@ -989,12 +976,7 @@ export class OtherSettings {
         }
         const setting = section.inspect<any>(settingName);
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
-            const message = "Default value not found.";
-            const record: Record<string, string> = {
-                [sectionName + "." + settingName]: message
-            };
-
-            telemetry.logLanguageServerEvent("settingsValidation", record);
+            this.logSettingTelemetry(sectionName, settingName, "no default value");
             return defaultValue;
         }
         return setting.defaultValue;
@@ -1003,25 +985,15 @@ export class OtherSettings {
     private getAsAssociations(sectionName: string, settingName: string, resource?: any): Associations {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
         if (section === undefined || section === null) {
-            const message = "Configuration not found";
-            const record: Record<string, string> = {
-                [sectionName + "." + settingName]: message
-            };
-
-            telemetry.logLanguageServerEvent("settingsValidation", record);
+            this.logSettingTelemetry(sectionName, settingName, "setting does not exist'");
         }
         const value = section.get<any>(settingName);
-        if (isValidMapping(value, (key) => typeof key === 'string', (val) => typeof val === 'string')) {
+        if (isValidMapping(value, isString, isString)) {
             return value as Associations;
         }
         const setting = section.inspect<any>(settingName);
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
-            const message = "Default value not found.";
-            const record: Record<string, string> = {
-                [sectionName + "." + settingName]: message
-            };
-
-            telemetry.logLanguageServerEvent("settingsValidation", record);
+            this.logSettingTelemetry(sectionName, settingName, "no default value");
         }
         return setting?.defaultValue as Associations;
     }
@@ -1029,25 +1001,15 @@ export class OtherSettings {
     private getAsExcludes(sectionName: string, settingName: string, resource?: any): Excludes {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
         if (section === undefined || section === null) {
-            const message = "Configuration not found";
-            const record: Record<string, string> = {
-                [sectionName + "." + settingName]: message
-            };
-
-            telemetry.logLanguageServerEvent("settingsValidation", record);
+            this.logSettingTelemetry(sectionName, settingName, "setting does not exist'");
         }
         const value = section.get<any>(settingName);
-        if (isValidMapping(value, (key) => typeof key === 'string', (val) => typeof val === 'boolean')) {
+        if (isValidMapping(value, isString, (val) => typeof val === 'boolean' || isValidWhenObject(val))) {
             return value as Excludes;
         }
         const setting = section.inspect<any>(settingName);
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
-            const message = "Default value not found.";
-            const record: Record<string, string> = {
-                [sectionName + "." + settingName]: message
-            };
-
-            telemetry.logLanguageServerEvent("settingsValidation", record);
+            this.logSettingTelemetry(sectionName, settingName, "no default value");
         }
         return setting?.defaultValue as Excludes;
     }
