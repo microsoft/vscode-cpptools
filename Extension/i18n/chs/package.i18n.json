@@ -185,7 +185,7 @@
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "提供非上下文感知的“模糊”结果。",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "关闭 C/C++ 语言服务功能。",
 	"c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": "控制 IntelliSense 引擎是否将自动切换为包含 `#include` 错误的翻译单元的标记分析器。",
-	"c_cpp.configuration.autocomplete.markdownDescription": "控制自动完成提供程序。如果 `disabled`，且你想要基于字词的补全功能，则还需要设置 `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (`c` 和 `cuda-cpp` 语音也类似)。",
+	"c_cpp.configuration.autocomplete.markdownDescription": "控制自动完成提供程序。如果 `disabled`，且你想要基于字词的补全功能，则还需要设置 `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (`c` 和 `cuda-cpp` 语言也类似)。",
 	"c_cpp.configuration.autocomplete.default.description": "使用活动的 IntelliSense 引擎。",
 	"c_cpp.configuration.autocomplete.disabled.description": "使用 Visual Studio Code 提供的基于字词的补全。",
 	"c_cpp.configuration.errorSquiggles.description": "控制是否将 IntelliSense 引擎检测到的可疑编译错误报告回编辑器。还控制是否报告代码分析警告(如果找不到包含)。标记分析器引擎将忽略此设置。",
