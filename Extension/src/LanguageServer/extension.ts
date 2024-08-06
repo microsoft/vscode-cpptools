@@ -26,6 +26,7 @@ import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, code
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
 import { getLanguageConfig } from './languageConfig';
+import { getLocaleId } from './localization';
 import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
@@ -1391,9 +1392,11 @@ async function onOTFDocs(): Promise<void> {
         return;
     }
 
+    const locale = getLocaleId();
+
     const messages = [
         vscode.LanguageModelChatMessage
-            .User(request)];
+            .User(request + locale)];
 
     const [model] = await vscode.lm.selectChatModels({
         vendor: 'copilot',
