@@ -1338,7 +1338,7 @@ export class DefaultClient implements Client {
             defaultSystemIncludePath: settings.defaultSystemIncludePath,
             cppFilesExclude: settings.filesExclude,
             clangFormatPath: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
-            clangFormatStyle: settings.clangFormatStyle ? util.resolveVariables(settings.clangFormatStyle, this.AdditionalEnvironment) : undefined,            
+            clangFormatStyle: settings.clangFormatStyle ? util.resolveVariables(settings.clangFormatStyle, this.AdditionalEnvironment) : undefined,
             clangFormatFallbackStyle: settings.clangFormatFallbackStyle ? settings.clangFormatFallbackStyle : undefined,
             clangFormatSortIncludes: settings.clangFormatSortIncludes,
             codeAnalysisRunAutomatically: settings.codeAnalysisRunAutomatically,
