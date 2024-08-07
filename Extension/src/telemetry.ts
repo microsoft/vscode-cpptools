@@ -83,6 +83,10 @@ export async function isExperimentEnabled(experimentName: string): Promise<boole
     if (new CppSettings().experimentalFeatures) {
         return true;
     }
+    return isFlightEnabled(experimentName);
+}
+
+export async function isFlightEnabled(experimentName: string): Promise<boolean> {
     const experimentationService: IExperimentationService | undefined = await getExperimentationService();
     const isEnabled: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", experimentName);
     return isEnabled ?? false;

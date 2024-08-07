@@ -1465,7 +1465,7 @@ export class DefaultClient implements Client {
         return workspaceFolderSettingsParams;
     }
 
-    private getAllSettings(): SettingsParams {
+    private async getAllSettings(): Promise<SettingsParams> {
         const workspaceSettings: CppSettings = new CppSettings();
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
         const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = this.getAllWorkspaceFolderSettings();
@@ -1491,6 +1491,7 @@ export class DefaultClient implements Client {
             codeAnalysisMaxConcurrentThreads: workspaceSettings.codeAnalysisMaxConcurrentThreads,
             codeAnalysisMaxMemory: workspaceSettings.codeAnalysisMaxMemory,
             codeAnalysisUpdateDelay: workspaceSettings.codeAnalysisUpdateDelay,
+            otfDocsEnabled: await workspaceSettings.otfDocsEnabled,
             workspaceFolderSettings: workspaceFolderSettingsParams
         };
     }
@@ -1560,7 +1561,7 @@ export class DefaultClient implements Client {
             resetDatabase: resetDatabase,
             edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", getLocaleId()),
             localizedStrings: localizedStrings,
-            settings: this.getAllSettings()
+            settings: await this.getAllSettings()
         };
 
         this.loggingLevel = util.getNumericLoggingLevel(cppInitializationParams.settings.loggingLevel);
@@ -1632,7 +1633,7 @@ export class DefaultClient implements Client {
     public async sendDidChangeSettings(): Promise<void> {
         // Send settings json to native side
         await this.ready;
-        await this.languageClient.sendNotification(DidChangeSettingsNotification, this.getAllSettings());
+        await this.languageClient.sendNotification(DidChangeSettingsNotification, await this.getAllSettings());
     }
 
     public async onDidChangeSettings(_event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> {
