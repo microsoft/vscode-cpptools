@@ -21,9 +21,9 @@ class StaleCloser extends ActionBase_1.ActionBase {
         this.setMilestoneId = setMilestoneId;
     }
     async run() {
-        const updatedTimestamp = (0, utils_1.daysAgoToHumanReadbleDate)(this.closeDays);
+        const updatedTimestamp = this.closeDays ? (0, utils_1.daysAgoToHumanReadbleDate)(this.closeDays) : undefined;
         const pingTimestamp = this.pingDays ? (0, utils_1.daysAgoToTimestamp)(this.pingDays) : undefined;
-        const query = this.buildQuery((this.closeDays ? `updated:<${updatedTimestamp} ` : "") + "is:open is:unlocked");
+        const query = this.buildQuery((updatedTimestamp ? `updated:<${updatedTimestamp} ` : "") + "is:open is:unlocked");
         const addLabelsSet = this.addLabels ? this.addLabels.split(',') : [];
         const removeLabelsSet = this.removeLabels ? this.removeLabels.split(',') : [];
         for await (const page of this.github.query({ q: query })) {
