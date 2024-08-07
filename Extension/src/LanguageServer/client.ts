@@ -1604,6 +1604,9 @@ export class DefaultClient implements Client {
             },
             markdown: {
                 isTrusted: true
+                // TODO: support for icons in markdown is not yet in the released version of vscode-languageclient.
+                // Based on PR (https://github.com/microsoft/vscode-languageserver-node/pull/1504)
+                //supportThemeIcons: true
             }
 
             // TODO: should I set the output channel? Does this sort output between servers?
