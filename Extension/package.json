@@ -11,7 +11,7 @@
     },
     "license": "SEE LICENSE IN LICENSE.txt",
     "engines": {
-        "vscode": "^1.67.0"
+        "vscode": "^1.90.0"
     },
     "bugs": {
         "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -3286,6 +3286,17 @@
                         "default": false,
                         "markdownDescription": "%c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription%",
                         "scope": "application"
+                    },
+                    "C_Cpp.onTheFlyDocsEnabled": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "enabled",
+                            "disabled"
+                        ],
+                        "default": "default",
+                        "markdownDescription": "%c_cpp.configuration.otfDocsEnabled.markdownDescription%",
+                        "scope": "window"
                     }
                 }
             }

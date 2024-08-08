@@ -775,6 +775,12 @@
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
+    "c_cpp.configuration.otfDocsEnabled.markdownDescription": {
+        "message": "If  `enabled`, the Hover tooltip will display an option to generate a summary of the symbol with copilot. If `disabled`, the option will not be displayed.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.renameRequiresIdentifier.markdownDescription": {
         "message": "If `true`, 'Rename Symbol' will require a valid C/C++ identifier.",
         "comment": [

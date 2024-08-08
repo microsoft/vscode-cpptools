@@ -89,7 +89,16 @@ export function createProtocolFilter(): Middleware {
         provideHover: async (document, position, token, next: (document: any, position: any, token: any) => any) => clients.ActiveClient.enqueue(async () => {
             const me: Client = clients.getClientFor(document.uri);
             if (me.TrackedDocuments.has(document.uri.toString())) {
-                return next(document, position, token);
+                const result: Thenable<vscode.Hover> = next(document, position, token);
+                // Needed to support theme icons in markdown hover content until vscode-languageclient is updated.
+                return result.then((value: vscode.Hover) => {
+                    value.contents.forEach((content) => {
+                        if (content instanceof vscode.MarkdownString) {
+                            content.supportThemeIcons = true;
+                        }
+                    });
+                    return value;
+                });
             }
             return null;
         }),

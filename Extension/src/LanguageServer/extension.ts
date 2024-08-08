@@ -26,6 +26,7 @@ import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, code
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
 import { getLanguageConfig } from './languageConfig';
+import { getLocaleId } from './localization';
 import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
@@ -404,6 +405,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : () => Promise.resolve()));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.OTFDocs', enabled ? onOTFDocs : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -1378,4 +1380,67 @@ export async function preReleaseCheck(): Promise<void> {
 export async function getIncludes(maxDepth: number): Promise<any> {
     const includes = await clients.ActiveClient.getIncludes(maxDepth);
     return includes;
+}
+
+async function onOTFDocs(): Promise<void> {
+    const response = await clients.ActiveClient.getOTFDocsInfo();
+
+    // Ensure the content is valid before proceeding.
+    const request = response.content;
+
+    if (request.length === 0) {
+        return;
+    }
+
+    const locale = getLocaleId();
+
+    const messages = [
+        vscode.LanguageModelChatMessage
+            .User(request + locale)];
+
+    const [model] = await vscode.lm.selectChatModels({
+        vendor: 'copilot',
+        family: 'gpt-4'
+    });
+
+    let chatResponse: vscode.LanguageModelChatResponse | undefined;
+    try {
+        chatResponse = await model.sendRequest(
+            messages,
+            {},
+            new vscode.CancellationTokenSource().token
+        );
+    } catch (err) {
+        if (err instanceof vscode.LanguageModelError) {
+            console.log(err.message, err.code, err.cause);
+        } else {
+            throw err;
+        }
+        return;
+    }
+
+    let content: string = '';
+
+    try {
+        for await (const fragment of chatResponse.text) {
+            content += fragment;
+        }
+    } catch (err) {
+        return;
+    }
+
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        return;
+    }
+
+    // Prepare the client to show the content on next hover.
+    const result = await clients.ActiveClient.showOTFDocs(content);
+    // Make sure the editor has focus.
+    await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+    // Move the cursor to the position of the open hover.
+    editor.selection = new vscode.Selection(result.hoverPos.line, result.hoverPos.character, result.hoverPos.line, result.hoverPos.character);
+    // Trigger a hover event to show the new content. This is necessary because the content isn't updated if the hover isn't closed and then reopened.
+    // API proposal to update hover content: "editorHoverVerbosityLevel". (https://github.com/microsoft/vscode/issues/195394)
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus'});
 }
