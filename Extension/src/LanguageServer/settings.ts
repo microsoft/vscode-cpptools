@@ -473,7 +473,7 @@ export class CppSettings extends Settings {
             if (models.length === 0) {
                 // Register to update this setting if the user gains access to copilot.
                 vscode.lm.onDidChangeChatModels(() => {
-                    void this.Section.update("onTheFlyDocsEnabled", setting);
+                    clients.ActiveClient.sendDidChangeSettings();
                 });
                 return false;
             }

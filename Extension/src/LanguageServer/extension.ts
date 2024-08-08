@@ -1436,6 +1436,8 @@ async function onOTFDocs(): Promise<void> {
 
     // Prepare the client to show the content on next hover.
     const result = await clients.ActiveClient.showOTFDocs(content);
+    // Make sure the editor has focus.
+    await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
     // Move the cursor to the position of the open hover.
     editor.selection = new vscode.Selection(result.hoverPos.line, result.hoverPos.character, result.hoverPos.line, result.hoverPos.character);
     // Trigger a hover event to show the new content. This is necessary because the content isn't updated if the hover isn't closed and then reopened.
