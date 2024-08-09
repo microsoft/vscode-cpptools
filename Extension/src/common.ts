@@ -317,12 +317,12 @@ export function isBoolean(input: any): input is boolean {
     return typeof input === "boolean";
 }
 
-export function isObject(input: any): input is object {
-    return typeof input === "object";
+export function isObject(input: any): boolean {
+    return input !== null && typeof input === "object" && !isArray(input);
 }
 
 export function isArray(input: any): input is any[] {
-    return input instanceof Array;
+    return Array.isArray(input);
 }
 
 export function isOptionalString(input: any): input is string | undefined {
@@ -331,6 +331,15 @@ export function isOptionalString(input: any): input is string | undefined {
 
 export function isArrayOfString(input: any): input is string[] {
     return isArray(input) && input.every(isString);
+}
+
+// Validates whether the given object is a valid mapping of key and value type.
+// EX: {"key": true, "key2": false} should return true for keyType = string and valueType = boolean.
+export function isValidMapping(value: any, isValidKey: (key: any) => boolean, isValidValue: (value: any) => boolean): value is object {
+    if (isObject(value)) {
+        return Object.entries(value).every(([key, val]) => isValidKey(key) && isValidValue(val));
+    }
+    return false;
 }
 
 export function isOptionalArrayOfString(input: any): input is string[] | undefined {
@@ -1766,8 +1775,7 @@ export function buildShellCommandLine(originalCommand: CommandString, command: C
 
     let commandLine = result.join(' ');
     // There are special rules quoted command line in cmd.exe
-    if (isWindows)
-    {
+    if (isWindows) {
         commandLine = `chcp 65001>nul && ${commandLine}`;
         if (commandQuoted && argQuoted) {
             commandLine = '"' + commandLine + '"';

@@ -57,8 +57,7 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         return promise;
     }
 
-    private async requestRanges(uri: string, token: vscode.CancellationToken): Promise<vscode.FoldingRange[] | undefined>
-    {
+    private async requestRanges(uri: string, token: vscode.CancellationToken): Promise<vscode.FoldingRange[] | undefined> {
         const params: GetFoldingRangesParams = {
             uri
         };

@@ -80,7 +80,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
 
         let hasSelectIntelliSenseConfiguration: boolean = false;
         const settings: CppSettings = new CppSettings(this.client.RootUri);
-        const hasConfigurationSet: boolean = settings.defaultCompilerPath !== undefined ||
+        const hasConfigurationSet: boolean = settings.defaultCompilerPath !== null ||
             !!settings.defaultCompileCommands || !!settings.defaultConfigurationProvider ||
             this.client.configuration.CurrentConfiguration?.compilerPath !== undefined ||
             !!this.client.configuration.CurrentConfiguration?.compileCommands ||

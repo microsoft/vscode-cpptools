@@ -827,8 +827,8 @@
                         "items": {
                             "type": "string"
                         },
-                        "default": null,
                         "uniqueItems": true,
+                        "default": null,
                         "markdownDescription": "%c_cpp.configuration.default.browse.path.markdownDescription%",
                         "scope": "machine-overridable"
                     },
