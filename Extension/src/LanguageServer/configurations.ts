@@ -995,8 +995,6 @@ export class CppProperties {
                 if (configuration.compilerPath !== undefined) {
                     configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
                     configuration.compilerPathIsExplicit = true;
-                } else {
-                    configuration.compilerPathIsExplicit = false;
                 }
             }
 
