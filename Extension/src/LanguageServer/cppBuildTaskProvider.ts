@@ -414,7 +414,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             }
         });
         if (this.options === undefined) {
-            this.options = { };
+            this.options = {};
         }
         if (this.options.cwd) {
             this.options.cwd = util.resolveVariables(this.options.cwd.toString());
