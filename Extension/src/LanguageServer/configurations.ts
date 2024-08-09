@@ -951,7 +951,7 @@ export class CppProperties {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
                 configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
-                configuration.compilerPathIsExplicit = configuration.compilerPathIsExplicit || settings.defaultCompilerPath !== undefined;
+                configuration.compilerPathIsExplicit = configuration.compilerPathIsExplicit || settings.defaultCompilerPath !== null;
                 if (configuration.compilerPath === undefined) {
                     if (!!this.defaultCompilerPath && this.trustedCompilerFound) {
                         // If no config value yet set for these, pick up values from the defaults, but don't consider them explicit.
@@ -988,7 +988,7 @@ export class CppProperties {
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
                 if (configuration.compilerPath === "${default}") {
-                    configuration.compilerPath = settings.defaultCompilerPath;
+                    configuration.compilerPath = settings.defaultCompilerPath ?? undefined;
                 }
                 if (configuration.compilerPath === null) {
                     configuration.compilerPath = undefined;
@@ -1041,8 +1041,8 @@ export class CppProperties {
                     && !settings.defaultForcedInclude
                     && !settings.defaultCompileCommands
                     && !settings.defaultCompilerArgs
-                    && settings.defaultCStandard === ""
-                    && settings.defaultCppStandard === ""
+                    && (!settings.defaultCStandard || settings.defaultCStandard === "")
+                    && (!settings.defaultCppStandard || settings.defaultCppStandard === "")
                     && settings.defaultIntelliSenseMode === ""
                     && !settings.defaultConfigurationProvider;
 

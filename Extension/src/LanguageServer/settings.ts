@@ -14,7 +14,7 @@ import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
-import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
+import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isObject, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
 import { isWindows } from '../constants';
 import * as telemetry from '../telemetry';
 import { DefaultClient, cachedEditorConfigLookups, cachedEditorConfigSettings, hasTrustedCompilerPaths } from './client';
@@ -54,7 +54,7 @@ export interface WorkspaceFolderSettingsParams {
     clangFormatPath: string | undefined;
     clangFormatStyle: string | undefined;
     clangFormatFallbackStyle: string | undefined;
-    clangFormatSortIncludes: boolean | undefined;
+    clangFormatSortIncludes: boolean | null;
     codeAnalysisRunAutomatically: boolean;
     codeAnalysisExclude: Excludes;
     clangTidyEnabled: boolean;
@@ -64,8 +64,8 @@ export interface WorkspaceFolderSettingsParams {
     clangTidyHeaderFilter: string | null;
     clangTidyArgs: string[];
     clangTidyUseBuildPath: boolean;
-    clangTidyChecksEnabled: string[];
-    clangTidyChecksDisabled: string[];
+    clangTidyChecksEnabled: string[] | undefined;
+    clangTidyChecksDisabled: string[] | undefined;
     hover: string;
     markdownInComments: string;
     vcFormatIndentBraces: boolean;
@@ -272,7 +272,7 @@ export class CppSettings extends Settings {
     }
 
     private getClangPath(isFormat: boolean): string | undefined {
-        let path: string | undefined = changeBlankStringToUndefined(this.getAsString(isFormat ? "clang_format_path" : "codeAnalysis.clangTidy.path"));
+        let path: string | undefined = changeBlankStringToUndefined(this.getAsStringOrUndefined(isFormat ? "clang_format_path" : "codeAnalysis.clangTidy.path"));
         if (!path) {
             const cachedClangPath: string | undefined = isFormat ? getCachedClangFormatPath() : getCachedClangTidyPath();
             if (cachedClangPath !== undefined) {
@@ -345,25 +345,25 @@ export class CppSettings extends Settings {
     public get clangTidyConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.config")); }
     public get clangTidyFallbackConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.fallbackConfig")); }
     public get clangTidyHeaderFilter(): string | null { return this.getAsString("codeAnalysis.clangTidy.headerFilter", true); }
-    public get clangTidyArgs(): string[] { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.args"); }
+    public get clangTidyArgs(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.args"); }
     public get clangTidyUseBuildPath(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath"); }
-    public get clangTidyChecksEnabled(): string[] { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.enabled", true); }
-    public get clangTidyChecksDisabled(): string[] { return this.getAsArrayOfStrings("codeAnalysis.clangTidy.checks.disabled", true); }
+    public get clangTidyChecksEnabled(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.checks.enabled", true); }
+    public get clangTidyChecksDisabled(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.checks.disabled", true); }
     public get clangTidyCodeActionShowDisable(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.showDisable"); }
     public get clangTidyCodeActionShowClear(): string { return this.getAsString("codeAnalysis.clangTidy.codeAction.showClear"); }
     public get clangTidyCodeActionShowDocumentation(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.showDocumentation"); }
     public get clangTidyCodeActionFormatFixes(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.formatFixes"); }
     public addClangTidyChecksDisabled(value: string): void {
-        const checks: string[] = this.clangTidyChecksDisabled;
+        const checks: string[] | undefined = this.clangTidyChecksDisabled;
         if (checks === undefined) {
             return;
         }
         checks.push(value);
         void super.Section.update("codeAnalysis.clangTidy.checks.disabled", checks, vscode.ConfigurationTarget.WorkspaceFolder);
     }
-    public get clangFormatStyle(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("clang_format_style")); }
+    public get clangFormatStyle(): string | undefined { return changeBlankStringToUndefined(this.getAsString("clang_format_style")); }
     public get clangFormatFallbackStyle(): string | undefined { return changeBlankStringToUndefined(this.getAsString("clang_format_fallbackStyle")); }
-    public get clangFormatSortIncludes(): boolean | undefined { return this.getAsBooleanOrUndefined("clang_format_sortIncludes"); }
+    public get clangFormatSortIncludes(): boolean | null { return this.getAsBoolean("clang_format_sortIncludes", true); }
     public get experimentalFeatures(): boolean { return this.getAsString("experimentalFeatures").toLowerCase() === "enabled"; }
     public get suggestSnippets(): boolean { return this.getAsBoolean("suggestSnippets"); }
     public get intelliSenseEngine(): string { return this.getAsString("intelliSenseEngine"); }
@@ -392,13 +392,13 @@ export class CppSettings extends Settings {
         if (this.isArrayOfCommentContinuationPatterns(value)) {
             return value;
         }
-        const setting = getRawSetting("C_Cpp." + "commentContinuationPatterns");
+        const setting = getRawSetting("C_Cpp.commentContinuationPatterns");
         return setting.default;
     }
     public get isConfigurationWarningsEnabled(): boolean { return this.getAsString("configurationWarnings").toLowerCase() === "enabled"; }
     public get preferredPathSeparator(): string { return this.getAsString("preferredPathSeparator"); }
     public get updateChannel(): string { return this.getAsString("updateChannel"); }
-    public get isVcpkgEnabled(): boolean { return this.getAsString("vcpkg").toLowerCase() === "enabled"; }
+    public get vcpkgEnabled(): boolean { return this.getAsBoolean("vcpkg.enabled"); }
     public get addNodeAddonIncludePaths(): boolean { return this.getAsBoolean("addNodeAddonIncludePaths"); }
     public get renameRequiresIdentifier(): boolean { return this.getAsBoolean("renameRequiresIdentifier"); }
     public get filesExclude(): Excludes { return this.getAsExcludes("files.exclude"); }
@@ -410,7 +410,7 @@ export class CppSettings extends Settings {
     public get defaultCompileCommands(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.compileCommands")); }
     public get defaultForcedInclude(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return this.getAsStringOrUndefined("default.intelliSenseMode"); }
-    public get defaultCompilerPath(): string | undefined { return this.getAsStringOrUndefined("default.compilerPath"); }
+    public get defaultCompilerPath(): string | null { return this.getAsString("default.compilerPath", true); }
 
     public set defaultCompilerPath(value: string) {
         const defaultCompilerPathStr: string = "default.compilerPath";
@@ -433,8 +433,8 @@ export class CppSettings extends Settings {
         }
     }
     public get defaultCompilerArgs(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.compilerArgs"); }
-    public get defaultCStandard(): string { return this.getAsString("default.cStandard"); }
-    public get defaultCppStandard(): string { return this.getAsString("default.cppStandard"); }
+    public get defaultCStandard(): string | undefined{ return this.getAsStringOrUndefined("default.cStandard"); }
+    public get defaultCppStandard(): string | undefined { return this.getAsStringOrUndefined("default.cppStandard"); }
     public get defaultConfigurationProvider(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.configurationProvider")); }
     public get defaultMergeConfigurations(): boolean | undefined { return this.getAsBooleanOrUndefined("default.mergeConfigurations"); }
     public get defaultBrowsePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.browse.path"); }
@@ -531,27 +531,34 @@ export class CppSettings extends Settings {
     private getAsStringOrUndefined(settingName: string): string | undefined {
         const value: any = super.Section.get<any>(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
+        if (setting.default !== undefined) {
+            console.error(`Default value for ${settingName} is expected to be undefined.`);
+        }
+
         if (setting.enum !== undefined) {
             if (this.isValidEnum(setting.enum, value)) {
                 return value;
             }
-            return setting.default;
-        }
-        if (isString(value)) {
+        } else if (isString(value)) {
             return value;
-        } else {
-            return undefined;
         }
+
+        return undefined;
     }
 
     // Returns the value of a setting as a boolean with proper type validation and checks for valid enum values while returning an undefined value if necessary.
     private getAsBooleanOrUndefined(settingName: string): boolean | undefined {
         const value: any = super.Section.get<any>(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (setting.default !== undefined) {
+            console.error(`Default value for ${settingName} is expected to be undefined.`);
+        }
+
         if (isBoolean(value)) {
             return value;
-        } else {
-            return undefined;
         }
+
+        return undefined;
     }
 
     // Returns the value of a setting as a boolean with proper type validation.
@@ -559,13 +566,18 @@ export class CppSettings extends Settings {
     private getAsBoolean(settingName: string, allowNull: boolean): boolean | null;
     private getAsBoolean(settingName: string, allowNull: boolean = false): boolean | null {
         const value: any = super.Section.get<any>(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (!isBoolean(setting.default) && !(allowNull && setting.default === null)) {
+            console.error(`Default value for ${settingName} is expected to be boolean or null.`);
+        }
+
         if (allowNull && value === null) {
             return null;
         }
+
         if (isBoolean(value)) {
             return value;
         }
-        const setting = getRawSetting("C_Cpp." + settingName);
         return setting.default;
     }
 
@@ -574,24 +586,26 @@ export class CppSettings extends Settings {
     private getAsString(settingName: string, allowNull: boolean): string | null;
     private getAsString(settingName: string, allowNull: boolean = false): string | null {
         const value: any = super.Section.get<any>(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (!isString(setting.default) && !(allowNull && setting.default === null)) {
+            console.error(`Default value for ${settingName} is expected to be string or null.`);
+        }
+
         if (allowNull && value === null) {
             return null;
         }
-        const setting = getRawSetting("C_Cpp." + settingName);
 
         if (setting.enum !== undefined) {
-            if (settingName === "loggingLevel" && isNumber(Number(value)) && Number(value) >= 0) {
+            if (settingName === "loggingLevel" && isString(value) && isNumber(Number(value)) && Number(value) >= 0) {
                 return value;
             }
             if (this.isValidEnum(setting.enum, value)) {
                 return value;
             }
-            return setting.default;
-        }
-        if (isString(value)) {
+        } else if (isString(value)) {
             return value;
         }
-        return setting.default;
+        return setting.default as string;
     }
 
     // Returns the value of a setting as a number with proper type validation and checks if value falls within the specified range.
@@ -599,10 +613,14 @@ export class CppSettings extends Settings {
     private getAsNumber(settingName: string, allowNull: boolean): number | null;
     private getAsNumber(settingName: string, allowNull: boolean = false): number | null {
         const value: any = super.Section.get<any>(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (!isNumber(setting.default) && !(allowNull && setting.default === null)) {
+            console.error(`Default value for ${settingName} is expected to be number or null.`);
+        }
+
         if (allowNull && value === null) {
             return null;
         }
-        const setting = getRawSetting("C_Cpp." + settingName);
         // Validates the value is a number and clamps it to the specified range. Allows for undefined maximum or minimum values.
         if (isNumber(value)) {
             if (setting.minimum !== undefined && value < setting.minimum) {
@@ -613,37 +631,63 @@ export class CppSettings extends Settings {
             }
             return value;
         }
-        return setting.default;
+        return setting.default as number;
     }
+
+    private getAsArrayOfStringsOrUndefined(settingName: string, allowUndefinedEnums: boolean = false): string[] | undefined {
+        const value: any = super.Section.get(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (setting.default !== undefined) {
+            console.error(`Default value for ${settingName} is expected to be undefined.`);
+        }
+
+        if (isArrayOfString(value)) {
+            if (setting.items.enum && !allowUndefinedEnums) {
+                if (!value.every(x => this.isValidEnum(setting.items.enum, x))) {
+                    return setting.default;
+                }
+            }
+            return value;
+        }
+        return setting.default as string[];
+    }
+
+
 
     // Returns the value of a setting as an array of strings with proper type validation and checks for valid enum values.
     private getAsArrayOfStrings(settingName: string, allowUndefinedEnums: boolean = false): string[] {
         const value: any = super.Section.get(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
+        if (!isArrayOfString(setting.default)) {
+            console.error(`Default value for ${settingName} is expected to be string[].`);
+        }
+
         if (isArrayOfString(value)) {
-            if (!allowUndefinedEnums) {
-                if (setting.items.enum !== undefined) {
-                    if (!value.every(x => this.isValidEnum(setting.items.enum, x))) {
-                        return setting.default;
-                    }
+            if (setting.items.enum && !allowUndefinedEnums) {
+                if (!value.every(x => this.isValidEnum(setting.items.enum, x))) {
+                    return setting.default;
                 }
             }
             return value;
         }
-        return setting.default;
+        return setting.default as string[];
     }
 
     private getAsExcludes(settingName: string): Excludes;
     private getAsExcludes(settingName: string, allowNull: boolean): Excludes | null;
     private getAsExcludes(settingName: string, allowNull: boolean = false): Excludes | null {
         const value: any = super.Section.get(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (!isValidMapping(setting.default, isString, val => isBoolean(val) || isValidWhenObject(val)) && !(allowNull && setting.default === null)) {
+            console.error(`Default value for ${settingName} is expected to be Excludes or null.`);
+        }
+
         if (allowNull && value === null) {
             return null;
         }
-        if (isValidMapping(value, isString, (val) => isBoolean(val) || isValidWhenObject(val))) {
+        if (isValidMapping(value, isString, val => isBoolean(val) || isValidWhenObject(val))) {
             return value as Excludes;
         }
-        const setting = getRawSetting("C_Cpp." + settingName);
         return setting.default as Excludes;
     }
 
@@ -651,19 +695,23 @@ export class CppSettings extends Settings {
     private getAsAssociations(settingName: string, allowNull: boolean): Associations | null;
     private getAsAssociations(settingName: string, allowNull: boolean = false): Associations | null {
         const value: any = super.Section.get<any>(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName);
+        if (!isValidMapping(setting.default, isString, isString) && !(allowNull && setting.default === null)) {
+            console.error(`Default value for ${settingName} is expected to be Associations or null.`);
+        }
+
         if (allowNull && value === null) {
             return null;
         }
         if (isValidMapping(value, isString, isString)) {
             return value as Associations;
         }
-        const setting = getRawSetting("C_Cpp." + settingName);
         return setting.default as Associations;
     }
 
     // Checks a given enum value against a list of valid enum values from package.json.
-    private isValidEnum(enumDescription: any, value: any): boolean {
-        if (isArray(enumDescription) && enumDescription.length > 0) {
+    private isValidEnum(enumDescription: any, value: any): value is string {
+        if (isString(value) && isArray(enumDescription) && enumDescription.length > 0) {
             return enumDescription.some(x => x.toLowerCase() === value.toLowerCase());
         }
         return false;
@@ -674,7 +722,7 @@ export class CppSettings extends Settings {
     }
 
     private isCommentPattern(x: any): x is CommentPattern {
-        return isString(x.begin) && isString(x.continue);
+        return isObject(x) && isString(x.begin) && isString(x.continue);
     }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
@@ -973,7 +1021,7 @@ export class OtherSettings {
         return setting.defaultValue;
     }
 
-    private getAsAssociations(sectionName: string, settingName: string, resource?: any): Associations {
+    private getAsAssociations(sectionName: string, settingName: string, defaultValue: Associations, resource?: any): Associations {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
         const value = section.get<any>(settingName);
         if (isValidMapping(value, isString, isString)) {
@@ -983,10 +1031,10 @@ export class OtherSettings {
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
             this.logValidationError(sectionName, settingName, "no default value");
         }
-        return setting?.defaultValue as Associations;
+        return setting?.defaultValue ?? defaultValue;
     }
 
-    private getAsExcludes(sectionName: string, settingName: string, resource?: any): Excludes {
+    private getAsExcludes(sectionName: string, settingName: string, defaultValue: Excludes, resource?: any): Excludes {
         const section = vscode.workspace.getConfiguration(sectionName, resource);
         const value = section.get<any>(settingName);
         if (isValidMapping(value, isString, (val) => isBoolean(val) || isValidWhenObject(val))) {
@@ -996,7 +1044,7 @@ export class OtherSettings {
         if (setting?.defaultValue === undefined || setting.defaultValue === null) {
             this.logValidationError(sectionName, settingName, "no default value");
         }
-        return setting?.defaultValue as Excludes;
+        return setting?.defaultValue ?? defaultValue;
     }
 
     // All default values are obtained from the VS Code settings UI. Please update the default values as needed.
@@ -1004,13 +1052,26 @@ export class OtherSettings {
     public get editorInsertSpaces(): boolean { return this.getAsBoolean("editor", "insertSpaces", this.resource, true); }
     public get editorAutoClosingBrackets(): string { return this.getAsString("editor", "autoClosingBrackets", this.resource, "languageDefined"); }
     public get filesEncoding(): string { return this.getAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }, "utf8"); }
-    public get filesAssociations(): Associations { return this.getAsAssociations("files", "associations"); }
+    public get filesAssociations(): Associations { return this.getAsAssociations("files", "associations", {}); }
     public set filesAssociations(value: any) { void vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace); }
-    public get filesExclude(): Excludes { return this.getAsExcludes("files", "exclude", this.resource); }
+    private readonly defaultFilesExcludes = {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true
+    };
+    public get filesExclude(): Excludes { return this.getAsExcludes("files", "exclude", this.defaultFilesExcludes, this.resource); }
     public get filesAutoSaveAfterDelay(): boolean { return this.getAsString("files", "autoSave", this.resource, "off") === "afterDelay"; }
     public get editorInlayHintsEnabled(): boolean { return this.getAsString("editor.inlayHints", "enabled", this.resource, "on") !== "off"; }
     public get editorParameterHintsEnabled(): boolean { return this.getAsBoolean("editor.parameterHints", "enabled", this.resource, true); }
-    public get searchExclude(): Excludes { return this.getAsExcludes("search", "exclude", this.resource); }
+    private readonly defaultSearchExcludes = {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true
+    };
+    public get searchExclude(): Excludes { return this.getAsExcludes("search", "exclude", this.defaultSearchExcludes, this.resource); }
     public get workbenchSettingsEditor(): string { return this.getAsString("workbench.settings", "editor", this.resource, "ui"); }
 }
 

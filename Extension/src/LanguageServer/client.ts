@@ -2166,7 +2166,7 @@ export class DefaultClient implements Client {
 
     public getVcpkgEnabled(): Promise<boolean> {
         const cppSettings: CppSettings = new CppSettings(this.RootUri);
-        return Promise.resolve(cppSettings.isVcpkgEnabled);
+        return Promise.resolve(cppSettings.vcpkgEnabled);
     }
 
     public async getKnownCompilers(): Promise<configs.KnownCompiler[] | undefined> {
@@ -2726,7 +2726,7 @@ export class DefaultClient implements Client {
             showConfigStatus = ask.Value;
         }
 
-        const compilerPathNotSet: boolean = settings.defaultCompilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson === undefined;
+        const compilerPathNotSet: boolean = settings.defaultCompilerPath === null && this.configuration.CurrentConfiguration?.compilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson === undefined;
         const configurationNotSet: boolean = configProviderNotSetAndNoCache && compileCommandsNotSet && compilerPathNotSet;
 
         showConfigStatus = showConfigStatus || (configurationNotSet &&

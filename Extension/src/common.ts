@@ -317,12 +317,12 @@ export function isBoolean(input: any): input is boolean {
     return typeof input === "boolean";
 }
 
-export function isObject(input: any): input is object {
-    return typeof input === "object";
+export function isObject(input: any): boolean {
+    return input !== null && typeof input === "object" && !isArray(input);
 }
 
 export function isArray(input: any): input is any[] {
-    return input instanceof Array;
+    return Array.isArray(input);
 }
 
 export function isOptionalString(input: any): input is string | undefined {
