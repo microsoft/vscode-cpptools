@@ -392,7 +392,7 @@ export class CppSettings extends Settings {
         if (this.isArrayOfCommentContinuationPatterns(value)) {
             return value;
         }
-        const setting = getRawSetting("C_Cpp.commentContinuationPatterns");
+        const setting = getRawSetting("C_Cpp.commentContinuationPatterns", true);
         return setting.default;
     }
     public get isConfigurationWarningsEnabled(): boolean { return this.getAsString("configurationWarnings").toLowerCase() === "enabled"; }
@@ -530,7 +530,7 @@ export class CppSettings extends Settings {
     // Returns the value of a setting as a string with proper type validation and checks for valid enum values while returning an undefined value if necessary.
     private getAsStringOrUndefined(settingName: string): string | undefined {
         const value: any = super.Section.get<any>(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
         if (setting.default !== undefined) {
             console.error(`Default value for ${settingName} is expected to be undefined.`);
         }
@@ -549,7 +549,7 @@ export class CppSettings extends Settings {
     // Returns the value of a setting as a boolean with proper type validation and checks for valid enum values while returning an undefined value if necessary.
     private getAsBooleanOrUndefined(settingName: string): boolean | undefined {
         const value: any = super.Section.get<any>(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
         if (setting.default !== undefined) {
             console.error(`Default value for ${settingName} is expected to be undefined.`);
         }
@@ -570,7 +570,7 @@ export class CppSettings extends Settings {
     private getAsBoolean(settingName: string, allowNull: boolean): boolean | null;
     private getAsBoolean(settingName: string, allowNull: boolean = false): boolean | null {
         const value: any = super.Section.get<any>(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
         if (!this.isValidDefault(isBoolean, setting.default, allowNull)) {
             console.error(`Default value for ${settingName} is expected to be boolean${allowNull ? ' or null' : ''}.`);
         }
@@ -590,7 +590,7 @@ export class CppSettings extends Settings {
     private getAsString(settingName: string, allowNull: boolean): string | null;
     private getAsString(settingName: string, allowNull: boolean = false): string | null {
         const value: any = super.Section.get<any>(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
         if (!this.isValidDefault(isString, setting.default, allowNull)) {
             console.error(`Default value for ${settingName} is expected to be string${allowNull ? ' or null' : ''}.`);
         }
@@ -617,7 +617,7 @@ export class CppSettings extends Settings {
     private getAsNumber(settingName: string, allowNull: boolean): number | null;
     private getAsNumber(settingName: string, allowNull: boolean = false): number | null {
         const value: any = super.Section.get<any>(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
         if (!this.isValidDefault(isNumber, setting.default, allowNull)) {
             console.error(`Default value for ${settingName} is expected to be number${allowNull ? ' or null' : ''}.`);
         }
@@ -640,7 +640,7 @@ export class CppSettings extends Settings {
 
     private getAsArrayOfStringsOrUndefined(settingName: string, allowUndefinedEnums: boolean = false): string[] | undefined {
         const value: any = super.Section.get(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
         if (setting.default !== undefined) {
             console.error(`Default value for ${settingName} is expected to be undefined.`);
         }
@@ -659,7 +659,7 @@ export class CppSettings extends Settings {
     // Returns the value of a setting as an array of strings with proper type validation and checks for valid enum values.
     private getAsArrayOfStrings(settingName: string, allowUndefinedEnums: boolean = false): string[] {
         const value: any = super.Section.get(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
         if (!isArrayOfString(setting.default)) {
             console.error(`Default value for ${settingName} is expected to be string[].`);
         }
@@ -679,7 +679,7 @@ export class CppSettings extends Settings {
     private getAsExcludes(settingName: string, allowNull: boolean): Excludes | null;
     private getAsExcludes(settingName: string, allowNull: boolean = false): Excludes | null {
         const value: any = super.Section.get(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
         if (!this.isValidDefault(x => isValidMapping(x, isString, val => isBoolean(val) || isValidWhenObject(val)), setting.default, allowNull)) {
             console.error(`Default value for ${settingName} is expected to be Excludes${allowNull ? ' or null' : ''}.`);
         }
@@ -697,7 +697,7 @@ export class CppSettings extends Settings {
     private getAsAssociations(settingName: string, allowNull: boolean): Associations | null;
     private getAsAssociations(settingName: string, allowNull: boolean = false): Associations | null {
         const value: any = super.Section.get<any>(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
         if (!this.isValidDefault(x => isValidMapping(x, isString, isString), setting.default, allowNull)) {
             console.error(`Default value for ${settingName} is expected to be Associations${allowNull ? ' or null' : ''}.`);
         }

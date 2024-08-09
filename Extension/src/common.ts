@@ -65,7 +65,7 @@ export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptoo
 // Use getRawSetting to get subcategorized settings from package.json.
 // This prevents having to iterate every time we search.
 let flattenedPackageJson: Map<string, any>;
-export function getRawSetting(key: string): any {
+export function getRawSetting(key: string, breakIfMissing: boolean = false): any {
     if (flattenedPackageJson === undefined) {
         flattenedPackageJson = new Map();
         for (const subheading of packageJson.contributes.configuration) {
@@ -74,7 +74,11 @@ export function getRawSetting(key: string): any {
             }
         }
     }
-    return flattenedPackageJson.get(key);
+    const result = flattenedPackageJson.get(key);
+    if (result === undefined && breakIfMissing) {
+        debugger; // The setting does not exist in package.json. Check the `key`.
+    }
+    return result;
 }
 
 export async function getRawJson(path: string | undefined): Promise<any> {
