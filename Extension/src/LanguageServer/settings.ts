@@ -433,7 +433,7 @@ export class CppSettings extends Settings {
         }
     }
     public get defaultCompilerArgs(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.compilerArgs"); }
-    public get defaultCStandard(): string | undefined{ return this.getAsStringOrUndefined("default.cStandard"); }
+    public get defaultCStandard(): string | undefined { return this.getAsStringOrUndefined("default.cStandard"); }
     public get defaultCppStandard(): string | undefined { return this.getAsStringOrUndefined("default.cppStandard"); }
     public get defaultConfigurationProvider(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.configurationProvider")); }
     public get defaultMergeConfigurations(): boolean | undefined { return this.getAsBooleanOrUndefined("default.mergeConfigurations"); }
@@ -651,8 +651,6 @@ export class CppSettings extends Settings {
         }
         return setting.default as string[];
     }
-
-
 
     // Returns the value of a setting as an array of strings with proper type validation and checks for valid enum values.
     private getAsArrayOfStrings(settingName: string, allowUndefinedEnums: boolean = false): string[] {
