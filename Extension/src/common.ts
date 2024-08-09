@@ -76,6 +76,7 @@ export function getRawSetting(key: string, breakIfMissing: boolean = false): any
     }
     const result = flattenedPackageJson.get(key);
     if (result === undefined && breakIfMissing) {
+        // eslint-disable-next-line no-debugger
         debugger; // The setting does not exist in package.json. Check the `key`.
     }
     return result;
