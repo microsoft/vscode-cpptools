@@ -1041,8 +1041,8 @@ export class CppProperties {
                     && !settings.defaultForcedInclude
                     && !settings.defaultCompileCommands
                     && !settings.defaultCompilerArgs
-                    && (!settings.defaultCStandard || settings.defaultCStandard === "")
-                    && (!settings.defaultCppStandard || settings.defaultCppStandard === "")
+                    && !settings.defaultCStandard
+                    && !settings.defaultCppStandard
                     && settings.defaultIntelliSenseMode === ""
                     && !settings.defaultConfigurationProvider;
 

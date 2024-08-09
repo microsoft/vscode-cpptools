@@ -561,14 +561,18 @@ export class CppSettings extends Settings {
         return undefined;
     }
 
+    private isValidDefault(isValid: (x: any) => boolean, value: any, allowNull: boolean): boolean {
+        return isValid(value) || (allowNull && value === null);
+    }
+
     // Returns the value of a setting as a boolean with proper type validation.
     private getAsBoolean(settingName: string): boolean;
     private getAsBoolean(settingName: string, allowNull: boolean): boolean | null;
     private getAsBoolean(settingName: string, allowNull: boolean = false): boolean | null {
         const value: any = super.Section.get<any>(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
-        if (!isBoolean(setting.default) && !(allowNull && setting.default === null)) {
-            console.error(`Default value for ${settingName} is expected to be boolean or null.`);
+        if (!this.isValidDefault(isBoolean, setting.default, allowNull)) {
+            console.error(`Default value for ${settingName} is expected to be boolean${allowNull ? ' or null' : ''}.`);
         }
 
         if (allowNull && value === null) {
@@ -587,8 +591,8 @@ export class CppSettings extends Settings {
     private getAsString(settingName: string, allowNull: boolean = false): string | null {
         const value: any = super.Section.get<any>(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
-        if (!isString(setting.default) && !(allowNull && setting.default === null)) {
-            console.error(`Default value for ${settingName} is expected to be string or null.`);
+        if (!this.isValidDefault(isString, setting.default, allowNull)) {
+            console.error(`Default value for ${settingName} is expected to be string${allowNull ? ' or null' : ''}.`);
         }
 
         if (allowNull && value === null) {
@@ -614,8 +618,8 @@ export class CppSettings extends Settings {
     private getAsNumber(settingName: string, allowNull: boolean = false): number | null {
         const value: any = super.Section.get<any>(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
-        if (!isNumber(setting.default) && !(allowNull && setting.default === null)) {
-            console.error(`Default value for ${settingName} is expected to be number or null.`);
+        if (!this.isValidDefault(isNumber, setting.default, allowNull)) {
+            console.error(`Default value for ${settingName} is expected to be number${allowNull ? ' or null' : ''}.`);
         }
 
         if (allowNull && value === null) {
@@ -676,8 +680,8 @@ export class CppSettings extends Settings {
     private getAsExcludes(settingName: string, allowNull: boolean = false): Excludes | null {
         const value: any = super.Section.get(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
-        if (!isValidMapping(setting.default, isString, val => isBoolean(val) || isValidWhenObject(val)) && !(allowNull && setting.default === null)) {
-            console.error(`Default value for ${settingName} is expected to be Excludes or null.`);
+        if (!this.isValidDefault(x => isValidMapping(x, isString, val => isBoolean(val) || isValidWhenObject(val)), setting.default, allowNull)) {
+            console.error(`Default value for ${settingName} is expected to be Excludes${allowNull ? ' or null' : ''}.`);
         }
 
         if (allowNull && value === null) {
@@ -694,8 +698,8 @@ export class CppSettings extends Settings {
     private getAsAssociations(settingName: string, allowNull: boolean = false): Associations | null {
         const value: any = super.Section.get<any>(settingName);
         const setting = getRawSetting("C_Cpp." + settingName);
-        if (!isValidMapping(setting.default, isString, isString) && !(allowNull && setting.default === null)) {
-            console.error(`Default value for ${settingName} is expected to be Associations or null.`);
+        if (!this.isValidDefault(x => isValidMapping(x, isString, isString), setting.default, allowNull)) {
+            console.error(`Default value for ${settingName} is expected to be Associations${allowNull ? ' or null' : ''}.`);
         }
 
         if (allowNull && value === null) {
