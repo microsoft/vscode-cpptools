@@ -43,7 +43,7 @@ export interface WorkspaceFolderSettingsParams {
     errorSquiggles: string;
     exclusionPolicy: string;
     preferredPathSeparator: string;
-    intelliSenseCachePath: string | undefined;
+    intelliSenseCachePath: string;
     intelliSenseCacheSize: number;
     intelliSenseMemoryLimit: number;
     dimInactiveRegions: boolean;
@@ -51,14 +51,14 @@ export interface WorkspaceFolderSettingsParams {
     legacyCompilerArgsBehavior: boolean;
     defaultSystemIncludePath: string[] | undefined;
     cppFilesExclude: Excludes;
-    clangFormatPath: string | undefined;
+    clangFormatPath: string;
     clangFormatStyle: string | undefined;
     clangFormatFallbackStyle: string | undefined;
     clangFormatSortIncludes: boolean | null;
     codeAnalysisRunAutomatically: boolean;
     codeAnalysisExclude: Excludes;
     clangTidyEnabled: boolean;
-    clangTidyPath: string | undefined;
+    clangTidyPath: string;
     clangTidyConfig: string | undefined;
     clangTidyFallbackConfig: string | undefined;
     clangTidyHeaderFilter: string | null;
