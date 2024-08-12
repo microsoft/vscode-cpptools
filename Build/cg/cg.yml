@@ -90,7 +90,7 @@ extends:
             script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
 
         - task: Npm@0
-          name: NpmInstall_3
+          name: NpmInstall_2
           displayName: Install vsce
           inputs:
             arguments: --global @vscode/vsce
