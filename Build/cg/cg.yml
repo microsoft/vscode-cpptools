@@ -96,7 +96,7 @@ extends:
             arguments: --global readable-stream
 
         - task: Npm@0
-          name: NpmInstall_2
+          name: NpmInstall_3
           displayName: Install vsce
           inputs:
             arguments: --global @vscode/vsce
