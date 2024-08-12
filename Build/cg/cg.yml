@@ -80,20 +80,14 @@ extends:
           displayName: Use Yarn 1.x
 
         - task: UseNode@1
-          displayName: Use Node 16.x
+          displayName: Use Node 18.x
           inputs:
-            version: 16.x
+            version: 18.x
 
         - task: CmdLine@2
           displayName: Delete .npmrc if it exists
           inputs:
             script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
-
-        - task: Npm@0
-          name: NpmInstall_2
-          displayName: Install readable-stream (dependency required for vsce)
-          inputs:
-            arguments: --global readable-stream
 
         - task: Npm@0
           name: NpmInstall_3
