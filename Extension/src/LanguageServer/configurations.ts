@@ -62,8 +62,8 @@ export interface ConfigurationJson {
 
 export interface Configuration {
     name: string;
-    compilerPathInCppPropertiesJson?: string;
-    compilerPath?: string;
+    compilerPathInCppPropertiesJson?: string | null;
+    compilerPath?: string | null;
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
     compilerArgsLegacy?: string[];
@@ -990,11 +990,11 @@ export class CppProperties {
                 if (configuration.compilerPath === "${default}") {
                     configuration.compilerPath = settings.defaultCompilerPath ?? undefined;
                 }
-
-                if (configuration.compilerPath !== undefined) {
-                    configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
+                if (configuration.compilerPath === null) {
+                    configuration.compilerPath = undefined;
                     configuration.compilerPathIsExplicit = true;
-                } else if (settings.defaultCompilerPath === null) {
+                } else if (configuration.compilerPath !== undefined) {
+                    configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
                     configuration.compilerPathIsExplicit = true;
                 } else {
                     configuration.compilerPathIsExplicit = false;
@@ -1516,7 +1516,7 @@ export class CppProperties {
         return success;
     }
 
-    private resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true, assumeRelative: boolean = true): string {
+    private resolvePath(input_path: string | undefined | null, replaceAsterisks: boolean = true, assumeRelative: boolean = true): string {
         if (!input_path || input_path === "${default}") {
             return "";
         }
@@ -1590,6 +1590,7 @@ export class CppProperties {
                 (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0) &&
                 !resolvedCompilerPath.startsWith('"') &&
                 compilerPathAndArgs.compilerPath !== undefined &&
+                compilerPathAndArgs.compilerPath !== null &&
                 compilerPathAndArgs.compilerPath.includes(" ");
 
             const compilerPathErrors: string[] = [];
@@ -1598,7 +1599,7 @@ export class CppProperties {
             }
 
             // Get compiler path without arguments before checking if it exists
-            resolvedCompilerPath = compilerPathAndArgs.compilerPath;
+            resolvedCompilerPath = compilerPathAndArgs.compilerPath ?? undefined;
             if (resolvedCompilerPath) {
                 let pathExists: boolean = true;
                 const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
