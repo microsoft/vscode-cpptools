@@ -6,8 +6,7 @@ import * as vscode from 'vscode';
 import { ManualPromise } from '../../Utility/Async/manualPromise';
 import { CppSettings } from '../settings';
 
-interface FileData
-{
+interface FileData {
     version: number;
     promise: ManualPromise<vscode.InlayHint[]>;
     typeHints: CppInlayHint[];
