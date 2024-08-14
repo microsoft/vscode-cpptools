@@ -3287,7 +3287,7 @@
                         "markdownDescription": "%c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription%",
                         "scope": "application"
                     },
-                    "C_Cpp.onTheFlyDocsEnabled": {
+                    "C_Cpp.copilotHover": {
                         "type": "string",
                         "enum": [
                             "default",
@@ -3295,7 +3295,7 @@
                             "disabled"
                         ],
                         "default": "default",
-                        "markdownDescription": "%c_cpp.configuration.otfDocsEnabled.markdownDescription%",
+                        "markdownDescription": "%c_cpp.configuration.copilotHover.markdownDescription%",
                         "scope": "window"
                     }
                 }

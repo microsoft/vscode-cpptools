@@ -15,7 +15,7 @@ import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
 import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
-import { isWindows } from '../constants';
+import { isWindows, modelSelector } from '../constants';
 import { isFlightEnabled } from '../telemetry';
 import { DefaultClient, cachedEditorConfigLookups, cachedEditorConfigSettings, hasTrustedCompilerPaths } from './client';
 import { clients } from './extension';
@@ -160,7 +160,7 @@ export interface SettingsParams {
     codeAnalysisMaxMemory: number | null | undefined;
     codeAnalysisUpdateDelay: number | undefined;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
-    otfDocsEnabled: boolean | undefined;
+    copilotHover: boolean | undefined;
 }
 
 function getTarget(): vscode.ConfigurationTarget {
@@ -463,16 +463,26 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("inlayHints.referenceOperator.showSpace") === true;
     }
 
-    public get otfDocsEnabled(): PromiseLike<boolean> {
-        // Check if the user has access to copilot.
-        return vscode.lm.selectChatModels({vendor: "copilot"}).then((models) => {
-            // Check if the setting is explicitly set to enabled or disabled.
-            const setting = super.Section.get<string>("onTheFlyDocsEnabled");
+    public get copilotHover(): PromiseLike<boolean> {
+        // Check if the setting is explicitly set to enabled or disabled.
+        const setting = super.Section.get<string>("copilotHover");
 
-            // If no models are returned, the user doesn't have access to copilot.
+        if (setting === "disabled") {
+            return Promise.resolve(false);
+        }
+
+        // Check if the user has access to vscode language model.
+        const vscodelm = (vscode as any).lm;
+        if (!vscodelm) {
+            return Promise.resolve(false);
+        }
+
+        // Check if the user has access to Copilot.
+        return vscodelm.selectChatModels(modelSelector).then((models: any[]) => {
+            // If no models are returned, the user currently does not have access.
             if (models.length === 0) {
-                // Register to update this setting if the user gains access to copilot.
-                vscode.lm.onDidChangeChatModels(() => {
+                // Register to update this setting if the user gains access.
+                vscodelm.onDidChangeChatModels(() => {
                     clients.ActiveClient.sendDidChangeSettings();
                 });
                 return false;
@@ -481,12 +491,9 @@ export class CppSettings extends Settings {
             if (setting === "enabled") {
                 return true;
             }
-            if (setting === "disabled") {
-                return false;
-            }
 
             // Check for the feature flag.
-            return isFlightEnabled("cpp.otfDocs");
+            return isFlightEnabled("cpp.copilotHover");
         });
     }
 

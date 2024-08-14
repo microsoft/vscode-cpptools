@@ -543,17 +543,17 @@ interface GetIncludesResult
     includedFiles: string[];
 }
 
-interface ShowOTFDocsParams
+interface ShowCopilotHoverParams
 {
     content: string;
 }
 
-interface ShowOTFDocsResult
+interface ShowCopilotHoverResult
 {
     hoverPos: Position;
 }
 
-interface GetOTFDocsInfoResult
+interface GetCopilotHoverInfoResult
 {
     content: string;
 }
@@ -577,8 +577,8 @@ const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Posit
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
 const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
-const GetOTFDocsInfoRequest: RequestType<void, GetOTFDocsInfoResult, void> = new RequestType<void, GetOTFDocsInfoResult, void>('cpptools/getOTFDocsInfo');
-const ShowOTFDocsRequest: RequestType<ShowOTFDocsParams, ShowOTFDocsResult, void> = new RequestType<ShowOTFDocsParams, ShowOTFDocsResult, void>('cpptools/showOTFDocs');
+const GetCopilotHoverInfoRequest: RequestType<void, GetCopilotHoverInfoResult, void> = new RequestType<void, GetCopilotHoverInfoResult, void>('cpptools/getCopilotHoverInfo');
+const ShowCopilotHoverRequest: RequestType<ShowCopilotHoverParams, ShowCopilotHoverResult, void> = new RequestType<ShowCopilotHoverParams, ShowCopilotHoverResult, void>('cpptools/showCopilotHover');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
@@ -809,8 +809,8 @@ export interface Client {
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
     getIncludes(maxDepth: number): Promise<GetIncludesResult>;
-    showOTFDocs(content: string): Promise<ShowOTFDocsResult>;
-    getOTFDocsInfo(): Promise<GetOTFDocsInfoResult>;
+    showCopilotHover(content: string): Promise<ShowCopilotHoverResult>;
+    getCopilotHoverInfo(): Promise<GetCopilotHoverInfoResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -1491,7 +1491,7 @@ export class DefaultClient implements Client {
             codeAnalysisMaxConcurrentThreads: workspaceSettings.codeAnalysisMaxConcurrentThreads,
             codeAnalysisMaxMemory: workspaceSettings.codeAnalysisMaxMemory,
             codeAnalysisUpdateDelay: workspaceSettings.codeAnalysisUpdateDelay,
-            otfDocsEnabled: await workspaceSettings.otfDocsEnabled,
+            copilotHover: await workspaceSettings.copilotHover,
             workspaceFolderSettings: workspaceFolderSettingsParams
         };
     }
@@ -4005,15 +4005,15 @@ export class DefaultClient implements Client {
         DebugConfigurationProvider.ClearDetectedBuildTasks();
     }
 
-    public async showOTFDocs(content: string): Promise<ShowOTFDocsResult> {
-        const params: ShowOTFDocsParams = {content: content};
+    public async showCopilotHover(content: string): Promise<ShowCopilotHoverResult> {
+        const params: ShowCopilotHoverParams = {content: content};
         await this.ready;
-        return this.languageClient.sendRequest(ShowOTFDocsRequest, params);
+        return this.languageClient.sendRequest(ShowCopilotHoverRequest, params);
     }
 
-    public async getOTFDocsInfo(): Promise<GetOTFDocsInfoResult> {
+    public async getCopilotHoverInfo(): Promise<GetCopilotHoverInfoResult> {
         await this.ready;
-        return this.languageClient.sendRequest(GetOTFDocsInfoRequest, null);
+        return this.languageClient.sendRequest(GetCopilotHoverInfoRequest, null);
     }
 }
 
@@ -4127,6 +4127,6 @@ class NullClient implements Client {
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
     getIncludes(): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
-    showOTFDocs(content: string): Promise<ShowOTFDocsResult> { return Promise.resolve({} as ShowOTFDocsResult); }
-    getOTFDocsInfo(): Promise<GetOTFDocsInfoResult> { return Promise.resolve({} as GetOTFDocsInfoResult); }
+    showCopilotHover(content: string): Promise<ShowCopilotHoverResult> { return Promise.resolve({} as ShowCopilotHoverResult); }
+    getCopilotHoverInfo(): Promise<GetCopilotHoverInfoResult> { return Promise.resolve({} as GetCopilotHoverInfoResult); }
 }
