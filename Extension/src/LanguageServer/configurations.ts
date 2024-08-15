@@ -1566,10 +1566,10 @@ export class CppProperties {
 
         // Check if config name is unique.
         errors.name = this.isConfigNameUnique(config.name);
-        let resolvedCompilerPath: string | undefined;
+        let resolvedCompilerPath: string | undefined | null;
         // Validate compilerPath
         if (config.compilerPath) {
-            resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true }) ?? undefined;
+            resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true });
         }
 
         if (resolvedCompilerPath === undefined) {
