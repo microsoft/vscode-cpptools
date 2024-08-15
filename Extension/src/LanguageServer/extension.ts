@@ -20,12 +20,13 @@ import * as util from '../common';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
-import { ChatContextResult, Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
+import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
 import { getLanguageConfig } from './languageConfig';
+import { CppConfigurationLanguageModelTool } from './lmTool';
 import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
@@ -249,77 +250,10 @@ export async function activate(): Promise<void> {
         activeDocument = activeEditor.document;
     }
 
-    await setupCppChatVariable(util.extensionContext);
-}
-
-export async function setupCppChatVariable(context: vscode.ExtensionContext | undefined): Promise<void>
-{
-    if (!context) {
-        return;
+    if (util.extensionContext) {
+        const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool(clients));
+        disposables.push(tool);
     }
-
-    vscode.chat.registerChatVariableResolver('cpp',
-        `Describes the the C++ language features that can be used according
- to the following information: the C++ language standard version, the target architecture and target operating system.`, {
-            resolve: async (name, _context, _token) => {
-                function fixUpLanguage(languageId: string) {
-                    const languageIdToLanguage: { [id: string]: string } =
-                    { 'c': 'C', 'cpp': 'C++', 'cuda-cpp': 'CUDA C++' };
-                    return languageIdToLanguage[languageId] || languageId;
-                }
-
-                function fixUpCompiler(compilerId: string) {
-                    const compilerIdToCompiler: { [id: string]: string } =
-                    { 'msvc': 'MSVC', 'clang': 'Clang', 'gcc': 'GCC' };
-                    return compilerIdToCompiler[compilerId] || compilerId;
-                }
-
-                function fixUpStandardVersion(stdVerId: string) {
-                    const stdVerIdToStdVer: { [id: string]: string } =
-                    { 'c++98': 'C++98', 'c++03': 'C++03', 'c++11': 'C++11', 'c++14': 'C++14', 'c++17': 'C++17',
-                        'c++20': 'C++20', 'c++23': 'C++23', 'c90' : "C90", 'c99': "C99", 'c11': "C11", 'c17': "C17",
-                        'c23': "C23" };
-                    return stdVerIdToStdVer[stdVerId] || stdVerId;
-                }
-
-                function fixTargetPlatform(targetPlatformId: string) {
-                    const platformIdToPlatform: { [id: string]: string } = { 'windows': 'Windows', 'Linux': 'Linux', 'macos': 'macOS' };
-                    return platformIdToPlatform[targetPlatformId] || targetPlatformId;
-                }
-
-                if (name !== 'cpp') {
-                    return undefined;
-                }
-
-                // Return undefined if the active document is not a C++/C/CUDA/Header file.
-                const currentDoc = vscode.window.activeTextEditor?.document;
-                if (!currentDoc || (!util.isCpp(currentDoc) && !util.isHeaderFile(currentDoc.uri))) {
-                    return undefined;
-                }
-
-                const chatContext: ChatContextResult | undefined = await getChatContext();
-                if (!chatContext) {
-                    return undefined;
-                }
-
-                telemetry.logCppChatVariableEvent('cpp',
-                    { "language": chatContext.language, "compiler": chatContext.compiler, "standardVersion": chatContext.standardVersion,
-                        "targetPlatform": chatContext.targetPlatform, "targetArchitecture": chatContext.targetArchitecture });
-
-                const language = fixUpLanguage(chatContext.language);
-                const compiler = fixUpCompiler(chatContext.compiler);
-                const standardVersion = fixUpStandardVersion(chatContext.standardVersion);
-                const targetPlatform = fixTargetPlatform(chatContext.targetPlatform);
-                const value = `I am working on a project of the following nature:
-- Using ${language}. Prefer a solution written in ${language} to any other language. Call out which language you are using in the answer.
-- Using the ${language} standard language version ${standardVersion}. Prefer solutions using the new and more recent features introduced in ${standardVersion}. Call out which standard version you are using in the answer.
-- Using the ${compiler} compiler. Prefer solutions supported by the ${compiler} compiler.
-- Targeting the ${targetPlatform} platform. Prefer solutions and API that are supported on ${targetPlatform}.
-- Targeting the ${chatContext.targetArchitecture} architecture. Prefer solutions and techniques that are supported on the ${chatContext.targetArchitecture} architecture.
-`;
-                return [ { level: vscode.ChatVariableLevel.Full, value: value } ];
-            }
-        });
 }
 
 export function updateLanguageConfigurations(): void {
@@ -1443,8 +1377,4 @@ export async function preReleaseCheck(): Promise<void> {
 export async function getIncludes(maxDepth: number): Promise<any> {
     const includes = await clients.ActiveClient.getIncludes(maxDepth);
     return includes;
-}
-
-export async function getChatContext(): Promise<ChatContextResult | undefined> {
-    return clients?.ActiveClient?.getChatContext() ?? undefined;
 }
