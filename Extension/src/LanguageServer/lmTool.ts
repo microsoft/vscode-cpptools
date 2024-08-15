@@ -14,12 +14,12 @@ const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: str
     language: {
         'c': 'C',
         'cpp': 'C++',
-        'cuda-cpp': 'CUDA C++',
+        'cuda-cpp': 'CUDA C++'
     },
     compiler: {
         'msvc': 'MSVC',
         'clang': 'Clang',
-        'gcc': 'GCC',
+        'gcc': 'GCC'
     },
     standardVersion: {
         'c++98': 'C++98',
@@ -33,13 +33,13 @@ const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: str
         'c99': "C99",
         'c11': "C11",
         'c17': "C17",
-        'c23': "C23",
+        'c23': "C23"
     },
     targetPlatform: {
         'windows': 'Windows',
         'Linux': 'Linux',
-        'macos': 'macOS',
-    },
+        'macos': 'macOS'
+    }
 };
 
 class StringLanguageModelToolResult implements vscode.LanguageModelToolResult
@@ -52,7 +52,7 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
 {
     public constructor(private readonly clients: ClientCollection) {}
 
-    public async invoke(parameters: any, token: vscode.CancellationToken): Promise<vscode.LanguageModelToolResult> {
+    public async invoke(_parameters: any, _token: vscode.CancellationToken): Promise<vscode.LanguageModelToolResult> {
         return new StringLanguageModelToolResult(await this.getContext());
     }
 
