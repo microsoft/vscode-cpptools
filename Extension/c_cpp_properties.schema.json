@@ -18,7 +18,10 @@
                     "compilerPath": {
                         "markdownDescription": "Full path of the compiler being used, e.g. `/usr/bin/gcc`, to enable more accurate IntelliSense.",
                         "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     },
                     "compilerArgs": {
                         "markdownDescription": "Compiler arguments to modify the includes or defines used, e.g. `-nostdinc++`, `-m32`, etc. Arguments that take additional space-delimited arguments should be entered as separate arguments in the array, e.g. for `--sysroot <arg>` use `\"--sysroot\", \"<arg>\"`.",
