@@ -1130,7 +1130,9 @@ function mapWrapToEditorConfig(value: string | undefined): string {
 
 function matchesSection(filePath: string, section: string): boolean {
     const fileName: string = path.basename(filePath);
-    const sectionPattern: string = section.replace(/\*/g, '.*').replace(/\./g, '\\.');
+    // Escape all regex special characters except '*' and '?'
+    // Convert wildcards '*' to '.*' and '?' to '.'
+    const sectionPattern = section.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.');
     const regex: RegExp = new RegExp(`^${sectionPattern}$`);
     return regex.test(fileName);
 }
