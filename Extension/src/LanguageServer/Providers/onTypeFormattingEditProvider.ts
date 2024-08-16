@@ -4,7 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, FormatOnTypeRequest, FormatParams, FormatResult } from '../client';
-import { CppSettings, getEditorConfigSettings } from '../settings';
+import { getEditorConfigSettings } from '../editorConfig';
+import { CppSettings } from '../settings';
 import { makeVscodeTextEdits } from '../utils';
 
 export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvider {
