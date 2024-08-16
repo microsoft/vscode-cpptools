@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { ChatContextResult } from './client';
-import { ClientCollection } from './clientCollection';
+import { getClients } from './extension';
 
 const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: string } } = {
     language: {
@@ -50,19 +50,17 @@ class StringLanguageModelToolResult implements vscode.LanguageModelToolResult
 
 export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTool
 {
-    public constructor(private readonly clients: ClientCollection) {}
-
-    public async invoke(_parameters: any, _token: vscode.CancellationToken): Promise<vscode.LanguageModelToolResult> {
-        return new StringLanguageModelToolResult(await this.getContext());
+    public async invoke(_parameters: any, token: vscode.CancellationToken): Promise<vscode.LanguageModelToolResult> {
+        return new StringLanguageModelToolResult(await this.getContext(token));
     }
 
-    private async getContext(): Promise<string> {
+    private async getContext(token: vscode.CancellationToken): Promise<string> {
         const currentDoc = vscode.window.activeTextEditor?.document;
         if (!currentDoc || (!util.isCpp(currentDoc) && !util.isHeaderFile(currentDoc.uri))) {
             return 'The active document is not a C, C++, or CUDA file.';
         }
 
-        const chatContext: ChatContextResult | undefined = await (this.clients?.ActiveClient?.getChatContext() ?? undefined);
+        const chatContext: ChatContextResult | undefined = await (getClients()?.ActiveClient?.getChatContext(token) ?? undefined);
         if (!chatContext) {
             return 'No configuration information is available for the active document.';
         }
