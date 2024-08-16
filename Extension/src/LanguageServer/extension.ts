@@ -251,7 +251,7 @@ export async function activate(): Promise<void> {
     }
 
     if (util.extensionContext) {
-        const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool(clients));
+        const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
         disposables.push(tool);
     }
 }

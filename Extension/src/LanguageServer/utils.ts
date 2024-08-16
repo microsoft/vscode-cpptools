@@ -99,3 +99,10 @@ export function showInstallCompilerWalkthrough(): void {
 }
 
 const docsChangedFromCppToC: Set<string> = new Set<string>();
+
+export async function withCancellation<T>(promise: Promise<T>, token: vscode.CancellationToken): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+        token.onCancellationRequested(() => reject(new vscode.CancellationError()));
+        promise.then((value) => resolve(value), (reason) => reject(reason));
+    });
+}

@@ -63,7 +63,7 @@ import * as refs from './references';
 import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
 import { SettingsTracker } from './settingsTracker';
 import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
-import { handleChangedFromCppToC, makeLspRange, makeVscodeLocation, makeVscodeRange } from './utils';
+import { handleChangedFromCppToC, makeLspRange, makeVscodeLocation, makeVscodeRange, withCancellation } from './utils';
 import minimatch = require("minimatch");
 
 function deepCopy(obj: any) {
@@ -801,7 +801,7 @@ export interface Client {
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
     getIncludes(maxDepth: number): Promise<GetIncludesResult>;
-    getChatContext(): Promise<ChatContextResult | undefined>;
+    getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult | undefined>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -2244,9 +2244,17 @@ export class DefaultClient implements Client {
         return this.languageClient.sendRequest(IncludesRequest, params);
     }
 
-    public async getChatContext(): Promise<ChatContextResult | undefined> {
-        await this.ready;
-        return this.languageClient.sendRequest(CppContextRequest, null);
+    public async getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult | undefined> {
+        await withCancellation(this.ready, token);
+        const result = await this.languageClient.sendRequest(CppContextRequest, null, token);
+
+        // sendRequest() won't throw on cancellation, but will return an
+        // unexpected object with an error code and message.
+        if (token.isCancellationRequested) {
+            throw new vscode.CancellationError();
+        }
+
+        return result;
     }
 
     /**
@@ -4129,5 +4137,5 @@ class NullClient implements Client {
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
     getIncludes(): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
-    getChatContext(): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
+    getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
 }
