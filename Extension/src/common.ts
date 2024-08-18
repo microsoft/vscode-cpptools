@@ -1095,15 +1095,15 @@ export function isCl(compilerPath: string): boolean {
 
 /** CompilerPathAndArgs retains original casing of text input for compiler path and args */
 export interface CompilerPathAndArgs {
-    compilerPath?: string;
+    compilerPath?: string | null;
     compilerName: string;
     compilerArgs?: string[];
     compilerArgsFromCommandLineInPath: string[];
     allCompilerArgs: string[];
 }
 
-export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string, compilerArgs?: string[]): CompilerPathAndArgs {
-    let compilerPath: string | undefined = inputCompilerPath;
+export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string | null, compilerArgs?: string[]): CompilerPathAndArgs {
+    let compilerPath: string | undefined | null = inputCompilerPath;
     let compilerName: string = "";
     let compilerArgsFromCommandLineInPath: string[] = [];
     if (compilerPath) {
