@@ -2,16 +2,6 @@ name: $(Date:yyyyMMdd)$(rev:.r)
 trigger: none
 pr: none
 
-parameters:
-- name: verifyVersion
-  displayName: Attest version in package.json is correct
-  type: boolean
-  default: false
-- name: verifyChangelog
-  displayName: Attest CHANGELOG.md is updated
-  type: boolean
-  default: false
-
 resources:
   repositories:
   - repository: MicroBuildTemplate
@@ -39,13 +29,6 @@ extends:
     stages:
     - stage: Validate
       jobs:
-      # Introduce pipeline compilation errors to block scheduling if the requisite parameters are not set
-      - ${{ if not(eq(parameters.verifyBinariesVersion, true)) }}:
-        - 'Binary version in CMakeLists.txt should be updated before scheduling the pipeline.'
-
-      - ${{ if not(eq(parameters.verifyChangelog, true)) }}:
-        - 'CHANGELOG.md should be updated before scheduling the pipeline.'
-
       - template: /Build/publish/jobs_manual_validation.yml@self
         parameters:
           notifyUsers: $(NotifyUsers)

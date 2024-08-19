@@ -2,6 +2,16 @@ name: $(date:yyyyMMdd)$(rev:.r)
 trigger: none
 pr: none
 
+parameters:
+- name: verifyVersion
+  displayName: Attest version in package.json is correct
+  type: boolean
+  default: false
+- name: verifyChangelog
+  displayName: Attest CHANGELOG.md is updated
+  type: boolean
+  default: false
+
 resources:
   repositories:
   - repository: MicroBuildTemplate
@@ -25,6 +35,13 @@ extends:
     stages:
     - stage: package
       jobs:
+      # Introduce pipeline compilation errors to block scheduling if the requisite parameters are not set
+      - ${{ if not(eq(parameters.verifyVersion, true)) }}:
+        - 'Binary version in CMakeLists.txt should be updated before scheduling the pipeline.'
+
+      - ${{ if not(eq(parameters.verifyChangelog, true)) }}:
+        - 'CHANGELOG.md should be updated before scheduling the pipeline.'
+
       - template: /Build/package/jobs_package_vsix.yml@self
         parameters:
           vsixName: cpptools-extension-pack.vsix
