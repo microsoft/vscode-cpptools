@@ -1319,7 +1319,7 @@ export function UpdateInsidersAccess(): void {
         const insidersMitigationDone: PersistentState<boolean> = new PersistentState<boolean>("CPP.insidersMitigationDone", false);
         if (!insidersMitigationDone.Value) {
             if (vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
-                if (settings.getWithUndefinedDefault<string>("updateChannel") === undefined) {
+                if (settings.getStringWithUndefinedDefault("updateChannel") === undefined) {
                     installPrerelease = true;
                 }
             }

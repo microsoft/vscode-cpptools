@@ -14,8 +14,9 @@ import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
-import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
+import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isObject, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
 import { isWindows } from '../constants';
+import * as telemetry from '../telemetry';
 import { DefaultClient, cachedEditorConfigLookups, cachedEditorConfigSettings, hasTrustedCompilerPaths } from './client';
 import { clients } from './extension';
 import { CommentPattern } from './languageConfig';
@@ -25,144 +26,155 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface Excludes {
-    [key: string]: boolean | { when: string };
+    [key: string]: (boolean | { when: string });
 }
 
+export interface Associations {
+    [key: string]: string;
+}
+
+// Settings that can be undefined have default values assigned in the native code or are meant to return undefined.
 export interface WorkspaceFolderSettingsParams {
     uri: string | undefined;
-    intelliSenseEngine: string | undefined;
-    intelliSenseEngineFallback: boolean | undefined;
-    autocomplete: string | undefined;
-    autocompleteAddParentheses: boolean | undefined;
-    errorSquiggles: string | undefined;
-    exclusionPolicy: string | undefined;
-    preferredPathSeparator: string | undefined;
-    intelliSenseCachePath: string | undefined;
-    intelliSenseCacheSize: number | undefined;
-    intelliSenseMemoryLimit: number | undefined;
-    dimInactiveRegions: boolean | undefined;
-    suggestSnippets: boolean | undefined;
-    legacyCompilerArgsBehavior: boolean | undefined;
+    intelliSenseEngine: string;
+    intelliSenseEngineFallback: boolean;
+    autocomplete: string;
+    autocompleteAddParentheses: boolean;
+    errorSquiggles: string;
+    exclusionPolicy: string;
+    preferredPathSeparator: string;
+    intelliSenseCachePath: string;
+    intelliSenseCacheSize: number;
+    intelliSenseMemoryLimit: number;
+    dimInactiveRegions: boolean;
+    suggestSnippets: boolean;
+    legacyCompilerArgsBehavior: boolean;
     defaultSystemIncludePath: string[] | undefined;
-    cppFilesExclude: Excludes | undefined;
-    clangFormatPath: string | undefined;
+    cppFilesExclude: Excludes;
+    clangFormatPath: string;
     clangFormatStyle: string | undefined;
     clangFormatFallbackStyle: string | undefined;
-    clangFormatSortIncludes: boolean | undefined | null;
-    codeAnalysisRunAutomatically: boolean | undefined;
-    codeAnalysisExclude: Excludes | undefined;
-    clangTidyEnabled: boolean | undefined;
-    clangTidyPath: string | undefined;
+    clangFormatSortIncludes: boolean | null;
+    codeAnalysisRunAutomatically: boolean;
+    codeAnalysisExclude: Excludes;
+    clangTidyEnabled: boolean;
+    clangTidyPath: string;
     clangTidyConfig: string | undefined;
     clangTidyFallbackConfig: string | undefined;
-    clangTidyHeaderFilter: string | undefined | null;
-    clangTidyArgs: string[] | undefined;
-    clangTidyUseBuildPath: boolean | undefined;
-    clangTidyFixWarnings: boolean | undefined;
-    clangTidyFixErrors: boolean | undefined;
-    clangTidyFixNotes: boolean | undefined;
+    clangTidyHeaderFilter: string | null;
+    clangTidyArgs: string[];
+    clangTidyUseBuildPath: boolean;
     clangTidyChecksEnabled: string[] | undefined;
     clangTidyChecksDisabled: string[] | undefined;
-    hover: string | undefined;
-    markdownInComments: string | undefined;
-    vcFormatIndentBraces: boolean | undefined;
-    vcFormatIndentMultiLineRelativeTo: string | undefined;
-    vcFormatIndentWithinParentheses: string | undefined;
+    hover: string;
+    markdownInComments: string;
+    vcFormatIndentBraces: boolean;
+    vcFormatIndentMultiLineRelativeTo: string;
+    vcFormatIndentWithinParentheses: string;
     vcFormatIndentPreserveWithinParentheses: boolean;
-    vcFormatIndentCaseLabels: boolean | undefined;
-    vcFormatIndentCaseContents: boolean | undefined;
-    vcFormatIndentCaseContentsWhenBlock: boolean | undefined;
-    vcFormatIndentLambdaBracesWhenParameter: boolean | undefined;
-    vcFormatIndentGotoLabels: string | undefined;
-    vcFormatIndentPreprocessor: string | undefined;
-    vcFormatIndentAccesSpecifiers: boolean | undefined;
-    vcFormatIndentNamespaceContents: boolean | undefined;
-    vcFormatIndentPreserveComments: boolean | undefined;
-    vcFormatNewLineScopeBracesOnSeparateLines: boolean | undefined;
-    vcFormatNewLineBeforeOpenBraceNamespace: string | undefined;
-    vcFormatNewLineBeforeOpenBraceType: string | undefined;
-    vcFormatNewLineBeforeOpenBraceFunction: string | undefined;
-    vcFormatNewLineBeforeOpenBraceBlock: string | undefined;
-    vcFormatNewLineBeforeOpenBraceLambda: string | undefined;
-    vcFormatNewLineBeforeCatch: boolean | undefined;
-    vcFormatNewLineBeforeElse: boolean | undefined;
-    vcFormatNewLineBeforeWhileInDoWhile: boolean | undefined;
-    vcFormatNewLineCloseBraceSameLineEmptyType: boolean | undefined;
-    vcFormatNewLineCloseBraceSameLineEmptyFunction: boolean | undefined;
-    vcFormatSpaceWithinParameterListParentheses: boolean | undefined;
-    vcFormatSpaceBetweenEmptyParameterListParentheses: boolean | undefined;
-    vcFormatSpaceAfterKeywordsInControlFlowStatements: boolean | undefined;
-    vcFormatSpaceWithinControlFlowStatementParentheses: boolean | undefined;
-    vcFormatSpaceBeforeLambdaOpenParenthesis: boolean | undefined;
-    vcFormatSpaceWithinCastParentheses: boolean | undefined;
-    vcFormatSpaceAfterCastCloseParenthesis: boolean | undefined;
-    vcFormatSpaceWithinExpressionParentheses: boolean | undefined;
-    vcFormatSpaceBeforeBlockOpenBrace: boolean | undefined;
-    vcFormatSpaceBetweenEmptyBraces: boolean | undefined;
-    vcFormatSpaceBeforeInitializerListOpenBrace: boolean | undefined;
-    vcFormatSpaceWithinInitializerListBraces: boolean | undefined;
-    vcFormatSpacePreserveInInitializerList: boolean | undefined;
-    vcFormatSpaceBeforeOpenSquareBracket: boolean | undefined;
-    vcFormatSpaceWithinSquareBrackets: boolean | undefined;
-    vcFormatSpaceBeforeEmptySquareBrackets: boolean | undefined;
-    vcFormatSpaceBetweenEmptySquareBrackets: boolean | undefined;
-    vcFormatSpaceGroupSquareBrackets: boolean | undefined;
-    vcFormatSpaceWithinLambdaBrackets: boolean | undefined;
-    vcFormatSpaceBetweenEmptyLambdaBrackets: boolean | undefined;
-    vcFormatSpaceBeforeComma: boolean | undefined;
-    vcFormatSpaceAfterComma: boolean | undefined;
-    vcFormatSpaceRemoveAroundMemberOperators: boolean | undefined;
-    vcFormatSpaceBeforeInheritanceColon: boolean | undefined;
-    vcFormatSpaceBeforeConstructorColon: boolean | undefined;
-    vcFormatSpaceRemoveBeforeSemicolon: boolean | undefined;
-    vcFormatSpaceInsertAfterSemicolon: boolean | undefined;
-    vcFormatSpaceRemoveAroundUnaryOperator: boolean | undefined;
-    vcFormatSpaceBeforeFunctionOpenParenthesis: string | undefined;
-    vcFormatSpaceAroundBinaryOperator: string | undefined;
-    vcFormatSpaceAroundAssignmentOperator: string | undefined;
-    vcFormatSpacePointerReferenceAlignment: string | undefined;
-    vcFormatSpaceAroundTernaryOperator: string | undefined;
-    vcFormatWrapPreserveBlocks: string | undefined;
-    doxygenGenerateOnType: boolean | undefined;
-    doxygenGeneratedStyle: string | undefined;
-    doxygenSectionTags: string[] | undefined;
-    filesExclude: Excludes | undefined;
-    filesAutoSaveAfterDelay: boolean | undefined;
-    filesEncoding: string | undefined;
-    searchExclude: Excludes | undefined;
-    editorAutoClosingBrackets: string | undefined;
-    editorInlayHintsEnabled: boolean | undefined;
-    editorParameterHintsEnabled: boolean | undefined;
-    refactoringIncludeHeader: string | undefined;
+    vcFormatIndentCaseLabels: boolean;
+    vcFormatIndentCaseContents: boolean;
+    vcFormatIndentCaseContentsWhenBlock: boolean;
+    vcFormatIndentLambdaBracesWhenParameter: boolean;
+    vcFormatIndentGotoLabels: string;
+    vcFormatIndentPreprocessor: string;
+    vcFormatIndentAccesSpecifiers: boolean;
+    vcFormatIndentNamespaceContents: boolean;
+    vcFormatIndentPreserveComments: boolean;
+    vcFormatNewLineScopeBracesOnSeparateLines: boolean;
+    vcFormatNewLineBeforeOpenBraceNamespace: string;
+    vcFormatNewLineBeforeOpenBraceType: string;
+    vcFormatNewLineBeforeOpenBraceFunction: string;
+    vcFormatNewLineBeforeOpenBraceBlock: string;
+    vcFormatNewLineBeforeOpenBraceLambda: string;
+    vcFormatNewLineBeforeCatch: boolean;
+    vcFormatNewLineBeforeElse: boolean;
+    vcFormatNewLineBeforeWhileInDoWhile: boolean;
+    vcFormatNewLineCloseBraceSameLineEmptyType: boolean;
+    vcFormatNewLineCloseBraceSameLineEmptyFunction: boolean;
+    vcFormatSpaceWithinParameterListParentheses: boolean;
+    vcFormatSpaceBetweenEmptyParameterListParentheses: boolean;
+    vcFormatSpaceAfterKeywordsInControlFlowStatements: boolean;
+    vcFormatSpaceWithinControlFlowStatementParentheses: boolean;
+    vcFormatSpaceBeforeLambdaOpenParenthesis: boolean;
+    vcFormatSpaceWithinCastParentheses: boolean;
+    vcFormatSpaceAfterCastCloseParenthesis: boolean;
+    vcFormatSpaceWithinExpressionParentheses: boolean;
+    vcFormatSpaceBeforeBlockOpenBrace: boolean;
+    vcFormatSpaceBetweenEmptyBraces: boolean;
+    vcFormatSpaceBeforeInitializerListOpenBrace: boolean;
+    vcFormatSpaceWithinInitializerListBraces: boolean;
+    vcFormatSpacePreserveInInitializerList: boolean;
+    vcFormatSpaceBeforeOpenSquareBracket: boolean;
+    vcFormatSpaceWithinSquareBrackets: boolean;
+    vcFormatSpaceBeforeEmptySquareBrackets: boolean;
+    vcFormatSpaceBetweenEmptySquareBrackets: boolean;
+    vcFormatSpaceGroupSquareBrackets: boolean;
+    vcFormatSpaceWithinLambdaBrackets: boolean;
+    vcFormatSpaceBetweenEmptyLambdaBrackets: boolean;
+    vcFormatSpaceBeforeComma: boolean;
+    vcFormatSpaceAfterComma: boolean;
+    vcFormatSpaceRemoveAroundMemberOperators: boolean;
+    vcFormatSpaceBeforeInheritanceColon: boolean;
+    vcFormatSpaceBeforeConstructorColon: boolean;
+    vcFormatSpaceRemoveBeforeSemicolon: boolean;
+    vcFormatSpaceInsertAfterSemicolon: boolean;
+    vcFormatSpaceRemoveAroundUnaryOperator: boolean;
+    vcFormatSpaceBeforeFunctionOpenParenthesis: string;
+    vcFormatSpaceAroundBinaryOperator: string;
+    vcFormatSpaceAroundAssignmentOperator: string;
+    vcFormatSpacePointerReferenceAlignment: string;
+    vcFormatSpaceAroundTernaryOperator: string;
+    vcFormatWrapPreserveBlocks: string;
+    doxygenGenerateOnType: boolean;
+    doxygenGeneratedStyle: string;
+    doxygenSectionTags: string[];
+    filesExclude: Excludes;
+    filesAutoSaveAfterDelay: boolean;
+    filesEncoding: string;
+    searchExclude: Excludes;
+    editorAutoClosingBrackets: string;
+    editorInlayHintsEnabled: boolean;
+    editorParameterHintsEnabled: boolean;
+    refactoringIncludeHeader: string;
 }
 
 export interface SettingsParams {
-    filesAssociations: { [key: string]: string } | undefined;
-    workspaceFallbackEncoding: string | undefined;
-    maxConcurrentThreads: number | null | undefined;
-    maxCachedProcesses: number | null | undefined;
-    maxMemory: number | null | undefined;
-    maxSymbolSearchResults: number | undefined;
-    loggingLevel: string | undefined;
-    workspaceParsingPriority: string | undefined;
-    workspaceSymbols: string | undefined;
-    simplifyStructuredComments: boolean | undefined;
-    intelliSenseUpdateDelay: number | undefined;
-    experimentalFeatures: boolean | undefined;
-    enhancedColorization: boolean | undefined;
-    intellisenseMaxCachedProcesses: number | null | undefined;
-    intellisenseMaxMemory: number | null | undefined;
-    referencesMaxConcurrentThreads: number | null | undefined;
-    referencesMaxCachedProcesses: number | null | undefined;
-    referencesMaxMemory: number | null | undefined;
-    codeAnalysisMaxConcurrentThreads: number | null | undefined;
-    codeAnalysisMaxMemory: number | null | undefined;
-    codeAnalysisUpdateDelay: number | undefined;
+    filesAssociations: Associations;
+    workspaceFallbackEncoding: string;
+    maxConcurrentThreads: number | null;
+    maxCachedProcesses: number | null;
+    maxMemory: number | null;
+    maxSymbolSearchResults: number;
+    loggingLevel: string;
+    workspaceParsingPriority: string;
+    workspaceSymbols: string;
+    simplifyStructuredComments: boolean;
+    intelliSenseUpdateDelay: number;
+    experimentalFeatures: boolean;
+    enhancedColorization: boolean;
+    intellisenseMaxCachedProcesses: number | null;
+    intellisenseMaxMemory: number | null;
+    referencesMaxConcurrentThreads: number | null;
+    referencesMaxCachedProcesses: number | null;
+    referencesMaxMemory: number | null;
+    codeAnalysisMaxConcurrentThreads: number | null;
+    codeAnalysisMaxMemory: number | null;
+    codeAnalysisUpdateDelay: number;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
 }
 
 function getTarget(): vscode.ConfigurationTarget {
     return vscode.workspace.workspaceFolders ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
+}
+
+function isValidWhenObject(obj: unknown): obj is { when: string } {
+    return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'when' in obj &&
+        typeof (obj as { when: unknown }).when === 'string'
+    );
 }
 
 class Settings {
@@ -178,43 +190,45 @@ class Settings {
 
     protected get Section(): vscode.WorkspaceConfiguration { return this.settings; }
 
-    protected getWithFallback<T>(section: string, deprecatedSection: string): T {
-        const info: any = this.settings.inspect<T>(section);
-        if (info.workspaceFolderValue !== undefined) {
+    // If the setting has an undefined default, look for the workspaceFolder, workspace and global values as well.
+    public getArrayOfStringsWithUndefinedDefault(section: string): string[] | undefined;
+    public getArrayOfStringsWithUndefinedDefault(section: string, allowNull: boolean): string[] | undefined | null;
+    public getArrayOfStringsWithUndefinedDefault(section: string, allowNull: boolean = false): string[] | undefined | null {
+        const info: any = this.settings.inspect<string[]>(section);
+
+        if ((allowNull && info.workspaceFolderValue === null) || isArrayOfString(info.workspaceFolderValue)) {
             return info.workspaceFolderValue;
-        } else if (info.workspaceValue !== undefined) {
+        }
+
+        if ((allowNull && info.workspaceValue === null) || isArrayOfString(info.workspaceValue)) {
             return info.workspaceValue;
-        } else if (info.globalValue !== undefined) {
+        }
+
+        if ((allowNull && info.globalValue === null) || isArrayOfString(info.globalValue)) {
             return info.globalValue;
         }
-        const value: T | undefined = this.settings.get<T>(deprecatedSection);
-        if (value !== undefined) {
-            return value;
-        }
-        return info.defaultValue;
+        return undefined;
     }
 
-    protected getWithNullAsUndefined<T>(section: string): T | undefined {
-        const result: T | undefined | null = this.settings.get<T>(section);
-        if (result === null) {
-            return undefined;
-        }
-        return result;
-    }
+    public getStringWithUndefinedDefault(section: string): string | undefined {
+        const info: any = this.settings.inspect<string>(section);
 
-    public getWithUndefinedDefault<T>(section: string): T | undefined {
-        const info: any = this.settings.inspect<T>(section);
-        if (info.workspaceFolderValue !== undefined) {
+        if (isString(info.workspaceFolderValue)) {
             return info.workspaceFolderValue;
-        } else if (info.workspaceValue !== undefined) {
+        }
+
+        if (isString(info.workspaceValue)) {
             return info.workspaceValue;
-        } else if (info.globalValue !== undefined) {
+        }
+
+        if (isString(info.globalValue)) {
             return info.globalValue;
         }
         return undefined;
     }
 }
 
+// If a setting is undefined, a blank string, or null, return undefined instead.
 function changeBlankStringToUndefined(input: string | undefined): string | undefined {
     // Although null is not a valid type, user could enter a null anyway.
     return (input === undefined || input === null || input.trim() === "") ? undefined : input;
@@ -258,7 +272,7 @@ export class CppSettings extends Settings {
     }
 
     private getClangPath(isFormat: boolean): string | undefined {
-        let path: string | undefined = changeBlankStringToUndefined(super.Section.get<string>(isFormat ? "clang_format_path" : "codeAnalysis.clangTidy.path"));
+        let path: string | undefined = changeBlankStringToUndefined(this.getAsStringOrUndefined(isFormat ? "clang_format_path" : "codeAnalysis.clangTidy.path"));
         if (!path) {
             const cachedClangPath: string | undefined = isFormat ? getCachedClangFormatPath() : getCachedClangTidyPath();
             if (cachedClangPath !== undefined) {
@@ -312,36 +326,33 @@ export class CppSettings extends Settings {
         return path;
     }
 
-    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }
-    public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
-    public get maxSymbolSearchResults(): number | undefined { return super.Section.get<number>("maxSymbolSearchResults"); }
-    public get maxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("maxCachedProcesses"); }
-    public get intelliSenseMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxCachedProcesses"); }
-    public get intelliSenseMaxMemory(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxMemory"); }
-    public get referencesMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("references.maxConcurrentThreads"); }
-    public get referencesMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("references.maxCachedProcesses"); }
-    public get referencesMaxMemory(): number | undefined | null { return super.Section.get<number | null>("references.maxMemory"); }
-    public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("codeAnalysis.maxConcurrentThreads"); }
-    public get codeAnalysisMaxMemory(): number | undefined | null { return super.Section.get<number | null>("codeAnalysis.maxMemory"); }
-    public get codeAnalysisUpdateDelay(): number | undefined { return super.Section.get<number>("codeAnalysis.updateDelay"); }
-    public get codeAnalysisExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("codeAnalysis.exclude"); }
-    public get codeAnalysisRunAutomatically(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.runAutomatically"); }
-    public get codeAnalysisRunOnBuild(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.runOnBuild"); }
-    public get clangTidyEnabled(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.enabled"); }
-    public get clangTidyConfig(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("codeAnalysis.clangTidy.config")); }
-    public get clangTidyFallbackConfig(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("codeAnalysis.clangTidy.fallbackConfig")); }
-    public get clangTidyFixWarnings(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.clangTidy.fix.warnings"); }
-    public get clangTidyFixErrors(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.clangTidy.fix.errors"); }
-    public get clangTidyFixNotes(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.clangTidy.fix.notes"); }
-    public get clangTidyHeaderFilter(): string | undefined | null { return super.Section.get<string | null>("codeAnalysis.clangTidy.headerFilter"); }
-    public get clangTidyArgs(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.args"); }
-    public get clangTidyUseBuildPath(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.useBuildPath"); }
-    public get clangTidyChecksEnabled(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks.enabled"); }
-    public get clangTidyChecksDisabled(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks.disabled"); }
-    public get clangTidyCodeActionShowDisable(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.codeAction.showDisable"); }
-    public get clangTidyCodeActionShowClear(): string { return super.Section.get<string>("codeAnalysis.clangTidy.codeAction.showClear") ?? "AllAndAllType"; }
-    public get clangTidyCodeActionShowDocumentation(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.codeAction.showDocumentation"); }
-    public get clangTidyCodeActionFormatFixes(): boolean { return super.Section.get<boolean>("codeAnalysis.clangTidy.codeAction.formatFixes") ?? true; }
+    public get maxConcurrentThreads(): number | null { return this.getAsNumber("maxConcurrentThreads", true); }
+    public get maxMemory(): number | null { return this.getAsNumber("maxMemory", true); }
+    public get maxSymbolSearchResults(): number { return this.getAsNumber("maxSymbolSearchResults"); }
+    public get maxCachedProcesses(): number | null { return this.getAsNumber("maxCachedProcesses", true); }
+    public get intelliSenseMaxCachedProcesses(): number | null { return this.getAsNumber("intelliSense.maxCachedProcesses", true); }
+    public get intelliSenseMaxMemory(): number | null { return this.getAsNumber("intelliSense.maxMemory", true); }
+    public get referencesMaxConcurrentThreads(): number | null { return this.getAsNumber("references.maxConcurrentThreads", true); }
+    public get referencesMaxCachedProcesses(): number | null { return this.getAsNumber("references.maxCachedProcesses", true); }
+    public get referencesMaxMemory(): number | null { return this.getAsNumber("references.maxMemory", true); }
+    public get codeAnalysisMaxConcurrentThreads(): number | null { return this.getAsNumber("codeAnalysis.maxConcurrentThreads", true); }
+    public get codeAnalysisMaxMemory(): number | null { return this.getAsNumber("codeAnalysis.maxMemory", true); }
+    public get codeAnalysisUpdateDelay(): number { return this.getAsNumber("codeAnalysis.updateDelay"); }
+    public get codeAnalysisExclude(): Excludes { return this.getAsExcludes("codeAnalysis.exclude"); }
+    public get codeAnalysisRunAutomatically(): boolean { return this.getAsBoolean("codeAnalysis.runAutomatically"); }
+    public get codeAnalysisRunOnBuild(): boolean | undefined { return false; } // return this.getAsBoolean("codeAnalysis.runOnBuild");
+    public get clangTidyEnabled(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.enabled"); }
+    public get clangTidyConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.config")); }
+    public get clangTidyFallbackConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.fallbackConfig")); }
+    public get clangTidyHeaderFilter(): string | null { return this.getAsString("codeAnalysis.clangTidy.headerFilter", true); }
+    public get clangTidyArgs(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.args"); }
+    public get clangTidyUseBuildPath(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath"); }
+    public get clangTidyChecksEnabled(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.checks.enabled", true); }
+    public get clangTidyChecksDisabled(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.checks.disabled", true); }
+    public get clangTidyCodeActionShowDisable(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.showDisable"); }
+    public get clangTidyCodeActionShowClear(): string { return this.getAsString("codeAnalysis.clangTidy.codeAction.showClear"); }
+    public get clangTidyCodeActionShowDocumentation(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.showDocumentation"); }
+    public get clangTidyCodeActionFormatFixes(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.codeAction.formatFixes"); }
     public addClangTidyChecksDisabled(value: string): void {
         const checks: string[] | undefined = this.clangTidyChecksDisabled;
         if (checks === undefined) {
@@ -350,51 +361,58 @@ export class CppSettings extends Settings {
         checks.push(value);
         void super.Section.update("codeAnalysis.clangTidy.checks.disabled", checks, vscode.ConfigurationTarget.WorkspaceFolder);
     }
-    public get clangFormatStyle(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("clang_format_style")); }
-    public get clangFormatFallbackStyle(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("clang_format_fallbackStyle")); }
-    public get clangFormatSortIncludes(): boolean | undefined | null { return super.Section.get<boolean | null>("clang_format_sortIncludes"); }
-    public get experimentalFeatures(): boolean | undefined { return super.Section.get<string>("experimentalFeatures")?.toLowerCase() === "enabled"; }
-    public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
-    public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine")?.toLowerCase(); }
-    public get intelliSenseEngineFallback(): boolean | undefined { return super.Section.get<string>("intelliSenseEngineFallback")?.toLowerCase() === "enabled"; }
-    public get intelliSenseCachePath(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("intelliSenseCachePath")); }
-    public get intelliSenseCacheSize(): number | undefined { return super.Section.get<number>("intelliSenseCacheSize"); }
-    public get intelliSenseMemoryLimit(): number | undefined { return super.Section.get<number>("intelliSenseMemoryLimit"); }
-    public get intelliSenseUpdateDelay(): number | undefined { return super.Section.get<number>("intelliSenseUpdateDelay"); }
-    public get errorSquiggles(): string | undefined { return super.Section.get<string>("errorSquiggles")?.toLowerCase(); }
-    public get inactiveRegionOpacity(): number | undefined { return super.Section.get<number>("inactiveRegionOpacity"); }
-    public get inactiveRegionForegroundColor(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("inactiveRegionForegroundColor")); }
-    public get inactiveRegionBackgroundColor(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("inactiveRegionBackgroundColor")); }
-    public get autocomplete(): string | undefined { return super.Section.get<string>("autocomplete"); }
-    public get autocompleteAddParentheses(): boolean | undefined { return super.Section.get<boolean>("autocompleteAddParentheses"); }
-    public get loggingLevel(): string | undefined { return super.Section.get<string>("loggingLevel"); }
-    public get autoAddFileAssociations(): boolean | undefined { return super.Section.get<boolean>("autoAddFileAssociations"); }
-    public get workspaceParsingPriority(): string | undefined { return super.Section.get<string>("workspaceParsingPriority"); }
-    public get workspaceSymbols(): string | undefined { return super.Section.get<string>("workspaceSymbols"); }
-    public get exclusionPolicy(): string | undefined { return super.Section.get<string>("exclusionPolicy"); }
-    public get refactoringIncludeHeader(): string | undefined { return super.Section.get<string>("refactoring.includeHeader"); }
-    public get simplifyStructuredComments(): boolean | undefined { return super.Section.get<boolean>("simplifyStructuredComments"); }
-    public get doxygenGeneratedCommentStyle(): string | undefined { return super.Section.get<string>("doxygen.generatedStyle"); }
-    public get doxygenGenerateOnType(): boolean | undefined { return super.Section.get<boolean>("doxygen.generateOnType"); }
-    // eslint-disable-next-line no-extra-parens
-    public get commentContinuationPatterns(): (string | CommentPattern)[] | undefined { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
-    public get configurationWarnings(): boolean | undefined { return super.Section.get<string>("configurationWarnings")?.toLowerCase() !== "disabled"; }
-    public get preferredPathSeparator(): string | undefined { return super.Section.get<string>("preferredPathSeparator"); }
-    public get updateChannel(): string | undefined { return super.Section.get<string>("updateChannel"); }
-    public get vcpkgEnabled(): boolean | undefined { return super.Section.get<boolean>("vcpkg.enabled"); }
-    public get addNodeAddonIncludePaths(): boolean | undefined { return super.Section.get<boolean>("addNodeAddonIncludePaths"); }
-    public get renameRequiresIdentifier(): boolean | undefined { return super.Section.get<boolean>("renameRequiresIdentifier"); }
-    public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("files.exclude"); }
-    public get defaultIncludePath(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.includePath"); }
-    public get defaultDefines(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.defines"); }
-    public get defaultDotconfig(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("default.dotConfig")); }
-    public get defaultMacFrameworkPath(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.macFrameworkPath"); }
-    public get defaultWindowsSdkVersion(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("default.windowsSdkVersion")); }
-    public get defaultCompileCommands(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("default.compileCommands")); }
-    public get defaultForcedInclude(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.forcedInclude"); }
-    public get defaultIntelliSenseMode(): string | undefined { return super.Section.get<string>("default.intelliSenseMode"); }
-    public get defaultCompilerPath(): string | undefined { return super.Section.get<string | null>("default.compilerPath") ?? undefined; }
-    public set defaultCompilerPath(value: string | undefined) {
+    public get clangFormatStyle(): string | undefined { return changeBlankStringToUndefined(this.getAsString("clang_format_style")); }
+    public get clangFormatFallbackStyle(): string | undefined { return changeBlankStringToUndefined(this.getAsString("clang_format_fallbackStyle")); }
+    public get clangFormatSortIncludes(): boolean | null { return this.getAsBoolean("clang_format_sortIncludes", true); }
+    public get experimentalFeatures(): boolean { return this.getAsString("experimentalFeatures").toLowerCase() === "enabled"; }
+    public get suggestSnippets(): boolean { return this.getAsBoolean("suggestSnippets"); }
+    public get intelliSenseEngine(): string { return this.getAsString("intelliSenseEngine"); }
+    public get intelliSenseEngineFallback(): boolean { return this.getAsString("intelliSenseEngineFallback").toLowerCase() === "enabled"; }
+    public get intelliSenseCachePath(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("intelliSenseCachePath")); }
+    public get intelliSenseCacheSize(): number { return this.getAsNumber("intelliSenseCacheSize"); }
+    public get intelliSenseMemoryLimit(): number { return this.getAsNumber("intelliSenseMemoryLimit"); }
+    public get intelliSenseUpdateDelay(): number { return this.getAsNumber("intelliSenseUpdateDelay"); }
+    public get errorSquiggles(): string { return this.getAsString("errorSquiggles"); }
+    public get inactiveRegionOpacity(): number { return this.getAsNumber("inactiveRegionOpacity"); }
+    public get inactiveRegionForegroundColor(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("inactiveRegionForegroundColor")); }
+    public get inactiveRegionBackgroundColor(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("inactiveRegionBackgroundColor")); }
+    public get autocomplete(): string { return this.getAsString("autocomplete"); }
+    public get autocompleteAddParentheses(): boolean { return this.getAsBoolean("autocompleteAddParentheses"); }
+    public get loggingLevel(): string { return this.getAsString("loggingLevel"); }
+    public get autoAddFileAssociations(): boolean { return this.getAsBoolean("autoAddFileAssociations"); }
+    public get workspaceParsingPriority(): string { return this.getAsString("workspaceParsingPriority"); }
+    public get workspaceSymbols(): string { return this.getAsString("workspaceSymbols"); }
+    public get exclusionPolicy(): string { return this.getAsString("exclusionPolicy"); }
+    public get refactoringIncludeHeader(): string { return this.getAsString("refactoring.includeHeader"); }
+    public get simplifyStructuredComments(): boolean { return this.getAsBoolean("simplifyStructuredComments"); }
+    public get doxygenGeneratedCommentStyle(): string { return this.getAsString("doxygen.generatedStyle"); }
+    public get doxygenGenerateOnType(): boolean { return this.getAsBoolean("doxygen.generateOnType"); }
+    public get commentContinuationPatterns(): (string | CommentPattern)[] {
+        const value: any = super.Section.get<any>("commentContinuationPatterns");
+        if (this.isArrayOfCommentContinuationPatterns(value)) {
+            return value;
+        }
+        const setting = getRawSetting("C_Cpp.commentContinuationPatterns", true);
+        return setting.default;
+    }
+    public get isConfigurationWarningsEnabled(): boolean { return this.getAsString("configurationWarnings").toLowerCase() === "enabled"; }
+    public get preferredPathSeparator(): string { return this.getAsString("preferredPathSeparator"); }
+    public get updateChannel(): string { return this.getAsString("updateChannel"); }
+    public get vcpkgEnabled(): boolean { return this.getAsBoolean("vcpkg.enabled"); }
+    public get addNodeAddonIncludePaths(): boolean { return this.getAsBoolean("addNodeAddonIncludePaths"); }
+    public get renameRequiresIdentifier(): boolean { return this.getAsBoolean("renameRequiresIdentifier"); }
+    public get filesExclude(): Excludes { return this.getAsExcludes("files.exclude"); }
+    public get defaultIncludePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.includePath"); }
+    public get defaultDefines(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.defines"); }
+    public get defaultDotconfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.dotConfig")); }
+    public get defaultMacFrameworkPath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.macFrameworkPath"); }
+    public get defaultWindowsSdkVersion(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.windowsSdkVersion")); }
+    public get defaultCompileCommands(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.compileCommands")); }
+    public get defaultForcedInclude(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.forcedInclude"); }
+    public get defaultIntelliSenseMode(): string | undefined { return this.getAsStringOrUndefined("default.intelliSenseMode"); }
+    public get defaultCompilerPath(): string | null { return this.getAsString("default.compilerPath", true); }
+
+    public set defaultCompilerPath(value: string) {
         const defaultCompilerPathStr: string = "default.compilerPath";
         const compilerPathInfo: any = this.Section.inspect(defaultCompilerPathStr);
         let target: vscode.ConfigurationTarget = vscode.ConfigurationTarget.Global;
@@ -414,337 +432,303 @@ export class CppSettings extends Settings {
             });
         }
     }
-    public get defaultCompilerArgs(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.compilerArgs"); }
-    public get defaultCStandard(): string | undefined { return super.Section.get<string>("default.cStandard"); }
-    public get defaultCppStandard(): string | undefined { return super.Section.get<string>("default.cppStandard"); }
-    public get defaultConfigurationProvider(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("default.configurationProvider")); }
-    public get defaultMergeConfigurations(): boolean | undefined { return super.Section.get<boolean>("default.mergeConfigurations"); }
-    public get defaultBrowsePath(): string[] | undefined { return super.getWithUndefinedDefault<string[] | null>("default.browse.path") ?? undefined; }
-    public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("default.browse.databaseFilename")); }
-    public get defaultLimitSymbolsToIncludedHeaders(): boolean | undefined { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }
-    public get defaultSystemIncludePath(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.systemIncludePath"); }
-    public get defaultEnableConfigurationSquiggles(): boolean | undefined { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
-    public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
-    public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
-    public get codeFolding(): boolean { return super.Section.get<string>("codeFolding")?.toLowerCase() === "enabled"; }
-    public get caseSensitiveFileSupport(): boolean { return !isWindows || super.Section.get<string>("caseSensitiveFileSupport") === "enabled"; }
-    public get doxygenSectionTags(): string[] | undefined { return super.Section.get<string[]>("doxygen.sectionTags"); }
-    public get hover(): string | undefined { return super.Section.get<string>("hover"); }
-    public get markdownInComments(): string | undefined { return super.Section.get<string>("markdownInComments"); }
-    public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
-
-    public get inlayHintsAutoDeclarationTypes(): boolean {
-        return super.Section.get<boolean>("inlayHints.autoDeclarationTypes.enabled") === true;
-    }
-
-    public get inlayHintsAutoDeclarationTypesShowOnLeft(): boolean {
-        return super.Section.get<boolean>("inlayHints.autoDeclarationTypes.showOnLeft") === true;
-    }
-
-    public get inlayHintsParameterNames(): boolean {
-        return super.Section.get<boolean>("inlayHints.parameterNames.enabled") === true;
-    }
-
-    public get inlayHintsParameterNamesSuppressName(): boolean {
-        return super.Section.get<boolean>("inlayHints.parameterNames.suppressWhenArgumentContainsName") === true;
-    }
-
-    public get inlayHintsParameterNamesHideLeadingUnderscores(): boolean {
-        return super.Section.get<boolean>("inlayHints.parameterNames.hideLeadingUnderscores") === true;
-    }
-
-    public get inlayHintsReferenceOperator(): boolean {
-        return super.Section.get<boolean>("inlayHints.referenceOperator.enabled") === true;
-    }
-
-    public get inlayHintsReferenceOperatorShowSpace(): boolean {
-        return super.Section.get<boolean>("inlayHints.referenceOperator.showSpace") === true;
-    }
-
-    public get enhancedColorization(): boolean {
-        return super.Section.get<string>("enhancedColorization")?.toLowerCase() !== "disabled"
+    public get defaultCompilerArgs(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.compilerArgs"); }
+    public get defaultCStandard(): string | undefined { return this.getAsStringOrUndefined("default.cStandard"); }
+    public get defaultCppStandard(): string | undefined { return this.getAsStringOrUndefined("default.cppStandard"); }
+    public get defaultConfigurationProvider(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.configurationProvider")); }
+    public get defaultMergeConfigurations(): boolean | undefined { return this.getAsBooleanOrUndefined("default.mergeConfigurations"); }
+    public get defaultBrowsePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.browse.path"); }
+    public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.browse.databaseFilename")); }
+    public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
+    public get defaultSystemIncludePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.systemIncludePath"); }
+    public get defaultEnableConfigurationSquiggles(): boolean { return this.getAsBoolean("default.enableConfigurationSquiggles"); }
+    public get defaultCustomConfigurationVariables(): Associations | undefined { return this.getAsAssociations("default.customConfigurationVariables", true) ?? undefined; }
+    public get useBacktickCommandSubstitution(): boolean { return this.getAsBoolean("debugger.useBacktickCommandSubstitution"); }
+    public get codeFolding(): boolean { return this.getAsString("codeFolding").toLowerCase() === "enabled"; }
+    public get isCaseSensitiveFileSupportEnabled(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport").toLowerCase() === "enabled"; }
+    public get doxygenSectionTags(): string[] { return this.getAsArrayOfStrings("doxygen.sectionTags"); }
+    public get hover(): string { return this.getAsString("hover"); }
+    public get markdownInComments(): string { return this.getAsString("markdownInComments"); }
+    public get legacyCompilerArgsBehavior(): boolean { return this.getAsBoolean("legacyCompilerArgsBehavior"); }
+    public get inlayHintsAutoDeclarationTypes(): boolean { return this.getAsBoolean("inlayHints.autoDeclarationTypes.enabled"); }
+    public get inlayHintsAutoDeclarationTypesShowOnLeft(): boolean { return this.getAsBoolean("inlayHints.autoDeclarationTypes.showOnLeft"); }
+    public get inlayHintsParameterNames(): boolean { return this.getAsBoolean("inlayHints.parameterNames.enabled"); }
+    public get inlayHintsParameterNamesSuppressName(): boolean { return this.getAsBoolean("inlayHints.parameterNames.suppressWhenArgumentContainsName"); }
+    public get inlayHintsParameterNamesHideLeadingUnderscores(): boolean { return this.getAsBoolean("inlayHints.parameterNames.hideLeadingUnderscores"); }
+    public get inlayHintsReferenceOperator(): boolean { return this.getAsBoolean("inlayHints.referenceOperator.enabled"); }
+    public get inlayHintsReferenceOperatorShowSpace(): boolean { return this.getAsBoolean("inlayHints.referenceOperator.showSpace"); }
+    public get isEnhancedColorizationEnabled(): boolean {
+        return this.getAsString("enhancedColorization").toLowerCase() === "enabled"
             && this.intelliSenseEngine === "default"
-            && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
+            && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
     }
-
-    public get formattingEngine(): string | undefined {
-        return super.Section.get<string>("formatting")?.toLowerCase();
-    }
-
-    public get vcFormatIndentBraces(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.braces") === true;
-    }
-
-    public get vcFormatIndentMultiLineRelativeTo(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.indent.multiLineRelativeTo")!;
-    }
-
-    public get vcFormatIndentWithinParentheses(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.indent.withinParentheses")!;
-    }
-
-    public get vcFormatIndentPreserveWithinParentheses(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.preserveWithinParentheses") === true;
-    }
-
-    public get vcFormatIndentCaseLabels(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.caseLabels") === true;
-    }
-
-    public get vcFormatIndentCaseContents(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.caseContents") === true;
-    }
-
-    public get vcFormatIndentCaseContentsWhenBlock(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.caseContentsWhenBlock") === true;
-    }
-
-    public get vcFormatIndentLambdaBracesWhenParameter(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.lambdaBracesWhenParameter") === true;
-    }
-
-    public get vcFormatIndentGotoLabels(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.indent.gotoLabels")!;
-    }
-
-    public get vcFormatIndentPreprocessor(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.indent.preprocessor")!;
-    }
-
-    public get vcFormatIndentAccessSpecifiers(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.accessSpecifiers") === true;
-    }
-
-    public get vcFormatIndentNamespaceContents(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.namespaceContents") === true;
-    }
-
-    public get vcFormatIndentPreserveComments(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.preserveComments") === true;
-    }
-
-    public get vcFormatNewlineBeforeOpenBraceNamespace(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.namespace")!;
-    }
-
-    public get vcFormatNewlineBeforeOpenBraceType(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.type")!;
-    }
-
-    public get vcFormatNewlineBeforeOpenBraceFunction(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.function")!;
-    }
-
-    public get vcFormatNewlineBeforeOpenBraceBlock(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.block")!;
-    }
-
-    public get vcFormatNewlineBeforeOpenBraceLambda(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.lambda")!;
-    }
-
-    public get vcFormatNewlineScopeBracesOnSeparateLines(): boolean {
-        return super.Section.get<boolean>("vcFormat.newLine.scopeBracesOnSeparateLines") === true;
-    }
-
-    public get vcFormatNewlineCloseBraceSameLineEmptyType(): boolean {
-        return super.Section.get<boolean>("vcFormat.newLine.closeBraceSameLine.emptyType") === true;
-    }
-
-    public get vcFormatNewlineCloseBraceSameLineEmptyFunction(): boolean {
-        return super.Section.get<boolean>("vcFormat.newLine.closeBraceSameLine.emptyFunction") === true;
-    }
-
-    public get vcFormatNewlineBeforeCatch(): boolean {
-        return super.Section.get<boolean>("vcFormat.newLine.beforeCatch") === true;
-    }
-
-    public get vcFormatNewlineBeforeElse(): boolean {
-        return super.Section.get<boolean>("vcFormat.newLine.beforeElse") === true;
-    }
-
-    public get vcFormatNewlineBeforeWhileInDoWhile(): boolean {
-        return super.Section.get<boolean>("vcFormat.newLine.beforeWhileInDoWhile") === true;
-    }
-
-    public get vcFormatSpaceBeforeFunctionOpenParenthesis(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.space.beforeFunctionOpenParenthesis")!;
-    }
-
-    public get vcFormatSpaceWithinParameterListParentheses(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.withinParameterListParentheses") === true;
-    }
-
-    public get vcFormatSpaceBetweenEmptyParameterListParentheses(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.betweenEmptyParameterListParentheses") === true;
-    }
-
-    public get vcFormatSpaceAfterKeywordsInControlFlowStatements(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.afterKeywordsInControlFlowStatements") === true;
-    }
-
-    public get vcFormatSpaceWithinControlFlowStatementParentheses(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.withinControlFlowStatementParentheses") === true;
-    }
-
-    public get vcFormatSpaceBeforeLambdaOpenParenthesis(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") === true;
-    }
-
-    public get vcFormatSpaceWithinCastParentheses(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.withinCastParentheses") === true;
-    }
-
-    public get vcFormatSpaceAfterCastCloseParenthesis(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.afterCastCloseParenthesis") === true;
-    }
-
-    public get vcFormatSpaceWithinExpressionParentheses(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.withinExpressionParentheses") === true;
-    }
-
-    public get vcFormatSpaceBeforeBlockOpenBrace(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeBlockOpenBrace") === true;
-    }
-
-    public get vcFormatSpaceBetweenEmptyBraces(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.betweenEmptyBraces") === true;
-    }
-
-    public get vcFormatSpaceBeforeInitializerListOpenBrace(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeInitializerListOpenBrace") === true;
-    }
-
-    public get vcFormatSpaceWithinInitializerListBraces(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.withinInitializerListBraces") === true;
-    }
-
-    public get vcFormatSpacePreserveInInitializerList(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.preserveInInitializerList") === true;
-    }
-
-    public get vcFormatSpaceBeforeOpenSquareBracket(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeOpenSquareBracket") === true;
-    }
-
-    public get vcFormatSpaceWithinSquareBrackets(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.withinSquareBrackets") === true;
-    }
-
-    public get vcFormatSpaceBeforeEmptySquareBrackets(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeEmptySquareBrackets") === true;
-    }
-
-    public get vcFormatSpaceBetweenEmptySquareBrackets(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.betweenEmptySquareBrackets") === true;
-    }
-
-    public get vcFormatSpaceGroupSquareBrackets(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.groupSquareBrackets") === true;
-    }
-
-    public get vcFormatSpaceWithinLambdaBrackets(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.withinLambdaBrackets") === true;
-    }
-
-    public get vcFormatSpaceBetweenEmptyLambdaBrackets(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.betweenEmptyLambdaBrackets") === true;
-    }
-
-    public get vcFormatSpaceBeforeComma(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeComma") === true;
-    }
-
-    public get vcFormatSpaceAfterComma(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.afterComma") === true;
-    }
-
-    public get vcFormatSpaceRemoveAroundMemberOperators(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.removeAroundMemberOperators") === true;
-    }
-
-    public get vcFormatSpaceBeforeInheritanceColon(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeInheritanceColon") === true;
-    }
-
-    public get vcFormatSpaceBeforeConstructorColon(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeConstructorColon") === true;
-    }
-
-    public get vcFormatSpaceRemoveBeforeSemicolon(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.removeBeforeSemicolon") === true;
-    }
-
-    public get vcFormatSpaceInsertAfterSemicolon(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.insertAfterSemicolon") === true;
-    }
-
-    public get vcFormatSpaceRemoveAroundUnaryOperator(): boolean {
-        return super.Section.get<boolean>("vcFormat.space.removeAroundUnaryOperator") === true;
-    }
-
-    public get vcFormatSpaceAroundBinaryOperator(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.space.aroundBinaryOperator")!;
-    }
-
-    public get vcFormatSpaceAroundAssignmentOperator(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.space.aroundAssignmentOperator")!;
-    }
-
-    public get vcFormatSpacePointerReferenceAlignment(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.space.pointerReferenceAlignment")!;
-    }
-
-    public get vcFormatSpaceAroundTernaryOperator(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.space.aroundTernaryOperator")!;
-    }
-
-    public get vcFormatWrapPreserveBlocks(): string {
-        // These strings have default values in package.json, so should never be undefined.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return super.Section.get<string>("vcFormat.wrap.preserveBlocks")!;
-    }
-
+    public get formattingEngine(): string { return this.getAsString("formatting"); }
+    public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
+    public get vcFormatIndentMultiLineRelativeTo(): string { return this.getAsString("vcFormat.indent.multiLineRelativeTo"); }
+    public get vcFormatIndentWithinParentheses(): string { return this.getAsString("vcFormat.indent.withinParentheses"); }
+    public get vcFormatIndentPreserveWithinParentheses(): boolean { return this.getAsBoolean("vcFormat.indent.preserveWithinParentheses"); }
+    public get vcFormatIndentCaseLabels(): boolean { return this.getAsBoolean("vcFormat.indent.caseLabels"); }
+    public get vcFormatIndentCaseContents(): boolean { return this.getAsBoolean("vcFormat.indent.caseContents"); }
+    public get vcFormatIndentCaseContentsWhenBlock(): boolean { return this.getAsBoolean("vcFormat.indent.caseContentsWhenBlock"); }
+    public get vcFormatIndentLambdaBracesWhenParameter(): boolean { return this.getAsBoolean("vcFormat.indent.lambdaBracesWhenParameter"); }
+    public get vcFormatIndentGotoLabels(): string { return this.getAsString("vcFormat.indent.gotoLabels"); }
+    public get vcFormatIndentPreprocessor(): string { return this.getAsString("vcFormat.indent.preprocessor"); }
+    public get vcFormatIndentAccessSpecifiers(): boolean { return this.getAsBoolean("vcFormat.indent.accessSpecifiers"); }
+    public get vcFormatIndentNamespaceContents(): boolean { return this.getAsBoolean("vcFormat.indent.namespaceContents"); }
+    public get vcFormatIndentPreserveComments(): boolean { return this.getAsBoolean("vcFormat.indent.preserveComments"); }
+    public get vcFormatNewlineBeforeOpenBraceNamespace(): string { return this.getAsString("vcFormat.newLine.beforeOpenBrace.namespace"); }
+    public get vcFormatNewlineBeforeOpenBraceType(): string { return this.getAsString("vcFormat.newLine.beforeOpenBrace.type"); }
+    public get vcFormatNewlineBeforeOpenBraceFunction(): string { return this.getAsString("vcFormat.newLine.beforeOpenBrace.function"); }
+    public get vcFormatNewlineBeforeOpenBraceBlock(): string { return this.getAsString("vcFormat.newLine.beforeOpenBrace.block"); }
+    public get vcFormatNewlineBeforeOpenBraceLambda(): string { return this.getAsString("vcFormat.newLine.beforeOpenBrace.lambda"); }
+    public get vcFormatNewlineScopeBracesOnSeparateLines(): boolean { return this.getAsBoolean("vcFormat.newLine.scopeBracesOnSeparateLines"); }
+    public get vcFormatNewlineCloseBraceSameLineEmptyType(): boolean { return this.getAsBoolean("vcFormat.newLine.closeBraceSameLine.emptyType"); }
+    public get vcFormatNewlineCloseBraceSameLineEmptyFunction(): boolean { return this.getAsBoolean("vcFormat.newLine.closeBraceSameLine.emptyFunction"); }
+    public get vcFormatNewlineBeforeCatch(): boolean { return this.getAsBoolean("vcFormat.newLine.beforeCatch"); }
+    public get vcFormatNewlineBeforeElse(): boolean { return this.getAsBoolean("vcFormat.newLine.beforeElse"); }
+    public get vcFormatNewlineBeforeWhileInDoWhile(): boolean { return this.getAsBoolean("vcFormat.newLine.beforeWhileInDoWhile"); }
+    public get vcFormatSpaceBeforeFunctionOpenParenthesis(): string { return this.getAsString("vcFormat.space.beforeFunctionOpenParenthesis"); }
+    public get vcFormatSpaceWithinParameterListParentheses(): boolean { return this.getAsBoolean("vcFormat.space.withinParameterListParentheses"); }
+    public get vcFormatSpaceBetweenEmptyParameterListParentheses(): boolean { return this.getAsBoolean("vcFormat.space.betweenEmptyParameterListParentheses"); }
+    public get vcFormatSpaceAfterKeywordsInControlFlowStatements(): boolean { return this.getAsBoolean("vcFormat.space.afterKeywordsInControlFlowStatements"); }
+    public get vcFormatSpaceWithinControlFlowStatementParentheses(): boolean { return this.getAsBoolean("vcFormat.space.withinControlFlowStatementParentheses"); }
+    public get vcFormatSpaceBeforeLambdaOpenParenthesis(): boolean { return this.getAsBoolean("vcFormat.space.beforeLambdaOpenParenthesis"); }
+    public get vcFormatSpaceWithinCastParentheses(): boolean { return this.getAsBoolean("vcFormat.space.withinCastParentheses"); }
+    public get vcFormatSpaceAfterCastCloseParenthesis(): boolean { return this.getAsBoolean("vcFormat.space.afterCastCloseParenthesis"); }
+    public get vcFormatSpaceWithinExpressionParentheses(): boolean { return this.getAsBoolean("vcFormat.space.withinExpressionParentheses"); }
+    public get vcFormatSpaceBeforeBlockOpenBrace(): boolean { return this.getAsBoolean("vcFormat.space.beforeBlockOpenBrace"); }
+    public get vcFormatSpaceBetweenEmptyBraces(): boolean { return this.getAsBoolean("vcFormat.space.betweenEmptyBraces"); }
+    public get vcFormatSpaceBeforeInitializerListOpenBrace(): boolean { return this.getAsBoolean("vcFormat.space.beforeInitializerListOpenBrace"); }
+    public get vcFormatSpaceWithinInitializerListBraces(): boolean { return this.getAsBoolean("vcFormat.space.withinInitializerListBraces"); }
+    public get vcFormatSpacePreserveInInitializerList(): boolean { return this.getAsBoolean("vcFormat.space.preserveInInitializerList"); }
+    public get vcFormatSpaceBeforeOpenSquareBracket(): boolean { return this.getAsBoolean("vcFormat.space.beforeOpenSquareBracket"); }
+    public get vcFormatSpaceWithinSquareBrackets(): boolean { return this.getAsBoolean("vcFormat.space.withinSquareBrackets"); }
+    public get vcFormatSpaceBeforeEmptySquareBrackets(): boolean { return this.getAsBoolean("vcFormat.space.beforeEmptySquareBrackets"); }
+    public get vcFormatSpaceBetweenEmptySquareBrackets(): boolean { return this.getAsBoolean("vcFormat.space.betweenEmptySquareBrackets"); }
+    public get vcFormatSpaceGroupSquareBrackets(): boolean { return this.getAsBoolean("vcFormat.space.groupSquareBrackets"); }
+    public get vcFormatSpaceWithinLambdaBrackets(): boolean { return this.getAsBoolean("vcFormat.space.withinLambdaBrackets"); }
+    public get vcFormatSpaceBetweenEmptyLambdaBrackets(): boolean { return this.getAsBoolean("vcFormat.space.betweenEmptyLambdaBrackets"); }
+    public get vcFormatSpaceBeforeComma(): boolean { return this.getAsBoolean("vcFormat.space.beforeComma"); }
+    public get vcFormatSpaceAfterComma(): boolean { return this.getAsBoolean("vcFormat.space.afterComma"); }
+    public get vcFormatSpaceRemoveAroundMemberOperators(): boolean { return this.getAsBoolean("vcFormat.space.removeAroundMemberOperators"); }
+    public get vcFormatSpaceBeforeInheritanceColon(): boolean { return this.getAsBoolean("vcFormat.space.beforeInheritanceColon"); }
+    public get vcFormatSpaceBeforeConstructorColon(): boolean { return this.getAsBoolean("vcFormat.space.beforeConstructorColon"); }
+    public get vcFormatSpaceRemoveBeforeSemicolon(): boolean { return this.getAsBoolean("vcFormat.space.removeBeforeSemicolon"); }
+    public get vcFormatSpaceInsertAfterSemicolon(): boolean { return this.getAsBoolean("vcFormat.space.insertAfterSemicolon"); }
+    public get vcFormatSpaceRemoveAroundUnaryOperator(): boolean { return this.getAsBoolean("vcFormat.space.removeAroundUnaryOperator"); }
+    public get vcFormatSpaceAroundBinaryOperator(): string { return this.getAsString("vcFormat.space.aroundBinaryOperator"); }
+    public get vcFormatSpaceAroundAssignmentOperator(): string { return this.getAsString("vcFormat.space.aroundAssignmentOperator"); }
+    public get vcFormatSpacePointerReferenceAlignment(): string { return this.getAsString("vcFormat.space.pointerReferenceAlignment"); }
+    public get vcFormatSpaceAroundTernaryOperator(): string { return this.getAsString("vcFormat.space.aroundTernaryOperator"); }
+    public get vcFormatWrapPreserveBlocks(): string { return this.getAsString("vcFormat.wrap.preserveBlocks"); }
     public get dimInactiveRegions(): boolean {
-        return super.Section.get<boolean>("dimInactiveRegions") === true
-            && this.intelliSenseEngine === "default"
-            && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
+        return this.getAsBoolean("dimInactiveRegions")
+            && this.intelliSenseEngine === "default" && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
+    }
+    public get sshTargetsView(): string { return this.getAsString("sshTargetsView"); }
+
+    // Returns the value of a setting as a string with proper type validation and checks for valid enum values while returning an undefined value if necessary.
+    private getAsStringOrUndefined(settingName: string): string | undefined {
+        const value: any = super.Section.get<any>(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
+        if (setting.default !== undefined) {
+            console.error(`Default value for ${settingName} is expected to be undefined.`);
+        }
+
+        if (setting.enum !== undefined) {
+            if (this.isValidEnum(setting.enum, value)) {
+                return value;
+            }
+        } else if (isString(value)) {
+            return value;
+        }
+
+        return undefined;
     }
 
-    public get sshTargetsView(): string {
-        return super.Section.get<string>("sshTargetsView") ?? 'default';
+    // Returns the value of a setting as a boolean with proper type validation and checks for valid enum values while returning an undefined value if necessary.
+    private getAsBooleanOrUndefined(settingName: string): boolean | undefined {
+        const value: any = super.Section.get<any>(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
+        if (setting.default !== undefined) {
+            console.error(`Default value for ${settingName} is expected to be undefined.`);
+        }
+
+        if (isBoolean(value)) {
+            return value;
+        }
+
+        return undefined;
+    }
+
+    private isValidDefault(isValid: (x: any) => boolean, value: any, allowNull: boolean): boolean {
+        return isValid(value) || (allowNull && value === null);
+    }
+
+    // Returns the value of a setting as a boolean with proper type validation.
+    private getAsBoolean(settingName: string): boolean;
+    private getAsBoolean(settingName: string, allowNull: boolean): boolean | null;
+    private getAsBoolean(settingName: string, allowNull: boolean = false): boolean | null {
+        const value: any = super.Section.get<any>(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
+        if (!this.isValidDefault(isBoolean, setting.default, allowNull)) {
+            console.error(`Default value for ${settingName} is expected to be boolean${allowNull ? ' or null' : ''}.`);
+        }
+
+        if (allowNull && value === null) {
+            return null;
+        }
+
+        if (isBoolean(value)) {
+            return value;
+        }
+        return setting.default;
+    }
+
+    // Returns the value of a setting as a string with proper type validation and checks for valid enum values.
+    private getAsString(settingName: string): string;
+    private getAsString(settingName: string, allowNull: boolean): string | null;
+    private getAsString(settingName: string, allowNull: boolean = false): string | null {
+        const value: any = super.Section.get<any>(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
+        if (!this.isValidDefault(isString, setting.default, allowNull)) {
+            console.error(`Default value for ${settingName} is expected to be string${allowNull ? ' or null' : ''}.`);
+        }
+
+        if (allowNull && value === null) {
+            return null;
+        }
+
+        if (setting.enum !== undefined) {
+            if (settingName === "loggingLevel" && isString(value) && isNumber(Number(value)) && Number(value) >= 0) {
+                return value;
+            }
+            if (this.isValidEnum(setting.enum, value)) {
+                return value;
+            }
+        } else if (isString(value)) {
+            return value;
+        }
+        return setting.default as string;
+    }
+
+    // Returns the value of a setting as a number with proper type validation and checks if value falls within the specified range.
+    private getAsNumber(settingName: string): number;
+    private getAsNumber(settingName: string, allowNull: boolean): number | null;
+    private getAsNumber(settingName: string, allowNull: boolean = false): number | null {
+        const value: any = super.Section.get<any>(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
+        if (!this.isValidDefault(isNumber, setting.default, allowNull)) {
+            console.error(`Default value for ${settingName} is expected to be number${allowNull ? ' or null' : ''}.`);
+        }
+
+        if (allowNull && value === null) {
+            return null;
+        }
+        // Validates the value is a number and clamps it to the specified range. Allows for undefined maximum or minimum values.
+        if (isNumber(value)) {
+            if (setting.minimum !== undefined && value < setting.minimum) {
+                return setting.minimum;
+            }
+            if (setting.maximum !== undefined && value > setting.maximum) {
+                return setting.maximum;
+            }
+            return value;
+        }
+        return setting.default as number;
+    }
+
+    private getAsArrayOfStringsOrUndefined(settingName: string, allowUndefinedEnums: boolean = false): string[] | undefined {
+        const value: any = super.Section.get(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
+        if (setting.default !== undefined) {
+            console.error(`Default value for ${settingName} is expected to be undefined.`);
+        }
+
+        if (isArrayOfString(value)) {
+            if (setting.items.enum && !allowUndefinedEnums) {
+                if (!value.every(x => this.isValidEnum(setting.items.enum, x))) {
+                    return setting.default;
+                }
+            }
+            return value;
+        }
+        return setting.default as string[];
+    }
+
+    // Returns the value of a setting as an array of strings with proper type validation and checks for valid enum values.
+    private getAsArrayOfStrings(settingName: string, allowUndefinedEnums: boolean = false): string[] {
+        const value: any = super.Section.get(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
+        if (!isArrayOfString(setting.default)) {
+            console.error(`Default value for ${settingName} is expected to be string[].`);
+        }
+
+        if (isArrayOfString(value)) {
+            if (setting.items.enum && !allowUndefinedEnums) {
+                if (!value.every(x => this.isValidEnum(setting.items.enum, x))) {
+                    return setting.default;
+                }
+            }
+            return value;
+        }
+        return setting.default as string[];
+    }
+
+    private getAsExcludes(settingName: string): Excludes;
+    private getAsExcludes(settingName: string, allowNull: boolean): Excludes | null;
+    private getAsExcludes(settingName: string, allowNull: boolean = false): Excludes | null {
+        const value: any = super.Section.get(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
+        if (!this.isValidDefault(x => isValidMapping(x, isString, val => isBoolean(val) || isValidWhenObject(val)), setting.default, allowNull)) {
+            console.error(`Default value for ${settingName} is expected to be Excludes${allowNull ? ' or null' : ''}.`);
+        }
+
+        if (allowNull && value === null) {
+            return null;
+        }
+        if (isValidMapping(value, isString, val => isBoolean(val) || isValidWhenObject(val))) {
+            return value as Excludes;
+        }
+        return setting.default as Excludes;
+    }
+
+    private getAsAssociations(settingName: string): Associations;
+    private getAsAssociations(settingName: string, allowNull: boolean): Associations | null;
+    private getAsAssociations(settingName: string, allowNull: boolean = false): Associations | null {
+        const value: any = super.Section.get<any>(settingName);
+        const setting = getRawSetting("C_Cpp." + settingName, true);
+        if (!this.isValidDefault(x => isValidMapping(x, isString, isString), setting.default, allowNull)) {
+            console.error(`Default value for ${settingName} is expected to be Associations${allowNull ? ' or null' : ''}.`);
+        }
+
+        if (allowNull && value === null) {
+            return null;
+        }
+        if (isValidMapping(value, isString, isString)) {
+            return value as Associations;
+        }
+        return setting.default as Associations;
+    }
+
+    // Checks a given enum value against a list of valid enum values from package.json.
+    private isValidEnum(enumDescription: any, value: any): value is string {
+        if (isString(value) && isArray(enumDescription) && enumDescription.length > 0) {
+            return enumDescription.some(x => x.toLowerCase() === value.toLowerCase());
+        }
+        return false;
+    }
+
+    private isArrayOfCommentContinuationPatterns(x: any): x is (string | CommentPattern)[] {
+        return isArray(x) && x.every(y => isString(y) || this.isCommentPattern(y));
+    }
+
+    private isCommentPattern(x: any): x is CommentPattern {
+        return isObject(x) && isString(x.begin) && isString(x.continue);
     }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
-        const value: string | undefined = super.Section.get<string>(name);
+        const value: string = this.getAsString(name);
         void super.Section.update(name, value?.toLowerCase() === value1.toLowerCase() ? value2 : value1, getTarget());
     }
 
@@ -975,17 +959,6 @@ export class CppSettings extends Settings {
     }
 }
 
-export interface TextMateRuleSettings {
-    foreground?: string;
-    background?: string;
-    fontStyle?: string;
-}
-
-export interface TextMateRule {
-    scope: any;
-    settings: TextMateRuleSettings;
-}
-
 export class OtherSettings {
     private resource: vscode.Uri | undefined;
 
@@ -996,28 +969,112 @@ export class OtherSettings {
         this.resource = resource;
     }
 
-    public get editorTabSize(): number | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("tabSize"); }
-    public get editorInsertSpaces(): boolean | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<boolean>("insertSpaces"); }
-    public get editorAutoClosingBrackets(): string | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<string>("autoClosingBrackets"); }
-    public get filesEncoding(): string | undefined { return vscode.workspace.getConfiguration("files", { uri: this.resource, languageId: "cpp" }).get<string>("encoding"); }
-    public get filesAssociations(): any { return vscode.workspace.getConfiguration("files").get("associations"); }
-    public set filesAssociations(value: any) {
-        void vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace);
+    private logValidationError(sectionName: string, settingName: string, error: string): void {
+        telemetry.logLanguageServerEvent("settingsValidation", { setting: sectionName + '.' + settingName, error });
     }
-    public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
-    public get filesAutoSaveAfterDelay(): boolean { return vscode.workspace.getConfiguration("files").get("autoSave") === "afterDelay"; }
-    public get editorInlayHintsEnabled(): boolean { return vscode.workspace.getConfiguration("editor.inlayHints").get<string>("enabled") !== "off"; }
-    public get editorParameterHintsEnabled(): boolean | undefined { return vscode.workspace.getConfiguration("editor.parameterHints").get<boolean>("enabled"); }
-    public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
-    public get workbenchSettingsEditor(): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 
-    public get colorTheme(): string | undefined { return vscode.workspace.getConfiguration("workbench").get<string>("colorTheme"); }
+    private getAsString(sectionName: string, settingName: string, resource: any, defaultValue: string): string {
+        const section = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = section.get<any>(settingName);
+        if (isString(value)) {
+            return value;
+        }
+        const setting = section.inspect<any>(settingName);
 
-    public getCustomColorToken(colorTokenName: string): string | undefined { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations").get<string>(colorTokenName); }
-    public getCustomThemeSpecificColorToken(themeName: string, colorTokenName: string): string | undefined { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<string>(colorTokenName); }
+        if (setting?.defaultValue === undefined || setting.defaultValue === null) {
+            this.logValidationError(sectionName, settingName, "no default value");
+            return defaultValue;
+        }
+        return setting.defaultValue;
+    }
 
-    public get customTextMateRules(): TextMateRule[] | undefined { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations").get<TextMateRule[]>("textMateRules"); }
-    public getCustomThemeSpecificTextMateRules(themeName: string): TextMateRule[] | undefined { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<TextMateRule[]>("textMateRules"); }
+    private getAsBoolean(sectionName: string, settingName: string, resource: any, defaultValue: boolean): boolean {
+        const section = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = section.get<any>(settingName);
+        if (isBoolean(value)) {
+            return value;
+        }
+        const setting = section.inspect<any>(settingName);
+        if (setting?.defaultValue === undefined || setting.defaultValue === null) {
+            this.logValidationError(sectionName, settingName, "no default value");
+            return defaultValue;
+        }
+        return setting.defaultValue;
+    }
+
+    private getAsNumber(sectionName: string, settingName: string, resource: any, defaultValue: number, minimum?: number, maximum?: number): number {
+        const section = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = section.get<any>(settingName);
+        // Validates the value is a number and clamps it to the specified range. Allows for undefined maximum or minimum values.
+        if (isNumber(value)) {
+            if (minimum !== undefined && value < minimum) {
+                return minimum;
+            }
+            if (maximum !== undefined && value > maximum) {
+                return maximum;
+            }
+            return value;
+        }
+        const setting = section.inspect<any>(settingName);
+        if (setting?.defaultValue === undefined || setting.defaultValue === null) {
+            this.logValidationError(sectionName, settingName, "no default value");
+            return defaultValue;
+        }
+        return setting.defaultValue;
+    }
+
+    private getAsAssociations(sectionName: string, settingName: string, defaultValue: Associations, resource?: any): Associations {
+        const section = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = section.get<any>(settingName);
+        if (isValidMapping(value, isString, isString)) {
+            return value as Associations;
+        }
+        const setting = section.inspect<any>(settingName);
+        if (setting?.defaultValue === undefined || setting.defaultValue === null) {
+            this.logValidationError(sectionName, settingName, "no default value");
+        }
+        return setting?.defaultValue ?? defaultValue;
+    }
+
+    private getAsExcludes(sectionName: string, settingName: string, defaultValue: Excludes, resource?: any): Excludes {
+        const section = vscode.workspace.getConfiguration(sectionName, resource);
+        const value = section.get<any>(settingName);
+        if (isValidMapping(value, isString, (val) => isBoolean(val) || isValidWhenObject(val))) {
+            return value as Excludes;
+        }
+        const setting = section.inspect<any>(settingName);
+        if (setting?.defaultValue === undefined || setting.defaultValue === null) {
+            this.logValidationError(sectionName, settingName, "no default value");
+        }
+        return setting?.defaultValue ?? defaultValue;
+    }
+
+    // All default values are obtained from the VS Code settings UI. Please update the default values as needed.
+    public get editorTabSize(): number { return this.getAsNumber("editor", "tabSize", this.resource, 4, 1); }
+    public get editorInsertSpaces(): boolean { return this.getAsBoolean("editor", "insertSpaces", this.resource, true); }
+    public get editorAutoClosingBrackets(): string { return this.getAsString("editor", "autoClosingBrackets", this.resource, "languageDefined"); }
+    public get filesEncoding(): string { return this.getAsString("files", "encoding", { uri: this.resource, languageId: "cpp" }, "utf8"); }
+    public get filesAssociations(): Associations { return this.getAsAssociations("files", "associations", {}); }
+    public set filesAssociations(value: any) { void vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace); }
+    private readonly defaultFilesExcludes = {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true
+    };
+    public get filesExclude(): Excludes { return this.getAsExcludes("files", "exclude", this.defaultFilesExcludes, this.resource); }
+    public get filesAutoSaveAfterDelay(): boolean { return this.getAsString("files", "autoSave", this.resource, "off") === "afterDelay"; }
+    public get editorInlayHintsEnabled(): boolean { return this.getAsString("editor.inlayHints", "enabled", this.resource, "on") !== "off"; }
+    public get editorParameterHintsEnabled(): boolean { return this.getAsBoolean("editor.parameterHints", "enabled", this.resource, true); }
+    private readonly defaultSearchExcludes = {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true
+    };
+    public get searchExclude(): Excludes { return this.getAsExcludes("search", "exclude", this.defaultSearchExcludes, this.resource); }
+    public get workbenchSettingsEditor(): string { return this.getAsString("workbench.settings", "editor", this.resource, "ui"); }
 }
 
 function mapIndentationReferenceToEditorConfig(value: string | undefined): string {
