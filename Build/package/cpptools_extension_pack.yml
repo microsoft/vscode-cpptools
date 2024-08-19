@@ -1,0 +1,31 @@
+name: $(date:yyyyMMdd)$(rev:.r)
+trigger: none
+pr: none
+
+resources:
+  repositories:
+  - repository: MicroBuildTemplate
+    type: git
+    name: 1ESPipelineTemplates/MicroBuildTemplate
+    ref: refs/tags/release
+
+extends:
+  template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
+  parameters:
+    pool:
+      name: AzurePipelines-EO
+      image: AzurePipelinesWindows2022compliantGPT
+      os: windows
+    sdl:
+      sourceAnalysisPool:
+        name: AzurePipelines-EO
+        image: AzurePipelinesWindows2022compliantGPT
+        os: windows
+
+    stages:
+    - stage: package
+      jobs:
+      - template: /Build/package/jobs_package_vsix.yml@self
+        parameters:
+          vsixName: cpptools-extension-pack.vsix
+          srcDir: ExtensionPack
