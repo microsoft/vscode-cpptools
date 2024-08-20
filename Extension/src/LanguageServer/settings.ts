@@ -5,7 +5,6 @@
 'use strict';
 
 import { execSync } from 'child_process';
-import * as editorConfig from 'editorconfig';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -17,7 +16,8 @@ import * as which from 'which';
 import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isObject, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
 import { isWindows } from '../constants';
 import * as telemetry from '../telemetry';
-import { DefaultClient, cachedEditorConfigLookups, cachedEditorConfigSettings, hasTrustedCompilerPaths } from './client';
+import { cachedEditorConfigLookups, DefaultClient, hasTrustedCompilerPaths } from './client';
+import { getEditorConfigSettings, mapIndentationReferenceToEditorConfig, mapIndentToEditorConfig, mapNewOrSameLineToEditorConfig, mapWrapToEditorConfig } from './editorConfig';
 import { clients } from './extension';
 import { CommentPattern } from './languageConfig';
 import { PersistentState } from './persistentState';
@@ -1075,67 +1075,4 @@ export class OtherSettings {
     };
     public get searchExclude(): Excludes { return this.getAsExcludes("search", "exclude", this.defaultSearchExcludes, this.resource); }
     public get workbenchSettingsEditor(): string { return this.getAsString("workbench.settings", "editor", this.resource, "ui"); }
-}
-
-function mapIndentationReferenceToEditorConfig(value: string | undefined): string {
-    if (value !== undefined) {
-        // Will never actually be undefined, as these settings have default values.
-        if (value === "statementBegin") {
-            return "statement_begin";
-        }
-        if (value === "outermostParenthesis") {
-            return "outermost_parenthesis";
-        }
-    }
-    return "innermost_parenthesis";
-}
-
-function mapIndentToEditorConfig(value: string | undefined): string {
-    if (value !== undefined) {
-        // Will never actually be undefined, as these settings have default values.
-        if (value === "leftmostColumn") {
-            return "leftmost_column";
-        }
-        if (value === "oneLeft") {
-            return "one_left";
-        }
-    }
-    return "none";
-}
-
-function mapNewOrSameLineToEditorConfig(value: string | undefined): string {
-    if (value !== undefined) {
-        // Will never actually be undefined, as these settings have default values.
-        if (value === "newLine") {
-            return "new_line";
-        }
-        if (value === "sameLine") {
-            return "same_line";
-        }
-    }
-    return "ignore";
-}
-
-function mapWrapToEditorConfig(value: string | undefined): string {
-    if (value !== undefined) {
-        // Will never actually be undefined, as these settings have default values.
-        if (value === "allOneLineScopes") {
-            return "all_one_line_scopes";
-        }
-        if (value === "oneLiners") {
-            return "one_liners";
-        }
-    }
-    return "never";
-}
-
-// Look up the appropriate .editorconfig settings for the specified file.
-// This is intentionally not async to avoid races due to multiple entrancy.
-export function getEditorConfigSettings(fsPath: string): Promise<any> {
-    let editorConfigSettings: any = cachedEditorConfigSettings.get(fsPath);
-    if (!editorConfigSettings) {
-        editorConfigSettings = editorConfig.parseSync(fsPath);
-        cachedEditorConfigSettings.set(fsPath, editorConfigSettings);
-    }
-    return editorConfigSettings;
 }

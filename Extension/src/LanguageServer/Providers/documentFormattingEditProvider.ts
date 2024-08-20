@@ -5,8 +5,9 @@
 import * as vscode from 'vscode';
 import { ResponseError } from 'vscode-languageclient';
 import { DefaultClient, FormatDocumentRequest, FormatParams, FormatResult } from '../client';
+import { getEditorConfigSettings } from '../editorConfig';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
-import { CppSettings, OtherSettings, getEditorConfigSettings } from '../settings';
+import { CppSettings, OtherSettings } from '../settings';
 import { makeVscodeTextEdits } from '../utils';
 
 export class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
