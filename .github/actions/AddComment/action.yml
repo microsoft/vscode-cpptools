@@ -1,4 +1,4 @@
-name:Add Comment and Label
+name: Add Comment and Label
 description: Add comment (etc) to issues that are marked with a specified label (etc)
 inputs:
   token:
