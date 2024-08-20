@@ -3,9 +3,11 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
+import { ResponseError } from 'vscode-languageclient';
 import { Client, DefaultClient, GetDocumentSymbolRequest, GetDocumentSymbolRequestParams, GetDocumentSymbolResult, LocalizeDocumentSymbol, SymbolScope } from '../client';
 import { clients } from '../extension';
 import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
+import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { makeVscodeRange } from '../utils';
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
@@ -61,8 +63,16 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
             const params: GetDocumentSymbolRequestParams = {
                 uri: document.uri.toString()
             };
-            const response: GetDocumentSymbolResult = await defaultClient.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
-            if (token.isCancellationRequested || response.symbols === undefined) {
+            let response: GetDocumentSymbolResult;
+            try {
+                response = await defaultClient.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
+            } catch (e: any) {
+                if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                    throw new vscode.CancellationError();
+                }
+                throw e;
+            }
+            if (token.isCancellationRequested) {
                 throw new vscode.CancellationError();
             }
             const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(response.symbols);

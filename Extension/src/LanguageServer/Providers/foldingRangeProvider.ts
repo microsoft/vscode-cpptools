@@ -3,8 +3,10 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
+import { ResponseError } from 'vscode-languageclient';
 import { ManualPromise } from '../../Utility/Async/manualPromise';
 import { CppFoldingRange, DefaultClient, FoldingRangeKind, GetFoldingRangesParams, GetFoldingRangesRequest, GetFoldingRangesResult } from '../client';
+import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CppSettings } from '../settings';
 
 interface FoldingRangeRequestInfo {
@@ -62,8 +64,16 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
             uri
         };
 
-        const response: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
-        if (token.isCancellationRequested || response.ranges === undefined) {
+        let response: GetFoldingRangesResult;
+        try {
+            response = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
+        } catch (e: any) {
+            if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                throw new vscode.CancellationError();
+            }
+            throw e;
+        }
+        if (token.isCancellationRequested) {
             throw new vscode.CancellationError();
         }
         const result: vscode.FoldingRange[] = [];
