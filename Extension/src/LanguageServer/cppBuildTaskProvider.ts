@@ -98,7 +98,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         // Get user compiler path.
         const userCompilerPathAndArgs: util.CompilerPathAndArgs | undefined = await activeClient.getCurrentCompilerPathAndArgs();
-        let userCompilerPath: string | undefined;
+        let userCompilerPath: string | undefined | null;
         if (userCompilerPathAndArgs) {
             userCompilerPath = userCompilerPathAndArgs.compilerPath;
             if (userCompilerPath && userCompilerPathAndArgs.compilerName) {
@@ -414,7 +414,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             }
         });
         if (this.options === undefined) {
-            this.options = { };
+            this.options = {};
         }
         if (this.options.cwd) {
             this.options.cwd = util.resolveVariables(this.options.cwd.toString());

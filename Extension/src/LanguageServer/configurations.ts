@@ -62,8 +62,8 @@ export interface ConfigurationJson {
 
 export interface Configuration {
     name: string;
-    compilerPathInCppPropertiesJson?: string;
-    compilerPath?: string;
+    compilerPathInCppPropertiesJson?: string | null;
+    compilerPath?: string | null;
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
     compilerArgsLegacy?: string[];
@@ -951,7 +951,7 @@ export class CppProperties {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
                 configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
-                configuration.compilerPathIsExplicit = configuration.compilerPathIsExplicit || settings.defaultCompilerPath !== undefined;
+                configuration.compilerPathIsExplicit = configuration.compilerPathIsExplicit || settings.defaultCompilerPath !== null;
                 if (configuration.compilerPath === undefined) {
                     if (!!this.defaultCompilerPath && this.trustedCompilerFound) {
                         // If no config value yet set for these, pick up values from the defaults, but don't consider them explicit.
@@ -991,7 +991,6 @@ export class CppProperties {
                     configuration.compilerPath = settings.defaultCompilerPath;
                 }
                 if (configuration.compilerPath === null) {
-                    configuration.compilerPath = undefined;
                     configuration.compilerPathIsExplicit = true;
                 } else if (configuration.compilerPath !== undefined) {
                     configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
@@ -1041,8 +1040,8 @@ export class CppProperties {
                     && !settings.defaultForcedInclude
                     && !settings.defaultCompileCommands
                     && !settings.defaultCompilerArgs
-                    && settings.defaultCStandard === ""
-                    && settings.defaultCppStandard === ""
+                    && !settings.defaultCStandard
+                    && !settings.defaultCppStandard
                     && settings.defaultIntelliSenseMode === ""
                     && !settings.defaultConfigurationProvider;
 
@@ -1516,7 +1515,7 @@ export class CppProperties {
         return success;
     }
 
-    private resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true, assumeRelative: boolean = true): string {
+    private resolvePath(input_path: string | undefined | null, replaceAsterisks: boolean = true, assumeRelative: boolean = true): string {
         if (!input_path || input_path === "${default}") {
             return "";
         }
@@ -1567,10 +1566,10 @@ export class CppProperties {
 
         // Check if config name is unique.
         errors.name = this.isConfigNameUnique(config.name);
-        let resolvedCompilerPath: string | undefined;
+        let resolvedCompilerPath: string | undefined | null;
         // Validate compilerPath
         if (config.compilerPath) {
-            resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true }) ?? undefined;
+            resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true });
         }
 
         if (resolvedCompilerPath === undefined) {
@@ -1590,6 +1589,7 @@ export class CppProperties {
                 (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0) &&
                 !resolvedCompilerPath.startsWith('"') &&
                 compilerPathAndArgs.compilerPath !== undefined &&
+                compilerPathAndArgs.compilerPath !== null &&
                 compilerPathAndArgs.compilerPath.includes(" ");
 
             const compilerPathErrors: string[] = [];
@@ -1598,7 +1598,7 @@ export class CppProperties {
             }
 
             // Get compiler path without arguments before checking if it exists
-            resolvedCompilerPath = compilerPathAndArgs.compilerPath;
+            resolvedCompilerPath = compilerPathAndArgs.compilerPath ?? undefined;
             if (resolvedCompilerPath) {
                 let pathExists: boolean = true;
                 const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
@@ -1640,15 +1640,15 @@ export class CppProperties {
         }
 
         // Validate paths (directories)
-        errors.includePath = this.validatePath(config.includePath, {globPaths: true});
+        errors.includePath = this.validatePath(config.includePath, { globPaths: true });
         errors.macFrameworkPath = this.validatePath(config.macFrameworkPath);
         errors.browsePath = this.validatePath(config.browse ? config.browse.path : undefined);
 
         // Validate files
-        errors.forcedInclude = this.validatePath(config.forcedInclude, {isDirectory: false, assumeRelative: false});
-        errors.compileCommands = this.validatePath(config.compileCommands, {isDirectory: false});
-        errors.dotConfig = this.validatePath(config.dotConfig, {isDirectory: false});
-        errors.databaseFilename = this.validatePath(config.browse ? config.browse.databaseFilename : undefined, {isDirectory: false});
+        errors.forcedInclude = this.validatePath(config.forcedInclude, { isDirectory: false, assumeRelative: false });
+        errors.compileCommands = this.validatePath(config.compileCommands, { isDirectory: false });
+        errors.dotConfig = this.validatePath(config.dotConfig, { isDirectory: false });
+        errors.databaseFilename = this.validatePath(config.browse ? config.browse.databaseFilename : undefined, { isDirectory: false });
 
         // Validate intelliSenseMode
         if (isWindows) {
@@ -1661,7 +1661,7 @@ export class CppProperties {
         return errors;
     }
 
-    private validatePath(input: string | string[] | undefined, {isDirectory = true, assumeRelative = true, globPaths = false} = {}): string | undefined {
+    private validatePath(input: string | string[] | undefined, { isDirectory = true, assumeRelative = true, globPaths = false } = {}): string | undefined {
         if (!input) {
             return undefined;
         }
@@ -1877,8 +1877,8 @@ export class CppProperties {
         // Check for path-related squiggles.
         const paths: string[] = [];
         let compilerPath: string | undefined;
-        for (const pathArray of [ currentConfiguration.browse ? currentConfiguration.browse.path : undefined,
-            currentConfiguration.includePath, currentConfiguration.macFrameworkPath ]) {
+        for (const pathArray of [currentConfiguration.browse ? currentConfiguration.browse.path : undefined,
+            currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
             if (pathArray) {
                 for (const curPath of pathArray) {
                     paths.push(`${curPath}`);
@@ -2075,7 +2075,7 @@ export class CppProperties {
                     let message: string = "";
                     if (!pathExists) {
                         if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd
-                                && !path.isAbsolute(expandedPaths[0])) {
+                            && !path.isAbsolute(expandedPaths[0])) {
                             continue; // Skip the error, because it could be resolved recursively.
                         }
                         let badPath = "";
@@ -2089,7 +2089,7 @@ export class CppProperties {
                     } else {
                         // Check for file versus path mismatches.
                         if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
-                                    (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
+                            (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
                             if (expandedPaths.length > 1) {
                                 message = localize("multiple.paths.not.allowed", "Multiple paths are not allowed.");
                                 newSquiggleMetrics.MultiplePathsNotAllowed++;

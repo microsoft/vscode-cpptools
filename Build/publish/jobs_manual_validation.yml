@@ -1,0 +1,19 @@
+parameters:
+- name: notifyUsers
+  type: string
+  default: ''
+- name: releaseBuildUrl
+  type: string
+  default: ''
+
+jobs:
+- job: WaitForValidation
+  displayName: Wait for VSIX validation
+  pool: server
+  steps:
+    - task: ManualValidation@0
+      displayName: "Manual Validation"
+      inputs:
+        notifyUsers: $(notifyUsers)
+        instructions: |
+          Download and test the vsix from the latest release build: $(releaseBuildUrl)

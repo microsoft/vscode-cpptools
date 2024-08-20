@@ -1,0 +1,44 @@
+parameters:
+- name: vsixName
+  type: string
+  default: ''
+
+jobs:
+- job: Publish
+  displayName: Publish to Marketplace
+  templateContext:
+    type: releaseJob
+    isProduction: true
+    inputs:
+    - input: pipelineArtifact
+      pipeline: vsixBuild
+      artifactName: vsix
+      targetPath: $(Build.StagingDirectory)\vsix
+
+  steps:
+  - task: NodeTool@0
+    displayName: Use Node 18.x
+    inputs:
+      versionSpec: 18.x
+
+  - task: Npm@0
+    displayName: Install vsce
+    inputs:
+      arguments: --global @vscode/vsce
+
+  - task: AzureCLI@2
+    displayName: Generate AAD_TOKEN
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      scriptType: ps
+      scriptLocation: inlineScript
+      inlineScript: |
+        $aadToken = az account get-access-token --query accessToken --resource $(AzureGuid) -o tsv
+        Write-Host "##vso[task.setvariable variable=AAD_TOKEN;issecret=true]$aadToken"
+
+  - script: |
+      vsce publish --packagePath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}
+    displayName: Publish to Marketplace
+    env:
+      VSCE_PAT: $(AAD_TOKEN)
+
