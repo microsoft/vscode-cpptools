@@ -19,7 +19,7 @@ inputs:
   milestoneId:
     description: items with these milestones will be considered (id only, must match name)
   labels:
-    description: items with these labels will not be considered.  May be "*".
+    description: items with these labels will be considered.  May be "*".
   ignoreMilestoneNames:
     description: items with these milestones will not be considered (names only, must match IDs).  May be "*".
   ignoreMilestoneIds:
