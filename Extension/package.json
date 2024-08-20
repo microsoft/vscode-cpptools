@@ -915,16 +915,6 @@
                         ],
                         "scope": "resource"
                     },
-                    "C_Cpp.intelliSenseEngineFallback": {
-                        "type": "string",
-                        "enum": [
-                            "enabled",
-                            "disabled"
-                        ],
-                        "default": "disabled",
-                        "markdownDescription": "%c_cpp.configuration.intelliSenseEngineFallback.markdownDescription%",
-                        "scope": "resource"
-                    },
                     "C_Cpp.exclusionPolicy": {
                         "type": "string",
                         "enum": [

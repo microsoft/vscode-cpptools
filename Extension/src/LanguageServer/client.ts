@@ -1323,7 +1323,6 @@ export class DefaultClient implements Client {
         const result: WorkspaceFolderSettingsParams = {
             uri: workspaceFolderUri?.toString(),
             intelliSenseEngine: settings.intelliSenseEngine,
-            intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
             autocomplete: settings.autocomplete,
             autocompleteAddParentheses: settings.autocompleteAddParentheses,
             errorSquiggles: settings.errorSquiggles,
