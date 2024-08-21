@@ -10,7 +10,7 @@ import { daysAgoToHumanReadbleDate, daysAgoToTimestamp, safeLog } from '../commo
 export class AddComment extends ActionBase {
 	constructor(
 		private github: GitHub,
-		private createdAfter: string,
+		private createdAfter: string | undefined,
 		private afterDays: number,
 		labels: string,
 		private addComment: string,
@@ -45,6 +45,28 @@ export class AddComment extends ActionBase {
 				if (hydrated.open && this.validateIssue(hydrated)
 					// TODO: Verify updated timestamp
 				) {
+
+					// Don't add a comment if already commented on by an action.
+					let foundActionComment = false;
+					for await (const commentBatch of issue.getComments()) {
+						for (const comment of commentBatch) {
+
+							safeLog(`TEMP log comment author: ${comment.author}`);
+
+						  if (comment.author.isGitHubApp) {
+							safeLog('Found a comment by github-actions');
+							foundActionComment = true;
+							break;
+						  }
+						}
+						if (foundActionComment)
+							break;
+					}
+					if (foundActionComment) {
+						safeLog(`Issue ${hydrated.number} already commented on by an action. Ignoring`);
+						continue;
+					}
+
 					if (this.addComment) {
 						safeLog(`Posting comment on issue ${hydrated.number}`);
 						await issue.postComment(this.addComment);

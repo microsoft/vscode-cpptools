@@ -31,6 +31,24 @@ class AddComment extends ActionBase_1.ActionBase {
                 if (hydrated.open && this.validateIssue(hydrated)
                 // TODO: Verify updated timestamp
                 ) {
+                    // Don't add a comment if already commented on by an action.
+                    let foundActionComment = false;
+                    for await (const commentBatch of issue.getComments()) {
+                        for (const comment of commentBatch) {
+                            (0, utils_1.safeLog)(`TEMP log comment author: ${comment.author}`);
+                            if (comment.author.isGitHubApp) {
+                                (0, utils_1.safeLog)('Found a comment by github-actions');
+                                foundActionComment = true;
+                                break;
+                            }
+                        }
+                        if (foundActionComment)
+                            break;
+                    }
+                    if (foundActionComment) {
+                        (0, utils_1.safeLog)(`Issue ${hydrated.number} already commented on by an action. Ignoring`);
+                        continue;
+                    }
                     if (this.addComment) {
                         (0, utils_1.safeLog)(`Posting comment on issue ${hydrated.number}`);
                         await issue.postComment(this.addComment);
