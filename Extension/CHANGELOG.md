@@ -11,7 +11,7 @@
 * Improve the implementation of file buffers to reduce memory usage.
 
 ### Enhancements
-* Change the default `"editor.stickyScroll.defaultModel"` to `"foldingProviderModel"`. [#12483](https://github.com/microsoft/vscode-cpptools/issues/12483)
+* Change the default C/C++ `"editor.stickyScroll.defaultModel"` to `"foldingProviderModel"`. [#12483](https://github.com/microsoft/vscode-cpptools/issues/12483)
 * Add better validation for settings. [#12371](https://github.com/microsoft/vscode-cpptools/issues/12371)
 * Various IntelliSense parsing updates/fixes.
 
@@ -23,7 +23,7 @@
 * Fix `-I` not being used if `-iquote` is also used for the same path. [#12551](https://github.com/microsoft/vscode-cpptools/issues/12551)
 * Fix issues with relative paths on `nvcc` (CUDA) command lines not being handled correctly. [#12553](https://github.com/microsoft/vscode-cpptools/issues/12553)
 * Fix a random crash when a child process is created. [#12585](https://github.com/microsoft/vscode-cpptools/issues/12585)
-* Fix a crash on shutdown on macOS with `"C_Cpp.loggingLevel": "7"`. [#12567](https://github.com/microsoft/vscode-cpptools/issues/12567)
+* Fix a crash on shutdown on macOS with a verbose logging level. [#12567](https://github.com/microsoft/vscode-cpptools/issues/12567)
 * Fix some issues with recursive includes handling of symbolic links, multi-root, exclusion changes, and file/folder deletion.
 * Fix unnecessary IntelliSense resetting when a new file or folder was created.
 * Fix accumulation of stale signature help and completion requests.
