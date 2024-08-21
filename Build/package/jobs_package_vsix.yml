@@ -1,0 +1,54 @@
+parameters:
+- name: vsixName
+  type: string
+  default: ''
+- name: srcDir
+  type: string
+  default: ''
+
+jobs:
+- job: package
+  displayName: Build ${{ parameters.vsixName }}
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 1
+  templateContext:
+    outputs:
+    - output: pipelineArtifact
+      displayName: '${{ parameters.vsixName }}'
+      targetPath: $(Build.ArtifactStagingDirectory)\vsix
+      artifactName: vsix
+
+  steps:
+  - checkout: self
+
+  - task: UseNode@1
+    displayName: Use Node 18.x
+    inputs:
+      version: 18.x
+
+  - task: Npm@0
+    displayName: Install vsce
+    inputs:
+      arguments: --global @vscode/vsce
+
+  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
+    displayName: Use Yarn 1.x
+
+  - task: CmdLine@1
+    displayName: Create Staging Directory
+    inputs:
+      filename: mkdir
+      arguments: $(Build.ArtifactStagingDirectory)\vsix
+
+  - task: CmdLine@1
+    displayName: Run VSCE to package vsix
+    inputs:
+      filename: vsce
+      arguments: package --yarn -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}
+      workingFolder: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+
+  - task: Npm@0
+    displayName: Uninstall vsce
+    inputs:
+      command: uninstall
+      arguments: --global @vscode/vsce
