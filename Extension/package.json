@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.21.1-main",
+    "version": "1.22.0-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -827,8 +827,8 @@
                         "items": {
                             "type": "string"
                         },
-                        "default": null,
                         "uniqueItems": true,
+                        "default": null,
                         "markdownDescription": "%c_cpp.configuration.default.browse.path.markdownDescription%",
                         "scope": "machine-overridable"
                     },
@@ -5988,18 +5988,21 @@
         "configurationDefaults": {
             "[cpp]": {
                 "editor.wordBasedSuggestions": "off",
-                "editor.suggest.insertMode": "replace",
-                "editor.semanticHighlighting.enabled": true
+                "editor.semanticHighlighting.enabled": true,
+                "editor.stickyScroll.defaultModel": "foldingProviderModel",
+                "editor.suggest.insertMode": "replace"
             },
             "[cuda-cpp]": {
                 "editor.wordBasedSuggestions": "off",
-                "editor.suggest.insertMode": "replace",
-                "editor.semanticHighlighting.enabled": true
+                "editor.semanticHighlighting.enabled": true,
+                "editor.stickyScroll.defaultModel": "foldingProviderModel",
+                "editor.suggest.insertMode": "replace"
             },
             "[c]": {
                 "editor.wordBasedSuggestions": "off",
-                "editor.suggest.insertMode": "replace",
-                "editor.semanticHighlighting.enabled": true
+                "editor.semanticHighlighting.enabled": true,
+                "editor.stickyScroll.defaultModel": "foldingProviderModel",
+                "editor.suggest.insertMode": "replace"
             }
         },
         "semanticTokenTypes": [
@@ -6502,7 +6505,6 @@
         "@vscode/test-electron": "^2.3.10",
         "async-child-process": "^1.1.1",
         "await-notify": "^1.0.1",
-        "copy-webpack-plugin": "^12.0.2",
         "eslint": "^8.45.0",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-import": "^2.29.1",
@@ -6531,7 +6533,6 @@
         "@vscode/extension-telemetry": "^0.9.6",
         "chokidar": "^3.6.0",
         "comment-json": "^4.2.3",
-        "editorconfig": "^2.0.0",
         "escape-string-regexp": "^2.0.0",
         "glob": "^7.2.3",
         "minimatch": "^3.0.5",
@@ -6545,7 +6546,7 @@
         "ssh-config": "^4.4.4",
         "tmp": "^0.2.3",
         "vscode-cpptools": "^6.1.0",
-        "vscode-languageclient": "^9.0.1",
+        "vscode-languageclient": "^8.1.0",
         "vscode-nls": "^5.2.0",
         "vscode-tas-client": "^0.1.84",
         "which": "^2.0.2"
