@@ -37,11 +37,11 @@ export class HoverProvider implements vscode.HoverProvider {
             throw new vscode.CancellationError();
         }
         // VS Code doesn't like the raw objects returned via RPC, so we need to create proper VS Code objects here.
-        const strings: (vscode.MarkdownString | vscode.MarkedString)[] = new Array<vscode.MarkdownString | vscode.MarkedString>();
+        const strings: vscode.MarkdownString[] = [];
         let markdownString: vscode.MarkdownString;
         for (const element of hoverResult.contents) {
             markdownString = element as vscode.MarkdownString;
-            strings.push(markdownString.value);
+            strings.push(markdownString);
         }
         let range: vscode.Range | undefined;
         if (hoverResult.range) {
