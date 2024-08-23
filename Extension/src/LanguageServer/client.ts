@@ -1948,6 +1948,15 @@ export class DefaultClient implements Client {
         if (this.configuration.CurrentConfiguration) {
             configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
         }
+        const userModifiedSettings = Object.entries(this.settingsTracker.getUserModifiedSettings());
+        if (userModifiedSettings.length > 0) {
+            const settings: Record<string, any> = {};
+            for (const [key, ] of userModifiedSettings) {
+                const newKey = `C_Cpp.${key}`;
+                settings[newKey] = vscode.workspace.getConfiguration("C_Cpp").get(key) ?? '<error-retrieving-value>';
+            }
+            configJson += `Modified Settings:\n${JSON.stringify(settings, null, 4)}\n`;
+        }
 
         // Get diagnostics for configuration provider info.
         let configurationLoggingStr: string = "";
