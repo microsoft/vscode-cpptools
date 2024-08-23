@@ -1,7 +1,7 @@
 name: Enhancement Closer (no milestone)
 on:
   schedule:
-    - cron: 50 11 * * * # Run at 11:50 AM UTC (3:50 AM PST, 4:50 AM PDT)
+    - cron: 40 12 * * * # Run at 12:40 PM UTC (4:40 AM PST, 5:40 AM PDT)
   workflow_dispatch:
    inputs:
      readonly:
