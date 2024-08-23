@@ -1951,7 +1951,7 @@ export class DefaultClient implements Client {
         const userModifiedSettings = Object.entries(this.settingsTracker.getUserModifiedSettings());
         if (userModifiedSettings.length > 0) {
             const settings: Record<string, any> = {};
-            for (const [key, ] of userModifiedSettings) {
+            for (const [key] of userModifiedSettings) {
                 const newKey = `C_Cpp.${key}`;
                 settings[newKey] = vscode.workspace.getConfiguration("C_Cpp").get(key) ?? '<error-retrieving-value>';
             }

@@ -123,6 +123,9 @@ export class SettingsTracker {
                         if (typeof value === t) {
                             return t;
                         }
+                        if (t === "integer" && typeof value === "number") {
+                            return "number";
+                        }
                         if (t === "array" && value instanceof Array) {
                             return t;
                         }
@@ -131,8 +134,13 @@ export class SettingsTracker {
                         }
                     }
                 }
-            } else if (typeof type === "string" && typeof value === type) {
-                return type;
+            } else if (typeof type === "string") {
+                if (typeof value === type) {
+                    return type;
+                }
+                if (type === "integer" && typeof value === "number") {
+                    return "number";
+                }
             }
         }
         return undefined;
