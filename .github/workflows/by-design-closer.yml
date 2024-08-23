@@ -1,7 +1,7 @@
 name: By Design Closer
 on:
   schedule:
-    - cron: 0 12 * * * # Run at 12:00 PM UTC (4:00 AM PST, 5:00 AM PDT)
+    - cron: 0 12 * * * # Run at 12:00 PM UTC (4:00 AM PST, 4:00 AM PDT)
   workflow_dispatch:
    inputs:
      readonly:
