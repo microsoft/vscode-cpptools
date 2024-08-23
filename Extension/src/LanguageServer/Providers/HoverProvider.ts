@@ -38,10 +38,13 @@ export class HoverProvider implements vscode.HoverProvider {
         }
         // VS Code doesn't like the raw objects returned via RPC, so we need to create proper VS Code objects here.
         const strings: vscode.MarkdownString[] = [];
-        let markdownString: vscode.MarkdownString;
         for (const element of hoverResult.contents) {
-            markdownString = element as vscode.MarkdownString;
-            strings.push(markdownString);
+            const oldMarkdownString: vscode.MarkdownString = element as vscode.MarkdownString;
+            const newMarkdownString: vscode.MarkdownString = new vscode.MarkdownString(oldMarkdownString.value, oldMarkdownString.supportThemeIcons);
+            newMarkdownString.isTrusted = oldMarkdownString.isTrusted;
+            newMarkdownString.supportHtml = oldMarkdownString.supportHtml;
+            newMarkdownString.baseUri = oldMarkdownString.baseUri;
+            strings.push(newMarkdownString);
         }
         let range: vscode.Range | undefined;
         if (hoverResult.range) {
