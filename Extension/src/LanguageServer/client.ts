@@ -27,7 +27,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
+import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -43,6 +43,7 @@ import { localizedStringCount, lookupString } from '../nativeStrings';
 import { SessionState } from '../sessionState';
 import * as telemetry from '../telemetry';
 import { TestHook, getTestHook } from '../testHook';
+import { HoverProvider } from './Providers/HoverProvider';
 import {
     CodeAnalysisDiagnosticIdentifiersAndUri,
     RegisterCodeAnalysisNotifications,
@@ -53,12 +54,13 @@ import {
 import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import * as configs from './configurations';
 import { DataBinding } from './dataBinding';
+import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentWorkspaceState } from './persistentState';
 import { createProtocolFilter } from './protocolFilter';
 import * as refs from './references';
-import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams, getEditorConfigSettings } from './settings';
+import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
 import { SettingsTracker } from './settingsTracker';
 import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
 import { handleChangedFromCppToC, makeLspRange, makeVscodeLocation, makeVscodeRange } from './utils';
@@ -102,7 +104,6 @@ let workspaceHash: string = "";
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
-export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 export const cachedEditorConfigLookups: Map<string, boolean> = new Map<string, boolean>();
 export let semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
 
@@ -533,13 +534,11 @@ interface DidChangeActiveEditorParams {
     selection?: Range;
 }
 
-interface GetIncludesParams
-{
+interface GetIncludesParams {
     maxDepth: number;
 }
 
-interface GetIncludesResult
-{
+interface GetIncludesResult {
     includedFiles: string[];
 }
 
@@ -556,6 +555,7 @@ export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFol
 export const FormatDocumentRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatOnType');
+export const HoverRequest: RequestType<TextDocumentPositionParams, vscode.Hover, void> = new RequestType<TextDocumentPositionParams, vscode.Hover, void>('cpptools/hover');
 const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void> = new RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void>('cpptools/createDeclDef');
 const ExtractToFunctionRequest: RequestType<ExtractToFunctionParams, WorkspaceEditResult, void> = new RequestType<ExtractToFunctionParams, WorkspaceEditResult, void>('cpptools/extractToFunction');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
@@ -1257,6 +1257,7 @@ export class DefaultClient implements Client {
                 initializedClientCount = 0;
                 this.inlayHintsProvider = new InlayHintsProvider();
 
+                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, new HoverProvider(this)));
                 this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
                 this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, new RenameProvider(this)));
                 this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, new FindAllReferencesProvider(this)));
@@ -1275,7 +1276,7 @@ export class DefaultClient implements Client {
                 this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, this.codeFoldingProvider);
 
                 const settings: CppSettings = new CppSettings();
-                if (settings.enhancedColorization && semanticTokensLegend) {
+                if (settings.isEnhancedColorizationEnabled && semanticTokensLegend) {
                     this.semanticTokensProvider = new SemanticTokensProvider();
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                 }
@@ -1352,9 +1353,6 @@ export class DefaultClient implements Client {
             clangTidyHeaderFilter: settings.clangTidyHeaderFilter !== null ? util.resolveVariables(settings.clangTidyHeaderFilter, this.AdditionalEnvironment) : null,
             clangTidyArgs: util.resolveVariablesArray(settings.clangTidyArgs, this.AdditionalEnvironment),
             clangTidyUseBuildPath: settings.clangTidyUseBuildPath,
-            clangTidyFixWarnings: settings.clangTidyFixWarnings,
-            clangTidyFixErrors: settings.clangTidyFixErrors,
-            clangTidyFixNotes: settings.clangTidyFixNotes,
             clangTidyChecksEnabled: settings.clangTidyChecksEnabled,
             clangTidyChecksDisabled: settings.clangTidyChecksDisabled,
             markdownInComments: settings.markdownInComments,
@@ -1463,7 +1461,7 @@ export class DefaultClient implements Client {
             simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
             intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
             experimentalFeatures: workspaceSettings.experimentalFeatures,
-            enhancedColorization: workspaceSettings.enhancedColorization,
+            enhancedColorization: workspaceSettings.isEnhancedColorizationEnabled,
             intellisenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
             intellisenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
             referencesMaxConcurrentThreads: workspaceSettings.referencesMaxConcurrentThreads,
@@ -1520,9 +1518,9 @@ export class DefaultClient implements Client {
         }
 
         const workspaceSettings: CppSettings = new CppSettings();
-        if (workspaceSettings.caseSensitiveFileSupport !== currentCaseSensitiveFileSupport.Value) {
+        if (workspaceSettings.isCaseSensitiveFileSupportEnabled !== currentCaseSensitiveFileSupport.Value) {
             resetDatabase = true;
-            currentCaseSensitiveFileSupport.Value = workspaceSettings.caseSensitiveFileSupport;
+            currentCaseSensitiveFileSupport.Value = workspaceSettings.isCaseSensitiveFileSupportEnabled;
         }
 
         const cacheStoragePath: string = util.getCacheStoragePath();
@@ -1537,7 +1535,7 @@ export class DefaultClient implements Client {
             cacheStoragePath: cacheStoragePath,
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
-            caseSensitiveFileSupport: workspaceSettings.caseSensitiveFileSupport,
+            caseSensitiveFileSupport: workspaceSettings.isCaseSensitiveFileSupportEnabled,
             resetDatabase: resetDatabase,
             edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", getLocaleId()),
             localizedStrings: localizedStrings,
@@ -1635,7 +1633,7 @@ export class DefaultClient implements Client {
                 }
                 const settings: CppSettings = new CppSettings();
                 if (changedSettings.enhancedColorization) {
-                    if (settings.enhancedColorization && semanticTokensLegend) {
+                    if (settings.isEnhancedColorizationEnabled && semanticTokensLegend) {
                         this.semanticTokensProvider = new SemanticTokensProvider();
                         this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                     } else if (this.semanticTokensProviderDisposable) {
@@ -2101,7 +2099,7 @@ export class DefaultClient implements Client {
             result = "timeout";
             if (!requestFile) {
                 const settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.configurationWarnings && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+                if (settings.isConfigurationWarningsEnabled && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                     const dismiss: string = localize("dismiss.button", "Dismiss");
                     const disable: string = localize("disable.warnings.button", "Disable Warnings");
                     const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
@@ -2171,7 +2169,7 @@ export class DefaultClient implements Client {
 
     public getVcpkgEnabled(): Promise<boolean> {
         const cppSettings: CppSettings = new CppSettings(this.RootUri);
-        return Promise.resolve(!!cppSettings.vcpkgEnabled);
+        return Promise.resolve(cppSettings.vcpkgEnabled);
     }
 
     public async getKnownCompilers(): Promise<configs.KnownCompiler[] | undefined> {
@@ -2731,7 +2729,7 @@ export class DefaultClient implements Client {
             showConfigStatus = ask.Value;
         }
 
-        const compilerPathNotSet: boolean = settings.defaultCompilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson === undefined;
+        const compilerPathNotSet: boolean = settings.defaultCompilerPath === null && this.configuration.CurrentConfiguration?.compilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson === undefined;
         const configurationNotSet: boolean = configProviderNotSetAndNoCache && compileCommandsNotSet && compilerPathNotSet;
 
         showConfigStatus = showConfigStatus || (configurationNotSet &&
@@ -3057,7 +3055,7 @@ export class DefaultClient implements Client {
                         providerVersion < Version.v6,
                         itemConfig.compilerPath,
                         util.isArrayOfString(itemConfig.compilerArgs) ? itemConfig.compilerArgs : undefined);
-                    itemConfig.compilerPath = compilerPathAndArgs.compilerPath;
+                    itemConfig.compilerPath = compilerPathAndArgs.compilerPath ?? undefined;
                     if (itemConfig.compilerPath !== undefined) {
                         void this.addTrustedCompiler(itemConfig.compilerPath).catch(logAndReturn.undefined);
                     }
@@ -3161,7 +3159,7 @@ export class DefaultClient implements Client {
                     providerVersion < Version.v6,
                     sanitized.compilerPath,
                     util.isArrayOfString(sanitized.compilerArgs) ? sanitized.compilerArgs : undefined);
-                sanitized.compilerPath = compilerPathAndArgs.compilerPath;
+                sanitized.compilerPath = compilerPathAndArgs.compilerPath ?? undefined;
                 if (sanitized.compilerPath !== undefined) {
                     void this.addTrustedCompiler(sanitized.compilerPath).catch(logAndReturn.undefined);
                 }
@@ -3476,8 +3474,7 @@ export class DefaultClient implements Client {
         }
 
         let formatParams: FormatParams | undefined;
-        if (cppSettings.useVcFormat(editor.document))
-        {
+        if (cppSettings.useVcFormat(editor.document)) {
             const editorConfigSettings: any = getEditorConfigSettings(uri.fsPath);
             formatParams = {
                 editorConfigSettings: editorConfigSettings,

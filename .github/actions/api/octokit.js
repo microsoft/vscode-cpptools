@@ -12,6 +12,10 @@ let numRequests = 0;
 const getNumRequests = () => numRequests;
 exports.getNumRequests = getNumRequests;
 class OctoKit {
+    get octokit() {
+        numRequests++;
+        return this._octokit;
+    }
     constructor(token, params, options = { readonly: false }) {
         this.token = token;
         this.params = params;
@@ -22,10 +26,6 @@ class OctoKit {
         this._octokit = (0, github_1.getOctokit)(token);
         this.repoName = params.repo;
         this.repoOwner = params.owner;
-    }
-    get octokit() {
-        numRequests++;
-        return this._octokit;
     }
     getIssueByNumber(number) {
         return new OctoKitIssue(this.token, this.params, { number: number });

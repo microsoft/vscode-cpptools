@@ -1,7 +1,7 @@
 name: External closer - debugger
 on:
   schedule:
-    - cron: 10 11 * * * # Run at 11:10 AM UTC (3:10 AM PST, 4:10 AM PDT)
+    - cron: 10 13 * * * # Run at 1:10 PM UTC (5:10 AM PST, 6:10 AM PDT)
   workflow_dispatch:
    inputs:
      readonly:
