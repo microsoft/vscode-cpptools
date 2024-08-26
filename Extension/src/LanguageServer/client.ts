@@ -1953,7 +1953,7 @@ export class DefaultClient implements Client {
             const settings: Record<string, any> = {};
             for (const [key] of userModifiedSettings) {
                 // Some settings were renamed during a telemetry change, so we need to undo that here.
-                const realKey = key.endsWith('2') ? key.slice(0, key.length-1) : key;
+                const realKey = key.endsWith('2') ? key.slice(0, key.length - 1) : key;
                 const fullKey = `C_Cpp.${realKey}`;
                 settings[fullKey] = vscode.workspace.getConfiguration("C_Cpp").get(realKey) ?? '<error-retrieving-value>';
             }
