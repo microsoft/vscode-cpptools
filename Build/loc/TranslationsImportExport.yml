@@ -2,11 +2,14 @@
 # Pipeline for VsCodeExtension-Localization build definition
 # Runs OneLocBuild task to localize xlf file
 # ==================================================================================
-
 resources:
   repositories:
   - repository: self
     clean: true
+  - repository: MicroBuildTemplate
+    type: git
+    name: 1ESPipelineTemplates/MicroBuildTemplate
+    ref: refs/tags/release
 
 trigger: none
 pr: none
@@ -18,45 +21,72 @@ schedules:
     - main
   always: true
 
-pool:
-  name: 'AzurePipelines-EO'
-  demands:
-  - ImageOverride -equals AzurePipelinesWindows2022compliant
+variables: 
+  TeamName: cpptools
+  Codeql.Language: javascript
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '18.x'
-  displayName: 'Install Node.js'
+extends:
+  template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
+  parameters:
+    pool:
+      name: AzurePipelines-EO
+      image: AzurePipelinesWindows2022compliantGPT
+      os: windows
+    sdl:
+      sourceAnalysisPool: 
+        name: AzurePipelines-EO
+        image: AzurePipelinesWindows2022compliantGPT
+        os: windows
+    stages:
+    - stage: stage
+      jobs:
+      - job: job
+        templateContext:
+          outputs:
+          - output: pipelineArtifact
+            targetPath: '$(Build.ArtifactStagingDirectory)'
+            artifactName: 'drop'
+            publishLocation: 'Container'
+        steps:
+        - task: NodeTool@0
+          inputs:
+            versionSpec: '18.x'
+          displayName: 'Install Node.js'
 
-- task: CmdLine@2
-  inputs:
-    script: 'cd Extension && yarn install'
+        - task: CmdLine@2
+          inputs:
+            script: 'cd Extension && yarn install'
 
-- task: CmdLine@2
-  inputs:
-    script: 'cd ./Extension && yarn run translations-export && cd ..'
+        - task: CmdLine@2
+          inputs:
+            script: 'cd ./Extension && yarn run translations-export && cd ..'
 
-- task: OneLocBuild@2
-  env:
-    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-  inputs:
-    locProj: 'Build/loc/LocProject.json'
-    outDir: '$(Build.ArtifactStagingDirectory)'
-    isCreatePrSelected: false
-    prSourceBranchPrefix: 'locfiles'
-    packageSourceAuth: 'patAuth'
-    patVariable: '$(OneLocBuildPat)'
-    LclSource: lclFilesfromPackage
-    LclPackageId: 'LCL-JUNO-PROD-VCPP'
-    lsBuildXLocPackageVersion: '7.0.30510'
+        # Requires Azure client 2.x
+        - task: AzureCLI@2
+          displayName: 'Set OneLocBuildToken'
+          enabled: true
+          inputs:
+            azureSubscription: '$(AzureSubscription)'   # Azure DevOps service connection
+            scriptType: 'pscore'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              $token = az account get-access-token --query accessToken --resource $(AzureGuid) -o tsv
+              Write-Host "##vso[task.setvariable variable=AzDO.OneLocBuildToken;issecret=true]${token}"    
 
-- task: CmdLine@2
-  inputs:
-    script: 'cd Extension && node ./translations_auto_pr.js microsoft vscode-cpptools csigs $(csigsPat) csigs csigs@users.noreply.github.com "$(Build.ArtifactStagingDirectory)/loc" vscode-extensions-localization-export/vscode-extensions && cd ..'
+        - task: OneLocBuild@2
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+          inputs:
+            locProj: 'Build/loc/LocProject.json'
+            outDir: '$(Build.ArtifactStagingDirectory)'
+            isCreatePrSelected: false
+            prSourceBranchPrefix: 'locfiles'
+            packageSourceAuth: 'patAuth'
+            patVariable: '$(AzDO.OneLocBuildToken)'
+            LclSource: lclFilesfromPackage
+            LclPackageId: 'LCL-JUNO-PROD-VCPP'
+            lsBuildXLocPackageVersion: '7.0.30510'
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
+        - task: CmdLine@2
+          inputs:
+            script: 'cd Extension && node ./translations_auto_pr.js microsoft vscode-cpptools csigs $(csigsPat) csigs csigs@users.noreply.github.com "$(Build.ArtifactStagingDirectory)/loc" vscode-extensions-localization-export/vscode-extensions && cd ..'

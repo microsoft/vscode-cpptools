@@ -62,8 +62,8 @@ export interface ConfigurationJson {
 
 export interface Configuration {
     name: string;
-    compilerPathInCppPropertiesJson?: string;
-    compilerPath?: string;
+    compilerPathInCppPropertiesJson?: string | null;
+    compilerPath?: string | null;
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
     compilerArgsLegacy?: string[];
@@ -988,10 +988,9 @@ export class CppProperties {
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
                 if (configuration.compilerPath === "${default}") {
-                    configuration.compilerPath = settings.defaultCompilerPath ?? undefined;
+                    configuration.compilerPath = settings.defaultCompilerPath;
                 }
                 if (configuration.compilerPath === null) {
-                    configuration.compilerPath = undefined;
                     configuration.compilerPathIsExplicit = true;
                 } else if (configuration.compilerPath !== undefined) {
                     configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
@@ -1516,7 +1515,7 @@ export class CppProperties {
         return success;
     }
 
-    private resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true, assumeRelative: boolean = true): string {
+    private resolvePath(input_path: string | undefined | null, replaceAsterisks: boolean = true, assumeRelative: boolean = true): string {
         if (!input_path || input_path === "${default}") {
             return "";
         }
@@ -1567,10 +1566,10 @@ export class CppProperties {
 
         // Check if config name is unique.
         errors.name = this.isConfigNameUnique(config.name);
-        let resolvedCompilerPath: string | undefined;
+        let resolvedCompilerPath: string | undefined | null;
         // Validate compilerPath
         if (config.compilerPath) {
-            resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true }) ?? undefined;
+            resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true });
         }
 
         if (resolvedCompilerPath === undefined) {
@@ -1590,6 +1589,7 @@ export class CppProperties {
                 (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0) &&
                 !resolvedCompilerPath.startsWith('"') &&
                 compilerPathAndArgs.compilerPath !== undefined &&
+                compilerPathAndArgs.compilerPath !== null &&
                 compilerPathAndArgs.compilerPath.includes(" ");
 
             const compilerPathErrors: string[] = [];
@@ -1598,7 +1598,7 @@ export class CppProperties {
             }
 
             // Get compiler path without arguments before checking if it exists
-            resolvedCompilerPath = compilerPathAndArgs.compilerPath;
+            resolvedCompilerPath = compilerPathAndArgs.compilerPath ?? undefined;
             if (resolvedCompilerPath) {
                 let pathExists: boolean = true;
                 const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");

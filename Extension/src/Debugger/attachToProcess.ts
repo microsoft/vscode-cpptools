@@ -187,13 +187,18 @@ export class RemoteAttachPicker {
         const args: string[] = [`-ex "target extended-remote ${miDebuggerServerAddress}"`, '-ex "info os processes"', '-batch'];
         let processListOutput: util.ProcessReturnType = await util.spawnChildProcess(miDebuggerPath, args);
         // The device may not be responsive for a while during the restart after image deploy. Retry 5 times.
-        for (let i: number = 0; i < 5 && !processListOutput.succeeded; i++) {
+        for (let i: number = 0; i < 5 && !processListOutput.succeeded && processListOutput.outputError.length === 0; i++) {
             processListOutput = await util.spawnChildProcess(miDebuggerPath, args);
         }
 
         if (!processListOutput.succeeded) {
             throw new Error(localize('failed.to.make.gdb.connection', 'Failed to make GDB connection: "{0}".', processListOutput.output));
         }
+
+        if (processListOutput.outputError.length !== 0) {
+            throw new Error(localize('failed.to.make.gdb.connection', 'Failed to make GDB connection: "{0}".', processListOutput.outputError));
+        }
+
         const processes: AttachItem[] = this.parseProcessesFromInfoOsProcesses(processListOutput.output);
         if (!processes || processes.length === 0) {
             throw new Error(localize('failed.to.parse.processes', 'Failed to parse processes: "{0}".', processListOutput.output));
