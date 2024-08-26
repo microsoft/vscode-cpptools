@@ -753,7 +753,7 @@ export interface ProcessReturnType {
     succeeded: boolean;
     exitCode?: number | NodeJS.Signals;
     output: string;
-    outputError : string;
+    outputError: string;
 }
 
 export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
