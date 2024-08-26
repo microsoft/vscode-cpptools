@@ -33,10 +33,10 @@ export class StaleCloser extends ActionBase {
 	}
 
 	async run() {
-		const updatedTimestamp = daysAgoToHumanReadbleDate(this.closeDays);
+		const updatedTimestamp = this.closeDays ? daysAgoToHumanReadbleDate(this.closeDays) : undefined;
 		const pingTimestamp = this.pingDays ? daysAgoToTimestamp(this.pingDays) : undefined;
 
-		const query = this.buildQuery((this.closeDays ? `updated:<${updatedTimestamp} ` : "") + "is:open is:unlocked");
+		const query = this.buildQuery((updatedTimestamp ? `updated:<${updatedTimestamp} ` : "") + "is:open is:unlocked");
 
 		const addLabelsSet = this.addLabels ? this.addLabels.split(',') : [];
 		const removeLabelsSet = this.removeLabels ? this.removeLabels.split(',') : [];

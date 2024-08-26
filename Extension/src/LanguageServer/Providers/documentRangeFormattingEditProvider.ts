@@ -3,8 +3,11 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
+import { ResponseError } from 'vscode-languageclient';
 import { DefaultClient, FormatParams, FormatRangeRequest, FormatResult } from '../client';
-import { CppSettings, getEditorConfigSettings } from '../settings';
+import { getEditorConfigSettings } from '../editorConfig';
+import { RequestCancelled, ServerCancelled } from '../protocolFilter';
+import { CppSettings } from '../settings';
 import { makeVscodeTextEdits } from '../utils';
 
 export class DocumentRangeFormattingEditProvider implements vscode.DocumentRangeFormattingEditProvider {
@@ -42,12 +45,16 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
                 },
                 onChanges: false
             };
-            // We do not currently pass the CancellationToken to sendRequest
-            // because there is not currently cancellation logic for formatting
-            // in the native process. Formatting is currently done directly in
-            // message handling thread.
-            const response: FormatResult = await this.client.languageClient.sendRequest(FormatRangeRequest, params, token);
-            if (token.isCancellationRequested || response.edits === undefined) {
+            let response: FormatResult;
+            try {
+                response = await this.client.languageClient.sendRequest(FormatRangeRequest, params, token);
+            } catch (e: any) {
+                if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                    throw new vscode.CancellationError();
+                }
+                throw e;
+            }
+            if (token.isCancellationRequested) {
                 throw new vscode.CancellationError();
             }
             return makeVscodeTextEdits(response.edits);

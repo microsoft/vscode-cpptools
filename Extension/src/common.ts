@@ -753,6 +753,7 @@ export interface ProcessReturnType {
     succeeded: boolean;
     exitCode?: number | NodeJS.Signals;
     output: string;
+    outputError: string;
 }
 
 export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
@@ -766,7 +767,7 @@ export async function spawnChildProcess(program: string, args: string[] = [], co
     const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, skipLogging, cancellationToken);
     const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
     if (programOutput.exitCode) {
-        return { succeeded: false, exitCode, output: programOutput.stderr || programOutput.stdout || localize('process.exited', 'Process exited with code {0}', exitCode) };
+        return { succeeded: false, exitCode, outputError: programOutput.stderr, output: programOutput.stderr || programOutput.stdout || localize('process.exited', 'Process exited with code {0}', exitCode) };
     } else {
         let stdout: string;
         if (programOutput.stdout.length) {
@@ -775,7 +776,7 @@ export async function spawnChildProcess(program: string, args: string[] = [], co
         } else {
             stdout = localize('process.succeeded', 'Process executed successfully.');
         }
-        return { succeeded: true, exitCode, output: stdout };
+        return { succeeded: true, exitCode, outputError: programOutput.stderr, output: stdout };
     }
 }
 

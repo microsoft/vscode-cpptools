@@ -8,7 +8,6 @@
 'use strict';
 
 const path = require('path');
-const copyPlugin = require('copy-webpack-plugin');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -32,16 +31,6 @@ const config = {
         extensions: ['.js', '.ts',],
         mainFields: ['main', 'module'],
     },
-    plugins: [
-        new copyPlugin({
-            patterns: [
-                {
-                    from: path.resolve(__dirname, 'node_modules', "@one-ini", "wasm", "one_ini_bg.wasm"),
-                    to: path.resolve(__dirname, 'dist', 'src')
-                }
-            ]
-        })
-    ],
     module: {
         rules: [{
             test: /\.ts$/,
