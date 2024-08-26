@@ -610,7 +610,7 @@
                         "scope": "resource"
                     },
                     "C_Cpp.inactiveRegionOpacity": {
-                        "type:": "number",
+                        "type": "number",
                         "default": 0.55,
                         "markdownDescription": "%c_cpp.configuration.inactiveRegionOpacity.markdownDescription%",
                         "scope": "resource",
@@ -1153,6 +1153,7 @@
                         "scope": "resource"
                     },
                     "C_Cpp.vcFormat.newLine.beforeOpenBrace.lambda": {
+                        "type": "string",
                         "enum": [
                             "newLine",
                             "sameLine",
