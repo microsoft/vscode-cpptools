@@ -304,7 +304,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
 
         // When using showLoginTerminal, stdout include the passphrase prompt, etc. Try to get just the command output on the last line.
         const actualOutput: string | undefined = cancel ? '' : lastNonemptyLine(stdout);
-        result.resolve({ succeeded: !exitCode, exitCode, output: actualOutput || '' });
+        result.resolve({ succeeded: !exitCode, exitCode, outputError: '', output: actualOutput || '' });
     };
 
     const failed = (error?: any) => {
