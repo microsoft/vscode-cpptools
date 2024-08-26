@@ -62,17 +62,17 @@ export class SettingsTracker {
                     if (subVal === undefined) {
                         continue;
                     }
-                    if (subVal instanceof Object && !(subVal instanceof Array)) {
+                    if (newRawSetting === undefined && subVal instanceof Object) {
                         collectSettingsRecursive(newKey, subVal, depth + 1);
                     } else {
                         const entry: KeyValuePair | undefined = this.filterAndSanitize(newKey, subVal, correctlyScopedSubSettings, filter);
-                        if (entry && entry.key && entry.value) {
+                        if (entry?.key && entry.value !== undefined) {
                             result[entry.key] = entry.value;
                         }
                     }
                 }
             };
-            if (val instanceof Object && !(val instanceof Array)) {
+            if (rawSetting === undefined && val instanceof Object) {
                 collectSettingsRecursive(key, val, 1);
                 continue;
             }
@@ -107,6 +107,9 @@ export class SettingsTracker {
                         && (key !== "loggingLevel" || util.getNumericLoggingLevel(val) === -1)) {
                         return "<invalid>";
                     }
+                    return val;
+                } else if (val === curSetting["default"]) {
+                    // C_Cpp.default.browse.path is a special case where the default value is null and doesn't match the type definition.
                     return val;
                 }
             }
