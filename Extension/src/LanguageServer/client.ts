@@ -1974,7 +1974,7 @@ export class DefaultClient implements Client {
             settings.editorParameterHintsEnabled = editorSettings.editorParameterHintsEnabled;
             settings.searchExclude = editorSettings.searchExclude;
             settings.workbenchSettingsEditor = editorSettings.workbenchSettingsEditor;
-            configJson += `Tracked Editor Settings:\n${JSON.stringify(settings, null, 4)}\n`;
+            configJson += `Additional Tracked Settings:\n${JSON.stringify(settings, null, 4)}\n`;
         }
 
         // Get diagnostics for configuration provider info.
