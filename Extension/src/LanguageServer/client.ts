@@ -27,7 +27,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
+import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -43,6 +43,7 @@ import { localizedStringCount, lookupString } from '../nativeStrings';
 import { SessionState } from '../sessionState';
 import * as telemetry from '../telemetry';
 import { TestHook, getTestHook } from '../testHook';
+import { HoverProvider } from './Providers/HoverProvider';
 import {
     CodeAnalysisDiagnosticIdentifiersAndUri,
     RegisterCodeAnalysisNotifications,
@@ -53,12 +54,13 @@ import {
 import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import * as configs from './configurations';
 import { DataBinding } from './dataBinding';
+import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentWorkspaceState } from './persistentState';
 import { createProtocolFilter } from './protocolFilter';
 import * as refs from './references';
-import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams, getEditorConfigSettings } from './settings';
+import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
 import { SettingsTracker } from './settingsTracker';
 import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
 import { handleChangedFromCppToC, makeLspRange, makeVscodeLocation, makeVscodeRange } from './utils';
@@ -102,7 +104,6 @@ let workspaceHash: string = "";
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
-export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 export const cachedEditorConfigLookups: Map<string, boolean> = new Map<string, boolean>();
 export let semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
 
@@ -554,6 +555,7 @@ export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFol
 export const FormatDocumentRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatOnType');
+export const HoverRequest: RequestType<TextDocumentPositionParams, vscode.Hover, void> = new RequestType<TextDocumentPositionParams, vscode.Hover, void>('cpptools/hover');
 const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void> = new RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void>('cpptools/createDeclDef');
 const ExtractToFunctionRequest: RequestType<ExtractToFunctionParams, WorkspaceEditResult, void> = new RequestType<ExtractToFunctionParams, WorkspaceEditResult, void>('cpptools/extractToFunction');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
@@ -1255,6 +1257,7 @@ export class DefaultClient implements Client {
                 initializedClientCount = 0;
                 this.inlayHintsProvider = new InlayHintsProvider();
 
+                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, new HoverProvider(this)));
                 this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
                 this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, new RenameProvider(this)));
                 this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, new FindAllReferencesProvider(this)));
@@ -1323,7 +1326,6 @@ export class DefaultClient implements Client {
         const result: WorkspaceFolderSettingsParams = {
             uri: workspaceFolderUri?.toString(),
             intelliSenseEngine: settings.intelliSenseEngine,
-            intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
             autocomplete: settings.autocomplete,
             autocompleteAddParentheses: settings.autocompleteAddParentheses,
             errorSquiggles: settings.errorSquiggles,
@@ -1944,6 +1946,34 @@ export class DefaultClient implements Client {
         let configJson: string = "";
         if (this.configuration.CurrentConfiguration) {
             configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
+        }
+        const userModifiedSettings = Object.entries(this.settingsTracker.getUserModifiedSettings());
+        if (userModifiedSettings.length > 0) {
+            const settings: Record<string, any> = {};
+            for (const [key] of userModifiedSettings) {
+                // Some settings were renamed during a telemetry change, so we need to undo that here.
+                const realKey = key.endsWith('2') ? key.slice(0, key.length - 1) : key;
+                const fullKey = `C_Cpp.${realKey}`;
+                settings[fullKey] = vscode.workspace.getConfiguration("C_Cpp").get(realKey) ?? '<error-retrieving-value>';
+            }
+            configJson += `Modified Settings:\n${JSON.stringify(settings, null, 4)}\n`;
+        }
+
+        {
+            const editorSettings = new OtherSettings(this.RootUri);
+            const settings: Record<string, any> = {};
+            settings.editorTabSize = editorSettings.editorTabSize;
+            settings.editorInsertSpaces = editorSettings.editorInsertSpaces;
+            settings.editorAutoClosingBrackets = editorSettings.editorAutoClosingBrackets;
+            settings.filesEncoding = editorSettings.filesEncoding;
+            settings.filesAssociations = editorSettings.filesAssociations;
+            settings.filesExclude = editorSettings.filesExclude;
+            settings.filesAutoSaveAfterDelay = editorSettings.filesAutoSaveAfterDelay;
+            settings.editorInlayHintsEnabled = editorSettings.editorInlayHintsEnabled;
+            settings.editorParameterHintsEnabled = editorSettings.editorParameterHintsEnabled;
+            settings.searchExclude = editorSettings.searchExclude;
+            settings.workbenchSettingsEditor = editorSettings.workbenchSettingsEditor;
+            configJson += `Additional Tracked Settings:\n${JSON.stringify(settings, null, 4)}\n`;
         }
 
         // Get diagnostics for configuration provider info.

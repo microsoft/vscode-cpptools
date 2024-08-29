@@ -3,9 +3,11 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
+import { ResponseError } from 'vscode-languageclient';
 import { isExperimentEnabled } from '../../telemetry';
 import { DefaultClient, GetSymbolInfoRequest, LocalizeSymbolInformation, SymbolScope, WorkspaceSymbolParams } from '../client';
 import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
+import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { makeVscodeLocation } from '../utils';
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
@@ -25,7 +27,15 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
             experimentEnabled: await isExperimentEnabled('CppTools1')
         };
 
-        const symbols: LocalizeSymbolInformation[] = await this.client.languageClient.sendRequest(GetSymbolInfoRequest, params, token);
+        let symbols: LocalizeSymbolInformation[];
+        try {
+            symbols = await this.client.languageClient.sendRequest(GetSymbolInfoRequest, params, token);
+        } catch (e: any) {
+            if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                throw new vscode.CancellationError();
+            }
+            throw e;
+        }
         const resultSymbols: vscode.SymbolInformation[] = [];
         if (token.isCancellationRequested) {
             throw new vscode.CancellationError();
