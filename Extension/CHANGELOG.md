@@ -1,5 +1,19 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.22.1: August 29, 2024
+### Enhancement
+* Add "Additional Tracked Settings" to `C/C++: Log Diagnostics` output. [PR #12635](https://github.com/microsoft/vscode-cpptools/pull/12635)
+
+### Bug Fixes
+* Fix hover over static constexpr variables sometimes not working. [#12284](https://github.com/microsoft/vscode-cpptools/issues/12284)
+* Fix completion not giving results in several scenarios. [#12412](https://github.com/microsoft/vscode-cpptools/issues/12412)
+* Fix include completion showing results for deleted folders with recursive includes. [#12636](https://github.com/microsoft/vscode-cpptools/issues/12636)
+* Fix the `/FU` flag not working for C++/CLI . [#12641](https://github.com/microsoft/vscode-cpptools/issues/12641)
+* Fix some crashes with recursive includes. [#12643](https://github.com/microsoft/vscode-cpptools/issues/12643)
+* Fix IntelliSense not working on Windows when `C_Cpp.caseSensitiveFileSupport` is `enabled`. [#12648](https://github.com/microsoft/vscode-cpptools/issues/12648)
+* Changes that might fix a crash with `translate_encoding_to_utf8`. [#12652](https://github.com/microsoft/vscode-cpptools/issues/12652)
+* Fix a random crash during IntelliSense creation.
+
 ## Version 1.22.0: August 26, 2024
 ### Performance Improvements
 * Switch to an alternative implementation of recursive includes (that sends all the paths instead of only the "used" paths). [#11780](https://github.com/microsoft/vscode-cpptools/issues/11780)
