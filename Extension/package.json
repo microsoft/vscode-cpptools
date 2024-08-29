@@ -3342,11 +3342,6 @@
                 "category": "C/C++"
             },
             {
-                "command": "C_Cpp.ToggleIncludeFallback",
-                "title": "%c_cpp.command.toggleIncludeFallback.title%",
-                "category": "C/C++"
-            },
-            {
                 "command": "C_Cpp.ToggleDimInactiveRegions",
                 "title": "%c_cpp.command.toggleDimInactiveRegions.title%",
                 "category": "C/C++"
@@ -5861,10 +5856,6 @@
                 },
                 {
                     "command": "C_Cpp.DisableErrorSquiggles",
-                    "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
-                },
-                {
-                    "command": "C_Cpp.ToggleIncludeFallback",
                     "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
                 },
                 {
