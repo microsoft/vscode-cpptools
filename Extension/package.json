@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.22.1-main",
+    "version": "1.22.2-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -913,16 +913,6 @@
                             "%c_cpp.configuration.intelliSenseEngine.tagParser.description%",
                             "%c_cpp.configuration.intelliSenseEngine.disabled.description%"
                         ],
-                        "scope": "resource"
-                    },
-                    "C_Cpp.intelliSenseEngineFallback": {
-                        "type": "string",
-                        "enum": [
-                            "enabled",
-                            "disabled"
-                        ],
-                        "default": "disabled",
-                        "markdownDescription": "%c_cpp.configuration.intelliSenseEngineFallback.markdownDescription%",
                         "scope": "resource"
                     },
                     "C_Cpp.exclusionPolicy": {
@@ -3340,11 +3330,6 @@
             {
                 "command": "C_Cpp.DisableErrorSquiggles",
                 "title": "%c_cpp.command.disableErrorSquiggles.title%",
-                "category": "C/C++"
-            },
-            {
-                "command": "C_Cpp.ToggleIncludeFallback",
-                "title": "%c_cpp.command.toggleIncludeFallback.title%",
                 "category": "C/C++"
             },
             {
@@ -5862,10 +5847,6 @@
                 },
                 {
                     "command": "C_Cpp.DisableErrorSquiggles",
-                    "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
-                },
-                {
-                    "command": "C_Cpp.ToggleIncludeFallback",
                     "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
                 },
                 {

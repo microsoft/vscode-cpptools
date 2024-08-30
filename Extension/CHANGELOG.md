@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.22.2: August 29, 2024
+### Enhancement
+* Remove the `C_Cpp.intelliSenseEngineFallback` setting. [#12596](https://github.com/microsoft/vscode-cpptools/issues/12596)
+
+### Bug Fix
+* Fix a deadlock when doing "Find All References" and a file is deleted. [#12656](https://github.com/microsoft/vscode-cpptools/issues/12656)
+
 ## Version 1.22.1: August 29, 2024
 ### Enhancement
 * Add "Additional Tracked Settings" to `C/C++: Log Diagnostics` output. [PR #12635](https://github.com/microsoft/vscode-cpptools/pull/12635)

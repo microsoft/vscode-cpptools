@@ -17,7 +17,6 @@
     "c_cpp.command.switchHeaderSource.title": "Switch Header/Source",
     "c_cpp.command.enableErrorSquiggles.title": "Enable Error Squiggles",
     "c_cpp.command.disableErrorSquiggles.title": "Disable Error Squiggles",
-    "c_cpp.command.toggleIncludeFallback.title": "Toggle IntelliSense Engine Fallback on Include Errors",
     "c_cpp.command.toggleDimInactiveRegions.title": "Toggle Inactive Region Colorization",
     "c_cpp.command.resetDatabase.title": "Reset IntelliSense Database",
     "c_cpp.command.takeSurvey.title": "Take Survey",
@@ -469,12 +468,6 @@
     "c_cpp.configuration.intelliSenseEngine.default.description": "Provides context-aware results via a separate IntelliSense process.",
     "c_cpp.configuration.intelliSenseEngine.tagParser.description": "Provides \"fuzzy\" results that are not context-aware.",
     "c_cpp.configuration.intelliSenseEngine.disabled.description": "Turns off C/C++ language service features.",
-    "c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": {
-        "message": "Controls whether the IntelliSense engine will automatically switch to the Tag Parser for translation units containing `#include` errors.",
-        "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
-        ]
-    },
     "c_cpp.configuration.autocomplete.markdownDescription": {
         "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (and similarly for `c` and `cuda-cpp` languages).",
         "comment": [
