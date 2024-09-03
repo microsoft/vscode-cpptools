@@ -4,8 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import path = require("path");
-
 const elementId: { [key: string]: string } = {
     // Basic settings
     configName: "configName",
@@ -222,7 +220,7 @@ class SettingsApp {
         const compilerPath = <HTMLInputElement>document.getElementById(elementId.compilerPath);
         const knownCompilers = <HTMLSelectElement>document.getElementById(elementId.knownCompilers);
         for (let n = 0; n < knownCompilers.options.length; n++) {
-            if (path.normalize(compilerPath.value) === path.normalize(knownCompilers.options[n].value)) {
+            if (compilerPath.value.toLowerCase() === knownCompilers.options[n].value.toLowerCase()) {
                 knownCompilers.value = knownCompilers.options[n].value;
                 break;
             }
