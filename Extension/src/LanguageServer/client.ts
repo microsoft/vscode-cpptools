@@ -1345,7 +1345,6 @@ export class DefaultClient implements Client {
         const result: WorkspaceFolderSettingsParams = {
             uri: workspaceFolderUri?.toString(),
             intelliSenseEngine: settings.intelliSenseEngine,
-            intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
             autocomplete: settings.autocomplete,
             autocompleteAddParentheses: settings.autocompleteAddParentheses,
             errorSquiggles: settings.errorSquiggles,
@@ -1984,6 +1983,23 @@ export class DefaultClient implements Client {
                 settings[fullKey] = vscode.workspace.getConfiguration("C_Cpp").get(realKey) ?? '<error-retrieving-value>';
             }
             configJson += `Modified Settings:\n${JSON.stringify(settings, null, 4)}\n`;
+        }
+
+        {
+            const editorSettings = new OtherSettings(this.RootUri);
+            const settings: Record<string, any> = {};
+            settings.editorTabSize = editorSettings.editorTabSize;
+            settings.editorInsertSpaces = editorSettings.editorInsertSpaces;
+            settings.editorAutoClosingBrackets = editorSettings.editorAutoClosingBrackets;
+            settings.filesEncoding = editorSettings.filesEncoding;
+            settings.filesAssociations = editorSettings.filesAssociations;
+            settings.filesExclude = editorSettings.filesExclude;
+            settings.filesAutoSaveAfterDelay = editorSettings.filesAutoSaveAfterDelay;
+            settings.editorInlayHintsEnabled = editorSettings.editorInlayHintsEnabled;
+            settings.editorParameterHintsEnabled = editorSettings.editorParameterHintsEnabled;
+            settings.searchExclude = editorSettings.searchExclude;
+            settings.workbenchSettingsEditor = editorSettings.workbenchSettingsEditor;
+            configJson += `Additional Tracked Settings:\n${JSON.stringify(settings, null, 4)}\n`;
         }
 
         // Get diagnostics for configuration provider info.

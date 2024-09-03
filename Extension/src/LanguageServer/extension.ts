@@ -361,7 +361,6 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', enabled ? onAddToIncludePath : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', enabled ? onEnableSquiggles : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', enabled ? onDisableSquiggles : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', enabled ? onToggleIncludeFallback : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', enabled ? onToggleDimInactiveRegions : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', enabled ? onPauseParsing : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', enabled ? onResumeParsing : onDisabledCommand));
@@ -755,12 +754,6 @@ function onDisableSquiggles(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.update<string>("errorSquiggles", "disabled");
-}
-
-function onToggleIncludeFallback(): void {
-    // This only applies to the active client.
-    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleSetting("intelliSenseEngineFallback", "enabled", "disabled");
 }
 
 function onToggleDimInactiveRegions(): void {

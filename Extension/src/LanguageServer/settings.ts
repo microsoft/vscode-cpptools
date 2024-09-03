@@ -37,7 +37,6 @@ export interface Associations {
 export interface WorkspaceFolderSettingsParams {
     uri: string | undefined;
     intelliSenseEngine: string;
-    intelliSenseEngineFallback: boolean;
     autocomplete: string;
     autocompleteAddParentheses: boolean;
     errorSquiggles: string;
@@ -368,7 +367,6 @@ export class CppSettings extends Settings {
     public get experimentalFeatures(): boolean { return this.getAsString("experimentalFeatures").toLowerCase() === "enabled"; }
     public get suggestSnippets(): boolean { return this.getAsBoolean("suggestSnippets"); }
     public get intelliSenseEngine(): string { return this.getAsString("intelliSenseEngine"); }
-    public get intelliSenseEngineFallback(): boolean { return this.getAsString("intelliSenseEngineFallback").toLowerCase() === "enabled"; }
     public get intelliSenseCachePath(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("intelliSenseCachePath")); }
     public get intelliSenseCacheSize(): number { return this.getAsNumber("intelliSenseCacheSize"); }
     public get intelliSenseMemoryLimit(): number { return this.getAsNumber("intelliSenseMemoryLimit"); }
