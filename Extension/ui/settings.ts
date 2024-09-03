@@ -4,6 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+import path = require("path");
+
 const elementId: { [key: string]: string } = {
     // Basic settings
     configName: "configName",
@@ -212,10 +214,24 @@ class SettingsApp {
         this.vsCodeApi.postMessage({
             command: "knownCompilerSelect"
         });
-
-        // Reset selection to none
-        el.value = "";
     }
+
+    // To enable custom entries, the compiler path control is a text box on top of a select control.
+    // This function ensures that the select control is updated when the text box is changed.
+    private fixKnownCompilerSelection(): void {
+        const compilerPath = <HTMLInputElement>document.getElementById(elementId.compilerPath);
+        const knownCompilers = <HTMLSelectElement>document.getElementById(elementId.knownCompilers);
+        for (let n = 0; n < knownCompilers.options.length; n++) {
+            if (path.normalize(compilerPath.value) === path.normalize(knownCompilers.options[n].value)) {
+                knownCompilers.value = knownCompilers.options[n].value;
+                break;
+            }
+            if (n === knownCompilers.options.length - 1) {
+                knownCompilers.value = '';
+            }
+        }
+    }
+
     private onChangedCheckbox(id: string): void {
         if (this.updating) {
             return;
@@ -235,6 +251,9 @@ class SettingsApp {
         }
 
         const el: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
+        if (id === elementId.compilerPath) {
+            this.fixKnownCompilerSelection();
+        }
         this.vsCodeApi.postMessage({
             command: "change",
             key: id,
@@ -268,6 +287,7 @@ class SettingsApp {
             // Basic settings
             (<HTMLInputElement>document.getElementById(elementId.configName)).value = config.name;
             (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? config.compilerPath : "";
+            this.fixKnownCompilerSelection();
             (<HTMLInputElement>document.getElementById(elementId.compilerArgs)).value = joinEntries(config.compilerArgs);
 
             (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode ? config.intelliSenseMode : "${default}";
