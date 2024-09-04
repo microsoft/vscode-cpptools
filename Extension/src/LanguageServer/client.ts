@@ -3774,6 +3774,7 @@ export class DefaultClient implements Client {
                 const formatRangeStartLine: number = range.start.line + lineOffset;
                 let rangeStartLine: number = formatRangeStartLine;
                 let rangeStartCharacter: number = 0;
+                let startWithNewLine: boolean = true;
                 if (edit.newText.startsWith("\r\n\r\n")) {
                     rangeStartCharacter = 4;
                     rangeStartLine += 2;
@@ -3786,12 +3787,16 @@ export class DefaultClient implements Client {
                 } else if (edit.newText.startsWith("\n")) {
                     rangeStartCharacter = 1;
                     rangeStartLine += 1;
+                } else {
+                    startWithNewLine = false;
                 }
                 const newFormatRange: vscode.Range = new vscode.Range(
                     new vscode.Position(formatRangeStartLine + (nextLineOffset < 0 ? nextLineOffset : 0), range.start.character),
-                    new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? 0 : nextLineOffset),
+                    new vscode.Position(formatRangeStartLine + (nextLineOffset < 0 ? 0 : nextLineOffset),
                         isReplace ? range.end.character :
-                            range.end.character + edit.newText.length - rangeStartCharacter));
+                            ((startWithNewLine ? 0 : range.end.character) + (edit.newText.endsWith("\n") ? 0 : edit.newText.length - rangeStartCharacter))
+                    )
+                );
                 if (isSourceFile) {
                     sourceFormatUriAndRanges.push({ uri, range: newFormatRange });
                 } else {
