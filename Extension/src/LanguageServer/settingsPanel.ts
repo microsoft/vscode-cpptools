@@ -296,14 +296,17 @@ export class SettingsPanel {
     }
 
     private updateConfig(message: any): void {
-        const splitEntries: (input: any) => string[] = (input: any) => input.split("\n").filter((e: string) => e);
+        const splitEntries: (input: any) => string[] | undefined = (input: any) => {
+            const result = input.split("\n").filter((e: string) => e);
+            return result.length === 0 ? undefined : result;
+        };
 
         switch (message.key) {
             case elementId.configName:
                 this.configValues.name = message.value;
                 break;
             case elementId.compilerPath:
-                this.configValues.compilerPath = message.value;
+                this.configValues.compilerPath = message.value || undefined;
                 break;
             case elementId.compilerArgs:
                 this.configValues.compilerArgs = splitEntries(message.value);
@@ -328,22 +331,22 @@ export class SettingsPanel {
                 this.configValues.cppStandard = message.value;
                 break;
             case elementId.windowsSdkVersion:
-                this.configValues.windowsSdkVersion = message.value;
+                this.configValues.windowsSdkVersion = message.value || undefined;
                 break;
             case elementId.macFrameworkPath:
                 this.configValues.macFrameworkPath = splitEntries(message.value);
                 break;
             case elementId.compileCommands:
-                this.configValues.compileCommands = message.value;
+                this.configValues.compileCommands = message.value || undefined;
                 break;
             case elementId.dotConfig:
-                this.configValues.dotConfig = message.value;
+                this.configValues.dotConfig = message.value || undefined;
                 break;
             case elementId.mergeConfigurations:
                 this.configValues.mergeConfigurations = message.value;
                 break;
             case elementId.configurationProvider:
-                this.configValues.configurationProvider = message.value;
+                this.configValues.configurationProvider = message.value || undefined;
                 break;
             case elementId.forcedInclude:
                 this.configValues.forcedInclude = splitEntries(message.value);
@@ -364,7 +367,7 @@ export class SettingsPanel {
                 if (!this.configValues.browse) {
                     this.configValues.browse = {};
                 }
-                this.configValues.browse.databaseFilename = message.value;
+                this.configValues.browse.databaseFilename = message.value || undefined;
                 break;
         }
 
