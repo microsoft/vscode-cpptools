@@ -109,8 +109,8 @@ class SettingsApp {
         document.getElementById(elementId.configName)?.addEventListener("change", this.onConfigNameChanged.bind(this));
         document.getElementById(elementId.configSelection)?.addEventListener("change", this.onConfigSelect.bind(this));
         document.getElementById(elementId.addConfigBtn)?.addEventListener("click", this.onAddConfigBtn.bind(this));
-        document.getElementById(elementId.addConfigOk)?.addEventListener("click", this.OnAddConfigConfirm.bind(this, true));
-        document.getElementById(elementId.addConfigCancel)?.addEventListener("click", this.OnAddConfigConfirm.bind(this, false));
+        document.getElementById(elementId.addConfigOk)?.addEventListener("click", this.onAddConfigConfirm.bind(this, true));
+        document.getElementById(elementId.addConfigCancel)?.addEventListener("click", this.onAddConfigConfirm.bind(this, false));
     }
 
     private onTabKeyDown(e: any): void {
@@ -148,7 +148,7 @@ class SettingsApp {
         this.showElement(elementId.addConfigInputDiv, true);
     }
 
-    private OnAddConfigConfirm(request: boolean): void {
+    private onAddConfigConfirm(request: boolean): void {
         this.showElement(elementId.addConfigInputDiv, false);
         this.showElement(elementId.addConfigDiv, true);
 
@@ -204,7 +204,7 @@ class SettingsApp {
         if (this.updating) {
             return;
         }
-        const el: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.knownCompilers);
+        const el: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.knownCompilers);
         (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = el.value;
         this.onChanged(elementId.compilerPath);
 
@@ -217,17 +217,15 @@ class SettingsApp {
     // To enable custom entries, the compiler path control is a text box on top of a select control.
     // This function ensures that the select control is updated when the text box is changed.
     private fixKnownCompilerSelection(): void {
-        const compilerPath = <HTMLInputElement>document.getElementById(elementId.compilerPath);
+        const compilerPath = (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value.toLowerCase();
         const knownCompilers = <HTMLSelectElement>document.getElementById(elementId.knownCompilers);
         for (let n = 0; n < knownCompilers.options.length; n++) {
-            if (compilerPath.value.toLowerCase() === knownCompilers.options[n].value.toLowerCase()) {
+            if (compilerPath === knownCompilers.options[n].value.toLowerCase()) {
                 knownCompilers.value = knownCompilers.options[n].value;
-                break;
-            }
-            if (n === knownCompilers.options.length - 1) {
-                knownCompilers.value = '';
+                return;
             }
         }
+        knownCompilers.value = '';
     }
 
     private onChangedCheckbox(id: string): void {
