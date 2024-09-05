@@ -58,7 +58,7 @@ import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorCon
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentWorkspaceState } from './persistentState';
-import { createProtocolFilter } from './protocolFilter';
+import { RequestCancelled, ServerCancelled, createProtocolFilter } from './protocolFilter';
 import * as refs from './references';
 import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
 import { SettingsTracker } from './settingsTracker';
@@ -2250,9 +2250,7 @@ export class DefaultClient implements Client {
         try {
             result = await this.languageClient.sendRequest(CppContextRequest, null, token);
         } catch (e: any) {
-            // From <https://microsoft.github.io/language-server-protocol/specification#responseMessage>
-            // RequestCancelled = -32800, ServerCancelled = -32802,
-            if (e instanceof ResponseError && (e.code === -32800 /*RequestCancelled*/ || e.code === -32802 /*ServerCancelled*/)) {
+            if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
                 throw new vscode.CancellationError();
             }
 

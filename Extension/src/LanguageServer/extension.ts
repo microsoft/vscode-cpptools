@@ -250,7 +250,7 @@ export async function activate(): Promise<void> {
         activeDocument = activeEditor.document;
     }
 
-    if (util.extensionContext) {
+    if (util.extensionContext && new CppSettings().experimentalFeatures) {
         const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
         disposables.push(tool);
     }
