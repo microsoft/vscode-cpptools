@@ -277,7 +277,7 @@ interface IntelliSenseDiagnostic {
     relatedInformation?: IntelliSenseDiagnosticRelatedInformation[];
 }
 
-interface textDocumentLanguageInformation{
+interface TextDocumentLanguageInformation {
     uri: string;
     languageId: string;
 }
@@ -1764,17 +1764,16 @@ export class DefaultClient implements Client {
     }
 
     public async onDidOpenTextDocument(document: vscode.TextDocument): Promise<void> {
-        
+
         if (document.uri.scheme === "file") {
             console.log(document.languageId);
             const uri: string = document.uri.toString();
-            const textDocumentLanguagePersistentState: PersistentState<textDocumentLanguageInformation | undefined> = new PersistentState<textDocumentLanguageInformation | undefined>("CPP.textDocumentLanguage", undefined);
+            const textDocumentLanguagePersistentState: PersistentState<TextDocumentLanguageInformation | undefined> = new PersistentState<TextDocumentLanguageInformation | undefined>("CPP.textDocumentLanguage", undefined);
             const persistentLanguage: string | undefined = textDocumentLanguagePersistentState.Value?.languageId;
-            const persistentFile: string | undefined  = textDocumentLanguagePersistentState.Value?.uri;
+            const persistentFile: string | undefined = textDocumentLanguagePersistentState.Value?.uri;
 
-            if (persistentFile == uri && persistentLanguage) {
+            if (persistentFile === uri && persistentLanguage) {
                 await vscode.languages.setTextDocumentLanguage(document, persistentLanguage);
-
             }
 
             openFileVersions.set(uri, document.version);
@@ -1787,12 +1786,12 @@ export class DefaultClient implements Client {
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {
         const uri: string = document.uri.toString();
-        const textDocumentLanguagePersistentState: PersistentState<textDocumentLanguageInformation | undefined> = new PersistentState<textDocumentLanguageInformation | undefined>("CPP.textDocumentLanguage", undefined);
-        const persistentFile: string | undefined  = textDocumentLanguagePersistentState.Value?.uri;
+        const textDocumentLanguagePersistentState: PersistentState<TextDocumentLanguageInformation | undefined> = new PersistentState<TextDocumentLanguageInformation | undefined>("CPP.textDocumentLanguage", undefined);
+        const persistentFile: string | undefined = textDocumentLanguagePersistentState.Value?.uri;
         const persistentLanguage: string | undefined = textDocumentLanguagePersistentState.Value?.languageId;
         console.log(document.languageId);
         // If the file being closed has changed its language from the one we have stored, clear the stored language.
-        if (persistentFile == uri && persistentLanguage !== document.languageId) {
+        if (persistentFile === uri && persistentLanguage !== document.languageId) {
             textDocumentLanguagePersistentState.Value = undefined;
         }
         if (this.semanticTokensProvider) {
@@ -2449,7 +2448,7 @@ export class DefaultClient implements Client {
         diagnosticsCollectionIntelliSense.set(realUri, diagnosticsIntelliSense);
 
         clients.timeTelemetryCollector.setUpdateRangeTime(realUri);
-    }    
+    }
 
     private async setTemporaryTextDocumentLanguage(params: SetTemporaryTextDocumentLanguageParams): Promise<void> {
         const languageId: string = params.isC ? "c" : params.isCuda ? "cuda-cpp" : "cpp";
@@ -2457,13 +2456,13 @@ export class DefaultClient implements Client {
 
         const client: Client = clients.getClientFor(uri);
         const document: vscode.TextDocument | undefined = client.TrackedDocuments.get(params.uri);
-        if (params.isPersistent){
-            let textDocumentLanguagePersistentState: PersistentState<textDocumentLanguageInformation | undefined> = new PersistentState<textDocumentLanguageInformation | undefined>("CPP.textDocumentLanguage", undefined);
+        if (params.isPersistent) {
+            const textDocumentLanguagePersistentState: PersistentState<TextDocumentLanguageInformation | undefined> = new PersistentState<TextDocumentLanguageInformation | undefined>("CPP.textDocumentLanguage", undefined);
             textDocumentLanguagePersistentState.Value = undefined;
             const doc: vscode.TextDocument | undefined = await vscode.workspace.openTextDocument(params.uri);
             await vscode.languages.setTextDocumentLanguage(doc, languageId);
             console.log(textDocumentLanguagePersistentState.Value);
-            if (!textDocumentLanguagePersistentState.Value){
+            if (!textDocumentLanguagePersistentState.Value) {
                 textDocumentLanguagePersistentState.Value = {uri: doc.uri.toString(), languageId: languageId};
             }
         }
