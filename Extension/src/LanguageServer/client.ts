@@ -27,7 +27,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
+import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, ResponseError, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -801,7 +801,7 @@ export interface Client {
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
     getIncludes(maxDepth: number): Promise<GetIncludesResult>;
-    getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult | undefined>;
+    getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -2244,12 +2244,20 @@ export class DefaultClient implements Client {
         return this.languageClient.sendRequest(IncludesRequest, params);
     }
 
-    public async getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult | undefined> {
+    public async getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> {
         await withCancellation(this.ready, token);
-        const result = await this.languageClient.sendRequest(CppContextRequest, null, token);
+        let result: ChatContextResult;
+        try {
+            result = await this.languageClient.sendRequest(CppContextRequest, null, token);
+        } catch (e: any) {
+            // From <https://microsoft.github.io/language-server-protocol/specification#responseMessage>
+            // RequestCancelled = -32800, ServerCancelled = -32802,
+            if (e instanceof ResponseError && (e.code === -32800 /*RequestCancelled*/ || e.code === -32802 /*ServerCancelled*/)) {
+                throw new vscode.CancellationError();
+            }
 
-        // sendRequest() won't throw on cancellation, but will return an
-        // unexpected object with an error code and message.
+            throw e;
+        }
         if (token.isCancellationRequested) {
             throw new vscode.CancellationError();
         }

@@ -77,8 +77,7 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
 
         for (const key in knownValues) {
             const knownKey = key as keyof ChatContextResult;
-            if (knownValues[knownKey] && chatContext[knownKey])
-            {
+            if (knownValues[knownKey] && chatContext[knownKey]) {
                 chatContext[knownKey] = knownValues[knownKey][chatContext[knownKey]] || chatContext[knownKey];
             }
         }
