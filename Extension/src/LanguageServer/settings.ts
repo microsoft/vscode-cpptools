@@ -377,7 +377,6 @@ export class CppSettings extends Settings {
     public get autocomplete(): string { return this.getAsString("autocomplete"); }
     public get autocompleteAddParentheses(): boolean { return this.getAsBoolean("autocompleteAddParentheses"); }
     public get loggingLevel(): string { return this.getAsString("loggingLevel"); }
-    public get autoAddFileAssociations(): boolean { return this.getAsBoolean("autoAddFileAssociations"); }
     public get workspaceParsingPriority(): string { return this.getAsString("workspaceParsingPriority"); }
     public get workspaceSymbols(): string { return this.getAsString("workspaceSymbols"); }
     public get exclusionPolicy(): string { return this.getAsString("exclusionPolicy"); }

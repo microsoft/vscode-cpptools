@@ -57,7 +57,7 @@ import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
-import { PersistentFolderState, PersistentWorkspaceState } from './persistentState';
+import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
 import { createProtocolFilter } from './protocolFilter';
 import * as refs from './references';
 import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
@@ -277,6 +277,11 @@ interface IntelliSenseDiagnostic {
     relatedInformation?: IntelliSenseDiagnosticRelatedInformation[];
 }
 
+interface textDocumentLanguageInformation{
+    uri: string;
+    languageId: string;
+}
+
 interface RefactorDiagnostic {
     range: Range;
     code?: number;
@@ -472,6 +477,7 @@ interface SetTemporaryTextDocumentLanguageParams {
     uri: string;
     isC: boolean;
     isCuda: boolean;
+    isPersistent: boolean;
 }
 
 enum CodeAnalysisScope {
@@ -610,7 +616,6 @@ const RequestCustomConfig: NotificationType<string> = new NotificationType<strin
 const PublishRefactorDiagnosticsNotification: NotificationType<PublishRefactorDiagnosticsParams> = new NotificationType<PublishRefactorDiagnosticsParams>('cpptools/publishRefactorDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams> = new NotificationType<ShowMessageWindowParams>('cpptools/showMessageWindow');
 const ShowWarningNotification: NotificationType<ShowWarningParams> = new NotificationType<ShowWarningParams>('cpptools/showWarning');
-const ReportTextDocumentLanguage: NotificationType<string> = new NotificationType<string>('cpptools/reportTextDocumentLanguage');
 const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup> = new NotificationType<IntelliSenseSetup>('cpptools/IntelliSenseSetup');
 const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams> = new NotificationType<SetTemporaryTextDocumentLanguageParams>('cpptools/setTemporaryTextDocumentLanguage');
 const ReportCodeAnalysisProcessedNotification: NotificationType<number> = new NotificationType<number>('cpptools/reportCodeAnalysisProcessed');
@@ -1758,9 +1763,20 @@ export class DefaultClient implements Client {
         }
     }
 
-    public onDidOpenTextDocument(document: vscode.TextDocument): void {
+    public async onDidOpenTextDocument(document: vscode.TextDocument): Promise<void> {
+        
         if (document.uri.scheme === "file") {
+            console.log(document.languageId);
             const uri: string = document.uri.toString();
+            const textDocumentLanguagePersistentState: PersistentState<textDocumentLanguageInformation | undefined> = new PersistentState<textDocumentLanguageInformation | undefined>("CPP.textDocumentLanguage", undefined);
+            const persistentLanguage: string | undefined = textDocumentLanguagePersistentState.Value?.languageId;
+            const persistentFile: string | undefined  = textDocumentLanguagePersistentState.Value?.uri;
+
+            if (persistentFile == uri && persistentLanguage) {
+                await vscode.languages.setTextDocumentLanguage(document, persistentLanguage);
+
+            }
+
             openFileVersions.set(uri, document.version);
             void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(document.uri));
             void SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(document.uri));
@@ -1771,6 +1787,14 @@ export class DefaultClient implements Client {
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {
         const uri: string = document.uri.toString();
+        const textDocumentLanguagePersistentState: PersistentState<textDocumentLanguageInformation | undefined> = new PersistentState<textDocumentLanguageInformation | undefined>("CPP.textDocumentLanguage", undefined);
+        const persistentFile: string | undefined  = textDocumentLanguagePersistentState.Value?.uri;
+        const persistentLanguage: string | undefined = textDocumentLanguagePersistentState.Value?.languageId;
+        console.log(document.languageId);
+        // If the file being closed has changed its language from the one we have stored, clear the stored language.
+        if (persistentFile == uri && persistentLanguage !== document.languageId) {
+            textDocumentLanguagePersistentState.Value = undefined;
+        }
         if (this.semanticTokensProvider) {
             this.semanticTokensProvider.removeFile(uri);
         }
@@ -2365,7 +2389,6 @@ export class DefaultClient implements Client {
         RegisterCodeAnalysisNotifications(this.languageClient);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
-        this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntelliSenseSetupTime(e));
         this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => void this.setTemporaryTextDocumentLanguage(e));
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
@@ -2426,23 +2449,24 @@ export class DefaultClient implements Client {
         diagnosticsCollectionIntelliSense.set(realUri, diagnosticsIntelliSense);
 
         clients.timeTelemetryCollector.setUpdateRangeTime(realUri);
-    }
-
-    private setTextDocumentLanguage(languageStr: string): void {
-        const cppSettings: CppSettings = new CppSettings();
-        if (cppSettings.autoAddFileAssociations) {
-            const is_c: boolean = languageStr.startsWith("c;");
-            const is_cuda: boolean = languageStr.startsWith("cu;");
-            languageStr = languageStr.substring(is_c ? 2 : is_cuda ? 3 : 1);
-            this.addFileAssociations(languageStr, is_c ? "c" : is_cuda ? "cuda-cpp" : "cpp");
-        }
-    }
+    }    
 
     private async setTemporaryTextDocumentLanguage(params: SetTemporaryTextDocumentLanguageParams): Promise<void> {
         const languageId: string = params.isC ? "c" : params.isCuda ? "cuda-cpp" : "cpp";
         const uri: vscode.Uri = vscode.Uri.parse(params.uri);
+
         const client: Client = clients.getClientFor(uri);
         const document: vscode.TextDocument | undefined = client.TrackedDocuments.get(params.uri);
+        if (params.isPersistent){
+            let textDocumentLanguagePersistentState: PersistentState<textDocumentLanguageInformation | undefined> = new PersistentState<textDocumentLanguageInformation | undefined>("CPP.textDocumentLanguage", undefined);
+            textDocumentLanguagePersistentState.Value = undefined;
+            const doc: vscode.TextDocument | undefined = await vscode.workspace.openTextDocument(params.uri);
+            await vscode.languages.setTextDocumentLanguage(doc, languageId);
+            console.log(textDocumentLanguagePersistentState.Value);
+            if (!textDocumentLanguagePersistentState.Value){
+                textDocumentLanguagePersistentState.Value = {uri: doc.uri.toString(), languageId: languageId};
+            }
+        }
         if (!!document && document.languageId !== languageId) {
             if (document.languageId === "cpp" && languageId === "c") {
                 handleChangedFromCppToC(document);
