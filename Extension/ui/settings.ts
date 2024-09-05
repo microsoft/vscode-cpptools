@@ -109,8 +109,8 @@ class SettingsApp {
         document.getElementById(elementId.configName)?.addEventListener("change", this.onConfigNameChanged.bind(this));
         document.getElementById(elementId.configSelection)?.addEventListener("change", this.onConfigSelect.bind(this));
         document.getElementById(elementId.addConfigBtn)?.addEventListener("click", this.onAddConfigBtn.bind(this));
-        document.getElementById(elementId.addConfigOk)?.addEventListener("click", this.OnAddConfigConfirm.bind(this, true));
-        document.getElementById(elementId.addConfigCancel)?.addEventListener("click", this.OnAddConfigConfirm.bind(this, false));
+        document.getElementById(elementId.addConfigOk)?.addEventListener("click", this.onAddConfigConfirm.bind(this, true));
+        document.getElementById(elementId.addConfigCancel)?.addEventListener("click", this.onAddConfigConfirm.bind(this, false));
     }
 
     private onTabKeyDown(e: any): void {
@@ -148,7 +148,7 @@ class SettingsApp {
         this.showElement(elementId.addConfigInputDiv, true);
     }
 
-    private OnAddConfigConfirm(request: boolean): void {
+    private onAddConfigConfirm(request: boolean): void {
         this.showElement(elementId.addConfigInputDiv, false);
         this.showElement(elementId.addConfigDiv, true);
 
@@ -204,7 +204,7 @@ class SettingsApp {
         if (this.updating) {
             return;
         }
-        const el: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.knownCompilers);
+        const el: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.knownCompilers);
         (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = el.value;
         this.onChanged(elementId.compilerPath);
 
@@ -212,10 +212,22 @@ class SettingsApp {
         this.vsCodeApi.postMessage({
             command: "knownCompilerSelect"
         });
-
-        // Reset selection to none
-        el.value = "";
     }
+
+    // To enable custom entries, the compiler path control is a text box on top of a select control.
+    // This function ensures that the select control is updated when the text box is changed.
+    private fixKnownCompilerSelection(): void {
+        const compilerPath = (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value.toLowerCase();
+        const knownCompilers = <HTMLSelectElement>document.getElementById(elementId.knownCompilers);
+        for (let n = 0; n < knownCompilers.options.length; n++) {
+            if (compilerPath === knownCompilers.options[n].value.toLowerCase()) {
+                knownCompilers.value = knownCompilers.options[n].value;
+                return;
+            }
+        }
+        knownCompilers.value = '';
+    }
+
     private onChangedCheckbox(id: string): void {
         if (this.updating) {
             return;
@@ -235,6 +247,9 @@ class SettingsApp {
         }
 
         const el: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
+        if (id === elementId.compilerPath) {
+            this.fixKnownCompilerSelection();
+        }
         this.vsCodeApi.postMessage({
             command: "change",
             key: id,
@@ -268,6 +283,7 @@ class SettingsApp {
             // Basic settings
             (<HTMLInputElement>document.getElementById(elementId.configName)).value = config.name;
             (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? config.compilerPath : "";
+            this.fixKnownCompilerSelection();
             (<HTMLInputElement>document.getElementById(elementId.compilerArgs)).value = joinEntries(config.compilerArgs);
 
             (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode ? config.intelliSenseMode : "${default}";
