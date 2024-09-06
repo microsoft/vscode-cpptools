@@ -5,7 +5,9 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import { localize } from 'vscode-nls';
 import * as util from '../common';
+import * as logger from '../logger';
 import * as telemetry from '../telemetry';
 import { ChatContextResult } from './client';
 import { getClients } from './extension';
@@ -55,33 +57,53 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
     }
 
     private async getContext(token: vscode.CancellationToken): Promise<string> {
-        const currentDoc = vscode.window.activeTextEditor?.document;
-        if (!currentDoc || (!util.isCpp(currentDoc) && !util.isHeaderFile(currentDoc.uri))) {
-            return 'The active document is not a C, C++, or CUDA file.';
-        }
-
-        const chatContext: ChatContextResult | undefined = await (getClients()?.ActiveClient?.getChatContext(token) ?? undefined);
-        if (!chatContext) {
-            return 'No configuration information is available for the active document.';
-        }
-
-        telemetry.logLanguageModelToolEvent(
-            'cpp',
-            {
-                "language": chatContext.language,
-                "compiler": chatContext.compiler,
-                "standardVersion": chatContext.standardVersion,
-                "targetPlatform": chatContext.targetPlatform,
-                "targetArchitecture": chatContext.targetArchitecture
-            });
-
-        for (const key in knownValues) {
-            const knownKey = key as keyof ChatContextResult;
-            if (knownValues[knownKey] && chatContext[knownKey]) {
-                chatContext[knownKey] = knownValues[knownKey][chatContext[knownKey]] || chatContext[knownKey];
+        try
+        {
+            const currentDoc = vscode.window.activeTextEditor?.document;
+            if (!currentDoc || (!util.isCpp(currentDoc) && !util.isHeaderFile(currentDoc.uri))) {
+                return 'The active document is not a C, C++, or CUDA file.';
             }
-        }
 
-        return `The user is working on a ${chatContext.language} project. The project uses language version ${chatContext.standardVersion}, compiles using the ${chatContext.compiler} compiler, targets the ${chatContext.targetPlatform} platform, and targets the ${chatContext.targetArchitecture} architecture.`;
+            const chatContext: ChatContextResult | undefined = await (getClients()?.ActiveClient?.getChatContext(token) ?? undefined);
+            if (!chatContext) {
+                return 'No configuration information is available for the active document.';
+            }
+
+            telemetry.logLanguageModelToolEvent(
+                'cpp',
+                {
+                    "language": chatContext.language,
+                    "compiler": chatContext.compiler,
+                    "standardVersion": chatContext.standardVersion,
+                    "targetPlatform": chatContext.targetPlatform,
+                    "targetArchitecture": chatContext.targetArchitecture
+                });
+
+            for (const key in knownValues) {
+                const knownKey = key as keyof ChatContextResult;
+                if (knownValues[knownKey] && chatContext[knownKey]) {
+                    chatContext[knownKey] = knownValues[knownKey][chatContext[knownKey]] || chatContext[knownKey];
+                }
+            }
+
+            return `The user is working on a ${chatContext.language} project. The project uses language version ${chatContext.standardVersion}, compiles using the ${chatContext.compiler} compiler, targets the ${chatContext.targetPlatform} platform, and targets the ${chatContext.targetArchitecture} architecture.`;
+        }
+        catch (e: any)
+        {
+            await this.reportError();
+            return "";
+        }
+    }
+
+    private async reportError(): Promise<void>
+    {
+        try
+        {
+            logger.getOutputChannelLogger().appendLine(localize("copilot.cppcontext.error", "Error while retrieving the #cpp context."));
+        }
+        catch
+        {
+            // Intentionally swallow any exception.
+        }
     }
 }
