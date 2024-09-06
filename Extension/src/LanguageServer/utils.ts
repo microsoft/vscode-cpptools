@@ -8,7 +8,6 @@ import * as vscode from 'vscode';
 import { Range } from 'vscode-languageclient';
 import { SessionState } from '../sessionState';
 import { Location, TextEdit } from './commonTypes';
-import { CppSettings } from './settings';
 
 export function makeLspRange(vscRange: vscode.Range): Range {
     return {
@@ -37,10 +36,7 @@ export function rangeEquals(range1: vscode.Range | Range, range2: vscode.Range |
 // Check this before attempting to switch a document from C to C++.
 export function shouldChangeFromCToCpp(document: vscode.TextDocument): boolean {
     if (document.fileName.endsWith(".C") || document.fileName.endsWith(".H")) {
-        const cppSettings: CppSettings = new CppSettings();
-        if (cppSettings.autoAddFileAssociations) {
-            return !docsChangedFromCppToC.has(document.fileName);
-        }
+        return !docsChangedFromCppToC.has(document.fileName);
         // We could potentially add a new setting to enable switching to cpp even when files.associations isn't changed.
     }
     return false;
