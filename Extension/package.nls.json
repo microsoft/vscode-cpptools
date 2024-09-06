@@ -1006,5 +1006,7 @@
     "c_cpp.configuration.refactoring.includeHeader.markdownDescription": "Controls whether to include the header file of a refactored function/symbol to its corresponding source file when doing a refactoring action, such as create declaration/definition.",
     "c_cpp.configuration.refactoring.includeHeader.always.description": "Always include the header file if it is not included explicitly in its source file.",
     "c_cpp.configuration.refactoring.includeHeader.ifNeeded.description": "Only include the header file if it is not included explicitly in its source file or through implicit inclusion.",
-    "c_cpp.configuration.refactoring.includeHeader.never.description": "Never include the header file."
+    "c_cpp.configuration.refactoring.includeHeader.never.description": "Never include the header file.",
+    "c_cpp.languageModelTools.configuration.displayName": "C/C++ configuration",
+    "c_cpp.languageModelTools.configuration.userDescription": "Configuration of the active C or C++ file, like language standard version and target platform."
 }

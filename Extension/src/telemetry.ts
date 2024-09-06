@@ -123,6 +123,20 @@ export function logLanguageServerEvent(eventName: string, properties?: Record<st
     sendTelemetry();
 }
 
+export function logLanguageModelToolEvent(eventName: string, properties?: Record<string, string>, metrics?: Record<string, number>): void {
+    const sendTelemetry = () => {
+        if (experimentationTelemetry) {
+            const eventNamePrefix: string = "C_Cpp/Copilot/Chat/Tool/";
+            experimentationTelemetry.sendTelemetryEvent(eventNamePrefix + eventName, properties, metrics);
+        }
+    };
+
+    if (is.promise(initializationPromise)) {
+        return void initializationPromise.catch(logAndReturn.undefined).then(sendTelemetry).catch(logAndReturn.undefined);
+    }
+    sendTelemetry();
+}
+
 function getPackageInfo(): IPackageInfo {
     return {
         name: util.packageJson.publisher + "." + util.packageJson.name,
