@@ -44,21 +44,18 @@ const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: str
     }
 };
 
-class StringLanguageModelToolResult implements vscode.LanguageModelToolResult
-{
-    public constructor(public readonly value: string) {}
+class StringLanguageModelToolResult implements vscode.LanguageModelToolResult {
+    public constructor(public readonly value: string) { }
     public toString(): string { return this.value; }
 }
 
-export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTool
-{
+export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTool {
     public async invoke(_parameters: any, token: vscode.CancellationToken): Promise<vscode.LanguageModelToolResult> {
         return new StringLanguageModelToolResult(await this.getContext(token));
     }
 
     private async getContext(token: vscode.CancellationToken): Promise<string> {
-        try
-        {
+        try {
             const currentDoc = vscode.window.activeTextEditor?.document;
             if (!currentDoc || (!util.isCpp(currentDoc) && !util.isHeaderFile(currentDoc.uri))) {
                 return 'The active document is not a C, C++, or CUDA file.';
@@ -88,21 +85,17 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
 
             return `The user is working on a ${chatContext.language} project. The project uses language version ${chatContext.standardVersion}, compiles using the ${chatContext.compiler} compiler, targets the ${chatContext.targetPlatform} platform, and targets the ${chatContext.targetArchitecture} architecture.`;
         }
-        catch (e: any)
-        {
+        catch {
             await this.reportError();
             return "";
         }
     }
 
-    private async reportError(): Promise<void>
-    {
-        try
-        {
+    private async reportError(): Promise<void> {
+        try {
             logger.getOutputChannelLogger().appendLine(localize("copilot.cppcontext.error", "Error while retrieving the #cpp context."));
         }
-        catch
-        {
+        catch {
             // Intentionally swallow any exception.
         }
     }
