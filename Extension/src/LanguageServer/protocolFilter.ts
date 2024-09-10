@@ -92,17 +92,7 @@ export function createProtocolFilter(): Middleware {
         provideHover: async (document, position, token, next: (document: any, position: any, token: any) => any) => clients.ActiveClient.enqueue(async () => {
             const me: Client = clients.getClientFor(document.uri);
             if (me.TrackedDocuments.has(document.uri.toString())) {
-                // Currently needed to support icons.
-                return next(document, position, token).then((value: vscode.Hover) => {
-                    if (value && value.contents instanceof Array) {
-                        value.contents.forEach((content) => {
-                            if (content instanceof vscode.MarkdownString) {
-                                content.supportThemeIcons = true;
-                            }
-                        });
-                    }
-                    return value;
-                });
+                return next(document, position, token);
             }
             return null;
         }),

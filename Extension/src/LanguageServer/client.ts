@@ -43,6 +43,7 @@ import { localizedStringCount, lookupString } from '../nativeStrings';
 import { SessionState } from '../sessionState';
 import * as telemetry from '../telemetry';
 import { TestHook, getTestHook } from '../testHook';
+import { CopilotHoverProvider } from './Providers/CopilotHoverProvider';
 import { HoverProvider } from './Providers/HoverProvider';
 import {
     CodeAnalysisDiagnosticIdentifiersAndUri,
@@ -809,7 +810,8 @@ export interface Client {
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
     getIncludes(maxDepth: number): Promise<GetIncludesResult>;
-    showCopilotHover(content: string): Promise<ShowCopilotHoverResult>;
+    showCopilotHover_old(content: string): Promise<ShowCopilotHoverResult>;
+    showCopilotHover(content: string): Promise<void>;
     getCopilotHoverInfo(): Promise<GetCopilotHoverInfoResult>;
 }
 
@@ -832,6 +834,7 @@ export class DefaultClient implements Client {
     private inlayHintsProvider: InlayHintsProvider | undefined;
     private semanticTokensProvider: SemanticTokensProvider | undefined;
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
+    private hoverProvider: HoverProvider | undefined;
     private innerConfiguration?: configs.CppProperties;
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
@@ -1275,8 +1278,10 @@ export class DefaultClient implements Client {
                 this.registerFileWatcher();
                 initializedClientCount = 0;
                 this.inlayHintsProvider = new InlayHintsProvider();
+                this.hoverProvider = new HoverProvider(this);
 
-                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, new HoverProvider(this)));
+                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, this.hoverProvider));
+                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, new CopilotHoverProvider(this.hoverProvider)));
                 this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
                 this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, new RenameProvider(this)));
                 this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, new FindAllReferencesProvider(this)));
@@ -1602,9 +1607,6 @@ export class DefaultClient implements Client {
             },
             markdown: {
                 isTrusted: true
-                // TODO: support for icons in markdown is not yet in the released version of vscode-languageclient.
-                // Based on PR (https://github.com/microsoft/vscode-languageserver-node/pull/1504)
-                //supportThemeIcons: true
             }
 
             // TODO: should I set the output channel? Does this sort output between servers?
@@ -4029,10 +4031,15 @@ export class DefaultClient implements Client {
         DebugConfigurationProvider.ClearDetectedBuildTasks();
     }
 
-    public async showCopilotHover(content: string): Promise<ShowCopilotHoverResult> {
+    public async showCopilotHover_old(content: string): Promise<ShowCopilotHoverResult> {
         const params: ShowCopilotHoverParams = {content: content};
         await this.ready;
         return this.languageClient.sendRequest(ShowCopilotHoverRequest, params);
+    }
+
+    public async showCopilotHover(content: string): Promise<void> {
+        this.hoverProvider?.showCopilotHover.resolve(content);
+        this.hoverProvider?.showCopilotHover.reset();
     }
 
     public async getCopilotHoverInfo(): Promise<GetCopilotHoverInfoResult> {
@@ -4151,6 +4158,7 @@ class NullClient implements Client {
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
     getIncludes(): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
-    showCopilotHover(content: string): Promise<ShowCopilotHoverResult> { return Promise.resolve({} as ShowCopilotHoverResult); }
+    showCopilotHover_old(content: string): Promise<ShowCopilotHoverResult> { return Promise.resolve({} as ShowCopilotHoverResult); }
+    showCopilotHover(content: string): Promise<void> { return Promise.resolve(); }
     getCopilotHoverInfo(): Promise<GetCopilotHoverInfoResult> { return Promise.resolve({} as GetCopilotHoverInfoResult); }
 }

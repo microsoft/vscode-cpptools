@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { Position, ResponseError, TextDocumentPositionParams } from 'vscode-languageclient';
+import { ManualSignal } from '../../Utility/Async/manualSignal';
 import { DefaultClient, HoverRequest } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CppSettings } from '../settings';
@@ -54,4 +55,6 @@ export class HoverProvider implements vscode.HoverProvider {
 
         return new vscode.Hover(strings, range);
     }
+
+    public showCopilotHover = new ManualSignal<string>(true);
 }

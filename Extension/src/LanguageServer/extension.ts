@@ -1385,20 +1385,20 @@ async function onCopilotHover(): Promise<void> {
     if (!vscodelm) { return; }
 
     // Prep hover with wait message and get the hover position location.
-    const copilotHoverResult = await clients.ActiveClient.showCopilotHover('$(loading~spin)');
-    const hoverPosition = new vscode.Position(copilotHoverResult.hoverPos.line, copilotHoverResult.hoverPos.character);
+    //const copilotHoverResult = await clients.ActiveClient.showCopilotHover('$(loading~spin)');
+    //const hoverPosition = new vscode.Position(copilotHoverResult.hoverPos.line, copilotHoverResult.hoverPos.character);
 
     // Make sure the editor has focus.
-    await vscode.window.showTextDocument(vscode.window.activeTextEditor.document, { preserveFocus: false, selection: new vscode.Selection(hoverPosition, hoverPosition) });
+    //await vscode.window.showTextDocument(vscode.window.activeTextEditor.document, { preserveFocus: false, selection: new vscode.Selection(hoverPosition, hoverPosition) });
 
     // Workaround to force the editor to update it's content, needs to be called from another location first.
-    await vscode.commands.executeCommand('cursorMove', { to: 'right' });
-    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
+    //await vscode.commands.executeCommand('cursorMove', { to: 'right' });
+    //await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
 
     // Move back and show the correct hover.
-    await clients.ActiveClient.showCopilotHover('$(loading~spin)');
-    await vscode.commands.executeCommand('cursorMove', { to: 'left' });
-    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus'});
+    //await clients.ActiveClient.showCopilotHover('$(loading~spin)');
+    //await vscode.commands.executeCommand('cursorMove', { to: 'left' });
+    //await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus'});
 
     // Gather the content for the query from the client.
     const response = await clients.ActiveClient.getCopilotHoverInfo();
@@ -1447,16 +1447,16 @@ async function onCopilotHover(): Promise<void> {
         return;
     }
 
-    if (!vscode.window.activeTextEditor) { return; }
-    await vscode.window.showTextDocument(vscode.window.activeTextEditor.document, { preserveFocus: false, selection: new vscode.Selection(hoverPosition, hoverPosition) });
+    //if (!vscode.window.activeTextEditor) { return; }
+    //await vscode.window.showTextDocument(vscode.window.activeTextEditor.document, { preserveFocus: false, selection: new vscode.Selection(hoverPosition, hoverPosition) });
 
     // Same workaround as above to force the editor to update it's content.
-    await clients.ActiveClient.showCopilotHover('$(loading~spin)');
-    await vscode.commands.executeCommand('cursorMove', { to: 'right' });
-    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus'});
+    //await clients.ActiveClient.showCopilotHover('$(loading~spin)');
+    //await vscode.commands.executeCommand('cursorMove', { to: 'right' });
+    //await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus'});
 
     // Prepare and show the real content.
     await clients.ActiveClient.showCopilotHover(content);
-    await vscode.commands.executeCommand('cursorMove', { to: 'left' });
-    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus'});
+    //await vscode.commands.executeCommand('cursorMove', { to: 'left' });
+    //await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus'});
 }
