@@ -1479,6 +1479,7 @@ export class DefaultClient implements Client {
             codeAnalysisMaxConcurrentThreads: workspaceSettings.codeAnalysisMaxConcurrentThreads,
             codeAnalysisMaxMemory: workspaceSettings.codeAnalysisMaxMemory,
             codeAnalysisUpdateDelay: workspaceSettings.codeAnalysisUpdateDelay,
+            caseSensitiveFileSupportPendingRestart: workspaceSettings.isCaseSensitiveFileSupportEnabled,
             workspaceFolderSettings: workspaceFolderSettingsParams
         };
     }

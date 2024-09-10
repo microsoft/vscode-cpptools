@@ -160,6 +160,7 @@ export interface SettingsParams {
     codeAnalysisMaxConcurrentThreads: number | null;
     codeAnalysisMaxMemory: number | null;
     codeAnalysisUpdateDelay: number;
+    caseSensitiveFileSupportPendingRestart: boolean;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
 }
 
