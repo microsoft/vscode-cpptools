@@ -38,7 +38,8 @@
         "Snippets"
     ],
     "enabledApiProposals": [
-        "terminalDataWriteEvent"
+        "terminalDataWriteEvent",
+        "lmTools"
     ],
     "capabilities": {
         "untrustedWorkspaces": {
@@ -6450,6 +6451,19 @@
                     "title": "%c_cpp.codeActions.refactor.extract.function.title%",
                     "description": "%c_cpp.codeActions.refactor.extract.function.description%"
                 }
+            }
+        ],
+        "languageModelTools": [
+            {
+                "id": "cpptools-lmtool-configuration",
+                "name": "cpp",
+                "displayName": "%c_cpp.languageModelTools.configuration.displayName%",
+                "canBeInvokedManually": true,
+                "userDescription": "%c_cpp.languageModelTools.configuration.userDescription%",
+                "modelDescription": "For the active C or C++ file, this tool provides: the language (C, C++, or CUDA), the language standard version (such as C++11, C++14, C++17, or C++20), the compiler (such as GCC, Clang, or MSVC), the target platform (such as x86, x64, or ARM), and the target architecture (such as 32-bit or 64-bit).",
+                "icon": "$(file-code)",
+                "parametersSchema": {},
+                "when": "(config.C_Cpp.experimentalFeatures =~ /^[eE]nabled$/)"
             }
         ]
     },

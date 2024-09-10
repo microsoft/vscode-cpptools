@@ -27,6 +27,7 @@ import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, code
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
 import { getLanguageConfig } from './languageConfig';
+import { CppConfigurationLanguageModelTool } from './lmTool';
 import { getLocaleId } from './localization';
 import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
@@ -249,6 +250,11 @@ export async function activate(): Promise<void> {
     if (activeEditor) {
         clients.timeTelemetryCollector.setFirstFile(activeEditor.document.uri);
         activeDocument = activeEditor.document;
+    }
+
+    if (util.extensionContext && new CppSettings().experimentalFeatures) {
+        const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
+        disposables.push(tool);
     }
 }
 
@@ -1398,7 +1404,7 @@ async function onCopilotHover(): Promise<void> {
     // Move back and show the correct hover.
     await clients.ActiveClient.showCopilotHover('$(loading~spin)');
     await vscode.commands.executeCommand('cursorMove', { to: 'left' });
-    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus'});
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
 
     // Gather the content for the query from the client.
     const response = await clients.ActiveClient.getCopilotHoverInfo();
@@ -1453,10 +1459,10 @@ async function onCopilotHover(): Promise<void> {
     // Same workaround as above to force the editor to update it's content.
     await clients.ActiveClient.showCopilotHover('$(loading~spin)');
     await vscode.commands.executeCommand('cursorMove', { to: 'right' });
-    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus'});
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
 
     // Prepare and show the real content.
     await clients.ActiveClient.showCopilotHover(content);
     await vscode.commands.executeCommand('cursorMove', { to: 'left' });
-    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus'});
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
 }
