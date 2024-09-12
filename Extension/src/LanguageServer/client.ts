@@ -27,7 +27,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
+import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, ResponseError, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -58,12 +58,12 @@ import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorCon
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentWorkspaceState } from './persistentState';
-import { createProtocolFilter } from './protocolFilter';
+import { RequestCancelled, ServerCancelled, createProtocolFilter } from './protocolFilter';
 import * as refs from './references';
 import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
 import { SettingsTracker } from './settingsTracker';
 import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
-import { handleChangedFromCppToC, makeLspRange, makeVscodeLocation, makeVscodeRange } from './utils';
+import { handleChangedFromCppToC, makeLspRange, makeVscodeLocation, makeVscodeRange, withCancellation } from './utils';
 import minimatch = require("minimatch");
 
 function deepCopy(obj: any) {
@@ -542,6 +542,14 @@ interface GetIncludesResult {
     includedFiles: string[];
 }
 
+export interface ChatContextResult {
+    language: string;
+    standardVersion: string;
+    compiler: string;
+    targetPlatform: string;
+    targetArchitecture: string;
+}
+
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
@@ -562,6 +570,7 @@ const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Posit
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
 const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
+const CppContextRequest: RequestType<void, ChatContextResult, void> = new RequestType<void, ChatContextResult, void>('cpptools/getChatContext');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
@@ -792,6 +801,7 @@ export interface Client {
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
     getIncludes(maxDepth: number): Promise<GetIncludesResult>;
+    getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -2232,6 +2242,25 @@ export class DefaultClient implements Client {
         const params: GetIncludesParams = { maxDepth: maxDepth };
         await this.ready;
         return this.languageClient.sendRequest(IncludesRequest, params);
+    }
+
+    public async getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> {
+        await withCancellation(this.ready, token);
+        let result: ChatContextResult;
+        try {
+            result = await this.languageClient.sendRequest(CppContextRequest, null, token);
+        } catch (e: any) {
+            if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                throw new vscode.CancellationError();
+            }
+
+            throw e;
+        }
+        if (token.isCancellationRequested) {
+            throw new vscode.CancellationError();
+        }
+
+        return result;
     }
 
     /**
@@ -3774,6 +3803,7 @@ export class DefaultClient implements Client {
                 const formatRangeStartLine: number = range.start.line + lineOffset;
                 let rangeStartLine: number = formatRangeStartLine;
                 let rangeStartCharacter: number = 0;
+                let startWithNewLine: boolean = true;
                 if (edit.newText.startsWith("\r\n\r\n")) {
                     rangeStartCharacter = 4;
                     rangeStartLine += 2;
@@ -3786,12 +3816,16 @@ export class DefaultClient implements Client {
                 } else if (edit.newText.startsWith("\n")) {
                     rangeStartCharacter = 1;
                     rangeStartLine += 1;
+                } else {
+                    startWithNewLine = false;
                 }
                 const newFormatRange: vscode.Range = new vscode.Range(
                     new vscode.Position(formatRangeStartLine + (nextLineOffset < 0 ? nextLineOffset : 0), range.start.character),
-                    new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? 0 : nextLineOffset),
+                    new vscode.Position(formatRangeStartLine + (nextLineOffset < 0 ? 0 : nextLineOffset),
                         isReplace ? range.end.character :
-                            range.end.character + edit.newText.length - rangeStartCharacter));
+                            ((startWithNewLine ? 0 : range.end.character) + (edit.newText.endsWith("\n") ? 0 : edit.newText.length - rangeStartCharacter))
+                    )
+                );
                 if (isSourceFile) {
                     sourceFormatUriAndRanges.push({ uri, range: newFormatRange });
                 } else {
@@ -4114,4 +4148,5 @@ class NullClient implements Client {
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
     getIncludes(): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
+    getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
 }
