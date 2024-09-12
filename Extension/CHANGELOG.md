@@ -1,5 +1,18 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.22.3: September 12, 2024
+### Enhancement
+* Add support for providing additional context information to Copilot Chat. [PR #12685](https://github.com/microsoft/vscode-cpptools/pull/12685)
+
+### Bug Fixes
+* Fix the compiler selection control not keeping the list in sync with contents of the textbox. [#7427](https://github.com/microsoft/vscode-cpptools/issues/7427)
+* Fix a string localization issue. [#7824](https://github.com/microsoft/vscode-cpptools/issues/7824) 
+* Stop logging duplicate compiler path messages. [#12445](https://github.com/microsoft/vscode-cpptools/issues/12445)
+* Fix some crashes with recursive includes. [#12643](https://github.com/microsoft/vscode-cpptools/issues/12643)
+* Fix a rare crash on macOS related to `get_memory_usage`. [#12667](https://github.com/microsoft/vscode-cpptools/issues/12667)
+* Fix an issue with 'Extract to Function' formatting. [#12677](https://github.com/microsoft/vscode-cpptools/issues/12677)
+* Fix a potential deadlock in `process_paths`. [#12690](https://github.com/microsoft/vscode-cpptools/issues/12690)
+
 ## Version 1.22.2: August 29, 2024
 ### Enhancement
 * Remove the `C_Cpp.intelliSenseEngineFallback` setting. [#12596](https://github.com/microsoft/vscode-cpptools/issues/12596)
