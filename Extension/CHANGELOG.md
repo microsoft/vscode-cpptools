@@ -3,6 +3,7 @@
 ## Version 1.22.3: September 12, 2024
 ### Enhancement
 * Add support for providing additional context information to Copilot Chat. [PR #12685](https://github.com/microsoft/vscode-cpptools/pull/12685)
+  * Currently, it requires `"C_Cpp.experimentalFeatures": "enabled"` and typing `#cpp` in the chat.
 
 ### Bug Fixes
 * Fix the compiler selection control not keeping the list in sync with contents of the textbox. [#7427](https://github.com/microsoft/vscode-cpptools/issues/7427)
