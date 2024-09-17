@@ -2016,11 +2016,13 @@ export class DefaultClient implements Client {
         };
         try {
             const providerId: string | undefined = this.configurationProvider;
-            if (!providerId)
+            if (!providerId) {
                 return;
+            }
             const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(providerId);
-            if (!provider || !provider.isReady)
+            if (!provider || !provider.isReady) {
                 return;
+            }
             const resultCode = await this.provideCustomConfigurationAsync(docUri, provider);
             telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId, resultCode });
         } finally {
@@ -2120,12 +2122,12 @@ export class DefaultClient implements Client {
         return result;
     }
 
-    private async handleRequestCustomConfig(file: string): Promise<void> {
+    private handleRequestCustomConfig(file: string): void {
         const uri: vscode.Uri = vscode.Uri.file(file);
         const client: Client = clients.getClientFor(uri);
         if (client instanceof DefaultClient) {
             const defaultClient: DefaultClient = client as DefaultClient;
-            await defaultClient.provideCustomConfiguration(uri);
+            void defaultClient.provideCustomConfiguration(uri).catch(logAndReturn.undefined);
         }
     }
 
