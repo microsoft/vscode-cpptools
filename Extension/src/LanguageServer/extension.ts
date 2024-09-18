@@ -26,6 +26,7 @@ import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, code
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
 import { getLanguageConfig } from './languageConfig';
+import { CppConfigurationLanguageModelTool } from './lmTool';
 import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
@@ -248,6 +249,11 @@ export async function activate(): Promise<void> {
         clients.timeTelemetryCollector.setFirstFile(activeEditor.document.uri);
         activeDocument = activeEditor.document;
     }
+
+    if (util.extensionContext && new CppSettings().experimentalFeatures) {
+        const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
+        disposables.push(tool);
+    }
 }
 
 export function updateLanguageConfigurations(): void {
@@ -359,7 +365,6 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', enabled ? onAddToIncludePath : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', enabled ? onEnableSquiggles : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', enabled ? onDisableSquiggles : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', enabled ? onToggleIncludeFallback : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', enabled ? onToggleDimInactiveRegions : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', enabled ? onPauseParsing : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', enabled ? onResumeParsing : onDisabledCommand));
@@ -752,12 +757,6 @@ function onDisableSquiggles(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.update<string>("errorSquiggles", "disabled");
-}
-
-function onToggleIncludeFallback(): void {
-    // This only applies to the active client.
-    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleSetting("intelliSenseEngineFallback", "enabled", "disabled");
 }
 
 function onToggleDimInactiveRegions(): void {

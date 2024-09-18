@@ -37,7 +37,6 @@ export interface Associations {
 export interface WorkspaceFolderSettingsParams {
     uri: string | undefined;
     intelliSenseEngine: string;
-    intelliSenseEngineFallback: boolean;
     autocomplete: string;
     autocompleteAddParentheses: boolean;
     errorSquiggles: string;
@@ -367,7 +366,6 @@ export class CppSettings extends Settings {
     public get experimentalFeatures(): boolean { return this.getAsString("experimentalFeatures").toLowerCase() === "enabled"; }
     public get suggestSnippets(): boolean { return this.getAsBoolean("suggestSnippets"); }
     public get intelliSenseEngine(): string { return this.getAsString("intelliSenseEngine"); }
-    public get intelliSenseEngineFallback(): boolean { return this.getAsString("intelliSenseEngineFallback").toLowerCase() === "enabled"; }
     public get intelliSenseCachePath(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("intelliSenseCachePath")); }
     public get intelliSenseCacheSize(): number { return this.getAsNumber("intelliSenseCacheSize"); }
     public get intelliSenseMemoryLimit(): number { return this.getAsNumber("intelliSenseMemoryLimit"); }
@@ -459,7 +457,7 @@ export class CppSettings extends Settings {
     public get inlayHintsReferenceOperatorShowSpace(): boolean { return this.getAsBoolean("inlayHints.referenceOperator.showSpace"); }
     public get isEnhancedColorizationEnabled(): boolean {
         return this.getAsString("enhancedColorization").toLowerCase() === "enabled"
-            && this.intelliSenseEngine === "default"
+            && this.intelliSenseEngine.toLowerCase() === "default"
             && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
     }
     public get formattingEngine(): string { return this.getAsString("formatting"); }
@@ -523,7 +521,7 @@ export class CppSettings extends Settings {
     public get vcFormatWrapPreserveBlocks(): string { return this.getAsString("vcFormat.wrap.preserveBlocks"); }
     public get dimInactiveRegions(): boolean {
         return this.getAsBoolean("dimInactiveRegions")
-            && this.intelliSenseEngine === "default" && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
+            && this.intelliSenseEngine.toLowerCase() === "default" && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
     }
     public get sshTargetsView(): string { return this.getAsString("sshTargetsView"); }
 
@@ -894,7 +892,7 @@ export class CppSettings extends Settings {
     // This is intentionally not async to avoid races due to multiple entrancy.
     public useVcFormat(document: vscode.TextDocument): boolean {
         if (this.formattingEngine !== "default") {
-            return this.formattingEngine === "vcformat";
+            return this.formattingEngine.toLowerCase() === "vcformat";
         }
         if (this.clangFormatStyle && this.clangFormatStyle !== "file") {
             // If a clang-format style other than file is specified, don't try to switch to vcFormat.
