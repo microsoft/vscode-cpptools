@@ -3103,7 +3103,7 @@ export class DefaultClient implements Client {
         };
 
         // We send the higher priority notification to ensure we don't deadlock if the request is blocking the queue.
-        // We send the normal priroity notification to avoid a race that could result in a redundant request when racing with
+        // We send the normal priority notification to avoid a race that could result in a redundant request when racing with
         // the reset of custom configurations.
         void this.languageClient.sendNotification(CustomConfigurationHighPriorityNotification, params).catch(logAndReturn.undefined);
         void this.languageClient.sendNotification(CustomConfigurationNotification, params).catch(logAndReturn.undefined);
