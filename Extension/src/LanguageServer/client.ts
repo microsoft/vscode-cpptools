@@ -246,15 +246,6 @@ interface CompileCommandsPaths extends WorkspaceFolderParams {
     paths: string[];
 }
 
-interface QueryTranslationUnitSourceParams extends WorkspaceFolderParams {
-    uri: string;
-    ignoreExisting: boolean;
-}
-
-interface QueryTranslationUnitSourceResult {
-    candidates: string[];
-}
-
 interface GetDiagnosticsResult {
     diagnostics: string;
 }
@@ -554,7 +545,6 @@ export interface ChatContextResult {
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
-const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
 const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void> = new RequestType<void, GetDiagnosticsResult, void>('cpptools/getDiagnostics');
 export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void> = new RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void>('cpptools/getDocumentSymbols');
@@ -744,7 +734,7 @@ export interface Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
-    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void>;
+    provideCustomConfiguration(docUri: vscode.Uri): Promise<void>;
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     toggleReferenceResultsView(): void;
@@ -838,6 +828,7 @@ export class DefaultClient implements Client {
     public lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     public lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
     public lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
+    public currentCaseSensitiveFileSupport: PersistentWorkspaceState<boolean> | undefined;
     private registeredProviders: PersistentFolderState<string[]> | undefined;
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
@@ -1457,6 +1448,9 @@ export class DefaultClient implements Client {
         const workspaceSettings: CppSettings = new CppSettings();
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
         const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = this.getAllWorkspaceFolderSettings();
+        if (this.currentCaseSensitiveFileSupport && workspaceSettings.isCaseSensitiveFileSupportEnabled !== this.currentCaseSensitiveFileSupport.Value) {
+            void util.promptForReloadWindowDueToSettingsChange();
+        }
         return {
             filesAssociations: workspaceOtherSettings.filesAssociations,
             workspaceFallbackEncoding: workspaceOtherSettings.filesEncoding,
@@ -1484,7 +1478,7 @@ export class DefaultClient implements Client {
     }
 
     private async createLanguageClient(): Promise<void> {
-        const currentCaseSensitiveFileSupport: PersistentWorkspaceState<boolean> = new PersistentWorkspaceState<boolean>("CPP.currentCaseSensitiveFileSupport", false);
+        this.currentCaseSensitiveFileSupport = new PersistentWorkspaceState<boolean>("CPP.currentCaseSensitiveFileSupport", false);
         let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
         const exeExists: boolean = fs.existsSync(serverModule);
@@ -1527,9 +1521,9 @@ export class DefaultClient implements Client {
         }
 
         const workspaceSettings: CppSettings = new CppSettings();
-        if (workspaceSettings.isCaseSensitiveFileSupportEnabled !== currentCaseSensitiveFileSupport.Value) {
+        if (workspaceSettings.isCaseSensitiveFileSupportEnabled !== this.currentCaseSensitiveFileSupport.Value) {
             resetDatabase = true;
-            currentCaseSensitiveFileSupport.Value = workspaceSettings.isCaseSensitiveFileSupportEnabled;
+            this.currentCaseSensitiveFileSupport.Value = workspaceSettings.isCaseSensitiveFileSupportEnabled;
         }
 
         const cacheStoragePath: string = util.getCacheStoragePath();
@@ -1867,9 +1861,6 @@ export class DefaultClient implements Client {
         }
 
         await this.clearCustomConfigurations();
-        await Promise.all([
-            ...[...this.trackedDocuments].map(([_uri, document]) => this.provideCustomConfiguration(document.uri, undefined, true))
-        ]);
     }
 
     public async updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Promise<void> {
@@ -2019,68 +2010,42 @@ export class DefaultClient implements Client {
         return this.languageClient.sendNotification(RescanFolderNotification);
     }
 
-    public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> {
+    public async provideCustomConfiguration(docUri: vscode.Uri): Promise<void> {
         const onFinished: () => void = () => {
-            if (requestFile) {
-                void this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: requestFile });
-            }
+            void this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: docUri.toString() });
         };
-        const providerId: string | undefined = this.configurationProvider;
-        if (!providerId) {
-            onFinished();
-            return;
-        }
-        const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(providerId);
-        if (!provider || !provider.isReady) {
-            onFinished();
-            return;
-        }
         try {
-            DefaultClient.isStarted.reset();
-            const resultCode = await this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, provider);
+            const providerId: string | undefined = this.configurationProvider;
+            if (!providerId) {
+                return;
+            }
+            const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(providerId);
+            if (!provider || !provider.isReady) {
+                return;
+            }
+            const resultCode = await this.provideCustomConfigurationAsync(docUri, provider);
             telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId, resultCode });
         } finally {
             onFinished();
-            DefaultClient.isStarted.resolve();
         }
     }
 
-    private async provideCustomConfigurationAsync(docUri: vscode.Uri, requestFile: string | undefined, replaceExisting: boolean | undefined, provider: CustomConfigurationProvider1): Promise<string> {
+    private async provideCustomConfigurationAsync(docUri: vscode.Uri, provider: CustomConfigurationProvider1): Promise<string> {
         const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-
-        const params: QueryTranslationUnitSourceParams = {
-            uri: docUri.toString(),
-            ignoreExisting: !!replaceExisting,
-            workspaceFolderUri: this.RootUri?.toString()
-        };
-
-        const response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
-        if (!response.candidates || response.candidates.length === 0) {
-            // If we didn't receive any candidates, no configuration is needed.
-            return "noCandidates";
-        }
 
         // Need to loop through candidates, to see if we can get a custom configuration from any of them.
         // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
         const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | undefined> = async () => {
-            const uris: vscode.Uri[] = [];
-            for (let i: number = 0; i < response.candidates.length; ++i) {
-                const candidate: string = response.candidates[i];
-                const tuUri: vscode.Uri = vscode.Uri.parse(candidate);
-                try {
-                    if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
-                        uris.push(tuUri);
-                    }
-                } catch (err) {
-                    console.warn("Caught exception from canProvideConfiguration");
+            try {
+                if (!await provider.canProvideConfiguration(docUri, tokenSource.token)) {
+                    return [];
                 }
-            }
-            if (!uris.length) {
-                return [];
+            } catch (err) {
+                console.warn("Caught exception from canProvideConfiguration");
             }
             let configs: util.Mutable<SourceFileConfigurationItem>[] = [];
             try {
-                configs = await provider.provideConfigurations(uris, tokenSource.token);
+                configs = await provider.provideConfigurations([docUri], tokenSource.token);
             } catch (err) {
                 console.warn("Caught exception from provideConfigurations");
             }
@@ -2128,39 +2093,42 @@ export class DefaultClient implements Client {
         try {
             const configs: SourceFileConfigurationItem[] | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
             if (configs && configs.length > 0) {
-                this.sendCustomConfigurations(configs, provider.version, requestFile !== undefined);
+                this.sendCustomConfigurations(configs, provider.version);
             } else {
                 result = "noConfigurations";
             }
         } catch (err) {
             result = "timeout";
-            if (!requestFile) {
-                const settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.isConfigurationWarningsEnabled && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
-                    const dismiss: string = localize("dismiss.button", "Dismiss");
-                    const disable: string = localize("disable.warnings.button", "Disable Warnings");
-                    const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
-                    if (!configName) {
-                        return "noConfigName";
-                    }
-                    let message: string = localize("unable.to.provide.configuration",
-                        "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
-                        provider.name, docUri.fsPath, configName);
-                    if (err) {
-                        message += ` (${err})`;
-                    }
+            const settings: CppSettings = new CppSettings(this.RootUri);
+            if (settings.isConfigurationWarningsEnabled && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+                const dismiss: string = localize("dismiss.button", "Dismiss");
+                const disable: string = localize("disable.warnings.button", "Disable Warnings");
+                const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
+                if (!configName) {
+                    return "noConfigName";
+                }
+                let message: string = localize("unable.to.provide.configuration",
+                    "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
+                    provider.name, docUri.fsPath, configName);
+                if (err) {
+                    message += ` (${err})`;
+                }
 
-                    if (await vscode.window.showInformationMessage(message, dismiss, disable) === disable) {
-                        settings.toggleSetting("configurationWarnings", "enabled", "disabled");
-                    }
+                if (await vscode.window.showInformationMessage(message, dismiss, disable) === disable) {
+                    settings.toggleSetting("configurationWarnings", "enabled", "disabled");
                 }
             }
         }
         return result;
     }
 
-    private async handleRequestCustomConfig(requestFile: string): Promise<void> {
-        await this.provideCustomConfiguration(vscode.Uri.file(requestFile), requestFile);
+    private handleRequestCustomConfig(file: string): void {
+        const uri: vscode.Uri = vscode.Uri.file(file);
+        const client: Client = clients.getClientFor(uri);
+        if (client instanceof DefaultClient) {
+            const defaultClient: DefaultClient = client as DefaultClient;
+            void defaultClient.provideCustomConfiguration(uri).catch(logAndReturn.undefined);
+        }
     }
 
     private isExternalHeader(uri: vscode.Uri): boolean {
@@ -2382,13 +2350,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => void this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesPreview(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
-        this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
-            const client: Client = clients.getClientFor(vscode.Uri.file(requestFile));
-            if (client instanceof DefaultClient) {
-                const defaultClient: DefaultClient = client as DefaultClient;
-                void defaultClient.handleRequestCustomConfig(requestFile);
-            }
-        });
+        this.languageClient.onNotification(RequestCustomConfig, (e) => this.handleRequestCustomConfig(e));
         this.languageClient.onNotification(IntelliSenseResultNotification, (e) => this.handleIntelliSenseResult(e));
         this.languageClient.onNotification(PublishRefactorDiagnosticsNotification, publishRefactorDiagnostics);
         RegisterCodeAnalysisNotifications(this.languageClient);
@@ -3074,7 +3036,7 @@ export class DefaultClient implements Client {
             util.isOptionalArrayOfString(input.configuration.forcedInclude);
     }
 
-    private sendCustomConfigurations(configs: any, providerVersion: Version, wasRequested: boolean): void {
+    private sendCustomConfigurations(configs: any, providerVersion: Version): void {
         // configs is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
         if (!configs || !(configs instanceof Array)) {
             console.warn("discarding invalid SourceFileConfigurationItems[]: " + configs);
@@ -3140,9 +3102,10 @@ export class DefaultClient implements Client {
             workspaceFolderUri: this.RootUri?.toString()
         };
 
-        if (wasRequested) {
-            void this.languageClient.sendNotification(CustomConfigurationHighPriorityNotification, params).catch(logAndReturn.undefined);
-        }
+        // We send the higher priority notification to ensure we don't deadlock if the request is blocking the queue.
+        // We send the normal priority notification to avoid a race that could result in a redundant request when racing with
+        // the reset of custom configurations.
+        void this.languageClient.sendNotification(CustomConfigurationHighPriorityNotification, params).catch(logAndReturn.undefined);
         void this.languageClient.sendNotification(CustomConfigurationNotification, params).catch(logAndReturn.undefined);
     }
 
@@ -4088,7 +4051,7 @@ class NullClient implements Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
-    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> { return Promise.resolve(); }
+    provideCustomConfiguration(docUri: vscode.Uri): Promise<void> { return Promise.resolve(); }
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     toggleReferenceResultsView(): void { }

@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.22.3-main",
+    "version": "1.22.4-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -5864,7 +5864,7 @@
                 },
                 {
                     "command": "C_Cpp.LogDiagnostics",
-                    "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                    "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
                 },
                 {
                     "command": "C_Cpp.RescanWorkspace",
