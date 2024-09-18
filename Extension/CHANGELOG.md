@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.22.4: September 19, 2024
+### Enhancements
+* Performance improvements related to how custom configurations are processed. [#12632](https://github.com/microsoft/vscode-cpptools/issues/12632)
+* Performance improvements related to LSP request processing.
+
+### Bug Fixes
+* Fix some crashes with recursive includes. [#12643](https://github.com/microsoft/vscode-cpptools/issues/12643)
+* Possibly fix a crash in `find_existing_intellisense_client`. [#12666](https://github.com/microsoft/vscode-cpptools/issues/12666)
+* Fix issues applying `files.exclude` settings when `C_Cpp.caseSensitiveFileSupport` is enabled. [#12672](https://github.com/microsoft/vscode-cpptools/issues/12672)
+
 ## Version 1.22.3: September 12, 2024
 ### Enhancement
 * Add support for providing additional context information to Copilot Chat. [PR #12685](https://github.com/microsoft/vscode-cpptools/pull/12685)
