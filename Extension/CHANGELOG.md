@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.22.3: September 19, 2024
+## Version 1.22.4: September 19, 2024
 ### Enhancements
 * Performance improvements related to how custom configurations are processed. [#12632](https://github.com/microsoft/vscode-cpptools/issues/12632)
 * Performance improvements related to LSP request processing.
