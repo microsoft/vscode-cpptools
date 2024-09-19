@@ -190,7 +190,8 @@ export async function activate(): Promise<void> {
 
     void clients.ActiveClient.ready.then(() => intervalTimer = global.setInterval(onInterval, 2500));
 
-    await registerCommands(true);
+    const isRelatedFilesApiEnabled = await telemetry.isExperimentEnabled("CppToolsRelatedFilesApi");
+    registerCommands(true, isRelatedFilesApiEnabled);
 
     vscode.tasks.onDidStartTask(() => getActiveClient().PauseCodeAnalysis());
 
@@ -262,7 +263,7 @@ export async function activate(): Promise<void> {
         disposables.push(tool);
     }
 
-    if (await telemetry.isExperimentEnabled("CppToolsRelatedFilesApi")) {
+    if (isRelatedFilesApiEnabled) {
         const copilotExtension = vscode.extensions.getExtension<CopilotApi>('github.copilot');
         if (util.extensionContext && copilotExtension) {
             const api: CopilotApi = copilotExtension.isActive ? copilotExtension.exports : await copilotExtension.activate();
@@ -371,7 +372,7 @@ function onInterval(): void {
 /**
  * registered commands
  */
-export async function registerCommands(enabled: boolean): Promise<void> {
+export function registerCommands(enabled: boolean, isRelatedFilesApiEnabled: boolean): void {
     commandDisposables.forEach(d => d.dispose());
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
@@ -430,7 +431,7 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
 
-    if (!await telemetry.isExperimentEnabled("CppToolsRelatedFilesApi")) {
+    if (!isRelatedFilesApiEnabled) {
         commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : () => Promise.resolve()));
     }
 }
