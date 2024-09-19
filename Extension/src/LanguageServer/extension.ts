@@ -264,9 +264,8 @@ export async function activate(): Promise<void> {
     }
 
     if (isRelatedFilesApiEnabled) {
-        const copilotExtension = vscode.extensions.getExtension<CopilotApi>('github.copilot');
-        if (util.extensionContext && copilotExtension) {
-            const api: CopilotApi = copilotExtension.isActive ? copilotExtension.exports : await copilotExtension.activate();
+        const api = await getCopilotApi();
+        if (util.extensionContext && api) {
             for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
                 api.registerRelatedFilesProvider(
                     { extensionId: util.extensionContext.extension.id, languageId },
@@ -372,7 +371,7 @@ function onInterval(): void {
 /**
  * registered commands
  */
-export function registerCommands(enabled: boolean, isRelatedFilesApiEnabled: boolean): void {
+export function registerCommands(enabled: boolean, isRelatedFilesApiEnabled: boolean = false): void {
     commandDisposables.forEach(d => d.dispose());
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
@@ -1402,4 +1401,21 @@ export async function preReleaseCheck(): Promise<void> {
 export async function getIncludes(maxDepth: number): Promise<any> {
     const includes = await clients.ActiveClient.getIncludes(maxDepth);
     return includes;
+}
+
+async function getCopilotApi(): Promise<CopilotApi | undefined> {
+    const copilotExtension = vscode.extensions.getExtension<CopilotApi>('github.copilot');
+    if (!copilotExtension) {
+        return undefined;
+    }
+
+    if (!copilotExtension.isActive) {
+        try {
+            return await copilotExtension.activate();
+        } catch {
+            return undefined;
+        }
+    } else {
+        return copilotExtension.exports;
+    }
 }
