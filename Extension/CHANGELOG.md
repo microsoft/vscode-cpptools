@@ -7,6 +7,7 @@
 
 ### Bug Fixes
 * Fix an issue with missing database symbols after a Rename operation. [#12480](https://github.com/microsoft/vscode-cpptools/issues/12480)
+* Work around IntelliSense issues with clang 18 due to `size_t` not being defined. [#12618](https://github.com/microsoft/vscode-cpptools/issues/12618)
 * Fix some crashes with recursive includes. [#12643](https://github.com/microsoft/vscode-cpptools/issues/12643)
 * Possibly fix a crash in `find_existing_intellisense_client`. [#12666](https://github.com/microsoft/vscode-cpptools/issues/12666)
 * Fix issues applying `files.exclude` settings when `C_Cpp.caseSensitiveFileSupport` is enabled. [#12672](https://github.com/microsoft/vscode-cpptools/issues/12672)
