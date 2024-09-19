@@ -6,9 +6,12 @@
 * Performance improvements related to LSP request processing.
 
 ### Bug Fixes
+* Fix an issue with missing database symbols after a Rename operation. [#12480](https://github.com/microsoft/vscode-cpptools/issues/12480)
 * Fix some crashes with recursive includes. [#12643](https://github.com/microsoft/vscode-cpptools/issues/12643)
 * Possibly fix a crash in `find_existing_intellisense_client`. [#12666](https://github.com/microsoft/vscode-cpptools/issues/12666)
 * Fix issues applying `files.exclude` settings when `C_Cpp.caseSensitiveFileSupport` is enabled. [#12672](https://github.com/microsoft/vscode-cpptools/issues/12672)
+* Fix an issue with duplicate tag parsing occurring after a Rename operation. [12728](https://github.com/microsoft/vscode-cpptools/issues/12728)
+* Fix an issue causing unnecessary TU updates for files opened during a Rename operation, when `"files.refactoring.autoSave": false` is used.
 
 ## Version 1.22.3: September 12, 2024
 ### Enhancement
