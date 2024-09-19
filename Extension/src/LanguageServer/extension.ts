@@ -33,6 +33,13 @@ import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
 
+interface CopilotApi {
+    registerRelatedFilesProvider(
+        providerId: { extensionId: string; languageId: string },
+        callback: (uri: vscode.Uri) => Promise<{ entries: vscode.Uri[]; traits?: { name: string; value: string }[] }>
+    ): void;
+}
+
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const CppSourceStr: string = "C/C++";
@@ -183,7 +190,7 @@ export async function activate(): Promise<void> {
 
     void clients.ActiveClient.ready.then(() => intervalTimer = global.setInterval(onInterval, 2500));
 
-    registerCommands(true);
+    await registerCommands(true);
 
     vscode.tasks.onDidStartTask(() => getActiveClient().PauseCodeAnalysis());
 
@@ -253,6 +260,20 @@ export async function activate(): Promise<void> {
     if (util.extensionContext && new CppSettings().experimentalFeatures) {
         const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
         disposables.push(tool);
+    }
+
+    if (await telemetry.isExperimentEnabled("CppToolsRelatedFilesApi")) {
+        const copilotExtension = vscode.extensions.getExtension<CopilotApi>('github.copilot');
+        if (util.extensionContext && copilotExtension) {
+            const api: CopilotApi = copilotExtension.isActive ? copilotExtension.exports : await copilotExtension.activate();
+            for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
+                api.registerRelatedFilesProvider(
+                    { extensionId: util.extensionContext.extension.id, languageId },
+                    async (_uri: vscode.Uri) =>
+                        ({ entries: (await clients.ActiveClient.getIncludes(1))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [] })
+                );
+            }
+        }
     }
 }
 
@@ -350,7 +371,7 @@ function onInterval(): void {
 /**
  * registered commands
  */
-export function registerCommands(enabled: boolean): void {
+export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.forEach(d => d.dispose());
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
@@ -408,7 +429,10 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? () => onExtractToFunction(true, false) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : () => Promise.resolve()));
+
+    if (!await telemetry.isExperimentEnabled("CppToolsRelatedFilesApi")) {
+        commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : () => Promise.resolve()));
+    }
 }
 
 function onDisabledCommand() {
