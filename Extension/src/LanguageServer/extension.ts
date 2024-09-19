@@ -375,7 +375,7 @@ function onInterval(): void {
 /**
  * registered commands
  */
-export function registerCommands(enabled: boolean, isRelatedFilesApiEnabled: boolean = false): void {
+export function registerCommands(enabled: boolean, isRelatedFilesApiEnabled: boolean): void {
     commandDisposables.forEach(d => d.dispose());
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
