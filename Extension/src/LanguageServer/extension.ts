@@ -266,12 +266,16 @@ export async function activate(): Promise<void> {
     if (isRelatedFilesApiEnabled) {
         const api = await getCopilotApi();
         if (util.extensionContext && api) {
-            for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
-                api.registerRelatedFilesProvider(
-                    { extensionId: util.extensionContext.extension.id, languageId },
-                    async (_uri: vscode.Uri) =>
-                        ({ entries: (await clients.ActiveClient.getIncludes(1))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [] })
-                );
+            try {
+                for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
+                    api.registerRelatedFilesProvider(
+                        { extensionId: util.extensionContext.extension.id, languageId },
+                        async (_uri: vscode.Uri) =>
+                            ({ entries: (await clients.ActiveClient.getIncludes(1))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [] })
+                    );
+                }
+            } catch {
+                console.log("Failed to register Copilot related files provider.");
             }
         }
     }
