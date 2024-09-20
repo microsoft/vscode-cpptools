@@ -3,7 +3,7 @@
   <Import Project="packages\Microsoft.VisualStudioEng.MicroBuild.Core.0.4.1\build\Microsoft.VisualStudioEng.MicroBuild.Core.props" />
 
   <PropertyGroup>
-    <BaseOutputDirectory>$(MSBuildThisFileDirectory)../../Extension</BaseOutputDirectory>
+    <BaseOutputDirectory>$(BUILD_STAGINGDIRECTORY)/Extension</BaseOutputDirectory>
     <!-- These properties are required by MicroBuild, which only signs files that are under these paths -->
     <IntermediateOutputPath>$(BaseOutputDirectory)</IntermediateOutputPath>
     <OutDir>$(BaseOutputDirectory)</OutDir>
