@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Because of Webpack bundling, these are the only shipping Javascript file.
+    <!-- Because of Webpack bundling, these are the only shipping Javascript files.
          There are no third-party files to sign because they've all been bundled. -->
     <FilesToSign Include="$(OutDir)\dist\src\main.js;$(OutDir)\dist\ui\settings.js">
       <Authenticode>Microsoft400</Authenticode>
