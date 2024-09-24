@@ -102,6 +102,10 @@ extends:
             filename: mkdir
             arguments: $(Build.ArtifactStagingDirectory)\Extension
 
+        - script: yarn run vsix-prepublish
+          displayName: Build files
+          workingDirectory: $(Build.SourcesDirectory)\Extension
+
         - task: CmdLine@1
           name: ProcessRunner_12
           displayName: Run VSCE to package vsix
