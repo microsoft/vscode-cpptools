@@ -35,6 +35,13 @@ import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
 
+interface CopilotApi {
+    registerRelatedFilesProvider(
+        providerId: { extensionId: string; languageId: string },
+        callback: (uri: vscode.Uri) => Promise<{ entries: vscode.Uri[]; traits?: { name: string; value: string }[] }>
+    ): void;
+}
+
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const CppSourceStr: string = "C/C++";
@@ -185,7 +192,8 @@ export async function activate(): Promise<void> {
 
     void clients.ActiveClient.ready.then(() => intervalTimer = global.setInterval(onInterval, 2500));
 
-    registerCommands(true);
+    const isRelatedFilesApiEnabled = await telemetry.isExperimentEnabled("CppToolsRelatedFilesApi");
+    registerCommands(true, isRelatedFilesApiEnabled);
 
     vscode.tasks.onDidStartTask(() => getActiveClient().PauseCodeAnalysis());
 
@@ -255,6 +263,23 @@ export async function activate(): Promise<void> {
     if (util.extensionContext && new CppSettings().experimentalFeatures) {
         const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
         disposables.push(tool);
+    }
+
+    if (isRelatedFilesApiEnabled) {
+        const api = await getCopilotApi();
+        if (util.extensionContext && api) {
+            try {
+                for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
+                    api.registerRelatedFilesProvider(
+                        { extensionId: util.extensionContext.extension.id, languageId },
+                        async (_uri: vscode.Uri) =>
+                            ({ entries: (await clients.ActiveClient.getIncludes(1))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [] })
+                    );
+                }
+            } catch {
+                console.log("Failed to register Copilot related files provider.");
+            }
+        }
     }
 }
 
@@ -352,7 +377,7 @@ function onInterval(): void {
 /**
  * registered commands
  */
-export function registerCommands(enabled: boolean): void {
+export function registerCommands(enabled: boolean, isRelatedFilesApiEnabled: boolean): void {
     commandDisposables.forEach(d => d.dispose());
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
@@ -412,6 +437,10 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : () => Promise.resolve()));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCopilotHover', enabled ? onCopilotHover : onDisabledCommand));
+
+    if (!isRelatedFilesApiEnabled) {
+        commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : () => Promise.resolve()));
+    }
 }
 
 function onDisabledCommand() {
@@ -1467,4 +1496,21 @@ async function onCopilotHover(): Promise<void> {
     await clients.ActiveClient.showCopilotHover(content);
     await vscode.commands.executeCommand('cursorMove', { to: 'left' });
     await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
+}
+
+async function getCopilotApi(): Promise<CopilotApi | undefined> {
+    const copilotExtension = vscode.extensions.getExtension<CopilotApi>('github.copilot');
+    if (!copilotExtension) {
+        return undefined;
+    }
+
+    if (!copilotExtension.isActive) {
+        try {
+            return await copilotExtension.activate();
+        } catch {
+            return undefined;
+        }
+    } else {
+        return copilotExtension.exports;
+    }
 }

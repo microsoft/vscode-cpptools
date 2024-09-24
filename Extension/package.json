@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.22.3-main",
+    "version": "1.22.4-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -5875,7 +5875,7 @@
                 },
                 {
                     "command": "C_Cpp.LogDiagnostics",
-                    "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                    "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
                 },
                 {
                     "command": "C_Cpp.RescanWorkspace",
@@ -6463,7 +6463,10 @@
                 "modelDescription": "For the active C or C++ file, this tool provides: the language (C, C++, or CUDA), the language standard version (such as C++11, C++14, C++17, or C++20), the compiler (such as GCC, Clang, or MSVC), the target platform (such as x86, x64, or ARM), and the target architecture (such as 32-bit or 64-bit).",
                 "icon": "$(file-code)",
                 "parametersSchema": {},
-                "when": "(config.C_Cpp.experimentalFeatures =~ /^[eE]nabled$/)"
+                "when": "(config.C_Cpp.experimentalFeatures =~ /^[eE]nabled$/)",
+                "supportedContentTypes": [
+                    "text/plain"
+                ]
             }
         ]
     },
@@ -6479,7 +6482,7 @@
         "compile": "yarn install && (yarn verify prep --quiet || yarn prep) && yarn build",
         "watch": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build tsconfig.json --watch",
         "rebuild": "yarn install && yarn clean && yarn prep && yarn build",
-        "vscode:prepublish": "yarn install && yarn clean && yarn webpack",
+        "vsix-prepublish": "yarn install && yarn clean && yarn webpack",
         "webpack": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build ui.tsconfig.json && webpack --mode production --env vscode_nls",
         "generate-native-strings": "ts-node -T ./.scripts/generateNativeStrings.ts",
         "generate-options-schema": "ts-node -T ./.scripts/generateOptionsSchema.ts",

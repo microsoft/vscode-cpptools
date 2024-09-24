@@ -44,14 +44,15 @@ const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: str
     }
 };
 
-class StringLanguageModelToolResult implements vscode.LanguageModelToolResult {
-    public constructor(public readonly value: string) { }
-    public toString(): string { return this.value; }
-}
+const plainTextContentType = 'text/plain';
 
 export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTool {
-    public async invoke(_parameters: any, token: vscode.CancellationToken): Promise<vscode.LanguageModelToolResult> {
-        return new StringLanguageModelToolResult(await this.getContext(token));
+    public async invoke(options: vscode.LanguageModelToolInvocationOptions, token: vscode.CancellationToken): Promise<vscode.LanguageModelToolResult> {
+        const result: vscode.LanguageModelToolResult = {};
+        if (options.requestedContentTypes.includes(plainTextContentType)) {
+            result[plainTextContentType] = await this.getContext(token);
+        }
+        return result;
     }
 
     private async getContext(token: vscode.CancellationToken): Promise<string> {
