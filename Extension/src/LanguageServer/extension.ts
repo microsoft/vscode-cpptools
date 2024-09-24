@@ -1385,7 +1385,9 @@ export async function getIncludes(maxDepth: number): Promise<any> {
 // This uses several workarounds for interacting with the hover feature.
 // A proposal for dynamic hover content would help, such as the one here (https://github.com/microsoft/vscode/issues/195394)
 async function onCopilotHover(): Promise<void> {
-    if (!vscode.window.activeTextEditor) { return; }
+    if (!vscode.window.activeTextEditor) {
+        return;
+    }
     // Check if the user has access to vscode language model.
     const vscodelm = (vscode as any).lm;
     if (!vscodelm) { return; }
