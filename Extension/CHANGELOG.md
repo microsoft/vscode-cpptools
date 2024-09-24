@@ -1,5 +1,14 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.22.5: September 24, 2024
+### Enhancement
+* Add the database path to `C/C++: Log Diagnostics` output.
+
+### Bug Fixes
+* Fix some synchronization and crash issues with `handle_edits`.
+* Fix usage of `#cpp` with Copilot chat.
+* Fix some document buffer issues.
+
 ## Version 1.22.4: September 19, 2024
 ### Enhancements
 * Performance improvements related to how custom configurations are processed. [#12632](https://github.com/microsoft/vscode-cpptools/issues/12632)
