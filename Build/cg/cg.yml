@@ -104,7 +104,7 @@ extends:
 
         - script: yarn run vsix-prepublish
           displayName: Build files
-          workingDirectory: $(Build.ArtifactStagingDirectory)\Extension
+          workingDirectory: $(Build.SourcesDirectory)\Extension
 
         - task: CmdLine@1
           name: ProcessRunner_12
