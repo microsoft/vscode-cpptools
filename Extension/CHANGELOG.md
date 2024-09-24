@@ -5,8 +5,8 @@
 * Add the database path to the `C/C++: Log Diagnostics` output.
 
 ### Bug Fixes
-* Fix some synchronization and crash issues with `handle_edits`.
-* Fix usage of `#cpp` with Copilot chat.
+* Fix some synchronization and crash issues with `handle_edits`. [#12747](https://github.com/microsoft/vscode-cpptools/issues/12747)
+* Fix usage of `#cpp` with Copilot chat. [PR #12755](https://github.com/microsoft/vscode-cpptools/pull/12755)
 * Fix some document buffer issues.
 
 ## Version 1.22.4: September 19, 2024
