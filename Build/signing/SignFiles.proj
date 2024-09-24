@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="SignFiles" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="packages\Microsoft.VisualStudioEng.MicroBuild.Core.0.4.1\build\Microsoft.VisualStudioEng.MicroBuild.Core.props" />
+
+  <PropertyGroup>
+    <BaseOutputDirectory>$(BUILD_STAGINGDIRECTORY)/Extension</BaseOutputDirectory>
+    <!-- These properties are required by MicroBuild, which only signs files that are under these paths -->
+    <IntermediateOutputPath>$(BaseOutputDirectory)</IntermediateOutputPath>
+    <OutDir>$(BaseOutputDirectory)</OutDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Because of Webpack bundling, these are the only shipping Javascript files.
+         There are no third-party files to sign because they've all been bundled. -->
+    <FilesToSign Include="$(OutDir)\dist\src\main.js;$(OutDir)\dist\ui\settings.js">
+      <Authenticode>Microsoft400</Authenticode>
+    </FilesToSign>
+  </ItemGroup>
+
+  <Import Project="packages\Microsoft.VisualStudioEng.MicroBuild.Core.0.4.1\build\Microsoft.VisualStudioEng.MicroBuild.Core.targets" />
+</Project>
