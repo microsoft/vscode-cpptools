@@ -2,7 +2,7 @@
 
 ## Version 1.22.5: September 24, 2024
 ### Enhancement
-* Add the database path to `C/C++: Log Diagnostics` output.
+* Add the database path to the `C/C++: Log Diagnostics` output.
 
 ### Bug Fixes
 * Fix some synchronization and crash issues with `handle_edits`.
