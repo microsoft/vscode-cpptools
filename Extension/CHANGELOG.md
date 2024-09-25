@@ -1,5 +1,11 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.22.6: September 25, 2024
+### Bug Fixes
+* Fix an issue with usage of `#cpp` with Copilot chat. [vscode-copilot-release#1634](https://github.com/microsoft/vscode-copilot-release/issues/1634)
+* Fix a performance regression with tag parsing.
+* Fix a document buffer issue related to edits within files containing multi-byte characters.
+
 ## Version 1.22.5: September 24, 2024
 ### Enhancement
 * Add the database path to the `C/C++: Log Diagnostics` output.
