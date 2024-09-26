@@ -36,8 +36,8 @@ import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './uti
 interface CopilotApi {
     registerRelatedFilesProvider(
         providerId: { extensionId: string; languageId: string },
-        callback: (uri: vscode.Uri) => Promise<{ entries: vscode.Uri[]; traits?: { name: string; value: string }[] }>
-    ): void;
+        callback: (uri: vscode.Uri, token: vscode.CancellationToken) => Promise<{ entries: vscode.Uri[]; traits?: { name: string; value: string }[] }>
+    ): vscode.Disposable;
 }
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -270,8 +270,8 @@ export async function activate(): Promise<void> {
                 for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
                     api.registerRelatedFilesProvider(
                         { extensionId: util.extensionContext.extension.id, languageId },
-                        async (_uri: vscode.Uri) =>
-                            ({ entries: (await clients.ActiveClient.getIncludes(1))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [] })
+                        async (_uri: vscode.Uri, token: vscode.CancellationToken) =>
+                            ({ entries: (await clients.ActiveClient.getIncludes(1, token))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [] })
                     );
                 }
             } catch {
@@ -1403,7 +1403,9 @@ export async function preReleaseCheck(): Promise<void> {
 }
 
 export async function getIncludes(maxDepth: number): Promise<any> {
-    const includes = await clients.ActiveClient.getIncludes(maxDepth);
+    const tokenSource = new vscode.CancellationTokenSource();
+    const includes = await clients.ActiveClient.getIncludes(maxDepth, tokenSource.token);
+    tokenSource.dispose();
     return includes;
 }
 

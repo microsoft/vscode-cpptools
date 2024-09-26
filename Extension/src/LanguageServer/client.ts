@@ -790,7 +790,7 @@ export interface Client {
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
-    getIncludes(maxDepth: number): Promise<GetIncludesResult>;
+    getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult>;
     getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult>;
 }
 
@@ -2206,10 +2206,10 @@ export class DefaultClient implements Client {
         await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
-    public async getIncludes(maxDepth: number): Promise<GetIncludesResult> {
+    public async getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> {
         const params: GetIncludesParams = { maxDepth: maxDepth };
         await this.ready;
-        return this.languageClient.sendRequest(IncludesRequest, params);
+        return this.languageClient.sendRequest(IncludesRequest, params, token);
     }
 
     public async getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> {
@@ -4110,6 +4110,6 @@ class NullClient implements Client {
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
-    getIncludes(): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
+    getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
 }
