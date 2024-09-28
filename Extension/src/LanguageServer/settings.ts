@@ -14,7 +14,7 @@ import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
 import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isObject, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
-import { isWindows, modelSelector } from '../constants';
+import { isWindows } from '../constants';
 import * as telemetry from '../telemetry';
 import { cachedEditorConfigLookups, DefaultClient, hasTrustedCompilerPaths } from './client';
 import { getEditorConfigSettings, mapIndentationReferenceToEditorConfig, mapIndentToEditorConfig, mapNewOrSameLineToEditorConfig, mapWrapToEditorConfig } from './editorConfig';
@@ -161,7 +161,7 @@ export interface SettingsParams {
     codeAnalysisMaxMemory: number | null;
     codeAnalysisUpdateDelay: number;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
-    copilotHover: boolean | undefined;
+    copilotHover: string;
 }
 
 function getTarget(): vscode.ConfigurationTarget {
@@ -461,37 +461,8 @@ export class CppSettings extends Settings {
             && this.intelliSenseEngine.toLowerCase() === "default"
             && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
     }
-    public get copilotHover(): PromiseLike<boolean> {
-        // Check if the setting is explicitly set to enabled or disabled.
-        const setting = super.Section.get<string>("copilotHover");
-        if (setting === "disabled") {
-            return Promise.resolve(false);
-        }
+    public get copilotHover(): string { return (vscode as any).lm ? this.getAsString("copilotHover") : "disabled"; }
 
-        // Check if the user has access to vscode language model.
-        const vscodelm = (vscode as any).lm;
-        if (!vscodelm) {
-            return Promise.resolve(false);
-        }
-
-        // Check if the user has access to Copilot.
-        return vscodelm.selectChatModels(modelSelector).then((models: any[]) => {
-            // If no models are returned, the user currently does not have access.
-            if (models.length === 0) {
-                // Register to update this setting if the user gains access.
-                vscodelm.onDidChangeChatModels(() => {
-                    clients.ActiveClient.sendDidChangeSettings();
-                });
-                return false;
-            }
-
-            if (setting === "enabled") {
-                return true;
-            }
-
-            return telemetry.isFlightEnabled("cpp.copilotHover");
-        });
-    }
     public get formattingEngine(): string { return this.getAsString("formatting"); }
     public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
     public get vcFormatIndentMultiLineRelativeTo(): string { return this.getAsString("vcFormat.indent.multiLineRelativeTo"); }
