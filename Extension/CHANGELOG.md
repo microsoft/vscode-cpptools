@@ -6,7 +6,7 @@
 
 ### Bug Fixes
 * Fix an issue preventing use of a full command line in `compilerPath`. [PR #12774](https://github.com/microsoft/vscode-cpptools/pull/12774)
-* Some Copilot-related fixes. [PR #12773](https://github.com/microsoft/vscode-cpptools/pull/12773)
+* Fix some Copilot-related issues. [PR #12773](https://github.com/microsoft/vscode-cpptools/pull/12773)
 * Fix an infinite loop on shutdown after changing the selected settings.
 * Fix a crash (from `insert_lines`).
 
