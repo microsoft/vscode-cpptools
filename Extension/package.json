@@ -3278,6 +3278,17 @@
                         "default": false,
                         "markdownDescription": "%c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription%",
                         "scope": "application"
+                    },
+                    "C_Cpp.copilotHover": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "enabled",
+                            "disabled"
+                        ],
+                        "default": "default",
+                        "markdownDescription": "%c_cpp.configuration.copilotHover.markdownDescription%",
+                        "scope": "window"
                     }
                 }
             }

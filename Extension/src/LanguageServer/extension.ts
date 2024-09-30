@@ -17,6 +17,7 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
+import { modelSelector } from '../constants';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
@@ -27,6 +28,7 @@ import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
 import { getLanguageConfig } from './languageConfig';
 import { CppConfigurationLanguageModelTool } from './lmTool';
+import { getLocaleId } from './localization';
 import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
@@ -433,6 +435,7 @@ export function registerCommands(enabled: boolean, isRelatedFilesApiEnabled: boo
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? () => onExtractToFunction(true, false) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCopilotHover', enabled ? () => onCopilotHover() : onDisabledCommand));
 
     if (!isRelatedFilesApiEnabled) {
         commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : () => Promise.resolve()));
@@ -1405,6 +1408,115 @@ export async function preReleaseCheck(): Promise<void> {
 export async function getIncludes(maxDepth: number): Promise<any> {
     const includes = await clients.ActiveClient.getIncludes(maxDepth);
     return includes;
+}
+
+// This uses several workarounds for interacting with the hover feature.
+// A proposal for dynamic hover content would help, such as the one here (https://github.com/microsoft/vscode/issues/195394)
+async function onCopilotHover(): Promise<void> {
+    // Check if the user has access to vscode language model.
+    const vscodelm = (vscode as any).lm;
+    if (!vscodelm) {
+        return;
+    }
+
+    const copilotHoverProvider = clients.ActiveClient.getCopilotHoverProvider();
+    if (!copilotHoverProvider) {
+        return;
+    }
+
+    const hoverDocument = copilotHoverProvider.getCurrentHoverDocument();
+    const hoverPosition = copilotHoverProvider.getCurrentHoverPosition();
+    if (!hoverDocument || !hoverPosition) {
+        return;
+    }
+
+    // Prep hover with wait message.
+    copilotHoverProvider.showWaiting();
+
+    // Make sure the hover document has focus.
+    await vscode.window.showTextDocument(hoverDocument, { preserveFocus: false, selection: new vscode.Selection(hoverPosition, hoverPosition) });
+
+    // Workaround to force the editor to update it's content, needs to be called from another location first.
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return;
+    }
+    await vscode.commands.executeCommand('cursorMove', { to: 'right' });
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
+
+    // Move back and show the correct hover.
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return;
+    }
+    await vscode.commands.executeCommand('cursorMove', { to: 'left' });
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
+
+    // Gather the content for the query from the client.
+    const requestInfo = await copilotHoverProvider.getRequestInfo(hoverDocument, hoverPosition);
+
+    if (requestInfo.length === 0) {
+        return;
+    }
+
+    const locale = getLocaleId();
+
+    const messages = [
+        vscode.LanguageModelChatMessage
+            .User(requestInfo + locale)];
+
+    const [model] = await vscodelm.selectChatModels(modelSelector);
+
+    let chatResponse: vscode.LanguageModelChatResponse | undefined;
+    try {
+        chatResponse = await model.sendRequest(
+            messages,
+            {},
+            new vscode.CancellationTokenSource().token
+        );
+    } catch (err) {
+        if (err instanceof vscode.LanguageModelError) {
+            console.log(err.message, err.code, err.cause);
+        } else {
+            throw err;
+        }
+        return;
+    }
+
+    // Ensure we have a valid response from Copilot.
+    if (!chatResponse) {
+        return;
+    }
+
+    let content: string = '';
+
+    try {
+        for await (const fragment of chatResponse.text) {
+            content += fragment;
+        }
+    } catch (err) {
+        return;
+    }
+
+    if (content.length === 0) {
+        return;
+    }
+
+    // Make sure the hover document has focus.
+    await vscode.window.showTextDocument(hoverDocument, { preserveFocus: false, selection: new vscode.Selection(hoverPosition, hoverPosition) });
+
+    // Same workaround as above to force the editor to update it's content.
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return;
+    }
+    await vscode.commands.executeCommand('cursorMove', { to: 'right' });
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
+
+    // Prepare and show the real content.
+    copilotHoverProvider.showContent(content);
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return;
+    }
+    await vscode.commands.executeCommand('cursorMove', { to: 'left' });
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
 }
 
 async function getCopilotApi(): Promise<CopilotApi | undefined> {
