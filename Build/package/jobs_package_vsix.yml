@@ -34,6 +34,11 @@ jobs:
   - task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
     displayName: Use Yarn 1.x
 
+  - script: |
+      echo registry=https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/ > $(Build.SourcesDirectory)\${{ parameters.srcDir }}\.npmrc
+      echo always-auth=true >> $(Build.SourcesDirectory)\${{ parameters.srcDir }}\.npmrc
+    displayName: Use CFS feed to acquire npm packages
+
   - task: CmdLine@1
     displayName: Create Staging Directory
     inputs:
