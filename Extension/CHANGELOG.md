@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.22.7: September 30, 2024
+### Enhancement
+* The .vsix and .js files are now signed. [#12725](https://github.com/microsoft/vscode-cpptools/issues/12725), [#12744](https://github.com/microsoft/vscode-cpptools/issues/12744)
+
+### Bug Fixes
+* Fix some Copilot-related issues. [PR #12773](https://github.com/microsoft/vscode-cpptools/pull/12773)
+* Fix an issue preventing use of a full command line in `compilerPath`. [PR #12774](https://github.com/microsoft/vscode-cpptools/pull/12774)
+* Fix an infinite loop on shutdown after changing the selected settings.
+* Fix a crash (from `insert_lines`).
+
 ## Version 1.22.6: September 25, 2024
 ### Bug Fixes
 * Fix an issue with usage of `#cpp` with Copilot chat. [vscode-copilot-release#1634](https://github.com/microsoft/vscode-copilot-release/issues/1634)
