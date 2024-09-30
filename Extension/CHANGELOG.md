@@ -2,10 +2,10 @@
 
 ## Version 1.22.7: September 30, 2024
 ### Enhancement
-* The .vsix and .js files are signed now. [#12725](https://github.com/microsoft/vscode-cpptools/issues/12725), [#12744](https://github.com/microsoft/vscode-cpptools/issues/12744)
+* The .vsix and .js files are now signed. [#12725](https://github.com/microsoft/vscode-cpptools/issues/12725), [#12744](https://github.com/microsoft/vscode-cpptools/issues/12744)
 
 ### Bug Fixes
-* Fix an issue preventing use of a full command ldine in `compilerPath`. [PR #12774](https://github.com/microsoft/vscode-cpptools/pull/12774)
+* Fix an issue preventing use of a full command line in `compilerPath`. [PR #12774](https://github.com/microsoft/vscode-cpptools/pull/12774)
 * Some Copilot-related fixes. [PR #12773](https://github.com/microsoft/vscode-cpptools/pull/12773)
 * Fix an infinite loop on shutdown after changing the selected settings.
 * Fix a crash (from `insert_lines`).
