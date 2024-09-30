@@ -790,7 +790,7 @@ export interface Client {
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
-    getIncludes(maxDepth: number): Promise<GetIncludesResult>;
+    getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult>;
     getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult>;
 }
 
@@ -2206,29 +2206,17 @@ export class DefaultClient implements Client {
         await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
-    public async getIncludes(maxDepth: number): Promise<GetIncludesResult> {
+    public async getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> {
         const params: GetIncludesParams = { maxDepth: maxDepth };
         await this.ready;
-        return this.languageClient.sendRequest(IncludesRequest, params);
+        return DefaultClient.withLspCancellationHandling(
+            () => this.languageClient.sendRequest(IncludesRequest, params, token), token);
     }
 
     public async getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> {
         await withCancellation(this.ready, token);
-        let result: ChatContextResult;
-        try {
-            result = await this.languageClient.sendRequest(CppContextRequest, null, token);
-        } catch (e: any) {
-            if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
-                throw new vscode.CancellationError();
-            }
-
-            throw e;
-        }
-        if (token.isCancellationRequested) {
-            throw new vscode.CancellationError();
-        }
-
-        return result;
+        return DefaultClient.withLspCancellationHandling(
+            () => this.languageClient.sendRequest(CppContextRequest, null, token), token);
     }
 
     /**
@@ -2308,6 +2296,26 @@ export class DefaultClient implements Client {
 
         // unblock anything that is waiting for the dispatcher to empty
         this.dispatching.resolve();
+    }
+
+    private static async withLspCancellationHandling<T>(task: () => Promise<T>, token: vscode.CancellationToken): Promise<T> {
+        let result: T;
+
+        try {
+            result = await task();
+        } catch (e: any) {
+            if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                throw new vscode.CancellationError();
+            } else {
+                throw e;
+            }
+        }
+
+        if (token.isCancellationRequested) {
+            throw new vscode.CancellationError();
+        }
+
+        return result;
     }
 
     private callTaskWithTimeout<T>(task: () => Thenable<T>, ms: number, cancelToken?: vscode.CancellationTokenSource): Promise<T> {
@@ -4110,6 +4118,6 @@ class NullClient implements Client {
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
-    getIncludes(): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
+    getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
 }
