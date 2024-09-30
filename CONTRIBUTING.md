@@ -48,3 +48,9 @@ instructions provided by the bot. You will only need to do this once across all 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
 or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+### Adding/Updating package.json dependencies
+
+We maintain a public Azure Artifacts feed that we point the package manager to in .npmrc files. If you want to add a dependency or update a version in package.json, you may need to contact us so we can add it to our feed. Please ping our team in a PR or new issue if you experience this issue.
+
+For local development, you can delete the .npmrc file and the matching `yarn.lock` file while you wait for us to update the feed. However, these changes will need to be reverted in your branch before we will accept a PR.
