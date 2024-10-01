@@ -57,11 +57,12 @@ export class RenameProvider implements vscode.RenameProvider {
             }
             throw e;
         }
-
-        // Reset anything that can be cleared before processing the result.
-        workspaceReferences.resetProgressBar();
-        workspaceReferences.resetReferences();
-        requestCanceledListener.dispose();
+        finally {
+            // Reset anything that can be cleared before processing the result.
+            workspaceReferences.resetProgressBar();
+            workspaceReferences.resetReferences();
+            requestCanceledListener.dispose();
+        }
 
         // Process the result.
         if (cancelSource.token.isCancellationRequested || response.isCanceled) {

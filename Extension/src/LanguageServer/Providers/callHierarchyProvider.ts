@@ -51,12 +51,6 @@ export interface CallHierarchyParams {
 
 interface CallHierarchyItemResult {
     item?: CallHierarchyItem;
-
-    /**
-     * If a request is cancelled, `succeeded` will be undefined to indicate no result was returned.
-     * Therefore, object is not defined as optional on the language server.
-     */
-    succeeded: boolean;
 }
 
 interface CallHierarchyCallsItem {
@@ -137,16 +131,15 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
             }
             throw e;
         }
-        cancellationTokenListener.dispose();
-        requestCanceledListener.dispose();
+        finally {
+            cancellationTokenListener.dispose();
+            requestCanceledListener.dispose();
+        }
 
-        if (cancelSource.token.isCancellationRequested || response.succeeded === undefined) {
-            // Return undefined instead of vscode.CancellationError to avoid the following error message from VS Code:
-            // "MISSING provider."
-            // TODO: per issue https://github.com/microsoft/vscode/issues/169698 vscode.CancellationError is expected,
-            // so when VS Code fixes the error use vscode.CancellationError again.
-            return undefined;
-        } else if (response.item === undefined) {
+        if (cancelSource.token.isCancellationRequested) {
+            throw new vscode.CancellationError();
+        }
+        if (response.item === undefined) {
             return undefined;
         }
 
@@ -155,7 +148,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
-    Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
+        Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
         await this.client.ready;
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
@@ -216,7 +209,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async provideCallHierarchyOutgoingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
-    Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {
+        Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {
         const CallHierarchyCallsFromEvent: string = "CallHierarchyCallsFrom";
         if (item === undefined) {
             this.logTelemetry(CallHierarchyCallsFromEvent, CallHierarchyRequestStatus.Failed);
