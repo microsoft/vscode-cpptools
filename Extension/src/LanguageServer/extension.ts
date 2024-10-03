@@ -33,11 +33,22 @@ import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
 
+interface CopilotTrait {
+    name: string;
+    value: string;
+    includeInPrompt?: boolean;
+    promptTextOverride?: string;
+}
+
 interface CopilotApi {
     registerRelatedFilesProvider(
         providerId: { extensionId: string; languageId: string },
-        callback: (uri: vscode.Uri, token: vscode.CancellationToken) => Promise<{ entries: vscode.Uri[]; traits?: { name: string; value: string }[] }>
-    ): vscode.Disposable;
+        callback: (
+            uri: vscode.Uri,
+            context: { flags: Record<string, unknown> },
+            cancellationToken: vscode.CancellationToken
+        ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>
+    ): Disposable;
 }
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -270,7 +281,7 @@ export async function activate(): Promise<void> {
                 for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
                     api.registerRelatedFilesProvider(
                         { extensionId: util.extensionContext.extension.id, languageId },
-                        async (_uri: vscode.Uri, token: vscode.CancellationToken) =>
+                        async (_uri: vscode.Uri, _context: { flags: Record<string, unknown> }, token: vscode.CancellationToken) =>
                             ({ entries: (await clients.ActiveClient.getIncludes(1, token))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [] })
                     );
                 }
