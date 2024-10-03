@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.22.8: October 3, 2024
+## Version 1.22.8: October 7, 2024
 ### Performance Improvements
 * Switch to an alternative implementation of recursive includes (that sends all the paths instead of only the "used" paths). [#11780](https://github.com/microsoft/vscode-cpptools/issues/11780)
   - Performance improvement: Configuration is no longer blocked on tag parsing of all dependent headers.
