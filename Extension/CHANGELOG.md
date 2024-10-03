@@ -27,7 +27,8 @@
 
 ### Bug Fixes
 * Fix the compiler selection control not keeping the list in sync with the contents of the textbox. [#7427](https://github.com/microsoft/vscode-cpptools/issues/7427)
-* Fix a string localization issue. [#7824](https://github.com/microsoft/vscode-cpptools/issues/7824) 
+* Fix a string localization issue. [#7824](https://github.com/microsoft/vscode-cpptools/issues/7824)
+* Fix an issue with lingering IntelliSense squiggles after an edit. [#12175](https://github.com/microsoft/vscode-cpptools/issues/12175)
 * Fix hover over static constexpr variables sometimes not working. [#12284](https://github.com/microsoft/vscode-cpptools/issues/12284)
 * Fix completion not giving results in several scenarios. [#12412](https://github.com/microsoft/vscode-cpptools/issues/12412)
 * Stop logging duplicate compiler path messages. [#12445](https://github.com/microsoft/vscode-cpptools/issues/12445)
@@ -53,6 +54,7 @@
 * Fix unnecessary IntelliSense resetting when a new file or folder was created.
 * Fix an infinite loop on shutdown after changing the selected settings.
 * Fix accumulation of stale signature help and completion requests.
+* Fix handling of the `compiler-binddir` compiler argument.
 * Fix a random crash during IntelliSense creation.
 * Fix some bugs with include completion.
 
