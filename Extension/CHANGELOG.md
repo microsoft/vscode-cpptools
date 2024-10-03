@@ -8,7 +8,7 @@
 * Initialization performance improvements. [#12030](https://github.com/microsoft/vscode-cpptools/issues/12030)
   - Some processing is parallelized and started earlier (populating the filename cache, discovering files). [#11954](https://github.com/microsoft/vscode-cpptools/issues/11954), [#12169](https://github.com/microsoft/vscode-cpptools/issues/12169)
   - Some compiler configuration queries are cached in the database, and processing of compile_commands.json was improved. [#10029](https://github.com/microsoft/vscode-cpptools/issues/10029), [#12078](https://github.com/microsoft/vscode-cpptools/issues/12078)
-* Performance improvements related to how custom configurations are processed. [#12632](https://github.com/microsoft/vscode-cpptools/issues/12632)
+* Performance improvements related to how custom configurations are processed. [#9003](https://github.com/microsoft/vscode-cpptools/issues/9003), [#12632](https://github.com/microsoft/vscode-cpptools/issues/12632)
 * Improve the implementation of file buffers to reduce memory usage.
 * Performance improvements related to LSP request processing.
 
