@@ -1,5 +1,63 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.22.8: October 7, 2024
+### Performance Improvements
+* Switch to an alternative implementation of recursive includes (that sends all the paths instead of only the "used" paths). [#11780](https://github.com/microsoft/vscode-cpptools/issues/11780)
+  - Performance improvement: Configuration is no longer blocked on tag parsing of all dependent headers.
+  - Configuration change: Recursive include paths now take precedence over system include paths (similar to compiler behavior and non-recursive includes). [#11485](https://github.com/microsoft/vscode-cpptools/issues/11485)
+* Initialization performance improvements. [#12030](https://github.com/microsoft/vscode-cpptools/issues/12030)
+  - Some processing is parallelized and started earlier (populating the filename cache, discovering files). [#11954](https://github.com/microsoft/vscode-cpptools/issues/11954), [#12169](https://github.com/microsoft/vscode-cpptools/issues/12169)
+  - Some compiler configuration queries are cached in the database, and processing of compile_commands.json was improved. [#10029](https://github.com/microsoft/vscode-cpptools/issues/10029), [#12078](https://github.com/microsoft/vscode-cpptools/issues/12078)
+* Performance improvements related to how custom configurations are processed. [#9003](https://github.com/microsoft/vscode-cpptools/issues/9003), [#12632](https://github.com/microsoft/vscode-cpptools/issues/12632)
+* Improve the implementation of file buffers to reduce memory usage.
+* Performance improvements related to LSP request processing.
+
+### Enhancements
+* Add modified `C_Cpp` settings to the `C/C++: Log Diagnostics` output. [#11700](https://github.com/microsoft/vscode-cpptools/issues/11700)
+* Add better validation for settings. [#12371](https://github.com/microsoft/vscode-cpptools/issues/12371)
+* Change the default C/C++ `"editor.stickyScroll.defaultModel"` to `"foldingProviderModel"`. [#12483](https://github.com/microsoft/vscode-cpptools/issues/12483)
+* Remove the `C_Cpp.intelliSenseEngineFallback` setting. [#12596](https://github.com/microsoft/vscode-cpptools/issues/12596)
+* Enable `C/C++: Log Diagnostics` without a C/C++ file being active. [#12634](https://github.com/microsoft/vscode-cpptools/issues/12634)
+* Add "Additional Tracked Settings" to the `C/C++: Log Diagnostics` output. [PR #12635](https://github.com/microsoft/vscode-cpptools/pull/12635)
+* Add support for providing additional context information to Copilot Chat. [PR #12685](https://github.com/microsoft/vscode-cpptools/pull/12685)
+  * Currently, it requires `"C_Cpp.experimentalFeatures": "enabled"` and typing `#cpp` in the chat.
+* The .vsix and .js files are now signed. [#12725](https://github.com/microsoft/vscode-cpptools/issues/12725), [#12744](https://github.com/microsoft/vscode-cpptools/issues/12744)
+* Add the database path to the `C/C++: Log Diagnostics` output.
+* Various IntelliSense parsing updates/fixes.
+
+### Bug Fixes
+* Fix the compiler selection control not keeping the list in sync with the contents of the textbox. [#7427](https://github.com/microsoft/vscode-cpptools/issues/7427)
+* Fix a string localization issue. [#7824](https://github.com/microsoft/vscode-cpptools/issues/7824)
+* Fix an issue with lingering IntelliSense squiggles after an edit. [#12175](https://github.com/microsoft/vscode-cpptools/issues/12175)
+* Fix hover over static constexpr variables sometimes not working. [#12284](https://github.com/microsoft/vscode-cpptools/issues/12284)
+* Fix completion not giving results in several scenarios. [#12412](https://github.com/microsoft/vscode-cpptools/issues/12412)
+* Stop logging duplicate compiler path messages. [#12445](https://github.com/microsoft/vscode-cpptools/issues/12445)
+* Fix an issue where a file is incorrectly processed as C instead of C++. [#12466](https://github.com/microsoft/vscode-cpptools/issues/12466)
+* Fix an issue with missing database symbols after a Rename operation. [#12480](https://github.com/microsoft/vscode-cpptools/issues/12480)
+* Fix include path ordering being incorrect if there is a duplicate. [#12525](https://github.com/microsoft/vscode-cpptools/issues/12525)
+* Fix a WebAssembly "Out of Memory" error. [#12529](https://github.com/microsoft/vscode-cpptools/issues/12529)
+* Fix an error message not being shown if the connection failed with remote attach debugging. [#12547](https://github.com/microsoft/vscode-cpptools/issues/12547)
+  * Thank you for the contribution. [@MrStanislav0 (Stanislav)](https://github.com/MrStanislav0)
+* Fix `-I` not being used if `-iquote` is also used for the same path. [#12551](https://github.com/microsoft/vscode-cpptools/issues/12551)
+* Fix issues with relative paths on `nvcc` (CUDA) command lines not being handled correctly. [#12553](https://github.com/microsoft/vscode-cpptools/issues/12553)
+* Fix a crash on shutdown on macOS with a verbose logging level. [#12567](https://github.com/microsoft/vscode-cpptools/issues/12567)
+* Fix a random crash when a child process is created. [#12585](https://github.com/microsoft/vscode-cpptools/issues/12585)
+* Work around IntelliSense issues with clang 18 due to `size_t` not being defined. [#12618](https://github.com/microsoft/vscode-cpptools/issues/12618)
+* Fix the `/FU` flag not working for C++/CLI. [#12641](https://github.com/microsoft/vscode-cpptools/issues/12641)
+* Fix a crash in `find_existing_intellisense_client`. [#12666](https://github.com/microsoft/vscode-cpptools/issues/12666)
+* Fix a rare crash on macOS related to `get_memory_usage`. [#12667](https://github.com/microsoft/vscode-cpptools/issues/12667)
+* Fix an issue with 'Extract to Function' formatting. [#12677](https://github.com/microsoft/vscode-cpptools/issues/12677)
+* Fix an issue with duplicate tag parsing occurring after a Rename operation. [#12728](https://github.com/microsoft/vscode-cpptools/issues/12728)
+* Fix an issue preventing use of a full command line in `compilerPath`. [PR #12774](https://github.com/microsoft/vscode-cpptools/pull/12774)
+* Fix an issue causing unnecessary TU updates for files opened during a Rename operation, when `"files.refactoring.autoSave": false` is used.
+* Fix some issues with recursive includes handling of symbolic links, multi-root, exclusion changes, and file/folder deletion.
+* Fix unnecessary IntelliSense resetting when a new file or folder was created.
+* Fix an infinite loop on shutdown after changing the selected settings.
+* Fix accumulation of stale signature help and completion requests.
+* Fix handling of the `compiler-binddir` compiler argument.
+* Fix a random crash during IntelliSense creation.
+* Fix some bugs with include completion.
+
 ## Version 1.21.6: August 5, 2024
 * Fix a cpptools-srv crash on shutdown. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
 

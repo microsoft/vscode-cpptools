@@ -1,0 +1,42 @@
+name: Add Comment and Label
+description: Add comment (etc) to issues that are marked with a specified label (etc)
+inputs:
+  token:
+    description: GitHub token with issue, comment, and label read/write permissions
+    default: ${{ github.token }}
+  createdAfter:
+    description: Creation date after which to be considered.
+    required: false
+  afterDays:
+    description: Days to wait before performing this action (may be 0).
+    required: false
+  addComment:
+    description: Comment to add
+  labels:
+    description: items with these labels will be considered.  May be "*".
+    required: true
+  milestoneName:
+    description: items with these milestones will be considered (name only, must match ID)
+  milestoneId:
+    description: items with these milestones will be considered (id only, must match name)
+  ignoreLabels:
+    description: items with these labels will not be considered
+  ignoreMilestoneNames:
+    description: items with these milestones will not be considered (names only, must match IDs).  May be "*".
+  ignoreMilestoneIds:
+    description: items with these milestones will not be considered (IDs only, must match names)
+  addLabels:
+    description: Labels to add to issue.
+  removeLabels:
+    description: Labels to remove from issue.
+  minimumVotes:
+    descriptions: Only issues with at least this many votes will be considered.
+  maximumVotes:
+    descriptions: Only issues fewer or equal to this many votes will be considered.
+  involves:
+    descriptions: Qualifier to find issues that in some way involve a certain user either as an author, assignee, or mentions.
+  readonly:
+    description: If true, changes are not applied.
+runs:
+  using: 'node12'
+  main: 'index.js'

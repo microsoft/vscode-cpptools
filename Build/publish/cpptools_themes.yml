@@ -1,0 +1,43 @@
+name: $(Date:yyyyMMdd)$(rev:.r)
+trigger: none
+pr: none
+
+resources:
+  repositories:
+  - repository: MicroBuildTemplate
+    type: git
+    name: 1ESPipelineTemplates/MicroBuildTemplate
+    ref: refs/tags/release
+  pipelines:
+  - pipeline: vsixBuild
+    source: '\VC\VSCode\CpptoolsVSIX\Package cpptools-themes'
+    trigger: true
+
+extends:
+  template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
+  parameters:
+    pool:
+      name: AzurePipelines-EO
+      image: AzurePipelinesWindows2022compliantGPT
+      os: windows
+    sdl:
+      sourceAnalysisPool:
+        name: AzurePipelines-EO
+        image: AzurePipelinesWindows2022compliantGPT
+        os: windows
+
+    stages:
+    - stage: Validate
+      jobs:
+      - template: /Build/publish/jobs_manual_validation.yml@self
+        parameters:
+          notifyUsers: $(NotifyUsers)
+          releaseBuildUrl: $(ReleaseBuildUrl)
+
+    - stage: Release
+      dependsOn: Validate
+      jobs:
+      - template: /Build/publish/jobs_publish_vsix.yml@self
+        parameters:
+          vsixName: cpptools-themes.vsix
+

@@ -1,0 +1,48 @@
+name: $(date:yyyyMMdd)$(rev:.r)
+trigger: none
+pr: none
+
+parameters:
+- name: verifyVersion
+  displayName: Attest version in package.json is correct
+  type: boolean
+  default: false
+- name: verifyReadme
+  displayName: Attest README.md is updated
+  type: boolean
+  default: false
+
+resources:
+  repositories:
+  - repository: MicroBuildTemplate
+    type: git
+    name: 1ESPipelineTemplates/MicroBuildTemplate
+    ref: refs/tags/release
+
+extends:
+  template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
+  parameters:
+    pool:
+      name: AzurePipelines-EO
+      image: AzurePipelinesWindows2022compliantGPT
+      os: windows
+    sdl:
+      sourceAnalysisPool:
+        name: AzurePipelines-EO
+        image: AzurePipelinesWindows2022compliantGPT
+        os: windows
+
+    stages:
+    - stage: package
+      jobs:
+      # Introduce pipeline compilation errors to block scheduling if the requisite parameters are not set
+      - ${{ if not(eq(parameters.verifyVersion, true)) }}:
+        - 'The version in package.json should be updated before scheduling the pipeline.'
+
+      - ${{ if not(eq(parameters.verifyReadme, true)) }}:
+        - 'README.md should be updated before scheduling the pipeline.'
+
+      - template: /Build/package/jobs_package_vsix.yml@self
+        parameters:
+          vsixName: cpptools-extension-pack.vsix
+          srcDir: ExtensionPack

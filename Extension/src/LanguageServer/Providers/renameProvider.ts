@@ -3,10 +3,11 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { Position, RequestType } from 'vscode-languageclient';
+import { Position, RequestType, ResponseError } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import * as util from '../../common';
 import { DefaultClient, workspaceReferences } from '../client';
+import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CancellationSender, ReferenceType, ReferencesParams, ReferencesResult, getReferenceItemIconPath, getReferenceTagString } from '../references';
 import { CppSettings } from '../settings';
 
@@ -47,15 +48,24 @@ export class RenameProvider implements vscode.RenameProvider {
             position: Position.create(position.line, position.character),
             textDocument: { uri: document.uri.toString() }
         };
-        const response: ReferencesResult = await this.client.languageClient.sendRequest(RenameRequest, params, cancelSource.token);
-
-        // Reset anything that can be cleared before processing the result.
-        workspaceReferences.resetProgressBar();
-        workspaceReferences.resetReferences();
-        requestCanceledListener.dispose();
+        let response: ReferencesResult;
+        try {
+            response = await this.client.languageClient.sendRequest(RenameRequest, params, cancelSource.token);
+        } catch (e: any) {
+            if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                throw new vscode.CancellationError();
+            }
+            throw e;
+        }
+        finally {
+            // Reset anything that can be cleared before processing the result.
+            workspaceReferences.resetProgressBar();
+            workspaceReferences.resetReferences();
+            requestCanceledListener.dispose();
+        }
 
         // Process the result.
-        if (cancelSource.token.isCancellationRequested || response.referenceInfos === null || response.isCanceled) {
+        if (cancelSource.token.isCancellationRequested || response.isCanceled) {
             throw new vscode.CancellationError();
         } else if (response.referenceInfos.length === 0) {
             void vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));

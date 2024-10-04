@@ -17,7 +17,6 @@
     "c_cpp.command.switchHeaderSource.title": "Switch Header/Source",
     "c_cpp.command.enableErrorSquiggles.title": "Enable Error Squiggles",
     "c_cpp.command.disableErrorSquiggles.title": "Disable Error Squiggles",
-    "c_cpp.command.toggleIncludeFallback.title": "Toggle IntelliSense Engine Fallback on Include Errors",
     "c_cpp.command.toggleDimInactiveRegions.title": "Toggle Inactive Region Colorization",
     "c_cpp.command.resetDatabase.title": "Reset IntelliSense Database",
     "c_cpp.command.takeSurvey.title": "Take Survey",
@@ -121,7 +120,7 @@
         ]
     },
     "c_cpp.configuration.codeAnalysis.exclude.markdownDescription": {
-        "message": "Configure glob patterns for excluding folders and files for code analysis. Files not under the workspace folder are always excluded. Inherits values from `#files.exclude#` and `#C_Cpp.files.exclude#`. Read more about glob patterns [here](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options).",
+        "message": "Configure glob patterns for excluding folders and files for code analysis. Files not under the workspace folder are always excluded. Inherits values from `#files.exclude#` and `#C_Cpp.files.exclude#`. Learn more about [glob patterns](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options).",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -469,12 +468,6 @@
     "c_cpp.configuration.intelliSenseEngine.default.description": "Provides context-aware results via a separate IntelliSense process.",
     "c_cpp.configuration.intelliSenseEngine.tagParser.description": "Provides \"fuzzy\" results that are not context-aware.",
     "c_cpp.configuration.intelliSenseEngine.disabled.description": "Turns off C/C++ language service features.",
-    "c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": {
-        "message": "Controls whether the IntelliSense engine will automatically switch to the Tag Parser for translation units containing `#include` errors.",
-        "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
-        ]
-    },
     "c_cpp.configuration.autocomplete.markdownDescription": {
         "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (and similarly for `c` and `cuda-cpp` languages).",
         "comment": [
@@ -788,7 +781,7 @@
         ]
     },
     "c_cpp.configuration.filesExclude.markdownDescription": {
-        "message": "Configure glob patterns for excluding folders (and files if `#C_Cpp.exclusionPolicy#` is changed). These are specific to the C/C++ extension and are in addition to `#files.exclude#`, but unlike `#files.exclude#` they also apply to paths outside the current workspace folder and are not removed from the Explorer view. Read more about glob patterns [here](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options).",
+        "message": "Configure glob patterns for excluding folders (and files if `#C_Cpp.exclusionPolicy#` is changed). These are specific to the C/C++ extension and are in addition to `#files.exclude#`, but unlike `#files.exclude#` they also apply to paths outside the current workspace folder and are not removed from the Explorer view. Learn more about [glob patterns](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options).",
         "comment": [
             "Markdown text between `` and [) should not be translated and the capitalization, spacing, and punctuation (including the ``) should not be altered: https://en.wikipedia.org/wiki/Markdown"
         ]
@@ -1013,5 +1006,7 @@
     "c_cpp.configuration.refactoring.includeHeader.markdownDescription": "Controls whether to include the header file of a refactored function/symbol to its corresponding source file when doing a refactoring action, such as create declaration/definition.",
     "c_cpp.configuration.refactoring.includeHeader.always.description": "Always include the header file if it is not included explicitly in its source file.",
     "c_cpp.configuration.refactoring.includeHeader.ifNeeded.description": "Only include the header file if it is not included explicitly in its source file or through implicit inclusion.",
-    "c_cpp.configuration.refactoring.includeHeader.never.description": "Never include the header file."
+    "c_cpp.configuration.refactoring.includeHeader.never.description": "Never include the header file.",
+    "c_cpp.languageModelTools.configuration.displayName": "C/C++ configuration",
+    "c_cpp.languageModelTools.configuration.userDescription": "Configuration of the active C or C++ file, like language standard version and target platform."
 }

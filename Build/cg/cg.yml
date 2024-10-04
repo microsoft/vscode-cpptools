@@ -80,9 +80,9 @@ extends:
           displayName: Use Yarn 1.x
 
         - task: UseNode@1
-          displayName: Use Node 16.x
+          displayName: Use Node 18.x
           inputs:
-            version: 16.x
+            version: 18.x
 
         - task: CmdLine@2
           displayName: Delete .npmrc if it exists
@@ -101,6 +101,10 @@ extends:
           inputs:
             filename: mkdir
             arguments: $(Build.ArtifactStagingDirectory)\Extension
+
+        - script: yarn run vsix-prepublish
+          displayName: Build files
+          workingDirectory: $(Build.SourcesDirectory)\Extension
 
         - task: CmdLine@1
           name: ProcessRunner_12
