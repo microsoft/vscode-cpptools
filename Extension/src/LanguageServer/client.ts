@@ -55,7 +55,7 @@ import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import * as configs from './configurations';
 import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
-import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
+import { CppSourceStr, SnippetEntry, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentWorkspaceState } from './persistentState';
 import { RequestCancelled, ServerCancelled, createProtocolFilter } from './protocolFilter';
@@ -541,6 +541,15 @@ export interface ChatContextResult {
     targetArchitecture: string;
 }
 
+export interface CompletionContextsResult {
+    context: SnippetEntry[];
+}
+
+export interface CompletionContextParams {
+    file: string;
+    caretOffset: number;
+}
+
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
@@ -561,7 +570,7 @@ const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, G
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
 const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
 const CppContextRequest: RequestType<void, ChatContextResult, void> = new RequestType<void, ChatContextResult, void>('cpptools/getChatContext');
-
+const CompletionContextRequest: RequestType<CompletionContextParams, CompletionContextsResult, void> = new RequestType<CompletionContextParams, CompletionContextsResult, void>('cpptools/getCompletionContext');
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileCreated');
@@ -792,6 +801,7 @@ export interface Client {
     addTrustedCompiler(path: string): Promise<void>;
     getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult>;
     getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult>;
+    getCompletionContext(fileName: vscode.Uri, caretOffset: number, token: vscode.CancellationToken): Promise<CompletionContextsResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -2218,6 +2228,12 @@ export class DefaultClient implements Client {
         await withCancellation(this.ready, token);
         return DefaultClient.withLspCancellationHandling(
             () => this.languageClient.sendRequest(CppContextRequest, null, token), token);
+    }
+
+    public async getCompletionContext(file: vscode.Uri, caretOffset: number, token: vscode.CancellationToken): Promise<CompletionContextsResult> {
+        await withCancellation(this.ready, token);
+        return DefaultClient.withLspCancellationHandling(
+            () => this.languageClient.sendRequest(CompletionContextRequest, { file: file.toString(), caretOffset }, token), token);
     }
 
     /**
@@ -4123,4 +4139,5 @@ class NullClient implements Client {
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
     getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
+    getCompletionContext(file: vscode.Uri, caretOffset: number, token: vscode.CancellationToken): Promise<CompletionContextsResult> { return Promise.resolve({} as CompletionContextsResult); }
 }

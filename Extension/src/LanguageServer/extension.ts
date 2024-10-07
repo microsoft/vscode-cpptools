@@ -20,10 +20,10 @@ import * as util from '../common';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
-import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
+import { Client, CompletionContextsResult, DefaultClient, DoxygenCodeActionCommandArguments, GetIncludesResult, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
-import { registerRelatedFilesProvider } from './copilotProviders';
+import { getCopilotApi, registerRelatedFilesProvider } from './copilotProviders';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
 import { getLanguageConfig } from './languageConfig';
@@ -33,6 +33,21 @@ import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
+
+/*
+interface CopilotTrait {
+    name: string;
+    value: string;
+    includeInPrompt?: boolean;
+    promptTextOverride?: string;
+}*/
+
+export interface SnippetEntry {
+    uri: string;
+    text: string;
+    startLine: number;
+    endLine: number;
+}
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -264,6 +279,26 @@ export async function activate(): Promise<void> {
     }
 
     await registerRelatedFilesProvider();
+
+    const isCustomSnippetProviderApiEnabled = await telemetry.isExperimentEnabled("CppToolsCustomSnippetsApi");
+    if (isCustomSnippetProviderApiEnabled) {
+        const api = await getCopilotApi();
+        if (util.extensionContext && api) {
+            try {
+                for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
+                    api.registerSnippetsProvider(
+                        { extensionId: util.extensionContext.extension.id, languageId },
+                        async (uri: vscode.Uri, context: { flags: Record<string, unknown> }, token: vscode.CancellationToken) => {
+                            const result = await getCompletionContextWithCancellation(context.flags['caretOffset'] as number, token);
+                            return { entries: result.context };
+                        }
+                    );
+                }
+            } catch {
+                console.log("Failed to register Copilot related files provider.");
+            }
+        }
+    }
 }
 
 export function updateLanguageConfigurations(): void {
@@ -276,8 +311,8 @@ export function updateLanguageConfigurations(): void {
 }
 
 /**
- * workspace events
- */
+     * workspace events
+     */
 async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
     const client: Client = clients.getDefaultClient();
     if (client instanceof DefaultClient) {
@@ -488,9 +523,9 @@ async function onSwitchHeaderSource(): Promise<void> {
 }
 
 /**
- * Allow the user to select a workspace when multiple workspaces exist and get the corresponding Client back.
- * The resulting client is used to handle some command that was previously invoked.
- */
+     * Allow the user to select a workspace when multiple workspaces exist and get the corresponding Client back.
+     * The resulting client is used to handle some command that was previously invoked.
+     */
 async function selectClient(): Promise<Client> {
     if (clients.Count === 1) {
         return clients.ActiveClient;
@@ -1385,5 +1420,41 @@ export async function preReleaseCheck(): Promise<void> {
                 }
             });
         }
+    }
+}
+
+export async function getIncludesWithCancellation(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> {
+    const includes = await clients.ActiveClient.getIncludes(maxDepth, token);
+    const wksFolder = clients.ActiveClient.RootUri?.toString();
+
+    if (!wksFolder) {
+        return includes;
+    }
+
+    includes.includedFiles = includes.includedFiles.filter(header => vscode.Uri.file(header).toString().startsWith(wksFolder));
+    return includes;
+}
+
+export async function getCompletionContextWithCancellation(caretOffset: number, token: vscode.CancellationToken): Promise<CompletionContextsResult> {
+    try {
+        const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (!activeEditor) {
+            return { context: [] };
+        }
+
+        const snippets = await clients.ActiveClient.getCompletionContext(activeEditor.document.uri, caretOffset, token);
+        const wksFolder = clients.ActiveClient.RootUri?.toString();
+
+        if (!wksFolder) {
+            return snippets;
+        }
+
+        // Fix up URIs to be relative to the workspace folder.
+        // //?? TODO Fix the check, the uri do not start with wksFolder whew.
+        //snippets.context = snippets.context.filter(snippet =>
+        //    vscode.Uri.file(snippet.uri).toString().startsWith(wksFolder));
+        return snippets;
+    } catch (e) {
+        return { context: [] };
     }
 }

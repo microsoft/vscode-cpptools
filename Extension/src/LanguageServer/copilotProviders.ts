@@ -7,7 +7,7 @@
 import * as vscode from 'vscode';
 import * as util from '../common';
 import { ChatContextResult, GetIncludesResult } from './client';
-import { getActiveClient } from './extension';
+import { getActiveClient, SnippetEntry } from './extension';
 
 export interface CopilotTrait {
     name: string;
@@ -24,6 +24,22 @@ export interface CopilotApi {
             context: { flags: Record<string, unknown> },
             cancellationToken: vscode.CancellationToken
         ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>
+    ): Disposable;
+    registerRelatedFilesProvider(
+        providerId: { extensionId: string; languageId: string },
+        callback: (
+            uri: vscode.Uri,
+            context: { flags: Record<string, unknown> },
+            cancellationToken: vscode.CancellationToken
+        ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>
+    ): Disposable;
+    registerSnippetsProvider(
+        providerId: { extensionId: string; languageId: string },
+        callback: (
+            uri: vscode.Uri,
+            context: { flags: Record<string, unknown> },
+            cancellationToken: vscode.CancellationToken
+        ) => Promise<{ entries: SnippetEntry[] }>
     ): Disposable;
 }
 

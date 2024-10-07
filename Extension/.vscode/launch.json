@@ -14,10 +14,17 @@
                 "--skip-release-notes",
                 "--disable-workspace-trust",
                 "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionDevelopmentPath=C:/Users/lucappa/.vscode-insiders/extensions/copilot-client",
+                "--disable-extension=ms.vscode.cpptools",
+                "--disable-extension=github.synth-lab",
+                "--disable-extension=github.copilot",
+                "--disable-extension=github.copilot-nightly",
+                "--log=github.copilot:debug",
             ],
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceFolder}/dist/**"
+                "${workspaceFolder}/dist/**",
+                "C:/Users/lucappa/.vscode-insiders/extensions/copilot-client/dist/**"
             ],
             // you can use a watch task as a prelaunch task and it works like you'd want it to.
             "preLaunchTask": "watch"

@@ -39,6 +39,9 @@ describe('registerRelatedFilesProvider', () => {
         sinon.stub(util, 'extensionContext').value({ extension: { id: 'test-extension-id' } });
 
         class MockCopilotApi implements CopilotApi {
+            registerSnippetsProvider(_providerId: { extensionId: string; languageId: string }, _callback: (uri: vscode.Uri, context: { flags: Record<string, unknown> }, cancellationToken: vscode.CancellationToken) => Promise<{ entries: extension.SnippetEntry[] }>): Disposable {
+                throw new Error('Method not implemented.');
+            }
             public registerRelatedFilesProvider(
                 _providerId: { extensionId: string; languageId: string },
                 _callback: (
@@ -75,8 +78,8 @@ describe('registerRelatedFilesProvider', () => {
     });
 
     const arrange = ({ vscodeExtension, getIncludeFiles, chatContext, rootUri, flags }:
-    { vscodeExtension?: vscode.Extension<unknown>; getIncludeFiles?: GetIncludesResult; chatContext?: ChatContextResult; rootUri?: vscode.Uri; flags?: Record<string, unknown> } =
-    { vscodeExtension: undefined, getIncludeFiles: undefined, chatContext: undefined, rootUri: undefined, flags: {} }
+        { vscodeExtension?: vscode.Extension<unknown>; getIncludeFiles?: GetIncludesResult; chatContext?: ChatContextResult; rootUri?: vscode.Uri; flags?: Record<string, unknown> } =
+        { vscodeExtension: undefined, getIncludeFiles: undefined, chatContext: undefined, rootUri: undefined, flags: {} }
     ) => {
         activeClientStub.getIncludes.resolves(getIncludeFiles);
         activeClientStub.getChatContext.resolves(chatContext);
