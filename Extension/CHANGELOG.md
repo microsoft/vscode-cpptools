@@ -4,7 +4,7 @@
 ### Bug Fixes
 * Fix an issue with the 'Add #include' code action incorrectly using a relative path for a system include. [#12010](https://github.com/microsoft/vscode-cpptools/issues/12010)
 * Fix an issue with lingering incorrect squiggles after an edit. [#12175](https://github.com/microsoft/vscode-cpptools/issues/12175)
-* Fix an issing with clang-format/tidy version checks for some builds. [#12806](https://github.com/microsoft/vscode-cpptools/issues/12806)
+* Fix an issue with clang-format/tidy version checks for some builds. [#12806](https://github.com/microsoft/vscode-cpptools/issues/12806)
 * Revert/postpone changes related to recursive includes handling due to issues with some projects.
 * Fix a memory leak.
 
