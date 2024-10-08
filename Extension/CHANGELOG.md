@@ -3,6 +3,7 @@
 ## Version 1.22.8: October 8, 2024
 ### Bug Fixes
 * Fix an issue with lingering incorrect squiggles after an edit. [#12175](https://github.com/microsoft/vscode-cpptools/issues/12175)
+* Fix an issing with clang-format/tidy version checks for some builds. [#12806](https://github.com/microsoft/vscode-cpptools/issues/12806)
 * Reverted/portponed changes related to recursive includes handling, due to issues with some projects.
 * Fix a memory leak.
 
