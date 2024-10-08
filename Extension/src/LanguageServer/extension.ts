@@ -20,7 +20,7 @@ import * as util from '../common';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
-import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
+import { Client, DefaultClient, DoxygenCodeActionCommandArguments, GetIncludesResult, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
@@ -33,11 +33,22 @@ import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
 
+interface CopilotTrait {
+    name: string;
+    value: string;
+    includeInPrompt?: boolean;
+    promptTextOverride?: string;
+}
+
 interface CopilotApi {
     registerRelatedFilesProvider(
         providerId: { extensionId: string; languageId: string },
-        callback: (uri: vscode.Uri, token: vscode.CancellationToken) => Promise<{ entries: vscode.Uri[]; traits?: { name: string; value: string }[] }>
-    ): vscode.Disposable;
+        callback: (
+            uri: vscode.Uri,
+            context: { flags: Record<string, unknown> },
+            cancellationToken: vscode.CancellationToken
+        ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>
+    ): Disposable;
 }
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -270,8 +281,8 @@ export async function activate(): Promise<void> {
                 for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
                     api.registerRelatedFilesProvider(
                         { extensionId: util.extensionContext.extension.id, languageId },
-                        async (_uri: vscode.Uri, token: vscode.CancellationToken) =>
-                            ({ entries: (await clients.ActiveClient.getIncludes(1, token))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [] })
+                        async (_uri: vscode.Uri, _context: { flags: Record<string, unknown> }, token: vscode.CancellationToken) =>
+                            ({ entries: (await getIncludesWithCancellation(1, token))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [] })
                     );
                 }
             } catch {
@@ -1402,11 +1413,26 @@ export async function preReleaseCheck(): Promise<void> {
     }
 }
 
-export async function getIncludes(maxDepth: number): Promise<any> {
-    const tokenSource = new vscode.CancellationTokenSource();
-    const includes = await clients.ActiveClient.getIncludes(maxDepth, tokenSource.token);
-    tokenSource.dispose();
+export async function getIncludesWithCancellation(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> {
+    const includes = await clients.ActiveClient.getIncludes(maxDepth, token);
+    const wksFolder = clients.ActiveClient.RootUri?.toString();
+
+    if (!wksFolder) {
+        return includes;
+    }
+
+    includes.includedFiles = includes.includedFiles.filter(header => vscode.Uri.file(header).toString().startsWith(wksFolder));
     return includes;
+}
+
+async function getIncludes(maxDepth: number): Promise<GetIncludesResult> {
+    const tokenSource = new vscode.CancellationTokenSource();
+    try {
+        const includes = await getIncludesWithCancellation(maxDepth, tokenSource.token);
+        return includes;
+    } finally {
+        tokenSource.dispose();
+    }
 }
 
 async function getCopilotApi(): Promise<CopilotApi | undefined> {

@@ -529,7 +529,7 @@ interface GetIncludesParams {
     maxDepth: number;
 }
 
-interface GetIncludesResult {
+export interface GetIncludesResult {
     includedFiles: string[];
 }
 

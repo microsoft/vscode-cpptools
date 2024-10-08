@@ -1,5 +1,13 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.22.8: October 8, 2024
+### Bug Fixes
+* Fix an issue with the 'Add #include' code action incorrectly using a relative path for a system include. [#12010](https://github.com/microsoft/vscode-cpptools/issues/12010)
+* Fix an issue with lingering incorrect squiggles after an edit. [#12175](https://github.com/microsoft/vscode-cpptools/issues/12175)
+* Fix an issue with clang-format/tidy version checks for some builds. [#12806](https://github.com/microsoft/vscode-cpptools/issues/12806)
+* Revert/postpone changes related to recursive includes handling due to issues with some projects.
+* Fix a memory leak.
+
 ## Version 1.22.7: September 30, 2024
 ### Enhancement
 * The .vsix and .js files are now signed. [#12725](https://github.com/microsoft/vscode-cpptools/issues/12725), [#12744](https://github.com/microsoft/vscode-cpptools/issues/12744)
@@ -1377,7 +1385,7 @@
 ## Version 0.29.0: July 15, 2020
 ### New Features
 * Add Doxygen comment support (to tooltip display of hover, completion, and signature help). [#658](https://github.com/microsoft/vscode-cpptools/issues/658)
-  * The way comments are formatted is controlled by the `C_Cpp.simplifyStructuredComments` setting.
+  * The way comments are formatted is controlled by the `C_Cpp.simplifyStructuredComments` setting.
 * Auto-convert `.` to `->` when the type is a pointer. [#862](https://github.com/microsoft/vscode-cpptools/issues/862)
 * Switch to using the VS Code Semantic Tokens API for semantic colorization (works with remoting). [PR #5401](https://github.com/microsoft/vscode-cpptools/pull/5401), [#3932](https://github.com/microsoft/vscode-cpptools/issues/3932), [#3933](https://github.com/microsoft/vscode-cpptools/issues/3933), [#3942](https://github.com/microsoft/vscode-cpptools/issues/3942)
 * Add support for LogMessage Breakpoints for debug type `cppdbg`. [PR MIEngine#1013](https://github.com/microsoft/MIEngine/pull/1013)
@@ -2082,7 +2090,7 @@
 ## Version 0.16.1: March 30, 2018
 * Fix random deadlock caused by logging code on Linux/Mac. [#1759](https://github.com/Microsoft/vscode-cpptools/issues/1759)
 * Fix compiler from `compileCommands` not being queried for includes/defines if `compilerPath` isn't set on Windows. [#1754](https://github.com/Microsoft/vscode-cpptools/issues/1754)
-* Fix OSX `UseShellExecute` I/O bug. [#1756](https://github.com/Microsoft/vscode-cpptools/issues/1756)
+* Fix OSX `UseShellExecute` I/O bug. [#1756](https://github.com/Microsoft/vscode-cpptools/issues/1756)
 * Invalidate partially unzipped files from package manager. [#1757](https://github.com/Microsoft/vscode-cpptools/issues/1757)
 
 ## Version 0.16.0: March 28, 2018
