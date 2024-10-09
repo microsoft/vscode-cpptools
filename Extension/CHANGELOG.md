@@ -56,7 +56,6 @@
 * Fix handling of the `compiler-binddir` compiler argument.
 * Fix a random crash during IntelliSense creation.
 * Fix some bugs with include completion.
-* Fix a memory leak.
 
 ## Version 1.21.6: August 5, 2024
 * Fix a cpptools-srv crash on shutdown. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
