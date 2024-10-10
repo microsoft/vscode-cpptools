@@ -41,7 +41,7 @@
 	"select.command": "Wybierz polecenie...",
 	"active.analysis": "Uruchom analizę kodu dla aktywnego pliku",
 	"all.analysis": "Uruchamianie analizy kodu dla wszystkich plików",
-	"open.analysis": "Uruchamianie rozszerzenia Code Analysis na otwartych plikach",
+	"open.analysis": "Uruchamianie analizy kodu dla otwartych plików",
 	"c.cpp.references.statusbar": "Stan odwołań języka C/C++",
 	"c.cpp.configuration.tooltip": "Konfiguracja języka C/C++",
 	"c.cpp.configureIntelliSenseStatus.cppText": "Konfigurowanie funkcji IntelliSense (C/C++)",
