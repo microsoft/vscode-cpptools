@@ -35,7 +35,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
 
         if (!this.isNewHover(document, position)) {
             if (this.ready) {
-                const contentMarkdown = new vscode.MarkdownString(this.content);
+                const contentMarkdown = new vscode.MarkdownString(`$(sparkle) Copilot\n\n${this.content}\n\n_AI-generated content may be incorrect._`, true);
                 return new vscode.Hover(contentMarkdown);
             }
             if (this.waiting) {
@@ -48,7 +48,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         this.reset();
         this.currentDocument = document;
         this.currentPosition = position;
-        const commandString = "$(sparkle) [" + localize("generate.copilot.description", "Generate Copilot Description") + "](command:C_Cpp.ShowCopilotHover)";
+        const commandString = "$(sparkle) [" + localize("generate.copilot.description", "Generate Copilot summary") + "](command:C_Cpp.ShowCopilotHover)";
         const commandMarkdown = new vscode.MarkdownString(commandString);
         commandMarkdown.supportThemeIcons = true;
         commandMarkdown.isTrusted = true;
