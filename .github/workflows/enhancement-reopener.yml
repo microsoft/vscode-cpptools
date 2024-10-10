@@ -1,7 +1,7 @@
 name: Enhancement Reopener
 on:
   schedule:
-    - cron: 20 12 * * * # Run at 12:20 PM UTC (4:20 AM PST, 5:20 AM PDT)
+    - cron: 0 11 * * * # Run at 11:00 AM UTC (3:00 AM PST, 4:00 AM PDT)
   workflow_dispatch:
    inputs:
      readonly:

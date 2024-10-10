@@ -3,8 +3,9 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { Position, RequestType } from 'vscode-languageclient';
+import { Position, RequestType, ResponseError } from 'vscode-languageclient';
 import { DefaultClient, workspaceReferences } from '../client';
+import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CancellationSender, ReferenceInfo, ReferenceType, ReferencesParams, ReferencesResult } from '../references';
 
 const FindAllReferencesRequest: RequestType<ReferencesParams, ReferencesResult, void> =
@@ -34,22 +35,32 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
             position: Position.create(position.line, position.character),
             textDocument: { uri: document.uri.toString() }
         };
-        const response: ReferencesResult = await this.client.languageClient.sendRequest(FindAllReferencesRequest, params, cancelSource.token);
-
-        // Reset anything that can be cleared before processing the result.
-        workspaceReferences.resetProgressBar();
-        cancellationTokenListener.dispose();
-        requestCanceledListener.dispose();
+        let response: ReferencesResult | undefined;
+        let cancelled: boolean = false;
+        try {
+            response = await this.client.languageClient.sendRequest(FindAllReferencesRequest, params, cancelSource.token);
+        } catch (e: any) {
+            cancelled = e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled);
+            if (!cancelled) {
+                throw e;
+            }
+        }
+        finally {
+            // Reset anything that can be cleared before processing the result.
+            workspaceReferences.resetProgressBar();
+            cancellationTokenListener.dispose();
+            requestCanceledListener.dispose();
+        }
 
         // Process the result.
-        if (cancelSource.token.isCancellationRequested || response.referenceInfos === null || response.isCanceled) {
+        if (cancelSource.token.isCancellationRequested || cancelled || (response && response.isCanceled)) {
             // Return undefined instead of vscode.CancellationError to avoid the following error message from VS Code:
             // "Cannot destructure property 'range' of 'e.location' as it is undefined."
             // TODO: per issue https://github.com/microsoft/vscode/issues/169698
             // vscode.CancellationError is expected, so when VS Code fixes the error use vscode.CancellationError again.
             workspaceReferences.resetReferences();
             return undefined;
-        } else if (response.referenceInfos.length > 0) {
+        } else if (response && response.referenceInfos.length > 0) {
             response.referenceInfos.forEach((referenceInfo: ReferenceInfo) => {
                 if (referenceInfo.type === ReferenceType.Confirmed) {
                     const uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);

@@ -325,6 +325,7 @@ export async function checkDTS() {
     let failing = false;
     failing = !await assertAnyFile('vscode.d.ts') && (quiet || warn(`The VSCode import file '${$root}/dist/src/vscode.d.ts is missing.`)) || failing;
     failing = !await assertAnyFile('vscode.proposed.terminalDataWriteEvent.d.ts') && (quiet || warn(`The VSCode import file '${$root}/dist/src/vscode.proposed.terminalDataWriteEvent.d.ts is missing.`)) || failing;
+    failing = !await assertAnyFile('vscode.proposed.lmTools.d.ts') && (quiet || warn(`The VSCode import file '${$root}/dist/src/vscode.proposed.lmTools.d.ts is missing.`)) || failing;
 
     if (!failing) {
         verbose('VSCode d.ts files appear to be in place.');

@@ -65,7 +65,7 @@ export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptoo
 // Use getRawSetting to get subcategorized settings from package.json.
 // This prevents having to iterate every time we search.
 let flattenedPackageJson: Map<string, any>;
-export function getRawSetting(key: string): any {
+export function getRawSetting(key: string, breakIfMissing: boolean = false): any {
     if (flattenedPackageJson === undefined) {
         flattenedPackageJson = new Map();
         for (const subheading of packageJson.contributes.configuration) {
@@ -74,7 +74,12 @@ export function getRawSetting(key: string): any {
             }
         }
     }
-    return flattenedPackageJson.get(key);
+    const result = flattenedPackageJson.get(key);
+    if (result === undefined && breakIfMissing) {
+        // eslint-disable-next-line no-debugger
+        debugger; // The setting does not exist in package.json. Check the `key`.
+    }
+    return result;
 }
 
 export async function getRawJson(path: string | undefined): Promise<any> {
@@ -317,12 +322,12 @@ export function isBoolean(input: any): input is boolean {
     return typeof input === "boolean";
 }
 
-export function isObject(input: any): input is object {
-    return typeof input === "object";
+export function isObject(input: any): boolean {
+    return input !== null && typeof input === "object" && !isArray(input);
 }
 
 export function isArray(input: any): input is any[] {
-    return input instanceof Array;
+    return Array.isArray(input);
 }
 
 export function isOptionalString(input: any): input is string | undefined {
@@ -331,6 +336,15 @@ export function isOptionalString(input: any): input is string | undefined {
 
 export function isArrayOfString(input: any): input is string[] {
     return isArray(input) && input.every(isString);
+}
+
+// Validates whether the given object is a valid mapping of key and value type.
+// EX: {"key": true, "key2": false} should return true for keyType = string and valueType = boolean.
+export function isValidMapping(value: any, isValidKey: (key: any) => boolean, isValidValue: (value: any) => boolean): value is object {
+    if (isObject(value)) {
+        return Object.entries(value).every(([key, val]) => isValidKey(key) && isValidValue(val));
+    }
+    return false;
 }
 
 export function isOptionalArrayOfString(input: any): input is string[] | undefined {
@@ -739,6 +753,7 @@ export interface ProcessReturnType {
     succeeded: boolean;
     exitCode?: number | NodeJS.Signals;
     output: string;
+    outputError: string;
 }
 
 export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
@@ -752,7 +767,7 @@ export async function spawnChildProcess(program: string, args: string[] = [], co
     const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, skipLogging, cancellationToken);
     const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
     if (programOutput.exitCode) {
-        return { succeeded: false, exitCode, output: programOutput.stderr || programOutput.stdout || localize('process.exited', 'Process exited with code {0}', exitCode) };
+        return { succeeded: false, exitCode, outputError: programOutput.stderr, output: programOutput.stderr || programOutput.stdout || localize('process.exited', 'Process exited with code {0}', exitCode) };
     } else {
         let stdout: string;
         if (programOutput.stdout.length) {
@@ -761,7 +776,7 @@ export async function spawnChildProcess(program: string, args: string[] = [], co
         } else {
             stdout = localize('process.succeeded', 'Process executed successfully.');
         }
-        return { succeeded: true, exitCode, output: stdout };
+        return { succeeded: true, exitCode, outputError: programOutput.stderr, output: stdout };
     }
 }
 
@@ -1081,15 +1096,15 @@ export function isCl(compilerPath: string): boolean {
 
 /** CompilerPathAndArgs retains original casing of text input for compiler path and args */
 export interface CompilerPathAndArgs {
-    compilerPath?: string;
+    compilerPath?: string | null;
     compilerName: string;
     compilerArgs?: string[];
     compilerArgsFromCommandLineInPath: string[];
     allCompilerArgs: string[];
 }
 
-export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string, compilerArgs?: string[]): CompilerPathAndArgs {
-    let compilerPath: string | undefined = inputCompilerPath;
+export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string | null, compilerArgs?: string[]): CompilerPathAndArgs {
+    let compilerPath: string | undefined | null = inputCompilerPath;
     let compilerName: string = "";
     let compilerArgsFromCommandLineInPath: string[] = [];
     if (compilerPath) {
@@ -1766,8 +1781,7 @@ export function buildShellCommandLine(originalCommand: CommandString, command: C
 
     let commandLine = result.join(' ');
     // There are special rules quoted command line in cmd.exe
-    if (isWindows)
-    {
+    if (isWindows) {
         commandLine = `chcp 65001>nul && ${commandLine}`;
         if (commandQuoted && argQuoted) {
             commandLine = '"' + commandLine + '"';

@@ -1,7 +1,7 @@
 name: Question Closer - debugger
 on:
   schedule:
-    - cron: 20 11 * * * # Run at 11:20 AM UTC (3:20 AM PST, 4:20 AM PDT)
+    - cron: 0 14 * * * # Run at 2:00 PM UTC (6:00 AM PST, 7:00 AM PDT)
   workflow_dispatch:
    inputs:
      readonly:

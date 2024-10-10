@@ -1,0 +1,28 @@
+name: Feature Request - debugger
+on:
+  schedule:
+    - cron: 20 13 * * * # Run at 1:20 PM UTC (5:20 AM PST, 6:20 AM PDT)
+  workflow_dispatch:
+   inputs:
+     readonly:
+       description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
+       default: false
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+      - name: Install Actions
+        run: cd ./.github/actions && npm install --production && cd ../..
+      - name: Add Comment
+        uses: ./.github/actions/AddComment
+        with:
+          readonly: ${{ github.event.inputs.readonly }}
+          labels: feature request,debugger
+          ignoreLabels: "investigate: costing,investigate,external,by design,question,more info needed,language service,internal"
+          createdAfter: "2024-07-22"
+          addComment: "Thank you for your feature request. While we may not be able to implement it immediately, we will monitor community reactions to see how it fits into our backlog. Additionally, if you're working with GDB/LLDB, please note that the code is open source at https://github.com/microsoft/MIEngine/wiki/Contributing-Code . Your contributions are always welcome and appreciated."

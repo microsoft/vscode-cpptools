@@ -1,7 +1,7 @@
 name: Enhancement Closer (Triage)
 on:
   schedule:
-    - cron: 40 11 * * * # Run at 11:40 AM UTC (3:40 AM PST, 4:40 AM PDT)
+    - cron: 30 12 * * * # Run at 12:30 PM UTC (4:30 AM PST, 5:30 AM PDT)
   workflow_dispatch:
    inputs:
      readonly:

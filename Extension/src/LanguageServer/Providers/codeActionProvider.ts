@@ -3,13 +3,14 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { Position, Range, RequestType, TextEdit } from 'vscode-languageclient';
+import { Position, Range, RequestType, ResponseError, TextEdit } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { DefaultClient } from '../client';
 import {
     CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions
 } from '../codeAnalysis';
 import { LocalizeStringParams, getLocalizedString } from '../localization';
+import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CppSettings } from '../settings';
 import { makeVscodeRange } from '../utils';
 
@@ -70,17 +71,24 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             uri: document.uri.toString()
         };
 
-        let response: GetCodeActionsResult = await this.client.languageClient.sendRequest(
-            GetCodeActionsRequest, params, token);
+        let response: GetCodeActionsResult;
+        try {
+            response = await this.client.languageClient.sendRequest(GetCodeActionsRequest, params, token);
+        } catch (e: any) {
+            if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                throw new vscode.CancellationError();
+            }
+            throw e;
+        }
 
-        const resultCodeActions: vscode.CodeAction[] = [];
-        if (token.isCancellationRequested || response.commands === undefined) {
+        if (token.isCancellationRequested) {
             throw new vscode.CancellationError();
         }
 
+        const resultCodeActions: vscode.CodeAction[] = [];
         let hasSelectIntelliSenseConfiguration: boolean = false;
         const settings: CppSettings = new CppSettings(this.client.RootUri);
-        const hasConfigurationSet: boolean = settings.defaultCompilerPath !== undefined ||
+        const hasConfigurationSet: boolean = settings.defaultCompilerPath !== null ||
             !!settings.defaultCompileCommands || !!settings.defaultConfigurationProvider ||
             this.client.configuration.CurrentConfiguration?.compilerPath !== undefined ||
             !!this.client.configuration.CurrentConfiguration?.compileCommands ||
@@ -136,7 +144,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                         if (codeActionCodeInfo !== undefined) {
                             if (codeActionCodeInfo.fixAllTypeCodeAction !== undefined &&
                                 (codeActionCodeInfo.uriToInfo.size > 1 ||
-                                    codeActionCodeInfo.uriToInfo.values().next().value.numValidWorkspaceEdits > 1)) {
+                                    (codeActionCodeInfo.uriToInfo.values().next().value?.numValidWorkspaceEdits ?? 0) > 1)) {
                                 // Only show the "fix all type" if there is more than one fix for the type.
                                 fixCodeActions.push(codeActionCodeInfo.fixAllTypeCodeAction);
                             }
@@ -153,7 +161,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                         if (codeActionCodeInfo.removeAllTypeCodeAction !== undefined &&
                             codeActionCodeInfo.uriToInfo.size > 0 &&
                             (codeActionCodeInfo.uriToInfo.size > 1 ||
-                                codeActionCodeInfo.uriToInfo.values().next().value.identifiers.length > 1)) {
+                                (codeActionCodeInfo.uriToInfo.values().next().value?.identifiers?.length ?? 0) > 1)) {
                             // Only show the "clear all type" if there is more than one fix for the type.
                             removeAllTypeAvailable = true;
                         }
@@ -254,8 +262,15 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 if (!hoverResult.value.includes(localize("expands.to", "Expands to:"))) {
                     return false;
                 }
-                response = await this.client.languageClient.sendRequest(GetCodeActionsRequest, params, token);
-                if (token.isCancellationRequested || response.commands === undefined) {
+                try {
+                    response = await this.client.languageClient.sendRequest(GetCodeActionsRequest, params, token);
+                } catch (e: any) {
+                    if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                        return false;
+                    }
+                    throw e;
+                }
+                if (token.isCancellationRequested) {
                     return false;
                 }
                 for (const command of response.commands) {
