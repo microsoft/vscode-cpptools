@@ -1516,6 +1516,9 @@ async function onCopilotHover(): Promise<void> {
 
 async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, content?: string): Promise<void> {
     // Make sure the hover document has focus.
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return;
+    }
     await vscode.window.showTextDocument(hoverDocument, { preserveFocus: false, selection: new vscode.Selection(hoverPosition, hoverPosition) });
 
     // Same workaround as above to force the editor to update it's content.
