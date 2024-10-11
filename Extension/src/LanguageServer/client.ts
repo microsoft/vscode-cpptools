@@ -43,6 +43,7 @@ import { localizedStringCount, lookupString } from '../nativeStrings';
 import { SessionState } from '../sessionState';
 import * as telemetry from '../telemetry';
 import { TestHook, getTestHook } from '../testHook';
+import { CopilotHoverProvider } from './Providers/CopilotHoverProvider';
 import { HoverProvider } from './Providers/HoverProvider';
 import {
     CodeAnalysisDiagnosticIdentifiersAndUri,
@@ -533,6 +534,15 @@ export interface GetIncludesResult {
     includedFiles: string[];
 }
 
+export interface GetCopilotHoverInfoParams {
+    uri: string;
+    position: Position;
+}
+
+interface GetCopilotHoverInfoResult {
+    content: string;
+}
+
 export interface ChatContextResult {
     language: string;
     standardVersion: string;
@@ -554,6 +564,7 @@ export const FormatDocumentRequest: RequestType<FormatParams, FormatResult, void
 export const FormatRangeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatOnType');
 export const HoverRequest: RequestType<TextDocumentPositionParams, vscode.Hover, void> = new RequestType<TextDocumentPositionParams, vscode.Hover, void>('cpptools/hover');
+export const GetCopilotHoverInfoRequest: RequestType<GetCopilotHoverInfoParams, GetCopilotHoverInfoResult, void> = new RequestType<GetCopilotHoverInfoParams, GetCopilotHoverInfoResult, void>('cpptools/getCopilotHoverInfo');
 const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void> = new RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void>('cpptools/createDeclDef');
 const ExtractToFunctionRequest: RequestType<ExtractToFunctionParams, WorkspaceEditResult, void> = new RequestType<ExtractToFunctionParams, WorkspaceEditResult, void>('cpptools/extractToFunction');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
@@ -790,6 +801,7 @@ export interface Client {
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
+    getCopilotHoverProvider(): CopilotHoverProvider | undefined;
     getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult>;
     getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult>;
 }
@@ -824,11 +836,14 @@ export class DefaultClient implements Client {
     private settingsTracker: SettingsTracker;
     private loggingLevel: number = 1;
     private configurationProvider?: string;
+    private hoverProvider: HoverProvider | undefined;
+    private copilotHoverProvider: CopilotHoverProvider | undefined;
 
     public lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     public lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
     public lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
     public currentCaseSensitiveFileSupport: PersistentWorkspaceState<boolean> | undefined;
+    public currentCopilotHoverEnabled: PersistentWorkspaceState<string> | undefined;
     private registeredProviders: PersistentFolderState<string[]> | undefined;
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
@@ -1257,8 +1272,16 @@ export class DefaultClient implements Client {
                 this.registerFileWatcher();
                 initializedClientCount = 0;
                 this.inlayHintsProvider = new InlayHintsProvider();
+                this.hoverProvider = new HoverProvider(this);
 
-                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, new HoverProvider(this)));
+                const settings: CppSettings = new CppSettings();
+                this.currentCopilotHoverEnabled = new PersistentWorkspaceState<string>("cpp.copilotHover", settings.copilotHover);
+                if (settings.copilotHover === "enabled" ||
+                    (settings.copilotHover === "default" && await telemetry.isFlightEnabled("cpp.copilotHover"))) {
+                    this.copilotHoverProvider = new CopilotHoverProvider(this);
+                    this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, this.copilotHoverProvider));
+                }
+                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, this.hoverProvider));
                 this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
                 this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, new RenameProvider(this)));
                 this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, new FindAllReferencesProvider(this)));
@@ -1276,7 +1299,6 @@ export class DefaultClient implements Client {
                 this.codeFoldingProvider = new FoldingRangeProvider(this);
                 this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, this.codeFoldingProvider);
 
-                const settings: CppSettings = new CppSettings();
                 if (settings.isEnhancedColorizationEnabled && semanticTokensLegend) {
                     this.semanticTokensProvider = new SemanticTokensProvider();
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
@@ -1451,6 +1473,9 @@ export class DefaultClient implements Client {
         if (this.currentCaseSensitiveFileSupport && workspaceSettings.isCaseSensitiveFileSupportEnabled !== this.currentCaseSensitiveFileSupport.Value) {
             void util.promptForReloadWindowDueToSettingsChange();
         }
+        if (this.currentCopilotHoverEnabled && workspaceSettings.copilotHover !== this.currentCopilotHoverEnabled.Value) {
+            void util.promptForReloadWindowDueToSettingsChange();
+        }
         return {
             filesAssociations: workspaceOtherSettings.filesAssociations,
             workspaceFallbackEncoding: workspaceOtherSettings.filesEncoding,
@@ -1473,6 +1498,7 @@ export class DefaultClient implements Client {
             codeAnalysisMaxConcurrentThreads: workspaceSettings.codeAnalysisMaxConcurrentThreads,
             codeAnalysisMaxMemory: workspaceSettings.codeAnalysisMaxMemory,
             codeAnalysisUpdateDelay: workspaceSettings.codeAnalysisUpdateDelay,
+            copilotHover: workspaceSettings.copilotHover,
             workspaceFolderSettings: workspaceFolderSettingsParams
         };
     }
@@ -1583,6 +1609,12 @@ export class DefaultClient implements Client {
                     // We manually restart the language server so tell the LanguageClient not to do it automatically for us.
                     return { action: CloseAction.DoNotRestart, message };
                 }
+            },
+            markdown: {
+                isTrusted: true
+                // TODO: support for icons in markdown is not yet in the released version of vscode-languageclient.
+                // Based on PR (https://github.com/microsoft/vscode-languageserver-node/pull/1504)
+                //supportThemeIcons: true
             }
 
             // TODO: should I set the output channel? Does this sort output between servers?
@@ -4007,6 +4039,19 @@ export class DefaultClient implements Client {
         compilerDefaults = await this.requestCompiler(path);
         DebugConfigurationProvider.ClearDetectedBuildTasks();
     }
+
+    public getHoverProvider(): HoverProvider | undefined {
+        return this.hoverProvider;
+    }
+
+    public getCopilotHoverProvider(): CopilotHoverProvider | undefined {
+        return this.copilotHoverProvider;
+    }
+
+    public async getCopilotHoverInfo(): Promise<GetCopilotHoverInfoResult> {
+        await this.ready;
+        return this.languageClient.sendRequest(GetCopilotHoverInfoRequest, null);
+    }
 }
 
 function getLanguageServerFileName(): string {
@@ -4118,6 +4163,8 @@ class NullClient implements Client {
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
+    getCopilotHoverProvider(): CopilotHoverProvider | undefined { return undefined; }
+    getCopilotHoverInfo(): Promise<GetCopilotHoverInfoResult> { return Promise.resolve({} as GetCopilotHoverInfoResult); }
     getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
 }
