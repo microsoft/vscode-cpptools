@@ -40,6 +40,13 @@ interface CopilotTrait {
     promptTextOverride?: string;
 }
 
+interface SnippetEntry {
+    uri: string;
+    text: string;
+    startLine: number;
+    endLine: number;
+}
+
 interface CopilotApi {
     registerRelatedFilesProvider(
         providerId: { extensionId: string; languageId: string },
@@ -49,6 +56,15 @@ interface CopilotApi {
             cancellationToken: vscode.CancellationToken
         ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>
     ): Disposable;
+    registerSnippetsProvider(
+        providerId: { extensionId: string; languageId: string },
+        callback: (
+            uri: vscode.Uri,
+            context: { flags: Record<string, unknown> },
+            cancellationToken: vscode.CancellationToken
+        ) => Promise<{ entries: SnippetEntry[] }>
+    ): Disposable;
+
 }
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -290,6 +306,30 @@ export async function activate(): Promise<void> {
             }
         }
     }
+
+    const isCustomSnippetProviderApiEnabled = await telemetry.isExperimentEnabled("CppToolsCustomSnippetsApi");
+    if (isCustomSnippetProviderApiEnabled) {
+        const api = await getCopilotApi();
+        if (util.extensionContext && api) {
+            try {
+                for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
+                    api.registerSnippetsProvider(
+                        { extensionId: util.extensionContext.extension.id, languageId },
+                        async (_uri: vscode.Uri, _context: { flags: Record<string, unknown> }, _: vscode.CancellationToken) => ({
+                            entries: [{
+                                uri: "file:///Users/username/Code/cpp/test.cpp",
+                                text: "This is line 42\nThis is line 43\nThis is line 44\nThis is line 45\n",
+                                startLine: 42,
+                                endLine: 45
+                            }]
+                        })
+                    );
+                }
+            } catch {
+                console.log("Failed to register Copilot related files provider.");
+            }
+        }
+    }
 }
 
 export function updateLanguageConfigurations(): void {
@@ -302,8 +342,8 @@ export function updateLanguageConfigurations(): void {
 }
 
 /**
- * workspace events
- */
+     * workspace events
+     */
 async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
     const client: Client = clients.getDefaultClient();
     if (client instanceof DefaultClient) {
@@ -384,8 +424,8 @@ function onInterval(): void {
 }
 
 /**
- * registered commands
- */
+     * registered commands
+     */
 export function registerCommands(enabled: boolean, isRelatedFilesApiEnabled: boolean): void {
     commandDisposables.forEach(d => d.dispose());
     commandDisposables.length = 0;
@@ -513,9 +553,9 @@ async function onSwitchHeaderSource(): Promise<void> {
 }
 
 /**
- * Allow the user to select a workspace when multiple workspaces exist and get the corresponding Client back.
- * The resulting client is used to handle some command that was previously invoked.
- */
+     * Allow the user to select a workspace when multiple workspaces exist and get the corresponding Client back.
+     * The resulting client is used to handle some command that was previously invoked.
+     */
 async function selectClient(): Promise<Client> {
     if (clients.Count === 1) {
         return clients.ActiveClient;
