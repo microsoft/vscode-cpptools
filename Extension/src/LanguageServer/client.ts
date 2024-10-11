@@ -836,6 +836,7 @@ export class DefaultClient implements Client {
     private settingsTracker: SettingsTracker;
     private loggingLevel: number = 1;
     private configurationProvider?: string;
+    private hoverProvider: HoverProvider | undefined;
     private copilotHoverProvider: CopilotHoverProvider | undefined;
 
     public lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
@@ -1270,6 +1271,7 @@ export class DefaultClient implements Client {
                 this.registerFileWatcher();
                 initializedClientCount = 0;
                 this.inlayHintsProvider = new InlayHintsProvider();
+                this.hoverProvider = new HoverProvider(this);
 
                 const settings: CppSettings = new CppSettings();
                 if (settings.copilotHover === "enabled" ||
@@ -1277,7 +1279,7 @@ export class DefaultClient implements Client {
                     this.copilotHoverProvider = new CopilotHoverProvider(this);
                     this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, this.copilotHoverProvider));
                 }
-                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, new HoverProvider(this)));
+                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, this.hoverProvider));
                 this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
                 this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, new RenameProvider(this)));
                 this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, new FindAllReferencesProvider(this)));
@@ -4031,6 +4033,10 @@ export class DefaultClient implements Client {
         trustedCompilerPaths.push(path);
         compilerDefaults = await this.requestCompiler(path);
         DebugConfigurationProvider.ClearDetectedBuildTasks();
+    }
+
+    public getHoverProvider(): HoverProvider | undefined {
+        return this.hoverProvider;
     }
 
     public getCopilotHoverProvider(): CopilotHoverProvider | undefined {

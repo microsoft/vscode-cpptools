@@ -21,6 +21,7 @@ import { modelSelector } from '../constants';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
+import { CopilotHoverProvider } from './Providers/CopilotHoverProvider';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, GetIncludesResult, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
@@ -1448,30 +1449,18 @@ async function onCopilotHover(): Promise<void> {
         return;
     }
 
+    const errorMessage = localize("copilot.hover.error", "An error occurred while generating Copilot summary.");
+
     // Prep hover with wait message.
     copilotHoverProvider.showWaiting();
 
-    // Make sure the hover document has focus.
-    await vscode.window.showTextDocument(hoverDocument, { preserveFocus: false, selection: new vscode.Selection(hoverPosition, hoverPosition) });
-
-    // Workaround to force the editor to update it's content, needs to be called from another location first.
-    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
-        return;
-    }
-    await vscode.commands.executeCommand('cursorMove', { to: 'right' });
-    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
-
-    // Move back and show the correct hover.
-    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
-        return;
-    }
-    await vscode.commands.executeCommand('cursorMove', { to: 'left' });
-    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
+    await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition);
 
     // Gather the content for the query from the client.
     const requestInfo = await copilotHoverProvider.getRequestInfo(hoverDocument, hoverPosition);
 
     if (requestInfo.length === 0) {
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
         return;
     }
 
@@ -1493,6 +1482,7 @@ async function onCopilotHover(): Promise<void> {
     } catch (err) {
         if (err instanceof vscode.LanguageModelError) {
             console.log(err.message, err.code, err.cause);
+            await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
         } else {
             throw err;
         }
@@ -1501,6 +1491,7 @@ async function onCopilotHover(): Promise<void> {
 
     // Ensure we have a valid response from Copilot.
     if (!chatResponse) {
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
         return;
     }
 
@@ -1511,13 +1502,19 @@ async function onCopilotHover(): Promise<void> {
             content += fragment;
         }
     } catch (err) {
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
         return;
     }
 
     if (content.length === 0) {
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
         return;
     }
 
+    await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, content);
+}
+
+async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, content?: string): Promise<void> {
     // Make sure the hover document has focus.
     await vscode.window.showTextDocument(hoverDocument, { preserveFocus: false, selection: new vscode.Selection(hoverPosition, hoverPosition) });
 
@@ -1528,8 +1525,10 @@ async function onCopilotHover(): Promise<void> {
     await vscode.commands.executeCommand('cursorMove', { to: 'right' });
     await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
 
-    // Prepare and show the real content.
-    copilotHoverProvider.showContent(content);
+    if (content) {
+        copilotHoverProvider.showContent(content);
+    }
+
     if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
         return;
     }
