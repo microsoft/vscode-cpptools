@@ -843,6 +843,7 @@ export class DefaultClient implements Client {
     public lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
     public lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
     public currentCaseSensitiveFileSupport: PersistentWorkspaceState<boolean> | undefined;
+    public currentCopilotHoverEnabled: PersistentWorkspaceState<string> | undefined;
     private registeredProviders: PersistentFolderState<string[]> | undefined;
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
@@ -1274,6 +1275,7 @@ export class DefaultClient implements Client {
                 this.hoverProvider = new HoverProvider(this);
 
                 const settings: CppSettings = new CppSettings();
+                this.currentCopilotHoverEnabled = new PersistentWorkspaceState<string>("cpp.copilotHover", settings.copilotHover);
                 if (settings.copilotHover === "enabled" ||
                     (settings.copilotHover === "default" && await telemetry.isFlightEnabled("cpp.copilotHover"))) {
                     this.copilotHoverProvider = new CopilotHoverProvider(this);
@@ -1469,6 +1471,9 @@ export class DefaultClient implements Client {
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
         const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = this.getAllWorkspaceFolderSettings();
         if (this.currentCaseSensitiveFileSupport && workspaceSettings.isCaseSensitiveFileSupportEnabled !== this.currentCaseSensitiveFileSupport.Value) {
+            void util.promptForReloadWindowDueToSettingsChange();
+        }
+        if (this.currentCopilotHoverEnabled && workspaceSettings.copilotHover !== this.currentCopilotHoverEnabled.Value) {
             void util.promptForReloadWindowDueToSettingsChange();
         }
         return {
