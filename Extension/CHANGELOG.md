@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.22.9: October 10, 2024
+## Version 1.22.9: October 14, 2024
 ### Performance Improvements
 * Initialization performance improvements. [#12030](https://github.com/microsoft/vscode-cpptools/issues/12030)
   - Some processing is parallelized and started earlier (populating the filename cache, discovering files). [#11954](https://github.com/microsoft/vscode-cpptools/issues/11954), [#12169](https://github.com/microsoft/vscode-cpptools/issues/12169)
