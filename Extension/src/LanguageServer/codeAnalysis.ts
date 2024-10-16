@@ -122,7 +122,7 @@ export const codeAnalysisAllFixes: CodeActionAllInfo = {
         command: {
             title: 'FixAllCodeAnalysisProblems',
             command: 'C_Cpp.FixAllCodeAnalysisProblems',
-            arguments: [ 0, undefined, true, [] ]
+            arguments: [0, undefined, true, []]
         },
         kind: vscode.CodeActionKind.QuickFix
     },
@@ -179,7 +179,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
                 command: {
                     title: 'FixAllTypeCodeAnalysisProblems',
                     command: 'C_Cpp.FixAllTypeCodeAnalysisProblems',
-                    arguments: [ codeToFixes[0], ++codeToFixes[1].version, allTypeWorkspaceEdit, true, identifiersAndUris ]
+                    arguments: [codeToFixes[0], ++codeToFixes[1].version, allTypeWorkspaceEdit, true, identifiersAndUris]
                 },
                 kind: vscode.CodeActionKind.QuickFix
             };
@@ -191,7 +191,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
                 command: {
                     title: 'DisableAllTypeCodeAnalysisProblems',
                     command: 'C_Cpp.DisableAllTypeCodeAnalysisProblems',
-                    arguments: [ codeToFixes[0], identifiersAndUris ]
+                    arguments: [codeToFixes[0], identifiersAndUris]
                 },
                 kind: vscode.CodeActionKind.QuickFix
             };
@@ -205,7 +205,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
                 command: {
                     title: 'RemoveAllTypeCodeAnalysisProblems',
                     command: 'C_Cpp.RemoveCodeAnalysisProblems',
-                    arguments: [ false, identifiersAndUris ]
+                    arguments: [false, identifiersAndUris]
                 },
                 kind: vscode.CodeActionKind.QuickFix
             };
@@ -259,7 +259,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range),
             getLocalizedString(d.localizeStringParams), d.severity);
         const identifier: CodeAnalysisDiagnosticIdentifier = { range: d.range, code: d.code };
-        const identifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = { uri: params.uri, identifiers: [ identifier ] };
+        const identifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = { uri: params.uri, identifiers: [identifier] };
         const codeAction: CodeActionDiagnosticInfo = {
             version: nextVersion,
             range: makeVscodeRange(identifier.range),
@@ -269,7 +269,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                 command: {
                     title: 'RemoveCodeAnalysisProblems',
                     command: 'C_Cpp.RemoveCodeAnalysisProblems',
-                    arguments: [ false, [ identifiersAndUri ] ]
+                    arguments: [false, [identifiersAndUri]]
                 },
                 kind: vscode.CodeActionKind.QuickFix
             }
@@ -285,7 +285,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                 command: {
                     title: 'FixThisCodeAnalysisProblem',
                     command: 'C_Cpp.FixThisCodeAnalysisProblem',
-                    arguments: [ nextVersion, codeActionWorkspaceEdit.workspaceEdit, true, [ identifiersAndUri ] ]
+                    arguments: [nextVersion, codeActionWorkspaceEdit.workspaceEdit, true, [identifiersAndUri]]
                 },
                 kind: vscode.CodeActionKind.QuickFix
             };
@@ -313,13 +313,14 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                 }
                 const relatedIdentifier: CodeAnalysisDiagnosticIdentifier = { range: info.location.range, code: d.code };
                 const relatedIdentifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = {
-                    uri: info.location.uri, identifiers: [ relatedIdentifier ] };
+                    uri: info.location.uri, identifiers: [relatedIdentifier]
+                };
                 const relatedCodeAction: vscode.CodeAction = {
                     title: localize("fix.this.problem", "Fix this {0} problem", d.code),
                     command: {
                         title: 'FixThisCodeAnalysisProblem',
                         command: 'C_Cpp.FixThisCodeAnalysisProblem',
-                        arguments: [ nextVersion, relatedWorkspaceEdit, true, [ relatedIdentifiersAndUri ] ]
+                        arguments: [nextVersion, relatedWorkspaceEdit, true, [relatedIdentifiersAndUri]]
                     },
                     kind: vscode.CodeActionKind.QuickFix
                 };
@@ -334,7 +335,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                     };
                     relatedCodeActions.push(relatedCodeActionInfo);
                 }
-                rootAndRelatedWorkspaceEdits.push({ workspaceEdit: relatedWorkspaceEdit});
+                rootAndRelatedWorkspaceEdits.push({ workspaceEdit: relatedWorkspaceEdit });
                 rootAndRelatedIdentifiersAndUris.push(relatedIdentifiersAndUri);
             }
         }
@@ -349,7 +350,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                 const rootAndRelatedWorkspaceEdit: CodeActionWorkspaceEdit = rootAndRelatedWorkspaceEdits[rootAndRelatedWorkspaceEditsIndex];
                 if (rootAndRelatedWorkspaceEdit !== undefined) {
                     if (existingInfo.workspaceEdits === undefined) {
-                        existingInfo.workspaceEdits = [ rootAndRelatedWorkspaceEdit ];
+                        existingInfo.workspaceEdits = [rootAndRelatedWorkspaceEdit];
                     } else {
                         existingInfo.workspaceEdits.push(rootAndRelatedWorkspaceEdit);
                     }
@@ -378,7 +379,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                     docPage = `checks${checksGroup}/${checksPage}.html`;
                 }
                 // TODO: This should be checking the clang-tidy version used to better support usage of older versions.
-                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/18.1.6/tools/clang/tools/extra/docs/clang-tidy/${docPage}`);
+                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/19.1.0/tools/clang/tools/extra/docs/clang-tidy/${docPage}`);
                 diagnostic.code = { value: identifier.code, target: primaryDocUri };
 
                 if (new CppSettings().clangTidyCodeActionShowDocumentation) {
@@ -388,7 +389,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                             command: {
                                 title: 'ShowDocumentation',
                                 command: 'C_Cpp.ShowCodeAnalysisDocumentation',
-                                arguments: [ primaryDocUri ]
+                                arguments: [primaryDocUri]
                             },
                             kind: vscode.CodeActionKind.QuickFix
                         };
