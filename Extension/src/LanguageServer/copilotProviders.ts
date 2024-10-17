@@ -7,7 +7,7 @@
 import * as vscode from 'vscode';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { ChatContextResult, GetIncludesResult } from './client';
+import { ChatContextResult, DefaultClient, GetIncludesResult } from './client';
 import { getActiveClient } from './extension';
 
 let isRelatedFilesApiEnabled: boolean | undefined;
@@ -45,7 +45,8 @@ export async function registerRelatedFilesProvider(): Promise<void> {
 
                         const getIncludesHandler = async () => (await getIncludesWithCancellation(1, token))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [];
                         const getTraitsHandler = async () => {
-                            const chatContext: ChatContextResult | undefined = await (getActiveClient().getChatContext(token) ?? undefined);
+                            const client = getActiveClient();
+                            const chatContext: ChatContextResult | undefined = await (client.getChatContext(token) ?? undefined);
 
                             if (!chatContext) {
                                 return undefined;
@@ -58,6 +59,21 @@ export async function registerRelatedFilesProvider(): Promise<void> {
                                 { name: "targetPlatform", value: chatContext.targetPlatform, includeInPrompt: true, promptTextOverride: `This build targets ${chatContext.targetPlatform}.` },
                                 { name: "targetArchitecture", value: chatContext.targetArchitecture, includeInPrompt: true, promptTextOverride: `This build targets ${chatContext.targetArchitecture}.` }
                             ];
+
+                            if (client instanceof DefaultClient) {
+                                const defaultClient: DefaultClient = client as DefaultClient;
+                                const configuration = defaultClient.configuration.CurrentConfiguration;
+                                if (configuration) {
+                                    const defines = configuration.defines?.join(', ') ?? undefined;
+                                    if (defines) {
+                                        traits.push({ name: "compilerDefines", value: defines, includeInPrompt: true, promptTextOverride: `This compiler defines contain: ${defines}.` });
+                                    }
+                                    const compilerArgs = configuration.compilerArgs?.join(', ') ?? undefined;
+                                    if (compilerArgs) {
+                                        traits.push({ name: "compilerArgs", value: compilerArgs, includeInPrompt: true, promptTextOverride: `This compiler arguments contain: ${compilerArgs}.` });
+                                    }
+                                }
+                            }
 
                             const excludeTraits = context.flags.copilotcppExcludeTraits as string[] ?? [];
                             traits = traits.filter(trait => !excludeTraits.includes(trait.name));
