@@ -13,7 +13,7 @@ import { ChatContextResult, DefaultClient, GetIncludesResult } from '../../../..
 import { CopilotApi, CopilotTrait } from '../../../../src/LanguageServer/copilotProviders';
 import * as extension from '../../../../src/LanguageServer/extension';
 
-describe('registerRelatedFilesProvider', () => {
+describe('copilotProviders Tests', () => {
     let moduleUnderTest: any;
     let mockCopilotApi: sinon.SinonStubbedInstance<CopilotApi>;
     let getActiveClientStub: sinon.SinonStub;
@@ -102,7 +102,7 @@ describe('registerRelatedFilesProvider', () => {
         ok(mockCopilotApi.registerRelatedFilesProvider.calledWithMatch(sinon.match({ extensionId: 'test-extension-id', languageId: sinon.match.in(['c', 'cpp', 'cuda-cpp']) })), 'registerRelatedFilesProvider should be called with the correct providerId and languageId');
     });
 
-    it('should not add #cpp traits when ChatContext isn\'t available.', async () => {
+    it('should not provide cpp context traits when ChatContext isn\'t available.', async () => {
         arrange({
             vscodeExtension: vscodeExtension,
             getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
@@ -124,7 +124,7 @@ describe('registerRelatedFilesProvider', () => {
         ok(result.traits === undefined, 'result.traits should be undefined');
     });
 
-    it('should not add #cpp traits when copilotcppTraits flag is false.', async () => {
+    it('should not provide cpp context traits when copilotcppTraits flag is false.', async () => {
         arrange({
             vscodeExtension: vscodeExtension,
             getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
@@ -152,7 +152,7 @@ describe('registerRelatedFilesProvider', () => {
         ok(result.traits === undefined, 'result.traits should be undefined');
     });
 
-    it('should add #cpp traits when copilotcppTraits flag is true.', async () => {
+    it('should provide cpp context traits when copilotcppTraits flag is true.', async () => {
         arrange({
             vscodeExtension: vscodeExtension,
             getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
@@ -170,39 +170,64 @@ describe('registerRelatedFilesProvider', () => {
 
         const result = await callbackPromise;
 
-        ok(vscodeGetExtensionsStub.calledOnce, 'vscode.extensions.getExtension should be called once');
-        ok(mockCopilotApi.registerRelatedFilesProvider.calledThrice, 'registerRelatedFilesProvider should be called three times');
-        ok(mockCopilotApi.registerRelatedFilesProvider.calledWithMatch(sinon.match({ extensionId: 'test-extension-id', languageId: sinon.match.in(['c', 'cpp', 'cuda-cpp']) })), 'registerRelatedFilesProvider should be called with the correct providerId and languageId');
-        ok(getActiveClientStub.callCount !== 0, 'getActiveClient should be called');
-        ok(callbackPromise, 'callbackPromise should be defined');
         ok(result, 'result should be defined');
-        ok(result.entries.length === 1, 'result.entries should have 1 included file');
-        ok(result.entries[0].toString() === 'file:///c%3A/src/my_project/foo.h', 'result.entries should have "file:///c%3A/src/my_project/foo.h"');
         ok(result.traits, 'result.traits should be defined');
         ok(result.traits.length === 5, 'result.traits should have 5 traits');
-        ok(result.traits[0].name === 'language', 'result.traits[0].name should be "language"');
-        ok(result.traits[0].value === 'c++', 'result.traits[0].value should be "c++"');
-        ok(result.traits[0].includeInPrompt, 'result.traits[0].includeInPrompt should be true');
-        ok(result.traits[0].promptTextOverride === 'The language is c++.', 'result.traits[0].promptTextOverride should be "The language is c++."');
-        ok(result.traits[1].name === 'compiler', 'result.traits[1].name should be "compiler"');
-        ok(result.traits[1].value === 'msvc', 'result.traits[1].value should be "msvc"');
-        ok(result.traits[1].includeInPrompt, 'result.traits[1].includeInPrompt should be true');
-        ok(result.traits[1].promptTextOverride === 'This project compiles using msvc.', 'result.traits[1].promptTextOverride should be "This project compiles using msvc."');
-        ok(result.traits[2].name === 'standardVersion', 'result.traits[2].name should be "standardVersion"');
-        ok(result.traits[2].value === 'c++20', 'result.traits[2].value should be "c++20"');
-        ok(result.traits[2].includeInPrompt, 'result.traits[2].includeInPrompt should be true');
-        ok(result.traits[2].promptTextOverride === 'This project uses the c++20 language standard.', 'result.traits[2].promptTextOverride should be "This project uses the c++20 language standard."');
-        ok(result.traits[3].name === 'targetPlatform', 'result.traits[3].name should be "targetPlatform"');
-        ok(result.traits[3].value === 'windows', 'result.traits[3].value should be "windows"');
-        ok(result.traits[3].includeInPrompt, 'result.traits[3].includeInPrompt should be true');
-        ok(result.traits[3].promptTextOverride === 'This build targets windows.', 'result.traits[3].promptTextOverride should be "This build targets windows."');
-        ok(result.traits[4].name === 'targetArchitecture', 'result.traits[4].name should be "targetArchitecture"');
-        ok(result.traits[4].value === 'x64', 'result.traits[4].value should be "x64"');
-        ok(result.traits[4].includeInPrompt, 'result.traits[4].includeInPrompt should be true');
-        ok(result.traits[4].promptTextOverride === 'This build targets x64.', 'result.traits[4].promptTextOverride should be "This build targets x64."');
+        ok(result.traits.find((trait) => trait.name === 'language'), 'result.traits should have a language trait');
+        ok(result.traits.find((trait) => trait.name === 'language')?.value === 'c++', 'result.traits should have a language trait with value "c++"');
+        ok(result.traits.find((trait) => trait.name === 'language')?.includeInPrompt, 'result.traits should have a language trait with includeInPrompt true');
+        ok(result.traits.find((trait) => trait.name === 'language')?.promptTextOverride === 'The language is c++.', 'result.traits should have a language trait with promptTextOverride "The language is c++."');
+        ok(result.traits.find((trait) => trait.name === 'compiler'), 'result.traits should have a compiler trait');
+        ok(result.traits.find((trait) => trait.name === 'compiler')?.value === 'msvc', 'result.traits should have a compiler trait with value "msvc"');
+        ok(result.traits.find((trait) => trait.name === 'compiler')?.includeInPrompt, 'result.traits should have a compiler trait with includeInPrompt true');
+        ok(result.traits.find((trait) => trait.name === 'compiler')?.promptTextOverride === 'This project compiles using msvc.', 'result.traits should have a compiler trait with promptTextOverride "This project compiles using msvc."');
+        ok(result.traits.find((trait) => trait.name === 'standardVersion'), 'result.traits should have a standardVersion trait');
+        ok(result.traits.find((trait) => trait.name === 'standardVersion')?.value === 'c++20', 'result.traits should have a standardVersion trait with value "c++20"');
+        ok(result.traits.find((trait) => trait.name === 'standardVersion')?.includeInPrompt, 'result.traits should have a standardVersion trait with includeInPrompt true');
+        ok(result.traits.find((trait) => trait.name === 'standardVersion')?.promptTextOverride === 'This project uses the c++20 language standard.', 'result.traits should have a standardVersion trait with promptTextOverride "This project uses the c++20 language standard."');
+        ok(result.traits.find((trait) => trait.name === 'targetPlatform'), 'result.traits should have a targetPlatform trait');
+        ok(result.traits.find((trait) => trait.name === 'targetPlatform')?.value === 'windows', 'result.traits should have a targetPlatform trait with value "windows"');
+        ok(result.traits.find((trait) => trait.name === 'targetPlatform')?.includeInPrompt, 'result.traits should have a targetPlatform trait with includeInPrompt true');
+        ok(result.traits.find((trait) => trait.name === 'targetPlatform')?.promptTextOverride === 'This build targets windows.', 'result.traits should have a targetPlatform trait with promptTextOverride "This build targets windows."');
+        ok(result.traits.find((trait) => trait.name === 'targetArchitecture'), 'result.traits should have a targetArchitecture trait');
+        ok(result.traits.find((trait) => trait.name === 'targetArchitecture')?.value === 'x64', 'result.traits should have a targetArchitecture trait with value "x64"');
+        ok(result.traits.find((trait) => trait.name === 'targetArchitecture')?.includeInPrompt, 'result.traits should have a targetArchitecture trait with includeInPrompt true');
+        ok(result.traits.find((trait) => trait.name === 'targetArchitecture')?.promptTextOverride === 'This build targets x64.', 'result.traits should have a targetArchitecture trait with promptTextOverride "This build targets x64."');
     });
 
-    it('should exclude #cpp traits per copilotcppExcludeTraits.', async () => {
+    it('should provide compiler defines and arguments traits if available.', async () => {
+        arrange({
+            vscodeExtension: vscodeExtension,
+            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
+            chatContext: {
+                language: 'c++',
+                standardVersion: 'c++20',
+                compiler: 'msvc',
+                targetPlatform: 'windows',
+                targetArchitecture: 'x64',
+                compilerArgs: ['/std:c++17', '/permissive-'],
+                compilerUserDefines: ['DEBUG', 'TEST']
+            },
+            rootUri: vscode.Uri.file('C:\\src\\my_project'),
+            flags: { copilotcppTraits: true }
+        });
+        await moduleUnderTest.registerRelatedFilesProvider();
+
+        const result = await callbackPromise;
+
+        ok(result, 'result should be defined');
+        ok(result.traits, 'result.traits should be defined');
+        ok(result.traits.find((trait) => trait.name === 'compilerArgs'), 'result.traits should have a compiler args trait');
+        ok(result.traits.find((trait) => trait.name === 'compilerArgs')?.value === '/std:c++17 /permissive-', 'result.traits should have a compiler args trait with value "/std:c++17 /permissive-"');
+        ok(result.traits.find((trait) => trait.name === 'compilerArgs')?.includeInPrompt, 'result.traits should have a compiler args trait with includeInPrompt true');
+        ok(result.traits.find((trait) => trait.name === 'compilerArgs')?.promptTextOverride === 'The compiler command line arguments contain: /std:c++17 /permissive-.', 'result.traits should have a compiler args trait with promptTextOverride "The compiler command line arguments contain: /std:c++17 /permissive-"');
+        ok(result.traits.find((trait) => trait.name === 'compilerUserDefines'), 'result.traits should have a compiler defines trait');
+        ok(result.traits.find((trait) => trait.name === 'compilerUserDefines')?.value === 'DEBUG, TEST', 'result.traits should have a compiler defines trait with value "DEBUG, TEST"');
+        ok(result.traits.find((trait) => trait.name === 'compilerUserDefines')?.includeInPrompt, 'result.traits should have a compiler defines trait with includeInPrompt true');
+        ok(result.traits.find((trait) => trait.name === 'compilerUserDefines')?.promptTextOverride === 'The compiler command line user defines contain: DEBUG, TEST.', 'result.traits should have a compiler defines trait with promptTextOverride "The compiler command line user defines contain: DEBUG, TEST."');
+    });
+
+    it('should exclude cpp context traits per copilotcppExcludeTraits.', async () => {
         const excludeTraits = ['compiler', 'targetPlatform'];
         arrange({
             vscodeExtension: vscodeExtension,

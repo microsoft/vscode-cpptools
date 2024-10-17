@@ -539,6 +539,8 @@ export interface ChatContextResult {
     compiler: string;
     targetPlatform: string;
     targetArchitecture: string;
+    compilerArgs?: string[];
+    compilerUserDefines?: string[];
 }
 
 // Requests

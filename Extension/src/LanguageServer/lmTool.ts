@@ -67,20 +67,26 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
                 return 'No configuration information is available for the active document.';
             }
 
-            telemetry.logLanguageModelToolEvent(
-                'cpp',
-                {
-                    "language": chatContext.language,
-                    "compiler": chatContext.compiler,
-                    "standardVersion": chatContext.standardVersion,
-                    "targetPlatform": chatContext.targetPlatform,
-                    "targetArchitecture": chatContext.targetArchitecture
-                });
+            const telemetryProperties: Record<string, string> = {
+                "language": chatContext.language,
+                "compiler": chatContext.compiler,
+                "standardVersion": chatContext.standardVersion,
+                "targetPlatform": chatContext.targetPlatform,
+                "targetArchitecture": chatContext.targetArchitecture
+            };
+            if (chatContext.compilerArgs) {
+                telemetryProperties["compilerArgs"] = chatContext.compilerArgs.join(' ');
+            }
+            if (chatContext.compilerUserDefines) {
+                telemetryProperties["compilerUserDefines"] = chatContext.compilerUserDefines.join(', ');
+            }
+            telemetry.logLanguageModelToolEvent('cpp', telemetryProperties);
 
+            type KnownKeys = 'language' | 'standardVersion' | 'compiler' | 'targetPlatform' | 'targetArchitecture';
             for (const key in knownValues) {
-                const knownKey = key as keyof ChatContextResult;
-                if (knownValues[knownKey] && chatContext[knownKey]) {
-                    chatContext[knownKey] = knownValues[knownKey][chatContext[knownKey]] || chatContext[knownKey];
+                const knownKey = key as KnownKeys;
+                if (knownKey && knownValues[knownKey] && chatContext[knownKey]) {
+                    chatContext[knownKey] = knownValues[knownKey][chatContext[knownKey] as string] || chatContext[knownKey];
                 }
             }
 
