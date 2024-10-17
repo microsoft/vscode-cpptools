@@ -9,9 +9,13 @@ import { localize } from 'vscode-nls';
 import * as util from '../common';
 import * as logger from '../logger';
 import * as telemetry from '../telemetry';
-import { ChatContextResult } from './client';
+import { ChatContextResult, ProjectContextResult } from './client';
 import { getClients } from './extension';
+import { checkTime } from './utils';
 
+const MSVC: string = 'MSVC';
+const Clang: string = 'Clang';
+const GCC: string = 'GCC';
 const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: string } } = {
     language: {
         'c': 'C',
@@ -19,9 +23,9 @@ const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: str
         'cuda-cpp': 'CUDA C++'
     },
     compiler: {
-        'msvc': 'MSVC',
-        'clang': 'Clang',
-        'gcc': 'GCC'
+        'msvc': MSVC,
+        'clang': Clang,
+        'gcc': GCC
     },
     standardVersion: {
         'c++98': 'C++98',
@@ -44,6 +48,112 @@ const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: str
     }
 };
 
+function formatChatContext(context: ChatContextResult | ProjectContextResult): void {
+    type KnownKeys = 'language' | 'standardVersion' | 'compiler' | 'targetPlatform';
+    for (const key in knownValues) {
+        const knownKey = key as KnownKeys;
+        if (knownValues[knownKey] && context[knownKey]) {
+            // Clear the value if it's not in the known values.
+            context[knownKey] = knownValues[knownKey][context[knownKey]] || "";
+        }
+    }
+}
+
+export interface ProjectContext {
+    language: string;
+    standardVersion: string;
+    compiler: string;
+    targetPlatform: string;
+    targetArchitecture: string;
+    compilerArguments: string[];
+}
+
+// Set these values for local testing purpose without involving control tower.
+const defaultCompilerArgumentFilters: { [id: string]: RegExp | undefined } = {
+    MSVC: undefined, // Example: /^(\/std:.*|\/EHs-c-|\/GR-|\/await.*)$/,
+    Clang: undefined,
+    GCC: undefined // Example: /^(-std=.*|-fno-rtti|-fno-exceptions)$/
+};
+
+function filterComplierArguments(compiler: string, compilerArguments: string[], context: { flags: Record<string, unknown> }): string[] {
+    const defaultFilter: RegExp | undefined = defaultCompilerArgumentFilters[compiler] ?? undefined;
+    let additionalFilter: RegExp | undefined;
+    switch (compiler) {
+        case MSVC:
+            additionalFilter = context.flags.copilotcppMsvcCompilerArgumentFilter ? new RegExp(context.flags.copilotcppMsvcCompilerArgumentFilter as string) : undefined;
+            break;
+        case Clang:
+            additionalFilter = context.flags.copilotcppClangCompilerArgumentFilter ? new RegExp(context.flags.copilotcppClangCompilerArgumentFilter as string) : undefined;
+            break;
+        case GCC:
+            additionalFilter = context.flags.copilotcppGccCompilerArgumentFilter ? new RegExp(context.flags.copilotcppGccCompilerArgumentFilter as string) : undefined;
+            break;
+    }
+
+    return compilerArguments.filter(arg => defaultFilter?.test(arg) || additionalFilter?.test(arg));
+}
+
+export async function getProjectContext(context: { flags: Record<string, unknown> }, token: vscode.CancellationToken): Promise<ProjectContext | undefined> {
+    const telemetryProperties: Record<string, string> = {};
+    try {
+        const projectContext = await checkTime<ProjectContextResult | undefined>(async () => await getClients()?.ActiveClient?.getProjectContext(token) ?? undefined);
+        telemetryProperties["time"] = projectContext.time.toString();
+        if (!projectContext.result) {
+            return undefined;
+        }
+
+        formatChatContext(projectContext.result);
+
+        const result: ProjectContext = {
+            language: projectContext.result.language,
+            standardVersion: projectContext.result.standardVersion,
+            compiler: projectContext.result.compiler,
+            targetPlatform: projectContext.result.targetPlatform,
+            targetArchitecture: projectContext.result.targetArchitecture,
+            compilerArguments: []
+        };
+
+        if (projectContext.result.language) {
+            telemetryProperties["language"] = projectContext.result.language;
+        }
+        if (projectContext.result.compiler) {
+            telemetryProperties["compiler"] = projectContext.result.compiler;
+        }
+        if (projectContext.result.standardVersion) {
+            telemetryProperties["standardVersion"] = projectContext.result.standardVersion;
+        }
+        if (projectContext.result.targetPlatform) {
+            telemetryProperties["targetPlatform"] = projectContext.result.targetPlatform;
+        }
+        if (projectContext.result.targetArchitecture) {
+            telemetryProperties["targetArchitecture"] = projectContext.result.targetArchitecture;
+        }
+        telemetryProperties["compilerArgumentCount"] = projectContext.result.fileContext.compilerArguments.length.toString();
+        // Telemtry to learn about the argument distribution. The filtered arguments are expected to be non-PII.
+        if (projectContext.result.fileContext.compilerArguments.length) {
+            const filteredCompilerArguments = filterComplierArguments(projectContext.result.compiler, projectContext.result.fileContext.compilerArguments, context);
+            if (filteredCompilerArguments.length > 0) {
+                telemetryProperties["filteredCompilerArguments"] = filteredCompilerArguments.join(', ');
+                result.compilerArguments = filteredCompilerArguments;
+            }
+        }
+
+        return result;
+    }
+    catch {
+        try {
+            logger.getOutputChannelLogger().appendLine(localize("copilot.cppcontext.error", "Error while retrieving the project context."));
+        }
+        catch {
+            // Intentionally swallow any exception.
+        }
+        telemetryProperties["error"] = "true";
+        return undefined;
+    } finally {
+        telemetry.logLanguageModelToolEvent('Completions/tool', telemetryProperties);
+    }
+}
+
 export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTool<void> {
     public async invoke(options: vscode.LanguageModelToolInvocationOptions<void>, token: vscode.CancellationToken): Promise<vscode.LanguageModelToolResult> {
         return new vscode.LanguageModelToolResult([
@@ -63,13 +173,7 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
                 return 'No configuration information is available for the active document.';
             }
 
-            for (const key in knownValues) {
-                const knownKey = key as keyof ChatContextResult;
-                if (knownValues[knownKey] && chatContext[knownKey]) {
-                    // Clear the value if it's not in the known values.
-                    chatContext[knownKey] = knownValues[knownKey][chatContext[knownKey]] || "";
-                }
-            }
+            formatChatContext(chatContext);
 
             let contextString = "";
             if (chatContext.language) {
@@ -100,7 +204,7 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
             telemetryProperties["error"] = "true";
             return "";
         } finally {
-            telemetry.logLanguageModelToolEvent('cpp', telemetryProperties);
+            telemetry.logLanguageModelToolEvent('Chat/Tool/cpp', telemetryProperties);
         }
     }
 

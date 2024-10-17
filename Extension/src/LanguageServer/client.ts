@@ -541,6 +541,19 @@ export interface ChatContextResult {
     targetArchitecture: string;
 }
 
+export interface FileContextResult {
+    compilerArguments: string[];
+}
+
+export interface ProjectContextResult {
+    language: string;
+    standardVersion: string;
+    compiler: string;
+    targetPlatform: string;
+    targetArchitecture: string;
+    fileContext: FileContextResult;
+}
+
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
@@ -561,6 +574,7 @@ const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, G
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
 const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
 const CppContextRequest: RequestType<void, ChatContextResult, void> = new RequestType<void, ChatContextResult, void>('cpptools/getChatContext');
+const ProjectContextRequest: RequestType<void, ProjectContextResult, void> = new RequestType<void, ProjectContextResult, void>('cpptools/getProjectContext');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
@@ -792,6 +806,7 @@ export interface Client {
     addTrustedCompiler(path: string): Promise<void>;
     getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult>;
     getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult>;
+    getProjectContext(token: vscode.CancellationToken): Promise<ProjectContextResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -2218,6 +2233,12 @@ export class DefaultClient implements Client {
         await withCancellation(this.ready, token);
         return DefaultClient.withLspCancellationHandling(
             () => this.languageClient.sendRequest(CppContextRequest, null, token), token);
+    }
+
+    public async getProjectContext(token: vscode.CancellationToken): Promise<ProjectContextResult> {
+        await withCancellation(this.ready, token);
+        return DefaultClient.withLspCancellationHandling(
+            () => this.languageClient.sendRequest(ProjectContextRequest, null, token), token);
     }
 
     /**
@@ -4123,4 +4144,5 @@ class NullClient implements Client {
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
     getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
+    getProjectContext(token: vscode.CancellationToken): Promise<ProjectContextResult> { return Promise.resolve({} as ProjectContextResult); }
 }
