@@ -6,11 +6,8 @@
 
 import * as vscode from 'vscode';
 import * as util from '../common';
-import * as telemetry from '../telemetry';
 import { ChatContextResult, GetIncludesResult } from './client';
 import { getActiveClient } from './extension';
-
-let isRelatedFilesApiEnabled: boolean | undefined;
 
 export interface CopilotTrait {
     name: string;
@@ -31,10 +28,6 @@ export interface CopilotApi {
 }
 
 export async function registerRelatedFilesProvider(): Promise<void> {
-    if (!await getIsRelatedFilesApiEnabled()) {
-        return;
-    }
-
     const api = await getCopilotApi();
     if (util.extensionContext && api) {
         try {
@@ -79,12 +72,6 @@ export async function registerRelatedFilesProvider(): Promise<void> {
     }
 }
 
-export async function registerRelatedFilesCommands(commandDisposables: vscode.Disposable[], enabled: boolean): Promise<void> {
-    if (await getIsRelatedFilesApiEnabled()) {
-        commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : () => Promise.resolve()));
-    }
-}
-
 async function getIncludesWithCancellation(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> {
     const activeClient = getActiveClient();
     const includes = await activeClient.getIncludes(maxDepth, token);
@@ -96,24 +83,6 @@ async function getIncludesWithCancellation(maxDepth: number, token: vscode.Cance
 
     includes.includedFiles = includes.includedFiles.filter(header => vscode.Uri.file(header).toString().startsWith(wksFolder));
     return includes;
-}
-
-async function getIncludes(maxDepth: number): Promise<GetIncludesResult> {
-    const tokenSource = new vscode.CancellationTokenSource();
-    try {
-        const includes = await getIncludesWithCancellation(maxDepth, tokenSource.token);
-        return includes;
-    } finally {
-        tokenSource.dispose();
-    }
-}
-
-async function getIsRelatedFilesApiEnabled(): Promise<boolean> {
-    if (isRelatedFilesApiEnabled === undefined) {
-        isRelatedFilesApiEnabled = await telemetry.isExperimentEnabled("CppToolsRelatedFilesApi");
-    }
-
-    return isRelatedFilesApiEnabled;
 }
 
 export async function getCopilotApi(): Promise<CopilotApi | undefined> {
