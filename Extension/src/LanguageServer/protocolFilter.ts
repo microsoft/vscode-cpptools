@@ -59,11 +59,7 @@ export function createProtocolFilter(): Middleware {
                 }
             }
         }),
-        didChange: async (textDocumentChangeEvent, sendMessage) => clients.ActiveClient.enqueue(async () => {
-            const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
-            me.onDidChangeTextDocument(textDocumentChangeEvent);
-            await sendMessage(textDocumentChangeEvent);
-        }),
+        didChange: invoke1,
         willSave: invoke1,
         willSaveWaitUntil: async (event, sendMessage) => {
             // await clients.ActiveClient.ready;

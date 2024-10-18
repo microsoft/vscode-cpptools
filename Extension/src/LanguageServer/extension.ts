@@ -170,6 +170,7 @@ export async function activate(): Promise<void> {
     });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
+    disposables.push(vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument));
     disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
     disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
     ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
@@ -286,6 +287,11 @@ async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Prom
             UpdateInsidersAccess();
         }
     }
+}
+
+async function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): Promise<void> {
+    const me: Client = clients.getClientFor(event.document.uri);
+    me.onDidChangeTextDocument(event);
 }
 
 let noActiveEditorTimeout: NodeJS.Timeout | undefined;
