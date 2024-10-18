@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.22.10: October 18, 2024
+### Bug Fixes
+* Fix 'Extract to Function' feature not working.
+* Fix 'Go to Next/Prev Preprocessor Conditional' feature not working.
+
 ## Version 1.22.9: October 10, 2024
 ### Performance Improvements
 * Initialization performance improvements. [#12030](https://github.com/microsoft/vscode-cpptools/issues/12030)
