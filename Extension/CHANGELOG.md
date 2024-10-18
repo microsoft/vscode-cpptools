@@ -2,8 +2,8 @@
 
 ## Version 1.22.10: October 18, 2024
 ### Bug Fixes
-* Fix 'Extract to Function' feature not working.
-* Fix 'Go to Next/Prev Preprocessor Conditional' feature not working.
+* Fix the 'Extract to Function' feature not working.
+* Fix the 'Go to Next/Prev Preprocessor Conditional' feature not working.
 
 ## Version 1.22.9: October 10, 2024
 ### Performance Improvements
