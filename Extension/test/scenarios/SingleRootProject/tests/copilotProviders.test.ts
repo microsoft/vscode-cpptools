@@ -12,11 +12,9 @@ import * as util from '../../../../src/common';
 import { ChatContextResult, DefaultClient, GetIncludesResult } from '../../../../src/LanguageServer/client';
 import { CopilotApi, CopilotTrait } from '../../../../src/LanguageServer/copilotProviders';
 import * as extension from '../../../../src/LanguageServer/extension';
-import * as telemetry from '../../../../src/telemetry';
 
 describe('registerRelatedFilesProvider', () => {
     let moduleUnderTest: any;
-    let getIsRelatedFilesApiEnabledStub: sinon.SinonStub;
     let mockCopilotApi: sinon.SinonStubbedInstance<CopilotApi>;
     let getActiveClientStub: sinon.SinonStub;
     let activeClientStub: sinon.SinonStubbedInstance<DefaultClient>;
@@ -32,7 +30,6 @@ describe('registerRelatedFilesProvider', () => {
             {} // Stub if you need to, or keep the object empty
         );
 
-        getIsRelatedFilesApiEnabledStub = sinon.stub(telemetry, 'isExperimentEnabled');
         sinon.stub(util, 'extensionContext').value({ extension: { id: 'test-extension-id' } });
 
         class MockCopilotApi implements CopilotApi {
@@ -71,11 +68,10 @@ describe('registerRelatedFilesProvider', () => {
         sinon.restore();
     });
 
-    const arrange = ({ cppToolsRelatedFilesApi, vscodeExtension, getIncludeFiles, chatContext, rootUri, flags }:
-    { cppToolsRelatedFilesApi: boolean; vscodeExtension?: vscode.Extension<unknown>; getIncludeFiles?: GetIncludesResult; chatContext?: ChatContextResult; rootUri?: vscode.Uri; flags?: Record<string, unknown> } =
-    { cppToolsRelatedFilesApi: false, vscodeExtension: undefined, getIncludeFiles: undefined, chatContext: undefined, rootUri: undefined, flags: {} }
+    const arrange = ({ vscodeExtension, getIncludeFiles, chatContext, rootUri, flags }:
+    { vscodeExtension?: vscode.Extension<unknown>; getIncludeFiles?: GetIncludesResult; chatContext?: ChatContextResult; rootUri?: vscode.Uri; flags?: Record<string, unknown> } =
+    { vscodeExtension: undefined, getIncludeFiles: undefined, chatContext: undefined, rootUri: undefined, flags: {} }
     ) => {
-        getIsRelatedFilesApiEnabledStub.withArgs('CppToolsRelatedFilesApi').resolves(cppToolsRelatedFilesApi);
         activeClientStub.getIncludes.resolves(getIncludeFiles);
         activeClientStub.getChatContext.resolves(chatContext);
         sinon.stub(activeClientStub, 'RootUri').get(() => rootUri);
@@ -95,31 +91,19 @@ describe('registerRelatedFilesProvider', () => {
         vscodeGetExtensionsStub = sinon.stub(vscode.extensions, 'getExtension').returns(vscodeExtension);
     };
 
-    it('should not register provider if CppToolsRelatedFilesApi is not enabled', async () => {
+    it('should register provider', async () => {
         arrange(
-            { cppToolsRelatedFilesApi: false }
+            { vscodeExtension: vscodeExtension }
         );
 
         await moduleUnderTest.registerRelatedFilesProvider();
 
-        ok(getIsRelatedFilesApiEnabledStub.calledOnce, 'getIsRelatedFilesApiEnabled should be called once');
-    });
-
-    it('should register provider if CppToolsRelatedFilesApi is enabled', async () => {
-        arrange(
-            { cppToolsRelatedFilesApi: true, vscodeExtension: vscodeExtension }
-        );
-
-        await moduleUnderTest.registerRelatedFilesProvider();
-
-        ok(getIsRelatedFilesApiEnabledStub.calledOnce, 'getIsRelatedFilesApiEnabled should be called once');
         ok(vscodeGetExtensionsStub.calledOnce, 'vscode.extensions.getExtension should be called once');
         ok(mockCopilotApi.registerRelatedFilesProvider.calledWithMatch(sinon.match({ extensionId: 'test-extension-id', languageId: sinon.match.in(['c', 'cpp', 'cuda-cpp']) })), 'registerRelatedFilesProvider should be called with the correct providerId and languageId');
     });
 
     it('should not add #cpp traits when ChatContext isn\'t available.', async () => {
         arrange({
-            cppToolsRelatedFilesApi: true,
             vscodeExtension: vscodeExtension,
             getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
             chatContext: undefined,
@@ -130,7 +114,6 @@ describe('registerRelatedFilesProvider', () => {
 
         const result = await callbackPromise;
 
-        ok(getIsRelatedFilesApiEnabledStub.calledOnce, 'getIsRelatedFilesApiEnabled should be called once');
         ok(vscodeGetExtensionsStub.calledOnce, 'vscode.extensions.getExtension should be called once');
         ok(mockCopilotApi.registerRelatedFilesProvider.calledWithMatch(sinon.match({ extensionId: 'test-extension-id', languageId: sinon.match.in(['c', 'cpp', 'cuda-cpp']) })), 'registerRelatedFilesProvider should be called with the correct providerId and languageId');
         ok(getActiveClientStub.callCount !== 0, 'getActiveClient should be called');
@@ -143,7 +126,6 @@ describe('registerRelatedFilesProvider', () => {
 
     it('should not add #cpp traits when copilotcppTraits flag is false.', async () => {
         arrange({
-            cppToolsRelatedFilesApi: true,
             vscodeExtension: vscodeExtension,
             getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
             chatContext: {
@@ -160,7 +142,6 @@ describe('registerRelatedFilesProvider', () => {
 
         const result = await callbackPromise;
 
-        ok(getIsRelatedFilesApiEnabledStub.calledOnce, 'getIsRelatedFilesApiEnabled should be called once');
         ok(vscodeGetExtensionsStub.calledOnce, 'vscode.extensions.getExtension should be called once');
         ok(mockCopilotApi.registerRelatedFilesProvider.calledWithMatch(sinon.match({ extensionId: 'test-extension-id', languageId: sinon.match.in(['c', 'cpp', 'cuda-cpp']) })), 'registerRelatedFilesProvider should be called with the correct providerId and languageId');
         ok(getActiveClientStub.callCount !== 0, 'getActiveClient should be called');
@@ -173,7 +154,6 @@ describe('registerRelatedFilesProvider', () => {
 
     it('should add #cpp traits when copilotcppTraits flag is true.', async () => {
         arrange({
-            cppToolsRelatedFilesApi: true,
             vscodeExtension: vscodeExtension,
             getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
             chatContext: {
@@ -190,7 +170,6 @@ describe('registerRelatedFilesProvider', () => {
 
         const result = await callbackPromise;
 
-        ok(getIsRelatedFilesApiEnabledStub.calledOnce, 'getIsRelatedFilesApiEnabled should be called once');
         ok(vscodeGetExtensionsStub.calledOnce, 'vscode.extensions.getExtension should be called once');
         ok(mockCopilotApi.registerRelatedFilesProvider.calledThrice, 'registerRelatedFilesProvider should be called three times');
         ok(mockCopilotApi.registerRelatedFilesProvider.calledWithMatch(sinon.match({ extensionId: 'test-extension-id', languageId: sinon.match.in(['c', 'cpp', 'cuda-cpp']) })), 'registerRelatedFilesProvider should be called with the correct providerId and languageId');
@@ -226,7 +205,6 @@ describe('registerRelatedFilesProvider', () => {
     it('should exclude #cpp traits per copilotcppExcludeTraits.', async () => {
         const excludeTraits = ['compiler', 'targetPlatform'];
         arrange({
-            cppToolsRelatedFilesApi: true,
             vscodeExtension: vscodeExtension,
             getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
             chatContext: {
@@ -243,7 +221,6 @@ describe('registerRelatedFilesProvider', () => {
 
         const result = await callbackPromise;
 
-        ok(getIsRelatedFilesApiEnabledStub.calledOnce, 'getIsRelatedFilesApiEnabled should be called once');
         ok(vscodeGetExtensionsStub.calledOnce, 'vscode.extensions.getExtension should be called once');
         ok(mockCopilotApi.registerRelatedFilesProvider.calledThrice, 'registerRelatedFilesProvider should be called three times');
         ok(mockCopilotApi.registerRelatedFilesProvider.calledWithMatch(sinon.match({ extensionId: 'test-extension-id', languageId: sinon.match.in(['c', 'cpp', 'cuda-cpp']) })), 'registerRelatedFilesProvider should be called with the correct providerId and languageId');
@@ -258,114 +235,11 @@ describe('registerRelatedFilesProvider', () => {
     });
 
     it('should handle errors during provider registration', async () => {
-        arrange(
-            { cppToolsRelatedFilesApi: true }
-        );
+        arrange({});
 
         await moduleUnderTest.registerRelatedFilesProvider();
 
-        ok(getIsRelatedFilesApiEnabledStub.calledOnce, 'getIsRelatedFilesApiEnabled should be called once');
         ok(vscodeGetExtensionsStub.calledOnce, 'vscode.extensions.getExtension should be called once');
         ok(mockCopilotApi.registerRelatedFilesProvider.notCalled, 'registerRelatedFilesProvider should not be called');
-    });
-});
-
-describe('registerRelatedFilesCommands', () => {
-    let moduleUnderTest: any;
-    let getIsRelatedFilesApiEnabledStub: sinon.SinonStub;
-    let registerCommandStub: sinon.SinonStub;
-    let commandDisposables: vscode.Disposable[];
-    let getActiveClientStub: sinon.SinonStub;
-    let activeClientStub: sinon.SinonStubbedInstance<DefaultClient>;
-    let getIncludesResult: Promise<GetIncludesResult | undefined> = Promise.resolve(undefined);
-
-    beforeEach(() => {
-        proxyquire.noPreserveCache(); // Tells proxyquire to not fetch the module from cache
-        // Ensures that each test has a freshly loaded instance of moduleUnderTest
-        moduleUnderTest = proxyquire(
-            '../../../../src/LanguageServer/copilotProviders',
-            {} // Stub if you need to, or keep the object empty
-        );
-
-        activeClientStub = sinon.createStubInstance(DefaultClient);
-        getActiveClientStub = sinon.stub(extension, 'getActiveClient').returns(activeClientStub);
-        activeClientStub.getIncludes.resolves({ includedFiles: [] });
-        getIsRelatedFilesApiEnabledStub = sinon.stub(telemetry, 'isExperimentEnabled');
-        registerCommandStub = sinon.stub(vscode.commands, 'registerCommand');
-        commandDisposables = [];
-    });
-
-    afterEach(() => {
-        sinon.restore();
-    });
-
-    const arrange = ({ cppToolsRelatedFilesApi, getIncludeFiles, rootUri }:
-    { cppToolsRelatedFilesApi: boolean; getIncludeFiles?: GetIncludesResult; rootUri?: vscode.Uri } =
-    { cppToolsRelatedFilesApi: false, getIncludeFiles: undefined, rootUri: undefined }
-    ) => {
-        getIsRelatedFilesApiEnabledStub.withArgs('CppToolsRelatedFilesApi').resolves(cppToolsRelatedFilesApi);
-        activeClientStub.getIncludes.resolves(getIncludeFiles);
-        sinon.stub(activeClientStub, 'RootUri').get(() => rootUri);
-        registerCommandStub.callsFake((command: string, callback: (maxDepth: number) => Promise<GetIncludesResult>) => {
-            getIncludesResult = callback(1);
-        });
-    };
-
-    it('should register C_Cpp.getIncludes command if CppToolsRelatedFilesApi is enabled', async () => {
-        arrange({ cppToolsRelatedFilesApi: true });
-
-        await moduleUnderTest.registerRelatedFilesCommands(commandDisposables, true);
-
-        ok(getIsRelatedFilesApiEnabledStub.calledOnce, 'getIsRelatedFilesApiEnabled should be called once');
-        ok(registerCommandStub.calledOnce, 'registerCommand should be called once');
-        ok(commandDisposables.length === 1, 'commandDisposables should have one disposable');
-        ok(registerCommandStub.calledWithMatch('C_Cpp.getIncludes', sinon.match.func), 'registerCommand should be called with "C_Cpp.getIncludes" and a function');
-    });
-
-    it('should register C_Cpp.getIncludes command that can handle requests properly', async () => {
-        arrange({
-            cppToolsRelatedFilesApi: true,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo1.h', 'C:\\src\\my_project\\foo2.h'] },
-            rootUri: vscode.Uri.file('C:\\src\\my_project')
-        });
-        await moduleUnderTest.registerRelatedFilesCommands(commandDisposables, true);
-
-        const includesResult = await getIncludesResult;
-
-        ok(getIsRelatedFilesApiEnabledStub.calledOnce, 'getIsRelatedFilesApiEnabled should be called once');
-        ok(getActiveClientStub.calledOnce, 'getActiveClient should be called once');
-        ok(includesResult, 'includesResult should be defined');
-        ok(includesResult?.includedFiles.length === 2, 'includesResult should have 2 included files');
-        ok(includesResult?.includedFiles[0] === 'C:\\src\\my_project\\foo1.h', 'includesResult should have "C:\\src\\my_project\\foo1.h"');
-        ok(includesResult?.includedFiles[1] === 'C:\\src\\my_project\\foo2.h', 'includesResult should have "C:\\src\\my_project\\foo2.h"');
-    });
-
-    it('should not register C_Cpp.getIncludes command if CppToolsRelatedFilesApi is not enabled', async () => {
-        arrange({
-            cppToolsRelatedFilesApi: false
-        });
-
-        await moduleUnderTest.registerRelatedFilesCommands(commandDisposables, true);
-
-        ok(getIsRelatedFilesApiEnabledStub.calledOnce, 'getIsRelatedFilesApiEnabled should be called once');
-        ok(registerCommandStub.notCalled, 'registerCommand should not be called');
-        ok(commandDisposables.length === 0, 'commandDisposables should be empty');
-    });
-
-    it('should register C_Cpp.getIncludes as no-op command if enabled is false', async () => {
-        arrange({
-            cppToolsRelatedFilesApi: true,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
-            rootUri: vscode.Uri.file('C:\\src\\my_project')
-        });
-        await moduleUnderTest.registerRelatedFilesCommands(commandDisposables, false);
-
-        const includesResult = await getIncludesResult;
-
-        ok(getIsRelatedFilesApiEnabledStub.calledOnce, 'getIsRelatedFilesApiEnabled should be called once');
-        ok(registerCommandStub.calledOnce, 'registerCommand should be called once');
-        ok(commandDisposables.length === 1, 'commandDisposables should have one disposable');
-        ok(includesResult === undefined, 'includesResult should be undefined');
-        ok(registerCommandStub.calledWithMatch('C_Cpp.getIncludes', sinon.match.func), 'registerCommand should be called with "C_Cpp.getIncludes" and a function');
     });
 });
