@@ -11,7 +11,7 @@
 	"walkthrough.windows.note1.text": "Herhangi bir C++ kod temelini derlemek, oluşturmak ve doğrulamak için Visual Studio Code ile birlikte Visual Studio Derleme Araçları’nda bulunan C++ araç takımını kullanabilirsiniz. Bunun yanı sıra, bu C++ kod temelini geliştirmek için etkin olarak kullandığınız geçerli bir Visual Studio lisansına (Community, Pro veya Enterprise) sahip olursunuz.",
 	"walkthrough.windows.verify.compiler": "Derleyici yüklemesi doğrulanıyor",
 	"walkthrough.windows.open.command.prompt": "Windows Başlat menüsüne 'geliştirici' yazarak {0} açın.",
-	"walkthrough.windows.command.prompt.name1": "VS için Geliştirici Komut İstemi",
+	"walkthrough.windows.command.prompt.name1": "VS için Developer Komut İstemi",
 	"walkthrough.windows.check.install": "VS için Geliştirici Komut İstemi’ne {0} yazarak MSVC yüklemenizi denetleyin. Sürüm ve temel kullanım açıklamasını içeren bir telif hakkı iletisi göreceksiniz.",
 	"walkthrough.windows.note2": "Not",
 	"walkthrough.windows.note2.text": "Komut satırından veya VS Code’dan MSVC’yi kullanmak için şuradan çalıştırmanız gerek: {0}. {1}, {2} veya Windows komut istemi gibi sıradan bir kabuk gerekli yol ortam değişkenleri kümesi içermez.",

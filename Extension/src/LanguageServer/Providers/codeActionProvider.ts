@@ -144,7 +144,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                         if (codeActionCodeInfo !== undefined) {
                             if (codeActionCodeInfo.fixAllTypeCodeAction !== undefined &&
                                 (codeActionCodeInfo.uriToInfo.size > 1 ||
-                                    codeActionCodeInfo.uriToInfo.values().next().value.numValidWorkspaceEdits > 1)) {
+                                    (codeActionCodeInfo.uriToInfo.values().next().value?.numValidWorkspaceEdits ?? 0) > 1)) {
                                 // Only show the "fix all type" if there is more than one fix for the type.
                                 fixCodeActions.push(codeActionCodeInfo.fixAllTypeCodeAction);
                             }
@@ -161,7 +161,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                         if (codeActionCodeInfo.removeAllTypeCodeAction !== undefined &&
                             codeActionCodeInfo.uriToInfo.size > 0 &&
                             (codeActionCodeInfo.uriToInfo.size > 1 ||
-                                codeActionCodeInfo.uriToInfo.values().next().value.identifiers.length > 1)) {
+                                (codeActionCodeInfo.uriToInfo.values().next().value?.identifiers?.length ?? 0) > 1)) {
                             // Only show the "clear all type" if there is more than one fix for the type.
                             removeAllTypeAvailable = true;
                         }

@@ -736,78 +736,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/1ds-core-js 4.3.1 - MIT
-https://github.com/microsoft/ApplicationInsights-JS#readme
-
-copyright Microsoft 2018
-Copyright (c) Microsoft Corporation
-Copyright (c) Microsoft and contributors
-Copyright (c) NevWare21 Solutions LLC and contributors
-
-The MIT License (MIT)
-
-Copyright (c) Microsoft Corporation
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
----------------------------------------------------------
-
----------------------------------------------------------
-
-@microsoft/1ds-post-js 4.3.1 - MIT
-https://github.com/microsoft/ApplicationInsights-JS#readme
-
-copyright Microsoft 2018
-copyright Microsoft 2020
-copyright Microsoft 2018-2020
-copyright Microsoft 2022 Simple
-Copyright (c) Microsoft Corporation
-Copyright (c) Microsoft and contributors
-Copyright (c) NevWare21 Solutions LLC and contributors
-
-The MIT License (MIT)
-
-Copyright (c) Microsoft Corporation
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
----------------------------------------------------------
-
----------------------------------------------------------
-
-@microsoft/applicationinsights-channel-js 3.3.1 - MIT
+@microsoft/applicationinsights-channel-js 3.3.3 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 Copyright (c) Microsoft Corporation
@@ -841,7 +770,7 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/applicationinsights-common 3.3.1 - MIT
+@microsoft/applicationinsights-common 3.3.3 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 Copyright (c) Microsoft Corporation
@@ -875,7 +804,7 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/applicationinsights-core-js 3.3.1 - MIT
+@microsoft/applicationinsights-core-js 3.3.3 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 Copyright (c) Microsoft Corporation
@@ -942,40 +871,6 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/applicationinsights-web-basic 3.3.1 - MIT
-https://github.com/microsoft/ApplicationInsights-JS#readme
-
-Copyright (c) Microsoft Corporation
-Copyright (c) Microsoft and contributors
-Copyright (c) NevWare21 Solutions LLC and contributors
-
-The MIT License (MIT)
-
-Copyright (c) Microsoft Corporation
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-
----------------------------------------------------------
-
----------------------------------------------------------
-
 @microsoft/dynamicproto-js 2.0.3 - MIT
 https://github.com/microsoft/DynamicProto-JS#readme
 
@@ -1012,41 +907,6 @@ SOFTWARE.
 
 @nevware21/ts-async 0.5.2 - MIT
 https://github.com/nevware21/ts-async
-
-Copyright (c) 2022 NevWare21 Solutions LLC
-Copyright (c) 2023 NevWare21 Solutions LLC
-Copyright (c) 2024 NevWare21 Solutions LLC
-Copyright (c) NevWare21 Solutions LLC and contributors
-
-MIT License
-
-Copyright (c) 2022 NevWare21 Solutions LLC
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-
----------------------------------------------------------
-
----------------------------------------------------------
-
-@nevware21/ts-utils 0.11.3 - MIT
-https://github.com/nevware21/ts-utils
 
 Copyright (c) 2022 NevWare21 Solutions LLC
 Copyright (c) 2023 NevWare21 Solutions LLC
