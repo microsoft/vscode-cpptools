@@ -17,8 +17,8 @@
 	"walkthrough.windows.note1": "注意",
 	"walkthrough.windows.note1.text": "可以使用 Visual Studio 生成工具中的 C++ 工具集以及 Visual Studio Code 以编译、生成并验证任何 C++ 代码库，前提是同时具有有效的 Visual Studio 许可证(社区版、专业版或企业版)，且正积极将其用于开发该 C++ 代码库。",
 	"walkthrough.windows.open.command.prompt": "在 Windows“开始”菜单中键入‘开发人员’以打开 {0}。",
-	"walkthrough.windows.command.prompt.name1": "VS 的开发人员命令提示",
-	"walkthrough.windows.check.install": "在 VS 的开发人员命令提示中键入 {0} 以检查 MSVC 安装。你应该会看到包含版本和基本使用情况说明的版权消息。",
+	"walkthrough.windows.command.prompt.name1": "VS 的 Developer 命令提示",
+	"walkthrough.windows.check.install": "在 VS 的开发人员命令提示中键入 {0} 以检查 MSVC 安装。你应该会看到包含版本和基本使用说明的版权消息。",
 	"walkthrough.windows.note2": "注意",
 	"walkthrough.windows.note2.text": "要从命令行或 VS Code 使用 MSVC，必须从 {0} 运行。普通 shell (例如 {1}、 {2})或 Windows 命令提示符未设置必要的路径环境变量。",
 	"walkthrough.windows.command.prompt.name2": "VS 的开发人员命令提示"
