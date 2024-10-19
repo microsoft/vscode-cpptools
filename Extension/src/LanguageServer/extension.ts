@@ -27,7 +27,6 @@ import { registerRelatedFilesProvider } from './copilotProviders';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
 import { getLanguageConfig } from './languageConfig';
-import { CppConfigurationLanguageModelTool } from './lmTool';
 import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
@@ -252,10 +251,10 @@ export async function activate(): Promise<void> {
         activeDocument = activeEditor.document;
     }
 
-    if (util.extensionContext && new CppSettings().experimentalFeatures) {
-        const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
-        disposables.push(tool);
-    }
+    // if (util.extensionContext && new CppSettings().experimentalFeatures) {
+    //     const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
+    //     disposables.push(tool);
+    // }
 
     await registerRelatedFilesProvider();
 }
