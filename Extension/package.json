@@ -957,6 +957,38 @@
                             ]
                         },
                         "scope": "resource"
+                    },
+                    "C_Cpp.mergeCompileCommands": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "markdownDescription": "%c_cpp.configuration.mergeCompileCommands.markdownDescription%",
+                        "scope": "resource",
+                        "default": {
+                            "sources": [],
+                            "destination": ""
+                        },
+                        "required": [
+                            "sources",
+                            "destination"
+                        ],
+                        "properties": {
+                            "sources": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "uniqueItems": true,
+                                "markdownDescription": "%c_cpp.configuration.mergeCompileCommands.sources.markdownDescription%",
+                                "default": []
+                            },
+                            "destination": {
+                                "type": "string",
+                                "markdownDescription": "%c_cpp.configuration.mergeCompileCommands.destination.markdownDescription%",
+                                "default": ""
+                            }
+                        }
                     }
                 }
             },

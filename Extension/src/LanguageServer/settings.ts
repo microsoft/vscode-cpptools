@@ -33,6 +33,11 @@ export interface Associations {
     [key: string]: string;
 }
 
+export interface MergeCompileCommands {
+    sources: string[];
+    destination: string;
+}
+
 // Settings that can be undefined have default values assigned in the native code or are meant to return undefined.
 export interface WorkspaceFolderSettingsParams {
     uri: string | undefined;
@@ -403,6 +408,7 @@ export class CppSettings extends Settings {
     public get defaultForcedInclude(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return this.getAsStringOrUndefined("default.intelliSenseMode"); }
     public get defaultCompilerPath(): string | null { return this.getAsString("default.compilerPath", true); }
+    public get mergeCompileCommands(): MergeCompileCommands | undefined { return this.getMergeCompileCommands(); }
 
     public set defaultCompilerPath(value: string) {
         const defaultCompilerPathStr: string = "default.compilerPath";
@@ -701,6 +707,14 @@ export class CppSettings extends Settings {
             return value as Associations;
         }
         return setting.default as Associations;
+    }
+
+    private getMergeCompileCommands(): MergeCompileCommands | undefined {
+        const value: any = super.Section.get<any>("mergeCompileCommands");
+        //const setting = getRawSetting("C_Cpp.mergeCompileCommands", true);
+        // todo: add some validation here
+
+        return value as MergeCompileCommands;
     }
 
     // Checks a given enum value against a list of valid enum values from package.json.

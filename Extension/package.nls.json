@@ -724,6 +724,24 @@
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
+    "c_cpp.configuration.mergeCompileCommands.markdownDescription": {
+        "message": "Collect and merge all `compile_commands.json` listed in `sources` and save to `destination`",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.mergeCompileCommands.sources.markdownDescription": {
+        "message": "List of `compile_commands.json` files to merge. (glob patterns are not supported)",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.mergeCompileCommands.destination.markdownDescription": {
+        "message": "The destination file to save the merged `compile_commands.json` to.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.updateChannel.deprecationMessage": "This setting is deprecated. Pre-release extensions are now available via the Marketplace.",
     "c_cpp.configuration.default.dotConfig.markdownDescription": {
         "message": "The value to use in a configuration if `dotConfig` is not specified, or the value to insert if `${default}` is present in `dotConfig`.",
