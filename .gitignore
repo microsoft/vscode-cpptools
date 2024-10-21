@@ -13,3 +13,6 @@ OneLocBuild
 
 # ignore imported localization xlf directory
 vscode-translations-import
+
+# todo remove
+Extension/bin/libc.so 
