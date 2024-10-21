@@ -44,15 +44,10 @@ const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: str
     }
 };
 
-const plainTextContentType = 'text/plain';
-
 export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTool<void> {
     public async invoke(options: vscode.LanguageModelToolInvocationOptions<void>, token: vscode.CancellationToken): Promise<vscode.LanguageModelToolResult> {
-        const result: vscode.LanguageModelToolResult = {};
-        if (options.requestedContentTypes.includes(plainTextContentType)) {
-            result[plainTextContentType] = await this.getContext(token);
-        }
-        return result;
+        return new vscode.LanguageModelToolResult([
+            new vscode.LanguageModelTextPart(await this.getContext(token))]);
     }
 
     private async getContext(token: vscode.CancellationToken): Promise<string> {
