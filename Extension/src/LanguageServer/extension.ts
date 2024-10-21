@@ -23,6 +23,7 @@ import * as telemetry from '../telemetry';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
+import { registerRelatedFilesProvider } from './copilotProviders';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
 import { getLanguageConfig } from './languageConfig';
@@ -169,6 +170,7 @@ export async function activate(): Promise<void> {
     });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
+    disposables.push(vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument));
     disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
     disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
     ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
@@ -183,7 +185,7 @@ export async function activate(): Promise<void> {
 
     void clients.ActiveClient.ready.then(() => intervalTimer = global.setInterval(onInterval, 2500));
 
-    registerCommands(true);
+    await registerCommands(true);
 
     vscode.tasks.onDidStartTask(() => getActiveClient().PauseCodeAnalysis());
 
@@ -254,6 +256,8 @@ export async function activate(): Promise<void> {
         const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
         disposables.push(tool);
     }
+
+    await registerRelatedFilesProvider();
 }
 
 export function updateLanguageConfigurations(): void {
@@ -283,6 +287,11 @@ async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Prom
             UpdateInsidersAccess();
         }
     }
+}
+
+async function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): Promise<void> {
+    const me: Client = clients.getClientFor(event.document.uri);
+    me.onDidChangeTextDocument(event);
 }
 
 let noActiveEditorTimeout: NodeJS.Timeout | undefined;
@@ -350,7 +359,7 @@ function onInterval(): void {
 /**
  * registered commands
  */
-export function registerCommands(enabled: boolean): void {
+export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.forEach(d => d.dispose());
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
@@ -408,7 +417,6 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? () => onExtractToFunction(true, false) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : () => Promise.resolve()));
 }
 
 function onDisabledCommand() {
@@ -1372,9 +1380,4 @@ export async function preReleaseCheck(): Promise<void> {
             });
         }
     }
-}
-
-export async function getIncludes(maxDepth: number): Promise<any> {
-    const includes = await clients.ActiveClient.getIncludes(maxDepth);
-    return includes;
 }
