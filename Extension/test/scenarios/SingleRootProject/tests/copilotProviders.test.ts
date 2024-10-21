@@ -22,6 +22,12 @@ describe('registerRelatedFilesProvider', () => {
     let callbackPromise: Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }> | undefined;
     let vscodeExtension: vscode.Extension<unknown>;
 
+    const includedFiles = process.platform === 'win32' ?
+        ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] :
+        ['/system/include/vector', '/system/include/string', '/home/src/my_project/foo.h'];
+    const rootUri = vscode.Uri.file(process.platform === 'win32' ? 'C:\\src\\my_project' : '/home/src/my_project');
+    const expectedInclude = process.platform === 'win32' ? 'file:///c%3A/src/my_project/foo.h' : 'file:///home/src/my_project/foo.h';
+
     beforeEach(() => {
         proxyquire.noPreserveCache(); // Tells proxyquire to not fetch the module from cache
         // Ensures that each test has a freshly loaded instance of moduleUnderTest
@@ -105,9 +111,9 @@ describe('registerRelatedFilesProvider', () => {
     it('should not add #cpp traits when ChatContext isn\'t available.', async () => {
         arrange({
             vscodeExtension: vscodeExtension,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
+            getIncludeFiles: { includedFiles },
             chatContext: undefined,
-            rootUri: vscode.Uri.file('C:\\src\\my_project'),
+            rootUri,
             flags: { copilotcppTraits: true }
         });
         await moduleUnderTest.registerRelatedFilesProvider();
@@ -120,14 +126,14 @@ describe('registerRelatedFilesProvider', () => {
         ok(callbackPromise, 'callbackPromise should be defined');
         ok(result, 'result should be defined');
         ok(result.entries.length === 1, 'result.entries should have 1 included file');
-        ok(result.entries[0].toString() === 'file:///c%3A/src/my_project/foo.h', 'result.entries should have "file:///c%3A/src/my_project/foo.h"');
+        ok(result.entries[0].toString() === expectedInclude, `result.entries should have "${expectedInclude}"`);
         ok(result.traits === undefined, 'result.traits should be undefined');
     });
 
     it('should not add #cpp traits when copilotcppTraits flag is false.', async () => {
         arrange({
             vscodeExtension: vscodeExtension,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
+            getIncludeFiles: { includedFiles },
             chatContext: {
                 language: 'c++',
                 standardVersion: 'c++20',
@@ -135,7 +141,7 @@ describe('registerRelatedFilesProvider', () => {
                 targetPlatform: 'windows',
                 targetArchitecture: 'x64'
             },
-            rootUri: vscode.Uri.file('C:\\src\\my_project'),
+            rootUri,
             flags: { copilotcppTraits: false }
         });
         await moduleUnderTest.registerRelatedFilesProvider();
@@ -148,14 +154,14 @@ describe('registerRelatedFilesProvider', () => {
         ok(callbackPromise, 'callbackPromise should be defined');
         ok(result, 'result should be defined');
         ok(result.entries.length === 1, 'result.entries should have 1 included file');
-        ok(result.entries[0].toString() === 'file:///c%3A/src/my_project/foo.h', 'result.entries should have "file:///c%3A/src/my_project/foo.h"');
+        ok(result.entries[0].toString() === expectedInclude, `result.entries should have "${expectedInclude}"`);
         ok(result.traits === undefined, 'result.traits should be undefined');
     });
 
     it('should add #cpp traits when copilotcppTraits flag is true.', async () => {
         arrange({
             vscodeExtension: vscodeExtension,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
+            getIncludeFiles: { includedFiles },
             chatContext: {
                 language: 'c++',
                 standardVersion: 'c++20',
@@ -163,7 +169,7 @@ describe('registerRelatedFilesProvider', () => {
                 targetPlatform: 'windows',
                 targetArchitecture: 'x64'
             },
-            rootUri: vscode.Uri.file('C:\\src\\my_project'),
+            rootUri,
             flags: { copilotcppTraits: true }
         });
         await moduleUnderTest.registerRelatedFilesProvider();
@@ -177,7 +183,7 @@ describe('registerRelatedFilesProvider', () => {
         ok(callbackPromise, 'callbackPromise should be defined');
         ok(result, 'result should be defined');
         ok(result.entries.length === 1, 'result.entries should have 1 included file');
-        ok(result.entries[0].toString() === 'file:///c%3A/src/my_project/foo.h', 'result.entries should have "file:///c%3A/src/my_project/foo.h"');
+        ok(result.entries[0].toString() === expectedInclude, `result.entries should have "${expectedInclude}"`);
         ok(result.traits, 'result.traits should be defined');
         ok(result.traits.length === 5, 'result.traits should have 5 traits');
         ok(result.traits[0].name === 'language', 'result.traits[0].name should be "language"');
@@ -206,7 +212,7 @@ describe('registerRelatedFilesProvider', () => {
         const excludeTraits = ['compiler', 'targetPlatform'];
         arrange({
             vscodeExtension: vscodeExtension,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
+            getIncludeFiles: { includedFiles },
             chatContext: {
                 language: 'c++',
                 standardVersion: 'c++20',
@@ -214,7 +220,7 @@ describe('registerRelatedFilesProvider', () => {
                 targetPlatform: 'windows',
                 targetArchitecture: 'x64'
             },
-            rootUri: vscode.Uri.file('C:\\src\\my_project'),
+            rootUri,
             flags: { copilotcppTraits: true, copilotcppExcludeTraits: excludeTraits }
         });
         await moduleUnderTest.registerRelatedFilesProvider();
@@ -228,7 +234,7 @@ describe('registerRelatedFilesProvider', () => {
         ok(callbackPromise, 'callbackPromise should be defined');
         ok(result, 'result should be defined');
         ok(result.entries.length === 1, 'result.entries should have 1 included file');
-        ok(result.entries[0].toString() === 'file:///c%3A/src/my_project/foo.h', 'result.entries should have "file:///c%3A/src/my_project/foo.h"');
+        ok(result.entries[0].toString() === expectedInclude, `result.entries should have "${expectedInclude}"`);
         ok(result.traits, 'result.traits should be defined');
         ok(result.traits.length === 3, 'result.traits should have 3 traits');
         ok(result.traits.filter(trait => excludeTraits.includes(trait.name)).length === 0, 'result.traits should not include excluded traits');
