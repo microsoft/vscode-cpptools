@@ -38,7 +38,8 @@ export async function registerRelatedFilesProvider(): Promise<void> {
 
                         const getIncludesHandler = async () => (await getIncludesWithCancellation(1, token))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [];
                         const getTraitsHandler = async () => {
-                            const chatContext: ChatContextResult | undefined = await (getActiveClient().getChatContext(token) ?? undefined);
+                            const client = getActiveClient();
+                            const chatContext: ChatContextResult | undefined = await (client.getChatContext(token) ?? undefined);
 
                             if (!chatContext) {
                                 return undefined;
@@ -51,6 +52,16 @@ export async function registerRelatedFilesProvider(): Promise<void> {
                                 { name: "targetPlatform", value: chatContext.targetPlatform, includeInPrompt: true, promptTextOverride: `This build targets ${chatContext.targetPlatform}.` },
                                 { name: "targetArchitecture", value: chatContext.targetArchitecture, includeInPrompt: true, promptTextOverride: `This build targets ${chatContext.targetArchitecture}.` }
                             ];
+
+                            const compilerArgs = chatContext.compilerArgs?.join(' ') ?? undefined;
+                            if (compilerArgs) {
+                                traits.push({ name: "compilerArgs", value: compilerArgs, includeInPrompt: true, promptTextOverride: `The compiler command line arguments contain: ${compilerArgs}.` });
+                            }
+
+                            const compilerUserDefines = chatContext.compilerUserDefines?.join(', ') ?? undefined;
+                            if (compilerUserDefines) {
+                                traits.push({ name: "compilerUserDefines", value: compilerUserDefines, includeInPrompt: true, promptTextOverride: `The compiler command line user defines contain: ${compilerUserDefines}.` });
+                            }
 
                             const excludeTraits = context.flags.copilotcppExcludeTraits as string[] ?? [];
                             traits = traits.filter(trait => !excludeTraits.includes(trait.name));
