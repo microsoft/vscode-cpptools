@@ -38,8 +38,7 @@
         "Snippets"
     ],
     "enabledApiProposals": [
-        "terminalDataWriteEvent",
-        "lmTools"
+        "terminalDataWriteEvent"
     ],
     "capabilities": {
         "untrustedWorkspaces": {
