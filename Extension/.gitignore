@@ -35,7 +35,3 @@ src/nativeStrings.ts
 
 vscode*.d.ts
 .scripts/_*
-
-# The lmTools API is still changing frequently. We want to avoid spontaneous
-# build breaks just because the upstream API changed in VS Code Insiders.
-!vscode.proposed.lmTools.d.ts
