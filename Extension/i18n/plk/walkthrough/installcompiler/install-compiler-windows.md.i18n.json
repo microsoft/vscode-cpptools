@@ -17,7 +17,7 @@
 	"walkthrough.windows.note1": "Uwaga",
 	"walkthrough.windows.note1.text": "Zestawu narzędzi języka C++ z narzędzi Visual Studio Build Tools wraz z programem Visual Studio Code można używać do kompilowania, tworzenia i weryfikowania dowolnej bazy kodu języka C++, o ile masz również ważną licencję programu Visual Studio (Community, Pro lub Enterprise), której aktywnie używasz do opracowywania tej bazy kodu języka C++.",
 	"walkthrough.windows.open.command.prompt": "Otwórz pozycję {0}, wpisując „deweloper” w menu Start systemu Windows.",
-	"walkthrough.windows.command.prompt.name1": "Wiersz polecenia dla deweloperów dla programu VS",
+	"walkthrough.windows.command.prompt.name1": "Wiersz polecenia Developer dla programu VS",
 	"walkthrough.windows.check.install": "Sprawdź instalację programu MSVC, wpisując {0} w wierszu polecenia dewelopera dla programu VS. Powinien zostać wyświetlony komunikat o prawach autorskich z wersją i opisem użycia podstawowego.",
 	"walkthrough.windows.note2": "Uwaga",
 	"walkthrough.windows.note2.text": "Aby użyć programu MSVC z wiersza polecenia lub programu VS Code, należy uruchomić z {0}. Zwykła powłoka, taka jak {1}, {2} lub wiersz polecenia systemu Windows, nie ma ustawionych wymaganych zmiennych środowiskowych ścieżki.",
