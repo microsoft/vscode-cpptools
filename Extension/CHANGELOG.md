@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.22.10: October 21, 2024
+## Version 1.23.0: October 24, 2024
 ### Enhancements
 * Update to clang-format and clang-tidy 19.1.2. [#12824](https://github.com/microsoft/vscode-cpptools/issues/12824)
 
