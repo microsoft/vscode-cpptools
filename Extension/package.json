@@ -963,7 +963,7 @@
                             "null"
                         ],
                         "markdownDescription": "%c_cpp.configuration.mergeCompileCommands.markdownDescription%",
-                        "scope": "resource",
+                        "scope": "machine-overridable",
                         "default": {
                             "sources": [],
                             "destination": ""
