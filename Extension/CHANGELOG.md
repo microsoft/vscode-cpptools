@@ -13,7 +13,7 @@
 * Fix stale colorization due to delays in updating the open file version. [PR #12851](https://github.com/microsoft/vscode-cpptools/pull/12851)
 * Fix redundant progressive squiggle updates. [PR #12876](https://github.com/microsoft/vscode-cpptools/pull/12876)
 * Fix some duplicate requests potentially not getting discarded.
-* Fix a crash in `start_process_and_wait_for_exit`.
+* Fix a random crash in `start_process_and_wait_for_exit`.
 
 ## Version 1.22.10: October 21, 2024
 ### Bug Fixes
