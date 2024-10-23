@@ -38,8 +38,7 @@
         "Snippets"
     ],
     "enabledApiProposals": [
-        "terminalDataWriteEvent",
-        "lmTools"
+        "terminalDataWriteEvent"
     ],
     "capabilities": {
         "untrustedWorkspaces": {
@@ -6519,10 +6518,7 @@
                 "userDescription": "%c_cpp.languageModelTools.configuration.userDescription%",
                 "modelDescription": "For the active C or C++ file, this tool provides: the language (C, C++, or CUDA), the language standard version (such as C++11, C++14, C++17, or C++20), the compiler (such as GCC, Clang, or MSVC), the target platform (such as x86, x64, or ARM), and the target architecture (such as 32-bit or 64-bit).",
                 "icon": "$(file-code)",
-                "when": "(config.C_Cpp.experimentalFeatures =~ /^[eE]nabled$/)",
-                "supportedContentTypes": [
-                    "text/plain"
-                ]
+                "when": "(config.C_Cpp.experimentalFeatures =~ /^[eE]nabled$/)"
             }
         ]
     },
