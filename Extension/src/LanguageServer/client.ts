@@ -1277,7 +1277,7 @@ export class DefaultClient implements Client {
                 const settings: CppSettings = new CppSettings();
                 this.currentCopilotHoverEnabled = new PersistentWorkspaceState<string>("cpp.copilotHover", settings.copilotHover);
                 if (settings.copilotHover === "enabled" ||
-                    (settings.copilotHover === "default" && await telemetry.isFlightEnabled("cpp.copilotHover"))) {
+                    (settings.copilotHover === "default" && await telemetry.isFlightEnabled("CppCopilotHover"))) {
                     this.copilotHoverProvider = new CopilotHoverProvider(this);
                     this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, this.copilotHoverProvider));
                 }
@@ -4047,11 +4047,6 @@ export class DefaultClient implements Client {
     public getCopilotHoverProvider(): CopilotHoverProvider | undefined {
         return this.copilotHoverProvider;
     }
-
-    public async getCopilotHoverInfo(): Promise<GetCopilotHoverInfoResult> {
-        await this.ready;
-        return this.languageClient.sendRequest(GetCopilotHoverInfoRequest, null);
-    }
 }
 
 function getLanguageServerFileName(): string {
@@ -4164,7 +4159,6 @@ class NullClient implements Client {
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
     getCopilotHoverProvider(): CopilotHoverProvider | undefined { return undefined; }
-    getCopilotHoverInfo(): Promise<GetCopilotHoverInfoResult> { return Promise.resolve({} as GetCopilotHoverInfoResult); }
     getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
 }

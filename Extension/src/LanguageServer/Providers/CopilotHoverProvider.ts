@@ -16,6 +16,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
     private client: DefaultClient;
     private currentDocument: vscode.TextDocument | undefined;
     private currentPosition: vscode.Position | undefined;
+    private currentCancellationToken: vscode.CancellationToken | undefined;
     private waiting: boolean = false;
     private ready: boolean = false;
     private cancelled: boolean = false;
@@ -33,6 +34,13 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
             return undefined;
         }
 
+        // Wait for the main hover provider to finish and confirm it has content.
+        const hoverProvider = this.client.getHoverProvider();
+        if (!await hoverProvider?.contentReady) {
+            this.reset();
+            return undefined;
+        }
+
         if (!this.isNewHover(document, position)) {
             if (this.ready) {
                 const contentMarkdown = new vscode.MarkdownString(`$(sparkle) Copilot\n\n${this.content}`, true);
@@ -46,16 +54,12 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
 
         // Fresh hover, reset state.
         this.reset();
-        // Wait for the main hover provider to finish and confirm it has content.
-        const hoverProvider = this.client.getHoverProvider();
-        if (!await hoverProvider?.contentReady) {
-            return undefined;
-        }
         if (token.isCancellationRequested) {
             throw new vscode.CancellationError();
         }
         this.currentDocument = document;
         this.currentPosition = position;
+        this.currentCancellationToken = token;
         const commandString = "$(sparkle) [" + localize("generate.copilot.description", "Generate Copilot summary") + "](command:C_Cpp.ShowCopilotHover \"" + localize("copilot.disclaimer", "AI-generated content may be incorrect.") + "\")";
         const commandMarkdown = new vscode.MarkdownString(commandString);
         commandMarkdown.supportThemeIcons = true;
@@ -86,9 +90,14 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
             uri: document.uri.toString(),
             position: Position.create(position.line, position.character)
         };
+
         await this.client.ready;
+        if (this.currentCancellationToken?.isCancellationRequested) {
+            throw new vscode.CancellationError();
+        }
+
         try {
-            const response = await this.client.languageClient.sendRequest(GetCopilotHoverInfoRequest, params);
+            const response = await this.client.languageClient.sendRequest(GetCopilotHoverInfoRequest, params, this.currentCancellationToken);
             requestInfo = response.content;
         } catch (e: any) {
             if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
@@ -121,6 +130,9 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         this.waiting = false;
         this.ready = false;
         this.content = undefined;
+        this.currentDocument = undefined;
+        this.currentPosition = undefined;
+        this.currentCancellationToken = undefined;
     }
 
     private isNewHover(document: vscode.TextDocument, position: vscode.Position): boolean {
