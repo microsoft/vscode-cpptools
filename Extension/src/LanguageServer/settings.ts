@@ -161,6 +161,7 @@ export interface SettingsParams {
     codeAnalysisMaxMemory: number | null;
     codeAnalysisUpdateDelay: number;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
+    copilotHover: string;
 }
 
 function getTarget(): vscode.ConfigurationTarget {
@@ -454,6 +455,8 @@ export class CppSettings extends Settings {
             && this.intelliSenseEngine.toLowerCase() === "default"
             && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
     }
+    public get copilotHover(): string { return (vscode as any).lm ? this.getAsString("copilotHover") : "disabled"; }
+
     public get formattingEngine(): string { return this.getAsString("formatting"); }
     public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
     public get vcFormatIndentMultiLineRelativeTo(): string { return this.getAsString("vcFormat.indent.multiLineRelativeTo"); }

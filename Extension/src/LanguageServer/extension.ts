@@ -17,9 +17,11 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
+import { modelSelector } from '../constants';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
+import { CopilotHoverProvider } from './Providers/CopilotHoverProvider';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
@@ -28,6 +30,7 @@ import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
 import { getLanguageConfig } from './languageConfig';
 import { CppConfigurationLanguageModelTool } from './lmTool';
+import { getLocaleId } from './localization';
 import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
@@ -417,6 +420,7 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? () => onExtractToFunction(true, false) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCopilotHover', enabled ? () => onCopilotHover() : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -1380,4 +1384,114 @@ export async function preReleaseCheck(): Promise<void> {
             });
         }
     }
+}
+
+// This uses several workarounds for interacting with the hover feature.
+// A proposal for dynamic hover content would help, such as the one here (https://github.com/microsoft/vscode/issues/195394)
+async function onCopilotHover(): Promise<void> {
+    // Check if the user has access to vscode language model.
+    const vscodelm = (vscode as any).lm;
+    if (!vscodelm) {
+        return;
+    }
+
+    const copilotHoverProvider = clients.ActiveClient.getCopilotHoverProvider();
+    if (!copilotHoverProvider) {
+        return;
+    }
+
+    const hoverDocument = copilotHoverProvider.getCurrentHoverDocument();
+    const hoverPosition = copilotHoverProvider.getCurrentHoverPosition();
+    if (!hoverDocument || !hoverPosition) {
+        return;
+    }
+
+    const errorMessage = localize("copilot.hover.error", "An error occurred while generating Copilot summary.");
+
+    // Prep hover with wait message.
+    copilotHoverProvider.showWaiting();
+
+    await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition);
+
+    // Gather the content for the query from the client.
+    const requestInfo = await copilotHoverProvider.getRequestInfo(hoverDocument, hoverPosition);
+
+    if (requestInfo.length === 0) {
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
+        return;
+    }
+
+    const locale = getLocaleId();
+
+    const messages = [
+        vscode.LanguageModelChatMessage
+            .User(requestInfo + locale)];
+
+    const [model] = await vscodelm.selectChatModels(modelSelector);
+
+    let chatResponse: vscode.LanguageModelChatResponse | undefined;
+    try {
+        chatResponse = await model.sendRequest(
+            messages,
+            {},
+            new vscode.CancellationTokenSource().token
+        );
+    } catch (err) {
+        if (err instanceof vscode.LanguageModelError) {
+            console.log(err.message, err.code, err.cause);
+            await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
+        } else {
+            throw err;
+        }
+        return;
+    }
+
+    // Ensure we have a valid response from Copilot.
+    if (!chatResponse) {
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
+        return;
+    }
+
+    let content: string = '';
+
+    try {
+        for await (const fragment of chatResponse.text) {
+            content += fragment;
+        }
+    } catch (err) {
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
+        return;
+    }
+
+    if (content.length === 0) {
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
+        return;
+    }
+
+    await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, content);
+}
+
+async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, content?: string): Promise<void> {
+    // Make sure the hover document has focus.
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return;
+    }
+    await vscode.window.showTextDocument(hoverDocument, { preserveFocus: false, selection: new vscode.Selection(hoverPosition, hoverPosition) });
+
+    // Same workaround as above to force the editor to update it's content.
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return;
+    }
+    await vscode.commands.executeCommand('cursorMove', { to: 'right' });
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
+
+    if (content) {
+        copilotHoverProvider.showContent(content);
+    }
+
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return;
+    }
+    await vscode.commands.executeCommand('cursorMove', { to: 'left' });
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
 }
