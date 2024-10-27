@@ -1046,7 +1046,7 @@ export class DefaultClient implements Client {
             if (index === paths.length - 1) {
                 action = "disable";
                 settings.defaultCompilerPath = "";
-                await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
+                await this.configuration.updateCompilerPathIfSet("");
                 configurationSelected = true;
                 await this.showPrompt(sender);
                 return ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "disablePrompt");
@@ -1066,7 +1066,7 @@ export class DefaultClient implements Client {
                 configurationSelected = true;
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
-                await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
+                await this.configuration.updateCompilerPathIfSet(result[0].fsPath);
                 void SessionState.trustedCompilerFound.set(true);
             } else {
                 configurationSelected = true;
@@ -1084,8 +1084,9 @@ export class DefaultClient implements Client {
                     return ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, showButtonSender);
                 } else {
                     action = "select compiler";
-                    settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
-                    await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
+                    const newCompiler: string = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+                    settings.defaultCompilerPath = newCompiler;
+                    await this.configuration.updateCompilerPathIfSet(newCompiler);
                     void SessionState.trustedCompilerFound.set(true);
                 }
             }
