@@ -1443,7 +1443,7 @@ async function onCopilotHover(): Promise<void> {
         chatResponse = await model.sendRequest(
             messages,
             {},
-            new vscode.CancellationTokenSource().token
+            copilotHoverProvider.getCurrentHoverCancellationToken()
         );
     } catch (err) {
         if (err instanceof vscode.LanguageModelError) {
@@ -1484,7 +1484,8 @@ async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, ho
     // Check if the cursor has been manually moved by the user. If so, exit.
     const currentCursorPosition = vscode.window.activeTextEditor?.selection.active;
     if (!currentCursorPosition?.isEqual(hoverPosition)) {
-        return false;
+        // Reset implies cancellation, but we need to ensure cancellation is acknowledged before returning.
+        copilotHoverProvider.reset();
     }
 
     if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {

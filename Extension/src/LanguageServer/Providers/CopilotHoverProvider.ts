@@ -88,6 +88,10 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         return this.currentPosition;
     }
 
+    public getCurrentHoverCancellationToken(): vscode.CancellationToken | undefined {
+        return this.currentCancellationToken;
+    }
+
     public async getRequestInfo(document: vscode.TextDocument, position: vscode.Position): Promise<string> {
         let requestInfo = "";
         const params: GetCopilotHoverInfoParams = {
@@ -124,7 +128,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         return false;
     }
 
-    private reset(): void {
+    public reset(): void {
         // If there was a previous call, cancel it.
         if (this.waiting) {
             this.cancelled = true;
