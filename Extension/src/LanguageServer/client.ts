@@ -3933,6 +3933,7 @@ export class DefaultClient implements Client {
         if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
             void this.languageClient.sendNotification(IntervalTimerNotification).catch(logAndReturn.undefined);
             this.configuration.checkCppProperties();
+            this.configuration.checkMergeCompileCommands();
             this.configuration.checkCompileCommands();
         }
     }

@@ -21,7 +21,7 @@ import * as telemetry from '../telemetry';
 import { DefaultClient } from './client';
 import { CustomConfigurationProviderCollection, getCustomConfigProviders } from './customProviders';
 import { PersistentFolderState } from './persistentState';
-import { CppSettings, OtherSettings } from './settings';
+import { CppSettings, OtherSettings, MergeCompileCommands } from './settings';
 import { SettingsPanel } from './settingsPanel';
 import { ConfigurationType, getUI } from './ui';
 import escapeStringRegExp = require('escape-string-regexp');
@@ -32,6 +32,14 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 const configVersion: number = 4;
 
 type Environment = { [key: string]: string | string[] };
+
+interface CompileCommand {
+    directory: string;
+    file: string;
+    output?: string;
+    command: string; // The command string includes both commands and arguments (if any).
+    arguments?: string[];
+}
 
 // No properties are set in the config since we want to apply vscode settings first (if applicable).
 // That code won't trigger if another value is already set.
@@ -160,6 +168,10 @@ export class CppProperties {
     private diagnosticCollection: vscode.DiagnosticCollection;
     private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
     private settingsPanel?: SettingsPanel;
+    private mergeCompileCommandsSourceFiles: Set<vscode.Uri> = new Set<vscode.Uri>();
+    private mergeCompileCommands?: MergeCompileCommands;
+    private mergeCompileCommandsFileWatchers: fs.FSWatcher[] = [];
+    private mergeCompileCommandsFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -906,6 +918,65 @@ export class CppProperties {
         return this.configProviderAutoSelected;
     }
 
+    private resolveMergeCompileCommandsPaths(): void {
+        if (this.mergeCompileCommands) {
+            this.mergeCompileCommands.sources?.forEach(path => { this.resolvePath(path); });
+            this.mergeCompileCommands.sources = this.mergeCompileCommands.sources?.filter(path => fs.existsSync(path) && fs.statSync(path).isFile());
+            this.mergeCompileCommands.destination = this.resolvePath(this.mergeCompileCommands.destination);
+            // TODO: check that destination is a valid path (not necessarily exists, just ends with 'compile_commands.json')
+        }
+    }
+
+    private onMergeCompileCommandsFiles(): void {
+        // if we got here, it is expected that resolveMergeCompileCommandsPaths() was called
+        // so, any file path in mergeCompileCommands.sources is a valid file path
+        // try to make the parent dir of the destination
+        if (!this.mergeCompileCommands || 
+            this.mergeCompileCommands.destination.length === 0 ||
+            this.mergeCompileCommands.sources.length === 0) 
+        {
+            return;
+        }
+        var dst = this.mergeCompileCommands.destination;
+        const dst_dir = path.dirname(dst);
+        try {
+            fs.mkdirSync(dst_dir, {recursive : true});
+        }
+        catch (err: any) {
+            const failedToCreate: string = localize("failed.to.create.config.folder", 'Failed to create "{0}"', dst_dir);
+            void vscode.window.showErrorMessage(`${failedToCreate}: ${err.message}`);
+            return;
+        }
+        if (fs.existsSync(dst) && fs.statSync(dst).isDirectory()) {
+            dst = path.join(dst, "merged_compile_commands.json");
+        }
+
+        // merge all the json files
+        const mergedCompiledCommands: CompileCommand[] = [];
+        this.mergeCompileCommands.sources.forEach(src => {
+            try {
+                const fileData = fs.readFileSync(src);
+                const fileCommands = JSON.parse(fileData.toString()) as CompileCommand[];
+                mergedCompiledCommands.push(...fileCommands);
+            }
+            catch (err: any) {
+                const failedToRead: string = localize("failed.to.read.compile.commands", 'Failed to read "{0}"', src);
+                void vscode.window.showErrorMessage(`${failedToRead}: ${err.message}`);
+                return;
+            }
+        });
+
+        // try to save to the dst file
+        try {
+            const output = JSON.stringify(mergedCompiledCommands, null, 4);
+            fs.writeFileSync(dst, output);
+        }
+        catch (e: any) {
+            const failedToWrite: string = localize("failed.to.write.compile.commands", 'Failed to write "{0}"', dst);
+            void vscode.window.showErrorMessage(`${failedToWrite}: ${e.message}`);
+        }
+    }
+
     private updateServerOnFolderSettingsChange(): void {
         this.configProviderAutoSelected = false;
         if (!this.configurationJson) {
@@ -1104,9 +1175,57 @@ export class CppProperties {
             }
         }
 
+        this.mergeCompileCommands = settings.mergeCompileCommands;
+        this.updateMergeCompileCommandsFileWatchers();
+
         this.updateCompileCommandsFileWatchers();
         if (!this.configurationIncomplete) {
             this.onConfigurationsChanged();
+        }
+    }
+
+    private mergeCompileCommandsFileWwatcherTimer?: NodeJS.Timeout;
+
+    public updateMergeCompileCommandsFileWatchers(): void {
+        this.resolveMergeCompileCommandsPaths();
+        this.mergeCompileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
+        this.mergeCompileCommandsFileWatchers = []; // reset it
+        sources:
+        if (this.mergeCompileCommands &&
+            this.mergeCompileCommands.sources &&
+            this.mergeCompileCommands.sources.length > 0 &&
+            this.mergeCompileCommands.destination) {
+            // if we are here, resolveMergeCompileCommands():
+            // - filtered out non-existent paths from sources
+            // - destination path resolved
+            const filePaths: Set<string> = new Set<string>();
+            this.mergeCompileCommands.sources.forEach((source: string) => {
+                filePaths.add(source);
+            });
+            try {
+                filePaths.forEach((path: string) => {
+                    this.mergeCompileCommandsFileWatchers.push(fs.watch(path, () => {
+                        // on file changed:
+                        // - clear the old timer if it exists
+                        if (this.mergeCompileCommandsFileWwatcherTimer) {
+                            clearInterval(this.mergeCompileCommandsFileWwatcherTimer);
+                        }
+                        // - set a new timer to wait 1 second before processing the changes
+                        this.mergeCompileCommandsFileWwatcherTimer = setTimeout(() => {
+                            // - merge all the compile_commands.json files even if only one changed
+                            this.onMergeCompileCommandsFiles();
+                            // - clear the timer
+                            if (this.mergeCompileCommandsFileWwatcherTimer) {
+                                clearInterval(this.mergeCompileCommandsFileWwatcherTimer);
+                            }
+                            this.mergeCompileCommandsFileWwatcherTimer = undefined;
+                        }, 1000);
+                    }));
+                });
+            } catch (e) {
+                // The file watcher limit is hit.
+                // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
+            }
         }
     }
 
@@ -2322,12 +2441,41 @@ export class CppProperties {
         });
     }
 
+    public checkMergeCompileCommands(): void {
+        // Check for changes in case of file watcher failure.
+        this.resolveMergeCompileCommandsPaths();
+        const mergeCompileCommands: MergeCompileCommands | undefined = this.mergeCompileCommands;
+        if (!mergeCompileCommands) {
+            return;
+        }
+        // check if any of the sources changed since last time we manually checked
+        this.mergeCompileCommands?.sources.forEach((source) => {
+            fs.stat(source, (err, stats) => {
+                const uri = vscode.Uri.file(source);
+                if (err) {
+                    if (err.code === "ENOENT" && this.mergeCompileCommandsSourceFiles.has(uri)) {
+                        this.mergeCompileCommandsFileWatchers = []; // reset file watchers - TODO: do I need this?
+                        this.onMergeCompileCommandsFiles();
+                        this.mergeCompileCommandsSourceFiles.delete(uri); // File deleted
+                    }
+                } else if (stats.mtime > this.mergeCompileCommandsFileWatcherFallbackTime) {
+                    this.mergeCompileCommandsFileWatcherFallbackTime = new Date();
+                    this.onMergeCompileCommandsFiles();
+                    this.mergeCompileCommandsSourceFiles.add(uri); // File created.
+                }
+            });
+        });
+    }
+
     dispose(): void {
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];
 
         this.compileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
         this.compileCommandsFileWatchers = []; // reset it
+
+        this.mergeCompileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
+        this.mergeCompileCommandsFileWatchers = []; // reset it
 
         this.diagnosticCollection.dispose();
     }
