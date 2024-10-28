@@ -1411,7 +1411,16 @@ async function onCopilotHover(): Promise<void> {
     // Prep hover with wait message.
     copilotHoverProvider.showWaiting();
 
-    await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition);
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return;
+    }
+
+    // Move the cursor to the hover position, but don't focus the editor.
+    await vscode.window.showTextDocument(hoverDocument, { preserveFocus: true, selection: new vscode.Selection(hoverPosition, hoverPosition) });
+
+    if (!await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition)) {
+        return;
+    }
 
     // Gather the content for the query from the client.
     const requestInfo = await copilotHoverProvider.getRequestInfo(hoverDocument, hoverPosition);
@@ -1471,17 +1480,17 @@ async function onCopilotHover(): Promise<void> {
     await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, content);
 }
 
-async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, content?: string): Promise<void> {
-    // Make sure the hover document has focus.
-    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
-        return;
+async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, content?: string): Promise<boolean> {
+    // Check if the cursor has been manually moved by the user. If so, exit.
+    const currentCursorPosition = vscode.window.activeTextEditor?.selection.active;
+    if (!currentCursorPosition?.isEqual(hoverPosition)) {
+        return false;
     }
-    await vscode.window.showTextDocument(hoverDocument, { preserveFocus: false, selection: new vscode.Selection(hoverPosition, hoverPosition) });
 
-    // Same workaround as above to force the editor to update it's content.
     if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
-        return;
+        return false;
     }
+
     await vscode.commands.executeCommand('cursorMove', { to: 'right' });
     await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
 
@@ -1490,8 +1499,10 @@ async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, ho
     }
 
     if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
-        return;
+        return false;
     }
     await vscode.commands.executeCommand('cursorMove', { to: 'left' });
     await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
+
+    return true;
 }
