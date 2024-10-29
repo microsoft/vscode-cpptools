@@ -21,7 +21,7 @@ import * as telemetry from '../telemetry';
 import { DefaultClient } from './client';
 import { CustomConfigurationProviderCollection, getCustomConfigProviders } from './customProviders';
 import { PersistentFolderState } from './persistentState';
-import { CppSettings, OtherSettings, MergeCompileCommands } from './settings';
+import { CppSettings, MergeCompileCommands, OtherSettings } from './settings';
 import { SettingsPanel } from './settingsPanel';
 import { ConfigurationType, getUI } from './ui';
 import escapeStringRegExp = require('escape-string-regexp');
@@ -918,29 +918,29 @@ export class CppProperties {
         return this.configProviderAutoSelected;
     }
 
-    private resolveMergeCompileCommandsPaths(): void {
-        if (this.mergeCompileCommands) {
-            this.mergeCompileCommands.sources?.forEach(path => { this.resolvePath(path); });
-            this.mergeCompileCommands.sources = this.mergeCompileCommands.sources?.filter(path => fs.existsSync(path) && fs.statSync(path).isFile());
-            this.mergeCompileCommands.destination = this.resolvePath(this.mergeCompileCommands.destination);
-            // TODO: check that destination is a valid path (not necessarily exists, just ends with 'compile_commands.json')
+    private resolveMergeCompileCommandsPaths(): MergeCompileCommands | undefined {
+        if (!this.mergeCompileCommands) {
+            return undefined;
         }
+        var result: MergeCompileCommands = { sources: [], destination: "" };
+        this.mergeCompileCommands.sources.forEach(path => { result.sources.push(this.resolvePath(path)); });
+        result.destination = this.resolvePath(this.mergeCompileCommands.destination);
+        return result;
     }
 
     private onMergeCompileCommandsFiles(): void {
-        // if we got here, it is expected that resolveMergeCompileCommandsPaths() was called
-        // so, any file path in mergeCompileCommands.sources is a valid file path
-        // try to make the parent dir of the destination
-        if (!this.mergeCompileCommands || 
-            this.mergeCompileCommands.destination.length === 0 ||
-            this.mergeCompileCommands.sources.length === 0) 
-        {
+        console.log("trying to merge compile commands");
+        const mergeCompileCommands: MergeCompileCommands | undefined = this.resolveMergeCompileCommandsPaths();
+        if (mergeCompileCommands === undefined ||
+            mergeCompileCommands.destination.length === 0 ||
+            mergeCompileCommands.sources.length === 0) {
             return;
         }
-        var dst = this.mergeCompileCommands.destination;
+
+        var dst = mergeCompileCommands.destination;
         const dst_dir = path.dirname(dst);
         try {
-            fs.mkdirSync(dst_dir, {recursive : true});
+            fs.mkdirSync(dst_dir, { recursive: true });
         }
         catch (err: any) {
             const failedToCreate: string = localize("failed.to.create.config.folder", 'Failed to create "{0}"', dst_dir);
@@ -953,7 +953,7 @@ export class CppProperties {
 
         // merge all the json files
         const mergedCompiledCommands: CompileCommand[] = [];
-        this.mergeCompileCommands.sources.forEach(src => {
+        mergeCompileCommands.sources.forEach(src => {
             try {
                 const fileData = fs.readFileSync(src);
                 const fileCommands = JSON.parse(fileData.toString()) as CompileCommand[];
@@ -1190,7 +1190,6 @@ export class CppProperties {
         this.resolveMergeCompileCommandsPaths();
         this.mergeCompileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
         this.mergeCompileCommandsFileWatchers = []; // reset it
-        sources:
         if (this.mergeCompileCommands &&
             this.mergeCompileCommands.sources &&
             this.mergeCompileCommands.sources.length > 0 &&
@@ -2443,22 +2442,31 @@ export class CppProperties {
 
     public checkMergeCompileCommands(): void {
         // Check for changes in case of file watcher failure.
+        console.log("manually checking merge compile commands");
         this.resolveMergeCompileCommandsPaths();
         const mergeCompileCommands: MergeCompileCommands | undefined = this.mergeCompileCommands;
-        if (!mergeCompileCommands) {
+        if (mergeCompileCommands == undefined) {
+            console.log("merge compile commands not found, returning");
             return;
         }
+        // first, check if the destination file doesn't exist,
+        // if so, try to create it
+        if (!fs.existsSync(mergeCompileCommands.destination)) {
+            console.log("destination file not found, trying to create it");
+            this.onMergeCompileCommandsFiles();
+        }
         // check if any of the sources changed since last time we manually checked
-        this.mergeCompileCommands?.sources.forEach((source) => {
+        mergeCompileCommands.sources.forEach((source) => {
+            console.log("checking source file: ", source);
             fs.stat(source, (err, stats) => {
                 const uri = vscode.Uri.file(source);
-                if (err) {
-                    if (err.code === "ENOENT" && this.mergeCompileCommandsSourceFiles.has(uri)) {
-                        this.mergeCompileCommandsFileWatchers = []; // reset file watchers - TODO: do I need this?
-                        this.onMergeCompileCommandsFiles();
-                        this.mergeCompileCommandsSourceFiles.delete(uri); // File deleted
-                    }
+                if (err && err.code === "ENOENT" && this.mergeCompileCommandsSourceFiles.has(uri)) {
+                    // source file previously existed, but deleted 
+                    this.mergeCompileCommandsFileWatchers = []; // reset file watchers - TODO: do I need this?
+                    this.onMergeCompileCommandsFiles();
+                    this.mergeCompileCommandsSourceFiles.delete(uri); // File deleted
                 } else if (stats.mtime > this.mergeCompileCommandsFileWatcherFallbackTime) {
+                    // source file changed since last time we manually checked
                     this.mergeCompileCommandsFileWatcherFallbackTime = new Date();
                     this.onMergeCompileCommandsFiles();
                     this.mergeCompileCommandsSourceFiles.add(uri); // File created.
