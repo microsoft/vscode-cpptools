@@ -252,9 +252,14 @@ export async function activate(): Promise<void> {
         activeDocument = activeEditor.document;
     }
 
-    if (util.extensionContext && new CppSettings().experimentalFeatures) {
-        const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
-        disposables.push(tool);
+    if (util.extensionContext) {
+        // lmTools wasn't stabilized until 1.95, but (as of October 2024)
+        // cpptools can be installed on versions of VS Code as old as 1.67.
+        const version = util.getVsCodeVersion();
+        if (version[0] > 1 || (version[0] === 1 && version[1] >= 95)) {
+            const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
+            disposables.push(tool);
+        }
     }
 
     await registerRelatedFilesProvider();
