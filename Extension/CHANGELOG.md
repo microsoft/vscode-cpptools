@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.23.0: October 24, 2024
+## Version 1.23.0: October 29, 2024
 ### Enhancements
 * Update to clang-format and clang-tidy 19.1.2. [#12824](https://github.com/microsoft/vscode-cpptools/issues/12824)
 * Enable `#cpp` with GitHub Copilot chat without `C_Cpp.experimentalFeatures` enabled. [PR #12898](https://github.com/microsoft/vscode-cpptools/pull/12898)
