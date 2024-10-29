@@ -168,10 +168,11 @@ export class CppProperties {
     private diagnosticCollection: vscode.DiagnosticCollection;
     private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
     private settingsPanel?: SettingsPanel;
-    private mergeCompileCommandsSourceFiles: Set<vscode.Uri> = new Set<vscode.Uri>();
+    private mergeCompileCommandsSourceFiles: Set<string> = new Set<string>();
     private mergeCompileCommands?: MergeCompileCommands;
     private mergeCompileCommandsFileWatchers: fs.FSWatcher[] = [];
     private mergeCompileCommandsFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
+    private mergeCompileCommandsFileWwatcherTimer?: NodeJS.Timeout;
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -1184,26 +1185,24 @@ export class CppProperties {
         }
     }
 
-    private mergeCompileCommandsFileWwatcherTimer?: NodeJS.Timeout;
 
     public updateMergeCompileCommandsFileWatchers(): void {
-        this.resolveMergeCompileCommandsPaths();
         this.mergeCompileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
         this.mergeCompileCommandsFileWatchers = []; // reset it
-        if (this.mergeCompileCommands &&
-            this.mergeCompileCommands.sources &&
-            this.mergeCompileCommands.sources.length > 0 &&
-            this.mergeCompileCommands.destination) {
-            // if we are here, resolveMergeCompileCommands():
-            // - filtered out non-existent paths from sources
-            // - destination path resolved
+        const mergeCompileCommands = this.resolveMergeCompileCommandsPaths();
+        if (mergeCompileCommands &&
+            mergeCompileCommands.sources &&
+            mergeCompileCommands.sources.length > 0 &&
+            mergeCompileCommands.destination) {
+            // if we are here, sources and destination are resolved
             const filePaths: Set<string> = new Set<string>();
-            this.mergeCompileCommands.sources.forEach((source: string) => {
+            mergeCompileCommands.sources.forEach((source: string) => {
                 filePaths.add(source);
             });
             try {
                 filePaths.forEach((path: string) => {
                     this.mergeCompileCommandsFileWatchers.push(fs.watch(path, () => {
+                        console.log(path, " file watcher triggered");
                         // on file changed:
                         // - clear the old timer if it exists
                         if (this.mergeCompileCommandsFileWwatcherTimer) {
@@ -2443,8 +2442,7 @@ export class CppProperties {
     public checkMergeCompileCommands(): void {
         // Check for changes in case of file watcher failure.
         console.log("manually checking merge compile commands");
-        this.resolveMergeCompileCommandsPaths();
-        const mergeCompileCommands: MergeCompileCommands | undefined = this.mergeCompileCommands;
+        const mergeCompileCommands: MergeCompileCommands | undefined = this.resolveMergeCompileCommandsPaths();
         if (mergeCompileCommands == undefined) {
             console.log("merge compile commands not found, returning");
             return;
@@ -2456,23 +2454,36 @@ export class CppProperties {
             this.onMergeCompileCommandsFiles();
         }
         // check if any of the sources changed since last time we manually checked
+        var shouldMerge: boolean = false;
         mergeCompileCommands.sources.forEach((source) => {
-            console.log("checking source file: ", source);
-            fs.stat(source, (err, stats) => {
-                const uri = vscode.Uri.file(source);
-                if (err && err.code === "ENOENT" && this.mergeCompileCommandsSourceFiles.has(uri)) {
-                    // source file previously existed, but deleted 
-                    this.mergeCompileCommandsFileWatchers = []; // reset file watchers - TODO: do I need this?
-                    this.onMergeCompileCommandsFiles();
-                    this.mergeCompileCommandsSourceFiles.delete(uri); // File deleted
-                } else if (stats.mtime > this.mergeCompileCommandsFileWatcherFallbackTime) {
+            try {
+                const stats = fs.statSync(source);
+                if (!this.mergeCompileCommandsSourceFiles.has(source)) {
+                    console.log(source, " exists but was not previously added");
+                    this.mergeCompileCommandsSourceFiles.add(source); // File created.
+                    shouldMerge = true;
+                }
+                else if (stats.mtime > this.mergeCompileCommandsFileWatcherFallbackTime) {
+                    console.log(source, " was changeddd");
                     // source file changed since last time we manually checked
                     this.mergeCompileCommandsFileWatcherFallbackTime = new Date();
-                    this.onMergeCompileCommandsFiles();
-                    this.mergeCompileCommandsSourceFiles.add(uri); // File created.
+                    shouldMerge = true;
                 }
-            });
+            }
+            catch (err: any) {
+                if (err.code === "ENOENT") {
+                    console.log(source, " was deleted");
+                    // source file previously existed, but deleted 
+                    this.mergeCompileCommandsSourceFiles.delete(source); // File deleted
+                    this.mergeCompileCommandsFileWatchers = []; // reset file watchers - TODO: do I need this?
+                    shouldMerge = true;
+                }
+            }
         });
+        console.log("loop done, shouldMerge: ", shouldMerge);
+        if (shouldMerge) {
+            this.onMergeCompileCommandsFiles();
+        }
     }
 
     dispose(): void {
