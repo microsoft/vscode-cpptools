@@ -3,6 +3,7 @@
 ## Version 1.23.0: October 24, 2024
 ### Enhancements
 * Update to clang-format and clang-tidy 19.1.2. [#12824](https://github.com/microsoft/vscode-cpptools/issues/12824)
+* Enable `#cpp` with GitHub Copilot chat without `C_Cpp.experimentalFeatures` enabled. [PR #12898](https://github.com/microsoft/vscode-cpptools/pull/12898)
 
 ### Bug Fixes
 * Fix some translation issues. [#7824](https://github.com/microsoft/vscode-cpptools/issues/7824), [#12439](https://github.com/microsoft/vscode-cpptools/issues/12439), [#12440](https://github.com/microsoft/vscode-cpptools/issues/12440), [#12441](https://github.com/microsoft/vscode-cpptools/issues/12441)
