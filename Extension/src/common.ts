@@ -1814,3 +1814,7 @@ export function findExePathInArgs(args: CommandString[]): string | undefined {
 
     return undefined;
 }
+
+export function getVsCodeVersion(): number[] {
+    return vscode.version.split('.').map(num => parseInt(num, undefined));
+}
