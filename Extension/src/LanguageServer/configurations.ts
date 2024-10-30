@@ -1948,7 +1948,7 @@ export class CppProperties {
             compilerPath = checkPathExists.path;
         }
         if (!compilerPathExists) {
-            compilerMessage = localize('cannot.find2', "Cannot find \"{0}\".", compilerPath);
+            compilerMessage = localize('cannot.find', "Cannot find: {0}", compilerPath);
             newSquiggleMetrics.PathNonExistent++;
         }
         if (compilerMessage) {
@@ -1975,7 +1975,7 @@ export class CppProperties {
             dotConfigPath = checkPathExists.path;
         }
         if (!dotConfigPathExists) {
-            dotConfigMessage = localize('cannot.find2', "Cannot find \"{0}\".", dotConfigPath);
+            dotConfigMessage = localize('cannot.find', "Cannot find: {0}", dotConfigPath);
             newSquiggleMetrics.PathNonExistent++;
         } else if (dotConfigPath && !util.checkFileExistsSync(dotConfigPath)) {
             dotConfigMessage = localize("path.is.not.a.file", "Path is not a file: {0}", dotConfigPath);
@@ -2083,7 +2083,7 @@ export class CppProperties {
                         } else {
                             badPath = `"${expandedPaths[0]}"`;
                         }
-                        message = localize('cannot.find2', "Cannot find {0}", badPath);
+                        message = localize('cannot.find', "Cannot find: {0}", badPath);
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
                         // Check for file versus path mismatches.
@@ -2141,7 +2141,7 @@ export class CppProperties {
                         endOffset = curOffset + curMatch.length;
                         let message: string;
                         if (!pathExists) {
-                            message = localize('cannot.find2', "Cannot find \"{0}\".", expandedPaths[0]);
+                            message = localize('cannot.find', "Cannot find: {0}", expandedPaths[0]);
                             newSquiggleMetrics.PathNonExistent++;
                             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                                 new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
