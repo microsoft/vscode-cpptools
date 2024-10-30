@@ -75,11 +75,29 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
             for (const key in knownValues) {
                 const knownKey = key as keyof ChatContextResult;
                 if (knownValues[knownKey] && chatContext[knownKey]) {
-                    chatContext[knownKey] = knownValues[knownKey][chatContext[knownKey]] || chatContext[knownKey];
+                    // Clear the value if it's not in the known values.
+                    chatContext[knownKey] = knownValues[knownKey][chatContext[knownKey]] || "";
                 }
             }
 
-            return `The user is working on a ${chatContext.language} project. The project uses language version ${chatContext.standardVersion}, compiles using the ${chatContext.compiler} compiler, targets the ${chatContext.targetPlatform} platform, and targets the ${chatContext.targetArchitecture} architecture.`;
+            let contextString = "";
+            if (chatContext.language) {
+                contextString += `The user is working on a ${chatContext.language} project. `;
+            }
+            if (chatContext.standardVersion) {
+                contextString += `The project uses language version ${chatContext.standardVersion}. `;
+            }
+            if (chatContext.compiler) {
+                contextString += `The project compiles using the ${chatContext.compiler} compiler. `;
+            }
+            if (chatContext.targetPlatform) {
+                contextString += `The project targets the ${chatContext.targetPlatform} platform. `;
+            }
+            if (chatContext.targetArchitecture) {
+                contextString += `The project targets the ${chatContext.targetArchitecture} architecture. `;
+            }
+
+            return contextString;
         }
         catch {
             await this.reportError();
