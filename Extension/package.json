@@ -60,6 +60,42 @@
     ],
     "main": "./dist/src/main",
     "contributes": {
+        "languages": [
+            {
+                "id": "c",
+                "aliases": [
+                    "C"
+                ],
+                "extensions": [
+                    ".c",
+                    ".h"
+                ]
+            },
+            {
+                "id": "cpp",
+                "aliases": [
+                    "C++"
+                ],
+                "extensions": [
+                    ".cpp",
+                    ".cc",
+                    ".cxx",
+                    ".hpp",
+                    ".hh",
+                    ".hxx"
+                ]
+            },
+            {
+                "id": "cuda-cpp",
+                "aliases": [
+                    "CUDA"
+                ],
+                "extensions": [
+                    ".cu",
+                    ".cuh"
+                ]
+            }
+        ],
         "walkthroughs": [
             {
                 "id": "cppWelcome",
