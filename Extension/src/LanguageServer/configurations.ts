@@ -1178,7 +1178,6 @@ export class CppProperties {
             }
         });
         if (shouldMerge) {
-            //
             this.onMergeCompileCommandsFiles();
             return;
         }
@@ -1217,10 +1216,15 @@ export class CppProperties {
                         }, 1000);
                     }));
                 });
-            } catch (e) {
-                // a file watcher has failed, try to manually check for changes
-                console.log("file watcher limit reached, trying to manually check for changes");
-                this.checkMergeCompileCommands();
+            } catch (e: any) {
+                if (e.code == "ENOENT") {
+                    console.log("file doesn't exist: ", path);
+                    // TODO: add to a low cycle periodic check list until it exists
+                } else {
+                    console.log("file watcher error: ", e.code)
+                    console.log("file watcher limit reached, trying to manually check for changes");
+                    this.checkMergeCompileCommands();
+                }
             }
         }
     }
@@ -1277,6 +1281,7 @@ export class CppProperties {
 
         // if we got here, the merge was successful
         // set up file watchers again
+        console.log("merge successful");
         this.updateMergeCompileCommandsFileWatchers();
     }
 
