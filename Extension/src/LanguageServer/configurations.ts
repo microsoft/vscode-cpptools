@@ -171,7 +171,7 @@ export class CppProperties {
     private mergeCompileCommands?: MergeCompileCommands;
     private mergeCompileCommandsFileWatchers: fs.FSWatcher[] = [];
     private mergeCompileCommandsFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
-    private mergeCompileCommandsFileWwatcherTimer?: NodeJS.Timeout;
+    private mergeCompileCommandsFileWatcherTimer?: NodeJS.Timeout;
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -1201,18 +1201,18 @@ export class CppProperties {
                         console.log(path, " file watcher triggered");
                         // on file changed:
                         // - clear the old timer if it exists
-                        if (this.mergeCompileCommandsFileWwatcherTimer) {
-                            clearInterval(this.mergeCompileCommandsFileWwatcherTimer);
+                        if (this.mergeCompileCommandsFileWatcherTimer) {
+                            clearInterval(this.mergeCompileCommandsFileWatcherTimer);
                         }
                         // - set a new timer to wait 1 second before processing the changes
-                        this.mergeCompileCommandsFileWwatcherTimer = setTimeout(() => {
+                        this.mergeCompileCommandsFileWatcherTimer = setTimeout(() => {
                             // - merge all the compile_commands.json files even if only one changed
                             this.onMergeCompileCommandsFiles();
                             // - clear the timer
-                            if (this.mergeCompileCommandsFileWwatcherTimer) {
-                                clearInterval(this.mergeCompileCommandsFileWwatcherTimer);
+                            if (this.mergeCompileCommandsFileWatcherTimer) {
+                                clearInterval(this.mergeCompileCommandsFileWatcherTimer);
                             }
-                            this.mergeCompileCommandsFileWwatcherTimer = undefined;
+                            this.mergeCompileCommandsFileWatcherTimer = undefined;
                         }, 1000);
                     }));
                 });
