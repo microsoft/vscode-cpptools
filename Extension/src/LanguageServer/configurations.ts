@@ -309,13 +309,11 @@ export class CppProperties {
 
     private onConfigurationsChanged(): void {
         if (this.Configurations) {
-            console.log('onConfigurationsChanged');
             this.configurationsChanged.fire(this);
         }
     }
 
     private onSelectionChanged(): void {
-        console.log('onSelectionChanged ', this.CurrentConfigurationIndex);
         this.selectionChanged.fire(this.CurrentConfigurationIndex);
         void this.handleSquiggles().catch(logAndReturn.undefined);
     }
@@ -1116,10 +1114,7 @@ export class CppProperties {
 
     private compileCommandsFileWatcherTimer?: NodeJS.Timeout;
 
-    // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
-    // paths are expected to have variables resolved already
     public updateCompileCommandsFileWatcher(): void {
-        console.log("updateCompileCommandsFileWatcher called");
         // close the existing watcher if it exists
         this.compileCommandsFileWatcher?.close();
         this.compileCommandsFileWatcher = undefined;
@@ -1128,7 +1123,6 @@ export class CppProperties {
         // if so, avoid setting up a `compile_commands.json` file watcher to avoid unnessary parsing
         // by the language server
         if (this.CurrentConfiguration?.configurationProvider && !this.configurationProviderFailedToProvide) {
-            console.log("Skipping compile_commands.json file watcher setup as configuration provider is set");
             return;
         }
 
@@ -1138,7 +1132,6 @@ export class CppProperties {
                 // Wait 1 second after a change to allow time for the write to finish.
                 clearInterval(this.compileCommandsFileWatcherTimer);
                 this.compileCommandsFileWatcherTimer = setTimeout(() => {
-                    console.log("file watcher triggered for compile_commands.json");
                     this.onCompileCommandsChanged(path);
                     clearInterval(this.compileCommandsFileWatcherTimer);
                     this.compileCommandsFileWatcherTimer = undefined;
@@ -1147,7 +1140,6 @@ export class CppProperties {
                     // linux based systems lose track of the file (inode deleted)
                     // we need to close the watcher and wait until file is created again
                     if (eventType === "rename") {
-                        console.log("compile_commands.json was renamed or deleted, closing watcher");
                         this.compileCommandsFileWatcher?.close();
                         this.compileCommandsFileWatcher = undefined;
                         this.compileCommandsFile = undefined;
@@ -1159,11 +1151,9 @@ export class CppProperties {
             // either file not created or too many watchers
             // rely on polling until the file is created
             // then, file watching will be attempted again
-            console.log("failed to watch compile_commands.json", e);
             this.compileCommandsFileWatcher?.close();
             this.compileCommandsFileWatcher = undefined;
         }
-        console.log("file watcher finished");
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
@@ -2330,52 +2320,35 @@ export class CppProperties {
      */
     public checkCompileCommands(): void {
         if (this.compileCommandsFileWatcher !== undefined) {
-            console.log("Skipping check for compileCommands file changes, file watcher is active.");
             return;
         }
         if (this.CurrentConfiguration?.configurationProvider && !this.configurationProviderFailedToProvide) {
-            console.log("Skipping check for compileCommands file changes, configuration provider is set and not forced.");
             return;
         }
         const compileCommands: string | undefined = this.CurrentConfiguration?.compileCommands;
         if (compileCommands === undefined) {
-            console.log("Skipping check for compileCommands file changes, compileCommands is not set.");
             return;
         }
 
-        console.log("Manually checking for compileCommands file changes.");
         const compileCommandsFile: string | undefined = this.resolvePath(compileCommands);
         try {
             const stats = fs.statSync(compileCommandsFile);
             if (this.compileCommandsFile === undefined || stats.mtime > this.compileCommandsFileWatcherFallbackTime) {
                 this.compileCommandsFileWatcherFallbackTime = new Date();
-                console.log("checkCompileCommands(): compileCommands file changed");
                 this.onCompileCommandsChanged(compileCommandsFile);
                 this.compileCommandsFile = compileCommandsFile; // File created.
             }
         }
         catch (err: any) {
             if (err.code === "ENOENT" && this.compileCommandsFile) {
-                console.log("checkCompileCommands(): compileCommands file deleted");
                 this.onCompileCommandsChanged(compileCommandsFile);
                 this.compileCommandsFile = undefined; // File deleted
             }
         }
-        console.log("checkCompileCommands(): done");
 
         const providerInsufficient: boolean = !this.CurrentConfiguration?.configurationProvider || this.configurationProviderFailedToProvide;
         if (this.compileCommandsFile !== undefined && providerInsufficient) {
-            console.log("try to watch compileCommands file");
             this.updateCompileCommandsFileWatcher();
-        }
-        else {
-            // debug which condition was not met
-            if (this.compileCommandsFile === undefined) {
-                console.log("compileCommandsFile is undefined");
-            }
-            if (this.CurrentConfiguration?.configurationProvider) {
-                console.log("configurationProvider is set");
-            }
         }
     }
 
