@@ -2039,9 +2039,9 @@ export class DefaultClient implements Client {
         const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | undefined> = async () => {
             try {
                 if (!await provider.canProvideConfiguration(docUri, tokenSource.token)) {
-                    const forceCheck: boolean = true;
-                    this.configuration.checkCompileCommands(forceCheck);
-                    console.log("provideCustomConfigurationAsync(): Provider cannot provide configuration for: ", docUri.path);
+                    // some file cannot be provided by this provider
+                    // e.g file not included in a CMake project
+                    this.configuration.configurationProviderFailed();
                     return [];
                 }
             } catch (err) {
