@@ -137,7 +137,7 @@ export class CppProperties {
     private configFileWatcher: vscode.FileSystemWatcher | null = null;
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private compileCommandsFile: vscode.Uri | undefined | null = undefined;
-    private compileCommandsFileWatchers: fs.FSWatcher[] = [];
+    private compileCommandsFileWatcher: fs.FSWatcher | undefined = undefined;
     private compileCommandsFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private defaultCompilerPath: string | null = null;
     private knownCompilers?: KnownCompiler[];
@@ -308,16 +308,19 @@ export class CppProperties {
 
     private onConfigurationsChanged(): void {
         if (this.Configurations) {
+            console.log('onConfigurationsChanged');
             this.configurationsChanged.fire(this);
         }
     }
 
     private onSelectionChanged(): void {
+        console.log('onSelectionChanged ', this.CurrentConfigurationIndex);
         this.selectionChanged.fire(this.CurrentConfigurationIndex);
         void this.handleSquiggles().catch(logAndReturn.undefined);
     }
 
-    private onCompileCommandsChanged(path: string): void {
+    private onCompileCommandsChanged(path: string, caller: string): void {
+        console.log('onCompileCommandsChanged ', path, caller);
         this.compileCommandsChanged.fire(path);
     }
 
@@ -1104,53 +1107,48 @@ export class CppProperties {
             }
         }
 
-        this.updateCompileCommandsFileWatchers();
+
+        this.updateCompileCommandsFileWatcher();
         if (!this.configurationIncomplete) {
             this.onConfigurationsChanged();
         }
     }
 
     private compileCommandsFileWatcherTimer?: NodeJS.Timeout;
-    private compileCommandsFileWatcherFiles: Set<string> = new Set<string>();
 
     // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
     // paths are expected to have variables resolved already
-    public updateCompileCommandsFileWatchers(): void {
+    public updateCompileCommandsFileWatcher(): void {
+        // close the existing watcher if it exists
+        this.compileCommandsFileWatcher?.close();
+        this.compileCommandsFileWatcher = undefined;
+
+        // check if the current configuration is using a configuration provider (e.g `CMake Tools`)
+        // if so, avoid setting up a `compile_commands.json` file watcher to avoid unnessary parsing
+        // by the language server
+        if (this.CurrentConfiguration?.configurationProvider) {
+            return;
+        }
+
         if (this.configurationJson) {
-            this.compileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
-            this.compileCommandsFileWatchers = []; // reset it
-            const filePaths: Set<string> = new Set<string>();
-            this.configurationJson.configurations.forEach(c => {
-                if (c.compileCommands) {
-                    const fileSystemCompileCommandsPath: string = this.resolvePath(c.compileCommands);
-                    if (fs.existsSync(fileSystemCompileCommandsPath)) {
-                        filePaths.add(fileSystemCompileCommandsPath);
-                    }
-                }
-            });
+            const path: string = this.resolvePath(this.CurrentConfiguration?.compileCommands);
             try {
-                filePaths.forEach((path: string) => {
-                    this.compileCommandsFileWatchers.push(fs.watch(path, () => {
-                        // Wait 1 second after a change to allow time for the write to finish.
-                        if (this.compileCommandsFileWatcherTimer) {
-                            clearInterval(this.compileCommandsFileWatcherTimer);
-                        }
-                        this.compileCommandsFileWatcherFiles.add(path);
-                        this.compileCommandsFileWatcherTimer = setTimeout(() => {
-                            this.compileCommandsFileWatcherFiles.forEach((path: string) => {
-                                this.onCompileCommandsChanged(path);
-                            });
-                            if (this.compileCommandsFileWatcherTimer) {
-                                clearInterval(this.compileCommandsFileWatcherTimer);
-                            }
-                            this.compileCommandsFileWatcherFiles.clear();
-                            this.compileCommandsFileWatcherTimer = undefined;
-                        }, 1000);
-                    }));
-                });
-            } catch (e) {
-                // The file watcher limit is hit.
-                // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
+                this.compileCommandsFileWatcher = fs.watch(path, () => {
+                    // Wait 1 second after a change to allow time for the write to finish.
+                    clearInterval(this.compileCommandsFileWatcherTimer);
+                    this.compileCommandsFileWatcherTimer = setTimeout(() => {
+                        this.onCompileCommandsChanged(path, "file watcher");
+                        clearInterval(this.compileCommandsFileWatcherTimer);
+                        this.compileCommandsFileWatcherTimer = undefined;
+                    }, 1000);
+                })
+            }
+            catch (e: any) {
+                // either file not created or too many watchers
+                // rely on polling until the file is created
+                // then, file watching will be attempted again
+                this.compileCommandsFileWatcher?.close();
+                this.compileCommandsFileWatcher = undefined;
             }
         }
     }
@@ -2300,34 +2298,56 @@ export class CppProperties {
         });
     }
 
-    public checkCompileCommands(): void {
-        // Check for changes in case of file watcher failure.
-        const compileCommands: string | undefined = this.CurrentConfiguration?.compileCommands;
-        if (!compileCommands) {
+    /**
+     * Manually check for changes in the compileCommands file.  
+     * 
+     * NOTE: The check is skipped on any of the following terms:
+     * - There is an active `compile_commands.json` file watcher
+     * - The `configurationProvider` property is set and the `force` parameter is not set to true
+     * - The `compileCommands` property is not set
+     * @param bypassConfigurationProvider bypass the `ConfigurationProvider` is set condition
+     */
+    public checkCompileCommands(bypassConfigurationProvider: boolean = false): void {
+        // if the file watcher is active, we don't need to check here for changes
+        if (this.compileCommandsFileWatcher) {
             return;
         }
+        // configuration provider didn't fail to provide a configuration
+        if (this.CurrentConfiguration?.configurationProvider && !bypassConfigurationProvider) {
+            return;
+        }
+        // Check for changes in case of file watcher failure.
+        const compileCommands: string | undefined = this.CurrentConfiguration?.compileCommands;
+        if (compileCommands === undefined) {
+            return;
+        }
+
         const compileCommandsFile: string | undefined = this.resolvePath(compileCommands);
         fs.stat(compileCommandsFile, (err, stats) => {
             if (err) {
                 if (err.code === "ENOENT" && this.compileCommandsFile) {
-                    this.compileCommandsFileWatchers = []; // reset file watchers
-                    this.onCompileCommandsChanged(compileCommandsFile);
+                    this.onCompileCommandsChanged(compileCommandsFile, "periodic checker - file deleted");
                     this.compileCommandsFile = null; // File deleted
                 }
             } else if (stats.mtime > this.compileCommandsFileWatcherFallbackTime) {
                 this.compileCommandsFileWatcherFallbackTime = new Date();
-                this.onCompileCommandsChanged(compileCommandsFile);
+                this.onCompileCommandsChanged(compileCommandsFile, "periodic checker - file created");
                 this.compileCommandsFile = vscode.Uri.file(compileCommandsFile); // File created.
             }
         });
+
+        // if the compileCommands file is set (and not using a configuration provider), try to watch it
+        if (this.compileCommandsFile) {
+            this.updateCompileCommandsFileWatcher();
+        }
     }
 
     dispose(): void {
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];
 
-        this.compileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
-        this.compileCommandsFileWatchers = []; // reset it
+        this.compileCommandsFileWatcher?.close();
+        this.compileCommandsFileWatcher = undefined;
 
         this.diagnosticCollection.dispose();
     }
