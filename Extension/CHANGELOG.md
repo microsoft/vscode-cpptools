@@ -1,5 +1,11 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.22.11: November 5, 2024
+### Bug Fixes
+* Fix system includes incorrectly being treated as non-system includes when specified with `-I`. [#12842](https://github.com/microsoft/vscode-cpptools/issues/12842)
+* Fix inactive region ranges when multi-byte UTF-8 characters are used. [#12879](https://github.com/microsoft/vscode-cpptools/issues/12879)
+* Fix formatting with `.editorconfig` files. [#12921](https://github.com/microsoft/vscode-cpptools/issues/12921)
+
 ## Version 1.22.10: October 21, 2024
 ### Bug Fixes
 * Fix the 'Extract to Function' feature not working.
