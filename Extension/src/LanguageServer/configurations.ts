@@ -1128,7 +1128,7 @@ export class CppProperties {
 
         const path: string = this.resolvePath(this.CurrentConfiguration?.compileCommands);
         try {
-            this.compileCommandsFileWatcher = fs.watch(path, (eventType: fs.WatchEventType, filename: string | null) => {
+            this.compileCommandsFileWatcher = fs.watch(path, (eventType: fs.WatchEventType, _: string | null) => {
                 // Wait 1 second after a change to allow time for the write to finish.
                 clearInterval(this.compileCommandsFileWatcherTimer);
                 this.compileCommandsFileWatcherTimer = setTimeout(() => {
@@ -1136,7 +1136,7 @@ export class CppProperties {
                     clearInterval(this.compileCommandsFileWatcherTimer);
                     this.compileCommandsFileWatcherTimer = undefined;
 
-                    // if the file was deleted/renamed, 
+                    // if the file was deleted/renamed,
                     // linux based systems lose track of the file (inode deleted)
                     // we need to close the watcher and wait until file is created again
                     if (eventType === "rename") {
@@ -1145,7 +1145,7 @@ export class CppProperties {
                         this.compileCommandsFile = undefined;
                     }
                 }, 1000);
-            })
+            });
         }
         catch (e: any) {
             // either file not created or too many watchers
@@ -2301,9 +2301,8 @@ export class CppProperties {
         });
     }
 
-
     /**
-     * if `configurationProvider` is set, we don't watch for changes in the `compileCommands` file.  
+     * if `configurationProvider` is set, we don't watch for changes in the `compileCommands` file.
      * calling this function means we need to start checking it.
      */
     public configurationProviderFailed(): void {
@@ -2311,8 +2310,8 @@ export class CppProperties {
     }
 
     /**
-     * Manually check for changes in the compileCommands file.  
-     * 
+     * Manually check for changes in the compileCommands file.
+     *
      * NOTE: The check is skipped on any of the following terms:
      * - There is an active `compile_commands.json` file watcher
      * - The `configurationProvider` property is set and `configurationProviderFailed()` was not called
