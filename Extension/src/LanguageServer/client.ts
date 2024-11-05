@@ -2022,9 +2022,13 @@ export class DefaultClient implements Client {
             }
             const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(providerId);
             if (!provider || !provider.isReady) {
+                this.configuration.configurationProviderFailed();
                 return;
             }
             const resultCode = await this.provideCustomConfigurationAsync(docUri, provider);
+            if (resultCode !== "success") {
+                this.configuration.configurationProviderFailed();
+            }
             telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId, resultCode });
         } finally {
             onFinished();
@@ -2039,9 +2043,6 @@ export class DefaultClient implements Client {
         const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | undefined> = async () => {
             try {
                 if (!await provider.canProvideConfiguration(docUri, tokenSource.token)) {
-                    // some file cannot be provided by this provider
-                    // e.g file not included in a CMake project
-                    this.configuration.configurationProviderFailed();
                     return [];
                 }
             } catch (err) {
