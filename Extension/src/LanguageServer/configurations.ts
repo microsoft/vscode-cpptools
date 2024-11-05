@@ -1119,9 +1119,9 @@ export class CppProperties {
         this.compileCommandsFileWatcher?.close();
         this.compileCommandsFileWatcher = undefined;
 
-        // check if the current configuration is using a configuration provider (e.g `CMake Tools`)
-        // if so, avoid setting up a `compile_commands.json` file watcher to avoid unnessary parsing
-        // by the language server
+        // Check if the current configuration is using a configuration provider. (e.g `CMake Tools`)
+        // If so, avoid setting up a `compile_commands.json` file watcher to avoid unnessary parsing
+        // by the language server.
         if (this.CurrentConfiguration?.configurationProvider && !this.configurationProviderFailedToProvide) {
             return;
         }
@@ -1136,9 +1136,9 @@ export class CppProperties {
                     clearInterval(this.compileCommandsFileWatcherTimer);
                     this.compileCommandsFileWatcherTimer = undefined;
 
-                    // if the file was deleted/renamed,
-                    // linux based systems lose track of the file (inode deleted)
-                    // we need to close the watcher and wait until file is created again
+                    // If the file was deleted/renamed,
+                    // Linux based systems lose track of the file. (inode deleted)
+                    // We need to close the watcher and wait until file is created again.
                     if (eventType === "rename") {
                         this.compileCommandsFileWatcher?.close();
                         this.compileCommandsFileWatcher = undefined;
@@ -1148,9 +1148,9 @@ export class CppProperties {
             });
         }
         catch (e: any) {
-            // either file not created or too many watchers
-            // rely on polling until the file is created
-            // then, file watching will be attempted again
+            // Either file not created or too many active watchers.
+            // Rely on polling until the file is created.
+            // Then, file watching will be attempted again.
             this.compileCommandsFileWatcher?.close();
             this.compileCommandsFileWatcher = undefined;
         }
@@ -2302,8 +2302,10 @@ export class CppProperties {
     }
 
     /**
-     * if `configurationProvider` is set, we don't watch for changes in the `compileCommands` file.
-     * calling this function means we need to start checking it.
+     * Configuration provider failed to provide for some file.
+     * This is used to determine if we should start watching for changes in the `compileCommands` file.
+     *
+     * NOTE: This is only used when `configurationProvider` is set.
      */
     public configurationProviderFailed(): void {
         this.configurationProviderFailedToProvide = true;
@@ -2313,9 +2315,9 @@ export class CppProperties {
      * Manually check for changes in the compileCommands file.
      *
      * NOTE: The check is skipped on any of the following terms:
-     * - There is an active `compile_commands.json` file watcher
-     * - The `configurationProvider` property is set and `configurationProviderFailed()` was not called
-     * - The `compileCommands` property is not set
+     * - There is an active `compile_commands.json` file watcher.
+     * - The `configurationProvider` property is set and `configurationProviderFailed()` was not called.
+     * - The `compileCommands` property is not set.
      */
     public checkCompileCommands(): void {
         if (this.compileCommandsFileWatcher !== undefined) {
@@ -2341,7 +2343,7 @@ export class CppProperties {
         catch (err: any) {
             if (err.code === "ENOENT" && this.compileCommandsFile) {
                 this.onCompileCommandsChanged(compileCommandsFile);
-                this.compileCommandsFile = undefined; // File deleted
+                this.compileCommandsFile = undefined; // File deleted.
             }
         }
 
