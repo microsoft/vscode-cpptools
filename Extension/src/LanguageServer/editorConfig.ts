@@ -149,7 +149,7 @@ function getEditorConfig(filePath: string): any {
             });
 
             // Check if the current .editorconfig is the root.
-            if (configData['*']?.root === true) {
+            if (configData['*']?.root) {
                 break; // Stop searching after processing the root = true file.
             }
         }
