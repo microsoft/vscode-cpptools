@@ -138,7 +138,7 @@ export class CppProperties {
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private compileCommandsFile: string | undefined = undefined;
     private compileCommandsFileWatcher: fs.FSWatcher | undefined = undefined;
-    private compileCommandsFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
+    private compileCommandsLastCheckedTime: Map<string, Date | undefined> = new Map<string, Date | undefined>();
     private configurationProviderFailedToProvide: boolean = false;
     private defaultCompilerPath: string | null = null;
     private knownCompilers?: KnownCompiler[];
@@ -1106,28 +1106,51 @@ export class CppProperties {
         }
 
         this.configurationProviderFailedToProvide = false;
+        this.clearStaleCompileCommandsPaths();
         this.updateCompileCommandsFileWatcher();
         if (!this.configurationIncomplete) {
             this.onConfigurationsChanged();
         }
     }
 
+    private clearStaleCompileCommandsPaths(): void {
+        const paths: Set<string> = new Set();
+        this.configurationJson?.configurations.forEach((config: Configuration) => {
+            const path = this.resolvePath(config.compileCommands);
+            if (path.length > 0) {
+                paths.add(path);
+            }
+        });
+
+        for (const path of this.compileCommandsLastCheckedTime.keys()) {
+            if (!paths.has(path)) {
+                this.compileCommandsLastCheckedTime.delete(path);
+            }
+        }
+    }
+
     private compileCommandsFileWatcherTimer?: NodeJS.Timeout;
 
     public updateCompileCommandsFileWatcher(): void {
-        // close the existing watcher if it exists
         this.compileCommandsFileWatcher?.close();
         this.compileCommandsFileWatcher = undefined;
 
-        // Check if the current configuration is using a configuration provider. (e.g `CMake Tools`)
-        // If so, avoid setting up a `compile_commands.json` file watcher to avoid unnessary parsing
-        // by the language server.
+        // If the configuration provider is set, rely on it until it fails to do so.
         if (this.CurrentConfiguration?.configurationProvider && !this.configurationProviderFailedToProvide) {
             return;
         }
 
         const path: string = this.resolvePath(this.CurrentConfiguration?.compileCommands);
         try {
+            // Before starting the file watcher, we check if the file has changed since last time we checked it.
+            // This is used to detect if the file has changed while we used a different configuration.
+            const stats = fs.statSync(path);
+            const lastChecked: Date | undefined = this.compileCommandsLastCheckedTime.get(path);
+            if (lastChecked === undefined || stats.mtime > lastChecked) {
+                this.onCompileCommandsChanged(path);
+            }
+            this.compileCommandsLastCheckedTime.set(path, new Date());
+
             this.compileCommandsFileWatcher = fs.watch(path, (eventType: fs.WatchEventType, _: string | null) => {
                 // Wait 1 second after a change to allow time for the write to finish.
                 clearInterval(this.compileCommandsFileWatcherTimer);
@@ -1135,6 +1158,7 @@ export class CppProperties {
                     this.onCompileCommandsChanged(path);
                     clearInterval(this.compileCommandsFileWatcherTimer);
                     this.compileCommandsFileWatcherTimer = undefined;
+                    this.compileCommandsLastCheckedTime.set(path, new Date());
 
                     // If the file was deleted/renamed,
                     // Linux based systems lose track of the file. (inode deleted)
@@ -2334,10 +2358,11 @@ export class CppProperties {
         const compileCommandsFile: string | undefined = this.resolvePath(compileCommands);
         try {
             const stats = fs.statSync(compileCommandsFile);
-            if (this.compileCommandsFile === undefined || stats.mtime > this.compileCommandsFileWatcherFallbackTime) {
-                this.compileCommandsFileWatcherFallbackTime = new Date();
+            const lastChecked: Date | undefined = this.compileCommandsLastCheckedTime.get(compileCommandsFile);
+            if (this.compileCommandsFile === undefined || lastChecked === undefined || stats.mtime > lastChecked) {
+                this.compileCommandsLastCheckedTime.set(compileCommandsFile, new Date());
                 this.onCompileCommandsChanged(compileCommandsFile);
-                this.compileCommandsFile = compileCommandsFile; // File created.
+                this.compileCommandsFile = compileCommandsFile; // File created/modified.
             }
         }
         catch (err: any) {
