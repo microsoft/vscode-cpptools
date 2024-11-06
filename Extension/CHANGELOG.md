@@ -2,8 +2,8 @@
 
 ### Version 1.23.1: November 6, 2024
 ### Bug Fixes
-* Fix stalls caused by the protocol filter. [PR #12096](https://github.com/microsoft/vscode-cpptools/pull/12906)
-* A potential fix for a crash during cpptools-srv shutdown (in `uv_run`).
+* Fix a performance issue where some LSP requests would delay other LSP requests. [PR #12096](https://github.com/microsoft/vscode-cpptools/pull/12906)
+* A potential fix for a crash during process shutdown (in `uv_run`).
 * A potential fix for a crash in cpptools (in `report_intellisense_results`).
 * Fix a random deadlock in `handle_edits`.
 * Other internal fixes.
