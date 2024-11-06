@@ -5,7 +5,8 @@
 * A potential fix for a crash during process shutdown (in `uv_run`). [#12668](https://github.com/microsoft/vscode-cpptools/issues/12668)
 * Fix a performance issue where some LSP requests would delay other LSP requests. [#12905](https://github.com/microsoft/vscode-cpptools/issues/12905)
 * A potential fix for a crash in cpptools (in `report_intellisense_results`).
-* Fix a random deadlock in `handle_edits`.
+* Fix a random deadlock with `compiler_info::find_or_create`.
+* Fix a random deadlock with `handle_edits`.
 * Other internal fixes.
 
 ## Version 1.22.11: November 5, 2024
