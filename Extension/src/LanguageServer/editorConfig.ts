@@ -92,7 +92,17 @@ function parseEditorConfigContent(content: string): Record<string, any> {
             const [key, ...values] = line.split('=');
             if (key && values.length > 0) {
                 const trimmedKey = key.trim();
-                const value = values.join('=').trim();
+                let value: any = values.join('=').trim();
+
+                // Convert boolean-like and numeric values.
+                if (value.toLowerCase() === 'true') {
+                    value = true;
+                } else if (value.toLowerCase() === 'false') {
+                    value = false;
+                } else if (!isNaN(Number(value))) {
+                    value = Number(value);
+                }
+
                 if (currentSection) {
                     // Ensure the current section is initialized.
                     if (!config[currentSection]) {
@@ -114,7 +124,7 @@ function getEditorConfig(filePath: string): any {
     const rootDir: string = path.parse(currentDir).root;
 
     // Traverse from the file's directory to the root directory.
-    for (;;) {
+    for (; ;) {
         const editorConfigPath: string = path.join(currentDir, '.editorconfig');
         if (fs.existsSync(editorConfigPath)) {
             const configFileContent: string = fs.readFileSync(editorConfigPath, 'utf-8');
@@ -139,7 +149,7 @@ function getEditorConfig(filePath: string): any {
             });
 
             // Check if the current .editorconfig is the root.
-            if (configData['*']?.root?.toLowerCase() === 'true') {
+            if (configData['*']?.root) {
                 break; // Stop searching after processing the root = true file.
             }
         }

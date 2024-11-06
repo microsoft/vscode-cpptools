@@ -1,5 +1,19 @@
 # C/C++ for Visual Studio Code Changelog
 
+### Version 1.23.1: November 6, 2024
+### Bug Fixes
+* A potential fix for a crash during process shutdown (in `uv_run`). [#12668](https://github.com/microsoft/vscode-cpptools/issues/12668)
+* Fix a performance issue where some LSP requests would delay other LSP requests. [#12905](https://github.com/microsoft/vscode-cpptools/issues/12905)
+* A potential fix for a crash in cpptools (in `report_intellisense_results`).
+* Fix a random deadlock in `handle_edits`.
+* Other internal fixes.
+
+## Version 1.22.11: November 5, 2024
+### Bug Fixes
+* Fix system includes incorrectly being treated as non-system includes when specified with `-I`. [#12842](https://github.com/microsoft/vscode-cpptools/issues/12842)
+* Fix inactive region ranges when multi-byte UTF-8 characters are used. [#12879](https://github.com/microsoft/vscode-cpptools/issues/12879)
+* Fix formatting with `.editorconfig` files. [#12921](https://github.com/microsoft/vscode-cpptools/issues/12921)
+
 ## Version 1.23.0: October 29, 2024
 ### Enhancements
 * Update to clang-format and clang-tidy 19.1.2. [#12824](https://github.com/microsoft/vscode-cpptools/issues/12824)
