@@ -1137,7 +1137,6 @@ export class CppProperties {
     // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
     // paths are expected to have variables resolved already
     public updateCompileCommandsFileWatchers(): void {
-        console.log("updating file watchers");
         if (this.configurationJson) {
             this.compileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
             this.compileCommandsFileWatchers = []; // reset it
