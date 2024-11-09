@@ -1116,6 +1116,8 @@ export class CppProperties {
     }
 
     private clearStaleCompileCommandsFileWatcherFallbackTimes(): void {
+        // We need to keep track of relevant timestamps, so we cannot simply clear all entries.
+        // Instead, we clear entries that are no longer relevant.
         const trackedCompileCommandsPaths: Set<string> = new Set();
         this.configurationJson?.configurations.forEach((config: Configuration) => {
             const path = this.resolvePath(config.compileCommands);
