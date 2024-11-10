@@ -78,9 +78,9 @@
                             {
                                 "type": "array",
                                 "items": {
-                                    "type": "string",
-                                    "uniqueItems": true
+                                    "type": "string"
                                 },
+                                "uniqueItems": true,
                                 "default": []
                             }
                         ],
