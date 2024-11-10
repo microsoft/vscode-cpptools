@@ -413,7 +413,12 @@ export class CppSettings extends Settings {
         }
 
         // value is not a string, try to get it as an array of strings instead.
-        return this.getAsArrayOfStringsOrUndefined("default.compileCommands");
+        var valueArray: string[] | undefined = this.getAsArrayOfStringsOrUndefined("default.compileCommands");
+        valueArray = valueArray?.filter((value) => value !== "");
+        if (valueArray?.length === 0) {
+            return undefined;
+        }
+        return valueArray;
     }
 
 
@@ -651,7 +656,7 @@ export class CppSettings extends Settings {
         }
 
         if (isArrayOfString(value)) {
-            if (setting.items.enum && !allowUndefinedEnums) {
+            if (setting.items?.enum !== undefined && !allowUndefinedEnums) {
                 if (!value.every(x => this.isValidEnum(setting.items.enum, x))) {
                     return setting.default;
                 }
