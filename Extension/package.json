@@ -693,7 +693,20 @@
                         "scope": "machine-overridable"
                     },
                     "C_Cpp.default.compileCommands": {
-                        "type": "string",
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "default": ""
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "uniqueItems": true
+                                },
+                                "default": []
+                            }
+                        ],
                         "markdownDescription": "%c_cpp.configuration.default.compileCommands.markdownDescription%",
                         "scope": "machine-overridable"
                     },
