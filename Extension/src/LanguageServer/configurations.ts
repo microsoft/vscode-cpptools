@@ -78,8 +78,8 @@ export interface Configuration {
     defines?: string[];
     intelliSenseMode?: string;
     intelliSenseModeIsExplicit?: boolean;
-    compileCommandsInCppPropertiesJson?: string;
-    compileCommands?: string;
+    compileCommandsInCppPropertiesJson?: string[];
+    compileCommands?: string[];
     forcedInclude?: string[];
     configurationProviderInCppPropertiesJson?: string;
     configurationProvider?: string;
@@ -136,7 +136,7 @@ export class CppProperties {
     private currentConfigurationIndex: PersistentFolderState<number> | undefined;
     private configFileWatcher: vscode.FileSystemWatcher | null = null;
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
-    private compileCommandsFile: vscode.Uri | undefined | null = undefined;
+    private compileCommandsFiles: Set<string> = new Set();
     private compileCommandsFileWatchers: fs.FSWatcher[] = [];
     private compileCommandsFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private defaultCompilerPath: string | null = null;
@@ -389,7 +389,7 @@ export class CppProperties {
             configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
         }
         if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath &&
-            (isUnset(settings.defaultCompileCommands) || settings.defaultCompileCommands === "") && !configuration.compileCommands) {
+            (isUnset(settings.defaultCompileCommands) || settings.defaultCompileCommands?.length === 0) && !configuration.compileCommands) {
             // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
             // don't set a default when compileCommands is in use.
 
@@ -684,7 +684,7 @@ export class CppProperties {
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
             const config: Configuration | undefined = this.CurrentConfiguration;
             if (config) {
-                config.compileCommands = path;
+                config.compileCommands = [path];
                 this.writeToJson();
             }
             // Any time parsePropertiesFile is called, configurationJson gets
@@ -938,7 +938,7 @@ export class CppProperties {
             configuration.macFrameworkPath = this.updateConfigurationStringArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
             configuration.forcedInclude = this.updateConfigurationPathsArray(configuration.forcedInclude, settings.defaultForcedInclude, env, false);
-            configuration.compileCommands = this.updateConfigurationString(configuration.compileCommands, settings.defaultCompileCommands, env);
+            configuration.compileCommands = this.updateConfigurationStringArray(configuration.compileCommands, settings.defaultCompileCommands, env);
             configuration.compilerArgs = this.updateConfigurationStringArray(configuration.compilerArgs, settings.defaultCompilerArgs, env);
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
@@ -1092,7 +1092,7 @@ export class CppProperties {
             }
 
             if (configuration.compileCommands) {
-                configuration.compileCommands = this.resolvePath(configuration.compileCommands);
+                configuration.compileCommands = configuration.compileCommands.map((path: string) => this.resolvePath(path));
             }
 
             if (configuration.forcedInclude) {
@@ -1121,12 +1121,12 @@ export class CppProperties {
             this.compileCommandsFileWatchers = []; // reset it
             const filePaths: Set<string> = new Set<string>();
             this.configurationJson.configurations.forEach(c => {
-                if (c.compileCommands) {
-                    const fileSystemCompileCommandsPath: string = this.resolvePath(c.compileCommands);
+                c.compileCommands?.forEach((path: string) => {
+                    const fileSystemCompileCommandsPath: string = this.resolvePath(path);
                     if (fs.existsSync(fileSystemCompileCommandsPath)) {
                         filePaths.add(fileSystemCompileCommandsPath);
                     }
-                }
+                })
             });
             try {
                 filePaths.forEach((path: string) => {
@@ -2302,23 +2302,25 @@ export class CppProperties {
 
     public checkCompileCommands(): void {
         // Check for changes in case of file watcher failure.
-        const compileCommands: string | undefined = this.CurrentConfiguration?.compileCommands;
+        const compileCommands: string[] | undefined = this.CurrentConfiguration?.compileCommands;
         if (!compileCommands) {
             return;
         }
-        const compileCommandsFile: string | undefined = this.resolvePath(compileCommands);
-        fs.stat(compileCommandsFile, (err, stats) => {
-            if (err) {
-                if (err.code === "ENOENT" && this.compileCommandsFile) {
-                    this.compileCommandsFileWatchers = []; // reset file watchers
+        compileCommands.forEach((path: string) => {
+            const compileCommandsFile: string | undefined = this.resolvePath(path);
+            fs.stat(compileCommandsFile, (err, stats) => {
+                if (err) {
+                    if (err.code === "ENOENT" && this.compileCommandsFiles.has(compileCommandsFile)) {
+                        this.compileCommandsFileWatchers = []; // reset file watchers
+                        this.onCompileCommandsChanged(compileCommandsFile);
+                        this.compileCommandsFiles.delete(compileCommandsFile); // File deleted
+                    }
+                } else if (stats.mtime > this.compileCommandsFileWatcherFallbackTime) {
+                    this.compileCommandsFileWatcherFallbackTime = new Date();
                     this.onCompileCommandsChanged(compileCommandsFile);
-                    this.compileCommandsFile = null; // File deleted
+                    this.compileCommandsFiles.add(compileCommandsFile); // File created.
                 }
-            } else if (stats.mtime > this.compileCommandsFileWatcherFallbackTime) {
-                this.compileCommandsFileWatcherFallbackTime = new Date();
-                this.onCompileCommandsChanged(compileCommandsFile);
-                this.compileCommandsFile = vscode.Uri.file(compileCommandsFile); // File created.
-            }
+            });
         });
     }
 
