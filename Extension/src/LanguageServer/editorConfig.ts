@@ -6,6 +6,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { isWindows } from '../constants';
 
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 
@@ -64,39 +65,38 @@ export function mapWrapToEditorConfig(value: string | undefined): string {
 let isValid: boolean = true;
 let relativeToCurrentDir: boolean = false;
 
-// Helper function to find matching '}' for a given '{' position
+// Helper function to find matching '}' for a given '{' position.
 function findMatchingBrace(pattern: string, start: number): number {
     let braceLevel = 0;
-    let i = start;
-    while (i < pattern.length) {
+    for (let i = start; i < pattern.length; i++) {
         const c = pattern[i];
         switch (c) {
             case "\\":
                 if (i === pattern.length - 1) {
                     return -1;
                 }
-                i += 2;
+                i++;
                 break;
             case "{":
                 braceLevel++;
-                i++;
                 break;
             case "}":
                 braceLevel--;
                 if (braceLevel === 0) {
                     return i;
                 }
-                i++;
+                if (braceLevel < 0) {
+                    return -1;
+                }
                 break;
             default:
-                i++;
                 break;
         }
     }
     return -1;
 }
 
-// Function to handle brace expansion for ranges and lists
+// Function to handle brace expansion for ranges and lists.
 function handleBraceExpansion(pattern: string): string {
     const rangeMatch = pattern.match(/^\s*(-?\d+)\s*\.\.\s*(-?\d+)\s*$/);
     if (rangeMatch) {
@@ -168,7 +168,7 @@ function buildRangeRegex(start: number, end: number): string {
     if (start > 0) {
         return buildPositiveRangeRegex(start, end);
     }
-    // Pattern to match one or more zeros only if not followed by a non-zero digit
+    // Pattern to match one or more zeros only if not followed by a non-zero digit.
     const zeroPattern = "(0+(?![1-9]))";
     if (end === 0) {
         // If end is 0, start must be negative.
@@ -189,21 +189,21 @@ function buildZeroToNRegex(n: number): string {
     const length = nStr.length;
     const parts: string[] = [];
 
-    // Pattern to remove leading zeros when followed by a non-zero digit
+    // Pattern to remove leading zeros when followed by a non-zero digit.
     const leadingZerosPattern = "(0*(?=[1-9]))";
     let prefix = "";
 
     if (length > 1) {
-        // Handle numbers with fewer digits than `n`
+        // Handle numbers with fewer digits than `n`.
 
         // Single-digit numbers from 0 to 9
         parts.push(`[0-9]`);
         for (let i = 2; i < length; i++) {
-            // Multi-digit numbers with fewer digits than `n`
+            // Multi-digit numbers with fewer digits than `n`.
             parts.push(`([1-9]\\d{0,${i - 1}})`);
         }
 
-        // Build the main pattern by comparing each digit position
+        // Build the main pattern by comparing each digit position.
         for (let i = 0; i < length - 1; i++) {
             const digit = parseInt(nStr[i]);
             if (digit > 1) {
@@ -219,7 +219,7 @@ function buildZeroToNRegex(n: number): string {
         parts.push(`(${prefix}[0-${digit}])`);
     }
 
-    // Combine everything without start and end anchors
+    // Combine everything without start and end anchors.
     return `(${leadingZerosPattern}(${parts.join("|")}))`;
 }
 
@@ -231,7 +231,7 @@ function buildPositiveRangeRegex(start: number, end: number): string {
     const endLength = endStr.length;
     const parts: string[] = [];
 
-    // Pattern to remove leading zeros when followed by a non-zero digit
+    // Pattern to remove leading zeros when followed by a non-zero digit.
     const leadingZerosPattern = "(0*(?=[1-9]))";
 
     if (startLength === endLength) {
@@ -297,9 +297,7 @@ function buildPositiveRangeRegex(start: number, end: number): string {
             }
         }
     } else {
-        // endLength > startLength
-
-        // Add patterns for numbers with the same number of digits as `start`
+        // Add patterns for numbers with the same number of digits as `start`.
         let startPrefix = "";
         for (let i = 0; i < startLength - 1; i++) {
             const startDigit = parseInt(startStr[i]);
@@ -309,7 +307,7 @@ function buildPositiveRangeRegex(start: number, end: number): string {
             else if (startDigit !== 9) {
                 parts.push(`(${startPrefix}[${startDigit + 1}-9]\\d{${startLength - i - 1}})`);
             }
-            // if startDigit === 9, we don't need to add a pattern for this digit
+            // if startDigit === 9, we don't need to add a pattern for this digit.
             startPrefix += startStr[i];
         }
         const startDigit = parseInt(startStr[startLength - 1]);
@@ -319,13 +317,13 @@ function buildPositiveRangeRegex(start: number, end: number): string {
             parts.push(`(${startPrefix}[${startDigit}-9])`);
         }
 
-        // Handle numbers with more digits than 'start' and fewer digits than 'end'
+        // Handle numbers with more digits than 'start' and fewer digits than 'end'.
         for (let i = startLength + 1; i < endLength; i++) {
-            // Multi-digit numbers with more digits than 'start' and fewer digits than 'end'
+            // Multi-digit numbers with more digits than 'start' and fewer digits than 'end'.
             parts.push(`([1-9]\\d{${i - 1}})`);
         }
 
-        // Add patterns for numbers with the same number of digits as `end`
+        // Add patterns for numbers with the same number of digits as `end`.
         let endPrefix = "";
         for (let i = 0; i < endLength - 1; i++) {
             const endDigit = parseInt(endStr[i]);
@@ -336,7 +334,7 @@ function buildPositiveRangeRegex(start: number, end: number): string {
             } else if (endDigit !== 0) {
                 parts.push(`(${endPrefix}[0-${endDigit - 1}]\\d{${endLength - i - 1}})`);
             }
-            // endDigit === 0, we don't need to add a pattern for this digit
+            // endDigit === 0, we don't need to add a pattern for this digit.
             endPrefix += endStr[i];
         }
         const endDigit = parseInt(endStr[endLength - 1]);
@@ -347,11 +345,11 @@ function buildPositiveRangeRegex(start: number, end: number): string {
         }
     }
 
-    // Combine everything without start and end anchors
+    // Combine everything without start and end anchors.
     return `(${leadingZerosPattern}(${parts.join("|")}))`;
 }
 
-// Utility to escape regex special characters in a string
+// Utility to escape regex special characters in a string.
 function escapeRegex(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -518,6 +516,10 @@ function getEditorConfig(filePath: string): any {
     let currentDir: string = path.dirname(filePath);
     const rootDir: string = path.parse(currentDir).root;
 
+    if (isWindows) {
+        filePath = filePath.replace(/\\/g, '/');
+    }
+
     // Traverse from the file's directory to the root directory.
     for (; ;) {
         const editorConfigPath: string = path.join(currentDir, '.editorconfig');
@@ -533,9 +535,14 @@ function getEditorConfig(filePath: string): any {
                 };
             }
 
+            let currentDirForwardSlashes: string = currentDir;
+            if (isWindows) {
+                currentDirForwardSlashes = currentDir.replace(/\\/g, '/');
+            }
+
             // Match sections and combine configurations.
             Object.keys(configData).forEach((section: string) => {
-                if (section !== '*' && matchesSection(currentDir, filePath, section)) {
+                if (section !== '*' && matchesSection(currentDirForwardSlashes, filePath, section)) {
                     combinedConfig = {
                         ...combinedConfig,
                         ...configData[section]
