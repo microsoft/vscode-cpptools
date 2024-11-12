@@ -2330,7 +2330,6 @@ export class CppProperties {
             return;
         }
         const compileCommandsFile: string | undefined = this.resolvePath(compileCommands);
-        const compileCommandsLastChanged: Date | undefined = this.compileCommandsFileWatcherFallbackTime.get(compileCommandsFile);
         fs.stat(compileCommandsFile, (err, stats) => {
             if (err) {
                 if (err.code === "ENOENT" && this.compileCommandsFile) {
@@ -2339,10 +2338,13 @@ export class CppProperties {
                     this.onCompileCommandsChanged(compileCommandsFile);
                     this.compileCommandsFile = null; // File deleted
                 }
-            } else if (compileCommandsLastChanged !== undefined && stats.mtime > compileCommandsLastChanged) {
-                this.compileCommandsFileWatcherFallbackTime.set(compileCommandsFile, new Date());
-                this.onCompileCommandsChanged(compileCommandsFile);
-                this.compileCommandsFile = vscode.Uri.file(compileCommandsFile); // File created.
+            } else {
+                const compileCommandsLastChanged: Date | undefined = this.compileCommandsFileWatcherFallbackTime.get(compileCommandsFile);
+                if (compileCommandsLastChanged !== undefined && stats.mtime > compileCommandsLastChanged) {
+                    this.compileCommandsFileWatcherFallbackTime.set(compileCommandsFile, new Date());
+                    this.onCompileCommandsChanged(compileCommandsFile);
+                    this.compileCommandsFile = vscode.Uri.file(compileCommandsFile); // File created.
+                }
             }
         });
     }
