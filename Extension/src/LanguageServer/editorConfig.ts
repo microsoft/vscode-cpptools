@@ -64,7 +64,7 @@ export function mapWrapToEditorConfig(value: string | undefined): string {
 }
 
 export function matchesSection(pathPrefix: string, filePath: string, section: string): boolean {
-    // The following code is copied from; https://github.com/editorconfig/editorconfig-core-js
+    // The following code is copied from: https://github.com/editorconfig/editorconfig-core-js
     const matchOptions = { matchBase: true, dot: true };
     pathPrefix = pathPrefix.replace(/[?*+@!()|[\]{}]/g, '\\$&');
     pathPrefix = pathPrefix.replace(/^#/, '\\#');
