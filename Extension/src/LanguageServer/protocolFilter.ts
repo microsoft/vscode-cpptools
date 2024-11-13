@@ -8,15 +8,12 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { Middleware } from 'vscode-languageclient';
 import * as util from '../common';
-import { logAndReturn } from '../Utility/Async/returns';
 import { Client } from './client';
 import { clients } from './extension';
 import { shouldChangeFromCToCpp } from './utils';
 
 export const RequestCancelled: number = -32800;
 export const ServerCancelled: number = -32802;
-
-let anyFileOpened: boolean = false;
 
 export function createProtocolFilter(): Middleware {
     return {
@@ -43,16 +40,7 @@ export function createProtocolFilter(): Middleware {
                     // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
                     client.onDidOpenTextDocument(document);
                     client.takeOwnership(document);
-                    void sendMessage(document).then(() => {
-                        // For a file already open when we activate, sometimes we don't get any notifications about visible
-                        // or active text editors, visible ranges, or text selection. As a workaround, we trigger
-                        // onDidChangeVisibleTextEditors here, only for the first file opened.
-                        if (!anyFileOpened) {
-                            anyFileOpened = true;
-                            const cppEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => util.isCpp(e.document));
-                            client.onDidChangeVisibleTextEditors(cppEditors).catch(logAndReturn.undefined);
-                        }
-                    });
+                    void sendMessage(document);
                 }
             }
         },
