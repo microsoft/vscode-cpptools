@@ -2577,7 +2577,8 @@ export class DefaultClient implements Client {
                 }
                 let foundGlobMatch: boolean = false;
                 for (const assoc in assocs) {
-                    if (minimatch(filePath, assoc)) {
+                    const matcher = new minimatch.Minimatch(assoc);
+                    if (matcher.match(filePath)) {
                         foundGlobMatch = true;
                         break; // Assoc matched a glob pattern.
                     }
