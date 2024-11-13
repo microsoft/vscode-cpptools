@@ -95,7 +95,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
     public async getRequestInfo(document: vscode.TextDocument, position: vscode.Position): Promise<string> {
         let requestInfo = "";
         const params: GetCopilotHoverInfoParams = {
-            uri: document.uri.toString(),
+            textDocument: { uri: document.uri.toString() },
             position: Position.create(position.line, position.character)
         };
 

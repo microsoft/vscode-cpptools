@@ -535,7 +535,7 @@ export interface GetIncludesResult {
 }
 
 export interface GetCopilotHoverInfoParams {
-    uri: string;
+    textDocument: TextDocumentIdentifier;
     position: Position;
 }
 
