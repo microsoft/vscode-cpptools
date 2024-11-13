@@ -1092,11 +1092,13 @@ export class CppProperties {
             }
 
             if (configuration.compileCommands) {
-                configuration.compileCommands = configuration.compileCommands.map((path: string) => this.resolvePath(path));
-                if (!this.compileCommandsFileWatcherFallbackTime.has(configuration.compileCommands)) {
-                    // Start tracking the fallback time for a new path.
-                    this.compileCommandsFileWatcherFallbackTime.set(configuration.compileCommands, new Date());
-                }
+                configuration.compileCommands = configuration.compileCommands?.map((path: string) => this.resolvePath(path));
+                configuration.compileCommands?.forEach((path: string) => {
+                    if (!this.compileCommandsFileWatcherFallbackTime.has(path)) {
+                        // Start tracking the fallback time for a new path.
+                        this.compileCommandsFileWatcherFallbackTime.set(path, new Date());
+                    }
+                });
             }
 
             if (configuration.forcedInclude) {
@@ -1120,10 +1122,12 @@ export class CppProperties {
         // Instead, we clear entries that are no longer relevant.
         const trackedCompileCommandsPaths: Set<string> = new Set();
         this.configurationJson?.configurations.forEach((config: Configuration) => {
-            const path = this.resolvePath(config.compileCommands);
-            if (path.length > 0) {
-                trackedCompileCommandsPaths.add(path);
-            }
+            config.compileCommands?.forEach((path: string) => {
+                const compileCommandsFile = this.resolvePath(path);
+                if (compileCommandsFile.length > 0) {
+                    trackedCompileCommandsPaths.add(compileCommandsFile);
+                }
+            });
         });
 
         for (const path of this.compileCommandsFileWatcherFallbackTime.keys()) {
@@ -1145,9 +1149,9 @@ export class CppProperties {
             const filePaths: Set<string> = new Set<string>();
             this.configurationJson.configurations.forEach(c => {
                 c.compileCommands?.forEach((path: string) => {
-                    const fileSystemCompileCommandsPath: string = this.resolvePath(path);
-                    if (fs.existsSync(fileSystemCompileCommandsPath)) {
-                        filePaths.add(fileSystemCompileCommandsPath);
+                    const compileCommandsFile: string = this.resolvePath(path);
+                    if (fs.existsSync(compileCommandsFile)) {
+                        filePaths.add(compileCommandsFile);
                     }
                 })
             });
