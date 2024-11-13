@@ -5,7 +5,9 @@
 'use strict';
 
 import * as fs from 'fs';
+import { Minimatch } from 'minimatch';
 import * as path from 'path';
+import { isWindows } from '../constants';
 
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 
@@ -61,13 +63,25 @@ export function mapWrapToEditorConfig(value: string | undefined): string {
     return "never";
 }
 
-function matchesSection(filePath: string, section: string): boolean {
-    const fileName: string = path.basename(filePath);
-    // Escape all regex special characters except '*' and '?'.
-    // Convert wildcards '*' to '.*' and '?' to '.'.
-    const sectionPattern = section.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.');
-    const regex: RegExp = new RegExp(`^${sectionPattern}$`);
-    return regex.test(fileName);
+export function matchesSection(pathPrefix: string, filePath: string, section: string): boolean {
+    // The following code is copied from: https://github.com/editorconfig/editorconfig-core-js
+    const matchOptions = { matchBase: true, dot: true };
+    pathPrefix = pathPrefix.replace(/[?*+@!()|[\]{}]/g, '\\$&');
+    pathPrefix = pathPrefix.replace(/^#/, '\\#');
+    switch (section.indexOf('/')) {
+        case -1:
+            section = `**/${section}`;
+            break;
+        case 0:
+            section = section.substring(1);
+            break;
+        default:
+            break;
+    }
+    section = section.replace(/\\\\/g, '\\\\\\\\');
+    section = section.replace(/\*\*/g, '{*,**/**/**}');
+    const matcher = new Minimatch(`${pathPrefix}/${section}`, matchOptions);
+    return matcher.match(filePath);
 }
 
 function parseEditorConfigContent(content: string): Record<string, any> {
@@ -92,7 +106,17 @@ function parseEditorConfigContent(content: string): Record<string, any> {
             const [key, ...values] = line.split('=');
             if (key && values.length > 0) {
                 const trimmedKey = key.trim();
-                const value = values.join('=').trim();
+                let value: any = values.join('=').trim();
+
+                // Convert boolean-like and numeric values.
+                if (value === 'true') {
+                    value = true;
+                } else if (value === 'false') {
+                    value = false;
+                } else if (!isNaN(Number(value))) {
+                    value = Number(value);
+                }
+
                 if (currentSection) {
                     // Ensure the current section is initialized.
                     if (!config[currentSection]) {
@@ -113,8 +137,12 @@ function getEditorConfig(filePath: string): any {
     let currentDir: string = path.dirname(filePath);
     const rootDir: string = path.parse(currentDir).root;
 
+    if (isWindows) {
+        filePath = filePath.replace(/\\/g, '/');
+    }
+
     // Traverse from the file's directory to the root directory.
-    for (;;) {
+    for (; ;) {
         const editorConfigPath: string = path.join(currentDir, '.editorconfig');
         if (fs.existsSync(editorConfigPath)) {
             const configFileContent: string = fs.readFileSync(editorConfigPath, 'utf-8');
@@ -128,9 +156,14 @@ function getEditorConfig(filePath: string): any {
                 };
             }
 
+            let currentDirForwardSlashes: string = currentDir;
+            if (isWindows) {
+                currentDirForwardSlashes = currentDir.replace(/\\/g, '/');
+            }
+
             // Match sections and combine configurations.
             Object.keys(configData).forEach((section: string) => {
-                if (section !== '*' && matchesSection(filePath, section)) {
+                if (section !== '*' && matchesSection(currentDirForwardSlashes, filePath, section)) {
                     combinedConfig = {
                         ...combinedConfig,
                         ...configData[section]
@@ -139,7 +172,7 @@ function getEditorConfig(filePath: string): any {
             });
 
             // Check if the current .editorconfig is the root.
-            if (configData['*']?.root?.toLowerCase() === 'true') {
+            if (configData['*']?.root) {
                 break; // Stop searching after processing the root = true file.
             }
         }

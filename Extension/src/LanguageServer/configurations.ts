@@ -138,7 +138,7 @@ export class CppProperties {
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private compileCommandsFile: vscode.Uri | undefined | null = undefined;
     private compileCommandsFileWatchers: fs.FSWatcher[] = [];
-    private compileCommandsFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
+    private compileCommandsFileWatcherFallbackTime: Map<string, Date> = new Map<string, Date>(); // Used when file watching fails.
     private defaultCompilerPath: string | null = null;
     private knownCompilers?: KnownCompiler[];
     private defaultCStandard: string | null = null;
@@ -1093,6 +1093,10 @@ export class CppProperties {
 
             if (configuration.compileCommands) {
                 configuration.compileCommands = this.resolvePath(configuration.compileCommands);
+                if (!this.compileCommandsFileWatcherFallbackTime.has(configuration.compileCommands)) {
+                    // Start tracking the fallback time for a new path.
+                    this.compileCommandsFileWatcherFallbackTime.set(configuration.compileCommands, new Date());
+                }
             }
 
             if (configuration.forcedInclude) {
@@ -1104,9 +1108,28 @@ export class CppProperties {
             }
         }
 
+        this.clearStaleCompileCommandsFileWatcherFallbackTimes();
         this.updateCompileCommandsFileWatchers();
         if (!this.configurationIncomplete) {
             this.onConfigurationsChanged();
+        }
+    }
+
+    private clearStaleCompileCommandsFileWatcherFallbackTimes(): void {
+        // We need to keep track of relevant timestamps, so we cannot simply clear all entries.
+        // Instead, we clear entries that are no longer relevant.
+        const trackedCompileCommandsPaths: Set<string> = new Set();
+        this.configurationJson?.configurations.forEach((config: Configuration) => {
+            const path = this.resolvePath(config.compileCommands);
+            if (path.length > 0) {
+                trackedCompileCommandsPaths.add(path);
+            }
+        });
+
+        for (const path of this.compileCommandsFileWatcherFallbackTime.keys()) {
+            if (!trackedCompileCommandsPaths.has(path)) {
+                this.compileCommandsFileWatcherFallbackTime.delete(path);
+            }
         }
     }
 
@@ -1948,7 +1971,7 @@ export class CppProperties {
             compilerPath = checkPathExists.path;
         }
         if (!compilerPathExists) {
-            compilerMessage = localize('cannot.find2', "Cannot find \"{0}\".", compilerPath);
+            compilerMessage = localize('cannot.find', "Cannot find: {0}", compilerPath);
             newSquiggleMetrics.PathNonExistent++;
         }
         if (compilerMessage) {
@@ -1975,7 +1998,7 @@ export class CppProperties {
             dotConfigPath = checkPathExists.path;
         }
         if (!dotConfigPathExists) {
-            dotConfigMessage = localize('cannot.find2', "Cannot find \"{0}\".", dotConfigPath);
+            dotConfigMessage = localize('cannot.find', "Cannot find: {0}", dotConfigPath);
             newSquiggleMetrics.PathNonExistent++;
         } else if (dotConfigPath && !util.checkFileExistsSync(dotConfigPath)) {
             dotConfigMessage = localize("path.is.not.a.file", "Path is not a file: {0}", dotConfigPath);
@@ -2083,7 +2106,7 @@ export class CppProperties {
                         } else {
                             badPath = `"${expandedPaths[0]}"`;
                         }
-                        message = localize('cannot.find2', "Cannot find {0}", badPath);
+                        message = localize('cannot.find', "Cannot find: {0}", badPath);
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
                         // Check for file versus path mismatches.
@@ -2141,7 +2164,7 @@ export class CppProperties {
                         endOffset = curOffset + curMatch.length;
                         let message: string;
                         if (!pathExists) {
-                            message = localize('cannot.find2', "Cannot find \"{0}\".", expandedPaths[0]);
+                            message = localize('cannot.find', "Cannot find: {0}", expandedPaths[0]);
                             newSquiggleMetrics.PathNonExistent++;
                             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                                 new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
@@ -2310,14 +2333,18 @@ export class CppProperties {
         fs.stat(compileCommandsFile, (err, stats) => {
             if (err) {
                 if (err.code === "ENOENT" && this.compileCommandsFile) {
+                    this.compileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
                     this.compileCommandsFileWatchers = []; // reset file watchers
                     this.onCompileCommandsChanged(compileCommandsFile);
                     this.compileCommandsFile = null; // File deleted
                 }
-            } else if (stats.mtime > this.compileCommandsFileWatcherFallbackTime) {
-                this.compileCommandsFileWatcherFallbackTime = new Date();
-                this.onCompileCommandsChanged(compileCommandsFile);
-                this.compileCommandsFile = vscode.Uri.file(compileCommandsFile); // File created.
+            } else {
+                const compileCommandsLastChanged: Date | undefined = this.compileCommandsFileWatcherFallbackTime.get(compileCommandsFile);
+                if (compileCommandsLastChanged !== undefined && stats.mtime > compileCommandsLastChanged) {
+                    this.compileCommandsFileWatcherFallbackTime.set(compileCommandsFile, new Date());
+                    this.onCompileCommandsChanged(compileCommandsFile);
+                    this.compileCommandsFile = vscode.Uri.file(compileCommandsFile); // File created.
+                }
             }
         });
     }
