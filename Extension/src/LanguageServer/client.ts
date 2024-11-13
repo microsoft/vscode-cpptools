@@ -1285,6 +1285,12 @@ export class DefaultClient implements Client {
 
                 // Listen for messages from the language server.
                 this.registerNotifications();
+
+                // If a file is already open when we activate, sometimes we don't get any notifications about visible
+                // or active text editors, visible ranges, or text selection. As a workaround, we trigger
+                // onDidChangeVisibleTextEditors here.
+                const cppEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => util.isCpp(e.document));
+                await this.onDidChangeVisibleTextEditors(cppEditors);
             }
 
             // update all client configurations
@@ -2571,7 +2577,8 @@ export class DefaultClient implements Client {
                 }
                 let foundGlobMatch: boolean = false;
                 for (const assoc in assocs) {
-                    if (minimatch(filePath, assoc)) {
+                    const matcher = new minimatch.Minimatch(assoc);
+                    if (matcher.match(filePath)) {
                         foundGlobMatch = true;
                         break; // Assoc matched a glob pattern.
                     }
