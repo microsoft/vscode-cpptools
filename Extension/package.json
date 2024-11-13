@@ -6517,7 +6517,6 @@
     "devDependencies": {
         "@octokit/rest": "^20.1.1",
         "@types/glob": "^7.2.0",
-        "@types/minimatch": "^5.1.2",
         "@types/mocha": "^10.0.6",
         "@types/node": "^20.14.2",
         "@types/node-fetch": "^2.6.11",
@@ -6569,7 +6568,7 @@
         "comment-json": "^4.2.3",
         "escape-string-regexp": "^2.0.0",
         "glob": "^7.2.3",
-        "minimatch": "^10.0.1",
+        "minimatch": "^4.2.0",
         "mkdirp": "^3.0.1",
         "node-fetch": "^2.7.0",
         "node-loader": "^2.0.0",
