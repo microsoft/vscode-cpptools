@@ -1426,7 +1426,7 @@ export class CppProperties {
                 return filteredArray;
             }
         }
-        return undefined
+        return undefined;
     }
 
     private parsePropertiesFile(): boolean {
@@ -1947,7 +1947,7 @@ export class CppProperties {
         }
 
         currentConfiguration.compileCommands?.forEach((file: string) => {
-            paths.push(`${file}`)
+            paths.push(`${file}`);
         });
 
         if (currentConfiguration.compilerPath) {
