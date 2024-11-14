@@ -84,7 +84,7 @@
                                 "default": []
                             }
                         ],
-                        "markdownDescription": "Full path to `compile_commands.json` file for the workspace.",
+                        "markdownDescription": "Full path or a list of full paths to `compile_commands.json` files for the workspace.",
                         "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
                     },
                     "includePath": {
