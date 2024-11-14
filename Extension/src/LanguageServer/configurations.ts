@@ -1417,6 +1417,18 @@ export class CppProperties {
         return;
     }
 
+    private forceCompileCommandsAsArray(compileCommandsInCppPropertiesJson: any): string[] | undefined {
+        if (util.isString(compileCommandsInCppPropertiesJson) && compileCommandsInCppPropertiesJson.length > 0) {
+            return [compileCommandsInCppPropertiesJson];
+        } else if (util.isArrayOfString(compileCommandsInCppPropertiesJson)) {
+            const filteredArray: string[] = compileCommandsInCppPropertiesJson.filter(value => value.length > 0);
+            if (filteredArray.length > 0) {
+                return filteredArray;
+            }
+        }
+        return undefined
+    }
+
     private parsePropertiesFile(): boolean {
         if (!this.propertiesFile) {
             this.configurationJson = undefined;
@@ -1450,16 +1462,7 @@ export class CppProperties {
             // Configuration.compileCommands is allowed to be defined as a string in the schema, but we send an array to the language server.
             // For having a predictable behvaior, we convert it here to an array of strings.
             for (let i: number = 0; i < newJson.configurations.length; i++) {
-                let compileCommandsInCppPropertiesJson: string | string[] | undefined = <any>newJson.configurations[i].compileCommands;
-                newJson.configurations[i].compileCommands = undefined;
-                if (util.isString(compileCommandsInCppPropertiesJson) && compileCommandsInCppPropertiesJson.length > 0) {
-                    newJson.configurations[i].compileCommands = [compileCommandsInCppPropertiesJson];
-                } else if (util.isArrayOfString(compileCommandsInCppPropertiesJson)) {
-                    compileCommandsInCppPropertiesJson = compileCommandsInCppPropertiesJson.filter((value: string) => value.length > 0);
-                    if (compileCommandsInCppPropertiesJson.length > 0) {
-                        newJson.configurations[i].compileCommands = compileCommandsInCppPropertiesJson;
-                    }
-                }
+                newJson.configurations[i].compileCommands = this.forceCompileCommandsAsArray(<any>newJson.configurations[i].compileCommands);
             }
 
             this.configurationJson = newJson;
@@ -1811,6 +1814,11 @@ export class CppProperties {
         const configurations: ConfigurationJson = jsonc.parse(configurationsText, undefined, true) as any;
         const currentConfiguration: Configuration = configurations.configurations[this.CurrentConfigurationIndex];
 
+        // Configuration.compileCommands is allowed to be defined as a string in the schema, but we send an array to the language server.
+        // For having a predictable behvaior, we convert it here to an array of strings.
+        // Squiggles are still handled for both cases.
+        currentConfiguration.compileCommands = this.forceCompileCommandsAsArray(<any>currentConfiguration.compileCommands);
+
         let curTextStartOffset: number = 0;
         if (!currentConfiguration.name) {
             return;
@@ -1937,9 +1945,10 @@ export class CppProperties {
                 }
             }
         }
-        if (currentConfiguration.compileCommands) {
-            paths.push(`${currentConfiguration.compileCommands}`);
-        }
+
+        currentConfiguration.compileCommands?.forEach((file: string) => {
+            paths.push(`${file}`)
+        });
 
         if (currentConfiguration.compilerPath) {
             // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace and the possibility of compiler args.
