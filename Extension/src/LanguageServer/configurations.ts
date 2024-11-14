@@ -1153,7 +1153,7 @@ export class CppProperties {
                     if (fs.existsSync(compileCommandsFile)) {
                         filePaths.add(compileCommandsFile);
                     }
-                })
+                });
             });
             try {
                 filePaths.forEach((path: string) => {

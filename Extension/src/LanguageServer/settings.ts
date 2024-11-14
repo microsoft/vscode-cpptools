@@ -401,7 +401,6 @@ export class CppSettings extends Settings {
     public get defaultWindowsSdkVersion(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.windowsSdkVersion")); }
     public get defaultForcedInclude(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return this.getAsStringOrUndefined("default.intelliSenseMode"); }
-    public get defaultCompilerPath(): string | null { return this.getAsString("default.compilerPath", true); }
     public get defaultCompileCommands(): string[] | undefined {
         // Try to get the value as a string.
         const value: string | undefined = this.getAsStringOrUndefined("default.compileCommands");
@@ -413,14 +412,14 @@ export class CppSettings extends Settings {
         }
 
         // value is not a string, try to get it as an array of strings instead.
-        var valueArray: string[] | undefined = this.getAsArrayOfStringsOrUndefined("default.compileCommands");
+        let valueArray: string[] | undefined = this.getAsArrayOfStringsOrUndefined("default.compileCommands");
         valueArray = valueArray?.filter((value) => value !== "");
         if (valueArray?.length === 0) {
             return undefined;
         }
         return valueArray;
     }
-
+    public get defaultCompilerPath(): string | null { return this.getAsString("default.compilerPath", true); }
 
     public set defaultCompilerPath(value: string) {
         const defaultCompilerPathStr: string = "default.compilerPath";
