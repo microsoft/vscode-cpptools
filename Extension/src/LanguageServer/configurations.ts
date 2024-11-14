@@ -1446,6 +1446,25 @@ export class CppProperties {
                     }
                 }
             }
+
+            // Configuration.compileCommands is allowed to be defined as a string in the schema, but we send an array to the language server.
+            // For having a predictable behvaior, we convert it here to an array of strings.
+            for (let i: number = 0; i < newJson.configurations.length; i++) {
+                let compileCommandsInCppPropertiesJson: string | string[] | undefined = <any>newJson.configurations[i].compileCommands;
+                if (util.isString(compileCommandsInCppPropertiesJson) && compileCommandsInCppPropertiesJson.length > 0) {
+                    newJson.configurations[i].compileCommands = [compileCommandsInCppPropertiesJson];
+                } else if (util.isArrayOfString(compileCommandsInCppPropertiesJson)) {
+                    compileCommandsInCppPropertiesJson = compileCommandsInCppPropertiesJson.filter((value: string) => value.length > 0);
+                    if (compileCommandsInCppPropertiesJson.length > 0) {
+                        newJson.configurations[i].compileCommands = compileCommandsInCppPropertiesJson;
+                    } else {
+                        newJson.configurations[i].compileCommands = undefined;
+                    }
+                } else {
+                    newJson.configurations[i].compileCommands = undefined;
+                }
+            }
+
             this.configurationJson = newJson;
             if (this.CurrentConfigurationIndex < 0 || this.CurrentConfigurationIndex >= newJson.configurations.length) {
                 const index: number | undefined = this.getConfigIndexForPlatform(newJson);

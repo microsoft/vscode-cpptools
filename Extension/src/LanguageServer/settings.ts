@@ -413,7 +413,7 @@ export class CppSettings extends Settings {
 
         // value is not a string, try to get it as an array of strings instead.
         let valueArray: string[] | undefined = this.getAsArrayOfStringsOrUndefined("default.compileCommands");
-        valueArray = valueArray?.filter((value) => value !== "");
+        valueArray = valueArray?.filter((value: string) => value.length > 0);
         if (valueArray?.length === 0) {
             return undefined;
         }
