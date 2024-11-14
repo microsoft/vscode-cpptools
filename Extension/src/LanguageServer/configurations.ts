@@ -1093,8 +1093,8 @@ export class CppProperties {
             }
 
             if (configuration.compileCommands) {
-                configuration.compileCommands = configuration.compileCommands?.map((path: string) => this.resolvePath(path));
-                configuration.compileCommands?.forEach((path: string) => {
+                configuration.compileCommands = configuration.compileCommands.map((path: string) => this.resolvePath(path));
+                configuration.compileCommands.forEach((path: string) => {
                     if (!this.compileCommandsFileWatcherFallbackTime.has(path)) {
                         // Start tracking the fallback time for a new path.
                         this.compileCommandsFileWatcherFallbackTime.set(path, new Date());
@@ -1962,6 +1962,8 @@ export class CppProperties {
         const forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
         const compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
         const compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
+        // const compileCommandsArrayStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\[/);
+        // const compileCommandsArrayEnd: number = compileCommandsArrayStart === -1 ? -1 : curText.indexOf("]", curText.indexOf("[", curText.indexOf(":", compileCommandsArrayStart)) + 1);
         const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
         const compilerPathValueStart: number = curText.indexOf('"', curText.indexOf(":", compilerPathStart));
         const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', compilerPathValueStart + 1) + 1;
