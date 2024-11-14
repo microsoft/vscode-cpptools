@@ -2142,8 +2142,7 @@ export class CppProperties {
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
                         // Check for file versus path mismatches.
-                        if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
-                            (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
+                        if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) {
                             if (expandedPaths.length > 1) {
                                 message = localize("multiple.paths.not.allowed", "Multiple paths are not allowed.");
                                 newSquiggleMetrics.MultiplePathsNotAllowed++;
@@ -2156,9 +2155,10 @@ export class CppProperties {
                                 message = localize("path.is.not.a.file", "Path is not a file: {0}", expandedPaths[0]);
                                 newSquiggleMetrics.PathNotAFile++;
                             }
-                        } else if (curOffset >= compileCommandsArrayStart && curOffset <= compileCommandsArrayEnd) {
+                        } else if ((curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
+                            (curOffset >= compileCommandsArrayStart && curOffset <= compileCommandsArrayEnd)) {
                             if (expandedPaths.length > 1) {
-                                message = localize("multiple.paths.should.be.separate.entries", "Multiple paths should be separate entries in the array.");
+                                message = localize("multiple.paths.should.be.separate.entries", "Multiple paths should be separate entries in an array.");
                                 newSquiggleMetrics.MultiplePathsShouldBeSeparated++;
                             } else {
                                 const resolvedPath = this.resolvePath(expandedPaths[0]);
