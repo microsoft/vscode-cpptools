@@ -1451,17 +1451,14 @@ export class CppProperties {
             // For having a predictable behvaior, we convert it here to an array of strings.
             for (let i: number = 0; i < newJson.configurations.length; i++) {
                 let compileCommandsInCppPropertiesJson: string | string[] | undefined = <any>newJson.configurations[i].compileCommands;
+                newJson.configurations[i].compileCommands = undefined;
                 if (util.isString(compileCommandsInCppPropertiesJson) && compileCommandsInCppPropertiesJson.length > 0) {
                     newJson.configurations[i].compileCommands = [compileCommandsInCppPropertiesJson];
                 } else if (util.isArrayOfString(compileCommandsInCppPropertiesJson)) {
                     compileCommandsInCppPropertiesJson = compileCommandsInCppPropertiesJson.filter((value: string) => value.length > 0);
                     if (compileCommandsInCppPropertiesJson.length > 0) {
                         newJson.configurations[i].compileCommands = compileCommandsInCppPropertiesJson;
-                    } else {
-                        newJson.configurations[i].compileCommands = undefined;
                     }
-                } else {
-                    newJson.configurations[i].compileCommands = undefined;
                 }
             }
 
