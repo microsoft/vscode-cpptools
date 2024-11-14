@@ -389,7 +389,8 @@ export class CppProperties {
             configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
         }
         if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath &&
-            (isUnset(settings.defaultCompileCommands) || settings.defaultCompileCommands?.length === 0) && !configuration.compileCommands) {
+            (isUnset(settings.defaultCompileCommands) || settings.defaultCompileCommands?.length === 0) &&
+            (isUnset(configuration.compileCommands) || configuration.compileCommands?.length === 0)) {
             // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
             // don't set a default when compileCommands is in use.
 
