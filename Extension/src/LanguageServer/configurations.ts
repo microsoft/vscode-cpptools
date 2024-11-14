@@ -1898,9 +1898,9 @@ export class CppProperties {
             curText = curText.substring(0, nextNameStart2);
         }
         if (this.prevSquiggleMetrics.get(currentConfiguration.name) === undefined) {
-            this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0 });
+            this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0, MultiplePathsShouldBeSeparated: 0 });
         }
-        const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0 };
+        const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0, MultiplePathsShouldBeSeparated: 0 };
         const isWindows: boolean = os.platform() === 'win32';
 
         // TODO: Add other squiggles.
@@ -1962,8 +1962,8 @@ export class CppProperties {
         const forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
         const compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
         const compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
-        // const compileCommandsArrayStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\[/);
-        // const compileCommandsArrayEnd: number = compileCommandsArrayStart === -1 ? -1 : curText.indexOf("]", curText.indexOf("[", curText.indexOf(":", compileCommandsArrayStart)) + 1);
+        const compileCommandsArrayStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\[/);
+        const compileCommandsArrayEnd: number = compileCommandsArrayStart === -1 ? -1 : curText.indexOf("]", curText.indexOf("[", curText.indexOf(":", compileCommandsArrayStart)) + 1);
         const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
         const compilerPathValueStart: number = curText.indexOf('"', curText.indexOf(":", compilerPathStart));
         const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', compilerPathValueStart + 1) + 1;
@@ -2156,6 +2156,19 @@ export class CppProperties {
                                 message = localize("path.is.not.a.file", "Path is not a file: {0}", expandedPaths[0]);
                                 newSquiggleMetrics.PathNotAFile++;
                             }
+                        } else if (curOffset >= compileCommandsArrayStart && curOffset <= compileCommandsArrayEnd) {
+                            if (expandedPaths.length > 1) {
+                                message = localize("multiple.paths.should.be.separate.entries", "Multiple paths should be separate entries in the array.");
+                                newSquiggleMetrics.MultiplePathsShouldBeSeparated++;
+                            } else {
+                                const resolvedPath = this.resolvePath(expandedPaths[0]);
+                                if (util.checkFileExistsSync(resolvedPath)) {
+                                    continue;
+                                }
+
+                                message = localize("path.is.not.a.file", "Path is not a file: {0}", expandedPaths[0]);
+                                newSquiggleMetrics.PathNotAFile++;
+                            }
                         } else {
                             const mismatchedPaths: string[] = [];
                             for (const expandedPath of expandedPaths) {
@@ -2234,6 +2247,9 @@ export class CppProperties {
         }
         if (newSquiggleMetrics.MultiplePathsNotAllowed !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.MultiplePathsNotAllowed) {
             changedSquiggleMetrics.MultiplePathsNotAllowed = newSquiggleMetrics.MultiplePathsNotAllowed;
+        }
+        if (newSquiggleMetrics.MultiplePathsShouldBeSeparated !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.MultiplePathsShouldBeSeparated) {
+            changedSquiggleMetrics.MultiplePathsShouldBeSeparated = newSquiggleMetrics.MultiplePathsShouldBeSeparated;
         }
         if (Object.keys(changedSquiggleMetrics).length > 0) {
             telemetry.logLanguageServerEvent("ConfigSquiggles", undefined, changedSquiggleMetrics);
