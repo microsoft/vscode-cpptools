@@ -138,7 +138,8 @@ describe('copilotProviders Tests', () => {
         compiler: 'MSVC',
         targetPlatform: 'Windows',
         targetArchitecture: 'x64',
-        compilerArguments: []
+        compilerArguments: [],
+        compilerUserDefinesRelevant: []
     };
 
     it('should not provide project context traits when copilotcppTraits flag is false.', async () => {
@@ -245,7 +246,8 @@ describe('copilotProviders Tests', () => {
         compiler: 'MSVC',
         targetPlatform: 'Windows',
         targetArchitecture: 'x64',
-        compilerArguments: ['/std:c++17', '/GR-', '/EHs-c-', '/await']
+        compilerArguments: ['/std:c++17', '/GR-', '/EHs-c-', '/await'],
+        compilerUserDefinesRelevant: ['MY_FOO', 'MY_BAR']
     };
 
     it('should provide compiler command line traits if available.', async () => {
@@ -266,6 +268,10 @@ describe('copilotProviders Tests', () => {
         ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.value === '/std:c++17, /GR-, /EHs-c-, /await', 'result.traits should have a compiler arguments trait with value "/std:c++17, /GR-, /EHs-c-, /await"');
         ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.includeInPrompt, 'result.traits should have a compiler arguments trait with includeInPrompt true');
         ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.promptTextOverride === 'The compiler arguments include: /std:c++17, /GR-, /EHs-c-, /await.', 'result.traits should have a compiler arguments trait with promptTextOverride');
+        ok(result.traits.find((trait) => trait.name === 'compilerUserDefines'), 'result.traits should have a compiler user defines trait');
+        ok(result.traits.find((trait) => trait.name === 'compilerUserDefines')?.value === 'MY_FOO, MY_BAR', 'result.traits should have a compiler user defines trait with value "MY_FOO, MY_BAR"');
+        ok(result.traits.find((trait) => trait.name === 'compilerUserDefines')?.includeInPrompt, 'result.traits should have a compiler user defines trait with includeInPrompt true');
+        ok(result.traits.find((trait) => trait.name === 'compilerUserDefines')?.promptTextOverride === 'These compiler command line user defines may be relevent: MY_FOO, MY_BAR.', 'result.traits should have a compiler args trait with promptTextOverride');
         ok(!result.traits.find((trait) => trait.name === 'directAsks'), 'result.traits should not have a direct asks trait');
     });
 

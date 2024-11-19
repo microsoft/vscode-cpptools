@@ -66,6 +66,7 @@ export interface ProjectContext {
     targetPlatform: string;
     targetArchitecture: string;
     compilerArguments: string[];
+    compilerUserDefinesRelevant: string[];
 }
 
 // Set these values for local testing purpose without involving control tower.
@@ -93,6 +94,15 @@ function filterComplierArguments(compiler: string, compilerArguments: string[], 
     return compilerArguments.filter(arg => defaultFilter?.test(arg) || additionalFilter?.test(arg));
 }
 
+// We can set up copilotcppMacroReferenceFilter feature flag to filter macro references to learn about
+// macro usage distribution, i.e., compiler or platform specific macros, or even the presence of certain macros.
+const defaultMacroReferenceFilter: RegExp | undefined = undefined;
+function filterMacroReferences(macroReferences: string[], context: { flags: Record<string, unknown> }): string[] {
+    const filter: RegExp | undefined = context.flags.copilotcppMacroReferenceFilter ? new RegExp(context.flags.copilotcppMacroReferenceFilter as string) : undefined;
+
+    return macroReferences.filter(macro => defaultMacroReferenceFilter?.test(macro) || filter?.test(macro));
+}
+
 export async function getProjectContext(context: { flags: Record<string, unknown> }, token: vscode.CancellationToken): Promise<ProjectContext | undefined> {
     const telemetryProperties: Record<string, string> = {};
     try {
@@ -110,7 +120,8 @@ export async function getProjectContext(context: { flags: Record<string, unknown
             compiler: projectContext.result.compiler,
             targetPlatform: projectContext.result.targetPlatform,
             targetArchitecture: projectContext.result.targetArchitecture,
-            compilerArguments: []
+            compilerArguments: [],
+            compilerUserDefinesRelevant: []
         };
 
         if (projectContext.result.language) {
@@ -129,12 +140,30 @@ export async function getProjectContext(context: { flags: Record<string, unknown
             telemetryProperties["targetArchitecture"] = projectContext.result.targetArchitecture;
         }
         telemetryProperties["compilerArgumentCount"] = projectContext.result.fileContext.compilerArguments.length.toString();
-        // Telemtry to learn about the argument distribution. The filtered arguments are expected to be non-PII.
+        // Telemtry to learn about the argument and macro distribution. The filtered arguments and macro references
+        // are expected to be non-PII.
         if (projectContext.result.fileContext.compilerArguments.length) {
             const filteredCompilerArguments = filterComplierArguments(projectContext.result.compiler, projectContext.result.fileContext.compilerArguments, context);
             if (filteredCompilerArguments.length > 0) {
                 telemetryProperties["filteredCompilerArguments"] = filteredCompilerArguments.join(', ');
                 result.compilerArguments = filteredCompilerArguments;
+            }
+        }
+        telemetryProperties["compilerUserDefinesCount"] = projectContext.result.fileContext.compilerUserDefines.length.toString();
+        if (projectContext.result.fileContext.compilerUserDefines.length > 0) {
+            const userDefinesWithoutValue = projectContext.result.fileContext.compilerUserDefines.map(value => value.split('=')[0]);
+            const userDefinesRelatedToThisFile = userDefinesWithoutValue.filter(value => projectContext.result?.fileContext.macroReferences.includes(value));
+            if (userDefinesRelatedToThisFile.length > 0) {
+                // Don't care the actual name of the user define, just the count that's relevant.
+                telemetryProperties["compilerUserDefinesRelevantCount"] = userDefinesRelatedToThisFile.length.toString();
+                result.compilerUserDefinesRelevant = userDefinesRelatedToThisFile;
+            }
+        }
+        telemetryProperties["macroReferenceCount"] = projectContext.result.fileContext.macroReferences.length.toString();
+        if (projectContext.result.fileContext.macroReferences.length > 0) {
+            const filteredMacroReferences = filterMacroReferences(projectContext.result.fileContext.macroReferences, context);
+            if (filteredMacroReferences.length > 0) {
+                telemetryProperties["filteredMacroReferences"] = filteredMacroReferences.join(', ');
             }
         }
 

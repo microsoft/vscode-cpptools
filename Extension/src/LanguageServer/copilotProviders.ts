@@ -79,6 +79,10 @@ export async function registerRelatedFilesProvider(): Promise<void> {
                                 const compilerArgumentsValue = updatedArguments.join(", ");
                                 traits.push({ name: "compilerArguments", value: compilerArgumentsValue, includeInPrompt: true, promptTextOverride: `The compiler arguments include: ${compilerArgumentsValue}.` });
                             }
+                            if (cppContext.compilerUserDefinesRelevant.length > 0) {
+                                const compilerUserDefinesValue = cppContext.compilerUserDefinesRelevant.join(", ");
+                                traits.push({ name: "compilerUserDefines", value: compilerUserDefinesValue, includeInPrompt: true, promptTextOverride: `These compiler command line user defines may be relevent: ${compilerUserDefinesValue}.` });
+                            }
                             if (directAsks) {
                                 traits.push({ name: "directAsks", value: directAsks, includeInPrompt: true, promptTextOverride: directAsks });
                             }

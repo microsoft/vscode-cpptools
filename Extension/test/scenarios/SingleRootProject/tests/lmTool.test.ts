@@ -179,13 +179,21 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
         expectedCompiler,
         context,
         compilerArguments: compilerArguments,
-        expectedCompilerArguments
+        expectedCompilerArguments,
+        compilerUserDefines,
+        expectedCompilerUserDefines,
+        macroReferences,
+        expectedMacroReferences
     }: {
         compiler: string;
         expectedCompiler: string;
         context: { flags: Record<string, unknown> };
         compilerArguments: string[];
         expectedCompilerArguments: string[];
+        compilerUserDefines: string[];
+        expectedCompilerUserDefines: string[];
+        macroReferences: string[];
+        expectedMacroReferences: string[];
     }) => {
         arrangeProjectContextFromCppTools({
             projectContextFromCppTools: {
@@ -195,7 +203,9 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
                 targetPlatform: 'windows',
                 targetArchitecture: 'x64',
                 fileContext: {
-                    compilerArguments: compilerArguments
+                    compilerArguments: compilerArguments,
+                    compilerUserDefines: compilerUserDefines,
+                    macroReferences: macroReferences
                 }
             }
         });
@@ -229,6 +239,22 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             })));
         }
         ok(languageModelToolTelemetryStub.calledWithMatch('Completions/tool', sinon.match({
+            "compilerUserDefinesCount": compilerUserDefines.length.toString()
+        })));
+        if (expectedCompilerUserDefines.length > 0) {
+            ok(languageModelToolTelemetryStub.calledWithMatch('Completions/tool', sinon.match({
+                "compilerUserDefinesRelevantCount": expectedCompilerUserDefines.length.toString()
+            })));
+        }
+        ok(languageModelToolTelemetryStub.calledWithMatch('Completions/tool', sinon.match({
+            'macroReferenceCount': macroReferences.length.toString()
+        })));
+        if (expectedMacroReferences.length > 0) {
+            ok(languageModelToolTelemetryStub.calledWithMatch('Completions/tool', sinon.match({
+                'filteredMacroReferences': expectedMacroReferences.join(', ')
+            })));
+        }
+        ok(languageModelToolTelemetryStub.calledWithMatch('Completions/tool', sinon.match({
             'time': sinon.match.string
         })));
         ok(result, 'result should not be undefined');
@@ -238,6 +264,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
         ok(result.targetPlatform === 'Windows');
         ok(result.targetArchitecture === 'x64');
         ok(JSON.stringify(result.compilerArguments) === JSON.stringify(expectedCompilerArguments));
+        ok(JSON.stringify(result.compilerUserDefinesRelevant) === JSON.stringify(expectedCompilerUserDefines));
     };
 
     it('should log telemetry and provide cpp context properly when experimental flags are not defined.', async () => {
@@ -246,7 +273,11 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             expectedCompiler: 'GCC',
             context: { flags: {} },
             compilerArguments: ['-Wall', '-Werror', '-std=c++20'],
-            expectedCompilerArguments: []
+            expectedCompilerArguments: [],
+            compilerUserDefines: [],
+            expectedCompilerUserDefines: [],
+            macroReferences: [],
+            expectedMacroReferences: []
         });
     });
 
@@ -256,7 +287,39 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             expectedCompiler: 'GCC',
             context: { flags: { copilotcppGccCompilerArgumentFilter: '^-(fno\-exceptions|fno\-rtti)$' } },
             compilerArguments: ['-Wall', '-Werror', '-std=c++20', '-fno-exceptions', '-fno-rtti', '-pthread', '-O3', '-funroll-loops'],
-            expectedCompilerArguments: ['-fno-exceptions', '-fno-rtti']
+            expectedCompilerArguments: ['-fno-exceptions', '-fno-rtti'],
+            compilerUserDefines: [],
+            expectedCompilerUserDefines: [],
+            macroReferences: [],
+            expectedMacroReferences: []
+        });
+    });
+
+    it('should honor content-exclusion and provide user defines based on macro references.', async () => {
+        await testGetProjectContext({
+            compiler: 'gcc',
+            expectedCompiler: 'GCC',
+            context: { flags: {} },
+            compilerArguments: [],
+            expectedCompilerArguments: [],
+            compilerUserDefines: ['FOO', 'BAR', 'XYZ'],
+            expectedCompilerUserDefines: ['FOO', 'XYZ'],
+            macroReferences: ['FOO', 'XYZ', 'BAZ'],
+            expectedMacroReferences: []
+        });
+    });
+
+    it('should log macro reference telemetry based on copilotcppMacroReferenceFilter.', async () => {
+        await testGetProjectContext({
+            compiler: 'gcc',
+            expectedCompiler: 'GCC',
+            context: { flags: { copilotcppMacroReferenceFilter: '^(FOO|XYZ)$' } },
+            compilerArguments: [],
+            expectedCompilerArguments: [],
+            compilerUserDefines: [],
+            expectedCompilerUserDefines: [],
+            macroReferences: ['FOO', 'XYZ', 'BAZ'],
+            expectedMacroReferences: ['FOO', 'XYZ']
         });
     });
 
@@ -272,7 +335,11 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
                 }
             },
             compilerArguments: ['-fno-exceptions', '-fno-rtti'],
-            expectedCompilerArguments: []
+            expectedCompilerArguments: [],
+            compilerUserDefines: [],
+            expectedCompilerUserDefines: [],
+            macroReferences: [],
+            expectedMacroReferences: []
         });
     });
 
@@ -285,7 +352,9 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
                 targetPlatform: 'arduino',
                 targetArchitecture: 'bar',
                 fileContext: {
-                    compilerArguments: []
+                    compilerArguments: [],
+                    compilerUserDefines: [],
+                    macroReferences: []
                 }
             }
         });
@@ -295,6 +364,8 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
         ok(languageModelToolTelemetryStub.calledOnce, 'logLanguageModelToolEvent should be called once');
         ok(languageModelToolTelemetryStub.calledWithMatch('Completions/tool', sinon.match({
             "compilerArgumentCount": '0',
+            "compilerUserDefinesCount": '0',
+            "macroReferenceCount": '0',
             "targetArchitecture": 'bar'
         })));
         ok(result, 'result should not be undefined');
@@ -304,5 +375,6 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
         ok(result.targetPlatform === '');
         ok(result.targetArchitecture === 'bar');
         ok(result.compilerArguments.length === 0);
+        ok(result.compilerUserDefinesRelevant.length === 0);
     });
 });

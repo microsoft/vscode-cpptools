@@ -543,6 +543,8 @@ export interface ChatContextResult {
 
 export interface FileContextResult {
     compilerArguments: string[];
+    compilerUserDefines: string[];
+    macroReferences: string[];
 }
 
 export interface ProjectContextResult {
