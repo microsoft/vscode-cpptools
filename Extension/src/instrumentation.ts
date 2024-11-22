@@ -4,6 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+/* eslint @typescript-eslint/no-var-requires: "off" */
+
 export interface PerfMessage<TInput = Record<string, any> | undefined> {
     /** this is the 'name' of the event */
     name: string;
@@ -22,9 +24,9 @@ export interface PerfMessage<TInput = Record<string, any> | undefined> {
 }
 
 const services = {
-    instrument: <T extends Record<string, any>>(instance: T, _options?: { ignore?: string[]; name?: string }): T => { return instance; },
-    message: (message: PerfMessage) => { },
-    init: (vscode: any) => { },
+    instrument: <T extends Record<string, any>>(_instance: T, _options?: { ignore?: string[]; name?: string }): T => instance,
+    message: (_message: PerfMessage) => { },
+    init: (_vscode: any) => { },
     launchSettings: undefined as Record<string, any> | undefined
 };
 
@@ -42,7 +44,6 @@ export function isInstrumentationEnabled(): boolean {
     return !!(global as any).instrumentation;
 }
 
-
 // if the instrumentation code is not globally loaded yet, then load it now
 if (!isInstrumentationEnabled()) {
     // pull the launch settings from the environment if the variable has been set.
@@ -52,7 +53,6 @@ if (!isInstrumentationEnabled()) {
 
     // this loads the bootstrap module (global-instrumentation-support) which adds some global functions
     if (services.launchSettings?.bootstrapModule) {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         void require(services.launchSettings.bootstrapModule);
     }
 }
