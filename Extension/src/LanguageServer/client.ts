@@ -2321,8 +2321,7 @@ export class DefaultClient implements Client {
         // Don't cancel if the result has already been computed, because the result might still be usable
         // without needing to send an unnecessary re-request, which is the case for the callback to registerRelatedFilesProvider.
         if (token.isCancellationRequested) {
-            return result;
-            // throw new vscode.CancellationError();
+            return result; // throw new vscode.CancellationError();
         }
 
         return result;
