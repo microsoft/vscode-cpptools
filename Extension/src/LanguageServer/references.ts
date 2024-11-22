@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import { Position, TextDocumentIdentifier } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import * as util from '../common';
-import * as logger from '../logger';
+import { getOutputChannel } from '../logger';
 import * as telemetry from '../telemetry';
 import { DefaultClient } from './client';
 import { PersistentState } from './persistentState';
@@ -478,7 +478,7 @@ export class ReferencesManager {
                     this.referencesChannel.show(true);
                 }
             } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
-                const logChannel: vscode.OutputChannel = logger.getOutputChannel();
+                const logChannel: vscode.OutputChannel = getOutputChannel();
                 logChannel.appendLine(msg);
                 logChannel.appendLine("");
                 logChannel.show(true);

@@ -7,7 +7,7 @@
 import * as vscode from 'vscode';
 import { localize } from 'vscode-nls';
 import * as util from '../common';
-import * as logger from '../logger';
+import { getOutputChannelLogger } from '../logger';
 import * as telemetry from '../telemetry';
 import { ChatContextResult } from './client';
 import { getClients } from './extension';
@@ -106,7 +106,7 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
 
     private async reportError(): Promise<void> {
         try {
-            logger.getOutputChannelLogger().appendLine(localize("copilot.cppcontext.error", "Error while retrieving the #cpp context."));
+            getOutputChannelLogger().appendLine(localize("copilot.cppcontext.error", "Error while retrieving the #cpp context."));
         }
         catch {
             // Intentionally swallow any exception.

@@ -23,6 +23,7 @@ import { CppSettings } from './LanguageServer/settings';
 import { logAndReturn, returns } from './Utility/Async/returns';
 import { CppTools1 } from './cppTools1';
 import { logMachineIdMappings } from './id';
+import { sendInstrumentation } from './instrumentation';
 import { disposeOutputChannels, log } from './logger';
 import { PlatformInformation } from './platform';
 
@@ -35,6 +36,11 @@ let reloadMessageShown: boolean = false;
 const disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
+    sendInstrumentation({
+        name: "activate",
+        context: { cpptools: '', start: '' }
+    });
+
     util.setExtensionContext(context);
     Telemetry.activate();
     util.setProgress(0);
@@ -152,6 +158,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         log(localize("intellisense.disabled", "intelliSenseEngine is disabled"));
     }
 
+    sendInstrumentation({
+        name: "activate",
+        context: { cpptools: '', end: '' }
+    });
     return cppTools;
 }
 
