@@ -762,7 +762,7 @@ export interface Client {
     PauseCodeAnalysis(): void;
     ResumeCodeAnalysis(): void;
     CancelCodeAnalysis(): void;
-    handleConfigurationSelectCommand(): Promise<void>;
+    handleConfigurationSelectCommand(config?: string): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
     handleShowActiveCodeAnalysisCommands(): Promise<void>;
     handleShowIdleCodeAnalysisCommands(): Promise<void>;
@@ -3248,11 +3248,11 @@ export class DefaultClient implements Client {
     /**
      * command handlers
      */
-    public async handleConfigurationSelectCommand(): Promise<void> {
+    public async handleConfigurationSelectCommand(config?: string): Promise<void> {
         await this.ready;
         const configNames: string[] | undefined = this.configuration.ConfigurationNames;
         if (configNames) {
-            const index: number = await ui.showConfigurations(configNames);
+            const index: number = config ? configNames.indexOf(config) : await ui.showConfigurations(configNames);
             if (index < 0) {
                 return;
             }
