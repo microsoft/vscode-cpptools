@@ -1,3 +1,31 @@
 {
+<<<<<<< Updated upstream
     "files.autoSave": "afterDelay"
+=======
+    "workbench.editor.defaultBinaryEditor": "default",
+    "workbench.editor.enablePreviewFromCodeNavigation": true,
+    "workbench.editor.enablePreviewFromQuickOpen": true,
+    "workbench.editor.highlightModifiedTabs": true,
+    "workbench.editor.pinnedTabsOnSeparateRow": true,
+    "workbench.editor.scrollToSwitchTabs": true,
+    "workbench.editor.tabActionLocation": "left",
+    "workbench.editor.tabSizing": "fixed",
+    "workbench.editor.wrapTabs": true,
+    "workbench.editor.alwaysShowEditorActions": true,
+    "workbench.editor.autoLockGroups": {
+        "workbench.editor.chatSession": true
+    },
+    "workbench.editor.closeOnFileDelete": true,
+    "workbench.editor.limit.enabled": true,
+    "workbench.editor.limit.excludeDirty": true,
+    "workbench.editor.limit.perEditorGroup": true,
+    "workbench.editor.navigationScope": "editorGroup",
+    "workbench.editor.openPositioning": "last",
+    "workbench.editor.openSideBySideDirection": "down",
+    "workbench.editor.preferHistoryBasedLanguageDetection": true,
+    "workbench.editor.preventPinnedEditorClose": "never",
+    "workbench.editor.revealIfOpen": true,
+    "workbench.editor.sharedViewState": true,
+    "workbench.editor.showTabs": "none"
+>>>>>>> Stashed changes
 }
