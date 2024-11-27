@@ -1395,6 +1395,8 @@ export async function preReleaseCheck(): Promise<void> {
 // This uses several workarounds for interacting with the hover feature.
 // A proposal for dynamic hover content would help, such as the one here (https://github.com/microsoft/vscode/issues/195394)
 async function onCopilotHover(): Promise<void> {
+    telemetry.logLanguageServerEvent("CopilotHover");
+
     // Check if the user has access to vscode language model.
     const vscodelm = (vscode as any).lm;
     if (!vscodelm) {
@@ -1412,8 +1414,6 @@ async function onCopilotHover(): Promise<void> {
         return;
     }
 
-    const errorMessage = localize("copilot.hover.error", "An error occurred while generating Copilot summary.");
-
     // Prep hover with wait message.
     copilotHoverProvider.showWaiting();
 
@@ -1430,9 +1430,8 @@ async function onCopilotHover(): Promise<void> {
 
     // Gather the content for the query from the client.
     const requestInfo = await copilotHoverProvider.getRequestInfo(hoverDocument, hoverPosition);
-
     if (requestInfo.length === 0) {
-        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
+        await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, "Failed to receive request info from the client.");
         return;
     }
 
@@ -1454,7 +1453,7 @@ async function onCopilotHover(): Promise<void> {
     } catch (err) {
         if (err instanceof vscode.LanguageModelError) {
             console.log(err.message, err.code, err.cause);
-            await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.message);
         } else {
             throw err;
         }
@@ -1463,7 +1462,7 @@ async function onCopilotHover(): Promise<void> {
 
     // Ensure we have a valid response from Copilot.
     if (!chatResponse) {
-        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
+        await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition);
         return;
     }
 
@@ -1474,16 +1473,27 @@ async function onCopilotHover(): Promise<void> {
             content += fragment;
         }
     } catch (err) {
-        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
+        if (err instanceof Error) {
+            console.log(err.message, err.cause);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.message);
+        }
         return;
     }
 
     if (content.length === 0) {
-        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, errorMessage);
+        await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition);
         return;
     }
 
     await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, content);
+}
+
+async function reportCopilotFailure(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, customError?: string): Promise<void> {
+    const defaultError = "An error occurred while generating Copilot summary.";
+    const errorMessage = customError ? customError : defaultError;
+    telemetry.logLanguageServerEvent("CopilotHoverError", { errorMessage });
+    // Display the localized default failure message in the hover.
+    await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.error", defaultError));
 }
 
 async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, content?: string): Promise<boolean> {
