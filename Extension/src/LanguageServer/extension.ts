@@ -1489,7 +1489,7 @@ async function onCopilotHover(): Promise<void> {
 }
 
 async function reportCopilotFailure(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, customError?: string): Promise<void> {
-    const defaultError = "An error occurred while generating Copilot summary.";
+    const defaultError: string = "An error occurred while generating Copilot summary.";
     const errorMessage = customError ? customError : defaultError;
     telemetry.logLanguageServerEvent("CopilotHoverError", { errorMessage });
     // Display the localized default failure message in the hover.
