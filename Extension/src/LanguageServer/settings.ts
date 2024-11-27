@@ -455,7 +455,16 @@ export class CppSettings extends Settings {
             && this.intelliSenseEngine.toLowerCase() === "default"
             && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
     }
-    public get copilotHover(): string { return (vscode as any).lm ? this.getAsString("copilotHover") : "disabled"; }
+    public get copilotHover(): string {
+        if (!(vscode as any).lm) {
+            return "disabled";
+        }
+        const val = super.Section.get<any>("copilotHover");
+        if (val === undefined) {
+            return "default";
+        }
+        return val as string;
+    }
 
     public get formattingEngine(): string { return this.getAsString("formatting"); }
     public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
