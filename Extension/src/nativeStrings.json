@@ -478,5 +478,6 @@
     "refactor_extract_reference_return_c_code": "The function would have to return a value by reference. C code cannot return references.",
     "refactor_extract_xborder_jump": "Jumps between the selected code and the surrounding code are present.",
     "refactor_extract_missing_return": "In the selected code, some control paths exit without setting the return value. This is supported only for scalar, numeric, and pointer return types.",
-    "expand_selection": "Expand selection (to enable 'Extract to function')"
+    "expand_selection": "Expand selection (to enable 'Extract to function')",
+    "file_not_found_in_path2": "\"{0}\" not found in compile_commands.json files. 'includePath' from c_cpp_properties.json in folder '{1}' will be used for this file instead."
 }
