@@ -171,7 +171,7 @@ export async function getProjectContext(uri: vscode.Uri, context: { flags: Recor
     catch (exception) {
         try {
             const err: Error = exception as Error;
-            logger.getOutputChannelLogger().appendLine(localize("copilot.projectcontext.error", "Error while retrieving the project context. Reason: {0}", err.message));
+            getOutputChannelLogger().appendLine(localize("copilot.projectcontext.error", "Error while retrieving the project context. Reason: {0}", err.message));
         }
         catch {
             // Intentionally swallow any exception.
