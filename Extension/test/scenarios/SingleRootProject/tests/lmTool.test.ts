@@ -130,8 +130,8 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
     });
 
     const arrangeChatContextFromCppTools = ({ chatContextFromCppTools, isCpp, isHeaderFile }:
-        { chatContextFromCppTools?: ChatContextResult; isCpp?: boolean; isHeaderFile?: boolean } =
-        { chatContextFromCppTools: undefined, isCpp: undefined, isHeaderFile: false }
+    { chatContextFromCppTools?: ChatContextResult; isCpp?: boolean; isHeaderFile?: boolean } =
+    { chatContextFromCppTools: undefined, isCpp: undefined, isHeaderFile: false }
     ) => {
         activeClientStub.getChatContext.resolves(chatContextFromCppTools);
         sinon.stub(util, 'isCpp').returns(isCpp ?? true);
@@ -139,8 +139,8 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
     };
 
     const arrangeProjectContextFromCppTools = ({ projectContextFromCppTools, isCpp, isHeaderFile }:
-        { projectContextFromCppTools?: ProjectContextResult; isCpp?: boolean; isHeaderFile?: boolean } =
-        { projectContextFromCppTools: undefined, isCpp: undefined, isHeaderFile: false }
+    { projectContextFromCppTools?: ProjectContextResult; isCpp?: boolean; isHeaderFile?: boolean } =
+    { projectContextFromCppTools: undefined, isCpp: undefined, isHeaderFile: false }
     ) => {
         activeClientStub.getProjectContext.resolves(projectContextFromCppTools);
         sinon.stub(util, 'isCpp').returns(isCpp ?? true);
