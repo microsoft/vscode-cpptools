@@ -2348,8 +2348,8 @@ export class DefaultClient implements Client {
         return result;
     }
 
-    // This is used to avoid processing unnecessary LSP cancel requests during a Copilot completion
-    // when the result could still be used in 2 minutes in its cache before it sends another request.
+    // Copilot completions will cancel the current request if it times out (showing the user completion results without context info),
+    // but the results can still be used for future requests (due to caching) so it's better to return results instead of cancelling.
     private static async withoutLspCancellationHandling<T>(task: () => Promise<T>): Promise<T> {
         let result: T;
 
