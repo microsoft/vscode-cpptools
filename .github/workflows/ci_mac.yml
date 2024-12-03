@@ -10,6 +10,6 @@ jobs:
   job:
     uses: ./.github/workflows/job-compile-and-test.yml
     with:
-      runner-env: macos-12
+      runner-env: macos-14
       platform: mac
       yarn-args: --network-timeout 100000
