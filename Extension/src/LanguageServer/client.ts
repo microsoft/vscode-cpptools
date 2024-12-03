@@ -2228,10 +2228,24 @@ export class DefaultClient implements Client {
         await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
+    /**
+     * Copilot completion-related requests (e.g. getIncludes and getProjectContext) will have their cancellation tokens cancelled
+     * if the current request times out (showing the user completion results without context info),
+     * but the results can still be used for future requests (due to caching) so it's better to return results instead of cancelling.
+     * This is different behavior from the getChatContext, which does handle cancel requests, since the request blocks
+     * the UI results and always re-requests (no caching).
+    */
+
     public async getIncludes(maxDepth: number): Promise<GetIncludesResult> {
         const params: GetIncludesParams = { maxDepth: maxDepth };
         await this.ready;
         return this.languageClient.sendRequest(IncludesRequest, params);
+    }
+
+    public async getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> {
+        const params: TextDocumentIdentifier = { uri: uri.toString() };
+        await this.ready;
+        return this.languageClient.sendRequest(ProjectContextRequest, params);
     }
 
     public async getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> {
@@ -2239,12 +2253,6 @@ export class DefaultClient implements Client {
         await withCancellation(this.ready, token);
         return DefaultClient.withLspCancellationHandling(
             () => this.languageClient.sendRequest(CppContextRequest, params, token), token);
-    }
-
-    public async getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> {
-        const params: TextDocumentIdentifier = { uri: uri.toString() };
-        await this.ready;
-        return this.languageClient.sendRequest(ProjectContextRequest, params);
     }
 
     /**
