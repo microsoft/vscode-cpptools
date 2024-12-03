@@ -130,8 +130,8 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
     });
 
     const arrangeChatContextFromCppTools = ({ chatContextFromCppTools, isCpp, isHeaderFile }:
-    { chatContextFromCppTools?: ChatContextResult; isCpp?: boolean; isHeaderFile?: boolean } =
-    { chatContextFromCppTools: undefined, isCpp: undefined, isHeaderFile: false }
+        { chatContextFromCppTools?: ChatContextResult; isCpp?: boolean; isHeaderFile?: boolean } =
+        { chatContextFromCppTools: undefined, isCpp: undefined, isHeaderFile: false }
     ) => {
         activeClientStub.getChatContext.resolves(chatContextFromCppTools);
         sinon.stub(util, 'isCpp').returns(isCpp ?? true);
@@ -139,8 +139,8 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
     };
 
     const arrangeProjectContextFromCppTools = ({ projectContextFromCppTools, isCpp, isHeaderFile }:
-    { projectContextFromCppTools?: ProjectContextResult; isCpp?: boolean; isHeaderFile?: boolean } =
-    { projectContextFromCppTools: undefined, isCpp: undefined, isHeaderFile: false }
+        { projectContextFromCppTools?: ProjectContextResult; isCpp?: boolean; isHeaderFile?: boolean } =
+        { projectContextFromCppTools: undefined, isCpp: undefined, isHeaderFile: false }
     ) => {
         activeClientStub.getProjectContext.resolves(projectContextFromCppTools);
         sinon.stub(util, 'isCpp').returns(isCpp ?? true);
@@ -200,7 +200,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             }
         });
 
-        const result = await getProjectContext(mockTextDocumentStub.uri, context, new vscode.CancellationTokenSource().token);
+        const result = await getProjectContext(mockTextDocumentStub.uri, context);
 
         ok(result, 'result should not be undefined');
         ok(result.language === 'C++');
@@ -364,7 +364,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             }
         });
 
-        const result = await getProjectContext(mockTextDocumentStub.uri, { flags: {} }, new vscode.CancellationTokenSource().token);
+        const result = await getProjectContext(mockTextDocumentStub.uri, { flags: {} });
 
         ok(telemetryStub.calledOnce, 'Telemetry should be called once');
         ok(telemetryStub.calledWithMatch('ProjectContext', sinon.match({

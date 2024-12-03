@@ -804,9 +804,9 @@ export interface Client {
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
-    getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult>;
+    getIncludes(maxDepth: number): Promise<GetIncludesResult>;
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult>;
-    getProjectContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ProjectContextResult>;
+    getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -2228,11 +2228,10 @@ export class DefaultClient implements Client {
         await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
-    public async getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> {
+    public async getIncludes(maxDepth: number): Promise<GetIncludesResult> {
         const params: GetIncludesParams = { maxDepth: maxDepth };
         await this.ready;
-        return DefaultClient.withLspCancellationHandling(
-            () => this.languageClient.sendRequest(IncludesRequest, params, token), token);
+        return this.languageClient.sendRequest(IncludesRequest, params);
     }
 
     public async getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> {
@@ -2242,11 +2241,10 @@ export class DefaultClient implements Client {
             () => this.languageClient.sendRequest(CppContextRequest, params, token), token);
     }
 
-    public async getProjectContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ProjectContextResult> {
+    public async getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> {
         const params: TextDocumentIdentifier = { uri: uri.toString() };
-        await withCancellation(this.ready, token);
-        return DefaultClient.withLspCancellationHandling(
-            () => this.languageClient.sendRequest(ProjectContextRequest, params, token), token);
+        await this.ready;
+        return this.languageClient.sendRequest(ProjectContextRequest, params);
     }
 
     /**
@@ -2340,11 +2338,8 @@ export class DefaultClient implements Client {
                 throw e;
             }
         }
-
-        // Don't cancel if the result has already been computed, because the result might still be usable
-        // without needing to send an unnecessary re-request, which is the case for the callback to registerRelatedFilesProvider.
         if (token.isCancellationRequested) {
-            return result; // throw new vscode.CancellationError();
+            throw new vscode.CancellationError();
         }
 
         return result;
@@ -4153,7 +4148,7 @@ class NullClient implements Client {
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
-    getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
+    getIncludes(maxDepth: number): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
-    getProjectContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ProjectContextResult> { return Promise.resolve({} as ProjectContextResult); }
+    getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> { return Promise.resolve({} as ProjectContextResult); }
 }
