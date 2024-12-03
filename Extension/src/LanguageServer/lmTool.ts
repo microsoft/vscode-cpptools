@@ -127,11 +127,11 @@ function filterCompilerArguments(compiler: string, compilerArguments: string[], 
     return result;
 }
 
-export async function getProjectContext(uri: vscode.Uri, context: { flags: Record<string, unknown> }, token: vscode.CancellationToken): Promise<ProjectContext | undefined> {
+export async function getProjectContext(uri: vscode.Uri, context: { flags: Record<string, unknown> }): Promise<ProjectContext | undefined> {
     const telemetryProperties: Record<string, string> = {};
     const telemetryMetrics: Record<string, number> = {};
     try {
-        const projectContext = await checkDuration<ProjectContextResult | undefined>(async () => await getClients()?.ActiveClient?.getProjectContext(uri, token) ?? undefined);
+        const projectContext = await checkDuration<ProjectContextResult | undefined>(async () => await getClients()?.ActiveClient?.getProjectContext(uri) ?? undefined);
         telemetryMetrics["duration"] = projectContext.duration;
         if (!projectContext.result) {
             return undefined;
