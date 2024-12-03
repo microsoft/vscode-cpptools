@@ -123,10 +123,10 @@ export function logLanguageServerEvent(eventName: string, properties?: Record<st
     sendTelemetry();
 }
 
-export function logLanguageModelToolEvent(eventName: string, properties?: Record<string, string>, metrics?: Record<string, number>): void {
+export function logCopilotEvent(eventName: string, properties?: Record<string, string>, metrics?: Record<string, number>): void {
     const sendTelemetry = () => {
         if (experimentationTelemetry) {
-            const eventNamePrefix: string = "C_Cpp/Copilot/Chat/Tool/";
+            const eventNamePrefix: string = "C_Cpp/Copilot/";
             experimentationTelemetry.sendTelemetryEvent(eventNamePrefix + eventName, properties, metrics);
         }
     };
