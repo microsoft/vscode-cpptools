@@ -3,6 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+import { ContextProviderApiV1 } from '@github/copilot-language-server';
 import { ok } from 'assert';
 import { afterEach, beforeEach, describe, it } from 'mocha';
 import * as proxyquire from 'proxyquire';
@@ -57,6 +58,9 @@ describe('copilotProviders Tests', () => {
                     dispose: () => { },
                     [Symbol.dispose]: () => { }
                 };
+            }
+            public getContextProviderAPI(_version: string): Promise<ContextProviderApiV1 | undefined> {
+                throw new Error('Method not implemented.');
             }
         }
         mockCopilotApi = sinon.createStubInstance(MockCopilotApi);
