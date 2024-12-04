@@ -1,5 +1,24 @@
 # C/C++ for Visual Studio Code Changelog
 
+### Version 1.23.2: December 5, 2024
+### Bug Fixes
+* Include clang-format timeout from 10 seconds to 30 seconds. [#10213](https://github.com/microsoft/vscode-cpptools/issues/10213)
+* Fix casing of path in include completion tooltip on Windows. [#12895](https://github.com/microsoft/vscode-cpptools/issues/12895)
+* Fix pattern matching of sections in `.editorConfig` files. [12933](https://github.com/microsoft/vscode-cpptools/issues/12933)
+* Fix handling of relative paths passed to cl.exe `/reference` argument. [#12944](https://github.com/microsoft/vscode-cpptools/issues/12944)
+* Fix a leak of compile command file watchers. [#12946](https://github.com/microsoft/vscode-cpptools/issues/12946)
+* Fix a compile commands fallback logic issue. [#12947](https://github.com/microsoft/vscode-cpptools/issues/12947)
+  * Thank you for the contribution. [@yiftahw](https://github.com/yiftahw) [#12948](https://github.com/microsoft/vscode-cpptools/pull/12948)
+* Fix an issue in which a `didOpen` event was processed before the language client was fully started. [#12954](https://github.com/microsoft/vscode-cpptools/issues/12954)
+* Fix IntelliSense issues related to large header files (>32K) and encodings other than UTF-8.
+
+### Enhancements
+* Add handling of `-fno-char8_t` and `-fchar8_t` compiler arguments. [#12968](https://github.com/microsoft/vscode-cpptools/issues/12968)
+* Add support for passing an additional parameter to `C_Cpp.ConfigurationSelect` command. [#12993](https://github.com/microsoft/vscode-cpptools/pull/12993)
+  * Thank you for the contribution. [@adrianstephens](https://github.com/adrianstephens)
+* Update clang-format and clang-tidy from 19.1.2 to 19.1.5.
+* Changes to how paths are internally canonicalized on Linux and macOS, avoiding file system access to improve performance and delay resolution of symbolic links.
+
 ### Version 1.23.1: November 6, 2024
 ### Bug Fixes
 * A potential fix for a crash during process shutdown (in `uv_run`). [#12668](https://github.com/microsoft/vscode-cpptools/issues/12668)
