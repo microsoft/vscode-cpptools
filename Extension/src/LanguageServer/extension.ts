@@ -23,6 +23,7 @@ import * as telemetry from '../telemetry';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
+import { registerCopilotContextProvider } from './copilotCompletionContextProvider';
 import { registerRelatedFilesProvider } from './copilotProviders';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
@@ -33,6 +34,14 @@ import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
+
+export interface SnippetEntry {
+    uri: string;
+    text: string;
+    startLine: number;
+    endLine: number;
+    importance: number;
+}
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -264,6 +273,8 @@ export async function activate(): Promise<void> {
     }
 
     await registerRelatedFilesProvider();
+
+    await registerCopilotContextProvider();
 }
 
 export function updateLanguageConfigurations(): void {
