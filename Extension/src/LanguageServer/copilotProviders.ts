@@ -5,13 +5,16 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { localize } from 'vscode-nls';
+import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as logger from '../logger';
 import * as telemetry from '../telemetry';
 import { GetIncludesResult } from './client';
 import { getActiveClient } from './extension';
 import { getCompilerArgumentFilterMap, getProjectContext } from './lmTool';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface CopilotTrait {
     name: string;
