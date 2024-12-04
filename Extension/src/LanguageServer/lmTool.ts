@@ -5,13 +5,16 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { localize } from 'vscode-nls';
+import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as logger from '../logger';
 import * as telemetry from '../telemetry';
 import { ChatContextResult, ProjectContextResult } from './client';
 import { getClients } from './extension';
 import { checkDuration } from './utils';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 const MSVC: string = 'MSVC';
 const Clang: string = 'Clang';
@@ -177,7 +180,7 @@ export async function getProjectContext(uri: vscode.Uri, context: { flags: Recor
             // Intentionally swallow any exception.
         }
         telemetryProperties["error"] = "true";
-        return undefined;
+        throw exception; // Throw the exception for auto-retry.
     } finally {
         telemetry.logCopilotEvent('ProjectContext', telemetryProperties, telemetryMetrics);
     }
