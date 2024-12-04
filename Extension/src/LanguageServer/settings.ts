@@ -477,7 +477,9 @@ export class CppSettings extends Settings {
         }
         return val as string;
     }
-
+    public get cppCodeSnippetsFeatureNames(): string | undefined {
+        return super.Section.get<any>("cppCodeSnippetsFeatureNames") as string | undefined;
+    }
     public get formattingEngine(): string { return this.getAsString("formatting"); }
     public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
     public get vcFormatIndentMultiLineRelativeTo(): string { return this.getAsString("vcFormat.indent.multiLineRelativeTo"); }
