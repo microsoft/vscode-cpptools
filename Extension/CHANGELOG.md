@@ -2,7 +2,7 @@
 
 ### Version 1.23.2: December 5, 2024
 ### Bug Fixes
-* Include clang-format timeout from 10 seconds to 30 seconds. [#10213](https://github.com/microsoft/vscode-cpptools/issues/10213)
+* Increase clang-format timeout from 10 seconds to 30 seconds. [#10213](https://github.com/microsoft/vscode-cpptools/issues/10213)
 * Fix casing of path in include completion tooltip on Windows. [#12895](https://github.com/microsoft/vscode-cpptools/issues/12895)
 * Fix pattern matching of sections in `.editorConfig` files. [12933](https://github.com/microsoft/vscode-cpptools/issues/12933)
 * Fix handling of relative paths passed to cl.exe `/reference` argument. [#12944](https://github.com/microsoft/vscode-cpptools/issues/12944)
