@@ -33,7 +33,7 @@
 	"startup.codeanalysis.status": "Avvio...",
 	"c.cpp.codeanalysis.statusbar.showRunNowOptions": "Esegui",
 	"running.analysis.processed.tooltip": "In esecuzione: {0} / {1} ({2}%)",
-	"select.code.analysis.command": "Selezionare un comando di Code Analysis...",
+	"select.code.analysis.command": "Selezionare un comando di analisi codice...",
 	"cancel.analysis": "Annulla",
 	"resume.analysis": "Riprendi",
 	"pause.analysis": "Sospendi",

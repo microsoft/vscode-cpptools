@@ -2,13 +2,13 @@
 
 ### Version 1.23.2: December 5, 2024
 ### Enhancements
+* Changes to how paths are internally canonicalized on Linux and macOS, avoiding file system access to improve performance and delay resolution of symbolic links. [#12924](https://github.com/microsoft/vscode-cpptools/issues/12924)
 * Add handling of `-fno-char8_t` and `-fchar8_t` compiler arguments. [#12968](https://github.com/microsoft/vscode-cpptools/issues/12968)
 * Add support for providing well-known compiler argument information to Copilot Completions. [PR #12979](https://github.com/microsoft/vscode-cpptools/pull/12979)
 * Fixed unnecessary cancellation of Copilot context requests. [PR #12988](https://github.com/microsoft/vscode-cpptools/pull/12988)
 * Add support for passing an additional parameter to `C_Cpp.ConfigurationSelect` command. [PR #12993](https://github.com/microsoft/vscode-cpptools/pull/12993)
   * Thank you for the contribution. [@adrianstephens](https://github.com/adrianstephens)
 * Update clang-format and clang-tidy from 19.1.2 to 19.1.5.
-* Changes to how paths are internally canonicalized on Linux and macOS, avoiding file system access to improve performance and delay resolution of symbolic links.
 
 ### Bug Fixes
 * Increase clang-format timeout from 10 seconds to 30 seconds. [#10213](https://github.com/microsoft/vscode-cpptools/issues/10213)
@@ -21,6 +21,7 @@
   * Thank you for the contribution. [@yiftahw](https://github.com/yiftahw) [PR #12948](https://github.com/microsoft/vscode-cpptools/pull/12948)
 * Fix an issue in which a `didOpen` event was processed before the language client was fully started. [#12954](https://github.com/microsoft/vscode-cpptools/issues/12954)
 * Fix IntelliSense issues related to large header files (>32K) and encodings other than UTF-8.
+* Fix a deadlock.
 
 ### Version 1.23.1: November 6, 2024
 ### Bug Fixes
