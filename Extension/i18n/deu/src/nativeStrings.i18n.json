@@ -315,5 +315,6 @@
 	"refactor_extract_reference_return_c_code": "Die Funktion muss einen Wert durch Verweis zurückgeben. C-Code kann keine Verweise zurückgeben.",
 	"refactor_extract_xborder_jump": "Es sind Sprünge zwischen dem ausgewählten und dem umgebenden Code vorhanden.",
 	"refactor_extract_missing_return": "Im ausgewählten Code werden einige Steuerungspfade beendet, ohne den Rückgabewert festzulegen. Dies wird nur für skalare, numerische und Zeigerrückgabetypen unterstützt.",
-	"expand_selection": "Auswahl erweitern (um „In Funktion extrahieren“ zu aktivieren)"
+	"expand_selection": "Auswahl erweitern (um „In Funktion extrahieren“ zu aktivieren)",
+	"file_not_found_in_path2": "„{0}“ wurde in compile_commands.json-Dateien nicht gefunden. Stattdessen wird „includePath“ aus „c_cpp_properties.json“ im Ordner „{1}“ für diese Datei verwendet."
 }
