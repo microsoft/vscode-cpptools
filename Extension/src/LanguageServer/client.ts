@@ -804,9 +804,9 @@ export interface Client {
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
-    getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult>;
+    getIncludes(maxDepth: number): Promise<GetIncludesResult>;
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult>;
-    getProjectContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ProjectContextResult>;
+    getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -2228,11 +2228,24 @@ export class DefaultClient implements Client {
         await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
-    public async getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> {
+    /**
+     * Copilot completion-related requests (e.g. getIncludes and getProjectContext) will have their cancellation tokens cancelled
+     * if the current request times out (showing the user completion results without context info),
+     * but the results can still be used for future requests (due to caching) so it's better to return results instead of cancelling.
+     * This is different behavior from the getChatContext, which does handle cancel requests, since the request blocks
+     * the UI results and always re-requests (no caching).
+    */
+
+    public async getIncludes(maxDepth: number): Promise<GetIncludesResult> {
         const params: GetIncludesParams = { maxDepth: maxDepth };
         await this.ready;
-        return DefaultClient.withLspCancellationHandling(
-            () => this.languageClient.sendRequest(IncludesRequest, params, token), token);
+        return this.languageClient.sendRequest(IncludesRequest, params);
+    }
+
+    public async getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> {
+        const params: TextDocumentIdentifier = { uri: uri.toString() };
+        await this.ready;
+        return this.languageClient.sendRequest(ProjectContextRequest, params);
     }
 
     public async getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> {
@@ -2240,13 +2253,6 @@ export class DefaultClient implements Client {
         await withCancellation(this.ready, token);
         return DefaultClient.withLspCancellationHandling(
             () => this.languageClient.sendRequest(CppContextRequest, params, token), token);
-    }
-
-    public async getProjectContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ProjectContextResult> {
-        const params: TextDocumentIdentifier = { uri: uri.toString() };
-        await withCancellation(this.ready, token);
-        return DefaultClient.withLspCancellationHandling(
-            () => this.languageClient.sendRequest(ProjectContextRequest, params, token), token);
     }
 
     /**
@@ -2340,7 +2346,6 @@ export class DefaultClient implements Client {
                 throw e;
             }
         }
-
         if (token.isCancellationRequested) {
             throw new vscode.CancellationError();
         }
@@ -4151,7 +4156,7 @@ class NullClient implements Client {
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
-    getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
+    getIncludes(maxDepth: number): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
-    getProjectContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ProjectContextResult> { return Promise.resolve({} as ProjectContextResult); }
+    getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> { return Promise.resolve({} as ProjectContextResult); }
 }

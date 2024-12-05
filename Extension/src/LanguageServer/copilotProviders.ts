@@ -5,13 +5,16 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { localize } from 'vscode-nls';
+import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as logger from '../logger';
 import * as telemetry from '../telemetry';
 import { GetIncludesResult } from './client';
 import { getActiveClient } from './extension';
 import { getCompilerArgumentFilterMap, getProjectContext } from './lmTool';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface CopilotTrait {
     name: string;
@@ -38,14 +41,14 @@ export async function registerRelatedFilesProvider(): Promise<void> {
             for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
                 api.registerRelatedFilesProvider(
                     { extensionId: util.extensionContext.extension.id, languageId },
-                    async (uri: vscode.Uri, context: { flags: Record<string, unknown> }, token: vscode.CancellationToken) => {
+                    async (uri: vscode.Uri, context: { flags: Record<string, unknown> }) => {
                         const start = performance.now();
                         const telemetryProperties: Record<string, string> = {};
                         const telemetryMetrics: Record<string, number> = {};
                         try {
-                            const getIncludesHandler = async () => (await getIncludesWithCancellation(1, token))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [];
+                            const getIncludesHandler = async () => (await getIncludes(1))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [];
                             const getTraitsHandler = async () => {
-                                const projectContext = await getProjectContext(uri, context, token);
+                                const projectContext = await getProjectContext(uri, context);
 
                                 if (!projectContext) {
                                     return undefined;
@@ -154,9 +157,9 @@ export async function registerRelatedFilesProvider(): Promise<void> {
     }
 }
 
-async function getIncludesWithCancellation(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> {
+async function getIncludes(maxDepth: number): Promise<GetIncludesResult> {
     const activeClient = getActiveClient();
-    const includes = await activeClient.getIncludes(maxDepth, token);
+    const includes = await activeClient.getIncludes(maxDepth);
     const wksFolder = activeClient.RootUri?.toString();
 
     if (!wksFolder) {
