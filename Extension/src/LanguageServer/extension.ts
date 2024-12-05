@@ -1259,10 +1259,8 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     if (crashCallStack !== prevCppCrashCallStackData) {
         prevCppCrashCallStackData = crashCallStack;
 
-        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-        if (lines.length >= 6 && util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
-            const out: vscode.OutputChannel = getCrashCallStacksChannel();
-            out.appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}`);
+        if (lines.length >= 6 && util.getLoggingLevel() >= 1) {
+            getCrashCallStacksChannel().appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}`);
         }
     }
 

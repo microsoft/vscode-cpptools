@@ -17,7 +17,7 @@ import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
 import { CppBuildTask, CppBuildTaskDefinition, cppBuildTaskProvider } from '../LanguageServer/cppBuildTaskProvider';
 import { configPrefix } from '../LanguageServer/extension';
 import { CppSettings, OtherSettings } from '../LanguageServer/settings';
-import * as logger from '../logger';
+import { getOutputChannel, getOutputChannelLogger, Logger, showOutputChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import { rsync, scp, ssh } from '../SSH/commands';
 import * as Telemetry from '../telemetry';
@@ -236,14 +236,14 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (config.type === DebuggerType.cppvsdbg) {
             // Fail if cppvsdbg type is running on non-Windows
             if (os.platform() !== 'win32') {
-                void logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
+                void getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
                 return undefined; // Abort debugging silently.
             }
 
             // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
             // eslint-disable-next-line no-prototype-builtins
             if (config.hasOwnProperty("externalConsole")) {
-                void logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
+                void getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
                 if (config.externalConsole && !config.console) {
                     config.console = "externalTerminal";
                 }
@@ -322,18 +322,18 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         if (config.logging?.engineLogging) {
-            const outputChannel: logger.Logger = logger.getOutputChannelLogger();
+            const outputChannel: Logger = getOutputChannelLogger();
             outputChannel.appendLine(localize("debugger.launchConfig", "Launch configuration:"));
             outputChannel.appendLine(JSON.stringify(config, undefined, 2));
             // TODO: Enable when https://github.com/microsoft/vscode/issues/108619 is resolved.
-            // logger.showOutputChannel();
+            // showOutputChannel();
         }
 
         // Run deploy steps
         if (config.deploySteps && config.deploySteps.length !== 0) {
             const codeVersion: number[] = util.getVsCodeVersion();
             if ((util.isNumber(codeVersion[0]) && codeVersion[0] < 1) || (util.isNumber(codeVersion[0]) && codeVersion[0] === 1 && util.isNumber(codeVersion[1]) && codeVersion[1] < 69)) {
-                void logger.getOutputChannelLogger().showErrorMessage(localize("vs.code.1.69+.required", "'deploySteps' require VS Code 1.69+."));
+                void getOutputChannelLogger().showErrorMessage(localize("vs.code.1.69+.required", "'deploySteps' require VS Code 1.69+."));
                 return undefined;
             }
 
@@ -362,7 +362,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             if (processId) {
                 config.processId = processId;
             } else {
-                void logger.getOutputChannelLogger().showErrorMessage("No process was selected.");
+                void getOutputChannelLogger().showErrorMessage("No process was selected.");
                 return undefined;
             }
         }
@@ -421,7 +421,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     // Non-absolute. Check on $PATH
                     (await util.whichAsync(compilerPath) !== undefined);
                 if (!compilerPathExists) {
-                    logger.getOutputChannelLogger().appendLine(localize('compiler.path.not.exists', "Unable to find {0}. {1} task is ignored.", compilerPath, definition.label));
+                    getOutputChannelLogger().appendLine(localize('compiler.path.not.exists', "Unable to find {0}. {1} task is ignored.", compilerPath, definition.label));
                 }
                 const compilerName: string = path.basename(compilerPath);
                 const newConfig: CppDebugConfiguration = { ...defaultTemplateConfig }; // Copy enumerables and properties
@@ -493,7 +493,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
                             newConfig.miDebuggerPath = usrDebuggerPath;
                         } else {
-                            logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {1} is ignored.", `\"${debuggerName}\"`, compilerName));
+                            getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {1} is ignored.", `\"${debuggerName}\"`, compilerName));
                             return undefined;
                         }
                     }
@@ -605,7 +605,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
         }
 
-        const outputChannel: logger.Logger = logger.getOutputChannelLogger();
+        const outputChannel: Logger = getOutputChannelLogger();
 
         outputChannel.appendLine(localize("lldb.find.failed", "Missing dependency '{0}' for lldb-mi executable.", LLDBFramework));
         outputChannel.appendLine(localize("lldb.search.paths", "Searched in:"));
@@ -614,7 +614,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         });
         const xcodeCLIInstallCmd: string = "xcode-select --install";
         outputChannel.appendLine(localize("lldb.install.help", "To resolve this issue, either install XCode through the Apple App Store or install the XCode Command Line Tools by running '{0}' in a Terminal window.", xcodeCLIInstallCmd));
-        logger.showOutputChannel();
+        showOutputChannel();
 
         return undefined;
     }
@@ -693,11 +693,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
 
             if (messages.length > 0) {
-                logger.getOutputChannel().appendLine(localize("resolving.variables.in.sourcefilemap", "Resolving variables in {0}...", "sourceFileMap"));
+                getOutputChannel().appendLine(localize("resolving.variables.in.sourcefilemap", "Resolving variables in {0}...", "sourceFileMap"));
                 messages.forEach((message) => {
-                    logger.getOutputChannel().appendLine(message);
+                    getOutputChannel().appendLine(message);
                 });
-                logger.showOutputChannel();
+                showOutputChannel();
             }
         }
     }
@@ -1035,7 +1035,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             case StepType.command: {
                 // VS Code commands are the same regardless of which extension invokes them, so just invoke them here.
                 if (step.args && !Array.isArray(step.args)) {
-                    void logger.getOutputChannelLogger().showErrorMessage(localize('command.args.must.be.array', '"args" in command deploy step must be an array.'));
+                    void getOutputChannelLogger().showErrorMessage(localize('command.args.must.be.array', '"args" in command deploy step must be an array.'));
                     return false;
                 }
                 const returnCode: unknown = await vscode.commands.executeCommand(step.command, ...step.args);
@@ -1045,7 +1045,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             case StepType.rsync: {
                 const isScp: boolean = stepType === StepType.scp;
                 if (!step.files || !step.targetDir || !step.host) {
-                    void logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.copyFile', '"host", "files", and "targetDir" are required in {0} steps.', isScp ? 'SCP' : 'rsync'));
+                    void getOutputChannelLogger().showErrorMessage(localize('missing.properties.copyFile', '"host", "files", and "targetDir" are required in {0} steps.', isScp ? 'SCP' : 'rsync'));
                     return false;
                 }
                 const host: util.ISshHostInfo = util.isString(step.host) ? { hostName: step.host } : { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
@@ -1058,7 +1058,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         files = files.concat((await globAsync(fileGlob)).map(file => vscode.Uri.file(file)));
                     }
                 } else {
-                    void logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.copyFile', '"files" must be a string or an array of strings in {0} steps.', isScp ? 'SCP' : 'rsync'));
+                    void getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.copyFile', '"files" must be a string or an array of strings in {0} steps.', isScp ? 'SCP' : 'rsync'));
                     return false;
                 }
 
@@ -1076,7 +1076,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
             case StepType.ssh: {
                 if (!step.host || !step.command) {
-                    void logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.ssh', '"host" and "command" are required for ssh steps.'));
+                    void getOutputChannelLogger().showErrorMessage(localize('missing.properties.ssh', '"host" and "command" are required for ssh steps.'));
                     return false;
                 }
                 const host: util.ISshHostInfo = util.isString(step.host) ? { hostName: step.host } : { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
@@ -1091,18 +1091,18 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
             case StepType.shell: {
                 if (!step.command) {
-                    void logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.shell', '"command" is required for shell steps.'));
+                    void getOutputChannelLogger().showErrorMessage(localize('missing.properties.shell', '"command" is required for shell steps.'));
                     return false;
                 }
                 const taskResult: util.ProcessReturnType = await util.spawnChildProcess(step.command, undefined, step.continueOn);
                 if (!taskResult.succeeded || cancellationToken?.isCancellationRequested) {
-                    void logger.getOutputChannelLogger().showErrorMessage(taskResult.output);
+                    void getOutputChannelLogger().showErrorMessage(taskResult.output);
                     return false;
                 }
                 break;
             }
             default: {
-                logger.getOutputChannelLogger().appendLine(localize('deploy.step.type.not.supported', 'Deploy step type {0} is not supported.', step.type));
+                getOutputChannelLogger().appendLine(localize('deploy.step.type.not.supported', 'Deploy step type {0} is not supported.', step.type));
                 return false;
             }
         }
