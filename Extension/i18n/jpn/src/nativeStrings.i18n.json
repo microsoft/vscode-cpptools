@@ -315,5 +315,6 @@
 	"refactor_extract_reference_return_c_code": "関数は参照渡しで値を返す必要があります。C コードは参照を返すことができません。",
 	"refactor_extract_xborder_jump": "選択したコードと周囲のコードの間にジャンプが存在します。",
 	"refactor_extract_missing_return": "選択したコードでは、戻り値を設定せずに一部のコントロール パスが終了します。これは、スカラー型、数値型、およびポインター型の戻り値に対してのみサポートされます。",
-	"expand_selection": "選択範囲を展開する ([関数に抽出] を有効にする)"
+	"expand_selection": "選択範囲を展開する ([関数に抽出] を有効にする)",
+	"file_not_found_in_path2": "\"{0}\" が compile_commands.json ファイルに見つかりません。フォルダー '{1}' にある c_cpp_properties.json からの 'includePath' が、このファイルで代わりに使用されます。"
 }

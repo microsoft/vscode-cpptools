@@ -315,5 +315,6 @@
 	"refactor_extract_reference_return_c_code": "이 함수는 값을 참조로 반환해야 합니다. C 코드는 참조를 반환할 수 없습니다.",
 	"refactor_extract_xborder_jump": "선택된 코드와 주변 코드 사이에 점프가 있습니다.",
 	"refactor_extract_missing_return": "선택된 코드에서 일부 제어 경로가 반환 값 설정 없이 종료됩니다. 이는 스칼라, 숫자 및 포인터 반환 형식에 대해서만 지원됩니다.",
-	"expand_selection": "선택 영역 확장('함수로 추출'을 사용하도록 설정)"
+	"expand_selection": "선택 영역 확장('함수로 추출'을 사용하도록 설정)",
+	"file_not_found_in_path2": "compile_commands.json 파일에서 \"{0}\"을(를) 찾을 수 없습니다. '{1}' 폴더의 c_cpp_properties.json 'includePath'가 대신 이 파일에 사용됩니다."
 }

@@ -315,5 +315,6 @@
 	"refactor_extract_reference_return_c_code": "Funkce by musela vracet hodnotu pomocí odkazu. Kód C nemůže vracet odkazy.",
 	"refactor_extract_xborder_jump": "Přecházení mezi vybraným kódem a okolním kódem jsou k dispozici.",
 	"refactor_extract_missing_return": "Ve vybraném kódu se některé cesty ovládacího prvku ukončují bez nastavení návratové hodnoty. To se podporuje jenom u skalárních, numerických a ukazovacích návratových typů.",
-	"expand_selection": "Rozbalit výběr (pro povolení možnosti Extrahovat do funkce)"
+	"expand_selection": "Rozbalit výběr (pro povolení možnosti Extrahovat do funkce)",
+	"file_not_found_in_path2": "\"{0}\" not found in compile_commands.json files. 'includePath' from c_cpp_properties.json in folder '{1}' will be used for this file instead."
 }
