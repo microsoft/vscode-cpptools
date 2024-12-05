@@ -16,7 +16,6 @@
 	"path.is.not.a.file": "路径不是文件: {0}",
 	"path.is.not.a.directory": "路径不是目录: {0}",
 	"duplicate.name": "{0} 重复。配置名称应是唯一的。",
-	"cannot.find2": "无法找到“{0}”。",
 	"multiple.paths.not.allowed": "不允许使用多个路径。",
 	"paths.are.not.directories": "路径不是目录: {0}"
 }
