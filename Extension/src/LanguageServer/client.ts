@@ -541,6 +541,19 @@ export interface ChatContextResult {
     targetArchitecture: string;
 }
 
+export interface FileContextResult {
+    compilerArguments: string[];
+}
+
+export interface ProjectContextResult {
+    language: string;
+    standardVersion: string;
+    compiler: string;
+    targetPlatform: string;
+    targetArchitecture: string;
+    fileContext: FileContextResult;
+}
+
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
@@ -560,7 +573,8 @@ const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Posit
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
 const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
-const CppContextRequest: RequestType<void, ChatContextResult, void> = new RequestType<void, ChatContextResult, void>('cpptools/getChatContext');
+const CppContextRequest: RequestType<TextDocumentIdentifier, ChatContextResult, void> = new RequestType<TextDocumentIdentifier, ChatContextResult, void>('cpptools/getChatContext');
+const ProjectContextRequest: RequestType<TextDocumentIdentifier, ProjectContextResult, void> = new RequestType<TextDocumentIdentifier, ProjectContextResult, void>('cpptools/getProjectContext');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
@@ -762,7 +776,7 @@ export interface Client {
     PauseCodeAnalysis(): void;
     ResumeCodeAnalysis(): void;
     CancelCodeAnalysis(): void;
-    handleConfigurationSelectCommand(): Promise<void>;
+    handleConfigurationSelectCommand(config?: string): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
     handleShowActiveCodeAnalysisCommands(): Promise<void>;
     handleShowIdleCodeAnalysisCommands(): Promise<void>;
@@ -790,8 +804,9 @@ export interface Client {
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
-    getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult>;
-    getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult>;
+    getIncludes(maxDepth: number): Promise<GetIncludesResult>;
+    getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult>;
+    getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -1285,6 +1300,12 @@ export class DefaultClient implements Client {
 
                 // Listen for messages from the language server.
                 this.registerNotifications();
+
+                // If a file is already open when we activate, sometimes we don't get any notifications about visible
+                // or active text editors, visible ranges, or text selection. As a workaround, we trigger
+                // onDidChangeVisibleTextEditors here.
+                const cppEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => util.isCpp(e.document));
+                await this.onDidChangeVisibleTextEditors(cppEditors);
             }
 
             // update all client configurations
@@ -2207,17 +2228,31 @@ export class DefaultClient implements Client {
         await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
-    public async getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> {
+    /**
+     * Copilot completion-related requests (e.g. getIncludes and getProjectContext) will have their cancellation tokens cancelled
+     * if the current request times out (showing the user completion results without context info),
+     * but the results can still be used for future requests (due to caching) so it's better to return results instead of cancelling.
+     * This is different behavior from the getChatContext, which does handle cancel requests, since the request blocks
+     * the UI results and always re-requests (no caching).
+    */
+
+    public async getIncludes(maxDepth: number): Promise<GetIncludesResult> {
         const params: GetIncludesParams = { maxDepth: maxDepth };
         await this.ready;
-        return DefaultClient.withLspCancellationHandling(
-            () => this.languageClient.sendRequest(IncludesRequest, params, token), token);
+        return this.languageClient.sendRequest(IncludesRequest, params);
     }
 
-    public async getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> {
+    public async getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> {
+        const params: TextDocumentIdentifier = { uri: uri.toString() };
+        await this.ready;
+        return this.languageClient.sendRequest(ProjectContextRequest, params);
+    }
+
+    public async getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> {
+        const params: TextDocumentIdentifier = { uri: uri.toString() };
         await withCancellation(this.ready, token);
         return DefaultClient.withLspCancellationHandling(
-            () => this.languageClient.sendRequest(CppContextRequest, null, token), token);
+            () => this.languageClient.sendRequest(CppContextRequest, params, token), token);
     }
 
     /**
@@ -2311,7 +2346,6 @@ export class DefaultClient implements Client {
                 throw e;
             }
         }
-
         if (token.isCancellationRequested) {
             throw new vscode.CancellationError();
         }
@@ -2571,7 +2605,8 @@ export class DefaultClient implements Client {
                 }
                 let foundGlobMatch: boolean = false;
                 for (const assoc in assocs) {
-                    if (minimatch(filePath, assoc)) {
+                    const matcher = new minimatch.Minimatch(assoc);
+                    if (matcher.match(filePath)) {
                         foundGlobMatch = true;
                         break; // Assoc matched a glob pattern.
                     }
@@ -3241,11 +3276,11 @@ export class DefaultClient implements Client {
     /**
      * command handlers
      */
-    public async handleConfigurationSelectCommand(): Promise<void> {
+    public async handleConfigurationSelectCommand(config?: string): Promise<void> {
         await this.ready;
         const configNames: string[] | undefined = this.configuration.ConfigurationNames;
         if (configNames) {
-            const index: number = await ui.showConfigurations(configNames);
+            const index: number = config ? configNames.indexOf(config) : await ui.showConfigurations(configNames);
             if (index < 0) {
                 return;
             }
@@ -4121,6 +4156,7 @@ class NullClient implements Client {
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
-    getIncludes(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
-    getChatContext(token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
+    getIncludes(maxDepth: number): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
+    getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
+    getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> { return Promise.resolve({} as ProjectContextResult); }
 }
