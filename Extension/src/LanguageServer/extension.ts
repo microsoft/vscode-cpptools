@@ -584,13 +584,13 @@ async function installCompiler(sender?: any): Promise<void> {
     telemetry.logLanguageServerEvent('installCompiler', telemetryProperties);
 }
 
-async function onSelectConfiguration(): Promise<void> {
+async function onSelectConfiguration(config?: string): Promise<void> {
     if (!isFolderOpen()) {
         void vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration.'));
     } else {
         // This only applies to the active client. You cannot change the configuration for
         // a client that is not active since that client's UI will not be visible.
-        return clients.ActiveClient.handleConfigurationSelectCommand();
+        return clients.ActiveClient.handleConfigurationSelectCommand(config);
     }
 }
 

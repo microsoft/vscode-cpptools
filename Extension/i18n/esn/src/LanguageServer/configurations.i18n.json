@@ -16,7 +16,6 @@
 	"path.is.not.a.file": "La ruta de acceso no es un archivo: {0}",
 	"path.is.not.a.directory": "La ruta de acceso no es un directorio: {0}",
 	"duplicate.name": "{0} es un duplicado. El nombre de la configuración debe ser único.",
-	"cannot.find2": "No se encuentra \"{0}\".",
 	"multiple.paths.not.allowed": "No se permiten varias rutas de acceso.",
 	"paths.are.not.directories": "Las rutas de acceso no son directorios: {0}"
 }

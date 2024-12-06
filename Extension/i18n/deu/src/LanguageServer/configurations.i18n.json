@@ -16,7 +16,6 @@
 	"path.is.not.a.file": "Der Pfad ist keine Datei: {0}",
 	"path.is.not.a.directory": "Der Pfad ist kein Verzeichnis: {0}",
 	"duplicate.name": "\"{0}\" ist ein Duplikat. Der Konfigurationsname muss eindeutig sein.",
-	"cannot.find2": "\"{0}\" wurde nicht gefunden.",
 	"multiple.paths.not.allowed": "Mehrere Pfade sind nicht zulässig.",
 	"paths.are.not.directories": "Pfade sind keine Verzeichnisse: {0}"
 }

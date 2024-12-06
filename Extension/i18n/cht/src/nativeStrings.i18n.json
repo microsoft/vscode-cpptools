@@ -315,5 +315,6 @@
 	"refactor_extract_reference_return_c_code": "函式必須藉傳址傳回值。C 程式碼無法傳回參考。",
 	"refactor_extract_xborder_jump": "所選程式碼與周圍的程式碼之間存在跳躍。",
 	"refactor_extract_missing_return": "在選取的程式碼中，有一些控制項路徑未設定傳回值便結束。只有純量、數值與指標傳回類型支援此作法。",
-	"expand_selection": "展開選取範圍 (以啟用 [擷取至函式])"
+	"expand_selection": "展開選取範圍 (以啟用 [擷取至函式])",
+	"file_not_found_in_path2": "在 compile_commands.json 檔案中找不到 \"{0}\"。將對此檔案改用資料夾 '{1}' 中 c_cpp_properties.json 的 'includePath'。"
 }

@@ -315,5 +315,6 @@
 	"refactor_extract_reference_return_c_code": "La fonction doit renvoyer une valeur par référence. Le code C ne peut pas renvoyer de référence.",
 	"refactor_extract_xborder_jump": "Des sauts entre le code sélectionné et le code environnant sont présents.",
 	"refactor_extract_missing_return": "Dans le code sélectionné, certains chemins de contrôle s'arrêtent sans définir la valeur renvoyée. Cela n'est pris en charge que pour les types de retour scalaire, numérique et pointeur.",
-	"expand_selection": "Développer la sélection (pour activer ' Extraire vers la fonction')"
+	"expand_selection": "Développer la sélection (pour activer ' Extraire vers la fonction')",
+	"file_not_found_in_path2": "« {0} » n'a pas été trouvé dans les fichiers compile_commands.json. « includePath » from c_cpp_properties.json in folder « {1} » sera utilisé pour ce fichier à la place."
 }

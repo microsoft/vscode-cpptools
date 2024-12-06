@@ -241,7 +241,7 @@
 	"inline_macro": "Macro inline",
 	"unable_to_access_browse_database": "Impossibile accedere al database di esplorazione. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode è stato modificato perché non corrisponde al compilatore rilevato.  Provare a impostare \"compilerPath\".  Impostare \"compilerPath\" su \"\" per disabilitare il rilevamento delle inclusioni e delle definizioni del sistema.",
-	"remove_all_code_analysis_problems": "Rimuovere tutti i problemi Code Analysis",
+	"remove_all_code_analysis_problems": "Rimuovere tutti i problemi analisi codice",
 	"multiple_locations_note": "(Più località)",
 	"folder_tag": "Cartella",
 	"file_tag": "File",
@@ -315,5 +315,6 @@
 	"refactor_extract_reference_return_c_code": "La funzione deve restituire un valore per riferimento. Il codice C non è in grado di restituire riferimenti.",
 	"refactor_extract_xborder_jump": "Sono presenti collegamenti tra il codice selezionato e quello circostante.",
 	"refactor_extract_missing_return": "Nel codice selezionato alcuni percorsi di controllo terminano senza impostare il valore restituito. Questo comportamento è supportato solo per tipi restituiti scalari, numerici e puntatore.",
-	"expand_selection": "Espandi selezione (per abilitare 'Estrai in funzione')"
+	"expand_selection": "Espandi selezione (per abilitare 'Estrai in funzione')",
+	"file_not_found_in_path2": "\"{0}\" non è stato trovato nei file compile_commands.json. In alternativa per questo file verrà usato ''includePath'' del file c_cpp_properties.json nella cartella ''{1}''."
 }
