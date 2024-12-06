@@ -1431,7 +1431,9 @@ async function onCopilotHover(): Promise<void> {
     // Gather the content for the query from the client.
     const requestInfo = await copilotHoverProvider.getRequestInfo(hoverDocument, hoverPosition);
     if (requestInfo.length === 0) {
-        await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, "Failed to receive request info from the client.");
+        // Context is not available for this symbol.
+        telemetry.logLanguageServerEvent("CopilotHover", { "Message": "Copilot summary is not available for this symbol." });
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable", "Copilot summary is not available for this symbol."));
         return;
     }
 
@@ -1462,7 +1464,7 @@ async function onCopilotHover(): Promise<void> {
 
     // Ensure we have a valid response from Copilot.
     if (!chatResponse) {
-        await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition);
+        await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, "Invalid chat response from Copilot.");
         return;
     }
 
@@ -1481,15 +1483,14 @@ async function onCopilotHover(): Promise<void> {
     }
 
     if (content.length === 0) {
-        await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition);
+        await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, "No content in response from Copilot.");
         return;
     }
 
     await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, content);
 }
 
-async function reportCopilotFailure(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, customError?: string): Promise<void> {
-    const errorMessage = customError ? customError : "";
+async function reportCopilotFailure(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, errorMessage: string): Promise<void> {
     telemetry.logLanguageServerEvent("CopilotHoverError", { "ErrorMessage": errorMessage });
     // Display the localized default failure message in the hover.
     await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.error", "An error occurred while generating Copilot summary."));
