@@ -315,5 +315,6 @@
 	"refactor_extract_reference_return_c_code": "İşlevin başvuruya göre bir değer döndürmesi gerekiyor. C kodu başvuruları döndüremiyor.",
 	"refactor_extract_xborder_jump": "Seçili kod ile çevreleyen kod arasında atlamalar var.",
 	"refactor_extract_missing_return": "Seçili kodda bazı denetim yolları, dönüş değeri ayarlanmadan çıkış yapıyor. Bu durum yalnızca skaler, sayısal ve işaretçi dönüş türlerinde desteklenir.",
-	"expand_selection": "Seçimi genişlet (\"İşleve çıkar\" seçeneğini etkinleştirmek için)"
+	"expand_selection": "Seçimi genişlet (\"İşleve çıkar\" seçeneğini etkinleştirmek için)",
+	"file_not_found_in_path2": "\"{0}\" compile_commands.json dosyaları içinde bulunamadı. Bu dosya yerine '{1}' klasöründeki c_cpp_properties.json dosyasında bulunan 'includePath' kullanılacak."
 }

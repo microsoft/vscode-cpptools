@@ -315,5 +315,6 @@
 	"refactor_extract_reference_return_c_code": "函数必须通过引用返回一个值。C 代码不能返回引用。",
 	"refactor_extract_xborder_jump": "所选代码和外层代码之间的存在跳跃。",
 	"refactor_extract_missing_return": "在所选代码中，一些控制路径退出而没有设置返回值。这只受标量、数字、和指针返回类型支持。",
-	"expand_selection": "展开选择(以启用“提取到函数”)"
+	"expand_selection": "展开选择(以启用“提取到函数”)",
+	"file_not_found_in_path2": "在 compile_commands.json 文件中找不到 \"{0}\"。此文件将改用文件夹“{1}”中的 c_cpp_properties.json 中包含的 \"includePath\"。"
 }

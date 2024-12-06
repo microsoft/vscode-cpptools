@@ -16,7 +16,6 @@
 	"path.is.not.a.file": "路徑不是檔案: {0}",
 	"path.is.not.a.directory": "路徑不是目錄: {0}",
 	"duplicate.name": "{0} 重複。組態名稱應該是唯一的。",
-	"cannot.find2": "找不到 \"{0}\"。",
 	"multiple.paths.not.allowed": "不允許使用多個路徑。",
 	"paths.are.not.directories": "路徑不是目錄: {0}"
 }
