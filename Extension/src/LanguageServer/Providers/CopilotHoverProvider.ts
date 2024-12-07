@@ -67,7 +67,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         const commandString = "$(sparkle) [" + localize("generate.copilot.description", "Generate Copilot summary") + "](command:C_Cpp.ShowCopilotHover \"" + localize("copilot.disclaimer", "AI-generated content may be incorrect.") + "\")";
         const commandMarkdown = new vscode.MarkdownString(commandString);
         commandMarkdown.supportThemeIcons = true;
-        commandMarkdown.isTrusted = true;
+        commandMarkdown.isTrusted = { enabledCommands: ["C_Cpp.ShowCopilotHover"] };
         return new vscode.Hover(commandMarkdown);
     }
 
