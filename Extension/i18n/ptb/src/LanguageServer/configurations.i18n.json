@@ -16,7 +16,6 @@
 	"path.is.not.a.file": "O caminho não é um arquivo: {0}",
 	"path.is.not.a.directory": "O caminho não é um diretório: {0}",
 	"duplicate.name": "{0} é uma duplicata. O nome da configuração deve ser exclusivo.",
-	"cannot.find2": "Não é possível localizar \"{0}\".",
 	"multiple.paths.not.allowed": "Vários caminhos não são permitidos.",
 	"paths.are.not.directories": "Os caminhos não são diretórios: {0}"
 }

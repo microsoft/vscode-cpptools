@@ -315,5 +315,6 @@
 	"refactor_extract_reference_return_c_code": "La función debería devolver un valor por referencia. El código C no puede devolver referencias.",
 	"refactor_extract_xborder_jump": "Hay saltos entre el código seleccionado y el código que lo rodea.",
 	"refactor_extract_missing_return": "En el código seleccionado, algunas rutas de control salen sin establecer el valor devuelto. Esto se admite solo para tipos de valor devuelto escalar, numérico y puntero.",
-	"expand_selection": "Expandir selección (para habilitar 'Extraer a función')"
+	"expand_selection": "Expandir selección (para habilitar 'Extraer a función')",
+	"file_not_found_in_path2": "\"{0}\" no se encuentra en compile_commands.json archivos. ''includePath'' de c_cpp_properties.json de la carpeta ''{1}'' se usará en su lugar para este archivo."
 }

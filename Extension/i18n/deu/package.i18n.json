@@ -39,7 +39,7 @@
 	"c_cpp.command.RunCodeAnalysisOnActiveFile.title": "Codeanalyse für aktive Dateien ausführen",
 	"c_cpp.command.RunCodeAnalysisOnOpenFiles.title": "Codeanalyse für geöffnete Dateien ausführen",
 	"c_cpp.command.RunCodeAnalysisOnAllFiles.title": "Codeanalyse für alle Dateien ausführen",
-	"c_cpp.command.RemoveAllCodeAnalysisProblems.title": "Alle Code Analysis Probleme löschen",
+	"c_cpp.command.RemoveAllCodeAnalysisProblems.title": "Alle Codeanalyseprobleme löschen",
 	"c_cpp.command.BuildAndDebugFile.title": "C/C++-Datei debuggen",
 	"c_cpp.command.BuildAndRunFile.title": "C/C++-Datei ausführen",
 	"c_cpp.command.AddDebugConfiguration.title": "Debugkonfiguration hinzufügen",

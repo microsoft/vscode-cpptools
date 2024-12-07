@@ -16,7 +16,7 @@
 	"configuration.select.first": "Apri prima una cartella per selezionare una configurazione.",
 	"configuration.provider.select.first": "Apri prima una cartella per selezionare un provider di configurazione.",
 	"edit.configurations.open.first": "Aprire prima una cartella per modificare le configurazioni",
-	"code.action.aborted": "Impossibile applicare la correzione di Code Analysis perché il documento è stato modificato.",
+	"code.action.aborted": "Impossibile applicare la correzione di analisi codice perché il documento è stato modificato.",
 	"prerelease.message": "È disponibile una versione non definitiva dell'estensione C/C++. Passare a questa versione?",
 	"yes.button": "Sì",
 	"no.button": "No"

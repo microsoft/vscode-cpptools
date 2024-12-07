@@ -16,7 +16,6 @@
 	"path.is.not.a.file": "Le chemin n'est pas un fichier : {0}",
 	"path.is.not.a.directory": "Le chemin n'est pas un répertoire : {0}",
 	"duplicate.name": "{0} est dupliqué. Le nom de configuration doit être unique.",
-	"cannot.find2": "\"{0}\" est introuvable.",
 	"multiple.paths.not.allowed": "Il est interdit d’utiliser plusieurs chemin d’accès.",
 	"paths.are.not.directories": "Les chemins d’accès ne sont pas des répertoires : {0}"
 }
