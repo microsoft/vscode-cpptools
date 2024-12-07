@@ -1403,7 +1403,7 @@ async function onCopilotHover(): Promise<void> {
         return;
     }
 
-    const copilotHoverProvider = clients.ActiveClient.getCopilotHoverProvider();
+    const copilotHoverProvider = clients.getDefaultClient().getCopilotHoverProvider();
     if (!copilotHoverProvider) {
         return;
     }
