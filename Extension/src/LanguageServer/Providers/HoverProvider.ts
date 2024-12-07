@@ -4,17 +4,30 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { Position, ResponseError, TextDocumentPositionParams } from 'vscode-languageclient';
+import { ManualSignal } from '../../Utility/Async/manualSignal';
 import { DefaultClient, HoverRequest } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CppSettings } from '../settings';
 
 export class HoverProvider implements vscode.HoverProvider {
     private client: DefaultClient;
+    private lastContent: vscode.MarkdownString[] | undefined;
+    private readonly hasContent = new ManualSignal<boolean>(true);
     constructor(client: DefaultClient) {
         this.client = client;
     }
 
     public async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | undefined> {
+        this.hasContent.reset();
+        const copilotHoverProvider = this.client.getCopilotHoverProvider();
+        if (copilotHoverProvider) {
+            // Check if this is a reinvocation from Copilot.
+            if (!copilotHoverProvider.isNewHover(document, position) && this.lastContent) {
+                this.hasContent.resolve(this.lastContent.length > 0);
+                return new vscode.Hover(this.lastContent);
+            }
+        }
+
         const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
         if (settings.hover === "disabled") {
             return undefined;
@@ -52,6 +65,12 @@ export class HoverProvider implements vscode.HoverProvider {
                 hoverResult.range.end.line, hoverResult.range.end.character);
         }
 
+        this.hasContent.resolve(strings.length > 0);
+        this.lastContent = strings;
         return new vscode.Hover(strings, range);
+    }
+
+    get contentReady(): Promise<boolean> {
+        return this.hasContent;
     }
 }
