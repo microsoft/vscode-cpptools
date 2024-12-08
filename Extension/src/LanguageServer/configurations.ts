@@ -2340,7 +2340,7 @@ export class CppProperties {
                 }
             } else {
                 const compileCommandsLastChanged: Date | undefined = this.compileCommandsFileWatcherFallbackTime.get(compileCommandsFile);
-                if (compileCommandsLastChanged !== undefined && stats.mtime > compileCommandsLastChanged) {
+                if ((this.compileCommandsFile === null) || (compileCommandsLastChanged !== undefined && stats.mtime > compileCommandsLastChanged)) {
                     this.compileCommandsFileWatcherFallbackTime.set(compileCommandsFile, new Date());
                     this.onCompileCommandsChanged(compileCommandsFile);
                     this.compileCommandsFile = vscode.Uri.file(compileCommandsFile); // File created.
