@@ -337,7 +337,7 @@ export class SettingsPanel {
                 this.configValues.macFrameworkPath = splitEntries(message.value);
                 break;
             case elementId.compileCommands:
-                this.configValues.compileCommands = message.value || undefined;
+                this.configValues.compileCommands = splitEntries(message.value);
                 break;
             case elementId.dotConfig:
                 this.configValues.dotConfig = message.value || undefined;
