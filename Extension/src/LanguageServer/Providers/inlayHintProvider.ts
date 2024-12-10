@@ -32,6 +32,9 @@ export interface CppInlayHint {
     leftPadding: boolean;
     rightPadding: boolean;
     identifierLength: number;
+    definitionUri?: vscode.Uri;
+    definitionLine?: number;
+    definitionCharacter?: number;
 }
 
 enum InlayHintKind {
@@ -204,10 +207,11 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         const resolvedHints: vscode.InlayHint[] = [];
         for (const hint of hints) {
             const showOnLeft: boolean = settings.inlayHintsAutoDeclarationTypesShowOnLeft && hint.identifierLength > 0;
+            let labelPart: vscode.InlayHintLabelPart = this.createInlayHintLabelPart(hint, showOnLeft ? hint.label : ": " + hint.label);
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(hint.line, hint.character +
                     (showOnLeft ? 0 : hint.identifierLength)),
-                showOnLeft ? hint.label : ": " + hint.label,
+                [labelPart],
                 vscode.InlayHintKind.Type);
             inlayHint.paddingRight = showOnLeft || hint.rightPadding;
             inlayHint.paddingLeft = showOnLeft && hint.leftPadding;
@@ -244,14 +248,31 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             if (paramHintLabel === "" && refOperatorString === "") {
                 continue;
             }
-
+            let labelPart: vscode.InlayHintLabelPart = this.createInlayHintLabelPart(hint, refOperatorString + paramHintLabel + ":");
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(hint.line, hint.character),
-                refOperatorString + paramHintLabel + ":",
+                [labelPart],
                 vscode.InlayHintKind.Parameter);
             inlayHint.paddingRight = true;
             resolvedHints.push(inlayHint);
         }
         return resolvedHints;
+    }
+
+    private createInlayHintLabelPart(hint: CppInlayHint, hintLabel: string): vscode.InlayHintLabelPart {
+        let labelPart: vscode.InlayHintLabelPart = new vscode.InlayHintLabelPart(hintLabel);
+        if (hint.definitionUri !== undefined) {
+            let definitionPos = new vscode.Position(
+                hint.definitionLine as number,
+                hint.character as number);
+            const option: vscode.TextDocumentShowOptions = { selection: new vscode.Range(definitionPos, definitionPos) };
+            const commandOpen: vscode.Command = {
+                title: "Open Inlay Hint Definition File",
+                command: "vscode.openWith",
+                arguments: [hint.definitionUri, null, option]
+            };
+            labelPart.command = commandOpen;
+        }
+        return labelPart;
     }
 }

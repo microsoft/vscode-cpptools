@@ -9,6 +9,7 @@
 * Add support for passing an additional parameter to `C_Cpp.ConfigurationSelect` command. [PR #12993](https://github.com/microsoft/vscode-cpptools/pull/12993)
   * Thank you for the contribution. [@adrianstephens](https://github.com/adrianstephens)
 * Update clang-format and clang-tidy from 19.1.2 to 19.1.5.
+* Add support for providing the definition with inlay hint for the specific symbol. [#13010](https://github.com/microsoft/vscode-cpptools/issues/13010)
 
 ### Bug Fixes
 * Increase clang-format timeout from 10 seconds to 30 seconds. [#10213](https://github.com/microsoft/vscode-cpptools/issues/10213)
