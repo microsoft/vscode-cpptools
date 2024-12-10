@@ -541,6 +541,7 @@ export interface GetCopilotHoverInfoParams {
 
 interface GetCopilotHoverInfoResult {
     content: string;
+    files: string[];
 }
 
 export interface ChatContextResult {

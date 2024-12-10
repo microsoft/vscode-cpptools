@@ -107,6 +107,16 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         try {
             const response = await this.client.languageClient.sendRequest(GetCopilotHoverInfoRequest, params, this.currentCancellationToken);
             requestInfo = response.content;
+            if (response.files) {
+                for (const file of response.files) {
+                    const fileUri = vscode.Uri.parse(file);
+                    const token = this.currentCancellationToken ?? new vscode.CancellationTokenSource().token;
+                    if (await vscode.lm.fileIsIgnored(fileUri, token)) {
+                        return "";
+                    }
+                }
+            }
+
         } catch (e: any) {
             if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
                 throw new vscode.CancellationError();
