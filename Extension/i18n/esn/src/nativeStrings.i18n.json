@@ -316,5 +316,6 @@
 	"refactor_extract_xborder_jump": "Hay saltos entre el código seleccionado y el código que lo rodea.",
 	"refactor_extract_missing_return": "En el código seleccionado, algunas rutas de control salen sin establecer el valor devuelto. Esto se admite solo para tipos de valor devuelto escalar, numérico y puntero.",
 	"expand_selection": "Expandir selección (para habilitar 'Extraer a función')",
+	"copilot_hover_link": "Generate Copilot summary",
 	"file_not_found_in_path2": "\"{0}\" no se encuentra en compile_commands.json archivos. ''includePath'' de c_cpp_properties.json de la carpeta ''{1}'' se usará en su lugar para este archivo."
 }

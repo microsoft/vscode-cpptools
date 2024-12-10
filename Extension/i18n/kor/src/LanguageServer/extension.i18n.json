@@ -19,5 +19,7 @@
 	"code.action.aborted": "문서가 변경되어 코드 분석 수정 사항을 적용할 수 없습니다.",
 	"prerelease.message": "C/C++ 확장의 시험판 버전을 사용할 수 있습니다. 전환하시겠습니까?",
 	"yes.button": "예",
-	"no.button": "아니요"
+	"no.button": "아니요",
+	"copilot.hover.unavailable": "Copilot summary is not available for this symbol.",
+	"copilot.hover.error": "An error occurred while generating Copilot summary."
 }

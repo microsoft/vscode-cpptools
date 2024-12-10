@@ -19,5 +19,7 @@
 	"code.action.aborted": "Belge değiştiğinden kod analizi düzeltmesi uygulanamadı.",
 	"prerelease.message": "C/C++ uzantısının yayın öncesi bir sürümü var. Buna geçmek ister misiniz?",
 	"yes.button": "Evet",
-	"no.button": "Hayır"
+	"no.button": "Hayır",
+	"copilot.hover.unavailable": "Copilot summary is not available for this symbol.",
+	"copilot.hover.error": "An error occurred while generating Copilot summary."
 }

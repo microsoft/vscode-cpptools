@@ -19,5 +19,7 @@
 	"code.action.aborted": "ドキュメントが変更されたため、コード分析修正プログラムを適用できませんでした。",
 	"prerelease.message": "C/C++ 拡張機能のプレリリース版が利用可能です。切り替えますか?",
 	"yes.button": "はい",
-	"no.button": "いいえ"
+	"no.button": "いいえ",
+	"copilot.hover.unavailable": "Copilot summary is not available for this symbol.",
+	"copilot.hover.error": "An error occurred while generating Copilot summary."
 }

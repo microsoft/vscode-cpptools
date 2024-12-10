@@ -316,5 +316,6 @@
 	"refactor_extract_xborder_jump": "所选代码和外层代码之间的存在跳跃。",
 	"refactor_extract_missing_return": "在所选代码中，一些控制路径退出而没有设置返回值。这只受标量、数字、和指针返回类型支持。",
 	"expand_selection": "展开选择(以启用“提取到函数”)",
+	"copilot_hover_link": "Generate Copilot summary",
 	"file_not_found_in_path2": "在 compile_commands.json 文件中找不到 \"{0}\"。此文件将改用文件夹“{1}”中的 c_cpp_properties.json 中包含的 \"includePath\"。"
 }
