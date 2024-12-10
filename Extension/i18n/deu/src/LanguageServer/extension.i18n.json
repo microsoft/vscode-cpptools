@@ -19,5 +19,7 @@
 	"code.action.aborted": "Der Codeanalysepatch konnte nicht angewendet werden, da sich das Dokument geändert hat.",
 	"prerelease.message": "Eine Vorabversion der C/C++-Erweiterung ist verfügbar. Möchten Sie zu ihr wechseln?",
 	"yes.button": "Ja",
-	"no.button": "Nein"
+	"no.button": "Nein",
+	"copilot.hover.unavailable": "Copilot summary is not available for this symbol.",
+	"copilot.hover.error": "An error occurred while generating Copilot summary."
 }

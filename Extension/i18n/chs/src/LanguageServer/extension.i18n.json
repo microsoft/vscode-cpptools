@@ -19,5 +19,7 @@
 	"code.action.aborted": "无法应用代码分析修复程序，因为文档已更改。",
 	"prerelease.message": "C/C++ 扩展的预发行版本可用。是否要切换到它?",
 	"yes.button": "是",
-	"no.button": "否"
+	"no.button": "否",
+	"copilot.hover.unavailable": "Copilot summary is not available for this symbol.",
+	"copilot.hover.error": "An error occurred while generating Copilot summary."
 }
