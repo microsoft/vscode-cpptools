@@ -207,7 +207,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         const resolvedHints: vscode.InlayHint[] = [];
         for (const hint of hints) {
             const showOnLeft: boolean = settings.inlayHintsAutoDeclarationTypesShowOnLeft && hint.identifierLength > 0;
-            let labelPart: vscode.InlayHintLabelPart = this.createInlayHintLabelPart(hint, showOnLeft ? hint.label : ": " + hint.label);
+            const labelPart: vscode.InlayHintLabelPart = this.createInlayHintLabelPart(hint, showOnLeft ? hint.label : ": " + hint.label);
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(hint.line, hint.character +
                     (showOnLeft ? 0 : hint.identifierLength)),
@@ -248,7 +248,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             if (paramHintLabel === "" && refOperatorString === "") {
                 continue;
             }
-            let labelPart: vscode.InlayHintLabelPart = this.createInlayHintLabelPart(hint, refOperatorString + paramHintLabel + ":");
+            const labelPart: vscode.InlayHintLabelPart = this.createInlayHintLabelPart(hint, refOperatorString + paramHintLabel + ":");
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(hint.line, hint.character),
                 [labelPart],
@@ -260,9 +260,9 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
     }
 
     private createInlayHintLabelPart(hint: CppInlayHint, hintLabel: string): vscode.InlayHintLabelPart {
-        let labelPart: vscode.InlayHintLabelPart = new vscode.InlayHintLabelPart(hintLabel);
+        const labelPart: vscode.InlayHintLabelPart = new vscode.InlayHintLabelPart(hintLabel);
         if (hint.definitionUri !== undefined) {
-            let definitionPos = new vscode.Position(
+            const definitionPos = new vscode.Position(
                 hint.definitionLine as number,
                 hint.character as number);
             const option: vscode.TextDocumentShowOptions = { selection: new vscode.Range(definitionPos, definitionPos) };
