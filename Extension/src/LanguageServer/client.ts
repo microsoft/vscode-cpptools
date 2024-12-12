@@ -58,7 +58,7 @@ import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
-import { PersistentFolderState, PersistentWorkspaceState } from './persistentState';
+import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
 import { RequestCancelled, ServerCancelled, createProtocolFilter } from './protocolFilter';
 import * as refs from './references';
 import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
@@ -1367,7 +1367,14 @@ export class DefaultClient implements Client {
         DefaultClient.isStarted.resolve();
     }
 
-    private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
+    private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, workspaceFolder: vscode.WorkspaceFolder | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
+        const filesEncoding: string = otherSettings.filesEncoding;
+        let filesEncodingChanged: boolean = false;
+        if (workspaceFolder) {
+            const lastFilesEncoding: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastFilesEncoding", "", workspaceFolder);
+            filesEncodingChanged = lastFilesEncoding.Value !== filesEncoding;
+            lastFilesEncoding.Value = filesEncoding;
+        }
         const result: WorkspaceFolderSettingsParams = {
             uri: workspaceFolderUri?.toString(),
             intelliSenseEngine: settings.intelliSenseEngine,
@@ -1464,7 +1471,8 @@ export class DefaultClient implements Client {
             doxygenSectionTags: settings.doxygenSectionTags,
             filesExclude: otherSettings.filesExclude,
             filesAutoSaveAfterDelay: otherSettings.filesAutoSaveAfterDelay,
-            filesEncoding: otherSettings.filesEncoding,
+            filesEncoding: filesEncoding,
+            filesEncodingChanged: filesEncodingChanged,
             searchExclude: otherSettings.searchExclude,
             editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
             editorInlayHintsEnabled: otherSettings.editorInlayHintsEnabled,
@@ -1480,10 +1488,10 @@ export class DefaultClient implements Client {
         const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = [];
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             for (const workspaceFolder of vscode.workspace.workspaceFolders) {
-                workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(workspaceFolder.uri, new CppSettings(workspaceFolder.uri), new OtherSettings(workspaceFolder.uri)));
+                workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(workspaceFolder.uri, workspaceFolder, new CppSettings(workspaceFolder.uri), new OtherSettings(workspaceFolder.uri)));
             }
         } else {
-            workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(this.RootUri, workspaceSettings, workspaceOtherSettings));
+            workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(this.RootUri, undefined, workspaceSettings, workspaceOtherSettings));
         }
         return workspaceFolderSettingsParams;
     }
@@ -1498,9 +1506,14 @@ export class DefaultClient implements Client {
         if (this.currentCopilotHoverEnabled && workspaceSettings.copilotHover !== this.currentCopilotHoverEnabled.Value) {
             void util.promptForReloadWindowDueToSettingsChange();
         }
+        const workspaceFallbackEncoding: string = workspaceOtherSettings.filesEncoding;
+        const lastWorkspaceFallbackEncoding: PersistentState<string> = new PersistentState<string>("CPP.lastWorkspaceFallbackEncoding", "");
+        const workspaceFallbackEncodingChanged = lastWorkspaceFallbackEncoding.Value !== workspaceFallbackEncoding;
+        lastWorkspaceFallbackEncoding.Value = workspaceFallbackEncoding;
         return {
             filesAssociations: workspaceOtherSettings.filesAssociations,
-            workspaceFallbackEncoding: workspaceOtherSettings.filesEncoding,
+            workspaceFallbackEncoding: workspaceFallbackEncoding,
+            workspaceFallbackEncodingChanged: workspaceFallbackEncodingChanged,
             maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
             maxCachedProcesses: workspaceSettings.maxCachedProcesses,
             maxMemory: workspaceSettings.maxMemory,
