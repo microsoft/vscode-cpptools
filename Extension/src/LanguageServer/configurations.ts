@@ -2389,7 +2389,8 @@ export class CppProperties {
                     }
                 } else {
                     const compileCommandsLastChanged: Date | undefined = this.compileCommandsFileWatcherFallbackTime.get(compileCommandsFile);
-                    if (compileCommandsLastChanged !== undefined && stats.mtime > compileCommandsLastChanged) {
+                    if ((!this.compileCommandsFiles.has(compileCommandsFile)) ||
+                        (compileCommandsLastChanged !== undefined && stats.mtime > compileCommandsLastChanged)) {
                         this.compileCommandsFileWatcherFallbackTime.set(compileCommandsFile, new Date());
                         this.onCompileCommandsChanged(compileCommandsFile);
                         this.compileCommandsFiles.add(compileCommandsFile); // File created.
