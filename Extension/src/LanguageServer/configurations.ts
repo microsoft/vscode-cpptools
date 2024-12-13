@@ -1460,7 +1460,7 @@ export class CppProperties {
             }
 
             // Configuration.compileCommands is allowed to be defined as a string in the schema, but we send an array to the language server.
-            // For having a predictable behvaior, we convert it here to an array of strings.
+            // For having a predictable behavior, we convert it here to an array of strings.
             for (let i: number = 0; i < newJson.configurations.length; i++) {
                 newJson.configurations[i].compileCommands = this.forceCompileCommandsAsArray(<any>newJson.configurations[i].compileCommands);
             }
@@ -1815,7 +1815,7 @@ export class CppProperties {
         const currentConfiguration: Configuration = configurations.configurations[this.CurrentConfigurationIndex];
 
         // Configuration.compileCommands is allowed to be defined as a string in the schema, but we send an array to the language server.
-        // For having a predictable behvaior, we convert it here to an array of strings.
+        // For having a predictable behavior, we convert it here to an array of strings.
         // Squiggles are still handled for both cases.
         currentConfiguration.compileCommands = this.forceCompileCommandsAsArray(<any>currentConfiguration.compileCommands);
 
@@ -2389,7 +2389,7 @@ export class CppProperties {
                     }
                 } else {
                     const compileCommandsLastChanged: Date | undefined = this.compileCommandsFileWatcherFallbackTime.get(compileCommandsFile);
-                    if ((!this.compileCommandsFiles.has(compileCommandsFile)) ||
+                    if (!this.compileCommandsFiles.has(compileCommandsFile) ||
                         (compileCommandsLastChanged !== undefined && stats.mtime > compileCommandsLastChanged)) {
                         this.compileCommandsFileWatcherFallbackTime.set(compileCommandsFile, new Date());
                         this.onCompileCommandsChanged(compileCommandsFile);
