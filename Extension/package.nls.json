@@ -413,7 +413,7 @@
     "c_cpp.configuration.vcFormat.space.aroundBinaryOperator.description": {
         "message": "Spaces around binary operators.",
         "comment": [
-            "The term \"binary operator\" refers to an operator that takes two operands and not an operator that accepts a binary number."
+            "The term \"binary operators\" refers to operators that takes two operands and not operators on binary numbers."
         ]
     },
     "c_cpp.configuration.vcFormat.space.aroundAssignmentOperator.description": "Spaces around assignment operators.",
