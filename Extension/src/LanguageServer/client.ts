@@ -564,6 +564,16 @@ export interface ProjectContextResult {
     fileContext: FileContextResult;
 }
 
+interface FolderFilesEncodingChanged {
+    uri: string;
+    filesEncoding: string;
+}
+
+interface FilesEncodingChanged {
+    workspaceFallbackEncoding?: string;
+    foldersFilesEncoding: FolderFilesEncodingChanged[];
+}
+
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
@@ -642,6 +652,7 @@ const ReportCodeAnalysisTotalNotification: NotificationType<number> = new Notifi
 const DoxygenCommentGeneratedNotification: NotificationType<GenerateDoxygenCommentResult> = new NotificationType<GenerateDoxygenCommentResult>('cpptools/insertDoxygenComment');
 const CanceledReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/canceledReferences');
 const IntelliSenseResultNotification: NotificationType<IntelliSenseResult> = new NotificationType<IntelliSenseResult>('cpptools/intelliSenseResult');
+const FilesEncodingChangedNotification: NotificationType<FilesEncodingChanged> = new NotificationType<FilesEncodingChanged>('cpptools/filesEncodingChanged');
 
 let failureMessageShown: boolean = false;
 
@@ -819,6 +830,7 @@ export interface Client {
     getIncludes(maxDepth: number): Promise<GetIncludesResult>;
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult>;
     getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult>;
+    filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -1373,7 +1385,6 @@ export class DefaultClient implements Client {
         if (workspaceFolder) {
             const lastFilesEncoding: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastFilesEncoding", "", workspaceFolder);
             filesEncodingChanged = lastFilesEncoding.Value !== filesEncoding;
-            lastFilesEncoding.Value = filesEncoding;
         }
         const result: WorkspaceFolderSettingsParams = {
             uri: workspaceFolderUri?.toString(),
@@ -1509,7 +1520,6 @@ export class DefaultClient implements Client {
         const workspaceFallbackEncoding: string = workspaceOtherSettings.filesEncoding;
         const lastWorkspaceFallbackEncoding: PersistentState<string> = new PersistentState<string>("CPP.lastWorkspaceFallbackEncoding", "");
         const workspaceFallbackEncodingChanged = lastWorkspaceFallbackEncoding.Value !== workspaceFallbackEncoding;
-        lastWorkspaceFallbackEncoding.Value = workspaceFallbackEncoding;
         return {
             filesAssociations: workspaceOtherSettings.filesAssociations,
             workspaceFallbackEncoding: workspaceFallbackEncoding,
@@ -2451,6 +2461,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
         this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => void this.insertDoxygenComment(e));
         this.languageClient.onNotification(CanceledReferencesNotification, this.serverCanceledReferences);
+        this.languageClient.onNotification(FilesEncodingChangedNotification, (e) => this.filesEncodingChanged(e));
     }
 
     private handleIntelliSenseResult(intelliSenseResult: IntelliSenseResult): void {
@@ -4098,6 +4109,20 @@ export class DefaultClient implements Client {
     public getCopilotHoverProvider(): CopilotHoverProvider | undefined {
         return this.copilotHoverProvider;
     }
+
+    public filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void {
+        if (filesEncodingChanged.workspaceFallbackEncoding !== undefined) {
+            const lastWorkspaceFallbackEncoding: PersistentState<string> = new PersistentState<string>("CPP.lastWorkspaceFallbackEncoding", "");
+            lastWorkspaceFallbackEncoding.Value = filesEncodingChanged.workspaceFallbackEncoding;
+        }
+        for (const folderFilesEncoding of filesEncodingChanged.foldersFilesEncoding) {
+            const workspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(folderFilesEncoding.uri));
+            if (workspaceFolder !== undefined) {
+                const lastFilesEncoding: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastFilesEncoding", "", workspaceFolder);
+                lastFilesEncoding.Value = folderFilesEncoding.filesEncoding;
+            }
+        }
+    }
 }
 
 function getLanguageServerFileName(): string {
@@ -4213,4 +4238,5 @@ class NullClient implements Client {
     getIncludes(maxDepth: number): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
     getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> { return Promise.resolve({} as ProjectContextResult); }
+    filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void { }
 }
