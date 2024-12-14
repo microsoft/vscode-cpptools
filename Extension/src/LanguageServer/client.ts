@@ -527,6 +527,7 @@ interface DidChangeActiveEditorParams {
 }
 
 interface GetIncludesParams {
+    fileUri: string;
     maxDepth: number;
 }
 
@@ -827,7 +828,7 @@ export interface Client {
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
     getCopilotHoverProvider(): CopilotHoverProvider | undefined;
-    getIncludes(maxDepth: number): Promise<GetIncludesResult>;
+    getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult>;
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult>;
     getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult>;
     filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void;
@@ -2291,8 +2292,8 @@ export class DefaultClient implements Client {
      * the UI results and always re-requests (no caching).
     */
 
-    public async getIncludes(maxDepth: number): Promise<GetIncludesResult> {
-        const params: GetIncludesParams = { maxDepth: maxDepth };
+    public async getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult> {
+        const params: GetIncludesParams = { fileUri: uri.toString(), maxDepth };
         await this.ready;
         return this.languageClient.sendRequest(IncludesRequest, params);
     }
@@ -4235,7 +4236,7 @@ class NullClient implements Client {
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
     getCopilotHoverProvider(): CopilotHoverProvider | undefined { return undefined; }
-    getIncludes(maxDepth: number): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
+    getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
     getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> { return Promise.resolve({} as ProjectContextResult); }
     filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void { }
