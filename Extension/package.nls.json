@@ -410,7 +410,12 @@
     "c_cpp.configuration.vcFormat.space.removeBeforeSemicolon.description": "Spaces are removed before every semicolon.",
     "c_cpp.configuration.vcFormat.space.insertAfterSemicolon.description": "A space is inserted after every semicolon.",
     "c_cpp.configuration.vcFormat.space.removeAroundUnaryOperator.description": "Spaces between unary operators and operands are removed.",
-    "c_cpp.configuration.vcFormat.space.aroundBinaryOperator.description": "Spaces around binary operators.",
+    "c_cpp.configuration.vcFormat.space.aroundBinaryOperator.description": {
+        "message": "Spaces around binary operators.",
+        "comment": [
+            "The term \"binary operators\" refers to operators that takes two operands and not operators on binary numbers."
+        ]
+    },
     "c_cpp.configuration.vcFormat.space.aroundAssignmentOperator.description": "Spaces around assignment operators.",
     "c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.description": "Spaces around pointer and reference operators.",
     "c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.left.description": "Pointer and reference operators are aligned to the left.",
