@@ -10,7 +10,7 @@ import * as util from '../common';
 import * as logger from '../logger';
 import * as telemetry from '../telemetry';
 import { GetIncludesResult } from './client';
-import { getActiveClient } from './extension';
+import { getClients } from './extension';
 import { getCompilerArgumentFilterMap, getProjectContext } from './lmTool';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -46,7 +46,7 @@ export async function registerRelatedFilesProvider(): Promise<void> {
                         const telemetryProperties: Record<string, string> = {};
                         const telemetryMetrics: Record<string, number> = {};
                         try {
-                            const getIncludesHandler = async () => (await getIncludes(1))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [];
+                            const getIncludesHandler = async () => (await getIncludes(uri, 1))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [];
                             const getTraitsHandler = async () => {
                                 const projectContext = await getProjectContext(uri, context);
 
@@ -157,10 +157,10 @@ export async function registerRelatedFilesProvider(): Promise<void> {
     }
 }
 
-async function getIncludes(maxDepth: number): Promise<GetIncludesResult> {
-    const activeClient = getActiveClient();
-    const includes = await activeClient.getIncludes(maxDepth);
-    const wksFolder = activeClient.RootUri?.toString();
+async function getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult> {
+    const client = getClients().getClientFor(uri);
+    const includes = await client.getIncludes(uri, maxDepth);
+    const wksFolder = client.RootUri?.toString();
 
     if (!wksFolder) {
         return includes;

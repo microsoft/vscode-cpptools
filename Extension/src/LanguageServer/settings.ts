@@ -131,6 +131,7 @@ export interface WorkspaceFolderSettingsParams {
     filesExclude: Excludes;
     filesAutoSaveAfterDelay: boolean;
     filesEncoding: string;
+    filesEncodingChanged: boolean;
     searchExclude: Excludes;
     editorAutoClosingBrackets: string;
     editorInlayHintsEnabled: boolean;
@@ -141,6 +142,7 @@ export interface WorkspaceFolderSettingsParams {
 export interface SettingsParams {
     filesAssociations: Associations;
     workspaceFallbackEncoding: string;
+    workspaceFallbackEncodingChanged: boolean;
     maxConcurrentThreads: number | null;
     maxCachedProcesses: number | null;
     maxMemory: number | null;
