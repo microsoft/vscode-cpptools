@@ -672,11 +672,12 @@
         <div class="section">
             <div class="section-title" data-loc-id="compile.commands">Compile commands</div>
             <div class="section-text">
-                <span data-loc-id="compile.commands.description">The full path to the <code>compile_commands.json</code> file for the workspace. The include paths and defines discovered in this file will be used instead of the values set for <code>includePath</code> and <code>defines</code> settings. If the compile commands database does not contain an entry for the translation unit that corresponds to the file you opened in the editor, then a warning message will appear and the extension will use the <code>includePath</code> and <code>defines</code> settings instead.</span>
+                <span data-loc-id="compile.commands.description">A list of paths to <code>compile_commands.json</code> files for the workspace. The include paths and defines discovered in these files will be used instead of the values set for <code>includePath</code> and <code>defines</code> settings. If the compile commands database does not contain an entry for the translation unit that corresponds to the file you opened in the editor, then a warning message will appear and the extension will use the <code>includePath</code> and <code>defines</code> settings instead.</span>
             </div>
             <div>
-                <input name="inputValue" id="compileCommands" style="width: 798px"></input>
-                <div id="compileCommandsInvalid" class="error" style="width: 800px"></div>
+                <div class="section-note" data-loc-id="one.compile.commands.path.per.line">One compile commands path per line.</div>
+                <textarea name="inputValue" id="compileCommands" rows="4" cols="93" style="width: 800px"></textarea>
+                <div id="compileCommandsInvalid" class="error" style="margin-top: -4px; width: 794px"></div>
             </div>
         </div>
 
