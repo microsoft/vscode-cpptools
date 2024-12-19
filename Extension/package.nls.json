@@ -173,7 +173,7 @@
         ]
     },
     "c_cpp.configuration.codeAnalysis.clangTidy.path.markdownDescription": {
-        "message": "The full path of the `clang-tidy` executable. If not specified, and `clang-tidy` is available in the environment path, that is used. If not found in the environment path, the `clang-tidy` bundled with the extension will be used.",
+        "message": "The full path of the `clang-tidy` executable. If not specified, and `clang-tidy` is available in the environment path, that is used unless the version bundled with the extension is newer. If not found in the environment path, the `clang-tidy` bundled with the extension will be used.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -446,7 +446,7 @@
         ]
     },
     "c_cpp.configuration.clang_format_path.markdownDescription": {
-        "message": "The full path of the `clang-format` executable. If not specified, and `clang-format` is available in the environment path, that is used. If not found in the environment path, the `clang-format` bundled with the extension will be used.",
+        "message": "The full path of the `clang-format` executable. If not specified, and `clang-format` is available in the environment path, that is used unless the version bundled with the extension is newer. If not found in the environment path, the `clang-format` bundled with the extension will be used.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
