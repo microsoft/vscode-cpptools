@@ -1385,6 +1385,9 @@ export class DefaultClient implements Client {
         let filesEncodingChanged: boolean = false;
         if (workspaceFolder) {
             const lastFilesEncoding: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastFilesEncoding", "", workspaceFolder);
+            if (lastFilesEncoding.Value === "") {
+                lastFilesEncoding.Value = filesEncoding;
+            }
             filesEncodingChanged = lastFilesEncoding.Value !== filesEncoding;
         }
         const result: WorkspaceFolderSettingsParams = {
@@ -1520,6 +1523,9 @@ export class DefaultClient implements Client {
         }
         const workspaceFallbackEncoding: string = workspaceOtherSettings.filesEncoding;
         const lastWorkspaceFallbackEncoding: PersistentState<string> = new PersistentState<string>("CPP.lastWorkspaceFallbackEncoding", "");
+        if (lastWorkspaceFallbackEncoding.Value === "") {
+            lastWorkspaceFallbackEncoding.Value = workspaceFallbackEncoding;
+        }
         const workspaceFallbackEncodingChanged = lastWorkspaceFallbackEncoding.Value !== workspaceFallbackEncoding;
         return {
             filesAssociations: workspaceOtherSettings.filesAssociations,
