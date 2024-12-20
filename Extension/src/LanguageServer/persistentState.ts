@@ -19,6 +19,11 @@ class PersistentStateBase<T> {
         this.defaultvalue = defaultValue;
         this.state = state;
         this.curvalue = defaultValue;
+
+        // Ensure the default is written to the state store.
+        if (this.state && this.state.get<T>(this.key) === undefined) {
+            void this.state.update(this.key, this.defaultvalue);
+        }
     }
 
     public get Value(): T {
