@@ -1670,6 +1670,7 @@ export class DefaultClient implements Client {
         languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
         languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
         languageClient.onNotification(DebugLogNotification, logLocalized);
+        languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
         languageClient.registerProposedFeatures();
         await languageClient.start();
 
@@ -2443,7 +2444,6 @@ export class DefaultClient implements Client {
 
         this.languageClient.onNotification(ReloadWindowNotification, () => void util.promptForReloadWindowDueToSettingsChange());
         this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => void this.addTrustedCompiler(e.compilerPath));
-        this.languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
         this.languageClient.onNotification(ReportStatusNotification, (e) => void this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => void this.promptCompileCommands(e));
