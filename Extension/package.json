@@ -707,6 +707,9 @@
                                 "default": []
                             }
                         ],
+                        "default": [
+                            ""
+                        ],
                         "markdownDescription": "%c_cpp.configuration.default.compileCommands.markdownDescription%",
                         "scope": "machine-overridable"
                     },

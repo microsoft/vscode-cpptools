@@ -402,26 +402,19 @@ export class CppSettings extends Settings {
     public get defaultDotconfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.dotConfig")); }
     public get defaultMacFrameworkPath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.macFrameworkPath"); }
     public get defaultWindowsSdkVersion(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.windowsSdkVersion")); }
+    public get defaultCompileCommands(): string[] | undefined {
+        const value: any = super.Section.get<any>("default.compileCommands");
+        if (isString(value)) {
+            return value.length > 0 ? [value] : undefined;
+        }
+        if (isArrayOfString(value)) {
+            const result = value.filter(x => x.length > 0);
+            return result.length > 0 ? result : undefined;
+        }
+        return undefined;
+    }
     public get defaultForcedInclude(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return this.getAsStringOrUndefined("default.intelliSenseMode"); }
-    public get defaultCompileCommands(): string[] | undefined {
-        // Try to get the value as a string.
-        const value: string | undefined = this.getAsStringOrUndefined("default.compileCommands");
-        if (value !== undefined) {
-            if (changeBlankStringToUndefined(value) === undefined) {
-                return undefined;
-            }
-            return [value];
-        }
-
-        // value is not a string, try to get it as an array of strings instead.
-        let valueArray: string[] | undefined = this.getAsArrayOfStringsOrUndefined("default.compileCommands");
-        valueArray = valueArray?.filter((value: string) => value.length > 0);
-        if (valueArray?.length === 0) {
-            return undefined;
-        }
-        return valueArray;
-    }
     public get defaultCompilerPath(): string | null { return this.getAsString("default.compilerPath", true); }
 
     public set defaultCompilerPath(value: string) {
