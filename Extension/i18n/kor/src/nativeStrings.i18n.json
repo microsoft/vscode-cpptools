@@ -159,8 +159,8 @@
 	"fallback_to_64_bit_mode2": "컴파일러를 쿼리하지 못했습니다. 64비트 intelliSenseMode로 대체하는 중입니다.",
 	"fallback_to_no_bitness": "컴파일러를 쿼리하지 못했습니다. 0비트로 대체하는 중입니다.",
 	"intellisense_client_creation_aborted": "IntelliSense 클라이언트 만들기가 중단되었습니다. {0}",
-	"include_errors_config_provider_intellisense_disabled ": "configurationProvider 설정에서 제공하는 정보를 기준으로 #include 오류가 검색되었습니다. 태그 파서가 이 변환 단위({0})에 적합한 IntelliSense 기능을 제공합니다.",
-	"include_errors_config_provider_squiggles_disabled ": "configurationProvider 설정에서 제공하는 정보를 기준으로 #include 오류가 검색되었습니다. 이 변환 단위({0})에서 물결선을 사용할 수 없습니다.",
+	"include_errors_config_provider_intellisense_disabled": "configurationProvider 설정에서 제공하는 정보를 기준으로 #include 오류가 검색되었습니다. 태그 파서가 이 변환 단위({0})에 적합한 IntelliSense 기능을 제공합니다.",
+	"include_errors_config_provider_squiggles_disabled": "configurationProvider 설정에서 제공하는 정보를 기준으로 #include 오류가 검색되었습니다. 이 변환 단위({0})에서 물결선을 사용할 수 없습니다.",
 	"preprocessor_keyword": "전처리기 키워드",
 	"c_keyword": "C 키워드",
 	"cpp_keyword": "C++ 키워드",
@@ -316,5 +316,6 @@
 	"refactor_extract_xborder_jump": "선택된 코드와 주변 코드 사이에 점프가 있습니다.",
 	"refactor_extract_missing_return": "선택된 코드에서 일부 제어 경로가 반환 값 설정 없이 종료됩니다. 이는 스칼라, 숫자 및 포인터 반환 형식에 대해서만 지원됩니다.",
 	"expand_selection": "선택 영역 확장('함수로 추출'을 사용하도록 설정)",
-	"file_not_found_in_path2": "compile_commands.json 파일에서 \"{0}\"을(를) 찾을 수 없습니다. '{1}' 폴더의 c_cpp_properties.json 'includePath'가 대신 이 파일에 사용됩니다."
+	"file_not_found_in_path2": "compile_commands.json 파일에서 \"{0}\"을(를) 찾을 수 없습니다. '{1}' 폴더의 c_cpp_properties.json 'includePath'가 대신 이 파일에 사용됩니다.",
+	"copilot_hover_link": "Copilot 요약 생성"
 }
