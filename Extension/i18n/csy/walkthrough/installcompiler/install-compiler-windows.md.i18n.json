@@ -17,7 +17,7 @@
 	"walkthrough.windows.note1": "Poznámka",
 	"walkthrough.windows.note1.text": "Můžete použít sadu nástrojů C++ z Visual Studio Build Tools spolu s Visual Studio Code ke kompilaci, sestavení a ověření jakékoli kódové báze C++, pokud máte také platnou licenci Visual Studio (buď Community, Pro nebo Enterprise), kterou aktivně používáte k vývoji kódové báze C++.",
 	"walkthrough.windows.open.command.prompt": "Otevřete {0} zadáním příkazu „developer“ do nabídky Start systému Windows.",
-	"walkthrough.windows.command.prompt.name1": "Developer Command Prompt for VS",
+	"walkthrough.windows.command.prompt.name1": "Developer Command Prompt pro VS",
 	"walkthrough.windows.check.install": "MSVC instalaci zkontrolujte tak, že zadáte {0} do Developer Command Prompt for VS. Měla by se zobrazit zpráva o autorských právech v popisu verze a základního použití.",
 	"walkthrough.windows.note2": "Poznámka",
 	"walkthrough.windows.note2.text": "Pokud chcete použít MSVC z příkazového řádku nebo VS Code, musíte spouštět z {0}. Běžné prostředí, jako je {1}, {2} nebo příkazový řádek Windows, nemá nastavenou nezbytnou proměnnou prostředí cesty.",

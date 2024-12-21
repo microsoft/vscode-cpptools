@@ -159,8 +159,8 @@
 	"fallback_to_64_bit_mode2": "Nie można wykonać zapytania dotyczącego kompilatora. Powrót do 64-bitowego trybu intelliSenseMode.",
 	"fallback_to_no_bitness": "Nie można wykonać zapytania dotyczącego kompilatora. Powrót do braku liczby bitów.",
 	"intellisense_client_creation_aborted": "Przerwano tworzenie klienta IntelliSense: {0}",
-	"include_errors_config_provider_intellisense_disabled ": "Wykryto błędy #include na podstawie informacji podanych przez ustawienie configurationProvider. Funkcje IntelliSense dla tej jednostki tłumaczeniowej ({0}) będą udostępniane przez analizator tagów.",
-	"include_errors_config_provider_squiggles_disabled ": "Wykryto błędy #include na podstawie informacji podanych przez ustawienie configurationProvider. Zygzaki dla tej jednostki tłumaczeniowej ({0}) są wyłączone.",
+	"include_errors_config_provider_intellisense_disabled": "Wykryto błędy #include na podstawie informacji podanych przez ustawienie configurationProvider. Funkcje IntelliSense dla tej jednostki tłumaczeniowej ({0}) będą udostępniane przez analizator tagów.",
+	"include_errors_config_provider_squiggles_disabled": "Wykryto błędy #include na podstawie informacji podanych przez ustawienie configurationProvider. Zygzaki dla tej jednostki tłumaczeniowej ({0}) są wyłączone.",
 	"preprocessor_keyword": "słowo kluczowe preprocesora",
 	"c_keyword": "Słowo kluczowe języka C",
 	"cpp_keyword": "Słowo kluczowe języka C++",
@@ -316,5 +316,6 @@
 	"refactor_extract_xborder_jump": "Występują skoki między zaznaczonym kodem a otaczającym kodem.",
 	"refactor_extract_missing_return": "W zaznaczonym kodzie niektóre ścieżki kontroli kończą działanie bez ustawienia zwracanej wartości. Jest to obsługiwane tylko w przypadku zwracanych typów skalarnych, liczbowych i wskaźnikowych.",
 	"expand_selection": "Rozwiń wybór (aby włączyć opcję „Wyodrębnij do funkcji”)",
-	"file_not_found_in_path2": "\"{0}\" not found in compile_commands.json files. 'includePath' from c_cpp_properties.json in folder '{1}' will be used for this file instead."
+	"file_not_found_in_path2": "Nie znaleziono elementu „{0}” w plikach compile_commands.json. Zamiast tego dla tego pliku zostanie użyty element „includePath” z c_cpp_properties.json w folderze „{1}”.",
+	"copilot_hover_link": "Generuj podsumowanie funkcji Copilot"
 }
