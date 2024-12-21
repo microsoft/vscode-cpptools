@@ -16,7 +16,7 @@
         "Type": "git",
         "Git": {
           "RepositoryUrl": "https://github.com/lldb-tools/lldb-mi",
-          "CommitHash": "2388bd74133bc21eac59b2e2bf97f2a30770a315"
+          "CommitHash": "4fe9c663edce2447e114c71851694d8c529b982d"
         }
       }
     }
