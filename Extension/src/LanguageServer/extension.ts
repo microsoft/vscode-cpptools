@@ -37,6 +37,14 @@ import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
 
+export interface SnippetEntry {
+    uri: string;
+    value: string;
+    startLine: number;
+    endLine: number;
+    importance: number;
+}
+
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const CppSourceStr: string = "C/C++";
