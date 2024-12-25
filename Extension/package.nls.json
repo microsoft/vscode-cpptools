@@ -173,7 +173,7 @@
         ]
     },
     "c_cpp.configuration.codeAnalysis.clangTidy.path.markdownDescription": {
-        "message": "The full path of the `clang-tidy` executable. If not specified, and `clang-tidy` is available in the environment path, that is used. If not found in the environment path, the `clang-tidy` bundled with the extension will be used.",
+        "message": "The full path of the `clang-tidy` executable. If not specified, and `clang-tidy` is available in the environment path, that is used unless the version bundled with the extension is newer. If not found in the environment path, the `clang-tidy` bundled with the extension will be used.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -410,7 +410,12 @@
     "c_cpp.configuration.vcFormat.space.removeBeforeSemicolon.description": "Spaces are removed before every semicolon.",
     "c_cpp.configuration.vcFormat.space.insertAfterSemicolon.description": "A space is inserted after every semicolon.",
     "c_cpp.configuration.vcFormat.space.removeAroundUnaryOperator.description": "Spaces between unary operators and operands are removed.",
-    "c_cpp.configuration.vcFormat.space.aroundBinaryOperator.description": "Spaces around binary operators.",
+    "c_cpp.configuration.vcFormat.space.aroundBinaryOperator.description": {
+        "message": "Spaces around binary operators.",
+        "comment": [
+            "The term \"binary operators\" refers to operators that takes two operands and not operators on binary numbers."
+        ]
+    },
     "c_cpp.configuration.vcFormat.space.aroundAssignmentOperator.description": "Spaces around assignment operators.",
     "c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.description": "Spaces around pointer and reference operators.",
     "c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.left.description": "Pointer and reference operators are aligned to the left.",
@@ -441,7 +446,7 @@
         ]
     },
     "c_cpp.configuration.clang_format_path.markdownDescription": {
-        "message": "The full path of the `clang-format` executable. If not specified, and `clang-format` is available in the environment path, that is used. If not found in the environment path, the `clang-format` bundled with the extension will be used.",
+        "message": "The full path of the `clang-format` executable. If not specified, and `clang-format` is available in the environment path, that is used unless the version bundled with the extension is newer. If not found in the environment path, the `clang-format` bundled with the extension will be used.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]

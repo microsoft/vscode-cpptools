@@ -221,6 +221,7 @@ function sendTelemetry(info: PlatformInformation): void {
         default:
             break;
     }
+    telemetryProperties['appName'] = vscode.env.appName;
     Telemetry.logDebuggerEvent("acquisition", telemetryProperties);
     logMachineIdMappings().catch(logAndReturn.undefined);
 }

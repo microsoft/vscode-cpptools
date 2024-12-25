@@ -13,6 +13,7 @@ import * as telemetry from '../telemetry';
 import { DefaultClient } from './client';
 import { PersistentState } from './persistentState';
 import { FindAllRefsView } from './referencesView';
+import { CppSettings } from './settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -469,19 +470,24 @@ export class ReferencesManager {
         }
 
         if (this.referencesStartedWhileTagParsing) {
+            const showLog: boolean = util.getNumericLoggingLevel(new CppSettings().loggingLevel) >= 3;
             const msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
                 referencesCommandModeToString(this.client.ReferencesCommandMode));
             if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
                 if (this.referencesChannel) {
                     this.referencesChannel.appendLine(msg);
                     this.referencesChannel.appendLine("");
-                    this.referencesChannel.show(true);
+                    if (showLog) {
+                        this.referencesChannel.show(true);
+                    }
                 }
             } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
                 const logChannel: vscode.OutputChannel = logger.getOutputChannel();
                 logChannel.appendLine(msg);
                 logChannel.appendLine("");
-                logChannel.show(true);
+                if (showLog) {
+                    logChannel.show(true);
+                }
             }
         }
 
