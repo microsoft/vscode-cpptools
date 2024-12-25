@@ -72,16 +72,14 @@
                     "compileCommands": {
                         "oneOf": [
                             {
-                                "type": "string",
-                                "default": ""
+                                "type": "string"
                             },
                             {
                                 "type": "array",
                                 "items": {
                                     "type": "string"
                                 },
-                                "uniqueItems": true,
-                                "default": []
+                                "uniqueItems": true
                             }
                         ],
                         "markdownDescription": "Full path or a list of full paths to `compile_commands.json` files for the workspace.",
@@ -252,7 +250,6 @@
         },
         "enableConfigurationSquiggles": {
             "type": "boolean",
-            "default": true,
             "markdownDescription": "Controls whether the extension will report errors detected in `c_cpp_properties.json`.",
             "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         }
