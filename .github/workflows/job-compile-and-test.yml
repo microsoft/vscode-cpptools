@@ -42,8 +42,9 @@ jobs:
         run: yarn test
         working-directory: Extension
 
+      # These tests don't require the binary.
       - name: Run SingleRootProject tests
-        run: yarn test --scenario=SingleRootProject
+        run: yarn test --scenario=SingleRootProject --skipCheckBinaries
         working-directory: Extension
 
       # NOTE : We can't run the test that require the native binary files
