@@ -32,7 +32,6 @@ describe('copilotProviders Tests', () => {
     const rootUri: vscode.Uri = vscode.Uri.file(process.platform === 'win32' ? 'C:\\src\\my_project' : '/home/src/my_project');
     const expectedInclude: string = process.platform === 'win32' ? 'file:///c%3A/src/my_project/foo.h' : 'file:///home/src/my_project/foo.h';
     const sourceFileUri: vscode.Uri = vscode.Uri.file(process.platform === 'win32' ? 'file:///c%3A/src/my_project/foo.cpp' : 'file:///home/src/my_project/foo.cpp');
-    const maxDepth: number = 10;
 
     beforeEach(() => {
         proxyquire.noPreserveCache(); // Tells proxyquire to not fetch the module from cache
@@ -73,7 +72,7 @@ describe('copilotProviders Tests', () => {
 
         activeClientStub = sinon.createStubInstance(DefaultClient);
         getActiveClientStub = sinon.stub(extension, 'getActiveClient').returns(activeClientStub);
-        activeClientStub.getIncludes.resolves({ includedFiles: [] })(sourceFileUri, maxDepth);
+        activeClientStub.getIncludes.resolves({ includedFiles: [] });
         telemetryStub = sinon.stub(telemetry, 'logCopilotEvent').returns();
     });
 
@@ -85,14 +84,14 @@ describe('copilotProviders Tests', () => {
     { vscodeExtension?: vscode.Extension<unknown>; getIncludeFiles?: GetIncludesResult; projectContext?: ProjectContext; rootUri?: vscode.Uri; flags?: Record<string, unknown> } =
     { vscodeExtension: undefined, getIncludeFiles: undefined, projectContext: undefined, rootUri: undefined, flags: {} }
     ) => {
-        activeClientStub.getIncludes.resolves(getIncludeFiles)(sourceFileUri, maxDepth);
+        activeClientStub.getIncludes.resolves(getIncludeFiles);
         sinon.stub(lmTool, 'getProjectContext').resolves(projectContext);
         sinon.stub(activeClientStub, 'RootUri').get(() => rootUri);
         mockCopilotApi.registerRelatedFilesProvider.callsFake((_providerId: { extensionId: string; languageId: string }, callback: (uri: vscode.Uri, context: { flags: Record<string, unknown> }, cancellationToken: vscode.CancellationToken) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>) => {
             if (_providerId.languageId === 'cpp') {
                 const tokenSource = new vscode.CancellationTokenSource();
                 try {
-                    callbackPromise = callback(vscode.Uri.parse('file:///test-extension-path'), { flags: flags ?? {} }, tokenSource.token);
+                    callbackPromise = callback(sourceFileUri, { flags: flags ?? {} }, tokenSource.token);
                 } finally {
                     tokenSource.dispose();
                 }
