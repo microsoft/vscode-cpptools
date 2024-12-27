@@ -10,6 +10,7 @@ import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as util from '../../../../src/common';
 import { DefaultClient, GetIncludesResult } from '../../../../src/LanguageServer/client';
+import { ClientCollection } from '../../../../src/LanguageServer/clientCollection';
 import { CopilotApi, CopilotTrait } from '../../../../src/LanguageServer/copilotProviders';
 import * as extension from '../../../../src/LanguageServer/extension';
 import * as lmTool from '../../../../src/LanguageServer/lmTool';
@@ -19,7 +20,7 @@ import * as telemetry from '../../../../src/telemetry';
 describe('copilotProviders Tests', () => {
     let moduleUnderTest: any;
     let mockCopilotApi: sinon.SinonStubbedInstance<CopilotApi>;
-    let getActiveClientStub: sinon.SinonStub;
+    let getClientsStub: sinon.SinonStub;
     let activeClientStub: sinon.SinonStubbedInstance<DefaultClient>;
     let vscodeGetExtensionsStub: sinon.SinonStub;
     let callbackPromise: Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }> | undefined;
@@ -71,7 +72,9 @@ describe('copilotProviders Tests', () => {
         };
 
         activeClientStub = sinon.createStubInstance(DefaultClient);
-        getActiveClientStub = sinon.stub(extension, 'getActiveClient').returns(activeClientStub);
+        const clientsStub = sinon.createStubInstance(ClientCollection);
+        getClientsStub = sinon.stub(extension, 'getClients').returns(clientsStub);
+        clientsStub.getClientFor.returns(activeClientStub);
         activeClientStub.getIncludes.resolves({ includedFiles: [] });
         telemetryStub = sinon.stub(telemetry, 'logCopilotEvent').returns();
     });
@@ -130,7 +133,7 @@ describe('copilotProviders Tests', () => {
 
         ok(vscodeGetExtensionsStub.calledOnce, 'vscode.extensions.getExtension should be called once');
         ok(mockCopilotApi.registerRelatedFilesProvider.calledWithMatch(sinon.match({ extensionId: 'test-extension-id', languageId: sinon.match.in(['c', 'cpp', 'cuda-cpp']) })), 'registerRelatedFilesProvider should be called with the correct providerId and languageId');
-        ok(getActiveClientStub.callCount !== 0, 'getActiveClient should be called');
+        ok(getClientsStub.callCount !== 0, 'getClients should be called');
         ok(callbackPromise, 'callbackPromise should be defined');
         ok(result, 'result should be defined');
         ok(result.entries.length === 1, 'result.entries should have 1 included file');

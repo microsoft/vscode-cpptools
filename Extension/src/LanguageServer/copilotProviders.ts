@@ -10,7 +10,7 @@ import * as util from '../common';
 import * as logger from '../logger';
 import * as telemetry from '../telemetry';
 import { GetIncludesResult } from './client';
-import { clients } from './extension';
+import { getClients } from './extension';
 import { getCompilerArgumentFilterMap, getProjectContext } from './lmTool';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -158,7 +158,7 @@ export async function registerRelatedFilesProvider(): Promise<void> {
 }
 
 async function getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult> {
-    const client = clients.getClientFor(uri);
+    const client = getClients().getClientFor(uri);
     const includes = await client.getIncludes(uri, maxDepth);
     const wksFolder = client.RootUri?.toString();
 
