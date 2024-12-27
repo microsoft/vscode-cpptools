@@ -26,11 +26,13 @@ describe('copilotProviders Tests', () => {
     let vscodeExtension: vscode.Extension<unknown>;
     let telemetryStub: sinon.SinonStub;
 
-    const includedFiles = process.platform === 'win32' ?
+    const includedFiles: string[] = process.platform === 'win32' ?
         ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] :
         ['/system/include/vector', '/system/include/string', '/home/src/my_project/foo.h'];
-    const rootUri = vscode.Uri.file(process.platform === 'win32' ? 'C:\\src\\my_project' : '/home/src/my_project');
-    const expectedInclude = process.platform === 'win32' ? 'file:///c%3A/src/my_project/foo.h' : 'file:///home/src/my_project/foo.h';
+    const rootUri: vscode.Uri = vscode.Uri.file(process.platform === 'win32' ? 'C:\\src\\my_project' : '/home/src/my_project');
+    const expectedInclude: string = process.platform === 'win32' ? 'file:///c%3A/src/my_project/foo.h' : 'file:///home/src/my_project/foo.h';
+    const sourceFileUri: vscode.Uri = vscode.Uri.file(process.platform === 'win32' ? 'file:///c%3A/src/my_project/foo.cpp' : 'file:///home/src/my_project/foo.cpp');
+    const maxDepth: number = 10;
 
     beforeEach(() => {
         proxyquire.noPreserveCache(); // Tells proxyquire to not fetch the module from cache
@@ -71,7 +73,7 @@ describe('copilotProviders Tests', () => {
 
         activeClientStub = sinon.createStubInstance(DefaultClient);
         getActiveClientStub = sinon.stub(extension, 'getActiveClient').returns(activeClientStub);
-        activeClientStub.getIncludes.resolves({ includedFiles: [] });
+        activeClientStub.getIncludes.resolves({ includedFiles: [] })(sourceFileUri, maxDepth);
         telemetryStub = sinon.stub(telemetry, 'logCopilotEvent').returns();
     });
 
@@ -83,7 +85,7 @@ describe('copilotProviders Tests', () => {
     { vscodeExtension?: vscode.Extension<unknown>; getIncludeFiles?: GetIncludesResult; projectContext?: ProjectContext; rootUri?: vscode.Uri; flags?: Record<string, unknown> } =
     { vscodeExtension: undefined, getIncludeFiles: undefined, projectContext: undefined, rootUri: undefined, flags: {} }
     ) => {
-        activeClientStub.getIncludes.resolves(getIncludeFiles);
+        activeClientStub.getIncludes.resolves(getIncludeFiles)(sourceFileUri, maxDepth);
         sinon.stub(lmTool, 'getProjectContext').resolves(projectContext);
         sinon.stub(activeClientStub, 'RootUri').get(() => rootUri);
         mockCopilotApi.registerRelatedFilesProvider.callsFake((_providerId: { extensionId: string; languageId: string }, callback: (uri: vscode.Uri, context: { flags: Record<string, unknown> }, cancellationToken: vscode.CancellationToken) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>) => {
