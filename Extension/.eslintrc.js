@@ -24,17 +24,6 @@ module.exports = {
         "eslint-plugin-header"
     ],
     "rules": {
-        "indent": [
-            "warn",
-            4,
-            {
-                "SwitchCase": 1,
-                "ObjectExpression": "first"
-            }
-        ],
-        "@typescript-eslint/indent": [
-            "error", 4
-        ],
         "@typescript-eslint/adjacent-overload-signatures": "error",
         "@typescript-eslint/array-type": "error",
         "@typescript-eslint/await-thenable": "error",
