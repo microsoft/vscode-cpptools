@@ -584,8 +584,10 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
     private showErrorIfClNotAvailable(_configurationLabel: string): boolean {
         if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
-            void vscode.window.showErrorMessage(localize({ key: "cl.exe.not.available",
-                comment: ["{0} is a command option in a menu. {1} is the product name \"Developer Command Prompt for VS\"."] },
+            void vscode.window.showErrorMessage(localize({
+                key: "cl.exe.not.available",
+                comment: ["{0} is a command option in a menu. {1} is the product name \"Developer Command Prompt for VS\"."]
+            },
                 "{0} is only usable when VS Code is run from the {1}.", `cl.exe ${this.buildAndDebugActiveFileStr()}`, "Developer Command Prompt for VS"));
             return true;
         }
