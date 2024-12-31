@@ -42,6 +42,14 @@ jobs:
         run: yarn test
         working-directory: Extension
 
+      # These tests don't require the binary.
+      # On Linux, it is failing (before the tests actually run) with: Test run terminated with signal SIGSEGV.
+      # But it works on Linux during the E2E test.
+      - name: Run SingleRootProject tests
+        if: ${{ inputs.platform != 'linux' }}
+        run: yarn test --scenario=SingleRootProject --skipCheckBinaries
+        working-directory: Extension
+
       # NOTE : We can't run the test that require the native binary files
       #        yet -- there will be an update soon that allows the tester to 
       #        acquire them on-the-fly
