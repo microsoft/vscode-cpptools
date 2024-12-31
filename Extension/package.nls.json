@@ -566,7 +566,7 @@
     "c_cpp.configuration.exclusionPolicy.checkFolders.description": "The exclusion filters will only be evaluated once per folder (individual files are not checked).",
     "c_cpp.configuration.exclusionPolicy.checkFilesAndFolders.description": "The exclusion filters will be evaluated against every file and folder encountered.",
     "c_cpp.configuration.preferredPathSeparator.markdownDescription": {
-        "message": "The character used as a path separator for `#include` auto-completion results.",
+        "message": "The character used as a path separator for generated user paths.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
