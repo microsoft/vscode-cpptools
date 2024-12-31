@@ -984,7 +984,8 @@ export class DefaultClient implements Client {
     private static readonly compileCommandsLabel: string = "compile_commands.json";
     private static readonly compilersLabel: string = "compilers";
 
-    public async showSelectIntelliSenseConfiguration(paths: string[], compilersOnly?: boolean): Promise<number> {
+    public async showSelectIntelliSenseConfiguration(paths: string[], preferredPathSeparator: string, compilersOnly?: boolean): Promise<number> {
+        paths = paths.map(p => p.replace(/[\\/]/g, preferredPathSeparator));
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = compilersOnly || !vscode.workspace.workspaceFolders || !this.RootFolder ?
             localize("select.compiler", "Select a compiler to configure for IntelliSense") :
@@ -1077,7 +1078,13 @@ export class DefaultClient implements Client {
             installShown = false;
         }
         paths.push(localize("noConfig.string", "Do not configure with a compiler (not recommended)"));
-        const index: number = await this.showSelectIntelliSenseConfiguration(paths, showCompilersOnly);
+        let preferredPathSeparator: string = settings.preferredPathSeparator;
+        if (preferredPathSeparator === "Forward Slash") {
+            preferredPathSeparator = "/";
+        } else if (preferredPathSeparator === "Backslash") {
+            preferredPathSeparator = "\\";
+        }
+        const index: number = await this.showSelectIntelliSenseConfiguration(paths, preferredPathSeparator, showCompilersOnly);
         let action: string = "";
         let configurationSelected: boolean = false;
         const fromStatusBarButton: boolean = !showCompilersOnly;
@@ -1128,7 +1135,9 @@ export class DefaultClient implements Client {
                 } else {
                     action = "select compiler";
                     const newCompiler: string = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+
                     settings.defaultCompilerPath = newCompiler;
+                    settings.defaultCompilerPath = settings.defaultCompilerPath.replace(/[\\/]/g, preferredPathSeparator);
                     await this.configuration.updateCompilerPathIfSet(newCompiler);
                     void SessionState.trustedCompilerFound.set(true);
                 }
