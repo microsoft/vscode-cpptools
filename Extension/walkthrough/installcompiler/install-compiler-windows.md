@@ -8,7 +8,7 @@
 <p><strong data-loc-id="walkthrough.windows.note1">Note</strong>: <span data-loc-id="walkthrough.windows.note1.text">You can use the C++ toolset from Visual Studio Build Tools along with Visual Studio Code to compile, build, and verify any C++ codebase as long as you also have a valid Visual Studio license (either Community, Pro, or Enterprise) that you are actively using to develop that C++ codebase.</span></p>
 </blockquote>
 </li>
-<li><p data-loc-id="walkthrough.windows.open.command.prompt">Open the <strong>Developer Command Prompt for VS</strong> by typing &#39;<code>developer<code>&#39; in the Windows Start menu.</p>
+<li><p data-loc-id="walkthrough.windows.open.command.prompt">Open the <strong>Developer Command Prompt for VS</strong> by typing &#39;<code>developer</code>&#39; in the Windows Start menu.</p>
 </li>
 <li><p data-loc-id="walkthrough.windows.check.install">Check your MSVC installation by typing <code>cl</code> into the <span>Developer Command Prompt for VS</span>. You should see a copyright message with the version and basic usage description.</p>
 <blockquote>
