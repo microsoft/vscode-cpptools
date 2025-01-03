@@ -159,8 +159,8 @@
 	"fallback_to_64_bit_mode2": "Не удалось запросить сведения от компилятора. Возврат к 64-разрядному режиму IntelliSenseMode.",
 	"fallback_to_no_bitness": "Не удалось запросить сведения от компилятора. Возврат к режиму без использования разрядности.",
 	"intellisense_client_creation_aborted": "Создание клиента IntelliSense прервано: {0}",
-	"include_errors_config_provider_intellisense_disabled ": "обнаружены ошибки #include на основе сведений, предоставленных параметром configurationProvider. Функции IntelliSense для этой записи преобразования ({0}) будут предоставлены анализатором тегов.",
-	"include_errors_config_provider_squiggles_disabled ": "Обнаружены ошибки #include на основе сведений, предоставленных параметром configurationProvider. Волнистые линии для этой записи преобразования ({0}) отключены.",
+	"include_errors_config_provider_intellisense_disabled": "обнаружены ошибки #include на основе сведений, предоставленных параметром configurationProvider. Функции IntelliSense для этой записи преобразования ({0}) будут предоставлены анализатором тегов.",
+	"include_errors_config_provider_squiggles_disabled": "Обнаружены ошибки #include на основе сведений, предоставленных параметром configurationProvider. Волнистые линии для этой записи преобразования ({0}) отключены.",
 	"preprocessor_keyword": "ключевое слово препроцессора",
 	"c_keyword": "Ключевое слово C",
 	"cpp_keyword": "Ключевое слово C++",
@@ -316,5 +316,6 @@
 	"refactor_extract_xborder_jump": "Есть переходы между выбранным кодом и окружающим его кодом.",
 	"refactor_extract_missing_return": "В выбранном коде некоторые контрольные пути завершаются без установки возвращаемого значения. Это поддерживается только для скалярных, числовых типов возвращаемого значения и типов возвращаемого значения-указателей.",
 	"expand_selection": "Развернуть выделенный фрагмент (чтобы включить функцию \"Извлечение в функцию\")",
-	"file_not_found_in_path2": "\"{0}\" не найден в файлах compile_commands.json. Вместо него для этого файла будет использоваться \"includePath\" из файла c_cpp_properties.json в папке \"{1}\"."
+	"file_not_found_in_path2": "\"{0}\" не найден в файлах compile_commands.json. Вместо него для этого файла будет использоваться \"includePath\" из файла c_cpp_properties.json в папке \"{1}\".",
+	"copilot_hover_link": "Создать сводку Copilot"
 }

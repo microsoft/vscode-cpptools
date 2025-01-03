@@ -159,8 +159,8 @@
 	"fallback_to_64_bit_mode2": "コンパイラを照会できませんでした。64 ビットの intelliSenseMode に戻しています。",
 	"fallback_to_no_bitness": "コンパイラを照会できませんでした。ビットなしに戻ります。",
 	"intellisense_client_creation_aborted": "IntelliSense クライアントの作成が中止されました: {0}",
-	"include_errors_config_provider_intellisense_disabled ": "configurationProvider 設定によって提供された情報に基づいて、#include エラーが検出されました。この翻訳単位 ({0}) の IntelliSense 機能は、タグ パーサーによって提供されます。",
-	"include_errors_config_provider_squiggles_disabled ": "configurationProvider 設定によって提供された情報に基づいて、#include エラーが検出されました。この翻訳単位 ({0}) では、波線が無効になっています。",
+	"include_errors_config_provider_intellisense_disabled": "configurationProvider 設定によって提供された情報に基づいて、#include エラーが検出されました。この翻訳単位 ({0}) の IntelliSense 機能は、タグ パーサーによって提供されます。",
+	"include_errors_config_provider_squiggles_disabled": "configurationProvider 設定によって提供された情報に基づいて、#include エラーが検出されました。この翻訳単位 ({0}) では、波線が無効になっています。",
 	"preprocessor_keyword": "プリプロセッサ キーワード",
 	"c_keyword": "C キーワード",
 	"cpp_keyword": "C++ キーワード",
@@ -316,5 +316,6 @@
 	"refactor_extract_xborder_jump": "選択したコードと周囲のコードの間にジャンプが存在します。",
 	"refactor_extract_missing_return": "選択したコードでは、戻り値を設定せずに一部のコントロール パスが終了します。これは、スカラー型、数値型、およびポインター型の戻り値に対してのみサポートされます。",
 	"expand_selection": "選択範囲を展開する ([関数に抽出] を有効にする)",
-	"file_not_found_in_path2": "\"{0}\" が compile_commands.json ファイルに見つかりません。フォルダー '{1}' にある c_cpp_properties.json からの 'includePath' が、このファイルで代わりに使用されます。"
+	"file_not_found_in_path2": "\"{0}\" が compile_commands.json ファイルに見つかりません。フォルダー '{1}' にある c_cpp_properties.json からの 'includePath' が、このファイルで代わりに使用されます。",
+	"copilot_hover_link": "Copilot 要約の生成"
 }

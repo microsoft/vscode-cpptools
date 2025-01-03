@@ -17,5 +17,6 @@
 	"path.is.not.a.directory": "경로가 디렉터리가 아닙니다. {0}",
 	"duplicate.name": "{0}은(는) 중복됩니다. 구성 이름은 고유해야 합니다.",
 	"multiple.paths.not.allowed": "여러 경로는 허용되지 않습니다.",
+	"multiple.paths.should.be.separate.entries": "Multiple paths should be separate entries in an array.",
 	"paths.are.not.directories": "경로는 디렉터리가 아닙니다. {0}"
 }
