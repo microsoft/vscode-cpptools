@@ -23,6 +23,10 @@ export interface PerfMessage<TInput = Record<string, any> | undefined> {
     level?: number;
 }
 
+// need a real copy of the module require function that can't be subverted by webpack
+const rquire = module[`require`].bind(module);
+
+
 const services = {
     instrument: <T extends Record<string, any>>(instance: T, _options?: { ignore?: string[]; name?: string }): T => instance,
     message: (_message: PerfMessage) => { },
@@ -53,7 +57,7 @@ if (!isInstrumentationEnabled()) {
 
     // this loads the bootstrap module (global-instrumentation-support) which adds some global functions
     if (services.launchSettings?.bootstrapModule) {
-        void require(services.launchSettings.bootstrapModule);
+        rquire(services.launchSettings.bootstrapModule);
     }
 }
 
