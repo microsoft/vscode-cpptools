@@ -159,8 +159,8 @@
 	"fallback_to_64_bit_mode2": "Nepovedlo se poslat dotaz na kompilátor. Probíhá návrat k 64bitovému režimu intelliSenseMode.",
 	"fallback_to_no_bitness": "Nepovedlo se poslat dotaz na kompilátor. Probíhá návrat k režimu bez bitové verze.",
 	"intellisense_client_creation_aborted": "Vytváření klienta IntelliSense se přerušilo: {0}",
-	"include_errors_config_provider_intellisense_disabled ": "Na základě informací z nastavení configurationProvider se zjistily chyby direktivy #include. Funkce IntelliSense pro tuto jednotku překladu ({0}) bude poskytovat Tag Parser.",
-	"include_errors_config_provider_squiggles_disabled ": "Na základě informací z nastavení configurationProvider se zjistily chyby direktivy #include. Pro tuto jednotku překladu ({0}) se zakázaly vlnovky.",
+	"include_errors_config_provider_intellisense_disabled": "Na základě informací z nastavení configurationProvider se zjistily chyby direktivy #include. Funkce IntelliSense pro tuto jednotku překladu ({0}) bude poskytovat Tag Parser.",
+	"include_errors_config_provider_squiggles_disabled": "Na základě informací z nastavení configurationProvider se zjistily chyby direktivy #include. Pro tuto jednotku překladu ({0}) se zakázaly vlnovky.",
 	"preprocessor_keyword": "klíčové slovo preprocesoru",
 	"c_keyword": "Klíčové slovo jazyka C",
 	"cpp_keyword": "Klíčové slovo jazyka C++",
@@ -316,5 +316,6 @@
 	"refactor_extract_xborder_jump": "Přecházení mezi vybraným kódem a okolním kódem jsou k dispozici.",
 	"refactor_extract_missing_return": "Ve vybraném kódu se některé cesty ovládacího prvku ukončují bez nastavení návratové hodnoty. To se podporuje jenom u skalárních, numerických a ukazovacích návratových typů.",
 	"expand_selection": "Rozbalit výběr (pro povolení možnosti Extrahovat do funkce)",
-	"file_not_found_in_path2": "\"{0}\" not found in compile_commands.json files. 'includePath' from c_cpp_properties.json in folder '{1}' will be used for this file instead."
+	"file_not_found_in_path2": "V souborech compile_commands.json se nepovedlo najít {0}. Pro tento soubor se místo toho použije includePath ze souboru c_cpp_properties.json ve složce {1}.",
+	"copilot_hover_link": "Vygenerovat souhrn Copilotu"
 }

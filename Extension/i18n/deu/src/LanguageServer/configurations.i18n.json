@@ -17,5 +17,6 @@
 	"path.is.not.a.directory": "Der Pfad ist kein Verzeichnis: {0}",
 	"duplicate.name": "\"{0}\" ist ein Duplikat. Der Konfigurationsname muss eindeutig sein.",
 	"multiple.paths.not.allowed": "Mehrere Pfade sind nicht zulässig.",
+	"multiple.paths.should.be.separate.entries": "Multiple paths should be separate entries in an array.",
 	"paths.are.not.directories": "Pfade sind keine Verzeichnisse: {0}"
 }

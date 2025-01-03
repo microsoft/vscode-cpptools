@@ -16,10 +16,8 @@
 	"walkthrough.windows.link.install": "Installieren",
 	"walkthrough.windows.note1": "Hinweis",
 	"walkthrough.windows.note1.text": "Sie können das C++-Toolset aus Visual Studio Build Tools zusammen mit Visual Studio Code zum Kompilieren, Erstellen und Überprüfen von C++-Codebasis verwenden, sofern Sie auch über eine gültige Visual Studio-Lizenz (Community, Pro oder Enterprise) verfügen, die Sie aktiv zum Entwickeln dieser C++-Codebasis verwenden.",
-	"walkthrough.windows.open.command.prompt": "Öffnen Sie die {0}, indem Sie im Windows-Startmenü \"Developer\" eingeben.",
-	"walkthrough.windows.command.prompt.name1": "Developer-Eingabeaufforderung für VS",
-	"walkthrough.windows.check.install": "Überprüfen Sie die MSVC-Installation, indem Sie {0} in die Developer-Eingabeaufforderung für VS eingeben. Es sollten ein Copyrighthinweis mit der Version und der grundlegenden Nutzungsbeschreibung angezeigt werden.",
+	"walkthrough.windows.open.command.prompt": "Open the {0} by typing '{1}' in the Windows Start menu.",
+	"walkthrough.windows.check.install": "Check your MSVC installation by typing {0} into the {1}. You should see a copyright message with the version and basic usage description.",
 	"walkthrough.windows.note2": "Hinweis",
-	"walkthrough.windows.note2.text": "Um MSVC mithilfe der Befehlszeile oder mit VS Code zu verwenden, müssen Sie von einem {0} aus ausführen. Für eine normale Shell wie {1}, {2} oder die Windows-Eingabeaufforderung sind die erforderlichen PATH-Umgebungsvariablen nicht festgelegt.",
-	"walkthrough.windows.command.prompt.name2": "Developer-Eingabeaufforderung für VS"
+	"walkthrough.windows.note2.text": "Um MSVC mithilfe der Befehlszeile oder mit VS Code zu verwenden, müssen Sie von einem {0} aus ausführen. Für eine normale Shell wie {1}, {2} oder die Windows-Eingabeaufforderung sind die erforderlichen PATH-Umgebungsvariablen nicht festgelegt."
 }

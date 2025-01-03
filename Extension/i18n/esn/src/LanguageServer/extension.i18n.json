@@ -19,5 +19,7 @@
 	"code.action.aborted": "No se pudo aplicar la corrección de análisis de código porque el documento ha cambiado.",
 	"prerelease.message": "Hay disponible una versión preliminar de la extensión de C/C++. ¿Desea cambiar a ella?",
 	"yes.button": "Sí",
-	"no.button": "No"
+	"no.button": "No",
+	"copilot.hover.unavailable": "El resumen de Copilot no está disponible para este símbolo.",
+	"copilot.hover.error": "Error al generar el resumen de Copilot."
 }

@@ -17,5 +17,6 @@
 	"path.is.not.a.directory": "パスがディレクトリではありません: {0}",
 	"duplicate.name": "{0} が重複しています。構成名は一意である必要があります。",
 	"multiple.paths.not.allowed": "複数のパスは使用できません。",
+	"multiple.paths.should.be.separate.entries": "Multiple paths should be separate entries in an array.",
 	"paths.are.not.directories": "パスはディレクトリではありません: {0}"
 }
