@@ -160,7 +160,7 @@
 	"c_cpp.configuration.vcFormat.space.removeBeforeSemicolon.description": "将移除每个分号前的空格。",
 	"c_cpp.configuration.vcFormat.space.insertAfterSemicolon.description": "在每个分号后面插入一个空格。",
 	"c_cpp.configuration.vcFormat.space.removeAroundUnaryOperator.description": "移除一元运算符和操作数之间的空格。",
-	"c_cpp.configuration.vcFormat.space.aroundBinaryOperator.description": "二进制运算符周围的空格。",
+	"c_cpp.configuration.vcFormat.space.aroundBinaryOperator.description": "二元运算符周围的空格。",
 	"c_cpp.configuration.vcFormat.space.aroundAssignmentOperator.description": "赋值运算符周围的空格。",
 	"c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.description": "指针和引用运算符周围的空格。",
 	"c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.left.description": "指针和引用运算符左对齐。",

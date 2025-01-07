@@ -334,6 +334,9 @@ export async function checkDTS() {
 }
 
 export async function checkBinaries() {
+    if ($switches.includes('--skipCheckBinaries')) {
+        return false;
+    }
     let failing = false;
     failing = !await assertAnyFile(['bin/cpptools.exe', 'bin/cpptools']) && (quiet || warn(`The native binary files are not present. You should either build or install the native binaries\n\n.`)) || failing;
 
