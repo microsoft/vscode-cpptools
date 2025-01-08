@@ -1,5 +1,33 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.23.3: January 9, 2025
+### New Feature
+* Enable setting multiple compile commands. [#7029](https://github.com/microsoft/vscode-cpptools/issues/7029)
+  * Thank you for the contribution. [@yiftahw](https://github.com/yiftahw) [PR #12960](https://github.com/microsoft/vscode-cpptools/pull/12960)
+
+### Enhancements
+* Modifications to the snippet completions to more closely match the snippets provided by TypeScript. [#4482](https://github.com/microsoft/vscode-cpptools/issues/4482)
+* Update clang path setting descriptions. [PR #13071](https://github.com/microsoft/vscode-cpptools/pull/13071)
+* Update clang-format and clang-tidy from 19.1.5 to 19.1.6.
+* IntelliSense parser updates.
+
+### Bug Fixes
+* Fix `compile_commands.json` no longer being used if the containing folder is deleted and recreated. [#7030](https://github.com/microsoft/vscode-cpptools/issues/7030)
+  * Thank you for the contribution. [@yiftahw](https://github.com/yiftahw) [PR #13032](https://github.com/microsoft/vscode-cpptools/pull/13032)
+* Fix `C_Cpp.enhancedColorization` not taking effect after it's changed. [#10565](https://github.com/microsoft/vscode-cpptools/issues/10565)
+* Fix changes to `files.encoding` not triggering a database reset. [#10892](https://github.com/microsoft/vscode-cpptools/issues/10892)
+* Fix parameter hints interpreting `*` in a comment as markdown. [#11082](https://github.com/microsoft/vscode-cpptools/issues/11082)
+* Fix an incorrect IntelliSense error when using `std::unique_ptr`. [#11979](https://github.com/microsoft/vscode-cpptools/issues/11979)
+* Fix an incorrect IntelliSense error with designated initializers. [#12239](https://github.com/microsoft/vscode-cpptools/issues/12239)
+* Fix handling of `koi8ru` and `koi8t` file encodings on Windows. [#12272](https://github.com/microsoft/vscode-cpptools/issues/12272)
+* Fix description of `C_Cpp.preferredPathSeparator`. [#12597](https://github.com/microsoft/vscode-cpptools/issues/12597)
+* Fix the IntelliSense process launching when it's disabled and the Copilot extension is used. [#12750](https://github.com/microsoft/vscode-cpptools/issues/12750), [#13058](https://github.com/microsoft/vscode-cpptools/issues/13058)
+* Fix the IntelliSense mode being `macos` instead of `windows` when `_WIN32` is defined on macOS. [#13016](https://github.com/Microsoft/vscode-cpptools/issues/13016)
+* Fix IntelliSense bugs when using non-UTF8 file encodings. [#13028](https://github.com/microsoft/vscode-cpptools/issues/13028), [#13044](https://github.com/microsoft/vscode-cpptools/issues/13044)
+* Fix an incorrect translation for "binary operator". [#13048](https://github.com/microsoft/vscode-cpptools/issues/13048)
+* Fix the "references may be missing" logging pane being shown when the `C_Cpp.loggingLevel` is `Error` or `None`. [#13066](https://github.com/microsoft/vscode-cpptools/issues/13066)
+* Fix `C_Cpp.default.compilerPath` not using the `C_Cpp.preferredPathSeparator` setting when generated from the 'Select IntelliSense Configuration' command. [#13083](https://github.com/microsoft/vscode-cpptools/issues/13083)
+
 ### Version 1.23.2: December 5, 2024
 ### Enhancements
 * Changes to how paths are internally canonicalized on Linux and macOS, avoiding file system access to improve performance and delay resolution of symbolic links. [#12924](https://github.com/microsoft/vscode-cpptools/issues/12924)
@@ -11,6 +39,7 @@
 * Update clang-format and clang-tidy from 19.1.2 to 19.1.5.
 
 ### Bug Fixes
+* Fix a perf regression in hover operation by using cached lexer line states. [#3126](https://github.com/microsoft/vscode-cpptools/issues/3126)
 * Increase clang-format timeout from 10 seconds to 30 seconds. [#10213](https://github.com/microsoft/vscode-cpptools/issues/10213)
 * Fix casing of path in include completion tooltip on Windows. [#12895](https://github.com/microsoft/vscode-cpptools/issues/12895)
 * Fix pattern matching of sections in `.editorConfig` files. [#12933](https://github.com/microsoft/vscode-cpptools/issues/12933)
