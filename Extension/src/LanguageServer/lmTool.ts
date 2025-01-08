@@ -38,7 +38,7 @@ const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: str
         'c++17': 'C++17',
         'c++20': 'C++20',
         'c++23': 'C++23',
-        'c90': "C90",
+        'c89': "C89",
         'c99': "C99",
         'c11': "C11",
         'c17': "C17",
@@ -140,6 +140,8 @@ export async function getProjectContext(uri: vscode.Uri, context: { flags: Recor
             return undefined;
         }
 
+        const originalStandardVersion = projectContext.result.standardVersion;
+
         formatChatContext(projectContext.result);
 
         const result: ProjectContext = {
@@ -159,6 +161,11 @@ export async function getProjectContext(uri: vscode.Uri, context: { flags: Recor
         }
         if (projectContext.result.standardVersion) {
             telemetryProperties["standardVersion"] = projectContext.result.standardVersion;
+        }
+        else {
+            if (originalStandardVersion) {
+                telemetryProperties["originalStandardVersion"] = originalStandardVersion;
+            }
         }
         if (projectContext.result.targetPlatform) {
             telemetryProperties["targetPlatform"] = projectContext.result.targetPlatform;
