@@ -376,6 +376,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             property['language'] === undefined &&
             property['compiler'] === undefined &&
             property['standardVersion'] === undefined &&
+            property['originalStandardVersion'] === 'gnu++17' &&
             property['targetPlatform'] === undefined)));
         ok(result, 'result should not be undefined');
         ok(result.language === '');
