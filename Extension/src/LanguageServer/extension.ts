@@ -1431,7 +1431,6 @@ async function onCopilotHover(): Promise<void> {
     // Gather the content for the query from the client.
     const requestInfo = await copilotHoverProvider.getRequestInfo(hoverDocument, hoverPosition);
     for (const file of requestInfo.files) {
-        // TODO: make uri from file string.
         const fileUri = vscode.Uri.file(file);
         if (await vscodelm.fileIsIgnored(fileUri, copilotHoverProvider.getCurrentHoverCancellationToken() ?? CancellationToken.None)) {
             // Context is not available for this file.
