@@ -1434,15 +1434,16 @@ async function onCopilotHover(): Promise<void> {
         const fileUri = vscode.Uri.file(file);
         if (await vscodelm.fileIsIgnored(fileUri, copilotHoverProvider.getCurrentHoverCancellationToken() ?? CancellationToken.None)) {
             // Context is not available for this file.
-            telemetry.logLanguageServerEvent("CopilotHover", { "Message": "Copilot summary is not available for this file." });
-            await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable", "Copilot summary is not available for this file."));
+            telemetry.logLanguageServerEvent("CopilotHover", { "Message": "Copilot summary is not available for definition or declaration." });
+            await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable", "Copilot summary is not available." + "\n\n" +
+                localize("copilot.hover.excluded", "The file containing this symbol's defintion or declaration has been excluded from use with Copilot.")));
             return;
         }
     }
     if (requestInfo.content.length === 0) {
         // Context is not available for this symbol.
         telemetry.logLanguageServerEvent("CopilotHover", { "Message": "Copilot summary is not available for this symbol." });
-        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable", "Copilot summary is not available for this symbol."));
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable.symbol", "Copilot summary is not available for this symbol."));
         return;
     }
 
