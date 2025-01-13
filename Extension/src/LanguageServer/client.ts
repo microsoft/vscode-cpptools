@@ -539,7 +539,7 @@ export interface GetCopilotHoverInfoParams {
     position: Position;
 }
 
-interface GetCopilotHoverInfoResult {
+export interface GetCopilotHoverInfoResult {
     content: string;
     files: string[];
 }

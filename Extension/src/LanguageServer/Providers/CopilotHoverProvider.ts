@@ -5,7 +5,7 @@
 import * as vscode from 'vscode';
 import { Position, ResponseError } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
-import { DefaultClient, GetCopilotHoverInfoParams, GetCopilotHoverInfoRequest } from '../client';
+import { DefaultClient, GetCopilotHoverInfoParams, GetCopilotHoverInfoRequest, GetCopilotHoverInfoResult } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CppSettings } from '../settings';
 
@@ -92,8 +92,8 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         return this.currentCancellationToken;
     }
 
-    public async getRequestInfo(document: vscode.TextDocument, position: vscode.Position): Promise<string> {
-        let requestInfo = "";
+    public async getRequestInfo(document: vscode.TextDocument, position: vscode.Position): Promise<GetCopilotHoverInfoResult> {
+        let response: GetCopilotHoverInfoResult;
         const params: GetCopilotHoverInfoParams = {
             textDocument: { uri: document.uri.toString() },
             position: Position.create(position.line, position.character)
@@ -105,18 +105,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         }
 
         try {
-            const response = await this.client.languageClient.sendRequest(GetCopilotHoverInfoRequest, params, this.currentCancellationToken);
-            requestInfo = response.content;
-            if (response.files) {
-                for (const file of response.files) {
-                    const fileUri = vscode.Uri.parse(file);
-                    const token = this.currentCancellationToken ?? new vscode.CancellationTokenSource().token;
-                    if (await vscode.lm.fileIsIgnored(fileUri, token)) {
-                        return "";
-                    }
-                }
-            }
-
+            response = await this.client.languageClient.sendRequest(GetCopilotHoverInfoRequest, params, this.currentCancellationToken);
         } catch (e: any) {
             if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
                 throw new vscode.CancellationError();
@@ -124,7 +113,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
             throw e;
         }
 
-        return requestInfo;
+        return response;
     }
 
     public isCancelled(document: vscode.TextDocument, position: vscode.Position): boolean {
