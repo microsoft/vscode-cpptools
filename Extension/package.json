@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.23.2-main",
+    "version": "1.23.3-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -696,7 +696,23 @@
                         "scope": "machine-overridable"
                     },
                     "C_Cpp.default.compileCommands": {
-                        "type": "string",
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "default": ""
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "uniqueItems": true,
+                                "default": []
+                            }
+                        ],
+                        "default": [
+                            ""
+                        ],
                         "markdownDescription": "%c_cpp.configuration.default.compileCommands.markdownDescription%",
                         "scope": "machine-overridable"
                     },

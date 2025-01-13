@@ -58,7 +58,7 @@ import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
-import { PersistentFolderState, PersistentWorkspaceState } from './persistentState';
+import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
 import { RequestCancelled, ServerCancelled, createProtocolFilter } from './protocolFilter';
 import * as refs from './references';
 import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
@@ -527,6 +527,7 @@ interface DidChangeActiveEditorParams {
 }
 
 interface GetIncludesParams {
+    fileUri: string;
     maxDepth: number;
 }
 
@@ -563,6 +564,16 @@ export interface ProjectContextResult {
     targetPlatform: string;
     targetArchitecture: string;
     fileContext: FileContextResult;
+}
+
+interface FolderFilesEncodingChanged {
+    uri: string;
+    filesEncoding: string;
+}
+
+interface FilesEncodingChanged {
+    workspaceFallbackEncoding?: string;
+    foldersFilesEncoding: FolderFilesEncodingChanged[];
 }
 
 // Requests
@@ -643,6 +654,7 @@ const ReportCodeAnalysisTotalNotification: NotificationType<number> = new Notifi
 const DoxygenCommentGeneratedNotification: NotificationType<GenerateDoxygenCommentResult> = new NotificationType<GenerateDoxygenCommentResult>('cpptools/insertDoxygenComment');
 const CanceledReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/canceledReferences');
 const IntelliSenseResultNotification: NotificationType<IntelliSenseResult> = new NotificationType<IntelliSenseResult>('cpptools/intelliSenseResult');
+const FilesEncodingChangedNotification: NotificationType<FilesEncodingChanged> = new NotificationType<FilesEncodingChanged>('cpptools/filesEncodingChanged');
 
 let failureMessageShown: boolean = false;
 
@@ -817,9 +829,10 @@ export interface Client {
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
     getCopilotHoverProvider(): CopilotHoverProvider | undefined;
-    getIncludes(maxDepth: number): Promise<GetIncludesResult>;
+    getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult>;
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult>;
     getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult>;
+    filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -972,7 +985,8 @@ export class DefaultClient implements Client {
     private static readonly compileCommandsLabel: string = "compile_commands.json";
     private static readonly compilersLabel: string = "compilers";
 
-    public async showSelectIntelliSenseConfiguration(paths: string[], compilersOnly?: boolean): Promise<number> {
+    public async showSelectIntelliSenseConfiguration(paths: string[], preferredPathSeparator: string, compilersOnly?: boolean): Promise<number> {
+        paths = paths.map(p => p.replace(/[\\/]/g, preferredPathSeparator));
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = compilersOnly || !vscode.workspace.workspaceFolders || !this.RootFolder ?
             localize("select.compiler", "Select a compiler to configure for IntelliSense") :
@@ -1065,7 +1079,13 @@ export class DefaultClient implements Client {
             installShown = false;
         }
         paths.push(localize("noConfig.string", "Do not configure with a compiler (not recommended)"));
-        const index: number = await this.showSelectIntelliSenseConfiguration(paths, showCompilersOnly);
+        let preferredPathSeparator: string = settings.preferredPathSeparator;
+        if (preferredPathSeparator === "Forward Slash") {
+            preferredPathSeparator = "/";
+        } else if (preferredPathSeparator === "Backslash") {
+            preferredPathSeparator = "\\";
+        }
+        const index: number = await this.showSelectIntelliSenseConfiguration(paths, preferredPathSeparator, showCompilersOnly);
         let action: string = "";
         let configurationSelected: boolean = false;
         const fromStatusBarButton: boolean = !showCompilersOnly;
@@ -1116,7 +1136,9 @@ export class DefaultClient implements Client {
                 } else {
                     action = "select compiler";
                     const newCompiler: string = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+
                     settings.defaultCompilerPath = newCompiler;
+                    settings.defaultCompilerPath = settings.defaultCompilerPath.replace(/[\\/]/g, preferredPathSeparator);
                     await this.configuration.updateCompilerPathIfSet(newCompiler);
                     void SessionState.trustedCompilerFound.set(true);
                 }
@@ -1264,6 +1286,8 @@ export class DefaultClient implements Client {
                 void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", additionalInfo));
             }
         }
+
+        this.updateActiveDocumentTextOptions();
     }
 
     private async init(rootUri: vscode.Uri | undefined, isFirstClient: boolean) {
@@ -1368,7 +1392,13 @@ export class DefaultClient implements Client {
         DefaultClient.isStarted.resolve();
     }
 
-    private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
+    private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, workspaceFolder: vscode.WorkspaceFolder | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
+        const filesEncoding: string = otherSettings.filesEncoding;
+        let filesEncodingChanged: boolean = false;
+        if (workspaceFolder) {
+            const lastFilesEncoding: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastFilesEncoding", filesEncoding, workspaceFolder);
+            filesEncodingChanged = lastFilesEncoding.Value !== filesEncoding;
+        }
         const result: WorkspaceFolderSettingsParams = {
             uri: workspaceFolderUri?.toString(),
             intelliSenseEngine: settings.intelliSenseEngine,
@@ -1465,7 +1495,8 @@ export class DefaultClient implements Client {
             doxygenSectionTags: settings.doxygenSectionTags,
             filesExclude: otherSettings.filesExclude,
             filesAutoSaveAfterDelay: otherSettings.filesAutoSaveAfterDelay,
-            filesEncoding: otherSettings.filesEncoding,
+            filesEncoding: filesEncoding,
+            filesEncodingChanged: filesEncodingChanged,
             searchExclude: otherSettings.searchExclude,
             editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
             editorInlayHintsEnabled: otherSettings.editorInlayHintsEnabled,
@@ -1481,10 +1512,10 @@ export class DefaultClient implements Client {
         const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = [];
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             for (const workspaceFolder of vscode.workspace.workspaceFolders) {
-                workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(workspaceFolder.uri, new CppSettings(workspaceFolder.uri), new OtherSettings(workspaceFolder.uri)));
+                workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(workspaceFolder.uri, workspaceFolder, new CppSettings(workspaceFolder.uri), new OtherSettings(workspaceFolder.uri)));
             }
         } else {
-            workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(this.RootUri, workspaceSettings, workspaceOtherSettings));
+            workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(this.RootUri, undefined, workspaceSettings, workspaceOtherSettings));
         }
         return workspaceFolderSettingsParams;
     }
@@ -1499,9 +1530,13 @@ export class DefaultClient implements Client {
         if (this.currentCopilotHoverEnabled && workspaceSettings.copilotHover !== this.currentCopilotHoverEnabled.Value) {
             void util.promptForReloadWindowDueToSettingsChange();
         }
+        const workspaceFallbackEncoding: string = workspaceOtherSettings.filesEncoding;
+        const lastWorkspaceFallbackEncoding: PersistentState<string> = new PersistentState<string>("CPP.lastWorkspaceFallbackEncoding", workspaceFallbackEncoding);
+        const workspaceFallbackEncodingChanged = lastWorkspaceFallbackEncoding.Value !== workspaceFallbackEncoding;
         return {
             filesAssociations: workspaceOtherSettings.filesAssociations,
-            workspaceFallbackEncoding: workspaceOtherSettings.filesEncoding,
+            workspaceFallbackEncoding: workspaceFallbackEncoding,
+            workspaceFallbackEncodingChanged: workspaceFallbackEncodingChanged,
             maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
             maxCachedProcesses: workspaceSettings.maxCachedProcesses,
             maxMemory: workspaceSettings.maxMemory,
@@ -1647,6 +1682,7 @@ export class DefaultClient implements Client {
         languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
         languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
         languageClient.onNotification(DebugLogNotification, logLocalized);
+        languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
         languageClient.registerProposedFeatures();
         await languageClient.start();
 
@@ -2269,8 +2305,8 @@ export class DefaultClient implements Client {
      * the UI results and always re-requests (no caching).
     */
 
-    public async getIncludes(maxDepth: number): Promise<GetIncludesResult> {
-        const params: GetIncludesParams = { maxDepth: maxDepth };
+    public async getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult> {
+        const params: GetIncludesParams = { fileUri: uri.toString(), maxDepth };
         await this.ready;
         return this.languageClient.sendRequest(IncludesRequest, params);
     }
@@ -2420,7 +2456,6 @@ export class DefaultClient implements Client {
 
         this.languageClient.onNotification(ReloadWindowNotification, () => void util.promptForReloadWindowDueToSettingsChange());
         this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => void this.addTrustedCompiler(e.compilerPath));
-        this.languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
         this.languageClient.onNotification(ReportStatusNotification, (e) => void this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => void this.promptCompileCommands(e));
@@ -2439,6 +2474,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
         this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => void this.insertDoxygenComment(e));
         this.languageClient.onNotification(CanceledReferencesNotification, this.serverCanceledReferences);
+        this.languageClient.onNotification(FilesEncodingChangedNotification, (e) => this.filesEncodingChanged(e));
     }
 
     private handleIntelliSenseResult(intelliSenseResult: IntelliSenseResult): void {
@@ -4086,6 +4122,20 @@ export class DefaultClient implements Client {
     public getCopilotHoverProvider(): CopilotHoverProvider | undefined {
         return this.copilotHoverProvider;
     }
+
+    public filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void {
+        if (filesEncodingChanged.workspaceFallbackEncoding !== undefined) {
+            const lastWorkspaceFallbackEncoding: PersistentState<string> = new PersistentState<string>("CPP.lastWorkspaceFallbackEncoding", "");
+            lastWorkspaceFallbackEncoding.Value = filesEncodingChanged.workspaceFallbackEncoding;
+        }
+        for (const folderFilesEncoding of filesEncodingChanged.foldersFilesEncoding) {
+            const workspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(folderFilesEncoding.uri));
+            if (workspaceFolder !== undefined) {
+                const lastFilesEncoding: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastFilesEncoding", "", workspaceFolder);
+                lastFilesEncoding.Value = folderFilesEncoding.filesEncoding;
+            }
+        }
+    }
 }
 
 function getLanguageServerFileName(): string {
@@ -4198,7 +4248,8 @@ class NullClient implements Client {
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
     getCopilotHoverProvider(): CopilotHoverProvider | undefined { return undefined; }
-    getIncludes(maxDepth: number): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
+    getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
     getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> { return Promise.resolve({} as ProjectContextResult); }
+    filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void { }
 }
