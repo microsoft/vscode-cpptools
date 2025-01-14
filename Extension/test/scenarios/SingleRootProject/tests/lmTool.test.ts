@@ -200,7 +200,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             }
         });
 
-        const result = await getProjectContext(mockTextDocumentStub.uri, context, new vscode.CancellationTokenSource().token);
+        const result = await getProjectContext(mockTextDocumentStub.uri, context);
 
         ok(result, 'result should not be undefined');
         ok(result.language === 'C++');
@@ -364,7 +364,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             }
         });
 
-        const result = await getProjectContext(mockTextDocumentStub.uri, { flags: {} }, new vscode.CancellationTokenSource().token);
+        const result = await getProjectContext(mockTextDocumentStub.uri, { flags: {} });
 
         ok(telemetryStub.calledOnce, 'Telemetry should be called once');
         ok(telemetryStub.calledWithMatch('ProjectContext', sinon.match({
@@ -376,6 +376,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             property['language'] === undefined &&
             property['compiler'] === undefined &&
             property['standardVersion'] === undefined &&
+            property['originalStandardVersion'] === 'gnu++17' &&
             property['targetPlatform'] === undefined)));
         ok(result, 'result should not be undefined');
         ok(result.language === '');

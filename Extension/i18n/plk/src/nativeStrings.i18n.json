@@ -315,5 +315,6 @@
 	"refactor_extract_reference_return_c_code": "Funkcja musiałaby zwracać wartość przez referencję. W kodzie języka C nie można zwracać referencji.",
 	"refactor_extract_xborder_jump": "Występują skoki między zaznaczonym kodem a otaczającym kodem.",
 	"refactor_extract_missing_return": "W zaznaczonym kodzie niektóre ścieżki kontroli kończą działanie bez ustawienia zwracanej wartości. Jest to obsługiwane tylko w przypadku zwracanych typów skalarnych, liczbowych i wskaźnikowych.",
-	"expand_selection": "Rozwiń wybór (aby włączyć opcję „Wyodrębnij do funkcji”)"
+	"expand_selection": "Rozwiń wybór (aby włączyć opcję „Wyodrębnij do funkcji”)",
+	"file_not_found_in_path2": "\"{0}\" not found in compile_commands.json files. 'includePath' from c_cpp_properties.json in folder '{1}' will be used for this file instead."
 }

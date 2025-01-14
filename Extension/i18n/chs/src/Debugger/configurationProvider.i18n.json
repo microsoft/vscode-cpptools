@@ -16,7 +16,7 @@
 	"compiler.path.not.exists": "找不到 {0}。将忽略 {1} 任务。",
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"debugger.path.not.exists": "找不到 {0} 调试器。将忽略 {1} 的调试配置。",
-	"build.and.debug.active.file": "生成和调试活动文件",
+	"build.and.debug.active.file": "构建和调试活动文件",
 	"cl.exe.not.available": "仅当从 VS 开发人员命令提示符处运行 VS Code 时，{0} 生成和调试才可用。",
 	"lldb.find.failed": "缺少 lldb-mi 可执行文件的依赖项“{0}”。",
 	"lldb.search.paths": "搜索范围:",
