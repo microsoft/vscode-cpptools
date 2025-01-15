@@ -1285,6 +1285,8 @@ export class DefaultClient implements Client {
                 void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", additionalInfo));
             }
         }
+
+        this.updateActiveDocumentTextOptions();
     }
 
     private async init(rootUri: vscode.Uri | undefined, isFirstClient: boolean) {

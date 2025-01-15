@@ -165,8 +165,8 @@ function getEditorConfig(filePath: string): any {
             Object.keys(configData).forEach((section: string) => {
                 if (section !== '*' && matchesSection(currentDirForwardSlashes, filePath, section)) {
                     combinedConfig = {
-                        ...combinedConfig,
-                        ...configData[section]
+                        ...configData[section],
+                        ...combinedConfig
                     };
                 }
             });
