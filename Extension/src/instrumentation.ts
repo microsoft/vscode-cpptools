@@ -55,6 +55,7 @@ if (!isInstrumentationEnabled()) {
     // this loads the bootstrap module (global-instrumentation-support) which adds some global functions.
     if (services.launchSettings?.bootstrapModule) {
         // work around for webpack to load the bootstrap module.
+        /* eslint no-eval: "off"  */
         eval(`require`)(services.launchSettings.bootstrapModule);
     }
 }
