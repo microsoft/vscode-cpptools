@@ -39,8 +39,6 @@
     ],
     "enabledApiProposals": [
         "terminalDataWriteEvent",
-        "chatVariableResolver",
-        "chatParticipantPrivate",
         "chatParticipantAdditions"
     ],
     "capabilities": {
@@ -6530,6 +6528,7 @@
         "lint": "yarn install && eslint -c .eslintrc.js --report-unused-disable-directives src test ui .scripts",
         "compile": "yarn install && (yarn verify prep --quiet || yarn prep) && yarn build",
         "watch": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build tsconfig.json --watch",
+        "watch-dev": "yarn install && yarn prep:dts-dev && tsc --build tsconfig.json --watch",
         "rebuild": "yarn install && yarn clean && yarn prep && yarn build",
         "vsix-prepublish": "yarn install && yarn clean && yarn webpack",
         "webpack": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build ui.tsconfig.json && webpack --mode production --env vscode_nls",
@@ -6540,8 +6539,10 @@
         "translations-generate": "set NODE_OPTIONS=--no-experimental-fetch && gulp translations-generate",
         "translations-import": "gulp translations-import",
         "import-edge-strings": "ts-node -T ./.scripts/import_edge_strings.ts",
-        "prep:dts": "yarn verify dts --quiet || (npx @vscode/dts dev && npx @vscode/dts main)",
-        "build": "yarn prep:dts && echo [Building TypeScript code] && tsc --build tsconfig.json"
+        "prep:dts": "yarn verify dts --quiet || npx @vscode/dts main",
+        "prep:dts-dev": "yarn verify dts --quiet || (npx @vscode/dts main && npx @vscode/dts dev)",
+        "build": "yarn prep:dts && echo [Building TypeScript code] && tsc --build tsconfig.json",
+        "build-dev": "yarn prep:dts-dev && echo [Building TypeScript code with dev dependencies] && tsc --build tsconfig.json"
     },
     "devDependencies": {
         "@octokit/rest": "^20.1.1",
