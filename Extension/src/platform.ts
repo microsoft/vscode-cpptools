@@ -8,7 +8,7 @@ import * as os from 'os';
 import * as plist from 'plist';
 import * as nls from 'vscode-nls';
 import { LinuxDistribution } from './linuxDistribution';
-import { getOutputChannelLogger, showOutputChannel } from './logger';
+import * as logger from './logger';
 import { SessionState, SupportedWindowsVersions } from './sessionState';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -81,8 +81,8 @@ export class PlatformInformation {
         }
 
         if (errorMessage) {
-            getOutputChannelLogger().appendLine(errorMessage);
-            showOutputChannel();
+            logger.getOutputChannel().appendLine(errorMessage);
+            logger.showOutputChannel();
         }
 
         return Promise.resolve(productDarwinVersion);

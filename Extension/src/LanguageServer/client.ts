@@ -844,8 +844,9 @@ export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
         instrument(vscode.debug, { name: "debug" });
         instrument(vscode.env, { name: "env" });
         instrument(vscode.extensions, { name: "extensions" });
+        return instrument(new DefaultClient(workspaceFolder), { ignore: ["enqueue", "onInterval", "logTelemetry"] });
     }
-    return instrument(new DefaultClient(workspaceFolder), { ignore: ["enqueue", "onInterval", "logTelemetry"] });
+    return new DefaultClient(workspaceFolder);
 }
 
 export function createNullClient(): Client {
