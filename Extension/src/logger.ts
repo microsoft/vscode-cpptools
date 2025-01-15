@@ -28,25 +28,26 @@ export class Logger {
         this.writer = writer;
     }
 
-    public append(level: number, message: string): void;
-    public append(message: string): void;
-    public append(levelOrMessage: string | number, message?: string): void {
-        message = message || levelOrMessage as string;
-        const hasLevel = typeof levelOrMessage === 'number';
-
-        if (!hasLevel || getLoggingLevel() >= levelOrMessage) {
+    public appendAtLevel(level: number, message: string): void {
+        if (getLoggingLevel() >= level) {
             this.writer(message);
             if (Subscriber) {
                 Subscriber(message);
             }
         }
-        sendInstrumentation({ name: 'log', text: message, context: { channel: 'log', source: 'extension' }, level: hasLevel ? levelOrMessage : undefined });
+        sendInstrumentation({ name: 'log', text: message, context: { channel: 'log', source: 'extension' }, level });
     }
 
-    public appendLine(level: number, message: string): void;
-    public appendLine(message: string): void;
-    public appendLine(levelOrMessage: string | number, message?: string): void {
-        this.append(levelOrMessage as number, message + os.EOL);
+    public append(message: string): void {
+        this.appendAtLevel(0, message);
+    }
+
+    public appendLineAtLevel(level: number, message: string): void {
+        this.appendAtLevel(level, message + os.EOL);
+    }
+
+    public appendLine(message: string): void {
+        this.appendAtLevel(0, message + os.EOL);
     }
 
     // We should not await on this function.

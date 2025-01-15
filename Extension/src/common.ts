@@ -759,7 +759,7 @@ export interface ProcessReturnType {
 export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
     // Do not use CppSettings to avoid circular require()
     if (skipLogging === undefined || !skipLogging) {
-        getOutputChannelLogger().appendLine(5, `$ ${program} ${args.join(' ')}`);
+        getOutputChannelLogger().appendLineAtLevel(5, `$ ${program} ${args.join(' ')}`);
     }
     const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, skipLogging, cancellationToken);
     const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
@@ -811,7 +811,7 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
         proc.stdout.on('data', data => {
             const str: string = data.toString();
             if (skipLogging === undefined || !skipLogging) {
-                getOutputChannelLogger().append(1, str);
+                getOutputChannelLogger().appendAtLevel(1, str);
             }
             stdout += str;
             if (continueOn) {

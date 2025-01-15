@@ -2737,7 +2737,7 @@ export class DefaultClient implements Client {
             const status: IntelliSenseStatus = { status: Status.IntelliSenseCompiling };
             testHook.updateStatus(status);
         } else if (message.endsWith("IntelliSense done")) {
-            getOutputChannelLogger().appendLine(6, localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", (Date.now() - timeStamp) / 1000));
+            getOutputChannelLogger().appendLineAtLevel(6, localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", (Date.now() - timeStamp) / 1000));
             this.model.isUpdatingIntelliSense.Value = false;
             const status: IntelliSenseStatus = { status: Status.IntelliSenseReady };
             testHook.updateStatus(status);
@@ -3164,7 +3164,7 @@ export class DefaultClient implements Client {
         }
 
         const out: Logger = getOutputChannelLogger();
-        out.appendLine(6, localize("configurations.received", "Custom configurations received:"));
+        out.appendLineAtLevel(6, localize("configurations.received", "Custom configurations received:"));
         const sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
             if (this.isSourceFileConfigurationItem(item, providerVersion)) {
@@ -3176,8 +3176,8 @@ export class DefaultClient implements Client {
                     uri = item.uri.toString();
                 }
                 this.configurationLogging.set(uri, JSON.stringify(item.configuration, null, 4));
-                out.appendLine(6, `  uri: ${uri}`);
-                out.appendLine(6, `  config: ${JSON.stringify(item.configuration, null, 2)}`);
+                out.appendLineAtLevel(6, `  uri: ${uri}`);
+                out.appendLineAtLevel(6, `  config: ${JSON.stringify(item.configuration, null, 2)}`);
                 if (item.configuration.includePath.some(path => path.endsWith('**'))) {
                     console.warn("custom include paths should not use recursive includes ('**')");
                 }
@@ -3281,7 +3281,7 @@ export class DefaultClient implements Client {
                 return;
             }
 
-            getOutputChannelLogger().appendLine(6, localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
+            getOutputChannelLogger().appendLineAtLevel(6, localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
 
             // Separate compiler path and args before sending to language client
             if (util.isString(sanitized.compilerPath)) {

@@ -59,7 +59,7 @@ export class CppTools implements CppToolsTestApi {
         if (providers.add(provider, this.version)) {
             const added: CustomConfigurationProvider1 | undefined = providers.get(provider);
             if (added) {
-                getOutputChannelLogger().appendLine(5, localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));
+                getOutputChannelLogger().appendLineAtLevel(5, localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));
                 this.providers.push(added);
                 LanguageServer.getClients().forEach(client => void client.onRegisterCustomConfigurationProvider(added));
                 this.addNotifyReadyTimer(added);
