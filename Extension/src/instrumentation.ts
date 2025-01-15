@@ -60,7 +60,7 @@ if (!isInstrumentationEnabled()) {
 }
 
 // If the instrumentation object was *actually* loaded then we can set the services from the global object.
-// Having this separate ensures that this module is wired up to the global object. 
+// Having this separate ensures that this module is wired up to the global object.
 // It's not included in the previous block because if something else loads the instrumentation code first
 // this is still needed so that *this* module is properly connected to the global object.
 if (isInstrumentationEnabled()) {
@@ -71,4 +71,3 @@ if (isInstrumentationEnabled()) {
 
     services.init(require('vscode'));
 }
-
