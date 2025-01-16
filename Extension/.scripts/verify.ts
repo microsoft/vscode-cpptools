@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { checkBinaries, checkCompiled, checkDTS, checkPrep, error, green } from './common';
+import { checkBinaries, checkCompiled, checkDTS, checkPrep, checkProposals, error, green } from './common';
 const quiet = process.argv.includes('--quiet');
 
 export async function main() {
@@ -45,6 +45,15 @@ export async function prep() {
 export async function dts() {
     let failing = false;
     failing = (await checkDTS() && (quiet || error(`VSCode import files are not present. Run ${green('yarn prep')} to fix it.`))) || failing;
+
+    if (failing) {
+        process.exit(1);
+    }
+}
+
+export async function proposals() {
+    let failing = false;
+    failing = (await checkProposals() && (quiet || error(`Issue with VSCode proposals. Run ${green('yarn prep')} to fix it.`))) || failing;
 
     if (failing) {
         process.exit(1);
