@@ -1442,7 +1442,7 @@ async function onCopilotHover(): Promise<void> {
         }
     } catch (err) {
         if (err instanceof Error) {
-            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.message);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.name);
         }
         return;
     }
