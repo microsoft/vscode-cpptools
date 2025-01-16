@@ -4,7 +4,10 @@
 ### Bug Fixes
 * Fix a couple bugs with `.editorConfig` handling. [PR #13140](https://github.com/microsoft/vscode-cpptools/pull/13140)
 * Fix a bug when processing a file with invalid multi-byte sequences. [#13150](https://github.com/microsoft/vscode-cpptools/issues/13150)
+* Fix a potential telemetry issue with Copilot hover. [PR #13158](https://github.com/microsoft/vscode-cpptools/pull/13158)
 * Fix a crash when Copilot hover is used on code with no definition file (e.g. literals).
+* Update clang-format and clang-tidy from 19.1.6 to 19.1.7.
+* Update vsdbg from 17.12.10729.1 to 17.13.20115.1.
 * Fix `libiconv.dll` not being signed on Windows.
 
 ## Version 1.23.3: January 9, 2025
