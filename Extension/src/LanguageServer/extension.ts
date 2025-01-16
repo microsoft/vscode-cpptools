@@ -1471,7 +1471,7 @@ async function onCopilotHover(): Promise<void> {
     } catch (err) {
         if (err instanceof vscode.LanguageModelError) {
             console.log(err.message, err.code, err.cause);
-            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.message);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.code);
         } else {
             throw err;
         }
@@ -1491,9 +1491,12 @@ async function onCopilotHover(): Promise<void> {
             content += fragment;
         }
     } catch (err) {
-        if (err instanceof Error) {
+        if (err instanceof vscode.LanguageModelError) {
+            console.log(err.message, err.code, err.cause);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.code);
+        } else if (err instanceof Error) {
             console.log(err.message, err.cause);
-            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.message);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.name);
         }
         return;
     }
