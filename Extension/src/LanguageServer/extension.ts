@@ -1478,8 +1478,9 @@ async function onCopilotHover(): Promise<void> {
         if (err instanceof vscode.LanguageModelError) {
             console.log(err.message, err.code, err.cause);
             await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.code);
-        } else {
-            throw err;
+        } else if (err instanceof Error) {
+            console.log(err.message, err.cause);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.name);
         }
         return;
     }
