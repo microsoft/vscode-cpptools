@@ -124,18 +124,20 @@ function filterCompilerArguments(compiler: string, compilerArguments: string[], 
     if (filteredCompilerArguments.length > 0) {
         // Telemetry to learn about the argument distribution. The filtered arguments are expected to be non-PII.
         telemetryProperties["filteredCompilerArguments"] = filteredCompilerArguments.join(',');
-        telemetryProperties["filters"] = Object.keys(filterMap).filter(filter => !!filter).join(',');
+    }
+
+    const filters = Object.keys(filterMap).filter(filter => !!filter).join(',');
+    if (filters) {
+        telemetryProperties["filters"] = filters;
     }
 
     return result;
 }
 
-export async function getProjectContext(uri: vscode.Uri, context: { flags: Record<string, unknown> }): Promise<ProjectContext | undefined> {
-    const telemetryProperties: Record<string, string> = {};
-    const telemetryMetrics: Record<string, number> = {};
+export async function getProjectContext(uri: vscode.Uri, context: { flags: Record<string, unknown> }, telemetryProperties: Record<string, string>, telemetryMetrics: Record<string, number>): Promise<ProjectContext | undefined> {
     try {
         const projectContext = await checkDuration<ProjectContextResult | undefined>(async () => await getClients()?.ActiveClient?.getProjectContext(uri) ?? undefined);
-        telemetryMetrics["duration"] = projectContext.duration;
+        telemetryMetrics["projectContextDuration"] = projectContext.duration;
         if (!projectContext.result) {
             return undefined;
         }
@@ -186,10 +188,8 @@ export async function getProjectContext(uri: vscode.Uri, context: { flags: Recor
         catch {
             // Intentionally swallow any exception.
         }
-        telemetryProperties["error"] = "true";
+        telemetryProperties["projectContextError"] = "true";
         throw exception; // Throw the exception for auto-retry.
-    } finally {
-        telemetry.logCopilotEvent('ProjectContext', telemetryProperties, telemetryMetrics);
     }
 }
 

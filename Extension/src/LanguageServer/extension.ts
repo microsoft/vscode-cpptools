@@ -11,7 +11,7 @@ import * as StreamZip from 'node-stream-zip';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { Range } from 'vscode-languageclient';
+import { CancellationToken, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
@@ -1428,10 +1428,26 @@ async function onCopilotHover(): Promise<void> {
 
     // Gather the content for the query from the client.
     const requestInfo = await copilotHoverProvider.getRequestInfo(hoverDocument, hoverPosition);
-    if (requestInfo.length === 0) {
+    try {
+        for (const file of requestInfo.files) {
+            const fileUri = vscode.Uri.file(file);
+            if (await vscodelm.fileIsIgnored(fileUri, copilotHoverProvider.getCurrentHoverCancellationToken() ?? CancellationToken.None)) {
+                telemetry.logLanguageServerEvent("CopilotHover", { "Message": "Copilot summary is not available due to content exclusion." });
+                await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable", "Copilot summary is not available.") + "\n\n" +
+                    localize("copilot.hover.excluded", "The file containing this symbol's definition or declaration has been excluded from use with Copilot."));
+                return;
+            }
+        }
+    } catch (err) {
+        if (err instanceof Error) {
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.name);
+        }
+        return;
+    }
+    if (requestInfo.content.length === 0) {
         // Context is not available for this symbol.
         telemetry.logLanguageServerEvent("CopilotHover", { "Message": "Copilot summary is not available for this symbol." });
-        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable", "Copilot summary is not available for this symbol."));
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable.symbol", "Copilot summary is not available for this symbol."));
         return;
     }
 
@@ -1439,7 +1455,7 @@ async function onCopilotHover(): Promise<void> {
 
     const messages = [
         vscode.LanguageModelChatMessage
-            .User(requestInfo + locale)];
+            .User(requestInfo.content + locale)];
 
     const [model] = await vscodelm.selectChatModels(modelSelector);
 
@@ -1453,7 +1469,7 @@ async function onCopilotHover(): Promise<void> {
     } catch (err) {
         if (err instanceof vscode.LanguageModelError) {
             console.log(err.message, err.code, err.cause);
-            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.message);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.code);
         } else {
             throw err;
         }
@@ -1473,9 +1489,12 @@ async function onCopilotHover(): Promise<void> {
             content += fragment;
         }
     } catch (err) {
-        if (err instanceof Error) {
+        if (err instanceof vscode.LanguageModelError) {
+            console.log(err.message, err.code, err.cause);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.code);
+        } else if (err instanceof Error) {
             console.log(err.message, err.cause);
-            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.message);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.name);
         }
         return;
     }

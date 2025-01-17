@@ -48,7 +48,7 @@ export async function registerRelatedFilesProvider(): Promise<void> {
                         try {
                             const getIncludesHandler = async () => (await getIncludes(uri, 1))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [];
                             const getTraitsHandler = async () => {
-                                const projectContext = await getProjectContext(uri, context);
+                                const projectContext = await getProjectContext(uri, context, telemetryProperties, telemetryMetrics);
 
                                 if (!projectContext) {
                                     return undefined;
