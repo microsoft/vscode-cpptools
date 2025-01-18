@@ -479,6 +479,7 @@ interface CodeAnalysisParams {
 
 interface FinishedRequestCustomConfigParams {
     uri: string;
+    isProviderRegistered: boolean;
 }
 
 export interface TextDocumentWillSaveParams {
@@ -2102,8 +2103,9 @@ export class DefaultClient implements Client {
     }
 
     public async provideCustomConfiguration(docUri: vscode.Uri): Promise<void> {
+        let isProviderRegistered: boolean = false;
         const onFinished: () => void = () => {
-            void this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: docUri.toString() });
+            void this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: docUri.toString(), isProviderRegistered });
         };
         try {
             const providerId: string | undefined = this.configurationProvider;
@@ -2114,6 +2116,7 @@ export class DefaultClient implements Client {
             if (!provider || !provider.isReady) {
                 return;
             }
+            isProviderRegistered = true;
             const resultCode = await this.provideCustomConfigurationAsync(docUri, provider);
             telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId, resultCode });
         } finally {
