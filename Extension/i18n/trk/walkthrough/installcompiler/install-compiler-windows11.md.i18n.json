@@ -15,7 +15,7 @@
 	"walkthrough.windows.note2": "Not",
 	"walkthrough.windows.note2.text": "Komut satırından veya VS Code’dan MSVC’yi kullanmak için şuradan çalıştırmanız gerek: {0}. {1}, {2} veya Windows komut istemi gibi sıradan bir kabuk gerekli yol ortam değişkenleri kümesi içermez.",
 	"walkthrough.windows.other.compilers": "Diğer derleme seçenekleri",
-	"walkthrough.windows.text3": "Windows'tan Linux'u hedefliyorsanız {0}‘a bakın. Veya, {1}.",
+	"walkthrough.windows.text3": "Windows'tan Linux'u hedefliyorsanız {0} ‘a bakın. Veya, {1}.",
 	"walkthrough.windows.link.title1": "VS Code'da Linux için C++’yı ve Windows Alt Sistemi’ni (WSL) kullanma",
 	"walkthrough.windows.link.title2": "MinGW ile Windows’a GCC'yi yükleme"
 }

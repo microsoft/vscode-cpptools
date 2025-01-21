@@ -15,6 +15,6 @@
 	"ssh.terminal.command.canceled": "Příkaz terminálu \"{0}\" byl zrušen.",
 	"ssh.terminal.command.done": "\"{0}\" příkaz terminálu je hotový.",
 	"ssh.continuing.command.canceled": "Úloha '{0}' je zrušená, ale podkladový příkaz nemusí být ukončen. Zkontrolujte to prosím ručně.",
-	"ssh.process.failed": "Proces{0}se nezdařil: {1}",
+	"ssh.process.failed": "Proces {0} se nezdařil: {1}",
 	"ssh.wrote.data.to.terminal": "\"{0}\" zapsal data do terminálu: \"{1}\"."
 }

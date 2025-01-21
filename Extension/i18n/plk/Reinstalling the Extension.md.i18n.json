@@ -16,6 +16,6 @@
 	"reinstall.extension.text5": "W systemie Windows:",
 	"reinstall.extension.text6": "W systemie Linux:",
 	"reinstall.extension.text7": "Następnie zainstaluj ponownie za pośrednictwem interfejsu użytkownika platformy handlowej w programie VS Code.",
-	"reinstall.extension.text8": "Jeśli poprawna wersja rozszerzenia nie zostanie wdrożona przez VS Code, poprawny VSIX dla Twojego systemu może być {0}i zainstalowany przy użyciu opcji „Zainstaluj z VSIX...” w menu „...” w UI rynku w VS Code.",
+	"reinstall.extension.text8": "Jeśli poprawna wersja rozszerzenia nie zostanie wdrożona przez VS Code, poprawny VSIX dla Twojego systemu może być {0} i zainstalowany przy użyciu opcji „Zainstaluj z VSIX...” w menu „...” w UI rynku w VS Code.",
 	"download.vsix.link.title": "Pobrano z witryny internetowej platformy handlowej programu VS Code"
 }
