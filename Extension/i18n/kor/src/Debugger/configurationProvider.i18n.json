@@ -17,7 +17,7 @@
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"debugger.path.not.exists": "{0} 디버거를 찾을 수 없습니다. {1}에 대한 디버그 구성은 무시됩니다.",
 	"build.and.debug.active.file": "활성 파일 빌드 및 디버그",
-	"cl.exe.not.available": "{0} 빌드 및 디버그는 VS의 개발자 명령 프롬프트에서 VS Code를 실행하는 경우에만 사용할 수 있습니다.",
+	"cl.exe.not.available": "{0}은(는) VS Code가 {1}에서 실행되는 경우에만 사용할 수 있습니다.",
 	"lldb.find.failed": "lldb-mi 실행 파일에 대한 '{0}' 종속성이 없습니다.",
 	"lldb.search.paths": "다음에서 검색됨:",
 	"lldb.install.help": "이 문제를 해결하려면 Apple App Store를 통해 XCode를 설치하거나, 터미널 창에서 '{0}'을(를) 실행하여 XCode 명령줄 도구를 설치하세요.",

@@ -19,5 +19,9 @@
 	"code.action.aborted": "Nie można rozwiązać problemu z analizą kodu, ponieważ dokument został zmieniony.",
 	"prerelease.message": "Dostępna jest wersja wstępna rozszerzenia C/C++. Czy chcesz się na nią przełączyć?",
 	"yes.button": "Tak",
-	"no.button": "Nie"
+	"no.button": "Nie",
+	"copilot.hover.unavailable": "Podsumowanie Copilot jest niedostępne.",
+	"copilot.hover.excluded": "Plik zawierający definicję lub deklarację tego symbolu został wykluczony z używania z copilotem.",
+	"copilot.hover.unavailable.symbol": "Podsumowanie Copilot jest niedostępne dla tego symbolu.",
+	"copilot.hover.error": "Wystąpił błąd podczas generowania podsumowania funkcji Copilot."
 }
