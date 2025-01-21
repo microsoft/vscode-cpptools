@@ -14,5 +14,5 @@
 	"walkthrough.linux.choose.build.active.file": "Wybierz kompilację {0}.",
 	"walkthrough.linux.build.and.debug.active.file": "Kompiluj i debuguj aktywny plik",
 	"walkthrough.linux.after.running": "Po uruchomieniu i debugowaniu pliku C++ po raz pierwszy zobaczysz dwa nowe pliki w folderze {0} projektu: {1} i {2}.",
-	"walkthrough.linux.for.more.complex": "W przypadku bardziej złożonych scenariuszy kompilacji i debugowania można dostosować zadania kompilacji i konfiguracje debugowania w pozycjach {0} i {1}. Na przykład jeśli zwykle przekazujesz argumenty do kompilatora podczas kompilowania z poziomu wiersza polecenia, możesz określić te argumenty w pozycji{2} przy użyciu właściwości {3}. Podobnie można zdefiniować argumenty do przekazania do programu na potrzeby debugowania w pozycji{4}."
+	"walkthrough.linux.for.more.complex": "W przypadku bardziej złożonych scenariuszy kompilacji i debugowania można dostosować zadania kompilacji i konfiguracje debugowania w pozycjach {0} i {1}. Na przykład jeśli zwykle przekazujesz argumenty do kompilatora podczas kompilowania z poziomu wiersza polecenia, możesz określić te argumenty w pozycji {2} przy użyciu właściwości {3}. Podobnie można zdefiniować argumenty do przekazania do programu na potrzeby debugowania w pozycji {4}."
 }
