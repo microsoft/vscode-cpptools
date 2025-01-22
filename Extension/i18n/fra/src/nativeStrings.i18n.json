@@ -159,8 +159,8 @@
 	"fallback_to_64_bit_mode2": "Échec de l'interrogation du compilateur. Retour au intelliSenseMode 64 bits.",
 	"fallback_to_no_bitness": "Échec de l'interrogation du compilateur. Retour au mode sans nombre de bits.",
 	"intellisense_client_creation_aborted": "Abandon de la création du client IntelliSense : {0}",
-	"include_errors_config_provider_intellisense_disabled ": "Erreurs #include détectées d'après les informations fournies par le paramètre configurationProvider. Les fonctionnalités IntelliSense de cette unité de traduction ({0}) sont fournies par l'analyseur de balises.",
-	"include_errors_config_provider_squiggles_disabled ": "Erreurs #include détectées d'après les informations fournies par le paramètre configurationProvider. Les tildes sont désactivés pour cette unité de traduction ({0}).",
+	"include_errors_config_provider_intellisense_disabled": "Erreurs #include détectées d'après les informations fournies par le paramètre configurationProvider. Les fonctionnalités IntelliSense de cette unité de traduction ({0}) sont fournies par l'analyseur de balises.",
+	"include_errors_config_provider_squiggles_disabled": "Erreurs #include détectées d'après les informations fournies par le paramètre configurationProvider. Les tildes sont désactivés pour cette unité de traduction ({0}).",
 	"preprocessor_keyword": "mot clé de préprocesseur",
 	"c_keyword": "Mot clé C",
 	"cpp_keyword": "Mot clé C++",
@@ -316,5 +316,6 @@
 	"refactor_extract_xborder_jump": "Des sauts entre le code sélectionné et le code environnant sont présents.",
 	"refactor_extract_missing_return": "Dans le code sélectionné, certains chemins de contrôle s'arrêtent sans définir la valeur renvoyée. Cela n'est pris en charge que pour les types de retour scalaire, numérique et pointeur.",
 	"expand_selection": "Développer la sélection (pour activer ' Extraire vers la fonction')",
-	"file_not_found_in_path2": "« {0} » n'a pas été trouvé dans les fichiers compile_commands.json. « includePath » from c_cpp_properties.json in folder « {1} » sera utilisé pour ce fichier à la place."
+	"file_not_found_in_path2": "« {0} » n'a pas été trouvé dans les fichiers compile_commands.json. « includePath » from c_cpp_properties.json in folder « {1} » sera utilisé pour ce fichier à la place.",
+	"copilot_hover_link": "Générer un résumé de Copilot"
 }

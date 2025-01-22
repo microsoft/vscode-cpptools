@@ -17,5 +17,6 @@
 	"path.is.not.a.directory": "Ścieżka nie jest katalogiem: {0}",
 	"duplicate.name": "Element {0} jest duplikatem. Nazwa konfiguracji musi być unikatowa.",
 	"multiple.paths.not.allowed": "Wiele ścieżek jest niedozwolonych.",
+	"multiple.paths.should.be.separate.entries": "Wiele ścieżek powinno być osobnymi wpisami w tablicy.",
 	"paths.are.not.directories": "Ścieżki nie są katalogami: {0}"
 }

@@ -17,7 +17,7 @@
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"debugger.path.not.exists": "Nie można odnaleźć debugera {0}. Konfiguracja debugowania dla {1} jest ignorowana.",
 	"build.and.debug.active.file": "Kompiluj i debuguj aktywny plik",
-	"cl.exe.not.available": "{0} — funkcji kompilacji i debugowania można używać tylko wtedy, gdy program VS Code został uruchomiony z wiersza polecenia dla deweloperów w programie VS.",
+	"cl.exe.not.available": "Możliwe jest używanie opcji {0} w przypadku, gdy program VS Code zostanie uruchomiony z {1}.",
 	"lldb.find.failed": "Brak zależności „{0}” dla pliku wykonywalnego lldb-mi.",
 	"lldb.search.paths": "Wyszukano w:",
 	"lldb.install.help": "Aby rozwiązać ten problem, zainstaluj środowisko XCode za pośrednictwem sklepu Apple App Store lub zainstaluj narzędzia wiersza polecenia środowiska XCode, uruchamiając polecenie „{0}” w oknie terminala.",

@@ -17,5 +17,6 @@
 	"path.is.not.a.directory": "Yol bir dizin değil: {0}",
 	"duplicate.name": "{0} yineleniyor. Yapılandırma adı benzersiz olmalıdır.",
 	"multiple.paths.not.allowed": "Birden fazla yola izin verilmez.",
+	"multiple.paths.should.be.separate.entries": "Birden çok yol bir dizideki ayrı girişler olmalıdır.",
 	"paths.are.not.directories": "Yollar dizin değil: {0}"
 }
