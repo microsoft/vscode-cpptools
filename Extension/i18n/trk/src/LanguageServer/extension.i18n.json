@@ -19,5 +19,9 @@
 	"code.action.aborted": "Belge değiştiğinden kod analizi düzeltmesi uygulanamadı.",
 	"prerelease.message": "C/C++ uzantısının yayın öncesi bir sürümü var. Buna geçmek ister misiniz?",
 	"yes.button": "Evet",
-	"no.button": "Hayır"
+	"no.button": "Hayır",
+	"copilot.hover.unavailable": "Copilot özeti kullanılamıyor.",
+	"copilot.hover.excluded": "Bu simgenin tanımını veya bildirimini içeren dosya Copilot ile kullanımdan dışlandı.",
+	"copilot.hover.unavailable.symbol": "Copilot özeti bu sembol için kullanılamıyor.",
+	"copilot.hover.error": "Copilot özeti oluşturulurken bir hata oluştu."
 }

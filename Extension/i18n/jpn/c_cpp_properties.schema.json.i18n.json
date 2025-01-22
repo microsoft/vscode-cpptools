@@ -9,7 +9,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerArgs": "たとえば `-nostdinc++`、`-m32` など、使用されているインクルードや定義を変更するコンパイラ引数。追加のスペース区切りの引数を受け取る引数は、配列内の別の引数として入力する必要があります。たとえば、`--sysroot <arg>` の場合、`\"--sysroot\", \"<arg>\"` を使用します。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cStandard": "IntelliSense に使用する C 言語標準のバージョンです。注意: GNU 標準は、set コンパイラをクエリして GNU 定義を取得するためにのみ使用されるため、IntelliSense は同等の C 標準バージョンをエミュレートします。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cppStandard": "IntelliSense に使用する C++ 言語標準のバージョンです。注意: GNU 標準は、set コンパイラをクエリして GNU 定義を取得するためにのみ使用されるため、IntelliSense は同等の C++ 標準バージョンをエミュレートします。",
-	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compileCommands": "ワークスペースの `compile_commands.json` ファイルへの完全なパス。",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compileCommands": "ワークスペースの `compile_commands.json` ファイルへの完全なパスまたは完全なパスの一覧。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.includePath": "インクルードされたヘッダーを検索する際に IntelliSense エンジンによって使用されるパスの一覧です。これらのパスでの検索は再帰的ではありません。再帰的な検索を示すには、`**` を指定します。たとえば、`${workspaceFolder}/**` を指定するとすべてのサブディレクトリが検索されますが、`${workspaceFolder}` はそうではありません。通常、これにはシステム インクルードを含めるべきではありません。 代わりに、`C_Cpp.default.compilerPath` を設定します。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.macFrameworkPath": "Mac フレームワークからインクルードされたヘッダーを検索する際に IntelliSense エンジンが使用するパスの一覧です。Mac 構成でのみサポートされます。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.windowsSdkVersion": "Windows で使用する Windows SDK インクルード パスのバージョン (例: `10.0.17134.0`)。",

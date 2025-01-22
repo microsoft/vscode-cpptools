@@ -6,7 +6,7 @@
 {
 	"max.recursion.reached": "Ha raggiunto la ricorsione di espansione massima delle stringhe. Possibile riferimento circolare.",
 	"invalid.var.reference": "Riferimento a variabile {0} non valido nella stringa: {1}.",
-	"env.var.not.found": "La variabile di ambiente {0}non è stata trovata",
+	"env.var.not.found": "La variabile di ambiente {0} non è stata trovata",
 	"commands.not.supported": "I comandi non sono supportati per la stringa: {0}.",
 	"exception.executing.command": "Si è verificata un'eccezione durante l'esecuzione del comando {0} per la stringa: {1} {2}."
 }

@@ -159,8 +159,8 @@
 	"fallback_to_64_bit_mode2": "Falha ao consultar o compilador. Voltando para o intelliSenseMode de 64 bits.",
 	"fallback_to_no_bitness": "Falha ao consultar o compilador. Voltando para nenhum número de bit.",
 	"intellisense_client_creation_aborted": "Criação de cliente do IntelliSense anulada: {0}",
-	"include_errors_config_provider_intellisense_disabled ": "#inclui erros detectados com base nas informações fornecidas pela configuração configurationProvider. Os recursos do IntelliSense para essa unidade de conversão ({0}) serão fornecidos pelo Analisador de Marca.",
-	"include_errors_config_provider_squiggles_disabled ": "#inclui erros detectados com base nas informações fornecidas pela configuração configurationProvider. Os rabiscos estão desabilitados para esta unidade de tradução ({0}).",
+	"include_errors_config_provider_intellisense_disabled": "#inclui erros detectados com base nas informações fornecidas pela configuração configurationProvider. Os recursos do IntelliSense para essa unidade de conversão ({0}) serão fornecidos pelo Analisador de Marca.",
+	"include_errors_config_provider_squiggles_disabled": "#inclui erros detectados com base nas informações fornecidas pela configuração configurationProvider. Os rabiscos estão desabilitados para esta unidade de tradução ({0}).",
 	"preprocessor_keyword": "palavra-chave do pré-processador",
 	"c_keyword": "Palavra-chave C",
 	"cpp_keyword": "Palavra-chave C++",
@@ -316,5 +316,6 @@
 	"refactor_extract_xborder_jump": "Saltos entre o código selecionado e o código ao redor estão presentes.",
 	"refactor_extract_missing_return": "No código selecionado, alguns caminhos de controle são encerrados sem definir o valor retornado. Isso tem suporte apenas para os tipos de retorno escalar, numérico e de ponteiro.",
 	"expand_selection": "Expandir seleção (para habilitar \"Extrair para função\")",
-	"file_not_found_in_path2": "\"{0}\" não encontrado nos arquivos compile_commands.json. \"includePath\" de c_cpp_properties.json na pasta \"{1}\" será usado para esse arquivo."
+	"file_not_found_in_path2": "\"{0}\" não encontrado nos arquivos compile_commands.json. \"includePath\" de c_cpp_properties.json na pasta \"{1}\" será usado para esse arquivo.",
+	"copilot_hover_link": "Gerar resumo do Copilot"
 }
