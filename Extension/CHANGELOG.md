@@ -2,6 +2,7 @@
 
 ## Version 1.23.4: January 21, 2025
 ### Bug Fixes
+* Fix some localization issues. [#12909](https://github.com/microsoft/vscode-cpptools/issues/12909), [#13090](https://github.com/microsoft/vscode-cpptools/issues/13090)
 * Fix a couple bugs with `.editorConfig` handling. [PR #13140](https://github.com/microsoft/vscode-cpptools/pull/13140)
 * Fix a bug when processing a file with invalid multi-byte sequences. [#13150](https://github.com/microsoft/vscode-cpptools/issues/13150)
 * Fix a potential telemetry issue with Copilot hover. [PR #13158](https://github.com/microsoft/vscode-cpptools/pull/13158)
