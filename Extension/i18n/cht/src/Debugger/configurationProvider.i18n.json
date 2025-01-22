@@ -17,7 +17,7 @@
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"debugger.path.not.exists": "找不到 {0} 偵錯工具。已略過 {1} 的偵錯組態。",
 	"build.and.debug.active.file": "建置及偵錯使用中的檔案",
-	"cl.exe.not.available": "只有從 VS 的開發人員命令提示字元執行 VS Code 時，才可使用 {0} 組建和偵錯。",
+	"cl.exe.not.available": "{0} 僅限於從 {1} 執行 VS Code 時使用。",
 	"lldb.find.failed": "缺少 lldb-mi 可執行檔的相依性 '{0}'。",
 	"lldb.search.paths": "已在下列位置中搜尋:",
 	"lldb.install.help": "若要解決此問題，請透過 Apple App Store 安裝 XCode，或在終端機視窗中執行 '{0}' 以安裝 XCode 命令列工具。",

@@ -17,7 +17,7 @@
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"debugger.path.not.exists": "{0} Hata ayıklayıcı bulunamadı. {1} için hata ayıklama yapılandırması yok sayıldı.",
 	"build.and.debug.active.file": "etkin dosyayı derle ve dosyada hata ayıkla",
-	"cl.exe.not.available": "{0} derlemesi ve hata ayıklama yalnızca VS Code, VS için Geliştirici Komut İstemi'nden çalıştırıldığında kullanılabilir.",
+	"cl.exe.not.available": "{0} yalnızca VS Code {1} öğesinden çalıştırıldığında kullanılabilir.",
 	"lldb.find.failed": "lldb-mi yürütülebilir dosyası için '{0}' bağımlılığı eksik.",
 	"lldb.search.paths": "Şurada arandı:",
 	"lldb.install.help": "Bu sorunu çözmek için, Apple App Store üzerinden XCode'u yükleyin ya da bir Terminal penceresinde '{0}' çalıştırarak XCode Komut Satırı Araçları'nı yükleyin.",

@@ -17,5 +17,6 @@
 	"path.is.not.a.directory": "Il percorso non è una directory: {0}",
 	"duplicate.name": "{0} è duplicato. Il nome della configurazione deve essere univoco.",
 	"multiple.paths.not.allowed": "Più percorsi non sono consentiti.",
+	"multiple.paths.should.be.separate.entries": "Più percorsi devono essere voci separate in una matrice.",
 	"paths.are.not.directories": "I percorsi non sono directory: {0}"
 }

@@ -8,7 +8,7 @@
 	"clear.all.code.analysis.problems": "清除所有代码分析问题",
 	"fix.all.type.problems": "修复所有 {0} 问题",
 	"disable.all.type.problems": "禁用所有 {0} 问题",
-	"clear.all.type.problems": "清除所有{0}问题",
+	"clear.all.type.problems": "清除所有 {0} 问题",
 	"clear.this.problem": "清除此 {0} 问题",
 	"fix.this.problem": "修复此 {0} 问题",
 	"show.documentation.for": "显示 {0} 文档"
