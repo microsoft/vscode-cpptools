@@ -26,3 +26,4 @@ jobs:
           ignoreLabels: "investigate: costing,investigate,external,by design,question,more info needed,language service,internal"
           createdAfter: "2024-07-22"
           addComment: "Thank you for your feature request. While we may not be able to implement it immediately, we will monitor community reactions to see how it fits into our backlog. Additionally, if you're working with GDB/LLDB, please note that the code is open source at https://github.com/microsoft/MIEngine/wiki/Contributing-Code . Your contributions are always welcome and appreciated."
+          addLabels: help wanted
