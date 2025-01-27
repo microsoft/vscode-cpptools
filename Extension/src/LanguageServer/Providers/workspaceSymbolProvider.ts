@@ -23,8 +23,7 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
         }
 
         const params: WorkspaceSymbolParams = {
-            query: query,
-            experimentEnabled: await isExperimentEnabled('CppTools1')
+            query: query
         };
 
         let symbols: LocalizeSymbolInformation[];
