@@ -224,7 +224,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         let response: CallHierarchyCallsItemResult | undefined;
         let cancelled: boolean = false;
         try {
-            await this.client.languageClient.sendRequest(CallHierarchyCallsFromRequest, params, token);
+            response = await this.client.languageClient.sendRequest(CallHierarchyCallsFromRequest, params, token);
         } catch (e: any) {
             cancelled = e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled);
             if (!cancelled) {
