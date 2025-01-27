@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { ResponseError } from 'vscode-languageclient';
-import { isExperimentEnabled } from '../../telemetry';
 import { DefaultClient, GetSymbolInfoRequest, LocalizeSymbolInformation, SymbolScope, WorkspaceSymbolParams } from '../client';
 import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
