@@ -48,7 +48,7 @@ export const Git = async (...args: Parameters<Awaited<CommandFunction>>) => (awa
 export const GitClean = async (...args: Parameters<Awaited<CommandFunction>>) => (await new Command(await git, 'clean'))(...args);
 
 export async function getModifiedIgnoredFiles() {
-    const {code, error, stdio } = await GitClean('-Xd', '-n');
+    const { code, error, stdio } = await GitClean('-Xd', '-n');
     if (code) {
         throw new Error(`\n${error.all().join('\n')}`);
     }
@@ -65,11 +65,11 @@ export async function rimraf(...paths: string[]) {
         }
         if (await filepath.isFolder(each)) {
             verbose(`Removing folder ${red(each)}`);
-            all.push(rm(each, {recursive: true, force: true}));
+            all.push(rm(each, { recursive: true, force: true }));
             continue;
         }
         verbose(`Removing file ${red(each)}`);
-        all.push(rm(each, {force: true}));
+        all.push(rm(each, { force: true }));
     }
     await Promise.all(all);
 }
@@ -334,11 +334,26 @@ export async function checkDTS() {
 }
 
 export async function checkBinaries() {
+    if ($switches.includes('--skipCheckBinaries')) {
+        return false;
+    }
     let failing = false;
     failing = !await assertAnyFile(['bin/cpptools.exe', 'bin/cpptools']) && (quiet || warn(`The native binary files are not present. You should either build or install the native binaries\n\n.`)) || failing;
 
     if (!failing) {
         verbose('Native binary files appear to be in place.');
+    }
+    return failing;
+}
+
+export async function checkProposals() {
+    let failing = false;
+
+    await rm(`${$root}/vscode.proposed.chatParticipantAdditions.d.ts`);
+    failing = await assertAnyFile('vscode.proposed.chatParticipantAdditions.d.ts') && (quiet || warn(`The VSCode import file '${$root}/vscode.proposed.chatParticipantAdditions.d.ts' should not be present.`)) || failing;
+
+    if (!failing) {
+        verbose('VSCode proposals appear to be in place.');
     }
     return failing;
 }

@@ -19,5 +19,9 @@
 	"code.action.aborted": "無法套用程式碼分析修正，因為文件已變更。",
 	"prerelease.message": "已可使用 C/C++ 延伸模組的發行前版本。您要切換到此版本嗎?",
 	"yes.button": "是",
-	"no.button": "否"
+	"no.button": "否",
+	"copilot.hover.unavailable": "Copilot 摘要無法使用。",
+	"copilot.hover.excluded": "包含此符號定義或宣告的檔案已排除，無法搭配 Copilot 使用。",
+	"copilot.hover.unavailable.symbol": "此符號無法使用 Copilot 摘要。",
+	"copilot.hover.error": "產生 Copilot 摘要時發生錯誤。"
 }

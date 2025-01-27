@@ -17,7 +17,7 @@
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"debugger.path.not.exists": "Der {0}-Debugger wurde nicht gefunden. Die Debugkonfiguration für {1} wird ignoriert.",
 	"build.and.debug.active.file": "Aktive Datei erstellen und debuggen",
-	"cl.exe.not.available": "{0}-Build und -Debuggen können nur verwendet werden, wenn VS Code von der Developer-Eingabeaufforderung für VS ausgeführt wird.",
+	"cl.exe.not.available": "{0} kann nur verwendet werden, wenn VS Code von {1} ausgeführt wird.",
 	"lldb.find.failed": "Fehlende Abhängigkeit \"{0}\" für ausführbare LLDB-MI-Datei.",
 	"lldb.search.paths": "Gesucht in:",
 	"lldb.install.help": "Um dieses Problem zu beheben, installieren Sie entweder XCode über den Apple App Store, oder installieren Sie die XCode-Befehlszeilentools, indem Sie \"{0}\" in einem Terminalfenster ausführen.",

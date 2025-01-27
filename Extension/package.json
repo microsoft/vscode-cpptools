@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.23.0-main",
+    "version": "1.23.4-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -38,7 +38,8 @@
         "Snippets"
     ],
     "enabledApiProposals": [
-        "terminalDataWriteEvent"
+        "terminalDataWriteEvent",
+        "chatParticipantAdditions"
     ],
     "capabilities": {
         "untrustedWorkspaces": {
@@ -693,7 +694,23 @@
                         "scope": "machine-overridable"
                     },
                     "C_Cpp.default.compileCommands": {
-                        "type": "string",
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "default": ""
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "uniqueItems": true,
+                                "default": []
+                            }
+                        ],
+                        "default": [
+                            ""
+                        ],
                         "markdownDescription": "%c_cpp.configuration.default.compileCommands.markdownDescription%",
                         "scope": "machine-overridable"
                     },
@@ -3313,6 +3330,16 @@
                         "default": false,
                         "markdownDescription": "%c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription%",
                         "scope": "application"
+                    },
+                    "C_Cpp.copilotHover": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "disabled"
+                        ],
+                        "default": "default",
+                        "markdownDescription": "%c_cpp.configuration.copilotHover.markdownDescription%",
+                        "scope": "window"
                     }
                 }
             }
@@ -6511,13 +6538,12 @@
         "translations-generate": "set NODE_OPTIONS=--no-experimental-fetch && gulp translations-generate",
         "translations-import": "gulp translations-import",
         "import-edge-strings": "ts-node -T ./.scripts/import_edge_strings.ts",
-        "prep:dts": "yarn verify dts --quiet || (npx @vscode/dts dev && npx @vscode/dts main)",
+        "prep:dts": "yarn verify dts --quiet || (npx @vscode/dts main && npx @vscode/dts dev && yarn verify proposals)",
         "build": "yarn prep:dts && echo [Building TypeScript code] && tsc --build tsconfig.json"
     },
     "devDependencies": {
         "@octokit/rest": "^20.1.1",
         "@types/glob": "^7.2.0",
-        "@types/minimatch": "^3.0.5",
         "@types/mocha": "^10.0.6",
         "@types/node": "^20.14.2",
         "@types/node-fetch": "^2.6.11",
@@ -6569,7 +6595,7 @@
         "comment-json": "^4.2.3",
         "escape-string-regexp": "^2.0.0",
         "glob": "^7.2.3",
-        "minimatch": "^3.0.5",
+        "minimatch": "^4.2.0",
         "mkdirp": "^3.0.1",
         "node-fetch": "^2.7.0",
         "node-loader": "^2.0.0",

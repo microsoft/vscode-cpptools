@@ -23,6 +23,6 @@ jobs:
         with:
           readonly: ${{ github.event.inputs.readonly }}
           labels: "investigate: costing,debugger"
-          ignoreLabels: language service,internal
+          ignoreLabels: Language Service,internal
           closeDays: 180
           closeComment: "This issue has been closed as lower priority. We're sorry if this issue still impacts you but unfortunately we're not able to address this. We will accept a pull request from the community if it's applicable for this issue."

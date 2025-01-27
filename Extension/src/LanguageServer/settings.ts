@@ -131,6 +131,7 @@ export interface WorkspaceFolderSettingsParams {
     filesExclude: Excludes;
     filesAutoSaveAfterDelay: boolean;
     filesEncoding: string;
+    filesEncodingChanged: boolean;
     searchExclude: Excludes;
     editorAutoClosingBrackets: string;
     editorInlayHintsEnabled: boolean;
@@ -141,6 +142,7 @@ export interface WorkspaceFolderSettingsParams {
 export interface SettingsParams {
     filesAssociations: Associations;
     workspaceFallbackEncoding: string;
+    workspaceFallbackEncodingChanged: boolean;
     maxConcurrentThreads: number | null;
     maxCachedProcesses: number | null;
     maxMemory: number | null;
@@ -161,6 +163,7 @@ export interface SettingsParams {
     codeAnalysisMaxMemory: number | null;
     codeAnalysisUpdateDelay: number;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
+    copilotHover: string;
 }
 
 function getTarget(): vscode.ConfigurationTarget {
@@ -399,7 +402,17 @@ export class CppSettings extends Settings {
     public get defaultDotconfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.dotConfig")); }
     public get defaultMacFrameworkPath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.macFrameworkPath"); }
     public get defaultWindowsSdkVersion(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.windowsSdkVersion")); }
-    public get defaultCompileCommands(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.compileCommands")); }
+    public get defaultCompileCommands(): string[] | undefined {
+        const value: any = super.Section.get<any>("default.compileCommands");
+        if (isString(value)) {
+            return value.length > 0 ? [value] : undefined;
+        }
+        if (isArrayOfString(value)) {
+            const result = value.filter(x => x.length > 0);
+            return result.length > 0 ? result : undefined;
+        }
+        return undefined;
+    }
     public get defaultForcedInclude(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return this.getAsStringOrUndefined("default.intelliSenseMode"); }
     public get defaultCompilerPath(): string | null { return this.getAsString("default.compilerPath", true); }
@@ -454,6 +467,17 @@ export class CppSettings extends Settings {
             && this.intelliSenseEngine.toLowerCase() === "default"
             && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
     }
+    public get copilotHover(): string {
+        if (!(vscode as any).lm) {
+            return "disabled";
+        }
+        const val = super.Section.get<any>("copilotHover");
+        if (val === undefined) {
+            return "default";
+        }
+        return val as string;
+    }
+
     public get formattingEngine(): string { return this.getAsString("formatting"); }
     public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
     public get vcFormatIndentMultiLineRelativeTo(): string { return this.getAsString("vcFormat.indent.multiLineRelativeTo"); }
@@ -638,7 +662,7 @@ export class CppSettings extends Settings {
         }
 
         if (isArrayOfString(value)) {
-            if (setting.items.enum && !allowUndefinedEnums) {
+            if (setting.items?.enum !== undefined && !allowUndefinedEnums) {
                 if (!value.every(x => this.isValidEnum(setting.items.enum, x))) {
                     return setting.default;
                 }

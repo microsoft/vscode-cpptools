@@ -23,6 +23,6 @@ jobs:
         with:
           readonly: ${{ github.event.inputs.readonly }}
           labels: by design,debugger
-          ignoreLabels: language service,internal
+          ignoreLabels: Language Service,internal
           closeDays: 0
           closeComment: "This issue has been closed because the described behavior was determined to be by design."

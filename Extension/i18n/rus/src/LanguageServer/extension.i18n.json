@@ -19,5 +19,9 @@
 	"code.action.aborted": "Не удалось применить исправление анализа кода, так как документ был изменен.",
 	"prerelease.message": "Доступна предварительная версия расширения C/C++. Переключиться на нее?",
 	"yes.button": "Да",
-	"no.button": "Нет"
+	"no.button": "Нет",
+	"copilot.hover.unavailable": "Сводка Copilot недоступна.",
+	"copilot.hover.excluded": "Файл, содержащий определение или объявление этого символа, исключен из использования с Copilot.",
+	"copilot.hover.unavailable.symbol": "Сводка Copilot недоступна для этого символа.",
+	"copilot.hover.error": "При создании сводки Copilot возникла ошибка."
 }

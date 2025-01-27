@@ -9,7 +9,7 @@
 	"refer.read.me": "Consulte {0} para obtener información de solución de problemas. Puede crear incidencias en {1}",
 	"process.exited": "Proceso cerrado con el código {0}",
 	"process.succeeded": "El proceso se ejecutó correctamente.",
-	"killing.process": "{0}de proceso de terminación",
+	"killing.process": "{0} de proceso de terminación",
 	"warning.file.missing": "Advertencia: Falta el archivo {0} que se esperaba.",
 	"warning.debugging.not.tested": "Advertencia: La depuración no se ha probado para esta plataforma.",
 	"reload.workspace.for.changes": "Recargue el área de trabajo para que el cambio de configuración surta efecto.",
