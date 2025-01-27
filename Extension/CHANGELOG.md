@@ -47,6 +47,7 @@
 * Add support for passing an additional parameter to `C_Cpp.ConfigurationSelect` command. [PR #12993](https://github.com/microsoft/vscode-cpptools/pull/12993)
   * Thank you for the contribution. [@adrianstephens](https://github.com/adrianstephens)
 * Update clang-format and clang-tidy from 19.1.2 to 19.1.5.
+* Add support for providing the definition with inlay hint for the specific symbol. [#13010](https://github.com/microsoft/vscode-cpptools/issues/13010)
 
 ### Bug Fixes
 * Fix a perf regression in hover operation by using cached lexer line states. [#3126](https://github.com/microsoft/vscode-cpptools/issues/3126)
