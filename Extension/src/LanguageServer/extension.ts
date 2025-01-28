@@ -172,8 +172,14 @@ export async function activate(): Promise<void> {
         getCustomConfigProviders().forEach(provider => void client.onRegisterCustomConfigurationProvider(provider));
     });
 
-    disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
+    // These handlers for didChangeTextDocument and didOpenTextDocument are intentionally non-async and are
+    // intended primarily to maintain openFileVersions with the most recent versions of files, as quickly as
+    // possible, without being invoked before complete, delayed by awaits or queued behind other LSP messages, etc..
     disposables.push(vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument));
+    disposables.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
+
+
+    disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
     disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
     ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
@@ -298,9 +304,14 @@ async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Prom
     }
 }
 
-async function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): Promise<void> {
+function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): void {
     const me: Client = clients.getClientFor(event.document.uri);
     me.onDidChangeTextDocument(event);
+}
+
+function onDidOpenTextDocument(document: vscode.TextDocument): void {
+    const me: Client = clients.getClientFor(document.uri);
+    me.onDidOpenTextDocument(document);
 }
 
 let noActiveEditorTimeout: NodeJS.Timeout | undefined;
