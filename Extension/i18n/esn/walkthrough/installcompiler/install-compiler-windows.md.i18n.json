@@ -16,10 +16,8 @@
 	"walkthrough.windows.link.install": "Instalar",
 	"walkthrough.windows.note1": "Nota",
 	"walkthrough.windows.note1.text": "Puede usar el conjunto de herramientas de C++ de Visual Studio Build Tools junto con Visual Studio Code para compilar y comprobar cualquier código base de C++, siempre que también tenga una licencia de Visual Studio válida (Community, Pro o Enterprise) que esté usando de manera activa para desarrollar ese código base de C++.",
-	"walkthrough.windows.open.command.prompt": "Abra el {0} al escribir \"developer\" en el menú Inicio de Windows.",
-	"walkthrough.windows.command.prompt.name1": "Símbolo del sistema para desarrolladores para VS",
-	"walkthrough.windows.check.install": "Compruebe la instalación de MSVC escribiendo {0} en el Símbolo del sistema para desarrolladores para VS. Debería ver un mensaje de copyright con la versión y la descripción de uso básica.",
+	"walkthrough.windows.open.command.prompt": "Abra {0} escribiendo '{1}' en el menú Inicio de Windows.",
+	"walkthrough.windows.check.install": "Compruebe la instalación de MSVC escribiendo {0} en {1}. Debería ver un mensaje de copyright con la versión y la descripción de uso básica.",
 	"walkthrough.windows.note2": "Nota",
-	"walkthrough.windows.note2.text": "Para usar MSVC desde la línea de comandos o VS Code, debe ejecutar desde un {0}. Un shell normal como {1}, {2}, o el símbolo del sistema de Windows no tiene establecidas las variables de entorno de ruta de acceso necesarias.",
-	"walkthrough.windows.command.prompt.name2": "Símbolo del sistema para desarrolladores para VS"
+	"walkthrough.windows.note2.text": "Para usar MSVC desde la línea de comandos o VS Code, debe ejecutar desde un {0}. Un shell normal como {1}, {2}, o el símbolo del sistema de Windows no tiene establecidas las variables de entorno de ruta de acceso necesarias."
 }

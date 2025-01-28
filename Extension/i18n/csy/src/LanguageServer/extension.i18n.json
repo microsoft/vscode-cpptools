@@ -19,5 +19,9 @@
 	"code.action.aborted": "Opravu analýzy kódu nelze použít, protože dokument byl změněn.",
 	"prerelease.message": "K dispozici je předběžná verze rozšíření C/C++. Chcete na ni přepnout?",
 	"yes.button": "Ano",
-	"no.button": "Ne"
+	"no.button": "Ne",
+	"copilot.hover.unavailable": "Souhrn Copilot není k dispozici.",
+	"copilot.hover.excluded": "Soubor obsahující definici nebo deklaraci tohoto symbolu se vyloučil z použití s Copilotem.",
+	"copilot.hover.unavailable.symbol": "Souhrn Copilot není pro tento symbol k dispozici.",
+	"copilot.hover.error": "Při generování souhrnu Copilotu došlo k chybě."
 }
