@@ -112,3 +112,9 @@ export async function withCancellation<T>(promise: Promise<T>, token: vscode.Can
         });
     });
 }
+
+export async function checkDuration<T>(fn: () => Promise<T>): Promise<{ result: T; duration: number }> {
+    const start = performance.now();
+    const result = await fn();
+    return { result, duration: performance.now() - start };
+}

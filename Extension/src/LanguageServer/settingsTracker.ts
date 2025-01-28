@@ -108,6 +108,11 @@ export class SettingsTracker {
                         return "<invalid>";
                     }
                     return val;
+                } else if (curSetting["oneOf"]) {
+                    // Currently only C_Cpp.default.compileCommands uses this case.
+                    if (curSetting["oneOf"].some((x: any) => this.typeMatch(val, x.type))) {
+                        return val;
+                    }
                 } else if (val === curSetting["default"]) {
                     // C_Cpp.default.browse.path is a special case where the default value is null and doesn't match the type definition.
                     return val;
@@ -206,7 +211,7 @@ export class SettingsTracker {
             if (value && value.length > maxSettingLengthForTelemetry) {
                 value = value.substring(0, maxSettingLengthForTelemetry) + "...";
             }
-            return {key: key, value: value};
+            return { key: key, value: value };
         }
         return undefined;
     }

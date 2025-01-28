@@ -13,3 +13,6 @@ export const isLinux = OperatingSystem === 'linux';
 
 // if you want to see the output of verbose logging, set this to true.
 export const verboseEnabled = false;
+
+// Model selector for Copilot features
+export const modelSelector = { vendor: 'copilot', family: 'gpt-4' };

@@ -17,39 +17,25 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
+import { modelSelector } from '../constants';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
-import { Client, DefaultClient, DoxygenCodeActionCommandArguments, GetIncludesResult, openFileVersions } from './client';
+import { CopilotHoverProvider } from './Providers/CopilotHoverProvider';
+import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
+import { registerRelatedFilesProvider } from './copilotProviders';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
 import { getLanguageConfig } from './languageConfig';
 import { CppConfigurationLanguageModelTool } from './lmTool';
+import { getLocaleId } from './localization';
 import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
-
-interface CopilotTrait {
-    name: string;
-    value: string;
-    includeInPrompt?: boolean;
-    promptTextOverride?: string;
-}
-
-interface CopilotApi {
-    registerRelatedFilesProvider(
-        providerId: { extensionId: string; languageId: string },
-        callback: (
-            uri: vscode.Uri,
-            context: { flags: Record<string, unknown> },
-            cancellationToken: vscode.CancellationToken
-        ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>
-    ): Disposable;
-}
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -187,6 +173,7 @@ export async function activate(): Promise<void> {
     });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
+    disposables.push(vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument));
     disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
     disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
     ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
@@ -201,8 +188,7 @@ export async function activate(): Promise<void> {
 
     void clients.ActiveClient.ready.then(() => intervalTimer = global.setInterval(onInterval, 2500));
 
-    const isRelatedFilesApiEnabled = await telemetry.isExperimentEnabled("CppToolsRelatedFilesApi");
-    registerCommands(true, isRelatedFilesApiEnabled);
+    await registerCommands(true);
 
     vscode.tasks.onDidStartTask(() => getActiveClient().PauseCodeAnalysis());
 
@@ -269,27 +255,18 @@ export async function activate(): Promise<void> {
         activeDocument = activeEditor.document;
     }
 
-    if (util.extensionContext && new CppSettings().experimentalFeatures) {
-        const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
-        disposables.push(tool);
-    }
-
-    if (isRelatedFilesApiEnabled) {
-        const api = await getCopilotApi();
-        if (util.extensionContext && api) {
-            try {
-                for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
-                    api.registerRelatedFilesProvider(
-                        { extensionId: util.extensionContext.extension.id, languageId },
-                        async (_uri: vscode.Uri, _context: { flags: Record<string, unknown> }, token: vscode.CancellationToken) =>
-                            ({ entries: (await getIncludesWithCancellation(1, token))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [] })
-                    );
-                }
-            } catch {
-                console.log("Failed to register Copilot related files provider.");
-            }
+    if (util.extensionContext) {
+        // lmTools wasn't stabilized until 1.95, but (as of October 2024)
+        // cpptools can be installed on older versions of VS Code. See
+        // https://github.com/microsoft/vscode-cpptools/blob/main/Extension/package.json#L14
+        const version = util.getVsCodeVersion();
+        if (version[0] > 1 || (version[0] === 1 && version[1] >= 95)) {
+            const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
+            disposables.push(tool);
         }
     }
+
+    await registerRelatedFilesProvider();
 }
 
 export function updateLanguageConfigurations(): void {
@@ -319,6 +296,11 @@ async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Prom
             UpdateInsidersAccess();
         }
     }
+}
+
+function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): void {
+    const me: Client = clients.getClientFor(event.document.uri);
+    me.onDidChangeTextDocument(event);
 }
 
 let noActiveEditorTimeout: NodeJS.Timeout | undefined;
@@ -386,7 +368,7 @@ function onInterval(): void {
 /**
  * registered commands
  */
-export function registerCommands(enabled: boolean, isRelatedFilesApiEnabled: boolean): void {
+export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.forEach(d => d.dispose());
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
@@ -444,10 +426,7 @@ export function registerCommands(enabled: boolean, isRelatedFilesApiEnabled: boo
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? () => onExtractToFunction(true, false) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
-
-    if (!isRelatedFilesApiEnabled) {
-        commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : () => Promise.resolve()));
-    }
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCopilotHover', enabled ? () => onCopilotHover() : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -609,13 +588,13 @@ async function installCompiler(sender?: any): Promise<void> {
     telemetry.logLanguageServerEvent('installCompiler', telemetryProperties);
 }
 
-async function onSelectConfiguration(): Promise<void> {
+async function onSelectConfiguration(config?: string): Promise<void> {
     if (!isFolderOpen()) {
         void vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration.'));
     } else {
         // This only applies to the active client. You cannot change the configuration for
         // a client that is not active since that client's UI will not be visible.
-        return clients.ActiveClient.handleConfigurationSelectCommand();
+        return clients.ActiveClient.handleConfigurationSelectCommand(config);
     }
 }
 
@@ -1413,41 +1392,137 @@ export async function preReleaseCheck(): Promise<void> {
     }
 }
 
-export async function getIncludesWithCancellation(maxDepth: number, token: vscode.CancellationToken): Promise<GetIncludesResult> {
-    const includes = await clients.ActiveClient.getIncludes(maxDepth, token);
-    const wksFolder = clients.ActiveClient.RootUri?.toString();
+// This uses several workarounds for interacting with the hover feature.
+// A proposal for dynamic hover content would help, such as the one here (https://github.com/microsoft/vscode/issues/195394)
+async function onCopilotHover(): Promise<void> {
+    telemetry.logLanguageServerEvent("CopilotHover");
 
-    if (!wksFolder) {
-        return includes;
+    // Check if the user has access to vscode language model.
+    const vscodelm = (vscode as any).lm;
+    if (!vscodelm) {
+        return;
     }
 
-    includes.includedFiles = includes.includedFiles.filter(header => vscode.Uri.file(header).toString().startsWith(wksFolder));
-    return includes;
-}
+    const copilotHoverProvider = clients.getDefaultClient().getCopilotHoverProvider();
+    if (!copilotHoverProvider) {
+        return;
+    }
 
-async function getIncludes(maxDepth: number): Promise<GetIncludesResult> {
-    const tokenSource = new vscode.CancellationTokenSource();
+    const hoverDocument = copilotHoverProvider.getCurrentHoverDocument();
+    const hoverPosition = copilotHoverProvider.getCurrentHoverPosition();
+    if (!hoverDocument || !hoverPosition) {
+        return;
+    }
+
+    // Prep hover with wait message.
+    copilotHoverProvider.showWaiting();
+
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return;
+    }
+
+    // Move the cursor to the hover position, but don't focus the editor.
+    await vscode.window.showTextDocument(hoverDocument, { preserveFocus: true, selection: new vscode.Selection(hoverPosition, hoverPosition) });
+
+    if (!await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition)) {
+        return;
+    }
+
+    // Gather the content for the query from the client.
+    const requestInfo = await copilotHoverProvider.getRequestInfo(hoverDocument, hoverPosition);
+    if (requestInfo.length === 0) {
+        // Context is not available for this symbol.
+        telemetry.logLanguageServerEvent("CopilotHover", { "Message": "Copilot summary is not available for this symbol." });
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable", "Copilot summary is not available for this symbol."));
+        return;
+    }
+
+    const locale = getLocaleId();
+
+    const messages = [
+        vscode.LanguageModelChatMessage
+            .User(requestInfo + locale)];
+
+    const [model] = await vscodelm.selectChatModels(modelSelector);
+
+    let chatResponse: vscode.LanguageModelChatResponse | undefined;
     try {
-        const includes = await getIncludesWithCancellation(maxDepth, tokenSource.token);
-        return includes;
-    } finally {
-        tokenSource.dispose();
+        chatResponse = await model.sendRequest(
+            messages,
+            {},
+            copilotHoverProvider.getCurrentHoverCancellationToken()
+        );
+    } catch (err) {
+        if (err instanceof vscode.LanguageModelError) {
+            console.log(err.message, err.code, err.cause);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.code);
+        } else {
+            throw err;
+        }
+        return;
     }
+
+    // Ensure we have a valid response from Copilot.
+    if (!chatResponse) {
+        await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, "Invalid chat response from Copilot.");
+        return;
+    }
+
+    let content: string = '';
+
+    try {
+        for await (const fragment of chatResponse.text) {
+            content += fragment;
+        }
+    } catch (err) {
+        if (err instanceof vscode.LanguageModelError) {
+            console.log(err.message, err.code, err.cause);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.code);
+        } else if (err instanceof Error) {
+            console.log(err.message, err.cause);
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.name);
+        }
+        return;
+    }
+
+    if (content.length === 0) {
+        await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, "No content in response from Copilot.");
+        return;
+    }
+
+    await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, content);
 }
 
-async function getCopilotApi(): Promise<CopilotApi | undefined> {
-    const copilotExtension = vscode.extensions.getExtension<CopilotApi>('github.copilot');
-    if (!copilotExtension) {
-        return undefined;
+async function reportCopilotFailure(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, errorMessage: string): Promise<void> {
+    telemetry.logLanguageServerEvent("CopilotHoverError", { "ErrorMessage": errorMessage });
+    // Display the localized default failure message in the hover.
+    await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.error", "An error occurred while generating Copilot summary."));
+}
+
+async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, content?: string): Promise<boolean> {
+    // Check if the cursor has been manually moved by the user. If so, exit.
+    const currentCursorPosition = vscode.window.activeTextEditor?.selection.active;
+    if (!currentCursorPosition?.isEqual(hoverPosition)) {
+        // Reset implies cancellation, but we need to ensure cancellation is acknowledged before returning.
+        copilotHoverProvider.reset();
     }
 
-    if (!copilotExtension.isActive) {
-        try {
-            return await copilotExtension.activate();
-        } catch {
-            return undefined;
-        }
-    } else {
-        return copilotExtension.exports;
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return false;
     }
+
+    await vscode.commands.executeCommand('cursorMove', { to: 'right' });
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
+
+    if (content) {
+        copilotHoverProvider.showContent(content);
+    }
+
+    if (copilotHoverProvider.isCancelled(hoverDocument, hoverPosition)) {
+        return false;
+    }
+    await vscode.commands.executeCommand('cursorMove', { to: 'left' });
+    await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
+
+    return true;
 }

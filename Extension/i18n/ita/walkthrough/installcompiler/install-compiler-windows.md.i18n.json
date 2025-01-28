@@ -16,10 +16,8 @@
 	"walkthrough.windows.link.install": "Installa",
 	"walkthrough.windows.note1": "Nota",
 	"walkthrough.windows.note1.text": "È possibile usare il set di strumenti C++ di Visual Studio Build Tools insieme a Visual Studio Code per compilare, creare e verificare qualsiasi codebase C++, purché sia disponibile una licenza di Visual Studio valida (Community, Pro o Enterprise) usata attivamente per sviluppare la codebase C++.",
-	"walkthrough.windows.open.command.prompt": "Per aprire {0}, digitare 'developer' nel menu Start di Windows.",
-	"walkthrough.windows.command.prompt.name1": "Prompt dei comandi per gli sviluppatori per Visual Studio",
-	"walkthrough.windows.check.install": "Verificare l'installazione di MSVC digitando {0} al Prompt dei comandi per gli sviluppatori per Visual Studio. Verranno visualizzati un messaggio di copyright, la versione e la descrizione sulla sintassi di base.",
+	"walkthrough.windows.open.command.prompt": "Aprire {0} digitando \"{1}\" nel menu Start di Windows.",
+	"walkthrough.windows.check.install": "Controllare l'installazione di MSVC digitando {0} in {1}. Verranno visualizzati un messaggio di copyright, la versione e la descrizione sulla sintassi di base.",
 	"walkthrough.windows.note2": "Nota",
-	"walkthrough.windows.note2.text": "Per usare MSVC dalla riga di comando o da VS Code, è necessario eseguire l'applicazione da {0}. Con una shell normale, ad esempio {1}, {2} o il prompt dei comandi di Windows le variabili di ambiente del percorso necessarie non sono impostate.",
-	"walkthrough.windows.command.prompt.name2": "Prompt dei comandi per gli sviluppatori per Visual Studio"
+	"walkthrough.windows.note2.text": "Per usare MSVC dalla riga di comando o da VS Code, è necessario eseguire l'applicazione da {0}. Con una shell normale, ad esempio {1}, {2} o il prompt dei comandi di Windows le variabili di ambiente del percorso necessarie non sono impostate."
 }

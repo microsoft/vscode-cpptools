@@ -70,9 +70,20 @@
                         ]
                     },
                     "compileCommands": {
-                        "markdownDescription": "Full path to `compile_commands.json` file for the workspace.",
-                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
-                        "type": "string"
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "uniqueItems": true
+                            }
+                        ],
+                        "markdownDescription": "Full path or a list of full paths to `compile_commands.json` files for the workspace.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
                     },
                     "includePath": {
                         "markdownDescription": "A list of paths for the IntelliSense engine to use while searching for included headers. Searching on these paths is not recursive. Specify `**` to indicate recursive search. For example, `${workspaceFolder}/**` will search through all subdirectories while `${workspaceFolder}` will not. Usually, this should not include system includes; instead, set `C_Cpp.default.compilerPath`.",
@@ -239,7 +250,6 @@
         },
         "enableConfigurationSquiggles": {
             "type": "boolean",
-            "default": true,
             "markdownDescription": "Controls whether the extension will report errors detected in `c_cpp_properties.json`.",
             "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         }
