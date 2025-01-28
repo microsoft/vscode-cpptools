@@ -1858,11 +1858,7 @@ export class DefaultClient implements Client {
     public onDidOpenTextDocument(document: vscode.TextDocument): void {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
-            const oldVersion: number | undefined = openFileVersions.get(uri);
-            const newVersion: number = document.version;
-            if (oldVersion === undefined || newVersion > oldVersion) {
-                openFileVersions.set(uri, document.version);
-            }
+            openFileVersions.set(uri, document.version);
             void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(document.uri));
             void SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(document.uri));
         } else {
