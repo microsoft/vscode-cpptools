@@ -45,6 +45,7 @@
 * Fix `C_Cpp.default.compilerPath` not using the `C_Cpp.preferredPathSeparator` setting when generated from the 'Select IntelliSense Configuration' command. [#13083](https://github.com/microsoft/vscode-cpptools/issues/13083)
 * Fix a couple bugs with `.editorConfig` handling. [PR #13140](https://github.com/microsoft/vscode-cpptools/pull/13140)
 * Fix a bug when processing a file with invalid multi-byte sequences. [#13150](https://github.com/microsoft/vscode-cpptools/issues/13150)
+* Fix call hierarchy calls from. [#13200](https://github.com/microsoft/vscode-cpptools/issues/13200)
 * Fix IntelliSense issues related to large header files (>32K) and encodings other than UTF-8.
 * Update vsdbg from 17.12.10729.1 to 17.13.20115.1.
 * Other internal fixes.
