@@ -298,7 +298,7 @@ async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Prom
     }
 }
 
-async function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): Promise<void> {
+function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): void {
     const me: Client = clients.getClientFor(event.document.uri);
     me.onDidChangeTextDocument(event);
 }
