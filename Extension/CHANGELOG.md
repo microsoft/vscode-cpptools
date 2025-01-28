@@ -15,7 +15,6 @@
 * Update clang-format and clang-tidy from 19.1.2 to 19.1.7.
 * IntelliSense parser updates.
 
-## Version 1.22.10: October 21, 2024
 ### Bug Fixes
 * Fix a perf regression in hover operation by using cached lexer line states. [#3126](https://github.com/microsoft/vscode-cpptools/issues/3126)
 * Fix `compile_commands.json` no longer being used if the containing folder is deleted and recreated. [#7030](https://github.com/microsoft/vscode-cpptools/issues/7030)
