@@ -172,12 +172,11 @@ export async function activate(): Promise<void> {
         getCustomConfigProviders().forEach(provider => void client.onRegisterCustomConfigurationProvider(provider));
     });
 
-    // These handlers for didChangeTextDocument and didOpenTextDocument are intentionally non-async and are
+    // These handlers for didChangeTextDocument and didOpenTextDocument are intentionally synchronous and are
     // intended primarily to maintain openFileVersions with the most recent versions of files, as quickly as
-    // possible, without being invoked before complete, delayed by awaits or queued behind other LSP messages, etc..
+    // possible, without being delayed by awaits or queued behind other LSP messages, etc..
     disposables.push(vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument));
     disposables.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
-
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
