@@ -1841,7 +1841,8 @@ export class DefaultClient implements Client {
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
         if (util.isCpp(textDocumentChangeEvent.document)) {
             // If any file has changed, we need to abort the current rename operation
-            if (workspaceReferences.renamePending) {
+            if (workspaceReferences !== undefined // Occurs when a document changes before cpptools starts.
+                && workspaceReferences.renamePending) {
                 workspaceReferences.cancelCurrentReferenceRequest(refs.CancellationSender.User);
             }
 
