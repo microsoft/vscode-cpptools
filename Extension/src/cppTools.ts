@@ -9,9 +9,7 @@ import { CppToolsTestApi, CppToolsTestHook } from 'vscode-cpptools/out/testApi';
 import * as nls from 'vscode-nls';
 import { CustomConfigurationProvider1, CustomConfigurationProviderCollection, getCustomConfigProviders } from './LanguageServer/customProviders';
 import * as LanguageServer from './LanguageServer/extension';
-import { CppSettings } from './LanguageServer/settings';
-import { getNumericLoggingLevel } from './common';
-import { getOutputChannel } from './logger';
+import { getOutputChannelLogger } from './logger';
 import * as test from './testHook';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -61,10 +59,7 @@ export class CppTools implements CppToolsTestApi {
         if (providers.add(provider, this.version)) {
             const added: CustomConfigurationProvider1 | undefined = providers.get(provider);
             if (added) {
-                const settings: CppSettings = new CppSettings();
-                if (getNumericLoggingLevel(settings.loggingLevel) >= 5) {
-                    getOutputChannel().appendLine(localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));
-                }
+                getOutputChannelLogger().appendLineAtLevel(5, localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));
                 this.providers.push(added);
                 LanguageServer.getClients().forEach(client => void client.onRegisterCustomConfigurationProvider(added));
                 this.addNotifyReadyTimer(added);

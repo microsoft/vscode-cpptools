@@ -7,7 +7,8 @@
 import * as os from 'os';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { getNumericLoggingLevel } from './common';
+import { getLoggingLevel } from './common';
+import { sendInstrumentation } from './instrumentation';
 import { CppSourceStr } from './LanguageServer/extension';
 import { getLocalizedString, LocalizeStringParams } from './LanguageServer/localization';
 
@@ -27,18 +28,26 @@ export class Logger {
         this.writer = writer;
     }
 
-    public append(message: string): void {
-        this.writer(message);
-        if (Subscriber) {
-            Subscriber(message);
+    public appendAtLevel(level: number, message: string): void {
+        if (getLoggingLevel() >= level) {
+            this.writer(message);
+            if (Subscriber) {
+                Subscriber(message);
+            }
         }
+        sendInstrumentation({ name: 'log', text: message, context: { channel: 'log', source: 'extension' }, level });
+    }
+
+    public append(message: string): void {
+        this.appendAtLevel(0, message);
+    }
+
+    public appendLineAtLevel(level: number, message: string): void {
+        this.appendAtLevel(level, message + os.EOL);
     }
 
     public appendLine(message: string): void {
-        this.writer(message + os.EOL);
-        if (Subscriber) {
-            Subscriber(message + os.EOL);
-        }
+        this.appendAtLevel(0, message + os.EOL);
     }
 
     // We should not await on this function.
@@ -83,9 +92,8 @@ export function getOutputChannel(): vscode.OutputChannel {
     if (!outputChannel) {
         outputChannel = vscode.window.createOutputChannel(CppSourceStr);
         // Do not use CppSettings to avoid circular require()
-        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-        const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
-        if (getNumericLoggingLevel(loggingLevel) > 1) {
+        const loggingLevel = getLoggingLevel();
+        if (loggingLevel > 1) {
             outputChannel.appendLine(`loggingLevel: ${loggingLevel}`);
         }
     }
@@ -130,10 +138,7 @@ export function getOutputChannelLogger(): Logger {
 }
 
 export function log(output: string): void {
-    if (!outputChannel) {
-        outputChannel = getOutputChannel();
-    }
-    outputChannel.appendLine(`${output}`);
+    getOutputChannel().appendLine(`${output}`);
 }
 
 export interface DebugProtocolParams {
