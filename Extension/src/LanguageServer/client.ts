@@ -2914,15 +2914,21 @@ export class DefaultClient implements Client {
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.useVcFormat(editor.document)) {
                 const editorConfigSettings: any = getEditorConfigSettings(editor.document.uri.fsPath);
-                if (editorConfigSettings.indent_style === "space" || editorConfigSettings.indent_style === "tab") {
-                    editor.options.insertSpaces = editorConfigSettings.indent_style === "space";
+                if (editorConfigSettings.indent_style === "tab") {
+                    editor.options.insertSpaces = false;
+                } else if (editorConfigSettings.indent_style === "space") {
+                    editor.options.insertSpaces = true;
+                }
+                if (editorConfigSettings.indent_size !== undefined) {
                     if (editorConfigSettings.indent_size === "tab") {
-                        if (!editorConfigSettings.tab_width !== undefined) {
-                            editor.options.tabSize = editorConfigSettings.tab_width;
-                        }
-                    } else if (editorConfigSettings.indent_size !== undefined) {
+                        editor.options.indentSize = "tabSize";
+                    } else {
+                        editor.options.indentSize = editorConfigSettings.indent_size;
                         editor.options.tabSize = editorConfigSettings.indent_size;
                     }
+                }
+                if (editorConfigSettings.tab_width !== undefined) {
+                    editor.options.tabSize = editorConfigSettings.tab_width;
                 }
                 if (editorConfigSettings.end_of_line !== undefined) {
                     void editor.edit((edit) => {
