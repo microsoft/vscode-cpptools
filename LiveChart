@@ -1,0 +1,39 @@
+#include <iostream>
+#include <string>
+#include <websocketpp/client.hpp>
+#include <websocketpp/config/asio_no_tls.hpp>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
+typedef websocketpp::client<websocketpp::config::asio> client;
+
+client c;
+
+void on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
+    std::string payload = msg->get_payload();
+    try {
+        json j = json::parse(payload);
+        std::string event = j["e"];
+        if (event == "kline") {
+            // Extract the candlestick data
+            double open = std::stod(j["k"]["o"].get<std::string>());
+            double high = std::stod(j["k"]["h"].get<std::string>());
+            double low = std::stod(j["k"]["l"].get<std::string>());
+            double close = std::stod(j["k"]["c"].get<std::string>());
+            std::cout << "Open: " << open << ", High: " << high << ", Low: " << low << ", Close: " << close << std::endl;
+
+            // Process data for trading signals or predictions here
+            if (close > open) {
+                std::cout << "Bullish candle!" << std::endl;
+            } else {
+                std::cout << "Bearish candle!" << std::endl;
+            }
+        }
+    } catch (json::parse_error& e) {
+        std::cerr << "JSON parse error: " << e.what() << std::endl;
+    }
+}
+
+int main() {
+    try {
