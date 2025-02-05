@@ -54,6 +54,7 @@ import {
 } from './codeAnalysis';
 import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import * as configs from './configurations';
+import { CopilotCompletionContextFeatures, CopilotCompletionContextProvider, SnippetEntry } from './copilotCompletionContextProvider';
 import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
@@ -183,6 +184,7 @@ interface TelemetryPayload {
     event: string;
     properties?: Record<string, string>;
     metrics?: Record<string, number>;
+    signedMetrics?: Record<string, number>;
 }
 
 interface ReportStatusNotificationBody extends WorkspaceFolderParams {
@@ -576,6 +578,21 @@ interface FilesEncodingChanged {
     foldersFilesEncoding: FolderFilesEncodingChanged[];
 }
 
+export interface CopilotCompletionContextResult {
+    requestId: number;
+    isResultMissing: boolean;
+    snippets: SnippetEntry[];
+    translationUnitUri: string;
+    caretOffset: number;
+    featureFlag: CopilotCompletionContextFeatures;
+}
+
+export interface CopilotCompletionContextParams {
+    uri: string;
+    caretOffset: number;
+    featureFlag: CopilotCompletionContextFeatures;
+}
+
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
@@ -598,6 +615,7 @@ const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> =
 const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
 const CppContextRequest: RequestType<TextDocumentIdentifier, ChatContextResult, void> = new RequestType<TextDocumentIdentifier, ChatContextResult, void>('cpptools/getChatContext');
 const ProjectContextRequest: RequestType<TextDocumentIdentifier, ProjectContextResult, void> = new RequestType<TextDocumentIdentifier, ProjectContextResult, void>('cpptools/getProjectContext');
+const CopilotCompletionContextRequest: RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void> = new RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void>('cpptools/getCompletionContext');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
@@ -833,6 +851,7 @@ export interface Client {
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult>;
     getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult>;
     filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void;
+    getCompletionContext(fileName: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures, token: vscode.CancellationToken): Promise<CopilotCompletionContextResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -867,6 +886,7 @@ export class DefaultClient implements Client {
     private configurationProvider?: string;
     private hoverProvider: HoverProvider | undefined;
     private copilotHoverProvider: CopilotHoverProvider | undefined;
+    private copilotCompletionProvider?: CopilotCompletionContextProvider;
 
     public lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     public lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
@@ -1342,6 +1362,9 @@ export class DefaultClient implements Client {
                     this.semanticTokensProvider = new SemanticTokensProvider();
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                 }
+
+                this.copilotCompletionProvider = await CopilotCompletionContextProvider.Create();
+                this.disposables.push(this.copilotCompletionProvider);
 
                 // Listen for messages from the language server.
                 this.registerNotifications();
@@ -1875,6 +1898,7 @@ export class DefaultClient implements Client {
         if (diagnosticsCollectionIntelliSense) {
             diagnosticsCollectionIntelliSense.delete(document.uri);
         }
+        this.copilotCompletionProvider?.removeFile(uri);
         openFileVersions.delete(uri);
     }
 
@@ -2256,7 +2280,6 @@ export class DefaultClient implements Client {
         return util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior,
             this.configuration.CurrentConfiguration?.compilerPath,
             this.configuration.CurrentConfiguration?.compilerArgs);
-
     }
 
     public async getVcpkgInstalled(): Promise<boolean> {
@@ -2323,6 +2346,14 @@ export class DefaultClient implements Client {
         await withCancellation(this.ready, token);
         return DefaultClient.withLspCancellationHandling(
             () => this.languageClient.sendRequest(CppContextRequest, params, token), token);
+    }
+
+    public async getCompletionContext(file: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures,
+        token: vscode.CancellationToken): Promise<CopilotCompletionContextResult> {
+        await withCancellation(this.ready, token);
+        return DefaultClient.withLspCancellationHandling(
+            () => this.languageClient.sendRequest(CopilotCompletionContextRequest,
+                { uri: file.toString(), caretOffset, featureFlag }, token), token);
     }
 
     /**
@@ -2697,7 +2728,8 @@ export class DefaultClient implements Client {
         if (notificationBody.event === "includeSquiggles" && this.configurationProvider && notificationBody.properties) {
             notificationBody.properties["providerId"] = this.configurationProvider;
         }
-        telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
+        const metrics_unified: Record<string, number> = { ...notificationBody.metrics, ...notificationBody.signedMetrics };
+        telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, metrics_unified);
     }
 
     private async updateStatus(notificationBody: ReportStatusNotificationBody): Promise<void> {
@@ -4259,4 +4291,5 @@ class NullClient implements Client {
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
     getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> { return Promise.resolve({} as ProjectContextResult); }
     filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void { }
+    getCompletionContext(file: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures, token: vscode.CancellationToken): Promise<CopilotCompletionContextResult> { return Promise.resolve({} as CopilotCompletionContextResult); }
 }
