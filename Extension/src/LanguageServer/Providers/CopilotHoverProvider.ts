@@ -5,6 +5,8 @@
 import * as vscode from 'vscode';
 import { Position, ResponseError } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
+import { modelSelector } from '../../constants';
+import * as telemetry from '../../telemetry';
 import { DefaultClient, GetCopilotHoverInfoParams, GetCopilotHoverInfoRequest, GetCopilotHoverInfoResult } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CppSettings } from '../settings';
@@ -33,6 +35,22 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
         if (settings.hover === "disabled") {
             return undefined;
+        }
+
+        // Ensure the user has access to Copilot.
+        const vscodelm = (vscode as any).lm;
+        if (vscodelm) {
+            const [model] = await vscodelm.selectChatModels(modelSelector);
+            if (!model) {
+                return undefined;
+            }
+        }
+
+        if (settings.copilotHover === "default") {
+            // Check flight to make sure the feature is enabled.
+            if (!await telemetry.isFlightEnabled("CppCopilotHover")) {
+                return undefined;
+            }
         }
 
         const newHover = this.isNewHover(document, position);

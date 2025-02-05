@@ -1469,10 +1469,10 @@ async function onCopilotHover(): Promise<void> {
         vscode.LanguageModelChatMessage
             .User(requestInfo.content + locale)];
 
-    const [model] = await vscodelm.selectChatModels(modelSelector);
-
     let chatResponse: vscode.LanguageModelChatResponse | undefined;
     try {
+        const [model] = await vscodelm.selectChatModels(modelSelector);
+
         chatResponse = await model.sendRequest(
             messages,
             {},
