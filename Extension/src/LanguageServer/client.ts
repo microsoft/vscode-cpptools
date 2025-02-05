@@ -1316,8 +1316,7 @@ export class DefaultClient implements Client {
 
                 const settings: CppSettings = new CppSettings();
                 this.currentCopilotHoverEnabled = new PersistentWorkspaceState<string>("cpp.copilotHover", settings.copilotHover);
-                if (settings.copilotHover === "enabled" ||
-                    (settings.copilotHover === "default" && await telemetry.isFlightEnabled("CppCopilotHover"))) {
+                if (settings.copilotHover !== "disabled") {
                     this.copilotHoverProvider = new CopilotHoverProvider(this);
                     this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, this.copilotHoverProvider));
                 }
