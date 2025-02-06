@@ -1,5 +1,11 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.23.6: February 6, 2025
+### Bug Fixes
+* Fix symlink-related regression bugs. [#13214](https://github.com/microsoft/vscode-cpptools/issues/13214), [#13228](https://github.com/microsoft/vscode-cpptools/issues/13228)
+* Fix a regression bug when using 'Select IntelliSense Configuration'. [#13220](https://github.com/microsoft/vscode-cpptools/issues/13220)
+* Fix a regression bug with `files.associations` handling. [#13223](https://github.com/microsoft/vscode-cpptools/issues/13223)
+
 ## Version 1.23.5: January 28, 2025
 ### Enhancements
 * Modifications to the snippet completions to more closely match the snippets provided by TypeScript. [#4482](https://github.com/microsoft/vscode-cpptools/issues/4482)
