@@ -141,8 +141,6 @@ export class CppProperties {
     private knownCompilers?: KnownCompiler[];
     private defaultCStandard: string | null = null;
     private defaultCppStandard: string | null = null;
-    private defaultIncludes: string[] | null = null;
-    private defaultFrameworks?: string[];
     private defaultWindowsSdkVersion: string | null = null;
     private isCppPropertiesJsonVisible: boolean = false;
     private vcpkgIncludes: string[] = [];
@@ -377,9 +375,6 @@ export class CppProperties {
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {
             configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
-        }
-        if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
-            configuration.macFrameworkPath = this.defaultFrameworks;
         }
         if ((isUnset(settings.defaultWindowsSdkVersion) || settings.defaultWindowsSdkVersion === "") && this.defaultWindowsSdkVersion && process.platform === 'win32') {
             configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
@@ -967,13 +962,6 @@ export class CppProperties {
                         }
                         if (!configuration.windowsSdkVersion && !!this.defaultWindowsSdkVersion) {
                             configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
-                        }
-                        if (!origIncludePath && !!this.defaultIncludes) {
-                            const includePath: string[] = configuration.includePath || [];
-                            configuration.includePath = includePath.concat(this.defaultIncludes);
-                        }
-                        if (!configuration.macFrameworkPath && !!this.defaultFrameworks) {
-                            configuration.macFrameworkPath = this.defaultFrameworks;
                         }
                     }
                 } else {
