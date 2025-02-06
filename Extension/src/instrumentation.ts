@@ -72,3 +72,5 @@ if (isInstrumentationEnabled()) {
 
     services.init(require('vscode'));
 }
+
+(globalThis as any)["_vscode_"] = require('vscode');
