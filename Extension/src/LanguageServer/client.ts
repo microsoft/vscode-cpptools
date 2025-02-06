@@ -1134,10 +1134,9 @@ export class DefaultClient implements Client {
                     return ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, showButtonSender);
                 } else {
                     action = "select compiler";
-                    const newCompiler: string = util.isCl(paths[index]) ? "cl.exe" : paths[index];
-
+                    let newCompiler: string = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+                    newCompiler = newCompiler.replace(/[\\/]/g, preferredPathSeparator);
                     settings.defaultCompilerPath = newCompiler;
-                    settings.defaultCompilerPath = settings.defaultCompilerPath.replace(/[\\/]/g, preferredPathSeparator);
                     await this.configuration.updateCompilerPathIfSet(newCompiler);
                     void SessionState.trustedCompilerFound.set(true);
                 }
