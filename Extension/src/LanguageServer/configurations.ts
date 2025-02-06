@@ -120,8 +120,6 @@ export interface CompilerDefaults {
     knownCompilers: KnownCompiler[];
     cStandard: string;
     cppStandard: string;
-    includes: string[];
-    frameworks: string[];
     windowsSdkVersion: string;
     intelliSenseMode: string;
     trustedCompilerFound: boolean;
@@ -295,8 +293,6 @@ export class CppProperties {
         this.knownCompilers = compilerDefaults.knownCompilers;
         this.defaultCStandard = compilerDefaults.cStandard;
         this.defaultCppStandard = compilerDefaults.cppStandard;
-        this.defaultIncludes = compilerDefaults.includes;
-        this.defaultFrameworks = compilerDefaults.frameworks;
         this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
         this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode !== "" ? compilerDefaults.intelliSenseMode : undefined;
         this.trustedCompilerFound = compilerDefaults.trustedCompilerFound;
@@ -349,7 +345,7 @@ export class CppProperties {
     }
 
     private async applyDefaultIncludePathsAndFrameworks() {
-        if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
+        if (this.configurationIncomplete && this.vcpkgPathReady) {
             const configuration: Configuration | undefined = this.CurrentConfiguration;
             if (configuration) {
                 this.applyDefaultConfigurationValues(configuration);
