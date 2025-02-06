@@ -9,7 +9,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerArgs": "사용된 포함 또는 정의를 수정하기 위한 컴파일러 인수입니다. `-nostdinc++`, `-m32` 등 추가 공백으로 구분된 인수를 사용하는 인수는 배열에 별도의 인수로 입력해야 합니다(예: `--sysroot <arg>`의 경우 `\"--sysroot\", \"<arg>\"`를 사용하세요).",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cStandard": "IntelliSense에 사용할 C 언어 표준의 버전입니다. 참고: GNU 표준은 GNU 정의를 가져오기 위해 설정된 컴파일러를 쿼리하는 데만 사용되며, IntelliSense는 해당 C 표준 버전을 에뮬레이트합니다.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cppStandard": "IntelliSense에 사용할 C++ 언어 표준의 버전입니다. 참고: GNU 표준은 GNU 정의를 가져오기 위해 설정된 컴파일러를 쿼리하는 데만 사용되며, IntelliSense는 해당 C++ 표준 버전을 에뮬레이트합니다.",
-	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compileCommands": "작업 영역의 `compile_commands.json` 파일 전체 경로입니다.",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compileCommands": "작업 영역에 대한 `compile_commands.json` 파일의 전체 경로 또는 전체 경로 목록입니다.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.includePath": "포함된 헤더를 검색하는 동안 사용할 IntelliSense 엔진의 경로 목록입니다. 이러한 경로 검색은 비재귀적입니다. 재귀적 검색을 나타내려면 `**`를 지정합니다. 예를 들어 `${workspaceFolder}/**`는 모든 하위 디렉터리를 검색하지만 `${workspaceFolder}`는 하위 디렉터리를 검색하지 않습니다. 일반적으로 시스템 포함은 포함되지 않아야 하고 `C_Cpp.default.compilerPath`가 설정되어야 합니다.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.macFrameworkPath": "Mac 프레임워크에서 포함된 헤더를 검색하는 동안 사용할 IntelliSense 엔진의 경로 목록입니다. Mac 구성에서만 지원됩니다.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.windowsSdkVersion": "Windows에서 사용할 Windows SDK 포함 경로의 버전입니다(예: `10.0.17134.0`).",

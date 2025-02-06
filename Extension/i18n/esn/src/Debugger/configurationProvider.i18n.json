@@ -17,7 +17,7 @@
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"debugger.path.not.exists": "No se encuentra el depurador {0}. Se ha omitido la configuración de depuración de {1}.",
 	"build.and.debug.active.file": "Compilar y depurar el archivo activo",
-	"cl.exe.not.available": "La compilación y depuración de {0} solo se puede usar cuando VS Code se ejecuta desde el Símbolo del sistema para desarrolladores de Visual Studio.",
+	"cl.exe.not.available": "{0} solo se puede usar cuando VS Code se ejecuta desde {1}.",
 	"lldb.find.failed": "Falta la dependencia \"{0}\" para el ejecutable lldb-mi.",
 	"lldb.search.paths": "Buscado en:",
 	"lldb.install.help": "Para resolver este problema, instale XCode mediante App Store de Apple o instale las herramientas de línea de comandos de XCode ejecutando \"{0}\" en una ventana de terminal.",
