@@ -2,6 +2,7 @@
 
 ## Version 1.23.6: February 6, 2025
 ### Bug Fixes
+* Fix a bug with remote attach debugging. [#13137](https://github.com/microsoft/vscode-cpptools/issues/13137)
 * Fix symlink-related regression bugs. [#13214](https://github.com/microsoft/vscode-cpptools/issues/13214), [#13228](https://github.com/microsoft/vscode-cpptools/issues/13228)
 * Fix a regression bug when using 'Select IntelliSense Configuration'. [#13220](https://github.com/microsoft/vscode-cpptools/issues/13220)
 * Fix a regression bug with `files.associations` handling. [#13223](https://github.com/microsoft/vscode-cpptools/issues/13223)
