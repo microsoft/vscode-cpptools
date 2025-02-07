@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+import { ContextProviderApiV1 } from '@github/copilot-language-server';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as util from '../common';
@@ -32,6 +33,7 @@ export interface CopilotApi {
             cancellationToken: vscode.CancellationToken
         ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>
     ): Disposable;
+    getContextProviderAPI(version: string): Promise<ContextProviderApiV1 | undefined>;
 }
 
 export async function registerRelatedFilesProvider(): Promise<void> {

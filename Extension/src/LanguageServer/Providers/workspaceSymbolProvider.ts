@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { ResponseError } from 'vscode-languageclient';
-import { isExperimentEnabled } from '../../telemetry';
 import { DefaultClient, GetSymbolInfoRequest, LocalizeSymbolInformation, SymbolScope, WorkspaceSymbolParams } from '../client';
 import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
@@ -23,8 +22,7 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
         }
 
         const params: WorkspaceSymbolParams = {
-            query: query,
-            experimentEnabled: await isExperimentEnabled('CppTools1')
+            query: query
         };
 
         let symbols: LocalizeSymbolInformation[];
