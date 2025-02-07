@@ -184,7 +184,6 @@ export async function activate(): Promise<void> {
     ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
     disposables.push(vscode.window.onDidChangeTextEditorSelection((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorSelection(e))));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors((e) => clients.ActiveClient.enqueue(async () => onDidChangeVisibleTextEditors(e))));
-
     updateLanguageConfigurations();
 
     reportMacCrashes();
@@ -1469,10 +1468,10 @@ async function onCopilotHover(): Promise<void> {
         vscode.LanguageModelChatMessage
             .User(requestInfo.content + locale)];
 
-    const [model] = await vscodelm.selectChatModels(modelSelector);
-
     let chatResponse: vscode.LanguageModelChatResponse | undefined;
     try {
+        const [model] = await vscodelm.selectChatModels(modelSelector);
+
         chatResponse = await model.sendRequest(
             messages,
             {},

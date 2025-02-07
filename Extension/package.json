@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.23.5-main",
+    "version": "1.23.6-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -6590,6 +6590,7 @@
         "xml2js": "^0.6.2"
     },
     "dependencies": {
+        "@github/copilot-language-server": "^1.253.0",
         "@vscode/extension-telemetry": "^0.9.6",
         "chokidar": "^3.6.0",
         "comment-json": "^4.2.3",
