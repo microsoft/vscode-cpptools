@@ -1193,7 +1193,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     if (lines[0] === "LOG") {
         let crashLogLine: number = 0;
         for (; crashLogLine < lines.length; ++crashLogLine) {
-            if (lines[crashLogLine] == "ENDLOG") {
+            if (lines[crashLogLine] === "ENDLOG") {
                 break;
             }
             crashLog += lines[crashLogLine] + "\n";
