@@ -38,7 +38,6 @@ export function createProtocolFilter(): Middleware {
                         return;
                     }
                     // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
-                    client.onDidOpenTextDocument(document);
                     client.takeOwnership(document);
                     void sendMessage(document);
                 }
