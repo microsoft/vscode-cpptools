@@ -1,6 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
 ## Version 1.24.0: Febrary 10, 2025
+### New Feature
+* Add experimental support for Copilot descriptions in hover tooltips, controlled by the `C_Cpp.copilotHover` setting. This feature is currently off by default and may be subject to A/B experimentation. To opt-out of Copilot Hover experiments, set `C_Cpp.copilotHover` to `disabled`.
+
 ### Enhancement
 * Improve/fix the switch header/source feature. [#2635](https://github.com/microsoft/vscode-cpptools/issues/2635)
 
