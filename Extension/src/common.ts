@@ -1443,7 +1443,7 @@ export function findPowerShell(): string | undefined {
                     return name;
                 }
             } catch (e) {
-                return undefined;
+                // ignore, try next candidate
             }
         }
     }
