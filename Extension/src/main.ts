@@ -158,6 +158,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         log(localize("intellisense.disabled", "intelliSenseEngine is disabled"));
     }
 
+    // Send an instrumentation message upon activation.
     sendInstrumentation({
         name: "activate",
         context: { cpptools: '', end: '' }
