@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.24.0: Febrary 10, 2025
+## Version 1.24.0: Febrary 11, 2025
 ### New Feature
 * Add experimental support for Copilot descriptions in hover tooltips, controlled by the `C_Cpp.copilotHover` setting. This feature is currently off by default and may be subject to A/B experimentation. To opt-out of Copilot Hover experiments, set `C_Cpp.copilotHover` to `disabled`.
 
@@ -8,6 +8,7 @@
 * Improve/fix the switch header/source feature. [#2635](https://github.com/microsoft/vscode-cpptools/issues/2635)
 
 ### Bug Fixes
+* Fix an IntelliSense crash in `build_sections`. [#12666](https://github.com/microsoft/vscode-cpptools/issues/12666), [#12956](https://github.com/microsoft/vscode-cpptools/issues/12956)
 * Fix a bug in which hundreds of custom configuration requests could be sent on startup before the configuration provider has registered. [#13166](https://github.com/microsoft/vscode-cpptools/issues/13166)
 * Fix handling of the `-framework` compiler argument. [#13204](https://github.com/microsoft/vscode-cpptools/issues/13204)
 * Fix a potential race between didChange and didOpen. [PR #13209](https://github.com/microsoft/vscode-cpptools/pull/13209)
