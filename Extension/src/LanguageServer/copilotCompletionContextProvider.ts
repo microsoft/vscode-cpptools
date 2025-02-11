@@ -72,7 +72,8 @@ export class CopilotCompletionContextProvider implements ContextResolver<CodeSni
     private static readonly providerId = 'ms-vscode.cpptools';
     private readonly completionContextCache: Map<string, CacheEntry> = new Map();
     private static readonly defaultCppDocumentSelector: DocumentSelector = [{ language: 'cpp' }, { language: 'c' }, { language: 'cuda-cpp' }];
-    private static readonly defaultTimeBudgetFactor: number = 0.5;
+    // A percentage expressed as an integer number, i.e. 50 means 50%.
+    private static readonly defaultTimeBudgetFactor: number = 50;
     private static readonly defaultMaxCaretDistance = 4096;
     private completionContextCancellation = new vscode.CancellationTokenSource();
     private contextProviderDisposable: vscode.Disposable | undefined;
@@ -177,7 +178,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<CodeSni
     private async fetchTimeBudgetFactor(context: ResolveRequest): Promise<number> {
         try {
             const budgetFactor = context.activeExperiments.get(CopilotCompletionContextProvider.CppCodeSnippetsTimeBudgetFactor);
-            return (budgetFactor as number) ?? CopilotCompletionContextProvider.defaultTimeBudgetFactor;
+            return ((budgetFactor as number) ?? CopilotCompletionContextProvider.defaultTimeBudgetFactor) / 100.0;
         } catch (e) {
             console.warn(`fetchTimeBudgetFactor(): error fetching ${CopilotCompletionContextProvider.CppCodeSnippetsTimeBudgetFactor}, using default: `, e);
             return CopilotCompletionContextProvider.defaultTimeBudgetFactor;
@@ -186,8 +187,8 @@ export class CopilotCompletionContextProvider implements ContextResolver<CodeSni
 
     private async fetchMaxDistanceToCaret(context: ResolveRequest): Promise<number> {
         try {
-            const budgetFactor = context.activeExperiments.get(CopilotCompletionContextProvider.CppCodeSnippetsMaxDistanceToCaret);
-            return (budgetFactor as number) ?? CopilotCompletionContextProvider.defaultMaxCaretDistance;
+            const maxDistance = context.activeExperiments.get(CopilotCompletionContextProvider.CppCodeSnippetsMaxDistanceToCaret);
+            return (maxDistance as number) ?? CopilotCompletionContextProvider.defaultMaxCaretDistance;
         } catch (e) {
             console.warn(`fetchMaxDistanceToCaret(): error fetching ${CopilotCompletionContextProvider.CppCodeSnippetsMaxDistanceToCaret}, using default: `, e);
             return CopilotCompletionContextProvider.defaultMaxCaretDistance;
