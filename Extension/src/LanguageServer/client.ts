@@ -1351,6 +1351,10 @@ export class DefaultClient implements Client {
                     this.copilotHoverProvider = new CopilotHoverProvider(this);
                     this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, this.copilotHoverProvider));
                 }
+
+                if (settings.copilotHover !== this.currentCopilotHoverEnabled.Value) {
+                    this.currentCopilotHoverEnabled.Value = settings.copilotHover;
+                }
                 this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, instrument(this.hoverProvider)));
                 this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, instrument(this.inlayHintsProvider)));
                 this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, instrument(new RenameProvider(this))));
