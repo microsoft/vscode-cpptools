@@ -1191,17 +1191,18 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     let crashLog: string = "";
     let crashStackStartLine: number = 0;
     if (lines[0] === "LOG") {
-        let crashLogLine: number = 0;
+        let crashLogLine: number = 1;
         for (; crashLogLine < lines.length; ++crashLogLine) {
             if (lines[crashLogLine] === "ENDLOG") {
                 break;
             }
             crashLog += lines[crashLogLine] + "\n";
         }
+        crashLog = crashLog.trimEnd();
         crashStackStartLine = ++crashLogLine;
     }
     if (lines[crashStackStartLine].startsWith("SIG")) {
-        signalType = lines[0];
+        signalType = lines[crashStackStartLine];
     } else {
         // The signal type may fail to be written.
         signalType = "SIG-??\n"; // Intentionally different from SIG-? from cpptools.
@@ -1290,7 +1291,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
         if (lines.length >= 6 && util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
             const out: vscode.OutputChannel = getCrashCallStacksChannel();
-            out.appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}${crashLog}`);
+            out.appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}\n\n${crashLog}\n\n`);
         }
     }
 
