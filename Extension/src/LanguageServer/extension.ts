@@ -1224,7 +1224,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             if (ret?.output === funcStr) {
                 ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
             }
-            if (ret !== undefined && ret.succeeded && !ret.output.includes("Could not open input file")) {
+            if (ret !== undefined && ret.succeeded && !ret.output.startsWith("Could not open input file")) {
                 funcStr = ret.output;
                 funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
                 funcStr = funcStr.replace(/std::basic_/g, "std::");
