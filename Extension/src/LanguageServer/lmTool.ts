@@ -72,43 +72,43 @@ export interface ProjectContext {
 
 export async function getProjectContext(uri: vscode.Uri, context: { flags: Record<string, unknown> }, cancellationToken: vscode.CancellationToken, telemetryProperties: Record<string, string>, telemetryMetrics: Record<string, number>): Promise<ProjectContext | undefined> {
     try {
-        const projectContext = await checkDuration<ChatContextResult | undefined>(async () => await getClients()?.ActiveClient?.getChatContext(uri, cancellationToken) ?? undefined);
-        telemetryMetrics["projectContextDuration"] = projectContext.duration;
-        if (!projectContext.result) {
+        const chatContext = await checkDuration<ChatContextResult | undefined>(async () => await getClients()?.ActiveClient?.getChatContext(uri, cancellationToken) ?? undefined);
+        telemetryMetrics["projectContextDuration"] = chatContext.duration;
+        if (!chatContext.result) {
             return undefined;
         }
 
-        const originalStandardVersion = projectContext.result.standardVersion;
+        const originalStandardVersion = chatContext.result.standardVersion;
 
-        formatChatContext(projectContext.result);
+        formatChatContext(chatContext.result);
 
         const result: ProjectContext = {
-            language: projectContext.result.language,
-            standardVersion: projectContext.result.standardVersion,
-            compiler: projectContext.result.compiler,
-            targetPlatform: projectContext.result.targetPlatform,
-            targetArchitecture: projectContext.result.targetArchitecture
+            language: chatContext.result.language,
+            standardVersion: chatContext.result.standardVersion,
+            compiler: chatContext.result.compiler,
+            targetPlatform: chatContext.result.targetPlatform,
+            targetArchitecture: chatContext.result.targetArchitecture
         };
 
-        if (projectContext.result.language) {
-            telemetryProperties["language"] = projectContext.result.language;
+        if (result.language) {
+            telemetryProperties["language"] = result.language;
         }
-        if (projectContext.result.compiler) {
-            telemetryProperties["compiler"] = projectContext.result.compiler;
+        if (result.compiler) {
+            telemetryProperties["compiler"] = result.compiler;
         }
-        if (projectContext.result.standardVersion) {
-            telemetryProperties["standardVersion"] = projectContext.result.standardVersion;
+        if (result.standardVersion) {
+            telemetryProperties["standardVersion"] = result.standardVersion;
         }
         else {
             if (originalStandardVersion) {
                 telemetryProperties["originalStandardVersion"] = originalStandardVersion;
             }
         }
-        if (projectContext.result.targetPlatform) {
-            telemetryProperties["targetPlatform"] = projectContext.result.targetPlatform;
+        if (result.targetPlatform) {
+            telemetryProperties["targetPlatform"] = result.targetPlatform;
         }
-        if (projectContext.result.targetArchitecture) {
-            telemetryProperties["targetArchitecture"] = projectContext.result.targetArchitecture;
+        if (result.targetArchitecture) {
+            telemetryProperties["targetArchitecture"] = result.targetArchitecture;
         }
 
         return result;
