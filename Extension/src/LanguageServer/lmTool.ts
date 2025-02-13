@@ -9,7 +9,7 @@ import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as logger from '../logger';
 import * as telemetry from '../telemetry';
-import { ChatContextResult, ProjectContextResult } from './client';
+import { ChatContextResult } from './client';
 import { getClients } from './extension';
 import { checkDuration } from './utils';
 
@@ -51,7 +51,7 @@ const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: str
     }
 };
 
-function formatChatContext(context: ChatContextResult | ProjectContextResult): void {
+function formatChatContext(context: ChatContextResult): void {
     type KnownKeys = 'language' | 'standardVersion' | 'compiler' | 'targetPlatform';
     for (const key in knownValues) {
         const knownKey = key as KnownKeys;
@@ -68,75 +68,11 @@ export interface ProjectContext {
     compiler: string;
     targetPlatform: string;
     targetArchitecture: string;
-    compilerArguments: Record<string, string>;
 }
 
-export function getCompilerArgumentFilterMap(compiler: string, context: { flags: Record<string, unknown> }): Record<string, string> | undefined {
-    // The copilotcppXXXCompilerArgumentFilters are maps.
-    // The keys are regex strings and the values, if not empty, are the prompt text to use when no arguments are found.
-    let filterMap: Record<string, string> | undefined;
+export async function getProjectContext(uri: vscode.Uri, context: { flags: Record<string, unknown> }, cancellationToken: vscode.CancellationToken, telemetryProperties: Record<string, string>, telemetryMetrics: Record<string, number>): Promise<ProjectContext | undefined> {
     try {
-        switch (compiler) {
-            case MSVC:
-                if (context.flags.copilotcppMsvcCompilerArgumentFilter !== undefined) {
-                    filterMap = JSON.parse(context.flags.copilotcppMsvcCompilerArgumentFilter as string);
-                }
-                break;
-            case Clang:
-                if (context.flags.copilotcppClangCompilerArgumentFilter !== undefined) {
-                    filterMap = JSON.parse(context.flags.copilotcppClangCompilerArgumentFilter as string);
-                }
-                break;
-            case GCC:
-                if (context.flags.copilotcppGccCompilerArgumentFilter !== undefined) {
-                    filterMap = JSON.parse(context.flags.copilotcppGccCompilerArgumentFilter as string);
-                }
-                break;
-        }
-    }
-    catch {
-        // Intentionally swallow any exception.
-    }
-    return filterMap;
-}
-
-function filterCompilerArguments(compiler: string, compilerArguments: string[], context: { flags: Record<string, unknown> }, telemetryProperties: Record<string, string>): Record<string, string> {
-    const filterMap = getCompilerArgumentFilterMap(compiler, context);
-    if (filterMap === undefined) {
-        return {};
-    }
-
-    const combinedArguments = compilerArguments.join(' ');
-    const result: Record<string, string> = {};
-    const filteredCompilerArguments: string[] = [];
-    for (const key in filterMap) {
-        if (!key) {
-            continue;
-        }
-        const filter = new RegExp(key, 'g');
-        const filtered = combinedArguments.match(filter);
-        if (filtered) {
-            filteredCompilerArguments.push(...filtered);
-            result[key] = filtered[filtered.length - 1];
-        }
-    }
-
-    if (filteredCompilerArguments.length > 0) {
-        // Telemetry to learn about the argument distribution. The filtered arguments are expected to be non-PII.
-        telemetryProperties["filteredCompilerArguments"] = filteredCompilerArguments.join(',');
-    }
-
-    const filters = Object.keys(filterMap).filter(filter => !!filter).join(',');
-    if (filters) {
-        telemetryProperties["filters"] = filters;
-    }
-
-    return result;
-}
-
-export async function getProjectContext(uri: vscode.Uri, context: { flags: Record<string, unknown> }, telemetryProperties: Record<string, string>, telemetryMetrics: Record<string, number>): Promise<ProjectContext | undefined> {
-    try {
-        const projectContext = await checkDuration<ProjectContextResult | undefined>(async () => await getClients()?.ActiveClient?.getProjectContext(uri) ?? undefined);
+        const projectContext = await checkDuration<ChatContextResult | undefined>(async () => await getClients()?.ActiveClient?.getChatContext(uri, cancellationToken) ?? undefined);
         telemetryMetrics["projectContextDuration"] = projectContext.duration;
         if (!projectContext.result) {
             return undefined;
@@ -151,8 +87,7 @@ export async function getProjectContext(uri: vscode.Uri, context: { flags: Recor
             standardVersion: projectContext.result.standardVersion,
             compiler: projectContext.result.compiler,
             targetPlatform: projectContext.result.targetPlatform,
-            targetArchitecture: projectContext.result.targetArchitecture,
-            compilerArguments: {}
+            targetArchitecture: projectContext.result.targetArchitecture
         };
 
         if (projectContext.result.language) {
@@ -175,8 +110,6 @@ export async function getProjectContext(uri: vscode.Uri, context: { flags: Recor
         if (projectContext.result.targetArchitecture) {
             telemetryProperties["targetArchitecture"] = projectContext.result.targetArchitecture;
         }
-        telemetryMetrics["compilerArgumentCount"] = projectContext.result.fileContext.compilerArguments.length;
-        result.compilerArguments = filterCompilerArguments(projectContext.result.compiler, projectContext.result.fileContext.compilerArguments, context, telemetryProperties);
 
         return result;
     }
