@@ -759,10 +759,7 @@ export interface ProcessReturnType {
 export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
     // Do not use CppSettings to avoid circular require()
     if (skipLogging === undefined || !skipLogging) {
-        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-        if (getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 5) {
-            getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}`);
-        }
+        getOutputChannelLogger().appendLineAtLevel(5, `$ ${program} ${args.join(' ')}`);
     }
     const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, skipLogging, cancellationToken);
     const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
@@ -789,10 +786,6 @@ interface ProcessOutput {
 async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
     const result = new ManualPromise<ProcessOutput>();
 
-    // Do not use CppSettings to avoid circular require()
-    const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-    const loggingLevel: number = (skipLogging === undefined || !skipLogging) ? getNumericLoggingLevel(settings.get<string>("loggingLevel")) : 0;
-
     let proc: child_process.ChildProcess;
     if (await isExecutable(program)) {
         proc = child_process.spawn(`.${isWindows ? '\\' : '/'}${path.basename(program)}`, args, { shell: true, cwd: path.dirname(program) });
@@ -817,8 +810,8 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
     if (proc.stdout) {
         proc.stdout.on('data', data => {
             const str: string = data.toString();
-            if (loggingLevel > 0) {
-                getOutputChannelLogger().append(str);
+            if (skipLogging === undefined || !skipLogging) {
+                getOutputChannelLogger().appendAtLevel(1, str);
             }
             stdout += str;
             if (continueOn) {
@@ -1574,6 +1567,10 @@ export function hasMsvcEnvironment(): boolean {
 function isIntegral(str: string): boolean {
     const regex = /^-?\d+$/;
     return regex.test(str);
+}
+
+export function getLoggingLevel() {
+    return getNumericLoggingLevel(vscode.workspace.getConfiguration("C_Cpp", null).get<string>("loggingLevel"));
 }
 
 export function getNumericLoggingLevel(loggingLevel: string | undefined): number {
