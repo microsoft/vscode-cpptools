@@ -554,7 +554,7 @@ export interface ChatContextResult {
     compiler: string;
     targetPlatform: string;
     targetArchitecture: string;
-    testFrameworks: string[];
+    usedTestFrameworks: string[];
 }
 
 interface FolderFilesEncodingChanged {
