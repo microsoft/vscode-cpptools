@@ -1224,7 +1224,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             if (ret?.output === funcStr) {
                 ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
             }
-            if (ret !== undefined && ret.succeeded) {
+            if (ret !== undefined && ret.succeeded && !ret.output.startsWith("Could not open input file")) {
                 funcStr = ret.output;
                 funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
                 funcStr = funcStr.replace(/std::basic_/g, "std::");
@@ -1235,7 +1235,11 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             }
         }
         if (funcStr.includes("/")) {
-            funcStr = "<func>";
+            funcStr = "<funcForwardSlash>";
+        } else if (funcStr.includes("\\")) {
+            funcStr = "<funcBackSlash>";
+        } else if (funcStr.includes("@")) {
+            funcStr = "<funcAt>";
         } else if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
             continue; // Skip these on early frames.
         }
@@ -1246,8 +1250,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
             const pendingOffset: string = line.substring(offsetPos2);
-            if (!pendingOffset.includes("/")) {
+            if (!pendingOffset.includes("/") && !pendingOffset.includes("\\") && !pendingOffset.includes("@")) {
                 crashCallStack += pendingOffset;
+            } else {
+                crashCallStack += "<offsetUnexpectedCharacter>";
             }
             const startAddressPos: number = line.indexOf("0x");
             if (startAddressPos === -1 || startAddressPos >= startPos) {
@@ -1263,8 +1269,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 continue; // unexpected
             }
             const pendingOffset: string = line.substring(offsetPos2, endPos);
-            if (!pendingOffset.includes("/")) {
+            if (!pendingOffset.includes("/") && !pendingOffset.includes("\\") && !pendingOffset.includes("@")) {
                 crashCallStack += pendingOffset;
+            } else {
+                crashCallStack += "<offsetUnexpectedCharacter>";
             }
         }
     }
@@ -1281,6 +1289,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
 
     if (data.length > 8192) { // The API has an 8k limit.
         data = data.substring(0, 8191) + "…";
+    }
+
+    if (addressData.includes("/") || addressData.includes("\\") || addressData.includes("@")) {
+        addressData = "<addressDataUnexpectedCharacter>";
     }
 
     logCppCrashTelemetry(data, addressData);
