@@ -1,6 +1,12 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.24.0: Febrary 11, 2025
+## Version 1.24.1: February 13, 2025
+### Bug Fixes
+* Fix random IntelliSense process crashes on Linux/macOS when `C_Cpp.intelliSenseCacheSize` is > 0. [#12668](https://github.com/microsoft/vscode-cpptools/issues/12668)
+* Fix a crash when processing Copilot snippets.
+* Fix a crash when using Copilot hover.
+
+## Version 1.24.0: February 11, 2025
 ### New Feature
 * Add experimental support for Copilot descriptions in hover tooltips, controlled by the `C_Cpp.copilotHover` setting. This feature is currently off by default and may be subject to A/B experimentation. To opt-out of Copilot Hover experiments, set `C_Cpp.copilotHover` to `disabled`.
 
