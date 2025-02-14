@@ -1349,7 +1349,7 @@ export class DefaultClient implements Client {
                 this.currentCopilotHoverEnabled = new PersistentWorkspaceState<string>("cpp.copilotHover", settings.copilotHover);
                 if (settings.copilotHover !== "disabled") {
                     this.copilotHoverProvider = new CopilotHoverProvider(this);
-                    this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, this.copilotHoverProvider));
+                    this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, instrument(this.copilotHoverProvider)));
                 }
 
                 if (settings.copilotHover !== this.currentCopilotHoverEnabled.Value) {
