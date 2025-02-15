@@ -45,21 +45,6 @@ export function isInstrumentationEnabled(): boolean {
     return !!(global as any).instrumentation;
 }
 
-// if the instrumentation code is not globally loaded *yet*, then load it now.
-if (!isInstrumentationEnabled()) {
-    // pull the launch settings from the environment if the variable has been set.
-    if (services.launchSettings === undefined) {
-        services.launchSettings = process.env.PERFECTO_LAUNCH_SETTINGS ? JSON.parse(process.env.PERFECTO_LAUNCH_SETTINGS) as Record<string, any> : { tests: [], collector: undefined };
-    }
-
-    // this loads the bootstrap module (global-instrumentation-support) which adds some global functions.
-    if (services.launchSettings?.bootstrapModule) {
-        // work around for webpack to load the bootstrap module.
-        /* eslint no-eval: "off"  */
-        eval(`require`)(services.launchSettings.bootstrapModule);
-    }
-}
-
 // If the instrumentation object was *actually* loaded then we can set the services from the global object.
 // Having this separate ensures that this module is wired up to the global object.
 // It's not included in the previous block because if something else loads the instrumentation code first
