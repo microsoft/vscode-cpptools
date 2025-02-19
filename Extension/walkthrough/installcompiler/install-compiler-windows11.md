@@ -2,7 +2,7 @@
 <p data-loc-id="walkthrough.windows.text1">If you&#39;re doing C++ development for Windows, we recommend installing the Microsoft Visual C++ (MSVC) compiler.</p>
 <ol>
 <li><p data-loc-id="walkthrough.windows.text2">To install MSVC, open the VS Code terminal (CTRL + `) and paste in the following command:
-<pre><code style="white-space: pre-wrap;">winget install Microsoft.VisualStudio.2022.BuildTools --force --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows11SDK.22000"</code></pre>
+<pre><code style="white-space: pre-wrap;">winget install Microsoft.VisualStudio.2022.BuildTools --force --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100"</code></pre>
 </li>
 <blockquote>
 <p><strong data-loc-id="walkthrough.windows.note1">Note</strong>: <span data-loc-id="walkthrough.windows.note1.text">You can use the C++ toolset from Visual Studio Build Tools along with Visual Studio Code to compile, build, and verify any C++ codebase as long as you also have a valid Visual Studio license (either Community, Pro, or Enterprise) that you are actively using to develop that C++ codebase.</span></p>
