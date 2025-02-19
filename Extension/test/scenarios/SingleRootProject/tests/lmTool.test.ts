@@ -159,12 +159,12 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             "standardVersion": 'C++20',
             "targetPlatform": 'Windows',
             "targetArchitecture": 'x64',
-            'testFrameworks': 'gtest,catch2'
+            'testFrameworks': 'gtest, catch2'
         })));
         ok(result, 'result should not be undefined');
         const text = result.content[0] as vscode.LanguageModelTextPart;
         ok(text, 'result should contain a text part');
-        const traits_text = `The user is working on a C++ project. The project uses language version C++20. The project compiles using the MSVC compiler. The project targets the Windows platform. The project targets the x64 architecture. The active document contains the content of the file 'undefined' which is located in a directory structure where other files are including headers for the following C++ test frameworks: gtest, catch2 . `;
+        const traits_text = `The user is working on a C++ project. The project uses language version C++20. The project compiles using the MSVC compiler. The project targets the Windows platform. The project targets the x64 architecture. The project uses the following C++ test frameworks: gtest, catch2. `;
         ok(text.value === traits_text);
     });
 
@@ -187,7 +187,8 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
                 standardVersion: 'c++20',
                 compiler: compiler,
                 targetPlatform: 'windows',
-                targetArchitecture: 'x64'
+                targetArchitecture: 'x64',
+                usedTestFrameworks: []
             }
         });
 
@@ -228,7 +229,8 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
                 standardVersion: 'gnu++17',
                 compiler: 'javac',
                 targetPlatform: 'arduino',
-                targetArchitecture: 'bar'
+                targetArchitecture: 'bar',
+                usedTestFrameworks: []
             }
         });
         const telemetryProperties: Record<string, string> = {};

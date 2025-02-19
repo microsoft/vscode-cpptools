@@ -169,8 +169,8 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
                 telemetryProperties["targetArchitecture"] = chatContext.targetArchitecture;
             }
             if (chatContext.usedTestFrameworks?.length > 0) {
-                contextString += `The active document contains the content of the file '${currentDoc.fileName}' which is located in a directory structure where other files are including headers for the following C++ test frameworks: ${chatContext.usedTestFrameworks.join(', ')} . `;
-                telemetryProperties["testFrameworks"] = chatContext.usedTestFrameworks.join(',');
+                contextString += `The project uses the following C++ test frameworks: ${chatContext.usedTestFrameworks.join(', ')}. `;
+                telemetryProperties["testFrameworks"] = chatContext.usedTestFrameworks.join(', ');
             }
             return contextString;
         }
