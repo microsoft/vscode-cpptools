@@ -1169,6 +1169,10 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
+function containsUnexpectedTelemetryCharacter(str: string): boolean {
+    return str.includes("/") || str.includes("\\") || str.includes("@");
+}
+
 async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
     if (err) {
         if (err.code === "ENOENT") {
@@ -1193,10 +1197,15 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     if (lines[0] === "LOG") {
         let crashLogLine: number = 1;
         for (; crashLogLine < lines.length; ++crashLogLine) {
-            if (lines[crashLogLine] === "ENDLOG") {
+            const pendingCrashLogLine = lines[crashLogLine];
+            if (pendingCrashLogLine === "ENDLOG") {
                 break;
             }
-            crashLog += lines[crashLogLine] + "\n";
+            if (!containsUnexpectedTelemetryCharacter(pendingCrashLogLine)) {
+                crashLog += pendingCrashLogLine + "\n";
+            } else {
+                crashLog += "<unexpectedCharacter>\n";
+            }
         }
         crashLog = crashLog.trimEnd();
         crashStackStartLine = ++crashLogLine;
@@ -1266,7 +1275,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
             const pendingOffset: string = line.substring(offsetPos2);
-            if (!pendingOffset.includes("/") && !pendingOffset.includes("\\") && !pendingOffset.includes("@")) {
+            if (!containsUnexpectedTelemetryCharacter(pendingOffset)) {
                 crashCallStack += pendingOffset;
             } else {
                 crashCallStack += "<offsetUnexpectedCharacter>";
@@ -1285,7 +1294,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 continue; // unexpected
             }
             const pendingOffset: string = line.substring(offsetPos2, endPos);
-            if (!pendingOffset.includes("/") && !pendingOffset.includes("\\") && !pendingOffset.includes("@")) {
+            if (!containsUnexpectedTelemetryCharacter(pendingOffset)) {
                 crashCallStack += pendingOffset;
             } else {
                 crashCallStack += "<offsetUnexpectedCharacter>";
@@ -1309,7 +1318,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         data = data.substring(0, 8191) + "…";
     }
 
-    if (addressData.includes("/") || addressData.includes("\\") || addressData.includes("@")) {
+    if (containsUnexpectedTelemetryCharacter(addressData)) {
         addressData = "<addressDataUnexpectedCharacter>";
     }
 
