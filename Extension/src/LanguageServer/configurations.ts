@@ -1575,7 +1575,7 @@ export class CppProperties {
                 result = result.slice(1, -1);
             }
             // On Windows, isAbsolute does not handle root paths without a slash, such as "C:"
-            const isWindowsRootPath: boolean = (process.platform === 'win32' && /^[a-zA-Z]:$/.test(result));
+            const isWindowsRootPath: boolean = process.platform === 'win32' && /^[a-zA-Z]:$/.test(result);
             // Make sure all paths result to an absolute path.
             // Do not add the root path to an unresolved env variable.
             if (!isWindowsRootPath && !result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
