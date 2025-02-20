@@ -9,12 +9,13 @@
       "name": "Microsoft Corporation"
     },
     "license": "SEE LICENSE IN LICENSE.txt",
-    "version": "1.3.0",
+    "version": "1.3.1",
     "engines": {
         "vscode": "^1.48.0"
     },
     "categories": [
-        "Extension Packs"
+        "Extension Packs",
+        "Programming Languages"
     ],
     "activationEvents": [
         "onCommand:ms-vscode.cpptools-extension-pack.unavailableCommand"
