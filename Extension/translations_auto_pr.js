@@ -6,8 +6,8 @@ const Octokit = require('@octokit/rest')
 const path = require('path');
 const parseGitConfig = require('parse-git-config');
 
-const branchName = 'localization';
-const mergeTo = 'main';
+const branchName = 'localization_test';
+const mergeTo = 'seanmcm/updateYarnFeb21_2025_test';
 const commitComment = 'Localization - Translated Strings';
 const pullRequestTitle = '[Auto] Localization - Translated Strings';
 
