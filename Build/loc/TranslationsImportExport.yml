@@ -50,8 +50,11 @@ extends:
         steps:
         - task: NodeTool@0
           inputs:
-            versionSpec: '18.x'
+            versionSpec: '20.x'
           displayName: 'Install Node.js'
+
+        - name: Delete .npmrc file
+          run: Remove-Item -Path $env:USERPROFILE\.npmrc -Force
 
         - task: CmdLine@2
           inputs:
