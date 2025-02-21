@@ -3744,7 +3744,7 @@
                             },
                             "svdPath": {
                                 "type": "string",
-                                "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description",
+                                "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description%",
                                 "default": ""
                             },
                             "showDisplayString": {
