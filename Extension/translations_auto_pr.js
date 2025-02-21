@@ -179,7 +179,7 @@ if (existingUserEmail === undefined) {
     cp.execSync(`git config --local user.email "${existingUserEmail}"`);
 }
 
-console.log(`pushing to remove branch (git push -f origin ${branchName})`);
+console.log(`pushing to remote branch (git push -f origin ${branchName})`);
 cp.execSync(`git push -f origin ${branchName}`);
 
 console.log("Checking if there is already a pull request...");
