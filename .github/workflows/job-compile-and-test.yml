@@ -19,19 +19,19 @@ jobs:
     runs-on: ${{ inputs.runner-env }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Node.js 20
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Delete .npmrc file (Windows)
-        if: runner.os == "Windows"
+        if: ${{ runner.os == 'Windows' }}
         run: Remove-Item -Path $env:USERPROFILE\.npmrc -Force
 
       - name: Delete .npmrc file (Unix)
-        if: runner.os != "Windows"
+        if: ${{ runner.os != 'Windows' }}
         run: rm -f $HOME/.npmrc
 
       - name: Install Dependencies
