@@ -293,9 +293,9 @@
     universal-user-agent "^6.0.0"
 
 "@octokit/endpoint@^9.0.1":
-  version "9.0.5"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@octokit/endpoint/-/endpoint-9.0.5.tgz"
-  integrity sha1-5sDuaE4wdhTAL8asEidMUNpGXEQ=
+  version "9.0.6"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@octokit/endpoint/-/endpoint-9.0.6.tgz#114d912108fe692d8b139cfe7fc0846dfd11b6c0"
+  integrity sha1-EU2RIQj+aS2LE5z+f8CEbf0RtsA=
   dependencies:
     "@octokit/types" "^13.1.0"
     universal-user-agent "^6.0.0"
