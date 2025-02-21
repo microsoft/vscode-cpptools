@@ -55,10 +55,10 @@
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@eslint/js/-/js-8.57.1.tgz#de633db3ec2ef6a3c89e2f19038063e8a122e2c2"
   integrity sha1-3mM9s+wu9qPIni8ZA4Bj6KEi4sI=
 
-"@github/copilot-language-server@1.266.0":
-  version "1.266.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server/-/copilot-language-server-1.266.0.tgz#fbdbc4843a036e9f5b7c4f88024e17fa4bb8fb1d"
-  integrity sha1-+9vEhDoDbp9bfE+IAk4X+ku4+x0=
+"@github/copilot-language-server@^1.266.0":
+  version "1.273.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server/-/copilot-language-server-1.273.0.tgz#561094fc0d832acae173c40549cd95d27a648fbc"
+  integrity sha1-VhCU/A2DKsrhc8QFSc2V0npkj7w=
   dependencies:
     vscode-languageserver-protocol "^3.17.5"
 
@@ -3906,10 +3906,10 @@ possible-typed-array-names@^1.0.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/possible-typed-array-names/-/possible-typed-array-names-1.1.0.tgz#93e3582bc0e5426586d9d07b79ee40fc841de4ae"
   integrity sha1-k+NYK8DlQmWG2dB7ee5A/IQd5K4=
 
-postcss@8.5.1||7.0.16, postcss@^7.0.16:
-  version "8.5.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/postcss/-/postcss-8.5.1.tgz#e2272a1f8a807fafa413218245630b5db10a3214"
-  integrity sha1-4icqH4qAf6+kEyGCRWMLXbEKMhQ=
+postcss@^7.0.16, postcss@^8.5.3:
+  version "8.5.3"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/postcss/-/postcss-8.5.3.tgz#1463b6f1c7fb16fe258736cba29a2de35237eafb"
+  integrity sha1-FGO28cf7Fv4lhzbLopot41I36vs=
   dependencies:
     nanoid "^3.3.8"
     picocolors "^1.1.1"

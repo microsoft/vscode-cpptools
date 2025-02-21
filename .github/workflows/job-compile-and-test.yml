@@ -26,14 +26,6 @@ jobs:
         with:
           node-version: 20
 
-      - name: Delete .npmrc file (Windows)
-        if: ${{ runner.os == 'Windows' }}
-        run: Remove-Item -Path $env:USERPROFILE\.npmrc -Force
-
-      - name: Delete .npmrc file (Unix)
-        if: ${{ runner.os != 'Windows' }}
-        run: rm -f $HOME/.npmrc
-
       - name: Install Dependencies
         run: yarn install ${{ inputs.yarn-args }}
         working-directory: Extension
