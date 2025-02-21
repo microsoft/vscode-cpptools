@@ -6613,7 +6613,7 @@
         "which": "^2.0.2"
     },
     "resolutions": {
-        "postcss": "^8.5.3",
+        "postcss": "^8.4.31",
         "gulp-typescript/**/glob-parent": "^5.1.2"
     }
 }
