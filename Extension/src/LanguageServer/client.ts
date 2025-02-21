@@ -553,6 +553,7 @@ export interface ChatContextResult {
     compiler: string;
     targetPlatform: string;
     targetArchitecture: string;
+    usedTestFrameworks: string[];
 }
 
 export interface FileContextResult {
