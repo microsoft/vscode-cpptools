@@ -108,14 +108,14 @@ console.log(`Ensure main ref is up to date locally (git fetch)`);
 cp.execSync('git fetch');
 
 // Remove old localization branch, if any
-if (hasBranch("localization")) {
-	console.log(`Remove old localization branch, if any (git branch -D localization)`);
-	cp.execSync('git branch -D localization');
+if (hasBranch("localization_test")) {
+	console.log(`Remove old localization_test branch, if any (git branch -D localization_test)`);
+	cp.execSync('git branch -D localization_test');
 }
 
 // Check out local branch
 console.log(`Creating local branch for changes (git checkout -b ${branchName})`);
-cp.execSync('git checkout -b localization');
+cp.execSync('git checkout -b localization_test');
 
 // Add changed files.
 console.log("Adding changed file (git add .)");
@@ -213,6 +213,6 @@ octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
     console.log(`Switching back to main (git checkout main)`);
     cp.execSync('git checkout main');
 
-    console.log(`Remove localization branch (git branch -D localization)`);
-    cp.execSync('git branch -D localization');
+    console.log(`Remove localization_test branch (git branch -D localization_test)`);
+    cp.execSync('git branch -D localization_test');
 });
