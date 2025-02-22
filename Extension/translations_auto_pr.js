@@ -3,9 +3,10 @@
 const fs = require("fs-extra");
 const cp = require("child_process");
 let Octokit;
-import('@octokit/rest').then(module => {
+(async () => {
+    const module = await import('@octokit/rest');
     Octokit = module.Octokit;
-});
+})();
 const path = require('path');
 const parseGitConfig = require('parse-git-config');
 
