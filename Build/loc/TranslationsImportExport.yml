@@ -53,11 +53,6 @@ extends:
             versionSpec: '20.x'
           displayName: 'Install Node.js'
 
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: Remove-Item -Path $env:USERPROFILE\.npmrc -Force
-
         - task: CmdLine@2
           inputs:
             script: 'cd Extension && yarn install'
