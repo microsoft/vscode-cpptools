@@ -809,6 +809,7 @@
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
+    "c_cpp.configuration.reduceRecursiveIncludes.markdownDescription": "Indicates whether recursive include paths should be reduced to only those currently referenced by the translation unit. If enabled, performance is impacted if the database needs to be populated to determine headers used. If disabled, performance may be impacted due to passing a large number of include paths to the IntelliSense process.",
     "c_cpp.configuration.debugger.useBacktickCommandSubstitution.markdownDescription": {
         "message": "If `true`, debugger shell command substitution will use obsolete backtick ``(`)``.",
         "comment": [

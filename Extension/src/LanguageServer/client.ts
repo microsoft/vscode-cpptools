@@ -1574,6 +1574,7 @@ export class DefaultClient implements Client {
             enhancedColorization: workspaceSettings.isEnhancedColorizationEnabled,
             intellisenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
             intellisenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
+            reduceRecursiveIncludes: workspaceSettings.reduceRecursiveIncludes,
             referencesMaxConcurrentThreads: workspaceSettings.referencesMaxConcurrentThreads,
             referencesMaxCachedProcesses: workspaceSettings.referencesMaxCachedProcesses,
             referencesMaxMemory: workspaceSettings.referencesMaxMemory,

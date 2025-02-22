@@ -973,6 +973,12 @@
                             ]
                         },
                         "scope": "resource"
+                    },
+                    "C_Cpp.reduceRecursiveIncludes": {
+                        "type": "boolean",
+                        "default": true,
+                        "markdownDescription": "%c_cpp.configuration.reduceRecursiveIncludes.markdownDescription%",
+                        "scope": "window"
                     }
                 }
             },
