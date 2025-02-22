@@ -2,11 +2,6 @@
 
 const fs = require("fs-extra");
 const cp = require("child_process");
-let Octokit;
-(async () => {
-    const module = await import('@octokit/rest');
-    Octokit = module.Octokit;
-})();
 const path = require('path');
 const parseGitConfig = require('parse-git-config');
 
@@ -187,19 +182,17 @@ console.log(`pushing to remote branch (git push -f origin ${branchName})`);
 cp.execSync(`git push -f origin ${branchName}`);
 
 console.log("Checking if there is already a pull request...");
-const octokit = new Octokit({auth: authToken});
-octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
-    let alreadyHasPullRequest = false;
-    if (data) {
-        data.forEach((pr) => {
-            alreadyHasPullRequest = alreadyHasPullRequest || (pr.title === pullRequestTitle);
-        });
-    }
+
+(async function() {
+    const { Octokit } = await import("@octokit/rest");
+    const octokit = new Octokit({ auth: authToken });
+    const { data } = await octokit.pulls.list({ owner: repoOwner, repo: repoName });
+    let alreadyHasPullRequest = data && data.some(pr => pr.title === pullRequestTitle);
 
     // If not already present, create a PR against our remote branch.
     if (!alreadyHasPullRequest) {
         console.log("There is not already a pull request.  Creating one.");
-        octokit.pulls.create({ body:"", owner: repoOwner, repo: repoName, title: pullRequestTitle, head: branchName, base: mergeTo });
+        await octokit.pulls.create({ body:"", owner: repoOwner, repo: repoName, title: pullRequestTitle, head: branchName, base: mergeTo });
     } else {
         console.log("There is already a pull request.");
     }
@@ -216,4 +209,4 @@ octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
 
     console.log(`Remove localization_test branch (git branch -D localization_test)`);
     cp.execSync('git branch -D localization_test');
-});
+})();
