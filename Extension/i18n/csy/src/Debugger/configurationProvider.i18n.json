@@ -38,7 +38,7 @@
 	"incorrect.files.type.copyFile": "„files“ musí být řetězec nebo pole řetězců v {0} krocích.",
 	"missing.properties.ssh": "Pro kroky ssh se vyžadují \"host\" a \"command\".",
 	"missing.properties.shell": "Pro kroky prostředí se vyžaduje příkaz command.",
-	"deploy.step.type.not.supported": "Typ kroku nasazení {0} se nepodporuje.",
+	"deploy.step.type.not.supported": "Typ kroku nasazení{0}se nepodporuje.",
 	"unexpected.os": "Neočekávaný typ operačního systému",
 	"path.to.pipe.program": "úplná cesta k programu kanálu, třeba {0}",
 	"enable.pretty.printing": "Povolit přehledný výpis pro {0}",
