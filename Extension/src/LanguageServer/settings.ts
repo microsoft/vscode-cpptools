@@ -156,6 +156,7 @@ export interface SettingsParams {
     enhancedColorization: boolean;
     intellisenseMaxCachedProcesses: number | null;
     intellisenseMaxMemory: number | null;
+    reduceRecursiveIncludes: boolean;
     referencesMaxConcurrentThreads: number | null;
     referencesMaxCachedProcesses: number | null;
     referencesMaxMemory: number | null;
@@ -481,6 +482,7 @@ export class CppSettings extends Settings {
         return super.Section.get<string>("cppCodeSnippetsFeatureNames");
     }
     public get formattingEngine(): string { return this.getAsString("formatting"); }
+    public get reduceRecursiveIncludes(): boolean { return this.getAsBoolean("reduceRecursiveIncludes"); }
     public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
     public get vcFormatIndentMultiLineRelativeTo(): string { return this.getAsString("vcFormat.indent.multiLineRelativeTo"); }
     public get vcFormatIndentWithinParentheses(): string { return this.getAsString("vcFormat.indent.withinParentheses"); }
