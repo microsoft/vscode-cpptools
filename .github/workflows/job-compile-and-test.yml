@@ -19,12 +19,12 @@ jobs:
     runs-on: ${{ inputs.runner-env }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Use Node.js 16
-        uses: actions/setup-node@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
 
       - name: Install Dependencies
         run: yarn install ${{ inputs.yarn-args }}
