@@ -12,7 +12,7 @@ import * as logger from '../logger';
 import * as telemetry from '../telemetry';
 import { GetIncludesResult } from './client';
 import { getClients } from './extension';
-import { getCompilerArgumentFilterMap, getProjectContext } from './lmTool';
+import { getProjectContext } from './lmTool';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -43,23 +43,20 @@ export async function registerRelatedFilesProvider(): Promise<void> {
             for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
                 api.registerRelatedFilesProvider(
                     { extensionId: util.extensionContext.extension.id, languageId },
-                    async (uri: vscode.Uri, context: { flags: Record<string, unknown> }) => {
+                    async (uri: vscode.Uri, context: { flags: Record<string, unknown> }, cancellationToken: vscode.CancellationToken) => {
                         const start = performance.now();
                         const telemetryProperties: Record<string, string> = {};
                         const telemetryMetrics: Record<string, number> = {};
                         try {
                             const getIncludesHandler = async () => (await getIncludes(uri, 1))?.includedFiles.map(file => vscode.Uri.file(file)) ?? [];
                             const getTraitsHandler = async () => {
-                                const projectContext = await getProjectContext(uri, context, telemetryProperties, telemetryMetrics);
+                                const projectContext = await getProjectContext(uri, context, cancellationToken, telemetryProperties, telemetryMetrics);
 
                                 if (!projectContext) {
                                     return undefined;
                                 }
 
-                                let traits: CopilotTrait[] = [
-                                    { name: "intelliSenseDisclaimer", value: '', includeInPrompt: true, promptTextOverride: `IntelliSense is currently configured with the following compiler information. It reflects the active configuration, and the project may have more configurations targeting different platforms.` },
-                                    { name: "intelliSenseDisclaimerBeginning", value: '', includeInPrompt: true, promptTextOverride: `Beginning of IntelliSense information.` }
-                                ];
+                                let traits: CopilotTrait[] = [];
                                 if (projectContext.language) {
                                     traits.push({ name: "language", value: projectContext.language, includeInPrompt: true, promptTextOverride: `The language is ${projectContext.language}.` });
                                 }
@@ -75,49 +72,6 @@ export async function registerRelatedFilesProvider(): Promise<void> {
                                 if (projectContext.targetArchitecture) {
                                     traits.push({ name: "targetArchitecture", value: projectContext.targetArchitecture, includeInPrompt: true, promptTextOverride: `This build targets ${projectContext.targetArchitecture}.` });
                                 }
-
-                                if (projectContext.compiler) {
-                                    // We will process compiler arguments based on copilotcppXXXCompilerArgumentFilters and copilotcppCompilerArgumentDirectAskMap feature flags.
-                                    // The copilotcppXXXCompilerArgumentFilters are maps. The keys are regex strings for filtering and the values, if not empty,
-                                    // are the prompt text to use when no arguments are found.
-                                    // copilotcppCompilerArgumentDirectAskMap map individual matched argument to a prompt text.
-                                    // For duplicate matches, the last one will be used.
-                                    const filterMap = getCompilerArgumentFilterMap(projectContext.compiler, context);
-                                    if (filterMap !== undefined) {
-                                        const directAskMap: Record<string, string> = context.flags.copilotcppCompilerArgumentDirectAskMap ? JSON.parse(context.flags.copilotcppCompilerArgumentDirectAskMap as string) : {};
-                                        let directAsks: string = '';
-                                        const remainingArguments: string[] = [];
-
-                                        for (const key in filterMap) {
-                                            if (!key) {
-                                                continue;
-                                            }
-
-                                            const matchedArgument = projectContext.compilerArguments[key] as string;
-                                            if (matchedArgument?.length > 0) {
-                                                if (directAskMap[matchedArgument]) {
-                                                    directAsks += `${directAskMap[matchedArgument]} `;
-                                                } else {
-                                                    remainingArguments.push(matchedArgument);
-                                                }
-                                            } else if (filterMap[key]) {
-                                                // Use the prompt text in the absence of argument.
-                                                directAsks += `${filterMap[key]} `;
-                                            }
-                                        }
-
-                                        if (remainingArguments.length > 0) {
-                                            const compilerArgumentsValue = remainingArguments.join(", ");
-                                            traits.push({ name: "compilerArguments", value: compilerArgumentsValue, includeInPrompt: true, promptTextOverride: `The compiler arguments include: ${compilerArgumentsValue}.` });
-                                        }
-
-                                        if (directAsks) {
-                                            traits.push({ name: "directAsks", value: directAsks, includeInPrompt: true, promptTextOverride: directAsks });
-                                        }
-                                    }
-                                }
-
-                                traits.push({ name: "intelliSenseDisclaimerEnd", value: '', includeInPrompt: true, promptTextOverride: `End of IntelliSense information.` });
 
                                 const includeTraitsArray = context.flags.copilotcppIncludeTraits ? context.flags.copilotcppIncludeTraits as string[] : [];
                                 const includeTraits = new Set(includeTraitsArray);
