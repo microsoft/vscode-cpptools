@@ -2,7 +2,7 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import { CodeSnippet, ContextResolver, ResolveRequest } from '@github/copilot-language-server';
+import { ContextResolver, ResolveRequest, SupportedContextItem } from '@github/copilot-language-server';
 import { randomUUID } from 'crypto';
 import * as vscode from 'vscode';
 import { DocumentSelector } from 'vscode-languageserver-protocol';
@@ -12,6 +12,7 @@ import { CopilotCompletionContextResult } from './client';
 import { CopilotCompletionContextTelemetry } from './copilotCompletionContextTelemetry';
 import { getCopilotApi } from './copilotProviders';
 import { clients } from './extension';
+import { getProjectContext, ProjectContext } from './lmTool';
 import { CppSettings } from './settings';
 
 export interface SnippetEntry {
@@ -30,6 +31,11 @@ class DefaultValueFallback extends Error {
 class CancellationError extends Error {
     static readonly Canceled = "Canceled";
     constructor() { super(CancellationError.Canceled); }
+}
+
+class InternalCancellationError extends Error {
+    static readonly Canceled = "Canceled";
+    constructor() { super(InternalCancellationError.Canceled); }
 }
 
 class CopilotContextProviderException extends Error {
@@ -68,7 +74,7 @@ export enum CopilotCompletionKind {
 
 type CacheEntry = [string, CopilotCompletionContextResult];
 
-export class CopilotCompletionContextProvider implements ContextResolver<CodeSnippet> {
+export class CopilotCompletionContextProvider implements ContextResolver<SupportedContextItem> {
     private static readonly providerId = 'ms-vscode.cpptools';
     private readonly completionContextCache: Map<string, CacheEntry> = new Map();
     private static readonly defaultCppDocumentSelector: DocumentSelector = [{ language: 'cpp' }, { language: 'c' }, { language: 'cuda-cpp' }];
@@ -79,16 +85,16 @@ export class CopilotCompletionContextProvider implements ContextResolver<CodeSni
     private contextProviderDisposable: vscode.Disposable | undefined;
 
     private async waitForCompletionWithTimeoutAndCancellation<T>(promise: Promise<T>, defaultValue: T | undefined,
-        timeout: number, token: vscode.CancellationToken): Promise<[T | undefined, CopilotCompletionKind]> {
+        timeout: number, copilotToken: vscode.CancellationToken): Promise<[T | undefined, CopilotCompletionKind]> {
         const defaultValuePromise = new Promise<T>((_resolve, reject) => setTimeout(() => {
-            if (token.isCancellationRequested) {
+            if (copilotToken.isCancellationRequested) {
                 reject(new CancellationError());
             } else {
                 reject(new DefaultValueFallback());
             }
         }, timeout));
         const cancellationPromise = new Promise<T>((_, reject) => {
-            token.onCancellationRequested(() => {
+            copilotToken.onCancellationRequested(() => {
                 reject(new CancellationError());
             });
         });
@@ -111,7 +117,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<CodeSni
     // Get the completion context with a timeout and a cancellation token.
     // The cancellationToken indicates that the value should not be returned nor cached.
     private async getCompletionContextWithCancellation(context: ResolveRequest, featureFlag: CopilotCompletionContextFeatures,
-        startTime: number, out: Logger, telemetry: CopilotCompletionContextTelemetry, token: vscode.CancellationToken):
+        startTime: number, out: Logger, telemetry: CopilotCompletionContextTelemetry, internalToken: vscode.CancellationToken):
         Promise<CopilotCompletionContextResult | undefined> {
         const documentUri = context.documentContext.uri;
         const caretOffset = context.documentContext.offset;
@@ -123,8 +129,19 @@ export class CopilotCompletionContextProvider implements ContextResolver<CodeSni
             const client = clients.getClientFor(docUri);
             if (!client) { throw WellKnownErrors.clientNotFound(); }
             const getCompletionContextStartTime = performance.now();
+
+            // Start collection of project traits concurrently with the completion context computation.
+            const telemetryProperties: Record<string, string> = {};
+            const telemetryMetrics: Record<string, number> = {};
+            const projectContextPromise = (async (): Promise<ProjectContext | undefined> => {
+                const getProjectContextStartTime = performance.now();
+                const projectContext = await getProjectContext(docUri, { flags: {} }, telemetryProperties, telemetryMetrics);
+                telemetryMetrics["projectContextElapsedMs"] = CopilotCompletionContextProvider.getRoundedDuration(getProjectContextStartTime);
+                return projectContext;
+            })();
+
             const copilotCompletionContext: CopilotCompletionContextResult =
-                await client.getCompletionContext(docUri, caretOffset, featureFlag, token);
+                await client.getCompletionContext(docUri, caretOffset, featureFlag, internalToken);
             telemetry.addRequestId(copilotCompletionContext.requestId);
             logMessage += ` (id:${copilotCompletionContext.requestId})`;
             if (!copilotCompletionContext.isResultMissing) {
@@ -141,30 +158,35 @@ export class CopilotCompletionContextProvider implements ContextResolver<CodeSni
                 telemetry.addResponseMetadata(false, copilotCompletionContext.snippets.length, copilotCompletionContext.translationUnitUri, copilotCompletionContext.caretOffset,
                     copilotCompletionContext.featureFlag);
                 telemetry.addComputeContextElapsed(CopilotCompletionContextProvider.getRoundedDuration(getCompletionContextStartTime));
-                return resultMismatch ? undefined : copilotCompletionContext;
+                if (resultMismatch) { return undefined; }
+
+                // Collect project traits and if any add them to the completion context.
+                const projectContext = await projectContextPromise;
+                if (projectContext?.standardVersion) {
+                    copilotCompletionContext.snippets.push({ name: "C++ language standard version", value: `This project uses the ${projectContext.standardVersion} language standard version.` });
+                }
+                telemetry.addTraitsMetadata(projectContext, telemetryProperties, telemetryMetrics);
+
+                return copilotCompletionContext;
             } else {
                 logMessage += `, result is missing`;
                 telemetry.addResponseMetadata(true);
                 return undefined;
             }
         } catch (e) {
-            if (e instanceof CancellationError) {
+            if (e instanceof vscode.CancellationError || (e as Error)?.message === CancellationError.Canceled) {
                 telemetry.addInternalCanceled(CopilotCompletionContextProvider.getRoundedDuration(startTime));
                 logMessage += `, (internal cancellation)`;
-                throw e;
-            } else if (e instanceof vscode.CancellationError || (e as Error)?.message === CancellationError.Canceled) {
-                telemetry.addCopilotCanceled(CopilotCompletionContextProvider.getRoundedDuration(startTime));
-                logMessage += `, (copilot cancellation)`;
-                throw e;
+                throw InternalCancellationError;
             }
 
             if (e instanceof WellKnownErrors) {
                 telemetry.addWellKnownError(e.message);
             }
 
+            telemetry.addError();
             const err = e as Error;
             out.appendLine(`Copilot: getCompletionContextWithCancellation(${documentUri}:${caretOffset}): Error: '${err?.message}', stack '${err?.stack}`);
-            telemetry.addError();
             return undefined;
         } finally {
             out.appendLine(logMessage);
@@ -234,7 +256,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<CodeSni
         this.completionContextCache.delete(fileUri);
     }
 
-    public async resolve(context: ResolveRequest, copilotCancel: vscode.CancellationToken): Promise<CodeSnippet[]> {
+    public async resolve(context: ResolveRequest, copilotCancel: vscode.CancellationToken): Promise<SupportedContextItem[]> {
         const resolveStartTime = performance.now();
         const out: Logger = getOutputChannelLogger();
         let logMessage = `Copilot: resolve(${context.documentContext.uri}:${context.documentContext.offset}): `;
@@ -271,7 +293,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<CodeSni
             // Handle cancellation.
             if (copilotCompletionContextKind === CopilotCompletionKind.Canceled) {
                 const duration: number = CopilotCompletionContextProvider.getRoundedDuration(resolveStartTime);
-                telemetry.addInternalCanceled(duration);
+                telemetry.addCopilotCanceled(duration);
                 throw new CancellationError();
             }
             telemetry.addCompletionContextKind(copilotCompletionContextKind);
@@ -281,7 +303,12 @@ export class CopilotCompletionContextProvider implements ContextResolver<CodeSni
             return copilotCompletionContext?.snippets ?? [];
         } catch (e: any) {
             if (e instanceof CancellationError) { throw e; }
-
+            // A new incoming snippet request from Copilot arrived and this request
+            // is now obsolete, give up immediately with no exception.
+            if (e instanceof InternalCancellationError) {
+                logMessage += `, (internal cancellation) `;
+                return [];
+            }
             // For any other exception's type, it is an error.
             telemetry.addError();
             throw e;
@@ -306,6 +333,8 @@ export class CopilotCompletionContextProvider implements ContextResolver<CodeSni
         try {
             const copilotApi = await getCopilotApi();
             if (!copilotApi) { throw new CopilotContextProviderException("getCopilotApi() returned null."); }
+            const hasGetContextProviderAPI = "getContextProviderAPI" in copilotApi;
+            if (!hasGetContextProviderAPI) { throw new CopilotContextProviderException("getContextProviderAPI() is not available."); }
             const contextAPI = await copilotApi.getContextProviderAPI("v1");
             if (!contextAPI) { throw new CopilotContextProviderException("getContextProviderAPI(v1) returned null."); }
             this.contextProviderDisposable = contextAPI.registerContextProvider({

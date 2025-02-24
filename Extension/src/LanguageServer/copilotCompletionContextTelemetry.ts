@@ -95,6 +95,16 @@ export class CopilotCompletionContextTelemetry {
         if (maxCaretDistance !== undefined) { this.addMetric('request.maxCaretDistance', maxCaretDistance); }
     }
 
+    public addTraitsMetadata(projectContext: any, telemetryProperties: Record<string, string>, telemetryMetrics: Record<string, number>): void {
+        this.addProperty("traits.present", projectContext ? "true" : "false");
+        for (const key in telemetryMetrics) {
+            this.addMetric(`traits.${key}`, telemetryMetrics[key]);
+        }
+        for (const key in telemetryProperties) {
+            this.addProperty(`traits.${key}`, telemetryProperties[key]);
+        }
+    }
+
     public send(postfix?: string): void {
         try {
             const eventName = CopilotCompletionContextTelemetry.copilotEventName + (postfix ? `/${postfix}` : '');
