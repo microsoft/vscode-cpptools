@@ -1764,6 +1764,10 @@ export class DefaultClient implements Client {
                     });
                 }
 
+                if (changedSettings['codeAnalysis.runAutomatically'] !== undefined || changedSettings['codeAnalysis.clangTidy.enabled'] !== undefined) {
+                    ui.refreshCodeAnalysisText(this.model.isRunningCodeAnalysis.Value);
+                }
+
                 const showButtonSender: string = "settingsChanged";
                 if (changedSettings["default.configurationProvider"] !== undefined) {
                     void ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, showButtonSender);

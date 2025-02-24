@@ -44,7 +44,7 @@ jobs:
     displayName: Run VSCE to package vsix
     inputs:
       filename: vsce
-      arguments: package --yarn -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}
+      arguments: package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}
       workingFolder: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
 
   - task: Npm@0
