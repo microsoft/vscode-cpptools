@@ -145,20 +145,19 @@ describe('copilotProviders Tests', () => {
         ok(result.traits === undefined, 'result.traits should be undefined');
     });
 
-    const projectContextNoArgs: ProjectContext = {
+    const projectContext: ProjectContext = {
         language: 'C++',
         standardVersion: 'C++20',
         compiler: 'MSVC',
         targetPlatform: 'Windows',
-        targetArchitecture: 'x64',
-        compilerArguments: {}
+        targetArchitecture: 'x64'
     };
 
     it('provides standardVersion trait by default.', async () => {
         arrange({
             vscodeExtension: vscodeExtension,
             getIncludeFiles: { includedFiles },
-            projectContext: projectContextNoArgs,
+            projectContext: projectContext,
             rootUri,
             flags: {}
         });
@@ -173,15 +172,21 @@ describe('copilotProviders Tests', () => {
         ok(result.traits.find((trait) => trait.name === 'standardVersion')?.value === 'C++20', 'result.traits should have a standardVersion trait with value "C++20"');
         ok(result.traits.find((trait) => trait.name === 'standardVersion')?.includeInPrompt, 'result.traits should have a standardVersion trait with includeInPrompt true');
         ok(result.traits.find((trait) => trait.name === 'standardVersion')?.promptTextOverride === 'This project uses the C++20 language standard.', 'result.traits should have a standardVersion trait with promptTextOverride');
+        ok(telemetryStub.calledOnce, 'Telemetry should be called once');
+        ok(telemetryStub.calledWithMatch('RelatedFilesProvider', sinon.match({
+            'traits': 'standardVersion'
+        }), sinon.match({
+            'duration': sinon.match.number
+        })));
     });
 
     it('provides traits per copilotcppIncludeTraits.', async () => {
         arrange({
             vscodeExtension: vscodeExtension,
             getIncludeFiles: { includedFiles },
-            projectContext: projectContextNoArgs,
+            projectContext: projectContext,
             rootUri,
-            flags: { copilotcppIncludeTraits: ['intelliSenseDisclaimer', 'intelliSenseDisclaimerBeginning', 'language', 'compiler', 'targetPlatform', 'targetArchitecture', 'intelliSenseDisclaimerEnd'] }
+            flags: { copilotcppIncludeTraits: ['language', 'compiler', 'targetPlatform', 'targetArchitecture'] }
         });
         await moduleUnderTest.registerRelatedFilesProvider();
 
@@ -189,13 +194,7 @@ describe('copilotProviders Tests', () => {
 
         ok(result, 'result should be defined');
         ok(result.traits, 'result.traits should be defined');
-        ok(result.traits.length === 8, 'result.traits should have 8 traits if none are excluded');
-        ok(result.traits.find((trait) => trait.name === 'intelliSenseDisclaimer'), 'result.traits should have a intellisense trait');
-        ok(result.traits.find((trait) => trait.name === 'intelliSenseDisclaimer')?.includeInPrompt, 'result.traits should have a intellisense trait with includeInPrompt true');
-        ok(result.traits.find((trait) => trait.name === 'intelliSenseDisclaimer')?.promptTextOverride === 'IntelliSense is currently configured with the following compiler information. It reflects the active configuration, and the project may have more configurations targeting different platforms.', 'result.traits should have a intellisense trait with promptTextOverride');
-        ok(result.traits.find((trait) => trait.name === 'intelliSenseDisclaimerBeginning'), 'result.traits should have a intellisenseBegin trait');
-        ok(result.traits.find((trait) => trait.name === 'intelliSenseDisclaimerBeginning')?.includeInPrompt, 'result.traits should have a intellisenseBegin trait with includeInPrompt true');
-        ok(result.traits.find((trait) => trait.name === 'intelliSenseDisclaimerBeginning')?.promptTextOverride === 'Beginning of IntelliSense information.', 'result.traits should have a intellisenseBegin trait with promptTextOverride');
+        ok(result.traits.length === 5, 'result.traits should have 5 traits if none are excluded');
         ok(result.traits.find((trait) => trait.name === 'language'), 'result.traits should have a language trait');
         ok(result.traits.find((trait) => trait.name === 'language')?.value === 'C++', 'result.traits should have a language trait with value "C++"');
         ok(result.traits.find((trait) => trait.name === 'language')?.includeInPrompt, 'result.traits should have a language trait with includeInPrompt true');
@@ -204,10 +203,6 @@ describe('copilotProviders Tests', () => {
         ok(result.traits.find((trait) => trait.name === 'compiler')?.value === 'MSVC', 'result.traits should have a compiler trait with value "MSVC"');
         ok(result.traits.find((trait) => trait.name === 'compiler')?.includeInPrompt, 'result.traits should have a compiler trait with includeInPrompt true');
         ok(result.traits.find((trait) => trait.name === 'compiler')?.promptTextOverride === 'This project compiles using MSVC.', 'result.traits should have a compiler trait with promptTextOverride');
-        ok(result.traits.find((trait) => trait.name === 'standardVersion'), 'result.traits should have a standardVersion trait');
-        ok(result.traits.find((trait) => trait.name === 'standardVersion')?.value === 'C++20', 'result.traits should have a standardVersion trait with value "C++20"');
-        ok(result.traits.find((trait) => trait.name === 'standardVersion')?.includeInPrompt, 'result.traits should have a standardVersion trait with includeInPrompt true');
-        ok(result.traits.find((trait) => trait.name === 'standardVersion')?.promptTextOverride === 'This project uses the C++20 language standard.', 'result.traits should have a standardVersion trait with promptTextOverride');
         ok(result.traits.find((trait) => trait.name === 'targetPlatform'), 'result.traits should have a targetPlatform trait');
         ok(result.traits.find((trait) => trait.name === 'targetPlatform')?.value === 'Windows', 'result.traits should have a targetPlatform trait with value "Windows"');
         ok(result.traits.find((trait) => trait.name === 'targetPlatform')?.includeInPrompt, 'result.traits should have a targetPlatform trait with includeInPrompt true');
@@ -216,9 +211,12 @@ describe('copilotProviders Tests', () => {
         ok(result.traits.find((trait) => trait.name === 'targetArchitecture')?.value === 'x64', 'result.traits should have a targetArchitecture trait with value "x64"');
         ok(result.traits.find((trait) => trait.name === 'targetArchitecture')?.includeInPrompt, 'result.traits should have a targetArchitecture trait with includeInPrompt true');
         ok(result.traits.find((trait) => trait.name === 'targetArchitecture')?.promptTextOverride === 'This build targets x64.', 'result.traits should have a targetArchitecture trait with promptTextOverride');
-        ok(result.traits.find((trait) => trait.name === 'intelliSenseDisclaimerEnd'), 'result.traits should have a intellisenseEnd trait');
-        ok(result.traits.find((trait) => trait.name === 'intelliSenseDisclaimerEnd')?.includeInPrompt, 'result.traits should have a intellisenseEnd trait with includeInPrompt true');
-        ok(result.traits.find((trait) => trait.name === 'intelliSenseDisclaimerEnd')?.promptTextOverride === 'End of IntelliSense information.', 'result.traits should have a intellisenseEnd trait with promptTextOverride');
+        ok(telemetryStub.calledWithMatch('RelatedFilesProvider', sinon.match({
+            'includeTraits': 'language,compiler,targetPlatform,targetArchitecture',
+            'traits': 'language,compiler,standardVersion,targetPlatform,targetArchitecture'
+        }), sinon.match({
+            'duration': sinon.match.number
+        })));
     });
 
     it('handles errors during provider registration.', async () => {
@@ -228,175 +226,5 @@ describe('copilotProviders Tests', () => {
 
         ok(vscodeGetExtensionsStub.calledOnce, 'vscode.extensions.getExtension should be called once');
         ok(mockCopilotApi.registerRelatedFilesProvider.notCalled, 'registerRelatedFilesProvider should not be called');
-    });
-
-    const projectContext: ProjectContext = {
-        language: 'C++',
-        standardVersion: 'C++17',
-        compiler: 'MSVC',
-        targetPlatform: 'Windows',
-        targetArchitecture: 'x64',
-        compilerArguments: { "/std:c++\d+": '/std:c++17', "/GR-?": '/GR-', "/EH[ascr-]+": '/EHs-c-', "/await": '/await' }
-    };
-
-    it('provides compiler argument traits.', async () => {
-        arrange({
-            vscodeExtension: vscodeExtension,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
-            projectContext: projectContext,
-            rootUri: vscode.Uri.file('C:\\src\\my_project'),
-            flags: {
-                copilotcppIncludeTraits: ['compilerArguments'],
-                copilotcppMsvcCompilerArgumentFilter: '{"/std:c++\d+": "", "/GR-?": "", "/EH[ascr-]+": "", "/await": ""}'
-            }
-        });
-        await moduleUnderTest.registerRelatedFilesProvider();
-
-        const result = await callbackPromise;
-
-        ok(result, 'result should be defined');
-        ok(result.traits, 'result.traits should be defined');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments'), 'result.traits should have a compiler arguments trait');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.value === '/std:c++17, /GR-, /EHs-c-, /await', 'result.traits should have a compiler arguments trait with value "/std:c++17, /GR-, /EHs-c-, /await"');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.includeInPrompt, 'result.traits should have a compiler arguments trait with includeInPrompt true');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.promptTextOverride === 'The compiler arguments include: /std:c++17, /GR-, /EHs-c-, /await.', 'result.traits should have a compiler arguments trait with promptTextOverride');
-        ok(!result.traits.find((trait) => trait.name === 'directAsks'), 'result.traits should not have a direct asks trait');
-    });
-
-    it('provide direct ask traits of compiler arguments.', async () => {
-        arrange({
-            vscodeExtension: vscodeExtension,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
-            projectContext: projectContext,
-            rootUri: vscode.Uri.file('C:\\src\\my_project'),
-            flags: {
-                copilotcppIncludeTraits: ['directAsks', 'compilerArguments'],
-                copilotcppMsvcCompilerArgumentFilter: '{"/std:c++\d+": "", "/await": "", "/GR-?": "", "/EH[ascr-]+": ""}',
-                copilotcppCompilerArgumentDirectAskMap: '{"/GR-": "Do not generate code using RTTI keywords.", "/EHs-c-": "Do not generate code using exception handling keywords."}'
-            }
-        });
-        await moduleUnderTest.registerRelatedFilesProvider();
-
-        const result = await callbackPromise;
-
-        ok(result, 'result should be defined');
-        ok(result.traits, 'result.traits should be defined');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments'), 'result.traits should have a compiler arguments trait');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.value === '/std:c++17, /await', 'result.traits should have a compiler arguments trait with value "/std:c++17, /await"');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.includeInPrompt, 'result.traits should have a compiler arguments trait with includeInPrompt true');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.promptTextOverride === 'The compiler arguments include: /std:c++17, /await.', 'result.traits should have a compiler arguments trait with promptTextOverride');
-        ok(result.traits.find((trait) => trait.name === 'directAsks'), 'result.traits should have a direct asks trait');
-        ok(result.traits.find((trait) => trait.name === 'directAsks')?.value === 'Do not generate code using RTTI keywords. Do not generate code using exception handling keywords. ', 'result.traits should have a direct asks value');
-        ok(result.traits.find((trait) => trait.name === 'directAsks')?.includeInPrompt, 'result.traits should have a direct asks trait with includeInPrompt true');
-        ok(result.traits.find((trait) => trait.name === 'directAsks')?.promptTextOverride === 'Do not generate code using RTTI keywords. Do not generate code using exception handling keywords. ', 'result.traits should have a direct ask trait with promptTextOverride');
-        ok(telemetryStub.calledOnce, 'Telemetry should be called once');
-        ok(telemetryStub.calledWithMatch('RelatedFilesProvider', sinon.match({
-            "includeTraits": 'directAsks,compilerArguments',
-            'traits': 'standardVersion,compilerArguments,directAsks'
-        }), sinon.match({
-            'duration': sinon.match.number
-        })));
-    });
-
-    it('ignore compilerArguments trait if empty.', async () => {
-        arrange({
-            vscodeExtension: vscodeExtension,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
-            projectContext: projectContext,
-            rootUri: vscode.Uri.file('C:\\src\\my_project'),
-            flags: {
-                copilotcppIncludeTraits: ['directAsks', 'compilerArguments'],
-                copilotcppMsvcCompilerArgumentFilter: '{"/std:c++\d+": "", "/await": "", "/GR-?": "", "/EH[ascr-]+": ""}',
-                copilotcppCompilerArgumentDirectAskMap: '{"/GR-": "abc.", "/EHs-c-": "def.", "/std:c++17": "ghi.", "/await": "jkl."}'
-            }
-        });
-        await moduleUnderTest.registerRelatedFilesProvider();
-
-        const result = await callbackPromise;
-
-        ok(result, 'result should be defined');
-        ok(result.traits, 'result.traits should be defined');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments') === undefined, 'result.traits should not have a compiler arguments trait');
-        ok(result.traits.find((trait) => trait.name === 'directAsks'), 'result.traits should have a direct asks trait');
-        ok(telemetryStub.calledOnce, 'Telemetry should be called once');
-        ok(telemetryStub.calledWithMatch('RelatedFilesProvider', sinon.match({
-            "includeTraits": 'directAsks,compilerArguments',
-            'traits': 'standardVersion,directAsks'
-        })));
-    });
-
-    it('uses only last argument from the duplicates.', async () => {
-        arrange({
-            vscodeExtension: vscodeExtension,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
-            projectContext: {
-                language: 'C++',
-                standardVersion: 'C++20',
-                compiler: 'MSVC',
-                targetPlatform: 'Windows',
-                targetArchitecture: 'x64',
-                compilerArguments: { "/std:c++\d+": '/std:c++20', "/await": '/await' }
-            },
-            rootUri: vscode.Uri.file('C:\\src\\my_project'),
-            flags: {
-                copilotcppIncludeTraits: ['compilerArguments'],
-                copilotcppMsvcCompilerArgumentFilter: '{"/std:c++\d+": "", "/await": ""}'
-            }
-        });
-        await moduleUnderTest.registerRelatedFilesProvider();
-
-        const result = await callbackPromise;
-
-        ok(result, 'result should be defined');
-        ok(result.traits, 'result.traits should be defined');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments'), 'result.traits should have a compiler arguments trait');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.value === '/std:c++20, /await', 'result.traits should have a compiler arguments trait with value "/std:c++20, /await"');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.includeInPrompt, 'result.traits should have a compiler arguments trait with includeInPrompt true');
-        ok(result.traits.find((trait) => trait.name === 'compilerArguments')?.promptTextOverride === 'The compiler arguments include: /std:c++20, /await.', 'result.traits should have a compiler arguments trait with promptTextOverride');
-    });
-
-    it('provides direct asks trait for absence of arguments.', async () => {
-        arrange({
-            vscodeExtension: vscodeExtension,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
-            projectContext: projectContextNoArgs,
-            rootUri: vscode.Uri.file('C:\\src\\my_project'),
-            flags: {
-                copilotcppIncludeTraits: ['directAsks'],
-                copilotcppMsvcCompilerArgumentFilter:
-                    '{"/FOO": "/FOO is not set.", "/BAR": "/BAR is not set."}'
-            }
-        });
-        await moduleUnderTest.registerRelatedFilesProvider();
-
-        const result = await callbackPromise;
-
-        ok(result, 'result should be defined');
-        ok(result.traits, 'result.traits should be defined');
-        ok(result.traits.find((trait) => trait.name === 'directAsks'), 'result.traits should have a direct asks trait');
-        ok(result.traits.find((trait) => trait.name === 'directAsks')?.value === '/FOO is not set. /BAR is not set. ', 'result.traits should have a direct asks value');
-        ok(result.traits.find((trait) => trait.name === 'directAsks')?.includeInPrompt, 'result.traits should have a direct asks trait with includeInPrompt true');
-        ok(result.traits.find((trait) => trait.name === 'directAsks')?.promptTextOverride === "/FOO is not set. /BAR is not set. ", 'result.traits should have a direct ask trait with promptTextOverride');
-    });
-
-    it('does not accept empty regex.', async () => {
-        arrange({
-            vscodeExtension: vscodeExtension,
-            getIncludeFiles: { includedFiles: ['c:\\system\\include\\vector', 'c:\\system\\include\\string', 'C:\\src\\my_project\\foo.h'] },
-            projectContext: projectContextNoArgs,
-            rootUri: vscode.Uri.file('C:\\src\\my_project'),
-            flags: {
-                copilotcppIncludeTraits: ['directAsks'],
-                copilotcppMsvcCompilerArgumentFilter:
-                    '{"": "Empty regex not allowed."}'
-            }
-        });
-        await moduleUnderTest.registerRelatedFilesProvider();
-
-        const result = await callbackPromise;
-
-        ok(result, 'result should be defined');
-        ok(result.traits, 'result.traits should be defined');
-        ok(result.traits.find((trait) => trait.name === 'directAsks') === undefined, 'result.traits should not have a direct asks trait');
     });
 });

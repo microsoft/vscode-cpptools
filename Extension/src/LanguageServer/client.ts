@@ -556,19 +556,6 @@ export interface ChatContextResult {
     targetArchitecture: string;
 }
 
-export interface FileContextResult {
-    compilerArguments: string[];
-}
-
-export interface ProjectContextResult {
-    language: string;
-    standardVersion: string;
-    compiler: string;
-    targetPlatform: string;
-    targetArchitecture: string;
-    fileContext: FileContextResult;
-}
-
 interface FolderFilesEncodingChanged {
     uri: string;
     filesEncoding: string;
@@ -615,7 +602,6 @@ const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, G
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
 const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
 const CppContextRequest: RequestType<TextDocumentIdentifier, ChatContextResult, void> = new RequestType<TextDocumentIdentifier, ChatContextResult, void>('cpptools/getChatContext');
-const ProjectContextRequest: RequestType<TextDocumentIdentifier, ProjectContextResult, void> = new RequestType<TextDocumentIdentifier, ProjectContextResult, void>('cpptools/getProjectContext');
 const CopilotCompletionContextRequest: RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void> = new RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void>('cpptools/getCompletionContext');
 
 // Notifications to the server
@@ -850,7 +836,6 @@ export interface Client {
     getCopilotHoverProvider(): CopilotHoverProvider | undefined;
     getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult>;
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult>;
-    getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult>;
     filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void;
     getCompletionContext(fileName: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures, token: vscode.CancellationToken): Promise<CopilotCompletionContextResult>;
 }
@@ -1791,6 +1776,10 @@ export class DefaultClient implements Client {
                     });
                 }
 
+                if (changedSettings['codeAnalysis.runAutomatically'] !== undefined || changedSettings['codeAnalysis.clangTidy.enabled'] !== undefined) {
+                    ui.refreshCodeAnalysisText(this.model.isRunningCodeAnalysis.Value);
+                }
+
                 const showButtonSender: string = "settingsChanged";
                 if (changedSettings["default.configurationProvider"] !== undefined) {
                     void ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, showButtonSender);
@@ -2348,12 +2337,6 @@ export class DefaultClient implements Client {
         const params: GetIncludesParams = { fileUri: uri.toString(), maxDepth };
         await this.ready;
         return this.languageClient.sendRequest(IncludesRequest, params);
-    }
-
-    public async getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> {
-        const params: TextDocumentIdentifier = { uri: uri.toString() };
-        await this.ready;
-        return this.languageClient.sendRequest(ProjectContextRequest, params);
     }
 
     public async getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> {
@@ -4290,7 +4273,6 @@ class NullClient implements Client {
     getCopilotHoverProvider(): CopilotHoverProvider | undefined { return undefined; }
     getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
-    getProjectContext(uri: vscode.Uri): Promise<ProjectContextResult> { return Promise.resolve({} as ProjectContextResult); }
     filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void { }
     getCompletionContext(file: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures, token: vscode.CancellationToken): Promise<CopilotCompletionContextResult> { return Promise.resolve({} as CopilotCompletionContextResult); }
 }

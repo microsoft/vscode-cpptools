@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, it } from 'mocha';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as util from '../../../../src/common';
-import { ChatContextResult, DefaultClient, ProjectContextResult } from '../../../../src/LanguageServer/client';
+import { ChatContextResult, DefaultClient } from '../../../../src/LanguageServer/client';
 import { ClientCollection } from '../../../../src/LanguageServer/clientCollection';
 import * as extension from '../../../../src/LanguageServer/extension';
 import { CppConfigurationLanguageModelTool, getProjectContext } from '../../../../src/LanguageServer/lmTool';
@@ -138,15 +138,6 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
         sinon.stub(util, 'isHeaderFile').returns(isHeaderFile ?? false);
     };
 
-    const arrangeProjectContextFromCppTools = ({ projectContextFromCppTools, isCpp, isHeaderFile }:
-    { projectContextFromCppTools?: ProjectContextResult; isCpp?: boolean; isHeaderFile?: boolean } =
-    { projectContextFromCppTools: undefined, isCpp: undefined, isHeaderFile: false }
-    ) => {
-        activeClientStub.getProjectContext.resolves(projectContextFromCppTools);
-        sinon.stub(util, 'isCpp').returns(isCpp ?? true);
-        sinon.stub(util, 'isHeaderFile').returns(isHeaderFile ?? false);
-    };
-
     it('should log telemetry and provide #cpp chat context.', async () => {
         arrangeChatContextFromCppTools({
             chatContextFromCppTools: {
@@ -178,33 +169,26 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
         compiler,
         expectedCompiler,
         context,
-        compilerArguments: compilerArguments,
-        expectedCompilerArguments,
         telemetryProperties,
         telemetryMetrics
     }: {
         compiler: string;
         expectedCompiler: string;
         context: { flags: Record<string, unknown> };
-        compilerArguments: string[];
-        expectedCompilerArguments: Record<string, string>;
         telemetryProperties: Record<string, string>;
         telemetryMetrics: Record<string, number>;
     }) => {
-        arrangeProjectContextFromCppTools({
-            projectContextFromCppTools: {
+        arrangeChatContextFromCppTools({
+            chatContextFromCppTools: {
                 language: 'cpp',
                 standardVersion: 'c++20',
                 compiler: compiler,
                 targetPlatform: 'windows',
-                targetArchitecture: 'x64',
-                fileContext: {
-                    compilerArguments: compilerArguments
-                }
+                targetArchitecture: 'x64'
             }
         });
 
-        const result = await getProjectContext(mockTextDocumentStub.uri, context, telemetryProperties, telemetryMetrics);
+        const result = await getProjectContext(mockTextDocumentStub.uri, context, new vscode.CancellationTokenSource().token, telemetryProperties, telemetryMetrics);
 
         ok(result, 'result should not be undefined');
         ok(result.language === 'C++');
@@ -212,142 +196,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
         ok(result.standardVersion === 'C++20');
         ok(result.targetPlatform === 'Windows');
         ok(result.targetArchitecture === 'x64');
-        ok(JSON.stringify(result.compilerArguments) === JSON.stringify(expectedCompilerArguments));
     };
-
-    it('should provide compilerArguments based on copilotcppMsvcCompilerArgumentFilter.', async () => {
-        await testGetProjectContext({
-            compiler: 'msvc',
-            expectedCompiler: 'MSVC',
-            context: { flags: { copilotcppMsvcCompilerArgumentFilter: '{"foo-?": ""}' } },
-            compilerArguments: ['foo', 'bar', 'abc', 'foo-'],
-            expectedCompilerArguments: { 'foo-?': 'foo-' },
-            telemetryProperties: {},
-            telemetryMetrics: {}
-        });
-    });
-
-    it('should provide compilerArguments based on copilotcppClangCompilerArgumentFilter.', async () => {
-        await testGetProjectContext({
-            compiler: 'clang',
-            expectedCompiler: 'Clang',
-            context: { flags: { copilotcppClangCompilerArgumentFilter: '{"foo": "", "bar": ""}' } },
-            compilerArguments: ['foo', 'bar', 'abc'],
-            expectedCompilerArguments: { 'foo': 'foo', 'bar': 'bar' },
-            telemetryProperties: {},
-            telemetryMetrics: {}
-        });
-    });
-
-    it('should support spaces between argument and value.', async () => {
-        await testGetProjectContext({
-            compiler: 'clang',
-            expectedCompiler: 'Clang',
-            context: { flags: { copilotcppClangCompilerArgumentFilter: '{"-std\\\\sc\\\\+\\\\+\\\\d+": ""}' } },
-            compilerArguments: ['-std', 'c++17', '-std', 'foo', '-std', 'c++11', '-std', 'bar'],
-            expectedCompilerArguments: { '-std\\sc\\+\\+\\d+': '-std c++11' },
-            telemetryProperties: {},
-            telemetryMetrics: {}
-        });
-    });
-
-    it('should provide compilerArguments based on copilotcppGccCompilerArgumentFilter.', async () => {
-        await testGetProjectContext({
-            compiler: 'gcc',
-            expectedCompiler: 'GCC',
-            context: { flags: { copilotcppGccCompilerArgumentFilter: '{"foo": "", "bar": ""}' } },
-            compilerArguments: ['foo', 'bar', 'abc', 'bar', 'foo', 'bar'],
-            expectedCompilerArguments: { 'foo': 'foo', 'bar': 'bar' },
-            telemetryProperties: {},
-            telemetryMetrics: {}
-        });
-    });
-
-    it('should provide empty array for each regex if nothing matches.', async () => {
-        await testGetProjectContext({
-            compiler: 'msvc',
-            expectedCompiler: 'MSVC',
-            context: { flags: { copilotcppMsvcCompilerArgumentFilter: '{"foo": "", "bar": ""}' } },
-            compilerArguments: [],
-            expectedCompilerArguments: {},
-            telemetryProperties: {},
-            telemetryMetrics: {}
-        });
-    });
-
-    it('should filter out all compilerArguments by default.', async () => {
-        await testGetProjectContext({
-            compiler: 'gcc',
-            expectedCompiler: 'GCC',
-            context: { flags: {} },
-            compilerArguments: ['foo', 'bar'],
-            expectedCompilerArguments: {},
-            telemetryProperties: {},
-            telemetryMetrics: {}
-        });
-    });
-
-    it('should filter out all compilerArguments for empty regex.', async () => {
-        await testGetProjectContext({
-            compiler: 'msvc',
-            expectedCompiler: 'MSVC',
-            context: { flags: { copilotcppMsvcCompilerArgumentFilter: '{"": ""}' } },
-            compilerArguments: ['foo', 'bar'],
-            expectedCompilerArguments: {},
-            telemetryProperties: {},
-            telemetryMetrics: {}
-        });
-    });
-
-    it('should filter out all compilerArguments for empty copilotcppMsvcCompilerArgumentFilter.', async () => {
-        await testGetProjectContext({
-            compiler: 'msvc',
-            expectedCompiler: 'MSVC',
-            context: {
-                flags: {
-                    copilotcppMsvcCompilerArgumentFilter: ''
-                }
-            },
-            compilerArguments: ['foo', 'bar'],
-            expectedCompilerArguments: {},
-            telemetryProperties: {},
-            telemetryMetrics: {}
-        });
-    });
-
-    it('should filter out all compilerArguments for invalid copilotcppMsvcCompilerArgumentFilter.', async () => {
-        await testGetProjectContext({
-            compiler: 'msvc',
-            expectedCompiler: 'MSVC',
-            context: {
-                flags: {
-                    copilotcppMsvcCompilerArgumentFilter: 'Not a map'
-                }
-            },
-            compilerArguments: ['foo', 'bar'],
-            expectedCompilerArguments: {},
-            telemetryProperties: {},
-            telemetryMetrics: {}
-        });
-    });
-
-    it('should filter out all compilerArguments for unknown compilers.', async () => {
-        await testGetProjectContext({
-            compiler: 'unknown',
-            expectedCompiler: '',
-            context: {
-                flags: {
-                    copilotcppMsvcCompilerArgumentFilter: '{"(foo|bar)": ""}',
-                    copilotcppClangCompilerArgumentFilter: '{"(foo|bar)": ""}',
-                    copilotcppGccCompilerArgumentFilter: '{"(foo|bar)": ""}'
-                }
-            },
-            compilerArguments: ['foo', 'bar'],
-            expectedCompilerArguments: {},
-            telemetryProperties: {},
-            telemetryMetrics: {}
-        });
-    });
 
     it('should send telemetry.', async () => {
         const telemetryProperties: Record<string, string> = {};
@@ -355,9 +204,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
         const input = {
             compiler: 'msvc',
             expectedCompiler: 'MSVC',
-            context: { flags: { copilotcppMsvcCompilerArgumentFilter: '{"foo-?": "", "": "", "bar": "", "xyz": ""}' } },
-            compilerArguments: ['foo', 'bar', 'foo-', 'abc'],
-            expectedCompilerArguments: { 'foo-?': 'foo-', 'bar': 'bar' },
+            context: { flags: {} },
             telemetryProperties,
             telemetryMetrics
         };
@@ -368,71 +215,37 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
         ok(telemetryProperties['standardVersion'] === 'C++20');
         ok(telemetryProperties['targetPlatform'] === 'Windows');
         ok(telemetryProperties['targetArchitecture'] === 'x64');
-        ok(telemetryProperties['filteredCompilerArguments'] === 'foo,foo-,bar');
-        ok(telemetryProperties['filters'] === 'foo-?,bar,xyz');
-        ok(telemetryMetrics['compilerArgumentCount'] === input.compilerArguments.length);
-        ok(telemetryMetrics['projectContextDuration'] !== undefined);
-    });
-
-    it('should send filter telemetry if available.', async () => {
-        const telemetryProperties: Record<string, string> = {};
-        const telemetryMetrics: Record<string, number> = {};
-        const input = {
-            compiler: 'msvc',
-            expectedCompiler: 'MSVC',
-            context: { flags: { copilotcppMsvcCompilerArgumentFilter: '{"foo-?": "", "": "", "bar": "", "xyz": ""}' } },
-            compilerArguments: ['abc'],
-            expectedCompilerArguments: {},
-            telemetryProperties,
-            telemetryMetrics
-        };
-        await testGetProjectContext(input);
-
-        ok(telemetryProperties['language'] === 'C++');
-        ok(telemetryProperties['compiler'] === input.expectedCompiler);
-        ok(telemetryProperties['standardVersion'] === 'C++20');
-        ok(telemetryProperties['targetPlatform'] === 'Windows');
-        ok(telemetryProperties['targetArchitecture'] === 'x64');
-        ok(telemetryProperties['filteredCompilerArguments'] === undefined);
-        ok(telemetryProperties['filters'] === 'foo-?,bar,xyz');
-        ok(telemetryMetrics['compilerArgumentCount'] === input.compilerArguments.length);
         ok(telemetryMetrics['projectContextDuration'] !== undefined);
     });
 
     it('should not send telemetry for unknown values', async () => {
-        arrangeProjectContextFromCppTools({
-            projectContextFromCppTools: {
+        arrangeChatContextFromCppTools({
+            chatContextFromCppTools: {
                 language: 'java',
                 standardVersion: 'gnu++17',
                 compiler: 'javac',
                 targetPlatform: 'arduino',
-                targetArchitecture: 'bar',
-                fileContext: {
-                    compilerArguments: []
-                }
+                targetArchitecture: 'bar'
             }
         });
         const telemetryProperties: Record<string, string> = {};
         const telemetryMetrics: Record<string, number> = {};
 
         const result = await getProjectContext(mockTextDocumentStub.uri, {
-            flags: { copilotcppMsvcCompilerArgumentFilter: '{"foo-?": "", "": "", "bar": "", "xyz": ""}' }
-        }, telemetryProperties, telemetryMetrics);
+            flags: {}
+        }, new vscode.CancellationTokenSource().token, telemetryProperties, telemetryMetrics);
 
         ok(telemetryProperties["targetArchitecture"] === 'bar');
-        ok(telemetryProperties["filters"] === undefined);
         ok(telemetryProperties["language"] === undefined);
         ok(telemetryProperties["compiler"] === undefined);
         ok(telemetryProperties["standardVersion"] === undefined);
         ok(telemetryProperties["originalStandardVersion"] === 'gnu++17');
         ok(telemetryProperties["targetPlatform"] === undefined);
-        ok(telemetryMetrics["compilerArgumentCount"] === 0);
         ok(result, 'result should not be undefined');
         ok(result.language === '');
         ok(result.compiler === '');
         ok(result.standardVersion === '');
         ok(result.targetPlatform === '');
         ok(result.targetArchitecture === 'bar');
-        ok(Object.keys(result.compilerArguments).length === 0);
     });
 });
