@@ -27,7 +27,6 @@ const services = {
     instrument: <T extends Record<string, any>>(instance: T, _options?: { ignore?: string[]; name?: string }): T => instance,
     message: (_message: PerfMessage) => { },
     init: (_vscode: any) => { },
-    launchSettings: undefined as Record<string, any> | undefined
 };
 
 /** Adds instrumentation to all the members of an object when instrumentation is enabled  */
@@ -41,21 +40,15 @@ export function sendInstrumentation(message: PerfMessage): void {
 }
 
 /** verifies that the instrumentation is loaded into the global namespace */
-export function isInstrumentationEnabled(): boolean {
-    return !!(global as any).instrumentation;
-}
+export const isInstrumentationEnabled = !!(global as any).instrumentation;
 
-// If the instrumentation object was *actually* loaded then we can set the services from the global object.
-// Having this separate ensures that this module is wired up to the global object.
-// It's not included in the previous block because if something else loads the instrumentation code first
-// this is still needed so that *this* module is properly connected to the global object.
-if (isInstrumentationEnabled()) {
-    // instrumentation services provided by the tool
+// If the instrumentation is enabled, then ensure the functions are wired up.
+if (isInstrumentationEnabled) {
+    // Instrumentation services provided by the tool.
     services.instrument = (global as any).instrumentation.instrument;
     services.message = (global as any).instrumentation.message;
     services.init = (global as any).instrumentation.init;
 
+    // Passes the specific vscode object for this extension to the init routine.
     services.init(require('vscode'));
 }
-
-(globalThis as any)["_vscode_"] = require('vscode');

@@ -18,6 +18,7 @@ import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import { modelSelector } from '../constants';
+import { instrument } from '../instrumentation';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
@@ -222,7 +223,7 @@ export async function activate(): Promise<void> {
         { scheme: 'file', language: 'cpp' },
         { scheme: 'file', language: 'cuda-cpp' }
     ];
-    codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
+    codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, instrument({
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext): Promise<vscode.CodeAction[]> => {
 
             if (!await clients.ActiveClient.getVcpkgEnabled()) {
@@ -248,7 +249,7 @@ export async function activate(): Promise<void> {
             const actions: vscode.CodeAction[] = ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
             return actions;
         }
-    });
+    }));
 
     await vscode.commands.executeCommand('setContext', 'cpptools.msvcEnvironmentFound', util.hasMsvcEnvironment());
 

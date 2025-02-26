@@ -841,7 +841,7 @@ export interface Client {
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
-    if (isInstrumentationEnabled()) {
+    if (isInstrumentationEnabled) {
         instrument(vscode.languages, { name: "languages" });
         instrument(vscode.window, { name: "window" });
         instrument(vscode.workspace, { name: "workspace" });

@@ -23,7 +23,7 @@ import { CppSettings } from './LanguageServer/settings';
 import { logAndReturn, returns } from './Utility/Async/returns';
 import { CppTools1 } from './cppTools1';
 import { logMachineIdMappings } from './id';
-import { sendInstrumentation } from './instrumentation';
+import { instrument, sendInstrumentation } from './instrumentation';
 import { disposeOutputChannels, log } from './logger';
 import { PlatformInformation } from './platform';
 
@@ -60,7 +60,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         }
     }
 
-    vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
+    vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', instrument(new SchemaProvider()));
 
     // Initialize the DebuggerExtension and register the related commands and providers.
     await DebuggerExtension.initialize(context);
@@ -133,7 +133,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         }
     }
 
-    disposables.push(vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider));
+    disposables.push(vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, instrument(cppBuildTaskProvider)));
 
     vscode.tasks.onDidStartTask(event => {
         if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
