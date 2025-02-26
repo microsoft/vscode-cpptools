@@ -38,6 +38,7 @@ import { logAndReturn } from '../Utility/Async/returns';
 import { is } from '../Utility/System/guards';
 import * as util from '../common';
 import { isWindows } from '../constants';
+import { instrument, isInstrumentationEnabled } from '../instrumentation';
 import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
 import { localizedStringCount, lookupString } from '../nativeStrings';
 import { SessionState } from '../sessionState';
@@ -840,6 +841,16 @@ export interface Client {
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
+    if (isInstrumentationEnabled) {
+        instrument(vscode.languages, { name: "languages" });
+        instrument(vscode.window, { name: "window" });
+        instrument(vscode.workspace, { name: "workspace" });
+        instrument(vscode.commands, { name: "commands" });
+        instrument(vscode.debug, { name: "debug" });
+        instrument(vscode.env, { name: "env" });
+        instrument(vscode.extensions, { name: "extensions" });
+        return instrument(new DefaultClient(workspaceFolder), { ignore: ["enqueue", "onInterval", "logTelemetry"] });
+    }
     return new DefaultClient(workspaceFolder);
 }
 
@@ -1323,31 +1334,33 @@ export class DefaultClient implements Client {
                 this.currentCopilotHoverEnabled = new PersistentWorkspaceState<string>("cpp.copilotHover", settings.copilotHover);
                 if (settings.copilotHover !== "disabled") {
                     this.copilotHoverProvider = new CopilotHoverProvider(this);
-                    this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, this.copilotHoverProvider));
+                    this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, instrument(this.copilotHoverProvider)));
                 }
+
                 if (settings.copilotHover !== this.currentCopilotHoverEnabled.Value) {
                     this.currentCopilotHoverEnabled.Value = settings.copilotHover;
                 }
-                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, this.hoverProvider));
-                this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
-                this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, new RenameProvider(this)));
-                this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, new FindAllReferencesProvider(this)));
-                this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
-                this.disposables.push(vscode.languages.registerDocumentSymbolProvider(util.documentSelector, new DocumentSymbolProvider(), undefined));
-                this.disposables.push(vscode.languages.registerCodeActionsProvider(util.documentSelector, new CodeActionProvider(this), undefined));
-                this.disposables.push(vscode.languages.registerCallHierarchyProvider(util.documentSelector, new CallHierarchyProvider(this)));
+                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, instrument(this.hoverProvider)));
+                this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, instrument(this.inlayHintsProvider)));
+                this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, instrument(new RenameProvider(this))));
+                this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, instrument(new FindAllReferencesProvider(this))));
+                this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(instrument(new WorkspaceSymbolProvider(this))));
+                this.disposables.push(vscode.languages.registerDocumentSymbolProvider(util.documentSelector, instrument(new DocumentSymbolProvider()), undefined));
+                this.disposables.push(vscode.languages.registerCodeActionsProvider(util.documentSelector, instrument(new CodeActionProvider(this)), undefined));
+                this.disposables.push(vscode.languages.registerCallHierarchyProvider(util.documentSelector, instrument(new CallHierarchyProvider(this))));
+
                 // Because formatting and codeFolding can vary per folder, we need to register these providers once
                 // and leave them registered. The decision of whether to provide results needs to be made on a per folder basis,
                 // within the providers themselves.
-                this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(util.documentSelector, new DocumentFormattingEditProvider(this));
-                this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(util.documentSelector, new DocumentRangeFormattingEditProvider(this));
-                this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(util.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
+                this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(util.documentSelector, instrument(new DocumentFormattingEditProvider(this)));
+                this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(util.documentSelector, instrument(new DocumentRangeFormattingEditProvider(this)));
+                this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(util.documentSelector, instrument(new OnTypeFormattingEditProvider(this)), ";", "}", "\n");
 
                 this.codeFoldingProvider = new FoldingRangeProvider(this);
-                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, this.codeFoldingProvider);
+                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, instrument(this.codeFoldingProvider));
 
                 if (settings.isEnhancedColorizationEnabled && semanticTokensLegend) {
-                    this.semanticTokensProvider = new SemanticTokensProvider();
+                    this.semanticTokensProvider = instrument(new SemanticTokensProvider());
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                 }
 
@@ -1730,8 +1743,7 @@ export class DefaultClient implements Client {
                     const oldLoggingLevelLogged: boolean = this.loggingLevel > 1;
                     this.loggingLevel = util.getNumericLoggingLevel(changedSettings.loggingLevel);
                     if (oldLoggingLevelLogged || this.loggingLevel > 1) {
-                        const out: Logger = getOutputChannelLogger();
-                        out.appendLine(localize({ key: "loggingLevel.changed", comment: ["{0} is the setting name 'loggingLevel', {1} is a string value such as 'Debug'"] }, "{0} has changed to: {1}", "loggingLevel", changedSettings.loggingLevel));
+                        getOutputChannelLogger().appendLine(localize({ key: "loggingLevel.changed", comment: ["{0} is the setting name 'loggingLevel', {1} is a string value such as 'Debug'"] }, "{0} has changed to: {1}", "loggingLevel", changedSettings.loggingLevel));
                     }
                 }
                 const settings: CppSettings = new CppSettings();
@@ -2746,12 +2758,7 @@ export class DefaultClient implements Client {
             const status: IntelliSenseStatus = { status: Status.IntelliSenseCompiling };
             testHook.updateStatus(status);
         } else if (message.endsWith("IntelliSense done")) {
-            const settings: CppSettings = new CppSettings();
-            if (util.getNumericLoggingLevel(settings.loggingLevel) >= 6) {
-                const out: Logger = getOutputChannelLogger();
-                const duration: number = Date.now() - timeStamp;
-                out.appendLine(localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", duration / 1000));
-            }
+            getOutputChannelLogger().appendLineAtLevel(6, localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", (Date.now() - timeStamp) / 1000));
             this.model.isUpdatingIntelliSense.Value = false;
             const status: IntelliSenseStatus = { status: Status.IntelliSenseReady };
             testHook.updateStatus(status);
@@ -3183,11 +3190,8 @@ export class DefaultClient implements Client {
             return;
         }
 
-        const settings: CppSettings = new CppSettings();
         const out: Logger = getOutputChannelLogger();
-        if (util.getNumericLoggingLevel(settings.loggingLevel) >= 6) {
-            out.appendLine(localize("configurations.received", "Custom configurations received:"));
-        }
+        out.appendLineAtLevel(6, localize("configurations.received", "Custom configurations received:"));
         const sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
             if (this.isSourceFileConfigurationItem(item, providerVersion)) {
@@ -3199,10 +3203,8 @@ export class DefaultClient implements Client {
                     uri = item.uri.toString();
                 }
                 this.configurationLogging.set(uri, JSON.stringify(item.configuration, null, 4));
-                if (util.getNumericLoggingLevel(settings.loggingLevel) >= 6) {
-                    out.appendLine(`  uri: ${uri}`);
-                    out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
-                }
+                out.appendLineAtLevel(6, `  uri: ${uri}`);
+                out.appendLineAtLevel(6, `  config: ${JSON.stringify(item.configuration, null, 2)}`);
                 if (item.configuration.includePath.some(path => path.endsWith('**'))) {
                     console.warn("custom include paths should not use recursive includes ('**')");
                 }
@@ -3306,11 +3308,7 @@ export class DefaultClient implements Client {
                 return;
             }
 
-            const settings: CppSettings = new CppSettings();
-            if (util.getNumericLoggingLevel(settings.loggingLevel) >= 6) {
-                const out: Logger = getOutputChannelLogger();
-                out.appendLine(localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
-            }
+            getOutputChannelLogger().appendLineAtLevel(6, localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
 
             // Separate compiler path and args before sending to language client
             if (util.isString(sanitized.compilerPath)) {
