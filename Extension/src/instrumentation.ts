@@ -26,7 +26,7 @@ export interface PerfMessage<TInput = Record<string, any> | undefined> {
 const services = {
     instrument: <T extends Record<string, any>>(instance: T, _options?: { ignore?: string[]; name?: string }): T => instance,
     message: (_message: PerfMessage) => { },
-    init: (_vscode: any) => { },
+    init: (_vscode: any) => { }
 };
 
 /** Adds instrumentation to all the members of an object when instrumentation is enabled  */
