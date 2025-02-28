@@ -999,9 +999,9 @@ export class CppProperties {
                     // If the user doesn't set browse.path, copy the includePath over. Make sure ${workspaceFolder} is in there though...
                     configuration.browse.path = configuration.includePath.slice(0);
                     if (this.rootUri) {
-                        let normalizedRootUriFsPath: string = escapeStringRegExp(this.rootUri.fsPath.replace(/\\/g, "/"));
-                        let regexPattern = `^${normalizedRootUriFsPath}(\\*{0,2}|\/\\*{0,2})?$`;
-                        let regex = new RegExp(regexPattern, "g");
+                        const normalizedRootUriFsPath: string = escapeStringRegExp(this.rootUri.fsPath.replace(/\\/g, "/"));
+                        const regexPattern = `^${normalizedRootUriFsPath}(\\*{0,2}|\/\\*{0,2})?$`;
+                        const regex = new RegExp(regexPattern, "g");
                         if (configuration.includePath.findIndex((value: string) =>
                             !!value.match(regex)) === -1
                         ) {
