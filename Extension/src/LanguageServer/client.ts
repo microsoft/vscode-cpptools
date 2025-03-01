@@ -186,7 +186,6 @@ interface TelemetryPayload {
     event: string;
     properties?: Record<string, string>;
     metrics?: Record<string, number>;
-    signedMetrics?: Record<string, number>;
 }
 
 interface ReportStatusNotificationBody extends WorkspaceFolderParams {
@@ -2729,8 +2728,7 @@ export class DefaultClient implements Client {
         if (notificationBody.event === "includeSquiggles" && this.configurationProvider && notificationBody.properties) {
             notificationBody.properties["providerId"] = this.configurationProvider;
         }
-        const metrics_unified: Record<string, number> = { ...notificationBody.metrics, ...notificationBody.signedMetrics };
-        telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, metrics_unified);
+        telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
     }
 
     private async updateStatus(notificationBody: ReportStatusNotificationBody): Promise<void> {
