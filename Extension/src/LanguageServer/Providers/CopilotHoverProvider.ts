@@ -46,7 +46,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
             }
         }
 
-        if (settings.copilotHover === "default") {
+        if (new CppSettings().copilotHover === "default") {
             // Check flight to make sure the feature is enabled.
             if (!await telemetry.isFlightEnabled("CppCopilotHover")) {
                 return undefined;

@@ -3744,7 +3744,7 @@
                             },
                             "svdPath": {
                                 "type": "string",
-                                "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description",
+                                "description": "%c_cpp.debuggers.cppdbg.svdPath.description%",
                                 "default": ""
                             },
                             "showDisplayString": {
@@ -6542,7 +6542,7 @@
         "build": "yarn prep:dts && echo [Building TypeScript code] && tsc --build tsconfig.json"
     },
     "devDependencies": {
-        "@octokit/rest": "^20.1.1",
+        "@octokit/rest": "^21.1.1",
         "@types/glob": "^7.2.0",
         "@types/mocha": "^10.0.6",
         "@types/node": "^20.14.2",

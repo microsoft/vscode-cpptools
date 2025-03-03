@@ -477,7 +477,11 @@
             "allOf": [
               {
                 "if": {
-                  "properties": { "type": { "const": "scp" } }
+                  "properties": {
+                    "type": {
+                      "const": "scp"
+                    }
+                  }
                 },
                 "then": {
                   "properties": {
@@ -491,7 +495,11 @@
               },
               {
                 "if": {
-                  "properties": { "type": { "const": "rsync" } }
+                  "properties": {
+                    "type": {
+                      "const": "rsync"
+                    }
+                  }
                 },
                 "then": {
                   "properties": {
@@ -672,7 +680,7 @@
         },
         "svdPath": {
           "type": "string",
-          "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description",
+          "description": "%c_cpp.debuggers.cppdbg.svdPath.description%",
           "default": ""
         },
         "showDisplayString": {
