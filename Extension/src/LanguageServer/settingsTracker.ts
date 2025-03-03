@@ -104,7 +104,8 @@ export class SettingsTracker {
                     }
                     const curEnum: any[] = curSetting["enum"];
                     if (curEnum && curEnum.indexOf(val) === -1
-                        && (key !== "loggingLevel" || util.getNumericLoggingLevel(val) === -1)) {
+                        && (key !== "loggingLevel" || util.getNumericLoggingLevel(val) === -1)
+                        && (key !== "copilotHover" || val !== "enabled")) {
                         return "<invalid>";
                     }
                     return val;
