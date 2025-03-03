@@ -471,14 +471,17 @@ export class CppSettings extends Settings {
         if (!(vscode as any).lm) {
             return "disabled";
         }
-        const val = super.Section.get<any>("copilotHover");
-        if (val === undefined) {
-            return "default";
+        if (super.Section.get<any>("copilotHover") === "enabled") {
+            return "enabled";
         }
-        return val as string;
+        return this.getAsString("copilotHover");
     }
     public get cppCodeSnippetsFeatureNames(): string | undefined {
-        return super.Section.get<string>("cppCodeSnippetsFeatureNames");
+        const value = super.Section.get<any>("cppCodeSnippetsFeatureNames");
+        if (isString(value)) {
+            return value;
+        }
+        return undefined;
     }
     public get formattingEngine(): string { return this.getAsString("formatting"); }
     public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
