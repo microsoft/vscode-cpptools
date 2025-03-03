@@ -72,14 +72,16 @@ export class CopilotCompletionContextTelemetry {
         this.addMetric('computeContextElapsedMs', duration);
     }
 
-    public addResponseMetadata(isResultMissing: boolean, snippetCount?: number, uri?: string, caretOffset?: number,
+    public addResponseMetadata(areCodeSnippetsMissing: boolean, snippetCount?: number, codeSnippetsCount?: number, traitsCount?: number, caretOffset?: number,
         featureFlag?: CopilotCompletionContextFeatures): void {
-        this.addProperty('response.isResultMissing', isResultMissing.toString());
+        this.addProperty('response.areCodeSnippetsMissing', areCodeSnippetsMissing.toString());
         // Args can be undefined, in which case the value is set to a
         // special value (e.g. -1) to indicate data is not set.
         this.addMetric('response.snippetsCount', snippetCount ?? -1);
         this.addMetric('response.caretOffset', caretOffset ?? -1);
         this.addProperty('response.featureFlag', featureFlag?.toString() ?? '<not-set>');
+        this.addMetric('response.codeSnippetsCount', codeSnippetsCount ?? -1);
+        this.addMetric('response.traitsCount', traitsCount ?? -1);
     }
 
     public addRequestMetadata(uri: string, caretOffset: number, completionId: string,
@@ -93,6 +95,11 @@ export class CopilotCompletionContextTelemetry {
         this.addProperty('request.featureFlag', featureFlag?.toString() ?? '<not-set>');
         if (timeBudgetFactor !== undefined) { this.addMetric('request.timeBudgetFactor', timeBudgetFactor); }
         if (maxCaretDistance !== undefined) { this.addMetric('request.maxCaretDistance', maxCaretDistance); }
+    }
+
+    public addCppStandardVersionMetadata(standardVersion: string, elapsedMs: number): void {
+        this.addProperty('response.cppStandardVersion', standardVersion);
+        this.addMetric('response.cppStandardVersionElapsedMs', elapsedMs);
     }
 
     public send(postfix?: string): void {
