@@ -22,6 +22,7 @@ import { SemanticToken, SemanticTokensProvider } from './Providers/semanticToken
 import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 // End provider imports
 
+import { SupportedContextItem } from '@github/copilot-language-server';
 import { ok } from 'assert';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -55,7 +56,7 @@ import {
 } from './codeAnalysis';
 import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import * as configs from './configurations';
-import { CopilotCompletionContextFeatures, CopilotCompletionContextProvider, SnippetEntry } from './copilotCompletionContextProvider';
+import { CopilotCompletionContextFeatures, CopilotCompletionContextProvider } from './copilotCompletionContextProvider';
 import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
@@ -568,11 +569,13 @@ interface FilesEncodingChanged {
 
 export interface CopilotCompletionContextResult {
     requestId: number;
-    isResultMissing: boolean;
-    snippets: SnippetEntry[];
+    areCodeSnippetsMissing: boolean;
+    snippets: SupportedContextItem[];
     translationUnitUri: string;
     caretOffset: number;
     featureFlag: CopilotCompletionContextFeatures;
+    codeSnippetsCount: number;
+    traitsCount: number;
 }
 
 export interface CopilotCompletionContextParams {
