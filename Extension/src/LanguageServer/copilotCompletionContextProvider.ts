@@ -6,6 +6,7 @@ import { ContextResolver, ResolveRequest, SupportedContextItem } from '@github/c
 import { randomUUID } from 'crypto';
 import * as vscode from 'vscode';
 import { DocumentSelector } from 'vscode-languageserver-protocol';
+import { isNumber, isString } from '../common';
 import { getOutputChannelLogger, Logger } from '../logger';
 import * as telemetry from '../telemetry';
 import { CopilotCompletionContextResult } from './client';
@@ -176,8 +177,8 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
             telemetry.addComputeContextElapsed(CopilotCompletionContextProvider.getRoundedDuration(getCompletionContextStartTime));
 
             return resultMismatch ? undefined : copilotCompletionContext;
-        } catch (e) {
-            if (e instanceof vscode.CancellationError || (e as Error)?.message === CancellationError.Canceled) {
+        } catch (e: any) {
+            if (e instanceof vscode.CancellationError || e.message === CancellationError.Canceled) {
                 telemetry.addInternalCanceled(CopilotCompletionContextProvider.getRoundedDuration(startTime));
                 logMessage += `, (internal cancellation)`;
                 throw InternalCancellationError;
@@ -188,8 +189,11 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
             }
 
             telemetry.addError();
-            const err = e as Error;
-            out.appendLine(`Copilot: getCompletionContextWithCancellation(${documentUri}: ${caretOffset}): Error: '${err?.message}', stack '${err?.stack}`);
+            if (e.message && e.stack) {
+                out.appendLine(`Copilot: getCompletionContextWithCancellation(${documentUri}: ${caretOffset}): Error: '${e.message}', stack '${e.stack}`);
+            } else {
+                out.appendLine(`Copilot: getCompletionContextWithCancellation(${documentUri}: ${caretOffset}): Error: '${e}'`);
+            }
             return undefined;
         } finally {
             out.appendLine(logMessage);
@@ -203,7 +207,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
     private async fetchTimeBudgetFactor(context: ResolveRequest): Promise<number> {
         try {
             const budgetFactor = context.activeExperiments.get(CopilotCompletionContextProvider.CppCodeSnippetsTimeBudgetFactor);
-            return ((budgetFactor as number) ?? CopilotCompletionContextProvider.defaultTimeBudgetFactor) / 100.0;
+            return (isNumber(budgetFactor) ? budgetFactor : CopilotCompletionContextProvider.defaultTimeBudgetFactor) / 100.0;
         } catch (e) {
             console.warn(`fetchTimeBudgetFactor(): error fetching ${CopilotCompletionContextProvider.CppCodeSnippetsTimeBudgetFactor}, using default: `, e);
             return CopilotCompletionContextProvider.defaultTimeBudgetFactor;
@@ -213,7 +217,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
     private async fetchMaxDistanceToCaret(context: ResolveRequest): Promise<number> {
         try {
             const maxDistance = context.activeExperiments.get(CopilotCompletionContextProvider.CppCodeSnippetsMaxDistanceToCaret);
-            return (maxDistance as number) ?? CopilotCompletionContextProvider.defaultMaxCaretDistance;
+            return isNumber(maxDistance) ? maxDistance : CopilotCompletionContextProvider.defaultMaxCaretDistance;
         } catch (e) {
             console.warn(`fetchMaxDistanceToCaret(): error fetching ${CopilotCompletionContextProvider.CppCodeSnippetsMaxDistanceToCaret}, using default: `, e);
             return CopilotCompletionContextProvider.defaultMaxCaretDistance;
@@ -222,13 +226,14 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
 
     private async getEnabledFeatureNames(context: ResolveRequest): Promise<string[] | undefined> {
         try {
-            let enabledFeatureNames = new CppSettings().cppCodeSnippetsFeatureNames;
-            enabledFeatureNames ??= context.activeExperiments.get(CopilotCompletionContextProvider.CppCodeSnippetsEnabledFeatures) as string;
-            return enabledFeatureNames?.split(',').map(s => s.trim());
+            const enabledFeatureNames = new CppSettings().cppCodeSnippetsFeatureNames ?? context.activeExperiments.get(CopilotCompletionContextProvider.CppCodeSnippetsEnabledFeatures);
+            if (isString(enabledFeatureNames)) {
+                return enabledFeatureNames.split(',').map(s => s.trim());
+            }
         } catch (e) {
             console.warn(`getEnabledFeatures(): error fetching ${CopilotCompletionContextProvider.CppCodeSnippetsEnabledFeatures}: `, e);
-            return undefined;
         }
+        return undefined;
     }
 
     private async getEnabledFeatureFlag(context: ResolveRequest): Promise<CopilotCompletionContextFeatures | undefined> {
