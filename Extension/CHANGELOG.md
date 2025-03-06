@@ -1,5 +1,31 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.24.2: March 6, 2025
+### Enhancements
+* Various improvements to Copilot snippets. [PR #13296](https://github.com/microsoft/vscode-cpptools/pull/13296)
+* Add handling of `-cxx-isystem`, `-stblib++-isystem`, `-isystem-after`, and `--include-barrier` Clang compiler arguments when composing the order of include paths used by IntelliSense.
+* Defer building of an include completion cache to another thread, improving performance when a file is opened.
+
+### Bug Fixes
+* Fix the code analysis mode in the Language Status bar not updating after the setting changes. [#13240](https://github.com/microsoft/vscode-cpptools/issues/13240)
+* Fix the `svdPath` description being missing for `launch.json`. [#13287](https://github.com/microsoft/vscode-cpptools/issues/13287)
+* Update the Windows SDK packages referenced in the walkthrough. [#13290](https://github.com/microsoft/vscode-cpptools/issues/13290)
+* Fix an issue with `C:` being treated as a relative path. [PR #13297](https://github.com/microsoft/vscode-cpptools/pull/13297)
+* Fix an unnecessary TU reset when a change is detected in a `compile_commands.json` file that is not used by the active configuration. [#13317](https://github.com/microsoft/vscode-cpptools/issues/13317)
+* Fix handling of URIs in web environments. [#13327](https://github.com/microsoft/vscode-cpptools/issues/13327)
+* Fix a potential deadlock after using 'Reset IntelliSense Database'. [#13337](https://github.com/microsoft/vscode-cpptools/issues/13337)
+* Fix an issue with duplicate forced includes being removed. Multiple forced includes of the same file should now properly be included multiple times.
+* Fix an issue in which the base configuration browse paths may not get populated when using a custom configuration provider.
+* Fix an issue with forced includes not being resolved against the same include path search order as a compiler would.
+* Fix an issue with include path ordering of paths specified with the `-imsvc` argument.
+* Fix a race condition that could result in incorrect include completion results.
+* Fix potential IntelliSense process crashes when processing Copilot snippets.
+* Fix a crash involving iconv when converting UTF-16 or UTF-32 to UTF-8.
+* Fix a potential crash when using the IntelliSense cache.
+* Fix an IntelliSense crash if a "bad seq number" occurs.
+* Fix processes potentially getting stuck on shutdown.
+* Fix a potential crash when saving a file.
+
 ## Version 1.24.1: February 13, 2025
 ### Bug Fixes
 * Fix random IntelliSense process crashes on Linux/macOS when `C_Cpp.intelliSenseCacheSize` is > 0. [#12668](https://github.com/microsoft/vscode-cpptools/issues/12668)
