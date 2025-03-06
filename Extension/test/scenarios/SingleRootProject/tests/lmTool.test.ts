@@ -146,7 +146,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
                 compiler: 'msvc',
                 targetPlatform: 'windows',
                 targetArchitecture: 'x64',
-                usedTestFrameworks: ['gtest', 'catch2']
+                usedTestFrameworks: ['GTest', 'Catch2']
             }
         });
 
@@ -159,12 +159,12 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             "standardVersion": 'C++20',
             "targetPlatform": 'Windows',
             "targetArchitecture": 'x64',
-            'testFrameworks': 'gtest, catch2'
+            'testFrameworks': 'GTest, Catch2'
         })));
         ok(result, 'result should not be undefined');
         const text = result.content[0] as vscode.LanguageModelTextPart;
         ok(text, 'result should contain a text part');
-        const traits_text = `The user is working on a C++ project. The project uses language version C++20. The project compiles using the MSVC compiler. The project targets the Windows platform. The project targets the x64 architecture. The project uses the following C++ test frameworks: gtest, catch2. `;
+        const traits_text = `The user is working on a C++ project. The project uses language version C++20. The project compiles using the MSVC compiler. The project targets the Windows platform. The project targets the x64 architecture. The project uses the following C++ test frameworks: GTest, Catch2. `;
         ok(text.value === traits_text);
     });
 
