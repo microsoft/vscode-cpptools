@@ -200,8 +200,8 @@ export class LanguageStatusUI {
         if (this.isParsingWorkspacePaused) {
             const displayTwoStatus: boolean = this.isParsingFiles && this.isParsingWorkspace;
             return (this.isParsingFiles ? this.parsingFilesTooltip : "")
-              + (displayTwoStatus ? " | " : "")
-              + (this.isParsingWorkspace ? this.workspaceParsingPausedText : "");
+                + (displayTwoStatus ? " | " : "")
+                + (this.isParsingWorkspace ? this.workspaceParsingPausedText : "");
         } else {
             return this.isParsingWorkspace ? this.workspaceParsingRunningText : this.parsingFilesTooltip;
         }
@@ -260,6 +260,13 @@ export class LanguageStatusUI {
         };
         return item;
     }
+
+    public refreshCodeAnalysisText(isRunningCodeAnalysis: boolean) {
+        const activeText: string = this.isCodeAnalysisPaused ? this.codeAnalysisPausedText : this.codeAnalysisRunningText;
+        const idleText: string = this.codeAnalysisModePrefix + this.codeAnalysisCurrentMode();
+        this.codeAnalysisStatusItem.text = isRunningCodeAnalysis ? activeText : idleText;
+    }
+
     private setIsCodeAnalysisPaused(val: boolean): void {
         if (!this.isRunningCodeAnalysis) {
             return;
@@ -286,9 +293,7 @@ export class LanguageStatusUI {
         }
         this.isRunningCodeAnalysis = val;
         this.codeAnalysisStatusItem.busy = val;
-        const activeText: string = this.isCodeAnalysisPaused ? this.codeAnalysisPausedText : this.codeAnalysisRunningText;
-        const idleText: string = this.codeAnalysisModePrefix + this.codeAnalysisCurrentMode();
-        this.codeAnalysisStatusItem.text = val ? activeText : idleText;
+        this.refreshCodeAnalysisText(val);
         this.codeAnalysisStatusItem.command = val ? {
             command: "C_Cpp.ShowActiveCodeAnalysisCommands",
             title: localize("c.cpp.codeanalysis.statusbar.showCodeAnalysisOptions", "Options"),
@@ -497,7 +502,7 @@ export class LanguageStatusUI {
             // TODO: Check some "AlwaysShow" setting here.
             this.ShowConfiguration = isCppOrRelated || (util.getWorkspaceIsCpp() &&
                 (activeEditor.document.fileName.endsWith("tasks.json") ||
-                activeEditor.document.fileName.endsWith("launch.json")));
+                    activeEditor.document.fileName.endsWith("launch.json")));
 
             if (this.showConfigureIntelliSenseButton) {
                 if (isCppOrRelated && !!this.currentClient && this.currentClient.getShowConfigureIntelliSenseButton()) {

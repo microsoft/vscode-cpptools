@@ -18,6 +18,7 @@ import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import { modelSelector } from '../constants';
+import { instrument } from '../instrumentation';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
@@ -222,7 +223,7 @@ export async function activate(): Promise<void> {
         { scheme: 'file', language: 'cpp' },
         { scheme: 'file', language: 'cuda-cpp' }
     ];
-    codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
+    codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, instrument({
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext): Promise<vscode.CodeAction[]> => {
 
             if (!await clients.ActiveClient.getVcpkgEnabled()) {
@@ -248,7 +249,7 @@ export async function activate(): Promise<void> {
             const actions: vscode.CodeAction[] = ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
             return actions;
         }
-    });
+    }));
 
     await vscode.commands.executeCommand('setContext', 'cpptools.msvcEnvironmentFound', util.hasMsvcEnvironment());
 
@@ -1047,12 +1048,15 @@ export function watchForCrashes(crashDirectory: string): void {
 let previousCrashData: string;
 let previousCrashCount: number = 0;
 
-function logCrashTelemetry(data: string, type: string, offsetData?: string): void {
+function logCrashTelemetry(data: string, type: string, offsetData?: string, crashLog?: string): void {
     const crashObject: Record<string, string> = {};
     const crashCountObject: Record<string, number> = {};
     crashObject.CrashingThreadCallStack = data;
     if (offsetData !== undefined) {
         crashObject.CrashingThreadCallStackOffsets = offsetData;
+    }
+    if (crashLog !== undefined) {
+        crashObject.CrashLog = crashLog;
     }
     previousCrashCount = data === previousCrashData ? previousCrashCount + 1 : 0;
     previousCrashData = data;
@@ -1064,8 +1068,8 @@ function logMacCrashTelemetry(data: string): void {
     logCrashTelemetry(data, "MacCrash");
 }
 
-function logCppCrashTelemetry(data: string, offsetData?: string): void {
-    logCrashTelemetry(data, "CppCrash", offsetData);
+function logCppCrashTelemetry(data: string, offsetData?: string, crashLog?: string): void {
+    logCrashTelemetry(data, "CppCrash", offsetData, crashLog);
 }
 
 function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
@@ -1166,6 +1170,10 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
+function containsUnexpectedTelemetryCharacter(str: string): boolean {
+    return str.includes("/") || str.includes("\\") || str.includes("@");
+}
+
 async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
     if (err) {
         if (err.code === "ENOENT") {
@@ -1185,15 +1193,33 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     const endOffsetStr: string = isMac ? " " : " <";
     const dotStr: string = "\n…";
     let signalType: string;
-    if (lines[0].startsWith("SIG")) {
-        signalType = lines[0];
+    let crashLog: string = "";
+    let crashStackStartLine: number = 0;
+    if (lines[0] === "LOG") {
+        let crashLogLine: number = 1;
+        for (; crashLogLine < lines.length; ++crashLogLine) {
+            const pendingCrashLogLine = lines[crashLogLine];
+            if (pendingCrashLogLine === "ENDLOG") {
+                break;
+            }
+            if (!containsUnexpectedTelemetryCharacter(pendingCrashLogLine)) {
+                crashLog += pendingCrashLogLine + "\n";
+            } else {
+                crashLog += "<unexpectedCharacter>\n";
+            }
+        }
+        crashLog = crashLog.trimEnd();
+        crashStackStartLine = ++crashLogLine;
+    }
+    if (lines[crashStackStartLine].startsWith("SIG")) {
+        signalType = lines[crashStackStartLine];
     } else {
         // The signal type may fail to be written.
         signalType = "SIG-??\n"; // Intentionally different from SIG-? from cpptools.
     }
     let crashCallStack: string = "";
     let validFrameFound: boolean = false;
-    for (let lineNum: number = 0; lineNum < lines.length - 3; ++lineNum) { // skip last lines
+    for (let lineNum: number = crashStackStartLine; lineNum < lines.length - 3; ++lineNum) { // skip last lines
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
         if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
@@ -1235,7 +1261,11 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             }
         }
         if (funcStr.includes("/")) {
-            funcStr = "<func>";
+            funcStr = "<funcForwardSlash>";
+        } else if (funcStr.includes("\\")) {
+            funcStr = "<funcBackSlash>";
+        } else if (funcStr.includes("@")) {
+            funcStr = "<funcAt>";
         } else if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
             continue; // Skip these on early frames.
         }
@@ -1246,8 +1276,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
             const pendingOffset: string = line.substring(offsetPos2);
-            if (!pendingOffset.includes("/")) {
+            if (!containsUnexpectedTelemetryCharacter(pendingOffset)) {
                 crashCallStack += pendingOffset;
+            } else {
+                crashCallStack += "<offsetUnexpectedCharacter>";
             }
             const startAddressPos: number = line.indexOf("0x");
             if (startAddressPos === -1 || startAddressPos >= startPos) {
@@ -1263,8 +1295,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 continue; // unexpected
             }
             const pendingOffset: string = line.substring(offsetPos2, endPos);
-            if (!pendingOffset.includes("/")) {
+            if (!containsUnexpectedTelemetryCharacter(pendingOffset)) {
                 crashCallStack += pendingOffset;
+            } else {
+                crashCallStack += "<offsetUnexpectedCharacter>";
             }
         }
     }
@@ -1272,10 +1306,8 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     if (crashCallStack !== prevCppCrashCallStackData) {
         prevCppCrashCallStackData = crashCallStack;
 
-        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-        if (lines.length >= 6 && util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
-            const out: vscode.OutputChannel = getCrashCallStacksChannel();
-            out.appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}`);
+        if (lines.length >= 6 && util.getLoggingLevel() >= 1) {
+            getCrashCallStacksChannel().appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}\n\n${crashLog}`);
         }
     }
 
@@ -1285,7 +1317,11 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         data = data.substring(0, 8191) + "…";
     }
 
-    logCppCrashTelemetry(data, addressData);
+    if (containsUnexpectedTelemetryCharacter(addressData)) {
+        addressData = "<addressDataUnexpectedCharacter>";
+    }
+
+    logCppCrashTelemetry(data, addressData, crashLog);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
     if (crashFile === "cpptools.txt") {

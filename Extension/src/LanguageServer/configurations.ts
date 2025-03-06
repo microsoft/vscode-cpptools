@@ -995,17 +995,9 @@ export class CppProperties {
             if (!configuration.browse.path) {
                 if (settings.defaultBrowsePath) {
                     configuration.browse.path = settings.defaultBrowsePath;
-                } else if (configuration.includePath) {
-                    // If the user doesn't set browse.path, copy the includePath over. Make sure ${workspaceFolder} is in there though...
-                    configuration.browse.path = configuration.includePath.slice(0);
-                    if (configuration.includePath.findIndex((value: string) =>
-                        !!value.match(/^\$\{(workspaceRoot|workspaceFolder)\}(\\\*{0,2}|\/\*{0,2})?$/g)) === -1
-                    ) {
-                        configuration.browse.path.push("${workspaceFolder}");
-                    }
-                } else {
-                    configuration.browse.path = ["${workspaceFolder}"];
                 }
+                // Otherwise, if the browse path is not set, let the native process populate it
+                // with include paths, including any parsed from compilerArgs.
             } else {
                 configuration.browse.path = this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
             }
@@ -1574,9 +1566,11 @@ export class CppProperties {
                 quoted = true;
                 result = result.slice(1, -1);
             }
+            // On Windows, isAbsolute does not handle root paths without a slash, such as "C:"
+            const isWindowsRootPath: boolean = process.platform === 'win32' && /^[a-zA-Z]:$/.test(result);
             // Make sure all paths result to an absolute path.
             // Do not add the root path to an unresolved env variable.
-            if (!result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
+            if (!isWindowsRootPath && !result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
                 result = path.join(this.rootUri.fsPath, result);
             }
             if (quoted) {
