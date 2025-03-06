@@ -301,7 +301,7 @@ suite("[Inlay hints test]", function (): void {
             assert.strictEqual(valueAfterChange, valueNew, `Unable to change setting: ${inlayHintSetting}`);
             // TODO: We need a way to synchronize with native process having completely processed the setting change
             // and any changes in behavior being fully applied.
-            sleep(5000);
+            await sleep(5000);
         }
     }
 
