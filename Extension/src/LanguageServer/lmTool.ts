@@ -168,7 +168,10 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
                 contextString += `The project targets the ${chatContext.targetArchitecture} architecture. `;
                 telemetryProperties["targetArchitecture"] = chatContext.targetArchitecture;
             }
-
+            if (chatContext.usedTestFrameworks.length > 0) {
+                contextString += `The project uses the following C++ test frameworks: ${chatContext.usedTestFrameworks.join(', ')}. `;
+                telemetryProperties["testFrameworks"] = chatContext.usedTestFrameworks.join(', ');
+            }
             return contextString;
         }
         catch {
