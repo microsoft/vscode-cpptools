@@ -23,12 +23,13 @@ class DefaultValueFallback extends Error {
 
 class CancellationError extends Error {
     static readonly Canceled = "Canceled";
-    constructor() { super(CancellationError.Canceled); }
+    constructor() {
+        super(CancellationError.Canceled);
+        this.name = this.message;
+    }
 }
 
-class InternalCancellationError extends Error {
-    static readonly Canceled = "CpptoolsCanceled";
-    constructor() { super(InternalCancellationError.Canceled); }
+class InternalCancellationError extends CancellationError {
 }
 
 class CopilotCancellationError extends CancellationError {
