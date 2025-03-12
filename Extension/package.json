@@ -23,6 +23,9 @@
     },
     "homepage": "https://github.com/Microsoft/vscode-cpptools",
     "qna": "https://github.com/Microsoft/vscode-cpptools/issues",
+    "extensionKind": [
+        "workspace"
+    ],
     "keywords": [
         "C",
         "C++",
