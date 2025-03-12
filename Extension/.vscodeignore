@@ -46,6 +46,9 @@ typings/**
 import_edge_strings.js
 localized_string_ids.h
 translations_auto_pr.js
+readme.developer.md
+Reinstalling the Extension.md
+*.d.ts
 
 # ignore i18n language files
 i18n/**
