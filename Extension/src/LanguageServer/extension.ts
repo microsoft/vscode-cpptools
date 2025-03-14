@@ -290,16 +290,11 @@ async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Prom
     const client: Client = clients.getDefaultClient();
     if (client instanceof DefaultClient) {
         const defaultClient: DefaultClient = client as DefaultClient;
-        const changedDefaultClientSettings: Record<string, string> = await defaultClient.onDidChangeSettings(event);
         clients.forEach(client => {
             if (client !== defaultClient) {
                 void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
             }
         });
-        const newUpdateChannel: string = changedDefaultClientSettings.updateChannel;
-        if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
-            UpdateInsidersAccess();
-        }
     }
 }
 
@@ -1353,45 +1348,6 @@ export function getClients(): ClientCollection {
 
 export function getActiveClient(): Client {
     return clients.ActiveClient;
-}
-
-export function UpdateInsidersAccess(): void {
-    let installPrerelease: boolean = false;
-
-    // Only move them to the new prerelease mechanism if using updateChannel of Insiders.
-    const settings: CppSettings = new CppSettings();
-    const migratedInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.migratedInsiders", false);
-    if (settings.updateChannel === "Insiders") {
-        // Don't do anything while the user has autoUpdate disabled, so we do not cause the extension to be updated.
-        if (!migratedInsiders.Value && vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
-            installPrerelease = true;
-            migratedInsiders.Value = true;
-        }
-    } else {
-        // Reset persistent value, so we register again if they switch to "Insiders" again.
-        if (migratedInsiders.Value) {
-            migratedInsiders.Value = false;
-        }
-    }
-
-    // Mitigate an issue with VS Code not recognizing a programmatically installed VSIX as Prerelease.
-    // If using VS Code Insiders, and updateChannel is not explicitly set, default to Prerelease.
-    // Only do this once. If the user manually switches to Release, we don't want to switch them back to Prerelease again.
-    if (util.isVsCodeInsiders()) {
-        const insidersMitigationDone: PersistentState<boolean> = new PersistentState<boolean>("CPP.insidersMitigationDone", false);
-        if (!insidersMitigationDone.Value) {
-            if (vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
-                if (settings.getStringWithUndefinedDefault("updateChannel") === undefined) {
-                    installPrerelease = true;
-                }
-            }
-            insidersMitigationDone.Value = true;
-        }
-    }
-
-    if (installPrerelease) {
-        void vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true }).then(undefined, logAndReturn.undefined);
-    }
 }
 
 export async function preReleaseCheck(): Promise<void> {

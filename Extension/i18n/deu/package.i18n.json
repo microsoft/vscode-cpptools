@@ -238,8 +238,6 @@
 	"c_cpp.configuration.default.systemIncludePath.markdownDescription": "Der Wert, der für den System-Includepfad verwendet werden soll. Wenn diese Option festgelegt ist, wird der über die Einstellungen `compilerPath` und `compileCommands` abgerufene System-Includepfad überschrieben.",
 	"c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": "Steuert, ob die Erweiterung in `c_cpp_properties.json` erkannte Fehler meldet.",
 	"c_cpp.configuration.default.customConfigurationVariables.markdownDescription": "Der Wert, der in einer Konfiguration verwendet werden soll, wenn `customConfigurationVariables` nicht festgelegt ist, oder die Werte, die eingefügt werden sollen, wenn `${default}` als Schlüssel in `customConfigurationVariables` vorhanden ist.",
-	"c_cpp.configuration.updateChannel.markdownDescription": "Legen Sie den Wert auf `Insiders` fest, um die neuesten Insiders-Builds der Erweiterung (die neue Features und Bugfixes enthalten) automatisch herunterzuladen und zu installieren.",
-	"c_cpp.configuration.updateChannel.deprecationMessage": "Diese Einstellung ist veraltet. Erweiterungen der Vorabversionen sind jetzt über den Marketplace verfügbar.",
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "Der Wert, der in einer Konfiguration verwendet werden soll, wenn `dotConfig` nicht angegeben ist, oder der einzufügende Wert, wenn `${default}` in `dotConfig` vorhanden ist.",
 	"c_cpp.configuration.experimentalFeatures.description": "Hiermit wird gesteuert, ob experimentelle Features verwendet werden können.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "Wenn `true` festgelegt ist, werden Codeschnipsel vom Sprachserver bereitgestellt.",

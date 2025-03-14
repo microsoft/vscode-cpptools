@@ -238,8 +238,6 @@
 	"c_cpp.configuration.default.systemIncludePath.markdownDescription": "Valore da usare per il percorso di inclusione di sistema. Se è impostato, esegue l'override del percorso di inclusione di sistema acquisito con le impostazioni `compilerPat` e `compileCommands`.",
 	"c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": "Controlla se l'estensione segnala errori rilevati in `c_cpp_properties.json`.",
 	"c_cpp.configuration.default.customConfigurationVariables.markdownDescription": "Valore da usare in una configurazione se `customConfigurationVariables` non è impostato oppure valori da inserire se `${default}` è presente come chiave in `customConfigurationVariables`.",
-	"c_cpp.configuration.updateChannel.markdownDescription": "Impostare su `Insiders` per scaricare e installare automaticamente le build Insider più recenti dell'estensione, che includono funzionalità in arrivo e correzioni di bug.",
-	"c_cpp.configuration.updateChannel.deprecationMessage": "Questa impostazione è deprecata. Le versioni preliminari delle estensioni ora sono disponibili tramite il Marketplace.",
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "Il valore da usare in una configurazione se `dotConfig` non è specificato oppure il valore da inserire se `${default}` è presente in `dotConfig`.",
 	"c_cpp.configuration.experimentalFeatures.description": "Controlla se le funzionalità \"sperimentali\" sono utilizzabili.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "Se è `true`, i frammenti vengono forniti dal server di linguaggio.",

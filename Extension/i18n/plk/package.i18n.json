@@ -238,8 +238,6 @@
 	"c_cpp.configuration.default.systemIncludePath.markdownDescription": "Wartość do użycia na potrzeby ścieżki dołączania systemu. Jeśli jest ustawiona, zastępuje systemową ścieżką dołączania, którą można uzyskać za pomocą ustawień `compilerPath` oraz `compileCommands`.",
 	"c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": "Określa, czy rozszerzenie będzie raportować błędy wykryte w pliku `c_cpp_properties.json`.",
 	"c_cpp.configuration.default.customConfigurationVariables.markdownDescription": "Wartość do użycia w konfiguracji, jeśli element `customConfigurationVariables` nie został ustawiony, lub wartości do wstawienia, jeśli element `${default}` istnieje jako klucz w elemencie `customConfigurationVariables`.",
-	"c_cpp.configuration.updateChannel.markdownDescription": "Ustaw na wartość `Insiders`, aby automatycznie pobierać i instalować najnowsze kompilacje niejawnych testerów rozszerzenia, które zawierają nadchodzące funkcje i poprawki błędów.",
-	"c_cpp.configuration.updateChannel.deprecationMessage": "To ustawienie jest przestarzałe. Rozszerzenia w wersji wstępnej są teraz dostępne za pomocą witryny Marketplace.",
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "Wartość do użycia w konfiguracji, jeśli element `dotConfig` nie został określony, lub wartość do wstawienia, jeśli element `${default}` istnieje w elemencie `dotConfig`.",
 	"c_cpp.configuration.experimentalFeatures.description": "Określa, czy można używać funkcji „eksperymentalnych”.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "Jeśli wartość to `true`, fragmenty kodu będą dostarczane przez serwer języka.",

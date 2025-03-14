@@ -238,8 +238,6 @@
 	"c_cpp.configuration.default.systemIncludePath.markdownDescription": "Sistem ekleme yolu için kullanılacak değer. Ayarlanırsa `compilerPath` ve `compileCommands` ayarları aracılığıyla elde edilen sistem ekleme yolunu geçersiz kılar.",
 	"c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": "Uzantının `c_cpp_properties.json` dosyasında algılanan hataları bildirip bildirmeyeceğini denetler.",
 	"c_cpp.configuration.default.customConfigurationVariables.markdownDescription": "`customConfigurationVariables` ayarlanmamışsa bir yapılandırmada kullanılacak değer veya `customConfigurationVariables` içinde anahtar olarak `${default}` varsa eklenecek değerler.",
-	"c_cpp.configuration.updateChannel.markdownDescription": "Uzantının, gelecek özellikleri ve hata düzeltmelerini de içeren en son Insider üyeleri derlemelerini otomatik olarak indirip yüklemek için `Insider üyeleri` olarak ayarlayın.",
-	"c_cpp.configuration.updateChannel.deprecationMessage": "Bu ayar kullanım dışı. Yayın öncesi uzantılar artık Market üzerinden kullanılabilir.",
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "`dotConfig` belirtilmemişse bir yapılandırmada kullanılacak değer veya `dotConfig` içinde `${default}` varsa eklenecek değerler.",
 	"c_cpp.configuration.experimentalFeatures.description": "\"Deneysel\" özelliklerin kullanılabilir olup olmadığını denetler.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "Değer `true` ise, parçacıklar dil sunucusu tarafından sağlanır.",

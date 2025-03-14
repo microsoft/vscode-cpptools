@@ -238,8 +238,6 @@
 	"c_cpp.configuration.default.systemIncludePath.markdownDescription": "Valeur à utiliser pour le chemin d'inclusion système. Si cette option est définie, elle remplace le chemin d'inclusion système obtenu via les paramètres `compilerPath` et `compileCommands`.",
 	"c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": "Contrôle si l'extension signale les erreurs détectées dans `c_cpp_properties.json`.",
 	"c_cpp.configuration.default.customConfigurationVariables.markdownDescription": "Valeur à utiliser dans une configuration si `customConfigurationVariables` n'est pas défini, ou valeurs à insérer si `${default}` est présent dans `customConfigurationVariables`.",
-	"c_cpp.configuration.updateChannel.markdownDescription": "Définissez la valeur `Insiders` pour télécharger et installer automatiquement les dernières builds Insider de l’extension, qui incluent les fonctionnalités à venir et les correctifs de bogues.",
-	"c_cpp.configuration.updateChannel.deprecationMessage": "Ce paramètre est déconseillé. Les extensions en version préliminaire sont désormais disponibles via marketplace.",
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "La valeur à utiliser dans une configuration si `dotConfig` n'est pas spécifié, ou la valeur à insérer si `${default}` est présent dans `dotConfig`.",
 	"c_cpp.configuration.experimentalFeatures.description": "Contrôle si les fonctionnalités \"expérimentales\" sont utilisables.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "Si la valeur est `true`, les extraits de code sont fournis par le serveur de langage.",

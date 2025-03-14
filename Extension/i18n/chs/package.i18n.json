@@ -238,8 +238,6 @@
 	"c_cpp.configuration.default.systemIncludePath.markdownDescription": "要用于系统包含路径的值。如果设置，则其将替换通过 `compilerPath` 和 `compileCommands` 设置获取的系统包含路径。",
 	"c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": "控制扩展是否将报告在 `c_cpp_properties.json` 中检测到的错误。",
 	"c_cpp.configuration.default.customConfigurationVariables.markdownDescription": "未设置 `customConfigurationVariables` 时要在配置中使用的值，或 `${default}` 在 `customConfigurationVariables` 中作为键存在时要插入的值。",
-	"c_cpp.configuration.updateChannel.markdownDescription": "设置为 `Insiders` 以自动下载并安装扩展的最新预览体验版本，其中包含即将推出的功能和 bug 修复。",
-	"c_cpp.configuration.updateChannel.deprecationMessage": "此设置已弃用。预发行版扩展现在可通过市场获得。",
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "未指定 `dotConfig` 时要在配置中使用的值，或 `dotConfig` 中存在 `${default}` 时要插入的值。",
 	"c_cpp.configuration.experimentalFeatures.description": "控制“实验性”功能是否可用。",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "如果为 `true`，则由语言服务器提供片段。",

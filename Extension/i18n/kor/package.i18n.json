@@ -238,8 +238,6 @@
 	"c_cpp.configuration.default.systemIncludePath.markdownDescription": "시스템 포함 경로에 사용할 값입니다. 설정하는 경우 `compilerPath` 및 `compileCommands` 설정을 통해 얻은 시스템 포함 경로를 재정의합니다.",
 	"c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": "확장이 `c_cpp_properties.json`에서 검색된 오류를 보고하도록 할지를 제어합니다.",
 	"c_cpp.configuration.default.customConfigurationVariables.markdownDescription": "`customConfigurationVariables`가 설정되지 않은 경우 구성에서 사용할 값 또는 `${default}`가 `customConfigurationVariables`에 키로 존재하는 경우 삽입할 값입니다.",
-	"c_cpp.configuration.updateChannel.markdownDescription": "예정된 기능과 버그 수정을 포함하는 확장의 최신 참가자 빌드를 자동으로 다운로드하여 설치하려면 `Insiders`로 설정합니다.",
-	"c_cpp.configuration.updateChannel.deprecationMessage": "이 설정은 사용되지 않습니다. 이제 Marketplace를 통해 시험판 확장을 사용할 수 있습니다.",
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "`dotConfig`가 지정되지 않은 경우 구성에서 사용할 값 또는 `${default}`가 `dotConfig`에 있는 경우 삽입할 값입니다.",
 	"c_cpp.configuration.experimentalFeatures.description": "\"실험적\" 기능을 사용할 수 있는지 여부를 제어합니다.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "`true`이면 언어 서버에서 코드 조각을 제공합니다.",

@@ -723,13 +723,6 @@
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
-    "c_cpp.configuration.updateChannel.markdownDescription": {
-        "message": "Set to `Insiders` to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.",
-        "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
-        ]
-    },
-    "c_cpp.configuration.updateChannel.deprecationMessage": "This setting is deprecated. Pre-release extensions are now available via the Marketplace.",
     "c_cpp.configuration.default.dotConfig.markdownDescription": {
         "message": "The value to use in a configuration if `dotConfig` is not specified, or the value to insert if `${default}` is present in `dotConfig`.",
         "comment": [

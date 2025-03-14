@@ -392,7 +392,6 @@ export class CppSettings extends Settings {
     }
     public get isConfigurationWarningsEnabled(): boolean { return this.getAsString("configurationWarnings").toLowerCase() === "enabled"; }
     public get preferredPathSeparator(): string { return this.getAsString("preferredPathSeparator"); }
-    public get updateChannel(): string { return this.getAsString("updateChannel"); }
     public get vcpkgEnabled(): boolean { return this.getAsBoolean("vcpkg.enabled"); }
     public get addNodeAddonIncludePaths(): boolean { return this.getAsBoolean("addNodeAddonIncludePaths"); }
     public get renameRequiresIdentifier(): boolean { return this.getAsBoolean("renameRequiresIdentifier"); }

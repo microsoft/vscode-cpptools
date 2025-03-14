@@ -238,8 +238,6 @@
 	"c_cpp.configuration.default.systemIncludePath.markdownDescription": "O valor a ser usado para o sistema inclui o caminho. Se definido, ele substitui o sistema inclui o caminho adquirido através das configurações `compilerPath` e `compileCommands`.",
 	"c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": "Controla se a extensão reportará erros detectados em `c_cpp_properties.json`.",
 	"c_cpp.configuration.default.customConfigurationVariables.markdownDescription": "O valor a ser usado em uma configuração se `customConfigurationVariables` não estiver definido, ou os valores a serem inseridos se `${default}` estiver presente como uma chave em `customConfigurationVariables`.",
-	"c_cpp.configuration.updateChannel.markdownDescription": "Defina como `Insiders` para baixar e instalar automaticamente as compilações mais recentes dos Insiders da extensão, que incluem os próximos recursos e correções de bugs.",
-	"c_cpp.configuration.updateChannel.deprecationMessage": "Esta configuração foi preterida. As extensões de pré-lançamento agora estão disponíveis por meio do Marketplace.",
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "O valor a ser usado em uma configuração se `dotConfig` não for especificado, ou o valor a ser inserido se `${default}` estiver presente em `dotConfig`.",
 	"c_cpp.configuration.experimentalFeatures.description": "Controla se os recursos \"experimentais\" podem ser usados.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "Se `true`, os snippets são fornecidos pelo servidor de linguagem.",
