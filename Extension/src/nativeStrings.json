@@ -480,5 +480,6 @@
     "refactor_extract_missing_return": "In the selected code, some control paths exit without setting the return value. This is supported only for scalar, numeric, and pointer return types.",
     "expand_selection": "Expand selection (to enable 'Extract to function')",
     "file_not_found_in_path2": "\"{0}\" not found in compile_commands.json files. 'includePath' from c_cpp_properties.json in folder '{1}' will be used for this file instead.",
-    "copilot_hover_link": "Generate Copilot summary"
+    "copilot_hover_link": "Generate Copilot summary",
+    "browse_path_not_found": "Browse path not found: {0}"
 }
