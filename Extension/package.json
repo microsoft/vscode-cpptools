@@ -899,6 +899,7 @@
                     },
                     "C_Cpp.default.recursiveIncludes.reduce": {
                         "type": "boolean",
+                        "default": true,
                         "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.reduce.markdownDescription%",
                         "scope": "resource"
                     },
@@ -908,6 +909,7 @@
                             "beforeSystemIncludes",
                             "afterSystemIncludes"
                         ],
+                        "default": "afterSystemIncludes",
                         "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.priority.markdownDescription%",
                         "scope": "resource"
                     },
