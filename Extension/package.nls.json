@@ -682,7 +682,7 @@
         ]
     },
     "c_cpp.configuration.default.mergeConfigurations.markdownDescription": {
-        "message": "The value to use in a configuration if `mergeConfigurations` is not specified, or the value to insert if `${default}` is present in `mergeConfigurations`.",
+        "message": "The value to use in a configuration if `mergeConfigurations` is either not specified or set to `${default}`.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
