@@ -481,5 +481,5 @@
     "expand_selection": "Expand selection (to enable 'Extract to function')",
     "file_not_found_in_path2": "\"{0}\" not found in compile_commands.json files. 'includePath' from c_cpp_properties.json in folder '{1}' will be used for this file instead.",
     "copilot_hover_link": "Generate Copilot summary",
-    "browse_path_not_found": "Browse path not found: {0}"
+    "browse_path_not_found": "Unable to index files from non-existent folder: {0}"
 }
