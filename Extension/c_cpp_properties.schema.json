@@ -180,7 +180,10 @@
                     "mergeConfigurations": {
                         "markdownDescription": "Set to `true` to merge include paths, defines, and forced includes with those from a configuration provider.",
                         "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
-                        "type": "boolean"
+                        "type": [
+                            "boolean",
+                            "string"
+                        ]
                     },
                     "browse": {
                         "type": "object",
@@ -204,6 +207,30 @@
                                 "items": {
                                     "type": "string"
                                 }
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "recursiveIncludes": {
+                        "type": "object",
+                        "properties": {
+                            "reduce": {
+                                "markdownDescription": "Set to `true` to reduce the number of recursive include paths provided to IntelliSense to only those paths currently referenced by #include statements. This requires first parsing files to determine which files are included. Set to `false` to provide all recursive include paths to IntelliSense. Reducing the number of recursive include paths may improve IntelliSense performance when a very large number of recursive include paths are involved. Not reducing the number of recursive include paths can improve IntelliSense performance by avoiding the need to parse files to determine which include paths to provide.",
+                                "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
+                                "type": [
+                                    "boolean",
+                                    "string"
+                                ]
+                            },
+                            "priority": {
+                                "markdownDescription": "The priority of recursive include paths. If set to `beforeSystemIncludes`, the recursive include paths will be searched before system include paths. If set to `afterSystemIncludes`, the recursive include paths will be searched after system include paths.",
+                                "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
+                                "type": "string",
+                                "enum": [
+                                    "beforeSystemIncludes",
+                                    "afterSystemIncludes",
+                                    "${default}"
+                                ]
                             }
                         },
                         "additionalProperties": false

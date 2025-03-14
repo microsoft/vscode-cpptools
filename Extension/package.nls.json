@@ -682,7 +682,7 @@
         ]
     },
     "c_cpp.configuration.default.mergeConfigurations.markdownDescription": {
-        "message": "Set to `true` to merge include paths, defines, and forced includes with those from a configuration provider.",
+        "message": "The value to use in a configuration if `mergeConfigurations` is not specified, or the value to insert if `${default}` is present in `mergeConfigurations`.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -729,13 +729,25 @@
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
-    "c_cpp.configuration.updateChannel.deprecationMessage": "This setting is deprecated. Pre-release extensions are now available via the Marketplace.",
     "c_cpp.configuration.default.dotConfig.markdownDescription": {
         "message": "The value to use in a configuration if `dotConfig` is not specified, or the value to insert if `${default}` is present in `dotConfig`.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
+    "c_cpp.configuration.default.recursiveIncludes.reduce.markdownDescription": {
+        "message": "The value to use in a configuration if `recursiveIncludes.reduce` is not specified, or the value to insert if `${default}` is present in `recursiveIncludes.reduce`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.recursiveIncludes.priority.markdownDescription": {
+        "message": "The value to use in a configuration if `recursiveIncludes.priority` is not specified, or the value to insert if `${default}` is present in `recursiveIncludes.priority`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.updateChannel.deprecationMessage": "This setting is deprecated. Pre-release extensions are now available via the Marketplace.",
     "c_cpp.configuration.experimentalFeatures.description": "Controls whether \"experimental\" features are usable.",
     "c_cpp.configuration.suggestSnippets.markdownDescription": {
         "message": "If `true`, snippets are provided by the language server.",

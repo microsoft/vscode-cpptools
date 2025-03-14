@@ -897,6 +897,20 @@
                         "markdownDescription": "%c_cpp.configuration.default.dotConfig.markdownDescription%",
                         "scope": "resource"
                     },
+                    "C_Cpp.default.recursiveIncludes.reduce": {
+                        "type": "boolean",
+                        "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.reduce.markdownDescription%",
+                        "scope": "resource"
+                    },
+                    "C_Cpp.default.recursiveIncludes.priority": {
+                        "type": "string",
+                        "enum": [
+                            "beforeSystemIncludes",
+                            "afterSystemIncludes"
+                        ],
+                        "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.priority.markdownDescription%",
+                        "scope": "resource"
+                    },
                     "C_Cpp.configurationWarnings": {
                         "type": "string",
                         "enum": [
