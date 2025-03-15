@@ -747,6 +747,12 @@
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
+    "c_cpp.configuration.default.recursiveIncludes.order.markdownDescription": {
+        "message": "The value to use in a configuration if `recursiveIncludes.order` is not specified, or the value to insert if `${default}` is present in `recursiveIncludes.order`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.updateChannel.deprecationMessage": "This setting is deprecated. Pre-release extensions are now available via the Marketplace.",
     "c_cpp.configuration.experimentalFeatures.description": "Controls whether \"experimental\" features are usable.",
     "c_cpp.configuration.suggestSnippets.markdownDescription": {

@@ -231,6 +231,15 @@
                                     "afterSystemIncludes",
                                     "${default}"
                                 ]
+                            },
+                            "order": {
+                                "markdownDescription": "The order in which subdirectories of recursive includes are searched.",
+                                "type": "string",
+                                "enum": [
+                                    "depthFirst",
+                                    "breadthFirst",
+                                    "${default}"
+                                ]
                             }
                         },
                         "additionalProperties": false

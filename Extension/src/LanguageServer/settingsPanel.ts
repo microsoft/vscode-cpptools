@@ -54,6 +54,7 @@ const elementId: { [key: string]: string } = {
     forcedInclude: "forcedInclude",
     recursiveIncludesReduce: "recursiveIncludes.reduce",
     recursiveIncludesPriority: "recursiveIncludes.priority",
+    recursiveIncludesOrder: "recursiveIncludes.order",
 
     // Browse properties
     browsePath: "browsePath",
@@ -364,6 +365,12 @@ export class SettingsPanel {
                     this.configValues.recursiveIncludes = {};
                 }
                 this.configValues.recursiveIncludes.priority = message.value;
+                break;
+            case elementId.recursiveIncludesOrder:
+                if (!this.configValues.recursiveIncludes) {
+                    this.configValues.recursiveIncludes = {};
+                }
+                this.configValues.recursiveIncludes.order = message.value;
                 break;
             case elementId.browsePath:
                 if (!this.configValues.browse) {

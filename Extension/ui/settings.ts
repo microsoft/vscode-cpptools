@@ -44,6 +44,7 @@ const elementId: { [key: string]: string } = {
     dotConfigInvalid: "dotConfigInvalid",
     recursiveIncludesReduce: "recursiveIncludes.reduce",
     recursiveIncludesPriority: "recursiveIncludes.priority",
+    recursiveIncludesOrder: "recursiveIncludes.order",
 
     // Browse properties
     browsePath: "browsePath",
@@ -306,6 +307,7 @@ class SettingsApp {
             if (config.recursiveIncludes) {
                 (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesReduce)).checked = config.recursiveIncludes.reduce;
                 (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesPriority)).value = config.recursiveIncludes.priority;
+                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesOrder)).value = config.recursiveIncludes.order;
             }
 
             if (config.browse) {

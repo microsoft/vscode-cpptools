@@ -111,6 +111,7 @@ export interface Browse {
 export interface RecursiveIncludes {
     reduce?: boolean | string;
     priority?: string;
+    order?: string;
 }
 
 export interface KnownCompiler {
@@ -938,6 +939,7 @@ export class CppProperties {
             if (configuration.recursiveIncludes) {
                 configuration.recursiveIncludes.reduce = this.updateConfigurationBoolean(configuration.recursiveIncludes.reduce, settings.defaultRecursiveIncludesReduce);
                 configuration.recursiveIncludes.priority = this.updateConfigurationString(configuration.recursiveIncludes.priority, settings.defaultRecursiveIncludesPriority);
+                configuration.recursiveIncludes.order = this.updateConfigurationString(configuration.recursiveIncludes.order, settings.defaultRecursiveIncludesOrder);
             }
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
