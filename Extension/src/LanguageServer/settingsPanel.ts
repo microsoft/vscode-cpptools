@@ -52,6 +52,7 @@ const elementId: { [key: string]: string } = {
     mergeConfigurations: "mergeConfigurations",
     configurationProvider: "configurationProvider",
     forcedInclude: "forcedInclude",
+    recursiveIncludesRequireHeaders: "recursiveIncludes.requireHeaders",
     recursiveIncludesReduce: "recursiveIncludes.reduce",
     recursiveIncludesPriority: "recursiveIncludes.priority",
     recursiveIncludesOrder: "recursiveIncludes.order",
@@ -353,6 +354,12 @@ export class SettingsPanel {
                 break;
             case elementId.forcedInclude:
                 this.configValues.forcedInclude = splitEntries(message.value);
+                break;
+            case elementId.recursiveIncludesRequireHeaders:
+                if (!this.configValues.recursiveIncludes) {
+                    this.configValues.recursiveIncludes = {};
+                }
+                this.configValues.recursiveIncludes.requireHeaders = message.value;
                 break;
             case elementId.recursiveIncludesReduce:
                 if (!this.configValues.recursiveIncludes) {

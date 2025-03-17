@@ -730,25 +730,31 @@
         ]
     },
     "c_cpp.configuration.default.dotConfig.markdownDescription": {
-        "message": "The value to use in a configuration if `dotConfig` is not specified, or the value to insert if `${default}` is present in `dotConfig`.",
+        "message": "The value to use in a configuration if `dotConfig` is either not specified or set to `${default}`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.recursiveIncludes.requireHeaders.markdownDescription": {
+        "message": "The value to use in a configuration if `recursiveIncludes.requireHeaders` is either not specified or set to `${default}`.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
     "c_cpp.configuration.default.recursiveIncludes.reduce.markdownDescription": {
-        "message": "The value to use in a configuration if `recursiveIncludes.reduce` is not specified, or the value to insert if `${default}` is present in `recursiveIncludes.reduce`.",
+        "message": "The value to use in a configuration if `recursiveIncludes.reduce` is either not specified or set to `${default}`.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
     "c_cpp.configuration.default.recursiveIncludes.priority.markdownDescription": {
-        "message": "The value to use in a configuration if `recursiveIncludes.priority` is not specified, or the value to insert if `${default}` is present in `recursiveIncludes.priority`.",
+        "message": "The value to use in a configuration if `recursiveIncludes.priority` is either not specified or set to `${default}`.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
     "c_cpp.configuration.default.recursiveIncludes.order.markdownDescription": {
-        "message": "The value to use in a configuration if `recursiveIncludes.order` is not specified, or the value to insert if `${default}` is present in `recursiveIncludes.order`.",
+        "message": "The value to use in a configuration if `recursiveIncludes.order` is either not specified or set to `${default}`.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]

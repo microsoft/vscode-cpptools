@@ -109,6 +109,7 @@ export interface Browse {
 }
 
 export interface RecursiveIncludes {
+    requireHeaders?: boolean | string;
     reduce?: boolean | string;
     priority?: string;
     order?: string;
@@ -936,11 +937,13 @@ export class CppProperties {
             configuration.cStandardIsExplicit = configuration.cStandardIsExplicit || settings.defaultCStandard !== "";
             configuration.cppStandardIsExplicit = configuration.cppStandardIsExplicit || settings.defaultCppStandard !== "";
             configuration.mergeConfigurations = this.updateConfigurationBoolean(configuration.mergeConfigurations, settings.defaultMergeConfigurations);
-            if (configuration.recursiveIncludes) {
-                configuration.recursiveIncludes.reduce = this.updateConfigurationBoolean(configuration.recursiveIncludes.reduce, settings.defaultRecursiveIncludesReduce);
-                configuration.recursiveIncludes.priority = this.updateConfigurationString(configuration.recursiveIncludes.priority, settings.defaultRecursiveIncludesPriority);
-                configuration.recursiveIncludes.order = this.updateConfigurationString(configuration.recursiveIncludes.order, settings.defaultRecursiveIncludesOrder);
+            if (!configuration.recursiveIncludes) {
+                configuration.recursiveIncludes = {};
             }
+            configuration.recursiveIncludes.requireHeaders = this.updateConfigurationBoolean(configuration.recursiveIncludes.requireHeaders, settings.defaultRecursiveIncludesRequireHeaders);
+            configuration.recursiveIncludes.reduce = this.updateConfigurationBoolean(configuration.recursiveIncludes.reduce, settings.defaultRecursiveIncludesReduce);
+            configuration.recursiveIncludes.priority = this.updateConfigurationString(configuration.recursiveIncludes.priority, settings.defaultRecursiveIncludesPriority);
+            configuration.recursiveIncludes.order = this.updateConfigurationString(configuration.recursiveIncludes.order, settings.defaultRecursiveIncludesOrder);
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
