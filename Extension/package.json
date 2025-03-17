@@ -3341,17 +3341,6 @@
                         "markdownDescription": "%c_cpp.configuration.preferredPathSeparator.markdownDescription%",
                         "scope": "machine-overridable"
                     },
-                    "C_Cpp.updateChannel": {
-                        "type": "string",
-                        "enum": [
-                            "Default",
-                            "Insiders"
-                        ],
-                        "default": "Default",
-                        "markdownDescription": "%c_cpp.configuration.updateChannel.markdownDescription%",
-                        "scope": "application",
-                        "deprecationMessage": "%c_cpp.configuration.updateChannel.deprecationMessage%"
-                    },
                     "C_Cpp.experimentalFeatures": {
                         "type": "string",
                         "enum": [

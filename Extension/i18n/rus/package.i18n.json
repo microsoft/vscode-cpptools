@@ -238,8 +238,6 @@
 	"c_cpp.configuration.default.systemIncludePath.markdownDescription": "Значение, используемое для системного пути включения. Если этот параметр задан, он переопределяет системный путь включения, полученный с помощью параметров `compilerPath` и `compileCommands`.",
 	"c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": "Определяет, будет ли расширение сообщать об ошибках, обнаруженных в `c_cpp_properties.json`.",
 	"c_cpp.configuration.default.customConfigurationVariables.markdownDescription": "Значение, используемое в конфигурации, если параметр `customConfigurationVariables` не установлен, или вставляемые значения, если в `customConfigurationVariables` присутствует значение `${default}` в качестве ключа.",
-	"c_cpp.configuration.updateChannel.markdownDescription": "Задайте значение `Insiders`, чтобы автоматически скачать и установить последние выпуски расширения для предварительной оценки, включающие в себя запланированные функции и исправления ошибок.",
-	"c_cpp.configuration.updateChannel.deprecationMessage": "Этот параметр не рекомендуется. Предварительные версии расширений теперь доступны через Marketplace.",
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "Значение, используемое в конфигурации, если параметр `dotConfig` не указан, или вставляемое значение, если в `dotConfig` присутствует значение `${default}`.",
 	"c_cpp.configuration.experimentalFeatures.description": "Определяет, можно ли использовать \"экспериментальные\" функции.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "Если задано значение `true`, фрагменты кода предоставляются языковым сервером.",
