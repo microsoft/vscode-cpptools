@@ -1256,9 +1256,6 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
             }
         }
-        if (funcStr.includes("add_token_cache_to_string")) {
-            funcStr = funcStr.replace("add_token_cache_to_string", "key");
-        }
         if (containsFilteredTelemetryData(funcStr)) {
             funcStr = "?";
         } else if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
