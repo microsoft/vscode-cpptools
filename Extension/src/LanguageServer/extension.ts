@@ -1165,8 +1165,9 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
-function containsUnexpectedTelemetryCharacter(str: string): boolean {
-    return str.includes("/") || str.includes("\\") || str.includes("@");
+function containsFilteredTelemetryData(str: string): boolean {
+    const regex: RegExp = /(key|token|sig|secret|signature|password|passwd|pwd|android:value)[^a-zA-Z0-9]/i;
+    return regex.test(str);
 }
 
 async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
@@ -1197,10 +1198,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             if (pendingCrashLogLine === "ENDLOG") {
                 break;
             }
-            if (!containsUnexpectedTelemetryCharacter(pendingCrashLogLine)) {
-                crashLog += pendingCrashLogLine + "\n";
+            if (containsFilteredTelemetryData(pendingCrashLogLine)) {
+                crashLog += "?\n";
             } else {
-                crashLog += "<unexpectedCharacter>\n";
+                crashLog += pendingCrashLogLine + "\n";
             }
         }
         crashLog = crashLog.trimEnd();
@@ -1255,12 +1256,11 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
             }
         }
-        if (funcStr.includes("/")) {
-            funcStr = "<funcForwardSlash>";
-        } else if (funcStr.includes("\\")) {
-            funcStr = "<funcBackSlash>";
-        } else if (funcStr.includes("@")) {
-            funcStr = "<funcAt>";
+        if (funcStr.includes("add_token_cache_to_string")) {
+            funcStr = funcStr.replace("add_token_cache_to_string", "key");
+        }
+        if (containsFilteredTelemetryData(funcStr)) {
+            funcStr = "?";
         } else if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
             continue; // Skip these on early frames.
         }
@@ -1271,10 +1271,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
             const pendingOffset: string = line.substring(offsetPos2);
-            if (!containsUnexpectedTelemetryCharacter(pendingOffset)) {
-                crashCallStack += pendingOffset;
+            if (containsFilteredTelemetryData(pendingOffset)) {
+                crashCallStack += "?";
             } else {
-                crashCallStack += "<offsetUnexpectedCharacter>";
+                crashCallStack += pendingOffset;
             }
             const startAddressPos: number = line.indexOf("0x");
             if (startAddressPos === -1 || startAddressPos >= startPos) {
@@ -1290,10 +1290,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 continue; // unexpected
             }
             const pendingOffset: string = line.substring(offsetPos2, endPos);
-            if (!containsUnexpectedTelemetryCharacter(pendingOffset)) {
-                crashCallStack += pendingOffset;
+            if (containsFilteredTelemetryData(pendingOffset)) {
+                crashCallStack += "?";
             } else {
-                crashCallStack += "<offsetUnexpectedCharacter>";
+                crashCallStack += pendingOffset;
             }
         }
     }
@@ -1312,8 +1312,8 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         data = data.substring(0, 8191) + "…";
     }
 
-    if (containsUnexpectedTelemetryCharacter(addressData)) {
-        addressData = "<addressDataUnexpectedCharacter>";
+    if (containsFilteredTelemetryData(addressData)) {
+        addressData = "?";
     }
 
     logCppCrashTelemetry(data, addressData, crashLog);
