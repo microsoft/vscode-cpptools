@@ -183,7 +183,7 @@
 	"c_cpp.configuration.intelliSenseEngine.default.description": "Fornece resultados baseados no contextopor meio de um processo IntelliSense separado.",
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "Fornece resultados \"difusos\" que não são sensíveis ao contexto.",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "Desabilita os recursos do serviço de linguagem C/C++.",
-	"c_cpp.configuration.autocomplete.markdownDescription": "Controla o provedor de preenchimento automático. Se estiver `desabilitado` e você quiser a conclusão baseada em palavras, também precisará definir `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (e da mesma forma para linguagens `c` e `cuda-cpp`).",
+	"c_cpp.configuration.autocomplete.markdownDescription": "Controla o provedor de preenchimento automático. Se estiver `disabled` e você quiser a conclusão baseada em palavras, também precisará definir `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (e da mesma forma para linguagens `c` e `cuda-cpp`).",
 	"c_cpp.configuration.autocomplete.default.description": "Usa o mecanismo IntelliSense ativo.",
 	"c_cpp.configuration.autocomplete.disabled.description": "Usa o preenchimento baseado em palavras fornecido pelo Visual Studio Code.",
 	"c_cpp.configuration.errorSquiggles.description": "Controla se os erros de compilação suspeitos detectados pelo mecanismo do IntelliSense serão relatados de volta ao editor. Ele também controla se os avisos de análise de código são relatados se as inclusões não puderem ser encontradas. Essa configuração é ignorada pelo mecanismo do Analisador de Marca.",
