@@ -42,7 +42,6 @@ const elementId: { [key: string]: string } = {
     mergeConfigurations: "mergeConfigurations",
     dotConfig: "dotConfig",
     dotConfigInvalid: "dotConfigInvalid",
-    recursiveIncludesRequireHeaders: "recursiveIncludes.requireHeaders",
     recursiveIncludesReduce: "recursiveIncludes.reduce",
     recursiveIncludesPriority: "recursiveIncludes.priority",
     recursiveIncludesOrder: "recursiveIncludes.order",
@@ -107,8 +106,6 @@ class SettingsApp {
         // Special case for checkbox elements
         document.getElementById(elementId.limitSymbolsToIncludedHeaders)?.addEventListener("change", this.onChangedCheckbox.bind(this, elementId.limitSymbolsToIncludedHeaders));
         document.getElementById(elementId.mergeConfigurations)?.addEventListener("change", this.onChangedCheckbox.bind(this, elementId.mergeConfigurations));
-        document.getElementById(elementId.recursiveIncludesRequireHeaders)?.addEventListener("change", this.onChangedCheckbox.bind(this, elementId.recursiveIncludesRequireHeaders));
-        document.getElementById(elementId.recursiveIncludesReduce)?.addEventListener("change", this.onChangedCheckbox.bind(this, elementId.recursiveIncludesReduce));
     }
 
     private addEventsToConfigNameChanges(): void {
@@ -307,8 +304,7 @@ class SettingsApp {
             (<HTMLInputElement>document.getElementById(elementId.forcedInclude)).value = joinEntries(config.forcedInclude);
             (<HTMLInputElement>document.getElementById(elementId.dotConfig)).value = config.dotConfig ? config.dotConfig : "";
             if (config.recursiveIncludes) {
-                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesRequireHeaders)).checked = config.recursiveIncludes.requireHeaders;
-                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesReduce)).checked = config.recursiveIncludes.reduce;
+                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesReduce)).value = config.recursiveIncludes.reduce;
                 (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesPriority)).value = config.recursiveIncludes.priority;
                 (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesOrder)).value = config.recursiveIncludes.order;
             }

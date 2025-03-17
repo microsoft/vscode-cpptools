@@ -109,8 +109,7 @@ export interface Browse {
 }
 
 export interface RecursiveIncludes {
-    requireHeaders?: boolean | string;
-    reduce?: boolean | string;
+    reduce?: string;
     priority?: string;
     order?: string;
 }
@@ -940,8 +939,7 @@ export class CppProperties {
             if (!configuration.recursiveIncludes) {
                 configuration.recursiveIncludes = {};
             }
-            configuration.recursiveIncludes.requireHeaders = this.updateConfigurationBoolean(configuration.recursiveIncludes.requireHeaders, settings.defaultRecursiveIncludesRequireHeaders);
-            configuration.recursiveIncludes.reduce = this.updateConfigurationBoolean(configuration.recursiveIncludes.reduce, settings.defaultRecursiveIncludesReduce);
+            configuration.recursiveIncludes.reduce = this.updateConfigurationString(configuration.recursiveIncludes.reduce, settings.defaultRecursiveIncludesReduce);
             configuration.recursiveIncludes.priority = this.updateConfigurationString(configuration.recursiveIncludes.priority, settings.defaultRecursiveIncludesPriority);
             configuration.recursiveIncludes.order = this.updateConfigurationString(configuration.recursiveIncludes.order, settings.defaultRecursiveIncludesOrder);
             if (!configuration.compileCommands) {

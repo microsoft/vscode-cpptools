@@ -729,12 +729,6 @@
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
-    "c_cpp.configuration.default.recursiveIncludes.requireHeaders.markdownDescription": {
-        "message": "The value to use in a configuration if `recursiveIncludes.requireHeaders` is either not specified or set to `${default}`.",
-        "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
-        ]
-    },
     "c_cpp.configuration.default.recursiveIncludes.reduce.markdownDescription": {
         "message": "The value to use in a configuration if `recursiveIncludes.reduce` is either not specified or set to `${default}`.",
         "comment": [

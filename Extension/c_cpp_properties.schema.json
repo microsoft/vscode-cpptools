@@ -214,20 +214,15 @@
                     "recursiveIncludes": {
                         "type": "object",
                         "properties": {
-                            "requireHeaders": {
-                                "markdownDescription": "Set to `true` to filter expanded recursive include directories to only those currently containing any headers. Set to `false` to provide all recursive include paths to IntelliSense. Excluding recursive include directories that do not contain headers may improve IntelliSense performance when a very large number of recursive include paths are involved. However, performance may be impacted when headers are added or removed from directories, requiring re-expansion of the recursive include directories.",
-                                "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
-                                "type": [
-                                    "boolean",
-                                    "string"
-                                ]
-                            },
                             "reduce": {
-                                "markdownDescription": "Set to `true` to reduce the number of recursive include paths provided to IntelliSense to only those paths currently referenced by #include statements. This requires first parsing files to determine which files are included. Set to `false` to provide all recursive include paths to IntelliSense. Reducing the number of recursive include paths may improve IntelliSense performance when a very large number of recursive include paths are involved. Not reducing the number of recursive include paths can improve IntelliSense performance by avoiding the need to parse files to determine which include paths to provide.",
+                                "markdownDescription": "Set to `always` to always reduce the number of recursive include paths provided to IntelliSense to only those paths currently referenced by #include statements. This requires first parsing files to determine which files are included. Set to `never` to provide all recursive include paths to IntelliSense. Reducing the number of recursive include paths may improve IntelliSense performance when a very large number of recursive include paths are involved. Not reducing the number of recursive include paths can improve IntelliSense performance by avoiding the need to parse files to determine which include paths to provide.",
                                 "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
-                                "type": [
-                                    "boolean",
-                                    "string"
+                                "type": "string",
+                                "enum": [
+                                    "always",
+                                    "never",
+                                    "default",
+                                    "${default}"
                                 ]
                             },
                             "priority": {

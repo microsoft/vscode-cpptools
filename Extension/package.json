@@ -897,15 +897,14 @@
                         "markdownDescription": "%c_cpp.configuration.default.dotConfig.markdownDescription%",
                         "scope": "resource"
                     },
-                    "C_Cpp.default.recursiveIncludes.requireHeaders": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.requireHeaders.markdownDescription%",
-                        "scope": "resource"
-                    },
                     "C_Cpp.default.recursiveIncludes.reduce": {
-                        "type": "boolean",
-                        "default": false,
+                        "type": "string",
+                        "enum": [
+                            "always",
+                            "never",
+                            "default"
+                        ],
+                        "default": "default",
                         "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.reduce.markdownDescription%",
                         "scope": "resource"
                     },

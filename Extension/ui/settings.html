@@ -721,19 +721,20 @@
                 <div id="databaseFilenameInvalid" class="error" style="width: 800px"></div>
             </div>
         </div>
-
+1
         <div class="section">
-            <div class="section-title" data-loc-id="recursiveIncludes.requireHeaders">Recursive includes: require headers</div>
-            <input type="checkbox" id="recursiveIncludes.requireHeaders" style="vertical-align: middle; transform: scale(1.5)">
-                <span data-loc-id="recursiveIncludes.requireHeaders.checkbox">Set to <code>true</code> (or checked) to filter expanded recursive include directories to only those currently containing any headers. Set to <code>false</code> (or unchecked) to provide all recursive include paths to IntelliSense. Excluding recursive include directories that do not contain headers may improve IntelliSense performance when a very large number of recursive include paths are involved. However, performance may be impacted when headers are added or removed from directories, requiring re-expansion of the recursive include directories.</span>
-            </input>
-        </div>
-
-        <div class="section">
-            <div class="section-title" data-loc-id="recursiveIncludes.reduce">Recursive includes: reduce</div>
-            <input type="checkbox" id="recursiveIncludes.reduce" style="vertical-align: middle; transform: scale(1.5)">
-                <span data-loc-id="recursiveIncludes.reduce.checkbox">Set to <code>true</code> (or checked) to reduce the number of recursive include paths provided to IntelliSense to only those paths currently referenced by #include statements. This requires first parsing files to determine which files are included. Set to <code>false</code> (or unchecked) to provide all recursive include paths to IntelliSense. Reducing the number of recursive include paths may improve IntelliSense performance when a very large number of recursive include paths are involved. Not reducing the number of recursive include paths can improve IntelliSense performance by avoiding the need to parse files to determine which include paths to provide.</span>
-            </input>
+            <div class="section-title" data-loc-id="recursiveIncludes.reduce">Recursive includes: priority</div>
+            <div class="section-text">
+                <span data-loc-id="recursiveIncludes.reduce.description">Set to <code>always</code> to reduce the number of recursive include paths provided to IntelliSense to only those paths currently referenced by #include statements. This requires first parsing files to determine which files are included. Set to <code>never</code> to provide all recursive include paths to IntelliSense. Reducing the number of recursive include paths may improve IntelliSense performance when a very large number of recursive include paths are involved. Not reducing the number of recursive include paths can improve IntelliSense performance by avoiding the need to parse files to determine which include paths to provide.</span>
+            </div>
+            <div>
+            <select name="inputValue" id="recursiveIncludes.reduce" class="select-default">
+                <option value="${default}">${default}</option>
+                <option value="always">always</option>
+                <option value="never">never</option>
+                <option value="default">default</option>
+            </select>
+            </div>
         </div>
 
         <div class="section">
