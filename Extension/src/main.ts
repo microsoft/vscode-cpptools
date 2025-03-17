@@ -75,7 +75,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // Notify users if debugging may not be supported on their OS.
     util.checkDistro(info);
     await checkVsixCompatibility();
-    LanguageServer.UpdateInsidersAccess();
 
     const ignoreRecommendations: boolean | undefined = vscode.workspace.getConfiguration("extensions", null).get<boolean>("ignoreRecommendations");
     if (ignoreRecommendations !== true) {
