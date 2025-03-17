@@ -1,7 +1,5 @@
 {
   "defaults": [
-    "--pack_alignment",
-    "8",
     "-D__APPLE__=1",
     "-D__MACH__=1",
     "-D__arm__=1",
