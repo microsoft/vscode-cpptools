@@ -251,7 +251,7 @@
 	"c_cpp.configuration.hover.description": "Если этот параметр отключен, сведения при наведении курсора больше не предоставляются языковым сервером.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Включите службы интеграции для [диспетчера зависимостей vcpkg](https://aka.ms/vcpkg/).",
 	"c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription": "Добавьте пути включения из `nan` и `node-addon-api`, если они являются зависимостями.",
-	"c_cpp.configuration.copilotHover.markdownDescription": "Если параметр `отключен`, сведения о Copilot не будут отображаться при наведении указателя мыши.",
+	"c_cpp.configuration.copilotHover.markdownDescription": "Если параметр `disabled`, сведения о Copilot не будут отображаться при наведении указателя мыши.",
 	"c_cpp.configuration.renameRequiresIdentifier.markdownDescription": "Если этот параметр имеет значение `true`, для операции 'Переименование символа' потребуется указать допустимый идентификатор C/C++.",
 	"c_cpp.configuration.autocompleteAddParentheses.markdownDescription": "Если присвоено значение `true`, автозаполнение автоматически добавит `(` после вызовов функции, при этом также может добавляться `)` в зависимости от значения параметра `#editor.autoClosingBrackets#`.",
 	"c_cpp.configuration.filesExclude.markdownDescription": "Настройка стандартных масок для исключения папок (и файлов, если внесено изменение в `#C_Cpp.exclusionPolicy#`). Они специфичны для расширения C/C++ и дополняют `#files.exclude#`, но в отличие от `#files.exclude#` они применяются также к путям вне папки используемой рабочей области и не удаляются из представления обозревателя. Дополнительные сведения о [шаблонах глобусов](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options).",
