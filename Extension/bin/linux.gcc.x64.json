@@ -1,7 +1,5 @@
 {
   "defaults": [
-    "--pack_alignment",
-    "8",
     "-Dunix=1",
     "-D__unix__=1",
     "-D__linux__=1",
