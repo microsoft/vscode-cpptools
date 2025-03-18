@@ -290,16 +290,11 @@ async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Prom
     const client: Client = clients.getDefaultClient();
     if (client instanceof DefaultClient) {
         const defaultClient: DefaultClient = client as DefaultClient;
-        const changedDefaultClientSettings: Record<string, string> = await defaultClient.onDidChangeSettings(event);
         clients.forEach(client => {
             if (client !== defaultClient) {
                 void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
             }
         });
-        const newUpdateChannel: string = changedDefaultClientSettings.updateChannel;
-        if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
-            UpdateInsidersAccess();
-        }
     }
 }
 
@@ -1170,8 +1165,9 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
-function containsUnexpectedTelemetryCharacter(str: string): boolean {
-    return str.includes("/") || str.includes("\\") || str.includes("@");
+function containsFilteredTelemetryData(str: string): boolean {
+    const regex: RegExp = /(key|token|sig|secret|signature|password|passwd|pwd|android:value)[^a-zA-Z0-9]/i;
+    return regex.test(str);
 }
 
 async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
@@ -1202,10 +1198,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             if (pendingCrashLogLine === "ENDLOG") {
                 break;
             }
-            if (!containsUnexpectedTelemetryCharacter(pendingCrashLogLine)) {
-                crashLog += pendingCrashLogLine + "\n";
+            if (containsFilteredTelemetryData(pendingCrashLogLine)) {
+                crashLog += "?\n";
             } else {
-                crashLog += "<unexpectedCharacter>\n";
+                crashLog += pendingCrashLogLine + "\n";
             }
         }
         crashLog = crashLog.trimEnd();
@@ -1260,12 +1256,8 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
             }
         }
-        if (funcStr.includes("/")) {
-            funcStr = "<funcForwardSlash>";
-        } else if (funcStr.includes("\\")) {
-            funcStr = "<funcBackSlash>";
-        } else if (funcStr.includes("@")) {
-            funcStr = "<funcAt>";
+        if (containsFilteredTelemetryData(funcStr)) {
+            funcStr = "?";
         } else if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
             continue; // Skip these on early frames.
         }
@@ -1276,10 +1268,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
             const pendingOffset: string = line.substring(offsetPos2);
-            if (!containsUnexpectedTelemetryCharacter(pendingOffset)) {
-                crashCallStack += pendingOffset;
+            if (containsFilteredTelemetryData(pendingOffset)) {
+                crashCallStack += "?";
             } else {
-                crashCallStack += "<offsetUnexpectedCharacter>";
+                crashCallStack += pendingOffset;
             }
             const startAddressPos: number = line.indexOf("0x");
             if (startAddressPos === -1 || startAddressPos >= startPos) {
@@ -1295,10 +1287,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 continue; // unexpected
             }
             const pendingOffset: string = line.substring(offsetPos2, endPos);
-            if (!containsUnexpectedTelemetryCharacter(pendingOffset)) {
-                crashCallStack += pendingOffset;
+            if (containsFilteredTelemetryData(pendingOffset)) {
+                crashCallStack += "?";
             } else {
-                crashCallStack += "<offsetUnexpectedCharacter>";
+                crashCallStack += pendingOffset;
             }
         }
     }
@@ -1317,8 +1309,8 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         data = data.substring(0, 8191) + "…";
     }
 
-    if (containsUnexpectedTelemetryCharacter(addressData)) {
-        addressData = "<addressDataUnexpectedCharacter>";
+    if (containsFilteredTelemetryData(addressData)) {
+        addressData = "?";
     }
 
     logCppCrashTelemetry(data, addressData, crashLog);
@@ -1353,45 +1345,6 @@ export function getClients(): ClientCollection {
 
 export function getActiveClient(): Client {
     return clients.ActiveClient;
-}
-
-export function UpdateInsidersAccess(): void {
-    let installPrerelease: boolean = false;
-
-    // Only move them to the new prerelease mechanism if using updateChannel of Insiders.
-    const settings: CppSettings = new CppSettings();
-    const migratedInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.migratedInsiders", false);
-    if (settings.updateChannel === "Insiders") {
-        // Don't do anything while the user has autoUpdate disabled, so we do not cause the extension to be updated.
-        if (!migratedInsiders.Value && vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
-            installPrerelease = true;
-            migratedInsiders.Value = true;
-        }
-    } else {
-        // Reset persistent value, so we register again if they switch to "Insiders" again.
-        if (migratedInsiders.Value) {
-            migratedInsiders.Value = false;
-        }
-    }
-
-    // Mitigate an issue with VS Code not recognizing a programmatically installed VSIX as Prerelease.
-    // If using VS Code Insiders, and updateChannel is not explicitly set, default to Prerelease.
-    // Only do this once. If the user manually switches to Release, we don't want to switch them back to Prerelease again.
-    if (util.isVsCodeInsiders()) {
-        const insidersMitigationDone: PersistentState<boolean> = new PersistentState<boolean>("CPP.insidersMitigationDone", false);
-        if (!insidersMitigationDone.Value) {
-            if (vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
-                if (settings.getStringWithUndefinedDefault("updateChannel") === undefined) {
-                    installPrerelease = true;
-                }
-            }
-            insidersMitigationDone.Value = true;
-        }
-    }
-
-    if (installPrerelease) {
-        void vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true }).then(undefined, logAndReturn.undefined);
-    }
 }
 
 export async function preReleaseCheck(): Promise<void> {

@@ -130,8 +130,8 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
     });
 
     const arrangeChatContextFromCppTools = ({ chatContextFromCppTools, isCpp, isHeaderFile }:
-    { chatContextFromCppTools?: ChatContextResult; isCpp?: boolean; isHeaderFile?: boolean } =
-    { chatContextFromCppTools: undefined, isCpp: undefined, isHeaderFile: false }
+        { chatContextFromCppTools?: ChatContextResult; isCpp?: boolean; isHeaderFile?: boolean } =
+        { chatContextFromCppTools: undefined, isCpp: undefined, isHeaderFile: false }
     ) => {
         activeClientStub.getChatContext.resolves(chatContextFromCppTools);
         sinon.stub(util, 'isCpp').returns(isCpp ?? true);
@@ -145,7 +145,8 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
                 standardVersion: 'c++20',
                 compiler: 'msvc',
                 targetPlatform: 'windows',
-                targetArchitecture: 'x64'
+                targetArchitecture: 'x64',
+                usedTestFrameworks: ['GTest', 'Catch2']
             }
         });
 
@@ -157,12 +158,14 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             "compiler": 'MSVC',
             "standardVersion": 'C++20',
             "targetPlatform": 'Windows',
-            "targetArchitecture": 'x64'
+            "targetArchitecture": 'x64',
+            'testFrameworks': 'GTest, Catch2'
         })));
         ok(result, 'result should not be undefined');
         const text = result.content[0] as vscode.LanguageModelTextPart;
         ok(text, 'result should contain a text part');
-        ok(text.value === 'The user is working on a C++ project. The project uses language version C++20. The project compiles using the MSVC compiler. The project targets the Windows platform. The project targets the x64 architecture. ');
+        const traits_text = `The user is working on a C++ project. The project uses language version C++20. The project compiles using the MSVC compiler. The project targets the Windows platform. The project targets the x64 architecture. The project uses the following C++ test frameworks: GTest, Catch2. `;
+        ok(text.value === traits_text);
     });
 
     const testGetProjectContext = async ({
@@ -184,7 +187,8 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
                 standardVersion: 'c++20',
                 compiler: compiler,
                 targetPlatform: 'windows',
-                targetArchitecture: 'x64'
+                targetArchitecture: 'x64',
+                usedTestFrameworks: []
             }
         });
 
@@ -225,7 +229,8 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
                 standardVersion: 'gnu++17',
                 compiler: 'javac',
                 targetPlatform: 'arduino',
-                targetArchitecture: 'bar'
+                targetArchitecture: 'bar',
+                usedTestFrameworks: []
             }
         });
         const telemetryProperties: Record<string, string> = {};
