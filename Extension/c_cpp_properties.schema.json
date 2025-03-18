@@ -226,7 +226,7 @@
                                 ]
                             },
                             "priority": {
-                                "markdownDescription": "The priority of recursive include paths. If set to `beforeSystemIncludes`, the recursive include paths will be searched before system include paths. If set to `afterSystemIncludes`, the recursive include paths will be searched after system include paths.",
+                                "markdownDescription": "The priority of recursive include paths. If set to `beforeSystemIncludes`, the recursive include paths will be searched before system include paths. If set to `afterSystemIncludes`, the recursive include paths will be searched after system include paths. `beforeSystemIncludes` would more closely reflect the search order of a compiler, while `afterSystemIncludes` may result in improved performance.",
                                 "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                                 "type": "string",
                                 "enum": [
