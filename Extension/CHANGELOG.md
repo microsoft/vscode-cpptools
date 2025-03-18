@@ -1,5 +1,23 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.24.3: March 18, 2025
+### Enhancements
+* Add detected test frameworks to the Copilot context when `#cpp` is used. [PR #13285](https://github.com/microsoft/vscode-cpptools/pull/13285)
+* Update clang-tidy and clang-format from 19.1.7 to 20.1.0. [PR #13348](https://github.com/microsoft/vscode-cpptools/pull/13348)
+* Remove some unnecessary files from the vsix. [PR #13368](https://github.com/microsoft/vscode-cpptools/pull/13368)
+* Improve the logging when a non-existent path is used for indexing. [PR #13372](https://github.com/microsoft/vscode-cpptools/pull/13372)
+* Remove the `C_Cpp.updateChannel` setting. [PR #13376](https://github.com/microsoft/vscode-cpptools/pull/13376)
+* Switch to only passing the root framework to clang-tidy.
+
+### Bug Fixes
+* Fix a bug with symlink resolving with `compile_commands.json`. [#13321](https://github.com/microsoft/vscode-cpptools/issues/13321)
+* Fix a performance issue on macOS when processing `compile_commands.json` with a lot of include paths. [#13366](https://github.com/microsoft/vscode-cpptools/issues/13366)
+* Fix some localization bugs. [PR #13373](https://github.com/microsoft/vscode-cpptools/pull/13373)
+* Fix IntelliSense showing the wrong size of objects. [#13375](https://github.com/microsoft/vscode-cpptools/issues/13375)
+* Fix a `${workspaceFolder}/*` include path not being used as a non-recursive browse path.
+* Fix some potential IntelliSense process crashes when processing Copilot snippets.
+* Fix a regression with compiler query caching in the database.
+
 ## Version 1.24.2: March 6, 2025
 ### Enhancements
 * Various improvements to Copilot snippets. [PR #13296](https://github.com/microsoft/vscode-cpptools/pull/13296)
