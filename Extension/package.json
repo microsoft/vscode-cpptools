@@ -3339,7 +3339,8 @@
                         "type": "string",
                         "enum": [
                             "default",
-                            "disabled"
+                            "disabled",
+                            "enabled"
                         ],
                         "default": "default",
                         "markdownDescription": "%c_cpp.configuration.copilotHover.markdownDescription%",

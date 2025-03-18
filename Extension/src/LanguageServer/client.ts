@@ -1332,17 +1332,9 @@ export class DefaultClient implements Client {
                 initializedClientCount = 0;
                 this.inlayHintsProvider = new InlayHintsProvider();
                 this.hoverProvider = new HoverProvider(this);
+                this.copilotHoverProvider = new CopilotHoverProvider(this);
 
-                const settings: CppSettings = new CppSettings();
-                this.currentCopilotHoverEnabled = new PersistentWorkspaceState<string>("cpp.copilotHover", settings.copilotHover);
-                if (settings.copilotHover !== "disabled") {
-                    this.copilotHoverProvider = new CopilotHoverProvider(this);
-                    this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, instrument(this.copilotHoverProvider)));
-                }
-
-                if (settings.copilotHover !== this.currentCopilotHoverEnabled.Value) {
-                    this.currentCopilotHoverEnabled.Value = settings.copilotHover;
-                }
+                this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, instrument(this.copilotHoverProvider)));
                 this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, instrument(this.hoverProvider)));
                 this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, instrument(this.inlayHintsProvider)));
                 this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, instrument(new RenameProvider(this))));
@@ -1362,6 +1354,7 @@ export class DefaultClient implements Client {
                 this.codeFoldingProvider = new FoldingRangeProvider(this);
                 this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, instrument(this.codeFoldingProvider));
 
+                const settings: CppSettings = new CppSettings();
                 if (settings.isEnhancedColorizationEnabled && semanticTokensLegend) {
                     this.semanticTokensProvider = instrument(new SemanticTokensProvider());
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
