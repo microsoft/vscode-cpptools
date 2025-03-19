@@ -197,7 +197,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
             }
             return undefined;
         } finally {
-            out.appendLine(logMessage);
+            out.appendLineAtLevel(6, logMessage);
             telemetry.send("cache");
         }
     }
@@ -341,7 +341,7 @@ ${copilotCompletionContext?.areCodeSnippetsMissing ? " missing code-snippets" : 
             telemetry.addResolvedElapsed(duration);
             telemetry.addCacheSize(this.completionContextCache.size);
             telemetry.send();
-            out.appendLine(logMessage);
+            out.appendLineAtLevel(6, logMessage);
         }
     }
 
