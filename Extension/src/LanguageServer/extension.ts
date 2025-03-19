@@ -287,15 +287,11 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  */
 async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
-    const client: Client = clients.getDefaultClient();
-    if (client instanceof DefaultClient) {
-        const defaultClient: DefaultClient = client as DefaultClient;
-        clients.forEach(client => {
-            if (client !== defaultClient) {
-                void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
-            }
-        });
-    }
+    clients.forEach(client => {
+        if (client instanceof DefaultClient) {
+            void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
+        }
+    });
 }
 
 function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): void {
