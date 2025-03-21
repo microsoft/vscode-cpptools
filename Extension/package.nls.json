@@ -747,7 +747,6 @@
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
-    "c_cpp.configuration.updateChannel.deprecationMessage": "This setting is deprecated. Pre-release extensions are now available via the Marketplace.",
     "c_cpp.configuration.experimentalFeatures.description": "Controls whether \"experimental\" features are usable.",
     "c_cpp.configuration.suggestSnippets.markdownDescription": {
         "message": "If `true`, snippets are provided by the language server.",
