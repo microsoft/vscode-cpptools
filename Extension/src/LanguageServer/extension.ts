@@ -1175,7 +1175,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
 
     const lines: string[] = data.split("\n");
-    let addressData: string = ".\n.";
+    let addressData: string = ".\n";
     const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
     const telemetryHeader: string = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
@@ -1183,112 +1183,132 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     const startStr: string = isMac ? " _" : "<";
     const offsetStr: string = isMac ? " + " : "+";
     const endOffsetStr: string = isMac ? " " : " <";
-    const dotStr: string = "\n…";
+    const dotStr: string = "…\n";
     let signalType: string;
     let crashLog: string = "";
     let crashStackStartLine: number = 0;
     if (lines[0] === "LOG") {
         let crashLogLine: number = 1;
         for (; crashLogLine < lines.length; ++crashLogLine) {
-            const pendingCrashLogLine = lines[crashLogLine];
+            let pendingCrashLogLine = lines[crashLogLine];
             if (pendingCrashLogLine === "ENDLOG") {
                 break;
             }
+            pendingCrashLogLine += "\n";
             if (containsFilteredTelemetryData(pendingCrashLogLine)) {
                 crashLog += "?\n";
             } else {
-                crashLog += pendingCrashLogLine + "\n";
+                crashLog += pendingCrashLogLine;
             }
         }
         crashLog = crashLog.trimEnd();
         crashStackStartLine = ++crashLogLine;
     }
     if (lines[crashStackStartLine].startsWith("SIG")) {
-        signalType = lines[crashStackStartLine];
+        signalType = lines[crashStackStartLine] + "\n";
     } else {
         // The signal type may fail to be written.
         signalType = "SIG-??\n"; // Intentionally different from SIG-? from cpptools.
     }
+    data = telemetryHeader + signalType;
     let crashCallStack: string = "";
     let validFrameFound: boolean = false;
     for (let lineNum: number = crashStackStartLine; lineNum < lines.length - 3; ++lineNum) { // skip last lines
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
+        let pendingCallStack: string = "";
         if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
             if (!validFrameFound) {
                 continue; // Skip extra … at the start.
             }
-            crashCallStack += dotStr;
+            pendingCallStack = dotStr;
             const startAddressPos: number = line.indexOf("0x");
             const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
-            addressData += "\n";
             if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
-                addressData += "Unexpected offset";
+                addressData += "Unexpected offset\n";
             } else {
-                addressData += line.substring(startAddressPos, endAddressPos);
+                let pendingAddressData: string = line.substring(startAddressPos, endAddressPos) + "\n";
+                if (containsFilteredTelemetryData(pendingAddressData)) {
+                    pendingAddressData = "?\n";
+                }
+                addressData += pendingAddressData;
             }
-            continue;
-        }
-        const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
-        if (offsetPos === -1) {
-            crashCallStack += "\nMissing offsetStr";
-            addressData += "\n";
-            continue; // unexpected
-        }
-        const startPos2: number = startPos + 1;
-        let funcStr: string = line.substring(startPos2, offsetPos);
-        if (filtPath && filtPath.length !== 0) {
-            let ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, ["--no-strip-underscore", funcStr], undefined, true).catch(logAndReturn.undefined);
-            if (ret?.output === funcStr) {
-                ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
-            }
-            if (ret !== undefined && ret.succeeded && !ret.output.startsWith("Could not open input file")) {
-                funcStr = ret.output;
-                funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
-                funcStr = funcStr.replace(/std::basic_/g, "std::");
-                funcStr = funcStr.replace(/ >/g, ">");
-                funcStr = funcStr.replace(/, std::(?:allocator|char_traits)<char>/g, "");
-                funcStr = funcStr.replace(/<char>/g, "");
-                funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
-            }
-        }
-        if (containsFilteredTelemetryData(funcStr)) {
-            funcStr = "?";
-        } else if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
-            continue; // Skip these on early frames.
-        }
-        validFrameFound = true;
-        crashCallStack += "\n";
-        addressData += "\n";
-        crashCallStack += funcStr + offsetStr;
-        const offsetPos2: number = offsetPos + offsetStr.length;
-        if (isMac) {
-            const pendingOffset: string = line.substring(offsetPos2);
-            if (containsFilteredTelemetryData(pendingOffset)) {
-                crashCallStack += "?";
-            } else {
-                crashCallStack += pendingOffset;
-            }
-            const startAddressPos: number = line.indexOf("0x");
-            if (startAddressPos === -1 || startAddressPos >= startPos) {
-                // unexpected
-                crashCallStack += "<Missing 0x>";
-                continue;
-            }
-            addressData += `${line.substring(startAddressPos, startPos)}`;
         } else {
-            const endPos: number = line.indexOf(">", offsetPos2);
-            if (endPos === -1) {
-                crashCallStack += "<Missing > >";
-                continue; // unexpected
-            }
-            const pendingOffset: string = line.substring(offsetPos2, endPos);
-            if (containsFilteredTelemetryData(pendingOffset)) {
-                crashCallStack += "?";
+            const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
+            if (offsetPos === -1) {
+                pendingCallStack = "Missing offsetStr\n";
+                addressData += "\n";
             } else {
-                crashCallStack += pendingOffset;
+                const startPos2: number = startPos + 1;
+                let funcStr: string = line.substring(startPos2, offsetPos);
+                let origFuncStr: string = "";
+                if (filtPath && filtPath.length !== 0) {
+                    let ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, ["--no-strip-underscore", funcStr], undefined, true).catch(logAndReturn.undefined);
+                    if (ret?.output === funcStr) {
+                        ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
+                    }
+                    if (ret !== undefined && ret.succeeded && !ret.output.startsWith("Could not open input file")) {
+                        origFuncStr = funcStr;
+                        funcStr = ret.output;
+                        funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
+                        funcStr = funcStr.replace(/std::basic_/g, "std::");
+                        funcStr = funcStr.replace(/ >/g, ">");
+                        funcStr = funcStr.replace(/, std::(?:allocator|char_traits)<char>/g, "");
+                        funcStr = funcStr.replace(/<char>/g, "");
+                        funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
+                    }
+                }
+                if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
+                    continue; // Skip these on early frames.
+                }
+                validFrameFound = true;
+
+                let pendingOffset: string = offsetStr;
+                const offsetPos2: number = offsetPos + offsetStr.length;
+                // Compute pendingOffset.
+                if (isMac) {
+                    pendingOffset += line.substring(offsetPos2);
+                    const startAddressPos: number = line.indexOf("0x");
+                    if (startAddressPos === -1 || startAddressPos >= startPos) {
+                        // unexpected
+                        pendingOffset += "<Missing 0x>";
+                        addressData += "\n";
+                    } else {
+                        let pendingAddressData: string = line.substring(startAddressPos, startPos) + "\n";
+                        if (containsFilteredTelemetryData(pendingAddressData)) {
+                            pendingAddressData = "?\n";
+                        }
+                        addressData += pendingAddressData;
+                    }
+                } else {
+                    const endPos: number = line.indexOf(">", offsetPos2);
+                    if (endPos === -1) {
+                        pendingOffset += "<Missing > >"; // unexpected
+                    } else {
+                        pendingOffset += line.substring(offsetPos2, endPos);
+                    }
+                    addressData += "\n";
+                    // TODO: It seems like addressData should be obtained on Linux in case the function is filtered.
+                }
+                pendingOffset += "\n";
+                pendingCallStack = funcStr + pendingOffset;
+                if (containsFilteredTelemetryData(pendingCallStack)) {
+                    if (origFuncStr.length > 0 && origFuncStr !== funcStr) {
+                        pendingCallStack = origFuncStr + pendingOffset;
+                        if (containsFilteredTelemetryData(pendingCallStack)) {
+                            pendingCallStack = "?\n";
+                        }
+                    } else {
+                        pendingCallStack = "?\n";
+                    }
+                }
             }
         }
+        if (data.length + crashCallStack.length + pendingCallStack.length > 8191) { // The API has an 8k limit.
+            crashCallStack += "…";
+            break;
+        }
+        crashCallStack += pendingCallStack;
     }
 
     if (crashCallStack !== prevCppCrashCallStackData) {
@@ -1299,15 +1319,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         }
     }
 
-    data = telemetryHeader + signalType + crashCallStack;
+    data += crashCallStack;
 
-    if (data.length > 8192) { // The API has an 8k limit.
-        data = data.substring(0, 8191) + "…";
-    }
-
-    if (containsFilteredTelemetryData(addressData)) {
-        addressData = "?";
-    }
+    addressData = addressData.trimEnd();
 
     logCppCrashTelemetry(data, addressData, crashLog);
 
