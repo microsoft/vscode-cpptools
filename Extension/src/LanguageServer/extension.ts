@@ -1161,8 +1161,8 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
+const regex: RegExp = /(key|token|sig|secret|signature|password|passwd|pwd|android:value)[^a-zA-Z0-9]/i;
 function containsFilteredTelemetryData(str: string): boolean {
-    const regex: RegExp = /(key|token|sig|secret|signature|password|passwd|pwd|android:value)[^a-zA-Z0-9]/i;
     return regex.test(str);
 }
 
@@ -1311,17 +1311,18 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         crashCallStack += pendingCallStack;
     }
 
+    crashCallStack = crashCallStack.trimEnd();
+    addressData = addressData.trimEnd();
+
     if (crashCallStack !== prevCppCrashCallStackData) {
         prevCppCrashCallStackData = crashCallStack;
 
         if (lines.length >= 6 && util.getLoggingLevel() >= 1) {
-            getCrashCallStacksChannel().appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}\n\n${crashLog}`);
+            getCrashCallStacksChannel().appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}${crashLog.length > 0 ? "\n\n" + crashLog : ""}`);
         }
     }
 
     data += crashCallStack;
-
-    addressData = addressData.trimEnd();
 
     logCppCrashTelemetry(data, addressData, crashLog);
 
