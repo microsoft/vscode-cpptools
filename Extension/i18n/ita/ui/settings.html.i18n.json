@@ -12,6 +12,7 @@
 	"edit.configurations.in.json": "Modifica le configurazioni nel file JSON",
 	"edit.configurations.json": "C/C++: Modifica configurazioni (JSON)",
 	"check.the.schema": "Per altre informazioni sulle proprietà di C/C++, vedere {0}.",
+	"cpp.properties.schema.reference": "Informazioni di riferimento sullo schema delle proprietà C/C++",
 	"view.schema.reference": "Informazioni di riferimento sullo schema delle proprietà",
 	"intellisense.configurations": "Configurazioni IntelliSense",
 	"intellisense.configurations.description": "Usare questo editor per modificare le impostazioni di IntelliSense definite nel file {0} sottostante. Le modifiche apportate in questo editor sono valide solo per la configurazione selezionata. Per modificare più configurazioni contemporaneamente, passare a {1}.",
@@ -43,7 +44,7 @@
 	"cpp.standard.description": "Versione dello standard del linguaggio C++ da usare per IntelliSense. Nota: gli standard GNU vengono usati solo per eseguire query sul compilatore impostato per ottenere le definizioni di GNU. IntelliSense emulerà la versione dello standard di C++ equivalente.",
 	"advanced.settings": "Impostazioni avanzate",
 	"configuration.provider": "Provider di configurazione",
-	"configuration.provider.description": "ID di un'estensione VS Code che può fornire informazioni di configurazione IntelliSense per i file di origine. Ad esempio, usare l'ID estensione VS Code {0} per fornire le informazioni di configurazione dell'estensione CMake Tools.",
+	"configuration.provider.description": "ID di un'estensione VS Code che può fornire informazioni di configurazione IntelliSense per i file di origine. Ad esempio, usa l'ID estensione VS Code {0} per fornire le informazioni di configurazione dell'estensione CMake Tools.",
 	"windows.sdk.version": "Versione di Windows SDK",
 	"windows.sdk.version.description": "Versione del percorso di inclusione di Windows SDK da usare in Windows, ad esempio {0}.",
 	"mac.framework.path": "Percorso del framework Mac",
@@ -65,5 +66,11 @@
 	"limit.symbols": "Sfoglia: limita i simboli alle intestazioni incluse",
 	"limit.symbols.checkbox": "Quando è impostato su {0} (o selezionato), il parser tag analizzerà solo i file di codice che sono stati inclusi direttamente o indirettamente da un file di origine in {1}. Quando è impostato su {2} (o non è selezionato), il parser tag analizzerà tutti i file di codice trovati nei percorsi specificati nell'elenco di {3}.",
 	"database.filename": "Sfoglia: nome del file di database",
-	"database.filename.description": "Percorso del database dei simboli generato. Indica all'estensione di salvare il database dei simboli del parser di tag in una posizione diversa da quella di archiviazione predefinita dell'area di lavoro. Se viene specificato un percorso relativo, sarà relativo alla posizione di archiviazione predefinita dell'area di lavoro e non alla cartella dell'area di lavoro. È possibile usare la variabile {0} per specificare un percorso relativo alla cartella dell'area di lavoro, ad esempio {1}."
+	"database.filename.description": "Percorso del database dei simboli generato. Indica all'estensione di salvare il database dei simboli del parser di tag in una posizione diversa da quella di archiviazione predefinita dell'area di lavoro. Se viene specificato un percorso relativo, sarà relativo alla posizione di archiviazione predefinita dell'area di lavoro e non alla cartella dell'area di lavoro. È possibile usare la variabile {0} per specificare un percorso relativo alla cartella dell'area di lavoro, ad esempio {1}.",
+	"recursiveIncludes.reduce": "Recursive includes: priority",
+	"recursiveIncludes.reduce.description": "Set to {0} to reduce the number of recursive include paths provided to IntelliSense to only those paths currently referenced by #include statements. This requires first parsing files to determine which files are included. Set to {1} to provide all recursive include paths to IntelliSense. Reducing the number of recursive include paths may improve IntelliSense performance when a very large number of recursive include paths are involved. Not reducing the number of recursive include paths can improve IntelliSense performance by avoiding the need to parse files to determine which include paths to provide.",
+	"recursiveIncludes.priority": "Recursive includes: priority",
+	"recursiveIncludes.priority.description": "The priority of recursive include paths. If set to {0}, the recursive include paths will be searched before system include paths. If set to {1}, the recursive include paths will be searched after system include paths.",
+	"recursiveIncludes.order": "Recursive includes: priority",
+	"recursiveIncludes.order.description": "The order in which subdirectories under recursive include paths are searched."
 }

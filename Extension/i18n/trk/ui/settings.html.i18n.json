@@ -12,6 +12,7 @@
 	"edit.configurations.in.json": "JSON dosyasındaki yapılandırmaları düzenle",
 	"edit.configurations.json": "C/C++: Yapılandırmaları düzenle (JSON)",
 	"check.the.schema": "{0} adresine giderek C/C++ özellikleri hakkında daha fazla bilgi edinin.",
+	"cpp.properties.schema.reference": "C/C++ Özellikleri Şema Başvurusu",
 	"view.schema.reference": "Özellikler Şema Başvurusu",
 	"intellisense.configurations": "IntelliSense Yapılandırmaları",
 	"intellisense.configurations.description": "Temel alınan {0} dosyasında tanımlanan IntelliSense ayarlarını düzenlemek için bu düzenleyiciyi kullanın. Bu düzenleyicide yapılan değişiklikler yalnızca seçili yapılandırma için geçerlidir. Aynı anda birden çok yapılandırmayı düzenlemek için {1} seçeneğine gidin.",
@@ -65,5 +66,11 @@
 	"limit.symbols": "Gözat: sembolleri eklenen üst bilgilerle sınırla",
 	"limit.symbols.checkbox": "{0} (veya işaretli) olduğunda, Etiket Ayrıştırıcı yalnızca {1} içindeki bir kaynak dosya tarafından doğrudan veya dolaylı olarak dahil edilen kod dosyalarını ayrıştırır. {2} olduğunda (veya işaretlenmediğinde), Etiket Ayrıştırıcı {3} listesinde belirtilen yollarda bulunan tüm kod dosyalarını ayrıştırır.",
 	"database.filename": "Gözat: veritabanı dosya adı",
-	"database.filename.description": "Oluşturulan sembol veritabanının yolu. Bu, uzantının Etiket Ayrıştırıcısının sembol veritabanının çalışma alanı varsayılan depolama konumundan başka bir yerde kaydedilmesini sağlar. Göreli yol belirtilirse, çalışma alanı klasörünün kendisi değil, çalışma alanının varsayılan depolama konumuyla göreli olarak yapılır. {0} değişkeni, çalışma alanı klasörüne göreli bir yol belirtmek için kullanılabilir (örneğin, {1})."
+	"database.filename.description": "Oluşturulan sembol veritabanının yolu. Bu, uzantının Etiket Ayrıştırıcısının sembol veritabanının çalışma alanı varsayılan depolama konumundan başka bir yerde kaydedilmesini sağlar. Göreli yol belirtilirse, çalışma alanı klasörünün kendisi değil, çalışma alanının varsayılan depolama konumuyla göreli olarak yapılır. {0} değişkeni, çalışma alanı klasörüne göreli bir yol belirtmek için kullanılabilir (örneğin, {1}).",
+	"recursiveIncludes.reduce": "Recursive includes: priority",
+	"recursiveIncludes.reduce.description": "Set to {0} to reduce the number of recursive include paths provided to IntelliSense to only those paths currently referenced by #include statements. This requires first parsing files to determine which files are included. Set to {1} to provide all recursive include paths to IntelliSense. Reducing the number of recursive include paths may improve IntelliSense performance when a very large number of recursive include paths are involved. Not reducing the number of recursive include paths can improve IntelliSense performance by avoiding the need to parse files to determine which include paths to provide.",
+	"recursiveIncludes.priority": "Recursive includes: priority",
+	"recursiveIncludes.priority.description": "The priority of recursive include paths. If set to {0}, the recursive include paths will be searched before system include paths. If set to {1}, the recursive include paths will be searched after system include paths.",
+	"recursiveIncludes.order": "Recursive includes: priority",
+	"recursiveIncludes.order.description": "The order in which subdirectories under recursive include paths are searched."
 }

@@ -12,6 +12,7 @@
 	"edit.configurations.in.json": "編輯 JSON 檔案中的組態",
 	"edit.configurations.json": "C/C++: 編輯組態 (JSON)",
 	"check.the.schema": "若要深入了解 C/C++ 屬性，請前往 {0}。",
+	"cpp.properties.schema.reference": "C/C++ 屬性結構描述參考",
 	"view.schema.reference": "屬性結構描述參考",
 	"intellisense.configurations": "IntelliSense 組態",
 	"intellisense.configurations.description": "使用此編輯器來編輯基礎 {0} 檔案中定義的 IntelliSense 設定。在此編輯器中進行的變更只會套用到選取的組態。若要一次編輯多個組態，請前往 {1}。",
@@ -65,5 +66,11 @@
 	"limit.symbols": "瀏覽: 將符號限制為包含的標頭",
 	"limit.symbols.checkbox": "若為 {0} (或已選取)，標籤剖析器只會剖析 {1} 中原始程式檔直接或間接包含的程式碼檔。若為 {2} (或未選取)，標籤剖析器會剖析在 {3} 清單中的指定路徑找到的所有程式碼檔。",
 	"database.filename": "瀏覽: 資料庫檔案名稱",
-	"database.filename.description": "產生符號資料庫路徑。這會指示延伸模組將標籤剖析器的符號資料庫儲存在工作區預設儲存位置以外的某處。如果指定了相對路徑，就會是相對於工作區預設儲存位置 (非工作區資料夾本身) 的路徑。{0} 變數可用於指定相對於工作區資料夾的路徑 (例如 {1})。"
+	"database.filename.description": "產生符號資料庫路徑。這會指示延伸模組將標籤剖析器的符號資料庫儲存在工作區預設儲存位置以外的某處。如果指定了相對路徑，就會是相對於工作區預設儲存位置 (非工作區資料夾本身) 的路徑。{0} 變數可用於指定相對於工作區資料夾的路徑 (例如 {1})。",
+	"recursiveIncludes.reduce": "Recursive includes: priority",
+	"recursiveIncludes.reduce.description": "Set to {0} to reduce the number of recursive include paths provided to IntelliSense to only those paths currently referenced by #include statements. This requires first parsing files to determine which files are included. Set to {1} to provide all recursive include paths to IntelliSense. Reducing the number of recursive include paths may improve IntelliSense performance when a very large number of recursive include paths are involved. Not reducing the number of recursive include paths can improve IntelliSense performance by avoiding the need to parse files to determine which include paths to provide.",
+	"recursiveIncludes.priority": "Recursive includes: priority",
+	"recursiveIncludes.priority.description": "The priority of recursive include paths. If set to {0}, the recursive include paths will be searched before system include paths. If set to {1}, the recursive include paths will be searched after system include paths.",
+	"recursiveIncludes.order": "Recursive includes: priority",
+	"recursiveIncludes.order.description": "The order in which subdirectories under recursive include paths are searched."
 }

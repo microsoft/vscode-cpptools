@@ -317,5 +317,6 @@
 	"refactor_extract_missing_return": "Seçili kodda bazı denetim yolları, dönüş değeri ayarlanmadan çıkış yapıyor. Bu durum yalnızca skaler, sayısal ve işaretçi dönüş türlerinde desteklenir.",
 	"expand_selection": "Seçimi genişlet (\"İşleve çıkar\" seçeneğini etkinleştirmek için)",
 	"file_not_found_in_path2": "\"{0}\" compile_commands.json dosyaları içinde bulunamadı. Bu dosya yerine '{1}' klasöründeki c_cpp_properties.json dosyasında bulunan 'includePath' kullanılacak.",
-	"copilot_hover_link": "Copilot özeti oluştur"
+	"copilot_hover_link": "Copilot özeti oluştur",
+	"browse_path_not_found": "Mevcut olmayan klasörden dosyalar dizine alınamıyor: {0}"
 }
