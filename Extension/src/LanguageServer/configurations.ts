@@ -83,8 +83,9 @@ export interface Configuration {
     forcedInclude?: string[];
     configurationProviderInCppPropertiesJson?: string;
     configurationProvider?: string;
-    mergeConfigurations?: boolean;
+    mergeConfigurations?: boolean | string;
     browse?: Browse;
+    recursiveIncludes?: RecursiveIncludes;
     customConfigurationVariables?: { [key: string]: string };
 }
 
@@ -105,6 +106,12 @@ export interface Browse {
     path?: string[];
     limitSymbolsToIncludedHeaders?: boolean | string;
     databaseFilename?: string;
+}
+
+export interface RecursiveIncludes {
+    reduce?: string;
+    priority?: string;
+    order?: string;
 }
 
 export interface KnownCompiler {
@@ -813,12 +820,15 @@ export class CppProperties {
         return resolvedGlob;
     }
 
-    private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
+    private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env?: Environment, acceptBlank?: boolean): string | undefined {
         if (property === null || property === undefined || property === "${default}") {
             property = defaultValue;
         }
         if (property === null || property === undefined || (acceptBlank !== true && property === "")) {
             return undefined;
+        }
+        if (env === undefined) {
+            return property;
         }
         return util.resolveVariables(property, env);
     }
@@ -843,21 +853,8 @@ export class CppProperties {
         return paths;
     }
 
-    private updateConfigurationStringOrBoolean(property: string | boolean | undefined | null, defaultValue: boolean | undefined | null, env: Environment): string | boolean | undefined {
-        if (!property || property === "${default}") {
-            property = defaultValue;
-        }
-        if (!property || property === "") {
-            return undefined;
-        }
-        if (typeof property === "boolean") {
-            return property;
-        }
-        return util.resolveVariables(property, env);
-    }
-
-    private updateConfigurationBoolean(property: boolean | undefined | null, defaultValue: boolean | undefined | null): boolean | undefined {
-        if (property === null || property === undefined) {
+    private updateConfigurationBoolean(property: boolean | string | undefined | null, defaultValue: boolean | undefined | null): boolean | undefined {
+        if (property === null || property === undefined || property === "${default}") {
             property = defaultValue;
         }
 
@@ -865,7 +862,7 @@ export class CppProperties {
             return undefined;
         }
 
-        return property;
+        return property === true || property === "true";
     }
 
     private updateConfigurationStringDictionary(property: { [key: string]: string } | undefined, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } | undefined {
@@ -939,6 +936,12 @@ export class CppProperties {
             configuration.cStandardIsExplicit = configuration.cStandardIsExplicit || settings.defaultCStandard !== "";
             configuration.cppStandardIsExplicit = configuration.cppStandardIsExplicit || settings.defaultCppStandard !== "";
             configuration.mergeConfigurations = this.updateConfigurationBoolean(configuration.mergeConfigurations, settings.defaultMergeConfigurations);
+            if (!configuration.recursiveIncludes) {
+                configuration.recursiveIncludes = {};
+            }
+            configuration.recursiveIncludes.reduce = this.updateConfigurationString(configuration.recursiveIncludes.reduce, settings.defaultRecursiveIncludesReduce);
+            configuration.recursiveIncludes.priority = this.updateConfigurationString(configuration.recursiveIncludes.priority, settings.defaultRecursiveIncludesPriority);
+            configuration.recursiveIncludes.order = this.updateConfigurationString(configuration.recursiveIncludes.order, settings.defaultRecursiveIncludesOrder);
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
@@ -1002,7 +1005,7 @@ export class CppProperties {
                 configuration.browse.path = this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
             }
 
-            configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationStringOrBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
+            configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders);
             configuration.browse.databaseFilename = this.updateConfigurationString(configuration.browse.databaseFilename, settings.defaultDatabaseFilename, env);
 
             if (i === this.CurrentConfigurationIndex) {

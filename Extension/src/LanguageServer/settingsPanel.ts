@@ -52,6 +52,9 @@ const elementId: { [key: string]: string } = {
     mergeConfigurations: "mergeConfigurations",
     configurationProvider: "configurationProvider",
     forcedInclude: "forcedInclude",
+    recursiveIncludesReduce: "recursiveIncludes.reduce",
+    recursiveIncludesPriority: "recursiveIncludes.priority",
+    recursiveIncludesOrder: "recursiveIncludes.order",
 
     // Browse properties
     browsePath: "browsePath",
@@ -350,6 +353,24 @@ export class SettingsPanel {
                 break;
             case elementId.forcedInclude:
                 this.configValues.forcedInclude = splitEntries(message.value);
+                break;
+            case elementId.recursiveIncludesReduce:
+                if (!this.configValues.recursiveIncludes) {
+                    this.configValues.recursiveIncludes = {};
+                }
+                this.configValues.recursiveIncludes.reduce = message.value;
+                break;
+            case elementId.recursiveIncludesPriority:
+                if (!this.configValues.recursiveIncludes) {
+                    this.configValues.recursiveIncludes = {};
+                }
+                this.configValues.recursiveIncludes.priority = message.value;
+                break;
+            case elementId.recursiveIncludesOrder:
+                if (!this.configValues.recursiveIncludes) {
+                    this.configValues.recursiveIncludes = {};
+                }
+                this.configValues.recursiveIncludes.order = message.value;
                 break;
             case elementId.browsePath:
                 if (!this.configValues.browse) {
