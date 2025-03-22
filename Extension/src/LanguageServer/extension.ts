@@ -1213,14 +1213,11 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     data = telemetryHeader + signalType;
     let crashCallStack: string = "";
     let validFrameFound: boolean = false;
-    for (let lineNum: number = crashStackStartLine; lineNum < lines.length - 3; ++lineNum) { // skip last lines
+    for (let lineNum: number = crashStackStartLine + 1; lineNum < lines.length - 3; ++lineNum) { // skip last lines
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
         let pendingCallStack: string = "";
         if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
-            if (!validFrameFound) {
-                continue; // Skip extra … at the start.
-            }
             pendingCallStack = dotStr;
             const startAddressPos: number = line.indexOf("0x");
             const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
