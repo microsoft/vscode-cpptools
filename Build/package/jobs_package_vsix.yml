@@ -34,18 +34,13 @@ jobs:
   - task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
     displayName: Use Yarn 1.x
 
-  - task: CmdLine@1
+  - script: mkdir $(Build.ArtifactStagingDirectory)\vsix
     displayName: Create Staging Directory
-    inputs:
-      filename: mkdir
-      arguments: $(Build.ArtifactStagingDirectory)\vsix
 
-  - task: CmdLine@1
+  - script: |
+      cd $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+      vsce package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}
     displayName: Run VSCE to package vsix
-    inputs:
-      filename: vsce
-      arguments: package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}
-      workingFolder: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
 
   - task: Npm@0
     displayName: Uninstall vsce
