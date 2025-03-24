@@ -42,6 +42,9 @@ const elementId: { [key: string]: string } = {
     mergeConfigurations: "mergeConfigurations",
     dotConfig: "dotConfig",
     dotConfigInvalid: "dotConfigInvalid",
+    recursiveIncludesReduce: "recursiveIncludes.reduce",
+    recursiveIncludesPriority: "recursiveIncludes.priority",
+    recursiveIncludesOrder: "recursiveIncludes.order",
 
     // Browse properties
     browsePath: "browsePath",
@@ -300,6 +303,11 @@ class SettingsApp {
             (<HTMLInputElement>document.getElementById(elementId.configurationProvider)).value = config.configurationProvider ? config.configurationProvider : "";
             (<HTMLInputElement>document.getElementById(elementId.forcedInclude)).value = joinEntries(config.forcedInclude);
             (<HTMLInputElement>document.getElementById(elementId.dotConfig)).value = config.dotConfig ? config.dotConfig : "";
+            if (config.recursiveIncludes) {
+                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesReduce)).value = config.recursiveIncludes.reduce;
+                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesPriority)).value = config.recursiveIncludes.priority;
+                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesOrder)).value = config.recursiveIncludes.order;
+            }
 
             if (config.browse) {
                 (<HTMLInputElement>document.getElementById(elementId.browsePath)).value = joinEntries(config.browse.path);
