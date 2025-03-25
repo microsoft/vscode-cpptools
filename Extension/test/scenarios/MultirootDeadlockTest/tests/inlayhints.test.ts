@@ -12,10 +12,11 @@ import { suite } from 'mocha';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
+import { sleep } from '../../../../src/Utility/Async/sleep';
 import { timeout } from '../../../../src/Utility/Async/timeout';
 import * as testHelpers from '../../../common/testHelpers';
 
-suite("[Inlay hints test]", function(): void {
+suite("[Inlay hints test]", function (): void {
     // Settings
     const inlayHintSettings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('C_Cpp.inlayHints');
     const autoDeclarationTypesEnabled: string = "autoDeclarationTypes.enabled";
@@ -41,7 +42,7 @@ suite("[Inlay hints test]", function(): void {
     const fileUri: vscode.Uri = vscode.Uri.file(filePath);
     const disposables: vscode.Disposable[] = [];
 
-    suiteSetup(async function(): Promise<void> {
+    suiteSetup(async function (): Promise<void> {
         await testHelpers.activateCppExtension();
 
         const cpptools = await apit.getCppToolsTestApi(api.Version.latest) ?? assert.fail("Could not get cpptools test api");
@@ -74,7 +75,7 @@ suite("[Inlay hints test]", function(): void {
         await useDefaultSettings();
     });
 
-    suiteTeardown(async function(): Promise<void> {
+    suiteTeardown(async function (): Promise<void> {
         await restoreOriginalSettings();
         disposables.forEach(d => d.dispose());
     });
@@ -298,6 +299,9 @@ suite("[Inlay hints test]", function(): void {
             await inlayHintSettings.update(inlayHintSetting, valueNew, vscode.ConfigurationTarget.Global);
             const valueAfterChange: any = inlayHintSettings.inspect(inlayHintSetting)!.globalValue;
             assert.strictEqual(valueAfterChange, valueNew, `Unable to change setting: ${inlayHintSetting}`);
+            // TODO: We need a way to synchronize with native process having completely processed the setting change
+            // and any changes in behavior being fully applied.
+            await sleep(5000);
         }
     }
 

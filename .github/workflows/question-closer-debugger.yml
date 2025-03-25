@@ -23,7 +23,7 @@ jobs:
         with:
           readonly: ${{ github.event.inputs.readonly }}
           labels: question,debugger
-          ignoreLabels: language service,internal
+          ignoreLabels: Language Service,internal
           involves: wardengnaw,pieandcakes,calgagi
           closeDays: 14
           closeComment: "This issue has been closed because it is a question and has not had recent activity."

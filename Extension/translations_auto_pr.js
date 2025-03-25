@@ -2,9 +2,7 @@
 
 const fs = require("fs-extra");
 const cp = require("child_process");
-const Octokit = require('@octokit/rest')
 const path = require('path');
-const parseGitConfig = require('parse-git-config');
 
 const branchName = 'localization';
 const mergeTo = 'main';
@@ -106,8 +104,8 @@ cp.execSync('git fetch');
 
 // Remove old localization branch, if any
 if (hasBranch("localization")) {
-	console.log(`Remove old localization branch, if any (git branch -D localization)`);
-	cp.execSync('git branch -D localization');
+    console.log(`Remove old localization branch, if any (git branch -D localization)`);
+    cp.execSync('git branch -D localization');
 }
 
 // Check out local branch
@@ -129,13 +127,17 @@ if (!hasAnyChanges()) {
 // Save existing user name and email, in case already set.
 var existingUserName;
 var existingUserEmail;
-var gitConfigPath = path.resolve(process.cwd(), '../.git/config');
-var config = parseGitConfig.sync({ path: gitConfigPath });
 
-if (typeof config === 'object' && config.hasOwnProperty('user')) {
-    existingUserName = config.user.name;
-    existingUserEmail = config.user.email;
+try {
+    existingUserName = cp.execSync('git config --local user.name', { encoding: 'utf8', cwd: process.cwd() }).trim() || undefined
+} catch {
 }
+
+try {
+    existingUserEmail = cp.execSync('git config --local user.email', { encoding: 'utf8', cwd: process.cwd() }).trim() || undefined
+} catch {
+}
+
 if (existingUserName === undefined) {
     console.log(`Existing user name: undefined`);
 } else {
@@ -179,23 +181,21 @@ if (existingUserEmail === undefined) {
     cp.execSync(`git config --local user.email "${existingUserEmail}"`);
 }
 
-console.log(`pushing to remove branch (git push -f origin ${branchName})`);
+console.log(`pushing to remote branch (git push -f origin ${branchName})`);
 cp.execSync(`git push -f origin ${branchName}`);
 
 console.log("Checking if there is already a pull request...");
-const octokit = new Octokit.Octokit({auth: authToken});
-octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
-    let alreadyHasPullRequest = false;
-    if (data) {
-        data.forEach((pr) => {
-            alreadyHasPullRequest = alreadyHasPullRequest || (pr.title === pullRequestTitle);
-        });
-    }
+
+(async function() {
+    const { Octokit } = await import("@octokit/rest");
+    const octokit = new Octokit({ auth: authToken });
+    const { data } = await octokit.pulls.list({ owner: repoOwner, repo: repoName });
+    let alreadyHasPullRequest = data && data.some(pr => pr.title === pullRequestTitle);
 
     // If not already present, create a PR against our remote branch.
     if (!alreadyHasPullRequest) {
         console.log("There is not already a pull request.  Creating one.");
-        octokit.pulls.create({ body:"", owner: repoOwner, repo: repoName, title: pullRequestTitle, head: branchName, base: mergeTo });
+        await octokit.pulls.create({ body:"", owner: repoOwner, repo: repoName, title: pullRequestTitle, head: branchName, base: mergeTo });
     } else {
         console.log("There is already a pull request.");
     }
@@ -212,4 +212,4 @@ octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
 
     console.log(`Remove localization branch (git branch -D localization)`);
     cp.execSync('git branch -D localization');
-});
+})();

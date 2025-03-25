@@ -84,35 +84,26 @@ extends:
           inputs:
             version: 18.x
 
-        - task: CmdLine@2
+        - script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
           displayName: Delete .npmrc if it exists
-          inputs:
-            script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
 
         - task: Npm@0
-          name: NpmInstall_2
           displayName: Install vsce
           inputs:
             arguments: --global @vscode/vsce
 
-        - task: CmdLine@1
-          name: ProcessRunner_11
+        - script: mkdir $(Build.ArtifactStagingDirectory)\Extension
           displayName: Create Extension Staging Directory
-          inputs:
-            filename: mkdir
-            arguments: $(Build.ArtifactStagingDirectory)\Extension
 
         - script: yarn run vsix-prepublish
           displayName: Build files
           workingDirectory: $(Build.SourcesDirectory)\Extension
 
-        - task: CmdLine@1
+        - script: |
+            cd $(Build.SourcesDirectory)\Extension
+            vsce package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
           name: ProcessRunner_12
           displayName: Run VSCE to package vsix
-          inputs:
-            filename: vsce
-            arguments: package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
-            workingFolder: $(Build.SourcesDirectory)\Extension
 
         - task: Npm@0
           displayName: Uninstall vsce

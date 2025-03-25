@@ -11,13 +11,14 @@ import * as StreamZip from 'node-stream-zip';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { Range } from 'vscode-languageclient';
+import { CancellationToken, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import { modelSelector } from '../constants';
+import { instrument } from '../instrumentation';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
@@ -172,14 +173,18 @@ export async function activate(): Promise<void> {
         getCustomConfigProviders().forEach(provider => void client.onRegisterCustomConfigurationProvider(provider));
     });
 
-    disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
+    // These handlers for didChangeTextDocument and didOpenTextDocument are intentionally synchronous and are
+    // intended primarily to maintain openFileVersions with the most recent versions of files, as quickly as
+    // possible, without being delayed by awaits or queued behind other LSP messages, etc..
     disposables.push(vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument));
+    disposables.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
+
+    disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
     disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
     ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
     disposables.push(vscode.window.onDidChangeTextEditorSelection((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorSelection(e))));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors((e) => clients.ActiveClient.enqueue(async () => onDidChangeVisibleTextEditors(e))));
-
     updateLanguageConfigurations();
 
     reportMacCrashes();
@@ -218,7 +223,7 @@ export async function activate(): Promise<void> {
         { scheme: 'file', language: 'cpp' },
         { scheme: 'file', language: 'cuda-cpp' }
     ];
-    codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
+    codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, instrument({
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext): Promise<vscode.CodeAction[]> => {
 
             if (!await clients.ActiveClient.getVcpkgEnabled()) {
@@ -244,7 +249,7 @@ export async function activate(): Promise<void> {
             const actions: vscode.CodeAction[] = ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
             return actions;
         }
-    });
+    }));
 
     await vscode.commands.executeCommand('setContext', 'cpptools.msvcEnvironmentFound', util.hasMsvcEnvironment());
 
@@ -282,25 +287,21 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  */
 async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
-    const client: Client = clients.getDefaultClient();
-    if (client instanceof DefaultClient) {
-        const defaultClient: DefaultClient = client as DefaultClient;
-        const changedDefaultClientSettings: Record<string, string> = await defaultClient.onDidChangeSettings(event);
-        clients.forEach(client => {
-            if (client !== defaultClient) {
-                void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
-            }
-        });
-        const newUpdateChannel: string = changedDefaultClientSettings.updateChannel;
-        if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
-            UpdateInsidersAccess();
+    clients.forEach(client => {
+        if (client instanceof DefaultClient) {
+            void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
         }
-    }
+    });
 }
 
 function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): void {
     const me: Client = clients.getClientFor(event.document.uri);
     me.onDidChangeTextDocument(event);
+}
+
+function onDidOpenTextDocument(document: vscode.TextDocument): void {
+    const me: Client = clients.getClientFor(document.uri);
+    me.onDidOpenTextDocument(document);
 }
 
 let noActiveEditorTimeout: NodeJS.Timeout | undefined;
@@ -1038,12 +1039,15 @@ export function watchForCrashes(crashDirectory: string): void {
 let previousCrashData: string;
 let previousCrashCount: number = 0;
 
-function logCrashTelemetry(data: string, type: string, offsetData?: string): void {
+function logCrashTelemetry(data: string, type: string, offsetData?: string, crashLog?: string): void {
     const crashObject: Record<string, string> = {};
     const crashCountObject: Record<string, number> = {};
     crashObject.CrashingThreadCallStack = data;
     if (offsetData !== undefined) {
         crashObject.CrashingThreadCallStackOffsets = offsetData;
+    }
+    if (crashLog !== undefined) {
+        crashObject.CrashLog = crashLog;
     }
     previousCrashCount = data === previousCrashData ? previousCrashCount + 1 : 0;
     previousCrashData = data;
@@ -1055,8 +1059,8 @@ function logMacCrashTelemetry(data: string): void {
     logCrashTelemetry(data, "MacCrash");
 }
 
-function logCppCrashTelemetry(data: string, offsetData?: string): void {
-    logCrashTelemetry(data, "CppCrash", offsetData);
+function logCppCrashTelemetry(data: string, offsetData?: string, crashLog?: string): void {
+    logCrashTelemetry(data, "CppCrash", offsetData, crashLog);
 }
 
 function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
@@ -1157,6 +1161,11 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
+const regex: RegExp = /(key|token|sig|secret|signature|password|passwd|pwd|android:value)[^a-zA-Z0-9]/i;
+function containsFilteredTelemetryData(str: string): boolean {
+    return regex.test(str);
+}
+
 async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
     if (err) {
         if (err.code === "ENOENT") {
@@ -1166,7 +1175,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
 
     const lines: string[] = data.split("\n");
-    let addressData: string = ".\n.";
+    let addressData: string = ".\n";
     const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
     const telemetryHeader: string = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
@@ -1174,109 +1183,145 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     const startStr: string = isMac ? " _" : "<";
     const offsetStr: string = isMac ? " + " : "+";
     const endOffsetStr: string = isMac ? " " : " <";
-    const dotStr: string = "\n…";
+    const dotStr: string = "…\n";
     let signalType: string;
-    if (lines[0].startsWith("SIG")) {
-        signalType = lines[0];
+    let crashLog: string = "";
+    let crashStackStartLine: number = 0;
+    if (lines[0] === "LOG") {
+        let crashLogLine: number = 1;
+        for (; crashLogLine < lines.length; ++crashLogLine) {
+            let pendingCrashLogLine = lines[crashLogLine];
+            if (pendingCrashLogLine === "ENDLOG") {
+                break;
+            }
+            pendingCrashLogLine += "\n";
+            if (containsFilteredTelemetryData(pendingCrashLogLine)) {
+                crashLog += "?\n";
+            } else {
+                crashLog += pendingCrashLogLine;
+            }
+        }
+        crashLog = crashLog.trimEnd();
+        crashStackStartLine = ++crashLogLine;
+    }
+    if (lines[crashStackStartLine].startsWith("SIG")) {
+        signalType = lines[crashStackStartLine] + "\n";
     } else {
         // The signal type may fail to be written.
         signalType = "SIG-??\n"; // Intentionally different from SIG-? from cpptools.
     }
+    data = telemetryHeader + signalType;
     let crashCallStack: string = "";
     let validFrameFound: boolean = false;
-    for (let lineNum: number = 0; lineNum < lines.length - 3; ++lineNum) { // skip last lines
+    for (let lineNum: number = crashStackStartLine + 1; lineNum < lines.length - 3; ++lineNum) { // skip last lines
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
+        let pendingCallStack: string = "";
         if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
-            if (!validFrameFound) {
-                continue; // Skip extra … at the start.
-            }
-            crashCallStack += dotStr;
+            pendingCallStack = dotStr;
             const startAddressPos: number = line.indexOf("0x");
             const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
-            addressData += "\n";
             if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
-                addressData += "Unexpected offset";
+                addressData += "Unexpected offset\n";
             } else {
-                addressData += line.substring(startAddressPos, endAddressPos);
+                let pendingAddressData: string = line.substring(startAddressPos, endAddressPos) + "\n";
+                if (containsFilteredTelemetryData(pendingAddressData)) {
+                    pendingAddressData = "?\n";
+                }
+                addressData += pendingAddressData;
             }
-            continue;
-        }
-        const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
-        if (offsetPos === -1) {
-            crashCallStack += "\nMissing offsetStr";
-            addressData += "\n";
-            continue; // unexpected
-        }
-        const startPos2: number = startPos + 1;
-        let funcStr: string = line.substring(startPos2, offsetPos);
-        if (filtPath && filtPath.length !== 0) {
-            let ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, ["--no-strip-underscore", funcStr], undefined, true).catch(logAndReturn.undefined);
-            if (ret?.output === funcStr) {
-                ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
-            }
-            if (ret !== undefined && ret.succeeded) {
-                funcStr = ret.output;
-                funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
-                funcStr = funcStr.replace(/std::basic_/g, "std::");
-                funcStr = funcStr.replace(/ >/g, ">");
-                funcStr = funcStr.replace(/, std::(?:allocator|char_traits)<char>/g, "");
-                funcStr = funcStr.replace(/<char>/g, "");
-                funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
-            }
-        }
-        if (funcStr.includes("/")) {
-            funcStr = "<func>";
-        } else if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
-            continue; // Skip these on early frames.
-        }
-        validFrameFound = true;
-        crashCallStack += "\n";
-        addressData += "\n";
-        crashCallStack += funcStr + offsetStr;
-        const offsetPos2: number = offsetPos + offsetStr.length;
-        if (isMac) {
-            const pendingOffset: string = line.substring(offsetPos2);
-            if (!pendingOffset.includes("/")) {
-                crashCallStack += pendingOffset;
-            }
-            const startAddressPos: number = line.indexOf("0x");
-            if (startAddressPos === -1 || startAddressPos >= startPos) {
-                // unexpected
-                crashCallStack += "<Missing 0x>";
-                continue;
-            }
-            addressData += `${line.substring(startAddressPos, startPos)}`;
         } else {
-            const endPos: number = line.indexOf(">", offsetPos2);
-            if (endPos === -1) {
-                crashCallStack += "<Missing > >";
-                continue; // unexpected
-            }
-            const pendingOffset: string = line.substring(offsetPos2, endPos);
-            if (!pendingOffset.includes("/")) {
-                crashCallStack += pendingOffset;
+            const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
+            if (offsetPos === -1) {
+                pendingCallStack = "Missing offsetStr\n";
+                addressData += "\n";
+            } else {
+                const startPos2: number = startPos + 1;
+                let funcStr: string = line.substring(startPos2, offsetPos);
+                let origFuncStr: string = "";
+                if (filtPath && filtPath.length !== 0) {
+                    let ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, ["--no-strip-underscore", funcStr], undefined, true).catch(logAndReturn.undefined);
+                    if (ret?.output === funcStr) {
+                        ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
+                    }
+                    if (ret !== undefined && ret.succeeded && !ret.output.startsWith("Could not open input file")) {
+                        origFuncStr = funcStr;
+                        funcStr = ret.output;
+                        funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
+                        funcStr = funcStr.replace(/std::basic_/g, "std::");
+                        funcStr = funcStr.replace(/ >/g, ">");
+                        funcStr = funcStr.replace(/, std::(?:allocator|char_traits)<char>/g, "");
+                        funcStr = funcStr.replace(/<char>/g, "");
+                        funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
+                    }
+                }
+                if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
+                    continue; // Skip these on early frames.
+                }
+                validFrameFound = true;
+
+                let pendingOffset: string = offsetStr;
+                const offsetPos2: number = offsetPos + offsetStr.length;
+                // Compute pendingOffset.
+                if (isMac) {
+                    pendingOffset += line.substring(offsetPos2);
+                    const startAddressPos: number = line.indexOf("0x");
+                    if (startAddressPos === -1 || startAddressPos >= startPos) {
+                        // unexpected
+                        pendingOffset += "<Missing 0x>";
+                        addressData += "\n";
+                    } else {
+                        let pendingAddressData: string = line.substring(startAddressPos, startPos) + "\n";
+                        if (containsFilteredTelemetryData(pendingAddressData)) {
+                            pendingAddressData = "?\n";
+                        }
+                        addressData += pendingAddressData;
+                    }
+                } else {
+                    const endPos: number = line.indexOf(">", offsetPos2);
+                    if (endPos === -1) {
+                        pendingOffset += "<Missing > >"; // unexpected
+                    } else {
+                        pendingOffset += line.substring(offsetPos2, endPos);
+                    }
+                    addressData += "\n";
+                    // TODO: It seems like addressData should be obtained on Linux in case the function is filtered.
+                }
+                pendingOffset += "\n";
+                pendingCallStack = funcStr + pendingOffset;
+                if (containsFilteredTelemetryData(pendingCallStack)) {
+                    if (origFuncStr.length > 0 && origFuncStr !== funcStr) {
+                        pendingCallStack = origFuncStr + pendingOffset;
+                        if (containsFilteredTelemetryData(pendingCallStack)) {
+                            pendingCallStack = "?\n";
+                        }
+                    } else {
+                        pendingCallStack = "?\n";
+                    }
+                }
             }
         }
+        if (data.length + crashCallStack.length + pendingCallStack.length > 8191) { // The API has an 8k limit.
+            crashCallStack += "…";
+            break;
+        }
+        crashCallStack += pendingCallStack;
     }
+
+    crashCallStack = crashCallStack.trimEnd();
+    addressData = addressData.trimEnd();
 
     if (crashCallStack !== prevCppCrashCallStackData) {
         prevCppCrashCallStackData = crashCallStack;
 
-        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-        if (lines.length >= 6 && util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
-            const out: vscode.OutputChannel = getCrashCallStacksChannel();
-            out.appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}`);
+        if (lines.length >= 6 && util.getLoggingLevel() >= 1) {
+            getCrashCallStacksChannel().appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}${crashLog.length > 0 ? "\n\n" + crashLog : ""}`);
         }
     }
 
-    data = telemetryHeader + signalType + crashCallStack;
+    data += crashCallStack;
 
-    if (data.length > 8192) { // The API has an 8k limit.
-        data = data.substring(0, 8191) + "…";
-    }
-
-    logCppCrashTelemetry(data, addressData);
+    logCppCrashTelemetry(data, addressData, crashLog);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
     if (crashFile === "cpptools.txt") {
@@ -1308,45 +1353,6 @@ export function getClients(): ClientCollection {
 
 export function getActiveClient(): Client {
     return clients.ActiveClient;
-}
-
-export function UpdateInsidersAccess(): void {
-    let installPrerelease: boolean = false;
-
-    // Only move them to the new prerelease mechanism if using updateChannel of Insiders.
-    const settings: CppSettings = new CppSettings();
-    const migratedInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.migratedInsiders", false);
-    if (settings.updateChannel === "Insiders") {
-        // Don't do anything while the user has autoUpdate disabled, so we do not cause the extension to be updated.
-        if (!migratedInsiders.Value && vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
-            installPrerelease = true;
-            migratedInsiders.Value = true;
-        }
-    } else {
-        // Reset persistent value, so we register again if they switch to "Insiders" again.
-        if (migratedInsiders.Value) {
-            migratedInsiders.Value = false;
-        }
-    }
-
-    // Mitigate an issue with VS Code not recognizing a programmatically installed VSIX as Prerelease.
-    // If using VS Code Insiders, and updateChannel is not explicitly set, default to Prerelease.
-    // Only do this once. If the user manually switches to Release, we don't want to switch them back to Prerelease again.
-    if (util.isVsCodeInsiders()) {
-        const insidersMitigationDone: PersistentState<boolean> = new PersistentState<boolean>("CPP.insidersMitigationDone", false);
-        if (!insidersMitigationDone.Value) {
-            if (vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
-                if (settings.getStringWithUndefinedDefault("updateChannel") === undefined) {
-                    installPrerelease = true;
-                }
-            }
-            insidersMitigationDone.Value = true;
-        }
-    }
-
-    if (installPrerelease) {
-        void vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true }).then(undefined, logAndReturn.undefined);
-    }
 }
 
 export async function preReleaseCheck(): Promise<void> {
@@ -1430,10 +1436,26 @@ async function onCopilotHover(): Promise<void> {
 
     // Gather the content for the query from the client.
     const requestInfo = await copilotHoverProvider.getRequestInfo(hoverDocument, hoverPosition);
-    if (requestInfo.length === 0) {
+    try {
+        for (const file of requestInfo.files) {
+            const fileUri = vscode.Uri.file(file);
+            if (await vscodelm.fileIsIgnored(fileUri, copilotHoverProvider.getCurrentHoverCancellationToken() ?? CancellationToken.None)) {
+                telemetry.logLanguageServerEvent("CopilotHover", { "Message": "Copilot summary is not available due to content exclusion." });
+                await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable", "Copilot summary is not available.") + "\n\n" +
+                    localize("copilot.hover.excluded", "The file containing this symbol's definition or declaration has been excluded from use with Copilot."));
+                return;
+            }
+        }
+    } catch (err) {
+        if (err instanceof Error) {
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, err.name);
+        }
+        return;
+    }
+    if (requestInfo.content.length === 0) {
         // Context is not available for this symbol.
         telemetry.logLanguageServerEvent("CopilotHover", { "Message": "Copilot summary is not available for this symbol." });
-        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable", "Copilot summary is not available for this symbol."));
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, localize("copilot.hover.unavailable.symbol", "Copilot summary is not available for this symbol."));
         return;
     }
 
@@ -1441,12 +1463,12 @@ async function onCopilotHover(): Promise<void> {
 
     const messages = [
         vscode.LanguageModelChatMessage
-            .User(requestInfo + locale)];
-
-    const [model] = await vscodelm.selectChatModels(modelSelector);
+            .User(requestInfo.content + locale)];
 
     let chatResponse: vscode.LanguageModelChatResponse | undefined;
     try {
+        const [model] = await vscodelm.selectChatModels(modelSelector);
+
         chatResponse = await model.sendRequest(
             messages,
             {},

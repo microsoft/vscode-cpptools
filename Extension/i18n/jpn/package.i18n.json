@@ -238,8 +238,6 @@
 	"c_cpp.configuration.default.systemIncludePath.markdownDescription": "システム インクルード パスに使用する値です。これを設定した場合、`compilerPath` および `compileCommands` の設定によって取得されるシステム インクルード パスが上書きされます。",
 	"c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": "拡張機能が、`c_cpp_properties.json` で検出されたエラーを報告するかどうかを制御します。",
 	"c_cpp.configuration.default.customConfigurationVariables.markdownDescription": "`customConfigurationVariables` が設定されていない場合に構成で使用される値、または `customConfigurationVariables` 内に `${default}` がキーとして存在する場合に挿入される値。",
-	"c_cpp.configuration.updateChannel.markdownDescription": "`Insider` に設定すると、拡張機能の最新の Insider ビルドが自動的にダウンロードされてインストールされます。これには、次期バージョンの機能とバグ修正が含まれています。",
-	"c_cpp.configuration.updateChannel.deprecationMessage": "この設定は非推奨です。プレリリース版の拡張機能は、Marketplace で利用できるようになりました。",
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "`dotConfig` が指定されていない場合に構成で使用される値、または `dotConfig` 内に `${default}` が存在する場合に挿入される値。",
 	"c_cpp.configuration.experimentalFeatures.description": "\"experimental\" の機能を使用できるかどうかを制御します。",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "`true` の場合、スニペットは言語サーバーによって提供されます。",
