@@ -426,7 +426,7 @@
 
         <div style="height: 30px; display: block"></div>
 
-        <span data-loc-id="check.the.schema">Learn more about the C/C++ properties by going to <a href="https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference" title="Properties Schema Reference" data-loc-id-title="view.schema.reference">C/C++ Properties Schema Reference</a>.</span><br>
+        <span data-loc-id="check.the.schema">Learn more about the C/C++ properties by going to <a data-loc-id="cpp.properties.schema.reference" href="https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference" title="Properties Schema Reference" data-loc-id-title="view.schema.reference">C/C++ Properties Schema Reference</a>.</span><br>
     </div>
 
   </div> <!-- sidebar end -->
@@ -719,6 +719,49 @@
             <div>
                 <input name="inputValue" id="databaseFilename" style="width: 798px"></input>
                 <div id="databaseFilenameInvalid" class="error" style="width: 800px"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title" data-loc-id="recursiveIncludes.reduce">Recursive includes: priority</div>
+            <div class="section-text">
+                <span data-loc-id="recursiveIncludes.reduce.description">Set to <code>always</code> to reduce the number of recursive include paths provided to IntelliSense to only those paths currently referenced by #include statements. This requires first parsing files to determine which files are included. Set to <code>never</code> to provide all recursive include paths to IntelliSense. Reducing the number of recursive include paths may improve IntelliSense performance when a very large number of recursive include paths are involved. Not reducing the number of recursive include paths can improve IntelliSense performance by avoiding the need to parse files to determine which include paths to provide.</span>
+            </div>
+            <div>
+            <select name="inputValue" id="recursiveIncludes.reduce" class="select-default">
+                <option value="${default}">${default}</option>
+                <option value="always">always</option>
+                <option value="never">never</option>
+                <option value="default">default</option>
+            </select>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title" data-loc-id="recursiveIncludes.priority">Recursive includes: priority</div>
+            <div class="section-text">
+                <span data-loc-id="recursiveIncludes.priority.description">The priority of recursive include paths. If set to <code>beforeSystemIncludes</code>, the recursive include paths will be searched before system include paths. If set to <code>afterSystemIncludes</code>, the recursive include paths will be searched after system include paths.</span>
+            </div>
+            <div>
+            <select name="inputValue" id="recursiveIncludes.priority" class="select-default">
+                <option value="${default}">${default}</option>
+                <option value="beforeSystemIncludes">beforeSystemIncludes</option>
+                <option value="afterSystemIncludes">afterSystemIncludes</option>
+            </select>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title" data-loc-id="recursiveIncludes.order">Recursive includes: priority</div>
+            <div class="section-text">
+                <span data-loc-id="recursiveIncludes.order.description">The order in which subdirectories under recursive include paths are searched.</span>
+                </div>
+            <div>
+            <select name="inputValue" id="recursiveIncludes.order" class="select-default">
+                <option value="${default}">${default}</option>
+                <option value="depthFirst">depthFirst</option>
+                <option value="breadthFirst">breadthFirst</option>
+            </select>
             </div>
         </div>
 
