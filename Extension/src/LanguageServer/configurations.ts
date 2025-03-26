@@ -83,8 +83,9 @@ export interface Configuration {
     forcedInclude?: string[];
     configurationProviderInCppPropertiesJson?: string;
     configurationProvider?: string;
-    mergeConfigurations?: boolean;
+    mergeConfigurations?: boolean | string;
     browse?: Browse;
+    recursiveIncludes?: RecursiveIncludes;
     customConfigurationVariables?: { [key: string]: string };
 }
 
@@ -107,6 +108,12 @@ export interface Browse {
     databaseFilename?: string;
 }
 
+export interface RecursiveIncludes {
+    reduce?: string;
+    priority?: string;
+    order?: string;
+}
+
 export interface KnownCompiler {
     path: string;
     isC: boolean;
@@ -120,8 +127,6 @@ export interface CompilerDefaults {
     knownCompilers: KnownCompiler[];
     cStandard: string;
     cppStandard: string;
-    includes: string[];
-    frameworks: string[];
     windowsSdkVersion: string;
     intelliSenseMode: string;
     trustedCompilerFound: boolean;
@@ -143,8 +148,6 @@ export class CppProperties {
     private knownCompilers?: KnownCompiler[];
     private defaultCStandard: string | null = null;
     private defaultCppStandard: string | null = null;
-    private defaultIncludes: string[] | null = null;
-    private defaultFrameworks?: string[];
     private defaultWindowsSdkVersion: string | null = null;
     private isCppPropertiesJsonVisible: boolean = false;
     private vcpkgIncludes: string[] = [];
@@ -295,8 +298,6 @@ export class CppProperties {
         this.knownCompilers = compilerDefaults.knownCompilers;
         this.defaultCStandard = compilerDefaults.cStandard;
         this.defaultCppStandard = compilerDefaults.cppStandard;
-        this.defaultIncludes = compilerDefaults.includes;
-        this.defaultFrameworks = compilerDefaults.frameworks;
         this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
         this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode !== "" ? compilerDefaults.intelliSenseMode : undefined;
         this.trustedCompilerFound = compilerDefaults.trustedCompilerFound;
@@ -349,7 +350,7 @@ export class CppProperties {
     }
 
     private async applyDefaultIncludePathsAndFrameworks() {
-        if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
+        if (this.configurationIncomplete && this.vcpkgPathReady) {
             const configuration: Configuration | undefined = this.CurrentConfiguration;
             if (configuration) {
                 this.applyDefaultConfigurationValues(configuration);
@@ -381,9 +382,6 @@ export class CppProperties {
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {
             configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
-        }
-        if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
-            configuration.macFrameworkPath = this.defaultFrameworks;
         }
         if ((isUnset(settings.defaultWindowsSdkVersion) || settings.defaultWindowsSdkVersion === "") && this.defaultWindowsSdkVersion && process.platform === 'win32') {
             configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
@@ -822,12 +820,15 @@ export class CppProperties {
         return resolvedGlob;
     }
 
-    private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
+    private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env?: Environment, acceptBlank?: boolean): string | undefined {
         if (property === null || property === undefined || property === "${default}") {
             property = defaultValue;
         }
         if (property === null || property === undefined || (acceptBlank !== true && property === "")) {
             return undefined;
+        }
+        if (env === undefined) {
+            return property;
         }
         return util.resolveVariables(property, env);
     }
@@ -852,21 +853,8 @@ export class CppProperties {
         return paths;
     }
 
-    private updateConfigurationStringOrBoolean(property: string | boolean | undefined | null, defaultValue: boolean | undefined | null, env: Environment): string | boolean | undefined {
-        if (!property || property === "${default}") {
-            property = defaultValue;
-        }
-        if (!property || property === "") {
-            return undefined;
-        }
-        if (typeof property === "boolean") {
-            return property;
-        }
-        return util.resolveVariables(property, env);
-    }
-
-    private updateConfigurationBoolean(property: boolean | undefined | null, defaultValue: boolean | undefined | null): boolean | undefined {
-        if (property === null || property === undefined) {
+    private updateConfigurationBoolean(property: boolean | string | undefined | null, defaultValue: boolean | undefined | null): boolean | undefined {
+        if (property === null || property === undefined || property === "${default}") {
             property = defaultValue;
         }
 
@@ -874,7 +862,7 @@ export class CppProperties {
             return undefined;
         }
 
-        return property;
+        return property === true || property === "true";
     }
 
     private updateConfigurationStringDictionary(property: { [key: string]: string } | undefined, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } | undefined {
@@ -948,6 +936,12 @@ export class CppProperties {
             configuration.cStandardIsExplicit = configuration.cStandardIsExplicit || settings.defaultCStandard !== "";
             configuration.cppStandardIsExplicit = configuration.cppStandardIsExplicit || settings.defaultCppStandard !== "";
             configuration.mergeConfigurations = this.updateConfigurationBoolean(configuration.mergeConfigurations, settings.defaultMergeConfigurations);
+            if (!configuration.recursiveIncludes) {
+                configuration.recursiveIncludes = {};
+            }
+            configuration.recursiveIncludes.reduce = this.updateConfigurationString(configuration.recursiveIncludes.reduce, settings.defaultRecursiveIncludesReduce);
+            configuration.recursiveIncludes.priority = this.updateConfigurationString(configuration.recursiveIncludes.priority, settings.defaultRecursiveIncludesPriority);
+            configuration.recursiveIncludes.order = this.updateConfigurationString(configuration.recursiveIncludes.order, settings.defaultRecursiveIncludesOrder);
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
@@ -971,13 +965,6 @@ export class CppProperties {
                         }
                         if (!configuration.windowsSdkVersion && !!this.defaultWindowsSdkVersion) {
                             configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
-                        }
-                        if (!origIncludePath && !!this.defaultIncludes) {
-                            const includePath: string[] = configuration.includePath || [];
-                            configuration.includePath = includePath.concat(this.defaultIncludes);
-                        }
-                        if (!configuration.macFrameworkPath && !!this.defaultFrameworks) {
-                            configuration.macFrameworkPath = this.defaultFrameworks;
                         }
                     }
                 } else {
@@ -1011,22 +998,14 @@ export class CppProperties {
             if (!configuration.browse.path) {
                 if (settings.defaultBrowsePath) {
                     configuration.browse.path = settings.defaultBrowsePath;
-                } else if (configuration.includePath) {
-                    // If the user doesn't set browse.path, copy the includePath over. Make sure ${workspaceFolder} is in there though...
-                    configuration.browse.path = configuration.includePath.slice(0);
-                    if (configuration.includePath.findIndex((value: string) =>
-                        !!value.match(/^\$\{(workspaceRoot|workspaceFolder)\}(\\\*{0,2}|\/\*{0,2})?$/g)) === -1
-                    ) {
-                        configuration.browse.path.push("${workspaceFolder}");
-                    }
-                } else {
-                    configuration.browse.path = ["${workspaceFolder}"];
                 }
+                // Otherwise, if the browse path is not set, let the native process populate it
+                // with include paths, including any parsed from compilerArgs.
             } else {
                 configuration.browse.path = this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
             }
 
-            configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationStringOrBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
+            configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders);
             configuration.browse.databaseFilename = this.updateConfigurationString(configuration.browse.databaseFilename, settings.defaultDatabaseFilename, env);
 
             if (i === this.CurrentConfigurationIndex) {
@@ -1590,9 +1569,11 @@ export class CppProperties {
                 quoted = true;
                 result = result.slice(1, -1);
             }
+            // On Windows, isAbsolute does not handle root paths without a slash, such as "C:"
+            const isWindowsRootPath: boolean = process.platform === 'win32' && /^[a-zA-Z]:$/.test(result);
             // Make sure all paths result to an absolute path.
             // Do not add the root path to an unresolved env variable.
-            if (!result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
+            if (!isWindowsRootPath && !result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
                 result = path.join(this.rootUri.fsPath, result);
             }
             if (quoted) {
