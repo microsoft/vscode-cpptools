@@ -13,7 +13,6 @@ import { CopilotCompletionContextResult } from './client';
 import { CopilotCompletionContextTelemetry } from './copilotCompletionContextTelemetry';
 import { getCopilotApi } from './copilotProviders';
 import { clients } from './extension';
-import { ProjectContext } from './lmTool';
 import { CppSettings } from './settings';
 
 class DefaultValueFallback extends Error {
@@ -82,6 +81,9 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
     private completionContextCancellation = new vscode.CancellationTokenSource();
     private contextProviderDisposable: vscode.Disposable | undefined;
 
+    constructor(private readonly logger: Logger) {
+    }
+
     private async waitForCompletionWithTimeoutAndCancellation<T>(promise: Promise<T>, defaultValue: T | undefined,
         timeout: number, copilotToken: vscode.CancellationToken): Promise<[T | undefined, CopilotCompletionKind]> {
         const defaultValuePromise = new Promise<T>((_resolve, reject) => setTimeout(() => {
@@ -123,7 +125,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
     // Get the completion context with a timeout and a cancellation token.
     // The cancellationToken indicates that the value should not be returned nor cached.
     private async getCompletionContextWithCancellation(context: ResolveRequest, featureFlag: CopilotCompletionContextFeatures,
-        startTime: number, out: Logger, telemetry: CopilotCompletionContextTelemetry, internalToken: vscode.CancellationToken):
+        startTime: number, telemetry: CopilotCompletionContextTelemetry, internalToken: vscode.CancellationToken):
         Promise<CopilotCompletionContextResult | undefined> {
         const documentUri = context.documentContext.uri;
         const caretOffset = context.documentContext.offset;
@@ -133,55 +135,42 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
             telemetry.addRequestMetadata(documentUri, caretOffset, context.completionId,
                 context.documentContext.languageId, { featureFlag: snippetsFeatureFlag });
             const docUri = vscode.Uri.parse(documentUri);
+            const getClientForTime = performance.now();
             const client = clients.getClientFor(docUri);
+            const getClientForDuration = CopilotCompletionContextProvider.getRoundedDuration(getClientForTime);
+            telemetry.addGetClientForElapsed(getClientForDuration);
             if (!client) { throw WellKnownErrors.clientNotFound(); }
             const getCompletionContextStartTime = performance.now();
 
-            // Start collection of project traits concurrently with the completion context computation.
-            const projectContextPromise = (async (): Promise<ProjectContext | undefined> => {
-                const elapsedTimeMs = performance.now();
-                const projectContext = await client.getChatContext(docUri, internalToken);
-                telemetry.addCppStandardVersionMetadata(projectContext.standardVersion,
-                    CopilotCompletionContextProvider.getRoundedDuration(elapsedTimeMs));
-                return projectContext;
-            })();
-
             const copilotCompletionContext: CopilotCompletionContextResult =
                 await client.getCompletionContext(docUri, caretOffset, snippetsFeatureFlag, internalToken);
-            copilotCompletionContext.codeSnippetsCount = copilotCompletionContext.snippets.length;
             telemetry.addRequestId(copilotCompletionContext.requestId);
-            logMessage += ` (id:${copilotCompletionContext.requestId})`;
-            // Collect project traits and if any add them to the completion context.
-            const projectContext = await projectContextPromise;
-            if (projectContext?.standardVersion) {
-                copilotCompletionContext.snippets.push({ name: "C++ language standard version", value: `This project uses the ${projectContext.standardVersion} language standard version.` });
-                copilotCompletionContext.traitsCount = 1;
+            logMessage += `(id:${copilotCompletionContext.requestId}) (getClientFor elapsed:${getClientForDuration}ms)`;
+            if (!copilotCompletionContext.areSnippetsMissing) {
+                const resultMismatch = copilotCompletionContext.sourceFileUri !== docUri.toString();
+                if (resultMismatch) { logMessage += ` (mismatch TU vs result)`; }
+            }
+            const cacheEntryId = randomUUID().toString();
+            this.completionContextCache.set(copilotCompletionContext.sourceFileUri, [cacheEntryId, copilotCompletionContext]);
+            const duration = CopilotCompletionContextProvider.getRoundedDuration(startTime);
+            telemetry.addCacheComputedData(duration, cacheEntryId);
+            logMessage += ` cached in ${duration}ms ${copilotCompletionContext.traits.length} trait(s)`;
+            if (copilotCompletionContext.areSnippetsMissing) { logMessage += ` (missing code-snippets) `; }
+            else {
+                logMessage += ` and ${copilotCompletionContext.snippets.length} snippet(s)`;
+                logMessage += `, response.featureFlag:${copilotCompletionContext.featureFlag}, \
+response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotCompletionContext.caretOffset} `;
             }
 
-            let resultMismatch = false;
-            if (!copilotCompletionContext.areCodeSnippetsMissing) {
-                resultMismatch = copilotCompletionContext.translationUnitUri !== docUri.toString();
-                const cacheEntryId = randomUUID().toString();
-                this.completionContextCache.set(copilotCompletionContext.translationUnitUri, [cacheEntryId, copilotCompletionContext]);
-                const duration = CopilotCompletionContextProvider.getRoundedDuration(startTime);
-                telemetry.addCacheComputedData(duration, cacheEntryId);
-                if (resultMismatch) { logMessage += `, mismatch TU vs result`; }
-                logMessage += `, cached ${copilotCompletionContext.snippets.length} snippets in ${duration}ms`;
-                logMessage += `, response.featureFlag:${copilotCompletionContext.featureFlag},\
-                ${copilotCompletionContext.translationUnitUri}:${copilotCompletionContext.caretOffset},\
-                snippetsCount:${copilotCompletionContext.codeSnippetsCount}, traitsCount:${copilotCompletionContext.traitsCount}`;
-            } else {
-                logMessage += ` (snippets are missing) `;
-            }
-            telemetry.addResponseMetadata(copilotCompletionContext.areCodeSnippetsMissing, copilotCompletionContext.snippets.length, copilotCompletionContext.codeSnippetsCount,
-                copilotCompletionContext.traitsCount, copilotCompletionContext.caretOffset, copilotCompletionContext.featureFlag);
+            telemetry.addResponseMetadata(copilotCompletionContext.areSnippetsMissing, copilotCompletionContext.snippets.length,
+                copilotCompletionContext.traits.length, copilotCompletionContext.caretOffset, copilotCompletionContext.featureFlag);
             telemetry.addComputeContextElapsed(CopilotCompletionContextProvider.getRoundedDuration(getCompletionContextStartTime));
 
-            return resultMismatch ? undefined : copilotCompletionContext;
+            return copilotCompletionContext;
         } catch (e: any) {
             if (e instanceof vscode.CancellationError || e.message === CancellationError.Canceled) {
                 telemetry.addInternalCanceled(CopilotCompletionContextProvider.getRoundedDuration(startTime));
-                logMessage += `, (internal cancellation)`;
+                logMessage += ` (internal cancellation) `;
                 throw InternalCancellationError;
             }
 
@@ -190,14 +179,11 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
             }
 
             telemetry.addError();
-            if (e.message && e.stack) {
-                out.appendLine(`Copilot: getCompletionContextWithCancellation(${documentUri}: ${caretOffset}): Error: '${e.message}', stack '${e.stack}`);
-            } else {
-                out.appendLine(`Copilot: getCompletionContextWithCancellation(${documentUri}: ${caretOffset}): Error: '${e}'`);
-            }
+            this.logger.appendLineAtLevel(7, `Copilot: getCompletionContextWithCancellation(${documentUri}: ${caretOffset}): Error: '${e}'`);
             return undefined;
         } finally {
-            out.appendLineAtLevel(6, logMessage);
+            this.logger.
+                appendLineAtLevel(7, logMessage);
             telemetry.send("cache");
         }
     }
@@ -251,7 +237,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
     }
 
     public static async Create() {
-        const copilotCompletionProvider = new CopilotCompletionContextProvider();
+        const copilotCompletionProvider = new CopilotCompletionContextProvider(getOutputChannelLogger());
         await copilotCompletionProvider.registerCopilotContextProvider();
         return copilotCompletionProvider;
     }
@@ -267,14 +253,15 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
 
     public async resolve(context: ResolveRequest, copilotCancel: vscode.CancellationToken): Promise<SupportedContextItem[]> {
         const resolveStartTime = performance.now();
-        const out: Logger = getOutputChannelLogger();
-        let logMessage = `Copilot: resolve(${context.documentContext.uri}:${context.documentContext.offset}): `;
+        let logMessage = `Copilot: resolve(${context.documentContext.uri}:${context.documentContext.offset}):`;
         const timeBudgetFactor = await this.fetchTimeBudgetFactor(context);
         const maxCaretDistance = await this.fetchMaxDistanceToCaret(context);
         const telemetry = new CopilotCompletionContextTelemetry();
         let copilotCompletionContext: CopilotCompletionContextResult | undefined;
         let copilotCompletionContextKind: CopilotCompletionKind = CopilotCompletionKind.Unknown;
         let featureFlag: CopilotCompletionContextFeatures | undefined;
+        const docUri = context.documentContext.uri;
+        const docOffset = context.documentContext.offset;
         try {
             featureFlag = await this.getEnabledFeatureFlag(context);
             telemetry.addRequestMetadata(context.documentContext.uri, context.documentContext.offset,
@@ -282,11 +269,10 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
             if (featureFlag === undefined) { return []; }
             this.completionContextCancellation.cancel();
             this.completionContextCancellation = new vscode.CancellationTokenSource();
-            const docUri = context.documentContext.uri;
             const cacheEntry: CacheEntry | undefined = this.completionContextCache.get(docUri.toString());
             const defaultValue = cacheEntry?.[1];
             const computeSnippetsPromise = this.getCompletionContextWithCancellation(context, featureFlag,
-                resolveStartTime, out, telemetry.fork(), this.completionContextCancellation.token);
+                resolveStartTime, telemetry.fork(), this.completionContextCancellation.token);
             [copilotCompletionContext, copilotCompletionContextKind] = await this.waitForCompletionWithTimeoutAndCancellation(
                 computeSnippetsPromise, defaultValue, context.timeBudget * timeBudgetFactor, copilotCancel);
             // Fix up copilotCompletionContextKind accounting for stale-cache-hits.
@@ -307,7 +293,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
                 throw new CopilotCancellationError();
             }
             logMessage += ` (id:${copilotCompletionContext?.requestId}) `;
-            return copilotCompletionContext?.snippets ?? [];
+            return [...copilotCompletionContext?.snippets ?? [], ...copilotCompletionContext?.traits ?? []] as SupportedContextItem[];
         } catch (e: any) {
             if (e instanceof CopilotCancellationError) {
                 telemetry.addCopilotCanceled(CopilotCompletionContextProvider.getRoundedDuration(resolveStartTime));
@@ -326,22 +312,20 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
             throw e;
         } finally {
             const duration: number = CopilotCompletionContextProvider.getRoundedDuration(resolveStartTime);
-            logMessage += ` featureFlag:${featureFlag?.toString()},`;
+            logMessage += `featureFlag:${featureFlag?.toString()},`;
             if (copilotCompletionContext === undefined) {
                 logMessage += ` result is undefined and no snippets provided (${copilotCompletionContextKind.toString()}), elapsed time:${duration}ms`;
             } else {
-                const uri = copilotCompletionContext.translationUnitUri ? copilotCompletionContext.translationUnitUri : "<undefined-uri>";
-                logMessage += ` for ${uri} provided ${copilotCompletionContext.codeSnippetsCount} code-snippets (${copilotCompletionContextKind.toString()},\
-${copilotCompletionContext?.areCodeSnippetsMissing ? " missing code-snippets" : ""}) and ${copilotCompletionContext.traitsCount} traits, elapsed time:${duration}ms`;
+                logMessage += ` for ${docUri}:${docOffset} provided ${copilotCompletionContext.snippets.length} code-snippet(s) (${copilotCompletionContextKind.toString()}\
+${copilotCompletionContext?.areSnippetsMissing ? ", missing code-snippets" : ""}) and ${copilotCompletionContext.traits.length} trait(s), elapsed time:${duration}ms`;
             }
-            telemetry.addResponseMetadata(copilotCompletionContext?.areCodeSnippetsMissing ?? true,
-                copilotCompletionContext?.snippets?.length,
-                copilotCompletionContext?.codeSnippetsCount, copilotCompletionContext?.traitsCount,
+            telemetry.addResponseMetadata(copilotCompletionContext?.areSnippetsMissing ?? true,
+                copilotCompletionContext?.snippets.length, copilotCompletionContext?.traits.length,
                 copilotCompletionContext?.caretOffset, copilotCompletionContext?.featureFlag);
             telemetry.addResolvedElapsed(duration);
             telemetry.addCacheSize(this.completionContextCache.size);
             telemetry.send();
-            out.appendLineAtLevel(6, logMessage);
+            this.logger.appendLineAtLevel(7, logMessage);
         }
     }
 
