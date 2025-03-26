@@ -5,7 +5,9 @@
 import * as vscode from 'vscode';
 import { Position, ResponseError } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
-import { DefaultClient, GetCopilotHoverInfoParams, GetCopilotHoverInfoRequest } from '../client';
+import { modelSelector } from '../../constants';
+import * as telemetry from '../../telemetry';
+import { DefaultClient, GetCopilotHoverInfoParams, GetCopilotHoverInfoRequest, GetCopilotHoverInfoResult } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CppSettings } from '../settings';
 
@@ -31,8 +33,20 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         await this.client.ready;
 
         const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
-        if (settings.hover === "disabled") {
+        if (settings.hover === "disabled" ||
+            settings.copilotHover === "disabled" ||
+            (settings.copilotHover === "default" && await telemetry.isFlightEnabled("CppCopilotHoverDisabled"))) {
+            // Either disabled by the user or by the flight.
             return undefined;
+        }
+
+        // Ensure the user has access to Copilot.
+        const vscodelm = (vscode as any).lm;
+        if (vscodelm) {
+            const [model] = await vscodelm.selectChatModels(modelSelector);
+            if (!model) {
+                return undefined;
+            }
         }
 
         const newHover = this.isNewHover(document, position);
@@ -92,8 +106,8 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         return this.currentCancellationToken;
     }
 
-    public async getRequestInfo(document: vscode.TextDocument, position: vscode.Position): Promise<string> {
-        let requestInfo = "";
+    public async getRequestInfo(document: vscode.TextDocument, position: vscode.Position): Promise<GetCopilotHoverInfoResult> {
+        let response: GetCopilotHoverInfoResult;
         const params: GetCopilotHoverInfoParams = {
             textDocument: { uri: document.uri.toString() },
             position: Position.create(position.line, position.character)
@@ -105,8 +119,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         }
 
         try {
-            const response = await this.client.languageClient.sendRequest(GetCopilotHoverInfoRequest, params, this.currentCancellationToken);
-            requestInfo = response.content;
+            response = await this.client.languageClient.sendRequest(GetCopilotHoverInfoRequest, params, this.currentCancellationToken);
         } catch (e: any) {
             if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
                 throw new vscode.CancellationError();
@@ -114,7 +127,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
             throw e;
         }
 
-        return requestInfo;
+        return response;
     }
 
     public isCancelled(document: vscode.TextDocument, position: vscode.Position): boolean {

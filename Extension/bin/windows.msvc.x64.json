@@ -5,8 +5,6 @@
     "--microsoft_bugs",
     "--microsoft_version",
     "1943",
-    "--pack_alignment",
-    "8",
     "-D_CPPUNWIND=1",
     "-D_MSC_VER=1943",
     "-D_MSC_FULL_VER=194334604",

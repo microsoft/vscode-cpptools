@@ -392,7 +392,6 @@ export class CppSettings extends Settings {
     }
     public get isConfigurationWarningsEnabled(): boolean { return this.getAsString("configurationWarnings").toLowerCase() === "enabled"; }
     public get preferredPathSeparator(): string { return this.getAsString("preferredPathSeparator"); }
-    public get updateChannel(): string { return this.getAsString("updateChannel"); }
     public get vcpkgEnabled(): boolean { return this.getAsBoolean("vcpkg.enabled"); }
     public get addNodeAddonIncludePaths(): boolean { return this.getAsBoolean("addNodeAddonIncludePaths"); }
     public get renameRequiresIdentifier(): boolean { return this.getAsBoolean("renameRequiresIdentifier"); }
@@ -445,6 +444,9 @@ export class CppSettings extends Settings {
     public get defaultBrowsePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.browse.path"); }
     public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.browse.databaseFilename")); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
+    public get defaultRecursiveIncludesReduce(): string { return this.getAsString("default.recursiveIncludes.reduce"); }
+    public get defaultRecursiveIncludesPriority(): string { return this.getAsString("default.recursiveIncludes.priority"); }
+    public get defaultRecursiveIncludesOrder(): string { return this.getAsString("default.recursiveIncludes.order"); }
     public get defaultSystemIncludePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean { return this.getAsBoolean("default.enableConfigurationSquiggles"); }
     public get defaultCustomConfigurationVariables(): Associations | undefined { return this.getAsAssociations("default.customConfigurationVariables", true) ?? undefined; }
@@ -471,13 +473,18 @@ export class CppSettings extends Settings {
         if (!(vscode as any).lm) {
             return "disabled";
         }
-        const val = super.Section.get<any>("copilotHover");
-        if (val === undefined) {
-            return "default";
+        if (super.Section.get<any>("copilotHover") === "enabled") {
+            return "enabled";
         }
-        return val as string;
+        return this.getAsString("copilotHover");
     }
-
+    public get cppCodeSnippetsFeatureNames(): string | undefined {
+        const value = super.Section.get<any>("cppCodeSnippetsFeatureNames");
+        if (isString(value)) {
+            return value;
+        }
+        return undefined;
+    }
     public get formattingEngine(): string { return this.getAsString("formatting"); }
     public get vcFormatIndentBraces(): boolean { return this.getAsBoolean("vcFormat.indent.braces"); }
     public get vcFormatIndentMultiLineRelativeTo(): string { return this.getAsString("vcFormat.indent.multiLineRelativeTo"); }

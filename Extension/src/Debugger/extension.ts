@@ -15,6 +15,7 @@ import { TargetLeafNode, setActiveSshTarget } from '../SSH/TargetsView/targetNod
 import { sshCommandToConfig } from '../SSH/sshCommandToConfig';
 import { getSshConfiguration, getSshConfigurationFiles, parseFailures, writeSshConfiguration } from '../SSH/sshHosts';
 import { pathAccessible } from '../common';
+import { instrument } from '../instrumentation';
 import { getSshChannel } from '../logger';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, DebugConfigurationProvider, IConfigurationAssetProvider } from './configurationProvider';
@@ -46,10 +47,10 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     let cppVsDebugProvider: DebugConfigurationProvider | null = null;
     if (os.platform() === 'win32') {
         cppVsDebugProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppvsdbg);
-        disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppvsdbg, cppVsDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
+        disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppvsdbg, instrument(cppVsDebugProvider), vscode.DebugConfigurationProviderTriggerKind.Dynamic));
     }
     const cppDebugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppdbg);
-    disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppdbg, cppDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
+    disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppdbg, instrument(cppDebugProvider), vscode.DebugConfigurationProviderTriggerKind.Dynamic));
 
     // Register DebugConfigurationProviders for "Run and Debug" play button.
     const debugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.all);
@@ -75,7 +76,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     }];
 
     // ConfigurationSnippetProvider needs to be initiallized after configurationProvider calls getConfigurationSnippets.
-    disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, new ConfigurationSnippetProvider(assetProvider)));
+    disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, instrument(new ConfigurationSnippetProvider(assetProvider))));
 
     // Register Debug Adapters
     disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppvsdbg, new CppvsdbgDebugAdapterDescriptorFactory(context)));
@@ -84,7 +85,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     // SSH Targets View
     await initializeSshTargets();
     const sshTargetsProvider: SshTargetsProvider = new SshTargetsProvider();
-    disposables.push(vscode.window.registerTreeDataProvider('CppSshTargetsView', sshTargetsProvider));
+    disposables.push(vscode.window.registerTreeDataProvider('CppSshTargetsView', instrument(sshTargetsProvider)));
     disposables.push(vscode.commands.registerCommand(addSshTargetCmd, () => enableSshTargetsViewAndRun(addSshTargetImpl)));
     disposables.push(vscode.commands.registerCommand('C_Cpp.removeSshTarget', (node?: BaseNode) => enableSshTargetsViewAndRun(removeSshTargetImpl, node)));
     disposables.push(vscode.commands.registerCommand(refreshCppSshTargetsViewCmd, (node?: BaseNode) => enableSshTargetsViewAndRun((node?: BaseNode) => sshTargetsProvider.refresh(node), node)));

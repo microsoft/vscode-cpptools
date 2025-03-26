@@ -238,8 +238,6 @@
 	"c_cpp.configuration.default.systemIncludePath.markdownDescription": "要用於系統包含路徑的值。若設定，會覆寫透過 `compilerPath` 和 `compileCommands` 設定所取得的系統包含路徑。",
 	"c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": "控制延伸模組是否會回報 `c_cpp_properties.json` 中偵測到的錯誤。",
 	"c_cpp.configuration.default.customConfigurationVariables.markdownDescription": "當未設定 `customConfigurationVariables` 時要在組態中使用的值，或當 `${default}` 在 `customConfigurationVariables` 中顯示為索引鍵時要插入的值。",
-	"c_cpp.configuration.updateChannel.markdownDescription": "設定為 `Insiders` 以自動下載並安裝最新的延伸模組測試人員組建，其中包括即將推出的功能和錯誤修正。",
-	"c_cpp.configuration.updateChannel.deprecationMessage": "此設定已過時。發行前版本擴充功能現在可透過 Marketplace 取得。",
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "當 `dotConfig` 未指定時，要在設定中使用的值，或 `dotConfig` 中有 `${default}` 時要插入的值。",
 	"c_cpp.configuration.experimentalFeatures.description": "控制「實驗性」功能是否可用。",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "若為 `true`，則由語言伺服器提供程式碼片段。",

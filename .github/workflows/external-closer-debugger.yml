@@ -23,6 +23,6 @@ jobs:
         with:
           readonly: ${{ github.event.inputs.readonly }}
           labels: external,debugger
-          ignoreLabels: language service,internal
+          ignoreLabels: Language Service,internal
           closeDays: 0
           closeComment: "This issue has been closed because it is external or not applicable to the extension."
