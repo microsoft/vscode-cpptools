@@ -72,12 +72,15 @@ export class CopilotCompletionContextTelemetry {
         this.addMetric('computeContextElapsedMs', duration);
     }
 
-    public addResponseMetadata(areCodeSnippetsMissing: boolean, snippetCount?: number, codeSnippetsCount?: number, traitsCount?: number, caretOffset?: number,
+    public addGetClientForElapsed(duration: number): void {
+        this.addMetric('getClientForElapsedMs', duration);
+    }
+
+    public addResponseMetadata(areSnippetsMissing: boolean, codeSnippetsCount?: number, traitsCount?: number, caretOffset?: number,
         featureFlag?: CopilotCompletionContextFeatures): void {
-        this.addProperty('response.areCodeSnippetsMissing', areCodeSnippetsMissing.toString());
+        this.addProperty('response.areCodeSnippetsMissing', areSnippetsMissing.toString());
         // Args can be undefined, in which case the value is set to a
         // special value (e.g. -1) to indicate data is not set.
-        this.addMetric('response.snippetsCount', snippetCount ?? -1);
         this.addMetric('response.caretOffset', caretOffset ?? -1);
         this.addProperty('response.featureFlag', featureFlag?.toString() ?? '<not-set>');
         this.addMetric('response.codeSnippetsCount', codeSnippetsCount ?? -1);
