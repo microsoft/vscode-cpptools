@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.24.4: March 25, 2025
+## Version 1.24.4: March 27, 2025
 ### Enhancements
 * Add a new `recursiveIncludes` property to `c_cpp_properties.json`. [PR #13374](https://github.com/microsoft/vscode-cpptools/pull/13374)
 * Turn Copilot hover on by default. [PR #13385](https://github.com/microsoft/vscode-cpptools/pull/13385)
@@ -8,7 +8,7 @@
 
 ### Bug Fixes
 * Fix one potential cause of the `get_mangled_function_name` IntelliSense process crash. [#13358](https://github.com/Microsoft/vscode-cpptools/issues/13358)
-* Fix Copilot-related logging appearing when it shouldn't. [PR #13388](https://github.com/microsoft/vscode-cpptools/pull/13388)
+* Fix Copilot-related logging appearing when it shouldn't. [PR #13388](https://github.com/microsoft/vscode-cpptools/pull/13388), [PR #13417](https://github.com/microsoft/vscode-cpptools/pull/13417)
 * Fix relative compiler paths being expanded in `compile_commands.json`. [#13405](https://github.com/microsoft/vscode-cpptools/issues/13405)
 * Fix all caps clang-format logging on Windows. [#13406](https://github.com/microsoft/vscode-cpptools/issues/13406)
 * Fix an IntelliSense process crash in `handle_function`.
