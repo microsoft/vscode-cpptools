@@ -22,7 +22,7 @@ import { SemanticToken, SemanticTokensProvider } from './Providers/semanticToken
 import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 // End provider imports
 
-import { SupportedContextItem } from '@github/copilot-language-server';
+import { CodeSnippet, Trait } from '@github/copilot-language-server';
 import { ok } from 'assert';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -569,13 +569,12 @@ interface FilesEncodingChanged {
 
 export interface CopilotCompletionContextResult {
     requestId: number;
-    areCodeSnippetsMissing: boolean;
-    snippets: SupportedContextItem[];
-    translationUnitUri: string;
+    areSnippetsMissing: boolean;
+    snippets: CodeSnippet[];
+    traits: Trait[];
+    sourceFileUri: string;
     caretOffset: number;
     featureFlag: CopilotCompletionContextFeatures;
-    codeSnippetsCount: number;
-    traitsCount: number;
 }
 
 export interface CopilotCompletionContextParams {
