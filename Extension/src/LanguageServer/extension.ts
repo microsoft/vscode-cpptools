@@ -1298,6 +1298,12 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                     } else {
                         pendingCallStack = "?\n";
                     }
+                    if (pendingCallStack === "?\n") {
+                        const pendingCallStackWithOffset: string = `?${pendingOffset}`;
+                        if (!containsFilteredTelemetryData(pendingCallStackWithOffset)) {
+                            pendingCallStack = pendingCallStackWithOffset;
+                        }
+                    }
                 }
             }
         }
