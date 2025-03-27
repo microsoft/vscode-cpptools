@@ -1299,7 +1299,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                         pendingCallStack = "?\n";
                     }
                     if (pendingCallStack === "?\n") {
-                        let pendingCallStackWithOffset: string = `?${pendingOffset}`;
+                        const pendingCallStackWithOffset: string = `?${pendingOffset}`;
                         if (!containsFilteredTelemetryData(pendingCallStackWithOffset)) {
                             pendingCallStack = pendingCallStackWithOffset;
                         }
