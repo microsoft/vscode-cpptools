@@ -965,10 +965,10 @@ function reportMacCrashes(): void {
                         fs.readFile(path.resolve(crashFolder, filename), 'utf8', (err, data) => {
                             if (err) {
                                 // Try again?
-                                fs.readFile(path.resolve(crashFolder, filename), 'utf8', handleMacCrashFileRead);
+                                fs.readFile(path.resolve(crashFolder, filename), 'utf8', handleCrashFileRead);
                                 return;
                             }
-                            handleMacCrashFileRead(err, data);
+                            handleCrashFileRead(err, data);
                         });
                     }, 5000);
                 });

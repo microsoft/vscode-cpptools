@@ -138,7 +138,7 @@ export function getOutputChannelLogger(): Logger {
 }
 
 export function log(output: string): void {
-    getOutputChannel().appendLine(`${output}`);
+    getCrashCallStacksChannel().appendLine(`${output}`);
 }
 
 export interface DebugProtocolParams {
