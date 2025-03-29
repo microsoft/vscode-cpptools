@@ -7,6 +7,6 @@
 	"max.recursion.reached": "Dosáhlo se maximální rekurze rozšiřování řetězce. Možná vznikl cyklický odkaz.",
 	"invalid.var.reference": "Neplatný odkaz na proměnnou {0} v řetězci: {1}",
 	"env.var.not.found": "Proměnná prostředí {0} se nenašla",
-	"commands.not.supported": "Pro řetězec se nepodporují příkazy: {0}",
+	"commands.not.supported": "Pro řetězec se nepodporují příkazy: {0}.",
 	"exception.executing.command": "Výjimka při provádění příkazu {0} pro řetězec: {1} {2}."
 }
