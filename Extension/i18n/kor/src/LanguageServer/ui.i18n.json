@@ -32,7 +32,7 @@
 	"c.cpp.codeanalysis.statusbar.showCodeAnalysisOptions": "옵션",
 	"startup.codeanalysis.status": "시작 중...",
 	"c.cpp.codeanalysis.statusbar.showRunNowOptions": "지금 실행",
-	"running.analysis.processed.tooltip": "실행 중: {0} / {1} ({2}%)",
+	"running.analysis.processed.tooltip": "실행 중: {0}/{1}({2}%)",
 	"select.code.analysis.command": "코드 분석 명령 선택...",
 	"cancel.analysis": "취소",
 	"resume.analysis": "다시 시작",
