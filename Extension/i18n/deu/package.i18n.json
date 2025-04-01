@@ -303,7 +303,7 @@
 	"c_cpp.debuggers.cppdbg.svdPath.description": "Der vollständige Pfad zur SVD-Datei eines eingebetteten Geräts.",
 	"c_cpp.debuggers.cppvsdbg.visualizerFile.description": "Die .natvis-Datei, die beim Debuggen dieses Prozesses verwendet werden soll.",
 	"c_cpp.debuggers.showDisplayString.description": "Wenn eine visualizerFile angegeben wird, wird die Anzeigezeichenfolge von showDisplayString aktiviert. Durch Aktivieren dieser Option kann die Leistung während des Debuggings verlangsamt werden.",
-	"c_cpp.debuggers.environment.description": "Umgebungsvariablen, die der Umgebung für das Programm hinzugefügt werden sollen. Beispiel: [ { \"name\": \"config\", \"value\": \"Debug\" } ], et non [ { \"config\": \"Debug\" } ].",
+	"c_cpp.debuggers.environment.description": "Umgebungsvariablen, die der Umgebung für das Programm hinzugefügt werden sollen. Beispiel: [ { \"name\": \"config\", \"value\": \"Debug\" } ], nicht [ { \"config\": \"Debug\" } ].",
 	"c_cpp.debuggers.envFile.description": "Absoluter Pfad zu einer Datei, die Umgebungsvariablendefinitionen enthält. Diese Datei enthält Schlüssel-Wert-Paare, die durch ein Gleichheitszeichen pro Zeile getrennt sind. Beispiel: `Key=Value`.",
 	"c_cpp.debuggers.additionalSOLibSearchPath.description": "Durch Semikolons getrennte Liste von Verzeichnissen, die für die Suche nach SO-Dateien verwendet werden sollen. Beispiel: \"c:\\dir1;c:\\dir2\".",
 	"c_cpp.debuggers.MIMode.description": "Hiermit wird der Konsolendebugger angegeben, mit dem die MIDebugEngine eine Verbindung herstellt. Zulässige Werte sind \"gdb\" und \"lldb\".",
