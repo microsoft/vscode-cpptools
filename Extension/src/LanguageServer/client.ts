@@ -1700,6 +1700,7 @@ export class DefaultClient implements Client {
         languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
         languageClient.onNotification(DebugLogNotification, logLocalized);
         languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
+        languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         languageClient.registerProposedFeatures();
         await languageClient.start();
 
@@ -2490,7 +2491,6 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(IntelliSenseResultNotification, (e) => this.handleIntelliSenseResult(e));
         this.languageClient.onNotification(PublishRefactorDiagnosticsNotification, publishRefactorDiagnostics);
         RegisterCodeAnalysisNotifications(this.languageClient);
-        this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntelliSenseSetupTime(e));
