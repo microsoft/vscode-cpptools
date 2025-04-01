@@ -303,7 +303,7 @@
 	"c_cpp.debuggers.cppdbg.svdPath.description": "Полный путь к SVD-файлу встроенного устройства.",
 	"c_cpp.debuggers.cppvsdbg.visualizerFile.description": "Файл NATVIS, используемый при отладке этого процесса.",
 	"c_cpp.debuggers.showDisplayString.description": "Если указано значение visualizerFile, showDisplayString включит отображаемую строку. Включение этого параметра может привести к снижению производительности во время отладки.",
-	"c_cpp.debuggers.environment.description": "Переменные среды для добавления в среду для программы. Пример: [ { \"name\": \"config\", \"value\": \"Debug\" } ], not [ { \"config\": \"Debug\" } ].",
+	"c_cpp.debuggers.environment.description": "Переменные среды для добавления в среду для программы. Пример: [ { \"name\": \"config\", \"value\": \"Debug\" } ], не [ { \"config\": \"Debug\" } ].",
 	"c_cpp.debuggers.envFile.description": "Абсолютный путь к файлу, содержащему определения переменных среды. Этот файл содержит пары \"ключ-значение\", разделенные знаком равенства и разнесенные по строкам. Например, \"ключ=значение\".",
 	"c_cpp.debuggers.additionalSOLibSearchPath.description": "Список каталогов, разделенных точкой с запятой, который следует использовать для поиска файлов SO. Пример: \"c:\\каталог_1;c:\\каталог_2\".",
 	"c_cpp.debuggers.MIMode.description": "Указывает отладчик консоли, к которому подключится MIDebugEngine. Допустимые значения: \"gdb\" \"lldb\".",
