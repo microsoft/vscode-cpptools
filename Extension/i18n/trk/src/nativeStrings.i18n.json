@@ -318,5 +318,6 @@
 	"expand_selection": "Seçimi genişlet (\"İşleve çıkar\" seçeneğini etkinleştirmek için)",
 	"file_not_found_in_path2": "\"{0}\" compile_commands.json dosyaları içinde bulunamadı. Bu dosya yerine '{1}' klasöründeki c_cpp_properties.json dosyasında bulunan 'includePath' kullanılacak.",
 	"copilot_hover_link": "Copilot özeti oluştur",
-	"browse_path_not_found": "Mevcut olmayan klasörden dosyalar dizine alınamıyor: {0}"
+	"browse_path_not_found": "Mevcut olmayan klasörden dosyalar dizine alınamıyor: {0}",
+	"license_terms": "C/C++ uzantısı yalnızca uygulamalarınızı geliştirmek ve test etmek için Microsoft Visual Studio, Mac için Visual Studio, Visual Studio Code, Azure DevOps, Team Foundation Server ve ardıl Microsoft ürünleri ve hizmetleri ile kullanılabilir."
 }

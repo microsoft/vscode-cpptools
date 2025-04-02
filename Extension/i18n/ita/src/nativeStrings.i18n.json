@@ -318,5 +318,6 @@
 	"expand_selection": "Espandi selezione (per abilitare 'Estrai in funzione')",
 	"file_not_found_in_path2": "\"{0}\" non è stato trovato nei file compile_commands.json. In alternativa per questo file verrà usato ''includePath'' del file c_cpp_properties.json nella cartella ''{1}''.",
 	"copilot_hover_link": "Genera riepilogo Copilot",
-	"browse_path_not_found": "Non è possibile indicizzare i file da una cartella non esistente: {0}"
+	"browse_path_not_found": "Non è possibile indicizzare i file da una cartella non esistente: {0}",
+	"license_terms": "L'estensione C/C++ può essere usata solo con Microsoft Visual Studio, Visual Studio per Mac, Visual Studio Code, Azure DevOps, Team Foundation Server e prodotti e servizi Microsoft successivi per sviluppare e testare le applicazioni."
 }

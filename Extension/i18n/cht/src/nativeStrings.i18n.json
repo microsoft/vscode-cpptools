@@ -318,5 +318,6 @@
 	"expand_selection": "展開選取範圍 (以啟用 [擷取至函式])",
 	"file_not_found_in_path2": "在 compile_commands.json 檔案中找不到 \"{0}\"。將對此檔案改用資料夾 '{1}' 中 c_cpp_properties.json 的 'includePath'。",
 	"copilot_hover_link": "產生 Copilot 摘要",
-	"browse_path_not_found": "無法為以下不存在的資料夾中的檔案編製索引：{0}"
+	"browse_path_not_found": "無法為以下不存在的資料夾中的檔案編製索引：{0}",
+	"license_terms": "C/C++ 擴展只能與 Microsoft Visual Studio、Visual Studio for Mac、Visual Studio Code、Azure DevOps、Team Foundation Server 以及後續的 Microsoft 產品和服務一起使用，以開發和測試您的應用程式。"
 }

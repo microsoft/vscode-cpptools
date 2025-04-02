@@ -318,5 +318,6 @@
 	"expand_selection": "選択範囲を展開する ([関数に抽出] を有効にする)",
 	"file_not_found_in_path2": "\"{0}\" が compile_commands.json ファイルに見つかりません。フォルダー '{1}' にある c_cpp_properties.json からの 'includePath' が、このファイルで代わりに使用されます。",
 	"copilot_hover_link": "Copilot 要約の生成",
-	"browse_path_not_found": "存在しないフォルダーにあるファイルにインデックスを付けることはできません: {0}"
+	"browse_path_not_found": "存在しないフォルダーにあるファイルにインデックスを付けることはできません: {0}",
+	"license_terms": "C/C++拡張は、Microsoft Visual Studio、Visual Studio for Mac、Visual Studio Code、Azure DevOps、Team Foundation Server、および後継のMicrosoft製品およびサービスでのみ使用して、アプリケーションの開発とテストを行うことができます。"
 }
