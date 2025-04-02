@@ -317,5 +317,7 @@
 	"refactor_extract_missing_return": "在所选代码中，一些控制路径退出而没有设置返回值。这只受标量、数字、和指针返回类型支持。",
 	"expand_selection": "展开选择(以启用“提取到函数”)",
 	"file_not_found_in_path2": "在 compile_commands.json 文件中找不到 \"{0}\"。此文件将改用文件夹“{1}”中的 c_cpp_properties.json 中包含的 \"includePath\"。",
-	"copilot_hover_link": "生成 Copilot 摘要"
+	"copilot_hover_link": "生成 Copilot 摘要",
+	"browse_path_not_found": "无法为不存在的文件夹 {0} 中的文件编制索引",
+	"license_terms": "C/C++ 扩展只能与 Microsoft Visual Studio、Visual Studio for Mac、Visual Studio Code、Azure DevOps、Team Foundation Server 以及后续的 Microsoft 产品和服务一起使用，以开发和测试您的应用程序。"
 }

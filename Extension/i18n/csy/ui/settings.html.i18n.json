@@ -8,10 +8,11 @@
 	"c.cpp.extension": "Rozšíření C/C++",
 	"open.this.editor": "Otevřít tento editor pomocí příkazu:",
 	"edit.configurations.ui": "C/C++: Upravit konfigurace (uživatelské rozhraní)",
-	"switch.to.json": "Pokud se chcete přepnout na soubor {0}, klikněte na odkaz na soubor nebo použijte příkaz:",
+	"switch.to.json": "Pokud chcete přepnout na soubor {0}, klikněte na odkaz na soubor nebo použijte příkaz:",
 	"edit.configurations.in.json": "Upravit konfigurace v souboru JSON",
 	"edit.configurations.json": "C/C++: Upravit konfigurace (JSON)",
 	"check.the.schema": "Další informace o vlastnostech jazyků C/C++ najdete tady: {0}",
+	"cpp.properties.schema.reference": "Referenční informace ke schématu vlastností C/C++",
 	"view.schema.reference": "Referenční informace ke schématu vlastností",
 	"intellisense.configurations": "Konfigurace IntelliSense",
 	"intellisense.configurations.description": "Pomocí tohoto editoru můžete upravovat nastavení IntelliSense definovaná v základním souboru {0}. Změny provedené v tomto editoru se budou vztahovat jen na vybranou konfiguraci. Pokud chcete upravit více konfigurací najednou, přejděte na {1}.",
@@ -65,5 +66,11 @@
 	"limit.symbols": "Procházení: omezení symbolů na zahrnuté hlavičky",
 	"limit.symbols.checkbox": "Když se nastaví na {0} (nebo zaškrtne), analyzátor značek bude parsovat jen soubory kódů, které přímo nebo nepřímo zahrnul zdrojový soubor v {1}. Když se nastaví na {2} (nebo nezaškrtne), analyzátor značek bude parsovat všechny soubory kódů nalezené na cestách zadaných v seznamu {3}.",
 	"database.filename": "Procházení: název souboru databáze",
-	"database.filename.description": "Cesta k vygenerované databázi symbolů. Na základě této možnosti bude rozšíření ukládat databázi symbolů analyzátoru značek někam jinam než do výchozího umístění úložiště pracovního prostoru. Pokud se zadá relativní cesta, bude relativní vzhledem k výchozímu umístění úložiště pracovního prostoru, nikoli k samotné složce pracovního prostoru. Pokud chcete zadat cestu relativní ke složce pracovního prostoru (třeba {1}), dá se použít proměnná {0}."
+	"database.filename.description": "Cesta k vygenerované databázi symbolů. Na základě této možnosti bude rozšíření ukládat databázi symbolů analyzátoru značek někam jinam než do výchozího umístění úložiště pracovního prostoru. Pokud se zadá relativní cesta, bude relativní vzhledem k výchozímu umístění úložiště pracovního prostoru, nikoli k samotné složce pracovního prostoru. Pokud chcete zadat cestu relativní ke složce pracovního prostoru (třeba {1}), dá se použít proměnná {0}.",
+	"recursiveIncludes.reduce": "Rekurzivní soubory k zahrnutí: priorita",
+	"recursiveIncludes.reduce.description": "Nastavením na {0} se počet cest rekurzivních souborů k zahrnutí poskytovaných funkci IntelliSense vždy sníží pouze na ty cesty, na které aktuálně odkazují příkazy #include. K tomu je potřeba nejdříve analyzovat soubory a zjistit, které soubory jsou zahrnuty. Nastavením na {1} poskytnete funkci IntelliSense všechny cesty rekurzivních souborů k zahrnutí. Snížení počtu cest rekurzivních souborů k zahrnutí může zlepšit výkon funkce IntelliSense, pokud se jedná o velmi velký počet cest souborů k zahrnutí. Nesnižování počtu cest rekurzivních souborů k zahrnutí může zlepšit výkon funkce IntelliSense, protože se vyhnete nutnosti analyzovat soubory a určit, které cesty souborů k zahrnutí je třeba poskytnout.",
+	"recursiveIncludes.priority": "Rekurzivní soubory k zahrnutí: priorita",
+	"recursiveIncludes.priority.description": "Priorita cest rekurzivních souborů zahrnutí Pokud je nastavená hodnota {0}, budou se cesty rekurzivních souborů k zahrnutí prohledávat před cestami systémových souborů k zahrnutí. Pokud je nastavená hodnota {1}, budou se cesty rekurzivních souborů k zahrnutí prohledávat po cestách systémových souborů k zahrnutí.",
+	"recursiveIncludes.order": "Rekurzivní soubory k zahrnutí: priorita",
+	"recursiveIncludes.order.description": "Pořadí, ve kterém se prohledávají podadresáře v cestách rekurzivních souborů k zahrnutí"
 }
