@@ -8,7 +8,7 @@
 	"walkthrough.windows.text1": "如果您正在執行 Windows 的 C++ 開發，建議您安裝 Microsoft Visual C++ (MSVC) 編譯器工具組。如果您是以 Windows 的 Linux 為目標，請查看 {0}。或者，您也可以 {1}。",
 	"walkthrough.windows.link.title1": "在 VS Code 中使用 C++ 與 Windows 子系統 Linux 版 (WSL) ",
 	"walkthrough.windows.link.title2": "使用 MinGW 在 Windows 安裝 GCC",
-	"walkthrough.windows.text2": "若要安裝 MSVC，請 {0} 從 Visual Studio {1} 頁面下載。",
+	"walkthrough.windows.text2": "若要安裝 MSVC，請 {0}從 Visual Studio{1} 頁面下載。",
 	"walkthrough.windows.build.tools1": "Build Tools for Visual Studio 2022",
 	"walkthrough.windows.link.downloads": "下載",
 	"walkthrough.windows.text3": "在 Visual Studio 安裝程式中，檢查 {0} 工作負載，然後選取 {1}。",
