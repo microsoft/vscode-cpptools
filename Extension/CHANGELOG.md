@@ -15,7 +15,6 @@
 * Add handling of `-cxx-isystem`, `-stblib++-isystem`, `-isystem-after`, and `--include-barrier` Clang compiler arguments when composing the order of include paths used by IntelliSense.
 * Defer the building of the include completion cache to another thread to improve performance when a file is opened.
 * On shutdown, immediately terminate the IntelliSense process instead of waiting 2 seconds.
-* Pass only the root framework to clang-tidy.
 
 ### Bug Fixes
 * Fix an IntelliSense crash in `build_sections`. [#12666](https://github.com/microsoft/vscode-cpptools/issues/12666), [#12956](https://github.com/microsoft/vscode-cpptools/issues/12956)
