@@ -1,0 +1,106 @@
+#include <iostream>
+using namespace std;
+
+// Node structure
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+    
+    Node(int value) {
+        data = value;
+        left = right = NULL;
+    }
+};
+
+// Binary Tree Class
+class BinaryTree {
+public:
+    Node* root;
+    
+    BinaryTree() { root = NULL; }
+
+    // Insert function
+    Node* insert(Node* node, int value) {
+        if (node == NULL) {
+            return new Node(value);
+        }
+        if (value < node->data) {
+            node->left = insert(node->left, value);
+        } else {
+            node->right = insert(node->right, value);
+        }
+        return node;
+    }
+
+    // Inorder Traversal (Left, Root, Right)
+    void inorder(Node* node) {
+        if (node != NULL) {
+            inorder(node->left);
+            cout << node->data << " ";
+            inorder(node->right);
+        }
+    }
+
+    // Preorder Traversal (Root, Left, Right)
+    void preorder(Node* node) {
+        if (node != NULL) {
+            cout << node->data << " ";
+            preorder(node->left);
+            preorder(node->right);
+        }
+    }
+
+    // Postorder Traversal (Left, Right, Root)
+    void postorder(Node* node) {
+        if (node != NULL) {
+            postorder(node->left);
+            postorder(node->right);
+            cout << node->data << " ";
+        }
+    }
+
+    // Search Function
+    bool search(Node* node, int key) {
+        if (node == NULL) return false;
+        if (node->data == key) return true;
+        return key < node->data ? search(node->left, key) : search(node->right, key);
+    }
+
+    // Get the height of the tree
+    int height(Node* node) {
+        if (node == NULL) return -1;
+        return 1 + max(height(node->left), height(node->right));
+    }
+};
+
+int main() {
+    BinaryTree tree;
+
+    // Insert nodes
+    tree.root = tree.insert(tree.root, 50);
+    tree.insert(tree.root, 30);
+    tree.insert(tree.root, 70);
+    tree.insert(tree.root, 20);
+    tree.insert(tree.root, 40);
+    tree.insert(tree.root, 60);
+    tree.insert(tree.root, 80);
+
+    cout << "Inorder Traversal:\n";
+    tree.inorder(tree.root);
+
+    cout << "\nPreorder Traversal:\n";
+    tree.preorder(tree.root);
+
+    cout << "\nPostorder Traversal:\n";
+    tree.postorder(tree.root);
+
+    // Searching
+    int searchKey = 40;
+    cout << "\nSearching for " << searchKey << ": " << (tree.search(tree.root, searchKey) ? "Found" : "Not Found") << endl;
+
+    // Print height
+    cout << "Height of the Tree: " << tree.height(tree.root) << endl;
+
+    return 0;
+}
