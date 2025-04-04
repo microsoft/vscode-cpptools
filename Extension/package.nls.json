@@ -785,7 +785,7 @@
         ]
     },
     "c_cpp.configuration.copilotHover.markdownDescription": {
-        "message": "If `disabled`, no 'Generate Copilot summary' option will appear in Hover.",
+        "message": "If `disabled`, no 'Generate Copilot summary' option will appear on hover.",
         "comment": [
             " {Locked=\"`disabled`\"} Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
