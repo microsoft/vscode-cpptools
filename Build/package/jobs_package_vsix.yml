@@ -22,9 +22,9 @@ jobs:
   - checkout: self
 
   - task: UseNode@1
-    displayName: Use Node 18.x
+    displayName: Use Node 22.x
     inputs:
-      version: 18.x
+      version: 22.x
 
   - task: Npm@0
     displayName: Install vsce
