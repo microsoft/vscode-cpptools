@@ -319,5 +319,5 @@
 	"file_not_found_in_path2": "compile_commands.json 파일에서 \"{0}\"을(를) 찾을 수 없습니다. '{1}' 폴더의 c_cpp_properties.json 'includePath'가 대신 이 파일에 사용됩니다.",
 	"copilot_hover_link": "Copilot 요약 생성",
 	"browse_path_not_found": "존재하지 않는 폴더에서 파일을 인덱싱할 수 없습니다. {0}",
-	"license_terms": "C/C++ 확장은 Microsoft Visual Studio, Mac용 Visual Studio, Visual Studio Code, Azure DevOps, Team Foundation Server 및 후속 Microsoft 제품 및 서비스에서만 애플리케이션을 개발하고 테스트하는 데 사용할 수 있습니다."
+	"license_terms": "C/C++ 확장은 애플리케이션을 개발하고 테스트하기 위해 Microsoft Visual Studio, 맥용 Visual Studio, Visual Studio Code, Azure DevOps, Team Foundation Server 및 후속 Microsoft 제품 및 서비스에만 사용할 수 있습니다."
 }
