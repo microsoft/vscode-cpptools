@@ -1069,7 +1069,7 @@ function extractArgs(argsString: string): string[] {
     } else {
         try {
             const executablePath: string = getExtensionFilePath("bin/cpptools-wordexp");
-            const executableDir = path.dirname(executablePath);
+            const executableDir: string = path.dirname(executablePath);
             process.chdir(executableDir);
             const wordexpResult: any = child_process.execFileSync(executablePath, [argsString], { shell: false });
             if (wordexpResult === undefined) {
