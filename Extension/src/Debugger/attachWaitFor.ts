@@ -24,10 +24,10 @@ export class AttachWaitFor {
 
     //Naive poll mechanism, parses /proc for a while till a match is found
     private async poll(program: string): Promise<string | undefined> {
+        this._channel.clear()
         const startTime = Date.now();  // Get the current time in milliseconds
         let seen = new Set<string>();
         let process: string | undefined;
-
         while (true) {
             const elapsedTime = Date.now() - startTime;
 
@@ -62,6 +62,9 @@ export class AttachWaitFor {
                 if (!process && p.detail!.includes(program)) {
                     console.log("Found program waiting for with pid %s - info %s", p.id!, p.detail!)
                     process = p.id!
+
+                    // Send sigstop by default?
+                    util.execChildProcess(`kill -STOP ${process}`, undefined, this._channel)
                     return
                 }
 
