@@ -1068,7 +1068,10 @@ function extractArgs(argsString: string): string[] {
         return result;
     } else {
         try {
-            const wordexpResult: any = child_process.execFileSync(getExtensionFilePath("bin/cpptools-wordexp"), [argsString], { shell: false });
+            const executablePath: string = getExtensionFilePath("bin/cpptools-wordexp");
+            const executableDir: string = path.dirname(executablePath);
+            process.chdir(executableDir);
+            const wordexpResult: any = child_process.execFileSync(executablePath, [argsString], { shell: false });
             if (wordexpResult === undefined) {
                 return [];
             }
