@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { Middleware } from 'vscode-languageclient';
 import * as util from '../common';
+import { logAndReturn } from '../Utility/Async/returns';
 import { Client } from './client';
 import { clients } from './extension';
 import { shouldChangeFromCToCpp } from './utils';
@@ -40,6 +41,10 @@ export function createProtocolFilter(): Middleware {
                     // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
                     client.takeOwnership(document);
                     void sendMessage(document);
+                    const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(editor => editor.document === document);
+                    if (editor) {
+                        client.onDidChangeVisibleTextEditors([editor]).catch(logAndReturn.undefined);
+                    }
                 }
             }
         },
