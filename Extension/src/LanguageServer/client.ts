@@ -1375,12 +1375,6 @@ export class DefaultClient implements Client {
                 this.registerNotifications();
 
                 initializeIntervalTimer();
-
-                // If a file is already open when we activate, sometimes we don't get any notifications about visible
-                // or active text editors, visible ranges, or text selection. As a workaround, we trigger
-                // onDidChangeVisibleTextEditors here.
-                const cppEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => util.isCpp(e.document));
-                await this.onDidChangeVisibleTextEditors(cppEditors);
             }
 
             // update all client configurations
