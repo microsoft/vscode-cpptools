@@ -41,10 +41,8 @@ export function createProtocolFilter(): Middleware {
                     // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
                     client.takeOwnership(document);
                     void sendMessage(document);
-                    const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(editor => editor.document === document);
-                    if (editor) {
-                        client.onDidChangeVisibleTextEditors([editor]).catch(logAndReturn.undefined);
-                    }
+                    const cppEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => util.isCpp(e.document));
+                    client.onDidChangeVisibleTextEditors(cppEditors).catch(logAndReturn.undefined);
                 }
             }
         },
