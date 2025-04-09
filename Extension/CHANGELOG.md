@@ -5,7 +5,7 @@
 * Improve the description of the `C_Cpp.copilotHover` setting. [PR #13461](https://github.com/microsoft/vscode-cpptools/pull/13461)
 
 ### Bug Fixes
-* Fix a crash during tag parsing. [#13435](https://github.com/Microsoft/vscode-cpptools/issues/13435)
+* Fix a crash during tag parsing (in `read_double`). [#13435](https://github.com/Microsoft/vscode-cpptools/issues/13435)
 * Fix the handling of default file associations for certain file extensions. [PR #13455](https://github.com/microsoft/vscode-cpptools/pull/13455)
 * Fix shell parsing of the arguments of a full command line in `compilerPath`. [PR #13468](https://github.com/microsoft/vscode-cpptools/pull/13468)
 * Fix C and CUDA files being interpreted as C++ in `compile_commands.json`. [#13471](https://github.com/microsoft/vscode-cpptools/issues/13471)
