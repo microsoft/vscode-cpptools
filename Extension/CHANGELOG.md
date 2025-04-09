@@ -1,5 +1,19 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.25.0: April 10, 2025
+### Enhancement
+* Improve the description of the `C_Cpp.copilotHover` setting. [PR #13461](https://github.com/microsoft/vscode-cpptools/pull/13461)
+
+### Bug Fixes
+* Fix a crash during tag parsing. [#13435](https://github.com/Microsoft/vscode-cpptools/issues/13435)
+* Fix the handling of default file associations for certain file extensions. [PR #13455](https://github.com/microsoft/vscode-cpptools/pull/13455)
+* Fix shell parsing of the arguments of a full command line in `compilerPath`. [PR #13468](https://github.com/microsoft/vscode-cpptools/pull/13468)
+* Fix `onDidChangeVisibleTextEditors` not getting called when a `didOpen` is received. [PR #13474](https://github.com/microsoft/vscode-cpptools/pull/13474)
+* Stop automatically mapping a `.C` file to C++ if it's already set in `files.associations`. [PR #13476](https://github.com/microsoft/vscode-cpptools/pull/13476)
+* Fix IntelliSense not updating after the language ID is changed, and prevent the language ID from being changed if it's set from `compile_commands.json` or a configuration provider.
+* Fix C and CUDA files being interpreted as C++ in `compile_commands.json`.
+* Fix a case where language server crash messages appear after 4 minutes.
+
 ## Version 1.24.5: April 3, 2025
 ### New Feature
 * Add support for Copilot descriptions in hover tooltips, controlled by the `C_Cpp.copilotHover` setting. [PR #13385](https://github.com/microsoft/vscode-cpptools/pull/13385)
