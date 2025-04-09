@@ -1329,6 +1329,11 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
 
     data += crashCallStack;
 
+    // TODO: Remove this in 1.25.1 after it's confirmed that it's not happening.
+    if (containsFilteredTelemetryData(data)) {
+        data = "unexpected call stack\n";
+    }
+
     logCppCrashTelemetry(data, addressData, crashLog);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
