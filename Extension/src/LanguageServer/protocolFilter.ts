@@ -34,9 +34,10 @@ export function createProtocolFilter(): Middleware {
                         const mappingString: string = baseFileName + "@" + document.fileName;
                         client.addFileAssociations(mappingString, "cpp");
                         client.sendDidChangeSettings();
-                        // Changes to the languageId in the editor take precendence over setTextDocumentLanguage.
-                        // So, this may or may not cause the file to be closed and reopened.
+                        // This will definitely cause the file to be closed and reopened.
+                        // setTextDocumentLanguage takes precedence over setting the languageId in UI.
                         void vscode.languages.setTextDocumentLanguage(document, "cpp");
+                        return;
                     }
                     // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
                     client.takeOwnership(document);
