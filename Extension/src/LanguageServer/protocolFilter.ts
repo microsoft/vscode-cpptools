@@ -34,9 +34,8 @@ export function createProtocolFilter(): Middleware {
                         const mappingString: string = baseFileName + "@" + document.fileName;
                         client.addFileAssociations(mappingString, "cpp");
                         client.sendDidChangeSettings();
-                        // This will cause the file to be closed and reopened.
+                        // This cause the file to be closed and reopened.
                         void vscode.languages.setTextDocumentLanguage(document, "cpp");
-                        return;
                     }
                     // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
                     client.takeOwnership(document);
