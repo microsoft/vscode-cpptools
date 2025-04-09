@@ -1101,14 +1101,14 @@ export class OtherSettings {
 }
 
 export function hasFileAssociation(fileName: string): boolean {
-    const associations: Associations = new OtherSettings().filesAssociations;
+    const otherSettings: OtherSettings = new OtherSettings()
+    const associations: Associations = otherSettings.filesAssociations;
     if (associations[fileName]) {
         return true;
-    } else {
-        for (const pattern in associations) {
-            if (pattern.startsWith('*.') && fileName.endsWith(pattern.slice(1))) {
-                return true;
-            }
+    }
+    for (const pattern in associations) {
+        if (pattern.startsWith('*.') && fileName.endsWith(pattern.slice(1))) {
+            return true;
         }
     }
     return false;
