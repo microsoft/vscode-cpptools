@@ -1101,7 +1101,7 @@ export class OtherSettings {
 }
 
 export function hasFileAssociation(fileName: string): boolean {
-    const otherSettings: OtherSettings = new OtherSettings()
+    const otherSettings: OtherSettings = new OtherSettings();
     const associations: Associations = otherSettings.filesAssociations;
     if (associations[fileName]) {
         return true;
