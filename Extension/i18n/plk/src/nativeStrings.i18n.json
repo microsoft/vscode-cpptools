@@ -317,5 +317,7 @@
 	"refactor_extract_missing_return": "W zaznaczonym kodzie niektóre ścieżki kontroli kończą działanie bez ustawienia zwracanej wartości. Jest to obsługiwane tylko w przypadku zwracanych typów skalarnych, liczbowych i wskaźnikowych.",
 	"expand_selection": "Rozwiń wybór (aby włączyć opcję „Wyodrębnij do funkcji”)",
 	"file_not_found_in_path2": "Nie znaleziono elementu „{0}” w plikach compile_commands.json. Zamiast tego dla tego pliku zostanie użyty element „includePath” z c_cpp_properties.json w folderze „{1}”.",
-	"copilot_hover_link": "Generuj podsumowanie funkcji Copilot"
+	"copilot_hover_link": "Generuj podsumowanie funkcji Copilot",
+	"browse_path_not_found": "Nie można indeksować plików z nieistniejącego folderu: {0}",
+	"license_terms": "Rozszerzenie C/C++ może być używane tylko z programami Microsoft Visual Studio, Visual Studio dla komputerów Mac, Visual Studio Code, Azure DevOps, Team Foundation Server oraz następcami produktów i usług firmy Microsoft do tworzenia i testowania aplikacji."
 }

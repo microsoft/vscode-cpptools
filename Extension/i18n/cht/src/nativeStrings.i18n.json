@@ -95,7 +95,7 @@
 	"failed_to_spawn_process": "無法產生處理序。錯誤: {0} ({1})",
 	"offering_completion": "正在提供完成",
 	"compiler_on_machine": "正在嘗試從電腦上找到的編譯器取得預設: '{0}'",
-	"unable_to_resolve_include_path": "無法解析包含路徑: {0}。",
+	"unable_to_resolve_include_path": "無法解析包含路徑: {0}",
 	"error_searching_for_intellisense_client": "搜尋 IntelliSense 用戶端時發生錯誤: {0}",
 	"intellisense_client_not_available_quick_info": "IntelliSense 用戶端無法使用，請使用標籤剖析器取得快速資訊。",
 	"tag_parser_quick_info": "使用標籤剖析器取得快速資訊",
@@ -317,5 +317,7 @@
 	"refactor_extract_missing_return": "在選取的程式碼中，有一些控制項路徑未設定傳回值便結束。只有純量、數值與指標傳回類型支援此作法。",
 	"expand_selection": "展開選取範圍 (以啟用 [擷取至函式])",
 	"file_not_found_in_path2": "在 compile_commands.json 檔案中找不到 \"{0}\"。將對此檔案改用資料夾 '{1}' 中 c_cpp_properties.json 的 'includePath'。",
-	"copilot_hover_link": "產生 Copilot 摘要"
+	"copilot_hover_link": "產生 Copilot 摘要",
+	"browse_path_not_found": "無法為以下不存在的資料夾中的檔案編製索引：{0}",
+	"license_terms": "C/C++ 擴展只能與 Microsoft Visual Studio、Visual Studio for Mac、Visual Studio Code、Azure DevOps、Team Foundation Server 以及後續的 Microsoft 產品和服務一起使用，以開發和測試您的應用程式。"
 }
