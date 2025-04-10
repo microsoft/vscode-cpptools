@@ -59,7 +59,7 @@ import * as configs from './configurations';
 import { CopilotCompletionContextFeatures, CopilotCompletionContextProvider } from './copilotCompletionContextProvider';
 import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
-import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
+import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
 import { RequestCancelled, ServerCancelled, createProtocolFilter } from './protocolFilter';
@@ -89,7 +89,7 @@ export function hasTrustedCompilerPaths(): boolean {
 
 // Data shared by all clients.
 let languageClient: LanguageClient;
-let firstClientStarted: Promise<void>;
+let firstClientStarted: Promise<{ wasShutdown: boolean }>;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let compilerDefaults: configs.CompilerDefaults | undefined;
@@ -508,6 +508,10 @@ interface CppInitializationParams {
     settings: SettingsParams;
 }
 
+interface CppInitializationResult {
+    shouldShutdown: boolean;
+}
+
 interface TagParseStatus {
     localizeStringParams: LocalizeStringParams;
     isPaused: boolean;
@@ -585,7 +589,7 @@ export interface CopilotCompletionContextParams {
 
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
-const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
+const InitializationRequest: RequestType<CppInitializationParams, CppInitializationResult, void> = new RequestType<CppInitializationParams, CppInitializationResult, void>('cpptools/initialize');
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
 const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void> = new RequestType<void, GetDiagnosticsResult, void>('cpptools/getDiagnostics');
@@ -1310,7 +1314,12 @@ export class DefaultClient implements Client {
     private async init(rootUri: vscode.Uri | undefined, isFirstClient: boolean) {
         ui = getUI();
         ui.bind(this);
-        await firstClientStarted;
+        if ((await firstClientStarted).wasShutdown) {
+            this.isSupported = false;
+            DefaultClient.isStarted.resolve();
+            return;
+        }
+
         try {
             const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
             this.innerConfiguration = new configs.CppProperties(this, rootUri, workspaceFolder);
@@ -1365,11 +1374,7 @@ export class DefaultClient implements Client {
                 // Listen for messages from the language server.
                 this.registerNotifications();
 
-                // If a file is already open when we activate, sometimes we don't get any notifications about visible
-                // or active text editors, visible ranges, or text selection. As a workaround, we trigger
-                // onDidChangeVisibleTextEditors here.
-                const cppEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => util.isCpp(e.document));
-                await this.onDidChangeVisibleTextEditors(cppEditors);
+                initializeIntervalTimer();
             }
 
             // update all client configurations
@@ -1578,7 +1583,7 @@ export class DefaultClient implements Client {
         };
     }
 
-    private async createLanguageClient(): Promise<void> {
+    private async createLanguageClient(): Promise<{ wasShutdown: boolean }> {
         this.currentCaseSensitiveFileSupport = new PersistentWorkspaceState<boolean>("CPP.currentCaseSensitiveFileSupport", false);
         let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
@@ -1700,6 +1705,7 @@ export class DefaultClient implements Client {
         languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
         languageClient.onNotification(DebugLogNotification, logLocalized);
         languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
+        languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         languageClient.registerProposedFeatures();
         await languageClient.start();
 
@@ -1710,7 +1716,15 @@ export class DefaultClient implements Client {
         // Move initialization to a separate message, so we can see log output from it.
         // A request is used in order to wait for completion and ensure that no subsequent
         // higher priority message may be processed before the Initialization request.
-        await languageClient.sendRequest(InitializationRequest, cppInitializationParams);
+        const initializeResult = await languageClient.sendRequest(InitializationRequest, cppInitializationParams);
+
+        // If the server requested shutdown, then reload with the failsafe (null) client.
+        if (initializeResult.shouldShutdown) {
+            await languageClient.stop();
+            await clients.recreateClients(true);
+        }
+
+        return { wasShutdown: initializeResult.shouldShutdown };
     }
 
     public async sendDidChangeSettings(): Promise<void> {
@@ -2490,7 +2504,6 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(IntelliSenseResultNotification, (e) => this.handleIntelliSenseResult(e));
         this.languageClient.onNotification(PublishRefactorDiagnosticsNotification, publishRefactorDiagnostics);
         RegisterCodeAnalysisNotifications(this.languageClient);
-        this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntelliSenseSetupTime(e));

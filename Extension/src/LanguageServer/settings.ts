@@ -1099,3 +1099,17 @@ export class OtherSettings {
     public get searchExclude(): Excludes { return this.getAsExcludes("search", "exclude", this.defaultSearchExcludes, this.resource); }
     public get workbenchSettingsEditor(): string { return this.getAsString("workbench.settings", "editor", this.resource, "ui"); }
 }
+
+export function hasFileAssociation(fileName: string): boolean {
+    const otherSettings: OtherSettings = new OtherSettings();
+    const associations: Associations = otherSettings.filesAssociations;
+    if (associations[fileName]) {
+        return true;
+    }
+    for (const pattern in associations) {
+        if (pattern.startsWith('*.') && fileName.endsWith(pattern.slice(1))) {
+            return true;
+        }
+    }
+    return false;
+}

@@ -317,5 +317,7 @@
 	"refactor_extract_missing_return": "Dans le code sélectionné, certains chemins de contrôle s'arrêtent sans définir la valeur renvoyée. Cela n'est pris en charge que pour les types de retour scalaire, numérique et pointeur.",
 	"expand_selection": "Développer la sélection (pour activer ' Extraire vers la fonction')",
 	"file_not_found_in_path2": "« {0} » n'a pas été trouvé dans les fichiers compile_commands.json. « includePath » from c_cpp_properties.json in folder « {1} » sera utilisé pour ce fichier à la place.",
-	"copilot_hover_link": "Générer un résumé de Copilot"
+	"copilot_hover_link": "Générer un résumé de Copilot",
+	"browse_path_not_found": "Impossible d’indexer des fichiers à partir d’un dossier inexistant : {0}",
+	"license_terms": "L’extension C/C++ ne peut être utilisée qu’avec Microsoft Visual Studio, Visual Studio pour Mac, Visual Studio Code, Azure DevOps, Team Foundation Server et les produits et services Microsoft successeurs pour développer et tester vos applications."
 }

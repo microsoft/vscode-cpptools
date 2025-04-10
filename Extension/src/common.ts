@@ -165,19 +165,19 @@ export function getVcpkgRoot(): string {
 export function isHeaderFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
-    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
+    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".inl", ".ipp", ".tcc", ".tlh", ".tli", ""].some(ext => fileExtLower === ext);
 }
 
 export function isCppFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
-    return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
+    return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ii", ".ino"].some(ext => fileExtLower === ext);
 }
 
 export function isCFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
-    return (fileExt === ".C") || fileExtLower === ".c";
+    return fileExt === ".c" || fileExtLower === ".i";
 }
 
 export function isCppOrCFile(uri: vscode.Uri | undefined): boolean {
@@ -1068,7 +1068,10 @@ function extractArgs(argsString: string): string[] {
         return result;
     } else {
         try {
-            const wordexpResult: any = child_process.execFileSync(getExtensionFilePath("bin/cpptools-wordexp"), [argsString], { shell: false });
+            const executablePath: string = getExtensionFilePath("bin/cpptools-wordexp");
+            const executableDir: string = path.dirname(executablePath);
+            process.chdir(executableDir);
+            const wordexpResult: any = child_process.execFileSync(executablePath, [argsString], { shell: false });
             if (wordexpResult === undefined) {
                 return [];
             }

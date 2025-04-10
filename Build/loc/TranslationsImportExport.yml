@@ -50,7 +50,7 @@ extends:
         steps:
         - task: NodeTool@0
           inputs:
-            versionSpec: '18.x'
+            versionSpec: '22.x'
           displayName: 'Install Node.js'
 
         - task: CmdLine@2

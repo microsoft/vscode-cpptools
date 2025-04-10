@@ -476,7 +476,7 @@
     "c_cpp.configuration.autocomplete.markdownDescription": {
         "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (and similarly for `c` and `cuda-cpp` languages).",
         "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered -- except for text \"value\", which is a placeholder that should be translated."
+            " {Locked=\"`disabled`\"} Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered -- except for text \"value\", which is a placeholder that should be translated."
         ]
     },
     "c_cpp.configuration.autocomplete.default.description": "Uses the active IntelliSense engine.",
@@ -785,9 +785,9 @@
         ]
     },
     "c_cpp.configuration.copilotHover.markdownDescription": {
-        "message": "If `disabled`, no Copilot information will appear in Hover.",
+        "message": "If `disabled`, no 'Generate Copilot summary' option will appear on hover.",
         "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+            " {Locked=\"`disabled`\"} Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
     "c_cpp.configuration.renameRequiresIdentifier.markdownDescription": {
