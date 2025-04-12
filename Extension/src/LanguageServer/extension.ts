@@ -1210,7 +1210,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         signalType = lines[crashStackStartLine] + "\n";
     } else {
         // The signal type may fail to be written.
-        signalType = "SIG-??\n"; // Intentionally different from SIG-? from cpptools.
+        // Intentionally different from SIGUNKNOWN from cpptools,
+        // and not SIG-? to avoid matching the regex in containsFilteredTelemetryData.
+        signalType = "SIGMISSING\n";
     }
     data = telemetryHeader + signalType;
     let crashCallStack: string = "";
@@ -1328,11 +1330,6 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
 
     data += crashCallStack;
-
-    // TODO: Remove this in 1.25.1 after it's confirmed that it's not happening.
-    if (containsFilteredTelemetryData(data)) {
-        data = "unexpected call stack\n";
-    }
 
     logCppCrashTelemetry(data, addressData, crashLog);
 
