@@ -254,7 +254,7 @@
 	"c_cpp.configuration.hover.description": "如果停用，語言伺服器將不再提供暫留詳細資料。",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "啟用 [vcpkg 相依性管理員](https://aka.ms/vcpkg/) 的整合服務。",
 	"c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription": "當 `nan` 和 `node-addon-api` 為相依性時，從中新增 include 路徑。",
-	"c_cpp.configuration.copilotHover.markdownDescription": "如果`disabled`，則暫留中將不會顯示 Copilot 資訊。",
+	"c_cpp.configuration.copilotHover.markdownDescription": "如果 `disabled`，暫留時將不會顯示 [產生 Copilot 摘要] 選項。",
 	"c_cpp.configuration.renameRequiresIdentifier.markdownDescription": "若為 `true`，則「重新命名符號」需要有效的 C/C++ 識別碼。",
 	"c_cpp.configuration.autocompleteAddParentheses.markdownDescription": "若為 `true`，自動完成將會在函式呼叫之後自動新增 `(`，在這種情況下也可能會新增 `)`，取決於 `editor.autoClosingBrackets` 設定的值。",
 	"c_cpp.configuration.filesExclude.markdownDescription": "設定 Glob 模式以排除資料夾 (若變更 `#C_Cpp.exclusionPolicy#`，則也會排除檔案)。這些模式為 C/C++ 延伸模組所特有，且是對 `#files.exclude#` 的外加，但與 `#files.exclude#` 不同的是，它們也適用於目前工作區資料夾以外的路徑，並且不會將其從總管檢視中移除。深入了解 [Glob 模式](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options)。",
