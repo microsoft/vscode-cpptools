@@ -285,35 +285,35 @@ class SettingsApp {
 
             // Basic settings
             (<HTMLInputElement>document.getElementById(elementId.configName)).value = config.name;
-            (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? config.compilerPath : "";
+            (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ?? "";
             this.fixKnownCompilerSelection();
             (<HTMLInputElement>document.getElementById(elementId.compilerArgs)).value = joinEntries(config.compilerArgs);
 
-            (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode ? config.intelliSenseMode : "${default}";
+            (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode ?? "${default}";
             (<HTMLInputElement>document.getElementById(elementId.includePath)).value = joinEntries(config.includePath);
             (<HTMLInputElement>document.getElementById(elementId.defines)).value = joinEntries(config.defines);
             (<HTMLInputElement>document.getElementById(elementId.cStandard)).value = config.cStandard;
             (<HTMLInputElement>document.getElementById(elementId.cppStandard)).value = config.cppStandard;
 
             // Advanced settings
-            (<HTMLInputElement>document.getElementById(elementId.windowsSdkVersion)).value = config.windowsSdkVersion ? config.windowsSdkVersion : "";
+            (<HTMLInputElement>document.getElementById(elementId.windowsSdkVersion)).value = config.windowsSdkVersion ?? "";
             (<HTMLInputElement>document.getElementById(elementId.macFrameworkPath)).value = joinEntries(config.macFrameworkPath);
             (<HTMLInputElement>document.getElementById(elementId.compileCommands)).value = joinEntries(config.compileCommands);
             (<HTMLInputElement>document.getElementById(elementId.mergeConfigurations)).checked = config.mergeConfigurations;
-            (<HTMLInputElement>document.getElementById(elementId.configurationProvider)).value = config.configurationProvider ? config.configurationProvider : "";
+            (<HTMLInputElement>document.getElementById(elementId.configurationProvider)).value = config.configurationProvider ?? "";
             (<HTMLInputElement>document.getElementById(elementId.forcedInclude)).value = joinEntries(config.forcedInclude);
-            (<HTMLInputElement>document.getElementById(elementId.dotConfig)).value = config.dotConfig ? config.dotConfig : "";
+            (<HTMLInputElement>document.getElementById(elementId.dotConfig)).value = config.dotConfig ?? "";
             if (config.recursiveIncludes) {
-                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesReduce)).value = config.recursiveIncludes.reduce;
-                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesPriority)).value = config.recursiveIncludes.priority;
-                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesOrder)).value = config.recursiveIncludes.order;
+                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesReduce)).value = config.recursiveIncludes.reduce ?? "${default}";
+                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesPriority)).value = config.recursiveIncludes.priority ?? "${default}";
+                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesOrder)).value = config.recursiveIncludes.order ?? "${default}";
             }
 
             if (config.browse) {
                 (<HTMLInputElement>document.getElementById(elementId.browsePath)).value = joinEntries(config.browse.path);
                 (<HTMLInputElement>document.getElementById(elementId.limitSymbolsToIncludedHeaders)).checked =
                     config.browse.limitSymbolsToIncludedHeaders && config.browse.limitSymbolsToIncludedHeaders;
-                (<HTMLInputElement>document.getElementById(elementId.databaseFilename)).value = config.browse.databaseFilename ? config.browse.databaseFilename : "";
+                (<HTMLInputElement>document.getElementById(elementId.databaseFilename)).value = config.browse.databaseFilename ?? "";
             } else {
                 (<HTMLInputElement>document.getElementById(elementId.browsePath)).value = "";
                 (<HTMLInputElement>document.getElementById(elementId.limitSymbolsToIncludedHeaders)).checked = false;
