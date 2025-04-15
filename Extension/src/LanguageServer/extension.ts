@@ -191,8 +191,6 @@ export async function activate(): Promise<void> {
 
     vcpkgDbPromise = initVcpkgDatabase();
 
-    void clients.ActiveClient.ready.then(() => intervalTimer = global.setInterval(onInterval, 2500));
-
     await registerCommands(true);
 
     vscode.tasks.onDidStartTask(() => getActiveClient().PauseCodeAnalysis());
@@ -364,6 +362,10 @@ async function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor
 function onInterval(): void {
     // TODO: do we need to pump messages to all clients? depends on what we do with the icons, I suppose.
     clients.ActiveClient.onInterval();
+}
+
+export function initializeIntervalTimer(): void {
+    intervalTimer = global.setInterval(onInterval, 2500);
 }
 
 /**
@@ -1298,6 +1300,12 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                     } else {
                         pendingCallStack = "?\n";
                     }
+                    if (pendingCallStack === "?\n") {
+                        const pendingCallStackWithOffset: string = `?${pendingOffset}`;
+                        if (!containsFilteredTelemetryData(pendingCallStackWithOffset)) {
+                            pendingCallStack = pendingCallStackWithOffset;
+                        }
+                    }
                 }
             }
         }
@@ -1320,6 +1328,11 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
 
     data += crashCallStack;
+
+    // TODO: Remove this in 1.25.1 after it's confirmed that it's not happening.
+    if (containsFilteredTelemetryData(data)) {
+        data = "unexpected call stack\n";
+    }
 
     logCppCrashTelemetry(data, addressData, crashLog);
 
