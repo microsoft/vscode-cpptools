@@ -2132,6 +2132,9 @@ export class CppProperties {
                             badPath = `"${expandedPaths[0]}"`;
                         }
                         message = localize('cannot.find', "Cannot find: {0}", badPath);
+                        if (incorrectExpandedPaths.length === 1 && incorrectExpandedPaths[0].match(/".*"/) !== null) {
+                            message += '.\n' + localize('wrapped.with.quotes', 'Do not add extra quotes around paths.');
+                        }
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
                         // Check for file versus path mismatches.
