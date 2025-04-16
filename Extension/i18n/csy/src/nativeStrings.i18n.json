@@ -319,5 +319,5 @@
 	"file_not_found_in_path2": "V souborech compile_commands.json se nepovedlo najít {0}. Pro tento soubor se místo toho použije includePath ze souboru c_cpp_properties.json ve složce {1}.",
 	"copilot_hover_link": "Vygenerovat souhrn Copilotu",
 	"browse_path_not_found": "Nelze indexovat soubory z neexistující složky: {0}",
-	"license_terms": "Rozšíření C/C++ lze použít pouze s produkty a službami Microsoft Visual Studio, Visual Studio for Mac, Visual Studio Code, Azure DevOps, Team Foundation Server a nástupnickými produkty a službami společnosti Microsoft k vývoji a testování vašich aplikací."
+	"license_terms": "Rozšíření C/C++ lze používat pouze s těmito produkty a službami pro vývoj a testování aplikací a nástupci těchto produktů a služeb od Microsoftu: Microsoft Visual Studio, Visual Studio pro Mac, Visual Studio Code, Azure DevOps a Team Foundation Server."
 }
