@@ -254,7 +254,7 @@
 	"c_cpp.configuration.hover.description": "Devre dışı bırakılırsa üzerine gelme ayrıntıları artık dil sunucusu tarafından sağlanmaz.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "[vcpkg bağımlılık yöneticisi](https://aka.ms/vcpkg/) için tümleştirme hizmetlerini etkinleştirin.",
 	"c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription": "`nan` ve `node-addon-api` bağımlılık olduğunda bunlardan ekleme yolları ekleyin.",
-	"c_cpp.configuration.copilotHover.markdownDescription": "`disabled` ise Hover'da Copilot bilgisi görünmez.",
+	"c_cpp.configuration.copilotHover.markdownDescription": "`disabled` durumunda, üzerine gelindiğinde 'Copilot özeti oluştur' seçeneği görüntülenmez.",
 	"c_cpp.configuration.renameRequiresIdentifier.markdownDescription": "`true` ise, 'Sembolü Yeniden Adlandır' işlemi için geçerli bir C/C++ tanımlayıcısı gerekir.",
 	"c_cpp.configuration.autocompleteAddParentheses.markdownDescription": "`true` ise otomatik tamamla özelliği, işlev çağrılarından sonra otomatik olarak `(` ekler. Bazı durumlarda `#editor.autoClosingBrackets#` ayarının değerine bağlı olarak `)` karakteri de eklenebilir.",
 	"c_cpp.configuration.filesExclude.markdownDescription": "Klasörleri (ve `#C_Cpp.exclusionPolicy#` değiştirilirse dosyaları) hariç tutmak için glob desenlerini yapılandırın. Bunlar, C/C++ uzantısına özgüdür ve `#files.exclude#` öğesine ek olarak, ancak `#files.exclude#` öğesinden farklı olarak, geçerli çalışma alanı klasörünün dışındaki yollara da uygulanırlar ve Explorer görünümünden kaldırılmazlar. [Glob desenleri](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options) ile ilgili daha fazla bilgi edinin.",
