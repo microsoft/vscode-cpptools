@@ -13,7 +13,7 @@
 	"edit.configurations.json": "C/C++: 编辑配置(JSON)",
 	"check.the.schema": "转到 {0}，详细了解 C/C++ 属性。",
 	"cpp.properties.schema.reference": "C/C++ 属性架构参考",
-	"view.schema.reference": "属性架构引用",
+	"view.schema.reference": "属性架构参考",
 	"intellisense.configurations": "IntelliSense 配置",
 	"intellisense.configurations.description": "使用此编辑器编辑在基础 {0} 文件中定义的 IntelliSense 设置。在此编辑器中所做的更改仅适用于所选的配置。要一次编辑多个配置，请转到 {1}。",
 	"configuration.name": "配置名称",

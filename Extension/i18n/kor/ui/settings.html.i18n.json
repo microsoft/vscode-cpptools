@@ -68,7 +68,7 @@
 	"database.filename": "찾아보기: 데이터베이스 파일 이름",
 	"database.filename.description": "생성된 기호 데이터베이스의 경로입니다. 이 경로는 태그 파서의 기호 데이터베이스를 작업 영역의 기본 스토리지 위치가 아닌 다른 곳에 저장하도록 확장에 지시합니다. 상대 경로가 지정된 경우 작업 영역 폴더 자체가 아니라 작업 영역의 기본 스토리지 위치에 대해 상대적으로 만들어집니다. {0} 변수를 사용하여 작업 영역 폴더에 상대적인 경로를 지정할 수 있습니다(예: {1}).",
 	"recursiveIncludes.reduce": "Recursive includes: reduce",
-	"recursiveIncludes.reduce.description": "intelliSense에 제공된 재귀 포함 경로의 수를 현재 #include 문에서 참조하는 경로로만 줄이려면 {0}(으)로 설정합니다. 이를 위해서는 포함된 파일을 확인하기 위해 먼저 파일을 구문 분석해야 합니다. IntelliSense에 대한 모든 재귀 포함 경로를 제공하려면 {1}(으)로 설정합니다. 재귀 포함 경로의 수를 줄이면 매우 많은 수의 재귀 포함 경로가 관련된 경우 IntelliSense 성능이 향상될 수 있습니다. 재귀 포함 경로의 수를 줄이지 않으면 제공할 포함 경로를 확인하기 위해 파일을 구문 분석할 필요가 없으므로 IntelliSense 성능을 향상시킬 수 있습니다.",
+	"recursiveIncludes.reduce.description": "IntelliSense에 제공된 재귀 포함 경로의 수를 현재 #include 문에서 참조하는 경로로만 줄이려면 {0}(으)로 설정합니다. 이를 위해서는 포함된 파일을 확인하기 위해 먼저 파일을 구문 분석해야 합니다. IntelliSense에 대한 모든 재귀 포함 경로를 제공하려면 {1}(으)로 설정합니다. 재귀 포함 경로의 수를 줄이면 매우 많은 수의 재귀 포함 경로가 관련된 경우 IntelliSense 성능이 향상될 수 있습니다. 재귀 포함 경로의 수를 줄이지 않으면 제공할 포함 경로를 확인하기 위해 파일을 구문 분석할 필요가 없으므로 IntelliSense 성능을 향상시킬 수 있습니다.",
 	"recursiveIncludes.priority": "재귀 포함: 우선 순위",
 	"recursiveIncludes.priority.description": "재귀 포함 경로의 우선 순위입니다. {0}(으)로 설정하면 재귀 포함 경로가 시스템 포함 경로 전에 검색됩니다. {1}(으)로 설정하면 시스템 포함 경로 후에 재귀 포함 경로가 검색됩니다.",
 	"recursiveIncludes.order": "Recursive includes: order",

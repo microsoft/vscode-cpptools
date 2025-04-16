@@ -72,5 +72,5 @@
 	"recursiveIncludes.priority": "Rekurzivní soubory k zahrnutí: priorita",
 	"recursiveIncludes.priority.description": "Priorita cest rekurzivních souborů zahrnutí Pokud je nastavená hodnota {0}, budou se cesty rekurzivních souborů k zahrnutí prohledávat před cestami systémových souborů k zahrnutí. Pokud je nastavená hodnota {1}, budou se cesty rekurzivních souborů k zahrnutí prohledávat po cestách systémových souborů k zahrnutí.",
 	"recursiveIncludes.order": "Recursive includes: order",
-	"recursiveIncludes.order.description": "Pořadí, ve kterém se prohledávají podadresáře v cestách rekurzivních souborů k zahrnutí"
+	"recursiveIncludes.order.description": "Pořadí, ve kterém se prohledávají podadresáře v cestách rekurzivních souborů k zahrnutí."
 }
