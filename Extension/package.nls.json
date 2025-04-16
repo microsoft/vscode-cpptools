@@ -476,7 +476,7 @@
     "c_cpp.configuration.autocomplete.markdownDescription": {
         "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (and similarly for `c` and `cuda-cpp` languages).",
         "comment": [
-            " {Locked=\"`disabled`\"} Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered -- except for text \"value\", which is a placeholder that should be translated."
+            "{Locked=\"`disabled`\"} {Locked=\"`\\\"[cpp]\\\": {\\\"editor.wordBasedSuggestions\\\": <\"} {Locked=\">}`\"} Locked=\"`c`\"} Locked=\"`cuda-cpp`\"}"
         ]
     },
     "c_cpp.configuration.autocomplete.default.description": "Uses the active IntelliSense engine.",
@@ -787,7 +787,7 @@
     "c_cpp.configuration.copilotHover.markdownDescription": {
         "message": "If `disabled`, no 'Generate Copilot summary' option will appear on hover.",
         "comment": [
-            " {Locked=\"`disabled`\"} Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+            "{Locked=\"`disabled`\"} {Locked=\"Copilot\"}"
         ]
     },
     "c_cpp.configuration.renameRequiresIdentifier.markdownDescription": {
@@ -878,7 +878,10 @@
     "c_cpp.debuggers.cppdbg.svdPath.description": "The full path to an embedded device's SVD file.",
     "c_cpp.debuggers.cppvsdbg.visualizerFile.description": ".natvis file to be used when debugging this process.",
     "c_cpp.debuggers.showDisplayString.description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
-    "c_cpp.debuggers.environment.description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"config\", \"value\": \"Debug\" } ], not [ { \"config\": \"Debug\" } ].",
+    "c_cpp.debuggers.environment.description": {
+        "message": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"config\", \"value\": \"Debug\" } ], not [ { \"config\": \"Debug\" } ].",
+        "comment": "{Locked=\"[ { \\\"name\": \\\"\"} {Locked=\"\\\", \\\"value\\\": \\\"\"} {Locked=\"\\\" } ]\"} {Locked=\"[ { \\\"\"} {Locked=\"\\\": \\\"\"} {Locked=\"\\\" } ]\"}"
+    },
     "c_cpp.debuggers.envFile.description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE.",
     "c_cpp.debuggers.additionalSOLibSearchPath.description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
     "c_cpp.debuggers.MIMode.description": "Indicates the console debugger that the MIDebugEngine will connect to. Allowed values are \"gdb\" \"lldb\".",
@@ -1003,22 +1006,32 @@
     "c_cpp.walkthrough.set.up.title": "Set up your C++ Environment",
     "c_cpp.walkthrough.activating.description": "Activating the C++ extension to determine whether your C++ Environment has been set up.\nActivating Extension...",
     "c_cpp.walkthrough.no.compilers.windows.description": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%22walkthrough%22)",
-    "c_cpp.walkthrough.no.compilers.description": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Either select “Install a C++ Compiler” to have a compiler installed for you or follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Install a C++ Compiler](command:C_Cpp.InstallCompiler?%22walkthrough%22)\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%22walkthrough%22)",
+    "c_cpp.walkthrough.no.compilers.description": {
+        "message": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Either select “Install a C++ Compiler” to have a compiler installed for you or follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Install a C++ Compiler](command:C_Cpp.InstallCompiler?%22walkthrough%22)\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%22walkthrough%22)",
+        "comment": [
+            "{Locked=\"C++\"} {Locked=\"\\\n[\"} {Locked=\"](command:C_Cpp.InstallCompiler?%22walkthrough%22)\\\n[\"} {Locked=\"](command:C_Cpp.RescanCompilers?%22walkthrough%22)\"}"
+        ]
+    },
     "c_cpp.walkthrough.compilers.found.description": "The C++ extension works with a C++ compiler. Select one from those already on your machine by clicking the button below.\n[Select my Default Compiler](command:C_Cpp.SelectIntelliSenseConfiguration?%22walkthrough%22)",
     "c_cpp.walkthrough.compilers.found.altText": "Image showing the select a default compiler quickpick and the list of compilers found on the users machine, one of which is selected.",
     "c_cpp.walkthrough.create.cpp.file.title": "Create a C++ file",
-    "c_cpp.walkthrough.create.cpp.file.description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D) a C++ file. Be sure to save it with the \".cpp\" extension, such as \"helloworld.cpp\". \n[Create a C++ File](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)",
+    "c_cpp.walkthrough.create.cpp.file.description": {
+        "message": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D) a C++ file. Be sure to save it with the \".cpp\" extension, such as \"helloworld.cpp\". \n[Create a C++ File](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)",
+        "comment": [
+            "{Locked=\"](command:toSide:workbench.action.files.openFile)\"} {Locked=\"](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)\"} {Locked=\"C++\"} {Locked=\".cpp\"} {Locked=\"\\\n[\"} {Locked=\"](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)\"}"
+        ]
+    },
     "c_cpp.walkthrough.create.cpp.file.altText": "Open a C++ file or a folder with a C++ project.",
     "c_cpp.walkthrough.command.prompt.title": {
         "message": "Launch from the Developer Command Prompt for VS",
         "comment": [
-            "Don't translate the product name \"Developer Command Prompt for VS\"."
+            "{Locked=\"Developer Command Prompt for VS\"}"
         ]
     },
     "c_cpp.walkthrough.command.prompt.description": {
         "message": "When using the Microsoft Visual Studio C++ compiler, the C++ extension requires you to launch VS Code from the Developer Command Prompt for VS. Follow the instructions on the right to relaunch.\n[Reload Window](command:workbench.action.reloadWindow)",
         "comment": [
-            "Don't translate the product name \"Developer Command Prompt for VS\"."
+            "{Locked=\"Visual Studio\"} {Locked=\"C++\"} {Locked=\"VS Code\"} {Locked=\"Developer Command Prompt for VS\"} {Locked=\"\\\n[\"} {Locked=\"](command:workbench.action.reloadWindow)\"}"
         ]
     },
     "c_cpp.walkthrough.run.debug.title": "Run and debug your C++ file",
