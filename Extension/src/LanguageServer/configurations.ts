@@ -1721,6 +1721,7 @@ export class CppProperties {
 
         for (const p of paths) {
             let pathExists: boolean = true;
+            let quotedPath: boolean = false;
             let resolvedPath: string = this.resolvePath(p);
             if (!resolvedPath) {
                 continue;
@@ -1728,7 +1729,10 @@ export class CppProperties {
 
             // Check if resolved path exists
             if (!fs.existsSync(resolvedPath)) {
-                if (assumeRelative && !path.isAbsolute(resolvedPath)) {
+                if (resolvedPath.match(/".*"/) !== null) {
+                    pathExists = false;
+                    quotedPath = true;
+                } else if (assumeRelative && !path.isAbsolute(resolvedPath)) {
                     continue;
                 } else if (!this.rootUri) {
                     pathExists = false;
@@ -1744,7 +1748,10 @@ export class CppProperties {
             }
 
             if (!pathExists) {
-                const message: string = localize('cannot.find', "Cannot find: {0}", resolvedPath);
+                let message: string = localize('cannot.find', "Cannot find: {0}", resolvedPath);
+                if (quotedPath) {
+                    message += '. ' + localize('wrapped.with.quotes', 'Do not add extra quotes around paths.');
+                }
                 errors.push(message);
                 continue;
             }
