@@ -478,8 +478,8 @@ export class CppSettings extends Settings {
         }
         return this.getAsString("copilotHover");
     }
-    public get cppCodeSnippetsFeatureNames(): string | undefined {
-        const value = super.Section.get<any>("cppCodeSnippetsFeatureNames");
+    public get cppContextProviderParams(): string | undefined {
+        const value = super.Section.get<any>("copilotContextProviderParams");
         if (isString(value)) {
             return value;
         }
