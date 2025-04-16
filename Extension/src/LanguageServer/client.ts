@@ -1892,10 +1892,6 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
-            void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(document.uri));
-            void SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(document.uri));
-        } else {
-            void SessionState.buildAndDebugIsSourceFile.set(false);
         }
     }
 
