@@ -1612,7 +1612,7 @@ export class CppProperties {
             resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true });
         }
 
-        if (resolvedCompilerPath === undefined) {
+        if (!resolvedCompilerPath) {
             resolvedCompilerPath = this.resolvePath(config.compilerPath);
         }
         const settings: CppSettings = new CppSettings(this.rootUri);
