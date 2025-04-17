@@ -1619,7 +1619,7 @@ export class CppProperties {
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
 
         // compilerPath + args in the same string isn't working yet.
-        const skipFullCommandString = !compilerPathAndArgs.compilerName && resolvedCompilerPath.indexOf(" ") >= 0;
+        const skipFullCommandString = !compilerPathAndArgs.compilerName && resolvedCompilerPath.includes(" ");
         if (resolvedCompilerPath
             && !skipFullCommandString
             // Don't error cl.exe paths because it could be for an older preview build.
