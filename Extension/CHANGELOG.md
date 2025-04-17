@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.25.1: April 17, 2025
+## Version 1.25.1: April 21, 2025
 ### Enhancement
 * Add a configuration warning message explaining why paths in quotes can't be found. [#11955](https://github.com/microsoft/vscode-cpptools/issues/11955)
 
@@ -9,6 +9,7 @@
 * Fix the 'Debug C/C++ File' button sometimes disappearing. [#13400](https://github.com/microsoft/vscode-cpptools/issues/13400)
 * Fix some cases of a tag parser crash with `read_double`. [#13435](https://github.com/Microsoft/vscode-cpptools/issues/13435)
 * Fix issues with the `recursiveIncludes` properties in the configuration UI editor. [PR #13498](https://github.com/microsoft/vscode-cpptools/pull/13498)
+* Update clang-tidy and clang-format from 20.1.2 to 20.1.3 (which has some bug fixes).
 * Fix some translation issues.
 
 ## Version 1.25.0: April 10, 2025
