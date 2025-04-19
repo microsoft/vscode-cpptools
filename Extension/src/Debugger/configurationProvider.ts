@@ -22,6 +22,7 @@ import { PlatformInformation } from '../platform';
 import { rsync, scp, ssh } from '../SSH/commands';
 import * as Telemetry from '../telemetry';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
+import { AttachWaitFor } from './attachWaitFor';
 import { ConfigMenu, ConfigMode, ConfigSource, CppDebugConfiguration, DebuggerEvent, DebuggerType, DebugType, IConfiguration, IConfigurationSnippet, isDebugLaunchStr, MIConfigurations, PipeTransportConfigurations, TaskStatus, WindowsConfigurations, WSLConfigurations } from './configurations';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
@@ -347,16 +348,20 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
         }
 
-        // Pick process if process id is empty
         if (config.request === "attach" && !config.processId) {
             let processId: string | undefined;
-            if (config.pipeTransport || config.useExtendedRemote) {
-                const remoteAttachPicker: RemoteAttachPicker = new RemoteAttachPicker();
-                processId = await remoteAttachPicker.ShowAttachEntries(config);
+            if (config.waitFor.enabled) {
+                const waitForAttach: AttachWaitFor = new AttachWaitFor()
+                processId = await waitForAttach.WaitForProcess(config.waitFor.pattern, config.waitFor.timeout)
             } else {
-                const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
-                const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
-                processId = await attacher.ShowAttachEntries(token);
+                if (config.pipeTransport || config.useExtendedRemote) {
+                    const remoteAttachPicker: RemoteAttachPicker = new RemoteAttachPicker();
+                    processId = await remoteAttachPicker.ShowAttachEntries(config);
+                } else {
+                    const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
+                    const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
+                    processId = await attacher.ShowAttachEntries(token);
+                }
             }
 
             if (processId) {
