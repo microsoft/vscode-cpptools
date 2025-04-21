@@ -12,7 +12,7 @@
 	"edit.configurations.in.json": "Edytuj konfiguracje w pliku JSON",
 	"edit.configurations.json": "C/C++: edytuj konfiguracje (JSON)",
 	"check.the.schema": "Dowiedz się więcej o właściwościach języka C/C++, przechodząc do: {0}.",
-	"cpp.properties.schema.reference": "Odwołanie do schematu właściwości języka C/C++",
+	"cpp.properties.schema.reference": "Odwołanie do schematu właściwości C/C++",
 	"view.schema.reference": "Odwołanie do schematu właściwości",
 	"intellisense.configurations": "Konfiguracje funkcji IntelliSense",
 	"intellisense.configurations.description": "Użyj tego edytora, aby edytować ustawienia funkcji IntelliSense zdefiniowane w źródłowym pliku {0}. Zmiany wprowadzone w tym edytorze dotyczą tylko wybranej konfiguracji. Aby edytować wiele konfiguracji naraz, przejdź do: {1}.",
