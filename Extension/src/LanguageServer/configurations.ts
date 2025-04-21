@@ -1617,7 +1617,11 @@ export class CppProperties {
         }
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
+
+        // compilerPath + args in the same string isn't working yet.
+        const skipFullCommandString = !compilerPathAndArgs.compilerName && resolvedCompilerPath.includes(" ");
         if (resolvedCompilerPath
+            && !skipFullCommandString
             // Don't error cl.exe paths because it could be for an older preview build.
             && compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe"
             && compilerPathAndArgs.compilerName.toLowerCase() !== "cl") {
@@ -1795,7 +1799,7 @@ export class CppProperties {
         if (!this.configurationJson) {
             return;
         }
-        if ((this.configurationJson.enableConfigurationSquiggles !== undefined && !this.configurationJson.enableConfigurationSquiggles) ||
+        if ((this.configurationJson.enableConfigurationSquiggles === false) ||
             (this.configurationJson.enableConfigurationSquiggles === undefined && !settings.defaultEnableConfigurationSquiggles)) {
             this.diagnosticCollection.clear();
             return;
