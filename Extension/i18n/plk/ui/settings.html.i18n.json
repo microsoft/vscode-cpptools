@@ -67,10 +67,10 @@
 	"limit.symbols.checkbox": "Jeśli wartość jest równa {0} (lub jest zaznaczona), analizator tagów analizuje tylko pliki kodu, które zostały bezpośrednio lub pośrednio dołączone przez plik źródłowy w {1}. Jeśli wartość jest równa {2} (lub nie jest zaznaczona), analizator tagów będzie analizować wszystkie pliki kodu znalezione w ścieżkach określonych na {3} liście.",
 	"database.filename": "Przeglądaj: nazwa pliku bazy danych",
 	"database.filename.description": "Ścieżka do generowanej bazy danych symboli. Określa ona, że rozszerzenie ma zapisać bazę danych symboli analizatora tagów w innym miejscu niż domyślna lokalizacja magazynowania obszaru roboczego. Jeśli zostanie określona ścieżka względna, będzie to ścieżka względem domyślnej lokalizacji magazynowania obszaru roboczego, a nie folderu obszaru roboczego. Można użyć zmiennej {0} do określenia ścieżki względem folderu obszaru roboczego (np. {1}).",
-	"recursiveIncludes.reduce": "Recursive includes: reduce",
+	"recursiveIncludes.reduce": "Rekursywne obejmuje: redukcję",
 	"recursiveIncludes.reduce.description": "Ustaw na wartość {0}, aby zmniejszyć liczbę ścieżek rekursywnego dołączania dostarczanych do funkcji IntelliSense tylko do tych ścieżek, do których obecnie odwołują się instrukcje #include. Wymaga to najpierw przeanalizowania plików w celu określenia, które pliki są dołączane. Ustaw na wartość{1}, aby dostarczać wszystkie ścieżki rekursywnego dołączania do funkcji IntelliSense. Zmniejszenie liczby ścieżek rekursywnego dołączania może zwiększyć wydajność funkcji IntelliSense w przypadku dużej liczby ścieżek rekursywnego dołączania. Brak zmniejszenia liczby ścieżek rekursywnego dołączania może zwiększyć wydajność funkcji IntelliSense, unikając konieczności analizowania plików w celu określenia, które ścieżki dołączane należy podać.",
 	"recursiveIncludes.priority": "Rekursywne dołączania: priorytet",
 	"recursiveIncludes.priority.description": "Priorytet ścieżek rekursywnego dołączania. Jeśli ustawiono na wartość {0}, ścieżki rekursywnego dołączania będą przeszukiwane przed ścieżkami systemowego dołączania. Jeśli ustawiono na wartość {1}, ścieżki rekursywnego dołączania będą przeszukiwane po ścieżkach systemowego dołączania.",
-	"recursiveIncludes.order": "Recursive includes: order",
+	"recursiveIncludes.order": "Rekursywne obejmuje: kolejność",
 	"recursiveIncludes.order.description": "Kolejność przeszukiwania podkatalogów w ścieżkach dołączania rekursywnego."
 }

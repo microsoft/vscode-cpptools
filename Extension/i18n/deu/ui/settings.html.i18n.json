@@ -67,10 +67,10 @@
 	"limit.symbols.checkbox": "Wenn {0} (oder aktiviert) ist, analysiert der Tagparser nur Codedateien, die direkt oder indirekt von einer Quelldatei in {1} eingeschlossen wurden. Wenn {2} (oder nicht aktiviert) ist, analysiert der Tagparser alle Codedateien, die in den in der {3} Liste angegebenen Pfaden gefunden wurden.",
 	"database.filename": "Durchsuchen: Datenbankdateiname",
 	"database.filename.description": "Der Pfad zur generierten Symboldatenbank. Hiermit wird die Erweiterung angewiesen, die Symboldatenbank des Tagparsers an einem anderen Speicherort als dem Standardspeicherort des Arbeitsbereichs zu speichern. Bei Angabe eines relativen Pfads wird dieser relativ zum Standardspeicherort des Arbeitsbereichs und nicht zum Arbeitsbereichsordner selbst erstellt. Die Variable „{0}“ kann verwendet werden, um einen Pfad relativ zum Arbeitsbereichsordner (Beispiel: {1}) anzugeben.",
-	"recursiveIncludes.reduce": "Recursive includes: reduce",
+	"recursiveIncludes.reduce": "Rekursive Umfasst: Reduzieren",
 	"recursiveIncludes.reduce.description": "Legen Sie diese Option auf „{0}“ fest, um die Anzahl der rekursiven Includepfade, die für IntelliSense bereitgestellt werden, auf die Pfade zu verringern, auf die derzeit von #include-Anweisungen verwiesen wird. Dazu müssen zuerst die Dateien analysiert werden, um zu bestimmen, welche Dateien eingeschlossen werden. Legen Sie diese Option auf „{1}“ fest, um alle rekursiven Includepfade für IntelliSense bereitzustellen. Wenn Sie die Anzahl rekursiver Includepfade verringern, kann sich die Leistung von IntelliSense verbessern, wenn eine sehr große Anzahl rekursiver Includepfade betroffen ist. Wenn Sie die Anzahl rekursiver Includepfade nicht verringern, kann die Leistung von IntelliSense verbessert werden, da die Dateien nicht analysiert werden müssen, um zu bestimmen, welche Includepfade bereitgestellt werden sollen.",
 	"recursiveIncludes.priority": "„Rekursiv“ umfasst: Priorität",
 	"recursiveIncludes.priority.description": "Die Priorität rekursiver Includepfade. Wenn sie auf „{0}“ festgelegt ist, werden die rekursiven Includepfade vor den systemseitigen Includepfaden durchsucht. Wenn sie auf „{1}“ festgelegt ist, werden die rekursiven Includepfade nach den systemseitigen Includepfaden durchsucht.",
-	"recursiveIncludes.order": "Recursive includes: order",
+	"recursiveIncludes.order": "Rekursiv umfasst: Reihenfolge",
 	"recursiveIncludes.order.description": "Die Reihenfolge, in der Unterverzeichnisse unter rekursiven Includepfaden durchsucht werden."
 }

@@ -67,10 +67,10 @@
 	"limit.symbols.checkbox": "Když se nastaví na {0} (nebo zaškrtne), analyzátor značek bude parsovat jen soubory kódů, které přímo nebo nepřímo zahrnul zdrojový soubor v {1}. Když se nastaví na {2} (nebo nezaškrtne), analyzátor značek bude parsovat všechny soubory kódů nalezené na cestách zadaných v seznamu {3}.",
 	"database.filename": "Procházení: název souboru databáze",
 	"database.filename.description": "Cesta k vygenerované databázi symbolů. Na základě této možnosti bude rozšíření ukládat databázi symbolů analyzátoru značek někam jinam než do výchozího umístění úložiště pracovního prostoru. Pokud se zadá relativní cesta, bude relativní vzhledem k výchozímu umístění úložiště pracovního prostoru, nikoli k samotné složce pracovního prostoru. Pokud chcete zadat cestu relativní ke složce pracovního prostoru (třeba {1}), dá se použít proměnná {0}.",
-	"recursiveIncludes.reduce": "Recursive includes: reduce",
+	"recursiveIncludes.reduce": "Rekurzivní soubory k zahrnutí: snížení",
 	"recursiveIncludes.reduce.description": "Nastavením na {0} se počet cest rekurzivních souborů k zahrnutí poskytovaných funkci IntelliSense vždy sníží pouze na ty cesty, na které aktuálně odkazují příkazy #include. K tomu je potřeba nejdříve analyzovat soubory a zjistit, které soubory jsou zahrnuty. Nastavením na {1} poskytnete funkci IntelliSense všechny cesty rekurzivních souborů k zahrnutí. Snížení počtu cest rekurzivních souborů k zahrnutí může zlepšit výkon funkce IntelliSense, pokud se jedná o velmi velký počet cest souborů k zahrnutí. Nesnižování počtu cest rekurzivních souborů k zahrnutí může zlepšit výkon funkce IntelliSense, protože se vyhnete nutnosti analyzovat soubory a určit, které cesty souborů k zahrnutí je třeba poskytnout.",
 	"recursiveIncludes.priority": "Rekurzivní soubory k zahrnutí: priorita",
 	"recursiveIncludes.priority.description": "Priorita cest rekurzivních souborů zahrnutí Pokud je nastavená hodnota {0}, budou se cesty rekurzivních souborů k zahrnutí prohledávat před cestami systémových souborů k zahrnutí. Pokud je nastavená hodnota {1}, budou se cesty rekurzivních souborů k zahrnutí prohledávat po cestách systémových souborů k zahrnutí.",
-	"recursiveIncludes.order": "Recursive includes: order",
+	"recursiveIncludes.order": "Rekurzivní soubory k zahrnutí: pořadí",
 	"recursiveIncludes.order.description": "Pořadí, ve kterém se prohledávají podadresáře v cestách rekurzivních souborů k zahrnutí."
 }

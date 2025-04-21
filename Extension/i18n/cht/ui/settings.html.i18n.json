@@ -67,10 +67,10 @@
 	"limit.symbols.checkbox": "若為 {0} (或已選取)，標籤剖析器只會剖析 {1} 中原始程式檔直接或間接包含的程式碼檔。若為 {2} (或未選取)，標籤剖析器會剖析在 {3} 清單中的指定路徑找到的所有程式碼檔。",
 	"database.filename": "瀏覽: 資料庫檔案名稱",
 	"database.filename.description": "產生符號資料庫路徑。這會指示延伸模組將標籤剖析器的符號資料庫儲存在工作區預設儲存位置以外的某處。如果指定了相對路徑，就會是相對於工作區預設儲存位置 (非工作區資料夾本身) 的路徑。{0} 變數可用於指定相對於工作區資料夾的路徑 (例如 {1})。",
-	"recursiveIncludes.reduce": "Recursive includes: reduce",
+	"recursiveIncludes.reduce": "遞迴包含: 減少",
 	"recursiveIncludes.reduce.description": "設定為 {0}，可使 IntelliSense 僅提供目前由 #include 陳述式參考的遞迴包含路徑。這需要先剖析檔案，以確定包含哪些檔案。設定為 {1} 以將所有遞迴包含路徑提供給 IntelliSense。當涉及非常大量的遞迴包含路徑時，減少遞迴包含路徑數目可能會改善 IntelliSense 的效能。不減少遞迴包含路徑的數量，可避免需要剖析檔案以決定要提供哪些包含路徑，從而 IntelliSense 效能。",
 	"recursiveIncludes.priority": "遞迴包含: 優先順序",
 	"recursiveIncludes.priority.description": "遞迴包含路徑的優先順序。如果設定為 {0}，則會在系統包含路徑之前搜尋遞迴包含路徑。如果設定為 {1}，則會在系統包含路徑之後搜尋遞迴包含路徑。",
-	"recursiveIncludes.order": "Recursive includes: order",
+	"recursiveIncludes.order": "遞迴包含: 順序",
 	"recursiveIncludes.order.description": "搜尋遞迴包含路徑下子目錄的順序。"
 }
