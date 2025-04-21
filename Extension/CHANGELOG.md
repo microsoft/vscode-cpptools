@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.25.1: April 21, 2025
+## Version 1.25.1: April 22, 2025
 ### Enhancement
 * Add a configuration warning message explaining why paths in quotes can't be found. [#11955](https://github.com/microsoft/vscode-cpptools/issues/11955)
 
