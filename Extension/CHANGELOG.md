@@ -1,11 +1,22 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.25.1: April 22, 2025
+### Enhancement
+* Add a configuration warning message explaining why paths in quotes can't be found. [#11955](https://github.com/microsoft/vscode-cpptools/issues/11955)
+
+### Bug Fixes
+* Fix no error appearing in the configuration UI when an invalid `compilerPath` is used. [#12661](https://github.com/microsoft/vscode-cpptools/issues/12661)
+* Fix the 'Debug C/C++ File' button sometimes disappearing. [#13400](https://github.com/microsoft/vscode-cpptools/issues/13400)
+* Fix some cases of a tag parser crash with `read_double`. [#13435](https://github.com/Microsoft/vscode-cpptools/issues/13435)
+* Fix issues with the `recursiveIncludes` properties in the configuration UI editor. [PR #13498](https://github.com/microsoft/vscode-cpptools/pull/13498)
+* Update clang-tidy and clang-format from 20.1.2 to 20.1.3 (which has some bug fixes).
+* Fix some translation issues.
+
 ## Version 1.25.0: April 10, 2025
 ### Enhancement
 * Improve the description of the `C_Cpp.copilotHover` setting. [PR #13461](https://github.com/microsoft/vscode-cpptools/pull/13461)
 
 ### Bug Fixes
-* Fix a crash during tag parsing (in `read_double`). [#13435](https://github.com/Microsoft/vscode-cpptools/issues/13435)
 * Fix the handling of default file associations for certain file extensions. [PR #13455](https://github.com/microsoft/vscode-cpptools/pull/13455)
 * Fix shell parsing of the arguments of a full command line in `compilerPath`. [PR #13468](https://github.com/microsoft/vscode-cpptools/pull/13468)
 * Fix C and CUDA files being interpreted as C++ in `compile_commands.json`. [#13471](https://github.com/microsoft/vscode-cpptools/issues/13471)

@@ -67,10 +67,10 @@
 	"limit.symbols.checkbox": "如果为 {0} (或已勾选)，则标记分析器将仅分析在 {1} 中由源文件直接或间接包含的代码文件。如果为 {2} (或未选中)，标记分析器将分析在 {3} 列表内指定路径中找到的所有代码文件。",
 	"database.filename": "浏览: 数据库文件名",
 	"database.filename.description": "所生成的符号数据库的路径。这指示扩展将标记分析器的符号数据库保存在工作区默认存储位置以外的其他位置。如果指定了相对路径，则它将相对于工作区的默认存储位置(而不是工作区文件夹本身)。{0} 变量可用于指定相对于工作区文件夹的路径(例如 {1})。",
-	"recursiveIncludes.reduce": "Recursive includes: reduce",
+	"recursiveIncludes.reduce": "递归包括: 缩减",
 	"recursiveIncludes.reduce.description": "设置为 {0} 可将提供给 IntelliSense 的递归包含路径数减少到仅限当前由 #include 语句引用的路径。这需要首先分析文件以确定包含哪些文件。设置为 {1} 可将所有递归包含路径提供给 IntelliSense。当涉及到大量递归包含路径时，减少递归包含路径的数量可能会提高 IntelliSense 性能。如果不减少递归包含路径的数量，则可以通过避免需要分析文件以确定要提供的包含路径来提高 IntelliSense 性能。",
 	"recursiveIncludes.priority": "递归包括: 优先级",
 	"recursiveIncludes.priority.description": "递归包含路径的优先级。如果设置为 {0}，则将在系统包含路径之前搜索递归包含路径。如果设置为 {1}，则将在系统包含路径之后搜索递归包含路径。",
-	"recursiveIncludes.order": "Recursive includes: order",
+	"recursiveIncludes.order": "递归包括: 顺序",
 	"recursiveIncludes.order.description": "搜索递归包含路径下子目录的顺序。"
 }
