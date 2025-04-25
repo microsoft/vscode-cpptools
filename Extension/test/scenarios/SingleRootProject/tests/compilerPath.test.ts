@@ -172,7 +172,8 @@ describe('validateCompilerPath', () => {
     const argsTests: [string, Uri, string, string[]][] = [
         ['cl.exe /std:c++20 /O2', assetsFolder, 'cl.exe', ['/std:c++20', '/O2']], // issue with /Fo"test.obj" argument
         [`"${path.join(assetsFolderFsPath, 'b i n', 'clang++')}" -std=c++20 -O2`, assetsFolder, 'clang++', ['-std=c++20', '-O2']],
-        [`${path.join('bin', 'gcc')} -std=c++20 -Wall`, assetsFolder, 'gcc', ['-std=c++20', '-Wall']]
+        [`${path.join('bin', 'gcc')} -std=c++20 -Wall`, assetsFolder, 'gcc', ['-std=c++20', '-Wall']],
+        ['clang -O2 -Wall', assetsFolder, 'clang', ['-O2', '-Wall']]
     ];
     it('Verify various compilerPath strings with args', () => {
         let index = -1;
@@ -220,4 +221,16 @@ describe('validateCompilerPath', () => {
         equal(result.telemetry?.PathNonExistent, 1, 'Should have telemetry for relative paths');
         equal(result.telemetry?.PathNotAFile, undefined, 'Should not have telemetry for invalid paths');
     });
+
+    it('Verify errors with unknown compiler not in Path with args', async () => {
+        const result = CppProperties.validateCompilerPath('icc -O2', assetsFolder);
+        equal(result.compilerName, 'icc', 'compilerName should be found');
+        deepEqual(result.allCompilerArgs, ['-O2'], 'args should match');
+        ok(result.error?.includes('Cannot find'), 'Should have an error for unknown compiler');
+        ok(result.error?.includes('missing double quotes'), 'Should have an error for missing double quotes');
+        equal(result.telemetry?.PathNonExistent, 1, 'Should have telemetry for relative paths');
+        equal(result.telemetry?.PathNotAFile, undefined, 'Should not have telemetry for invalid paths');
+        equal(result.telemetry?.CompilerPathMissingQuotes, 1, 'Should have telemetry for missing quotes');
+    });
+
 });

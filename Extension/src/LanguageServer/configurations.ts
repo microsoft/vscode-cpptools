@@ -1614,51 +1614,54 @@ export class CppProperties {
         const telemetry: { [key: string]: number } = {};
 
         // Don't error cl.exe paths because it could be for an older preview build.
-        if (!isCl) {
-            // Get compiler path without arguments before checking if it exists
-            if (compilerPathAndArgs.compilerPath) {
-                resolvedCompilerPath = compilerPathAndArgs.compilerPath;
-                let pathExists: boolean = true;
-                const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
-                if (!fs.existsSync(resolvedCompilerPath)) {
-                    if (existsWithExeAdded(resolvedCompilerPath)) {
-                        resolvedCompilerPath += ".exe";
-                    } else {
-                        const pathLocation = which.sync(resolvedCompilerPath, { nothrow: true });
-                        if (pathLocation) {
-                            resolvedCompilerPath = pathLocation;
-                            compilerPathAndArgs.compilerPath = pathLocation;
-                        } else if (rootUri) {
-                            // Check again for a relative path.
-                            const relativePath: string = rootUri.fsPath + path.sep + resolvedCompilerPath;
-                            if (!fs.existsSync(relativePath)) {
-                                if (existsWithExeAdded(relativePath)) {
-                                    resolvedCompilerPath = relativePath + ".exe";
-                                } else {
-                                    pathExists = false;
-                                }
+        if (!isCl && compilerPathAndArgs.compilerPath) {
+            const compilerPathMayNeedQuotes: boolean = !resolvedCompilerPath.startsWith('"') && resolvedCompilerPath.includes(" ") && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0;
+            let pathExists: boolean = true;
+            const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
+
+            resolvedCompilerPath = compilerPathAndArgs.compilerPath;
+            if (!fs.existsSync(resolvedCompilerPath)) {
+                if (existsWithExeAdded(resolvedCompilerPath)) {
+                    resolvedCompilerPath += ".exe";
+                } else {
+                    const pathLocation = which.sync(resolvedCompilerPath, { nothrow: true });
+                    if (pathLocation) {
+                        resolvedCompilerPath = pathLocation;
+                        compilerPathAndArgs.compilerPath = pathLocation;
+                    } else if (rootUri) {
+                        // Check again for a relative path.
+                        const relativePath: string = rootUri.fsPath + path.sep + resolvedCompilerPath;
+                        if (!fs.existsSync(relativePath)) {
+                            if (existsWithExeAdded(relativePath)) {
+                                resolvedCompilerPath = relativePath + ".exe";
                             } else {
-                                resolvedCompilerPath = relativePath;
+                                pathExists = false;
                             }
+                        } else {
+                            resolvedCompilerPath = relativePath;
                         }
                     }
                 }
+            }
 
-                const compilerPathErrors: string[] = [];
+            const compilerPathErrors: string[] = [];
+            if (compilerPathMayNeedQuotes && !pathExists) {
+                compilerPathErrors.push(localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.'));
+                telemetry.CompilerPathMissingQuotes = 1;
+            }
 
-                if (!pathExists) {
-                    const message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
-                    compilerPathErrors.push(message);
-                    telemetry.PathNonExistent = 1;
-                } else if (!util.checkExecutableWithoutExtensionExistsSync(resolvedCompilerPath)) {
-                    const message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
-                    compilerPathErrors.push(message);
-                    telemetry.PathNotAFile = 1;
-                }
+            if (!pathExists) {
+                const message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
+                compilerPathErrors.push(message);
+                telemetry.PathNonExistent = 1;
+            } else if (!util.checkExecutableWithoutExtensionExistsSync(resolvedCompilerPath)) {
+                const message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
+                compilerPathErrors.push(message);
+                telemetry.PathNotAFile = 1;
+            }
 
-                if (compilerPathErrors.length > 0) {
-                    compilerPathAndArgs.error = compilerPathErrors.join('\n');
-                }
+            if (compilerPathErrors.length > 0) {
+                compilerPathAndArgs.error = compilerPathErrors.join('\n');
             }
         }
         compilerPathAndArgs.telemetry = telemetry;

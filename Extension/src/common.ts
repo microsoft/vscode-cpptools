@@ -1108,6 +1108,16 @@ export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputComp
     let compilerPath: string | undefined = inputCompilerPath;
     let compilerName: string = "";
     let compilerArgsFromCommandLineInPath: string[] = [];
+    const trimLegacyQuotes = (compilerPath?: string): string | undefined => {
+        if (compilerPath && useLegacyBehavior) {
+            // Try to trim quotes from compiler path.
+            const tempCompilerPath: string[] = extractArgs(compilerPath);
+            if (tempCompilerPath.length > 0) {
+                return tempCompilerPath[0];
+            }
+        }
+        return compilerPath;
+    };
     if (compilerPath) {
         compilerPath = compilerPath.trim();
         if (isCl(compilerPath) || checkExecutableWithoutExtensionExistsSync(compilerPath)) {
@@ -1122,31 +1132,15 @@ export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputComp
             // Otherwise, a path with a leading quote would not be valid.
             compilerArgsFromCommandLineInPath = useLegacyBehavior ? legacyExtractArgs(compilerPath) : extractArgs(compilerPath);
             if (compilerArgsFromCommandLineInPath.length > 0) {
-                compilerPath = compilerArgsFromCommandLineInPath.shift();
-                if (compilerPath) {
-                    if (useLegacyBehavior) {
-                        // Try to trim quotes from compiler path.
-                        const tempCompilerPath: string[] = extractArgs(compilerPath);
-                        if (tempCompilerPath?.length > 0) {
-                            compilerPath = tempCompilerPath[0];
-                        }
-                    }
-                    compilerName = path.basename(compilerPath);
-                }
+                compilerPath = trimLegacyQuotes(compilerArgsFromCommandLineInPath.shift());
+                compilerName = path.basename(compilerPath ?? '');
             }
         } else {
             if (compilerPath.includes(' ')) {
-                // There is no leading quote, so we'll treat is as a command line.
+                // There is no leading quote, so we'll treat it as a command line.
                 const potentialArgs: string[] = useLegacyBehavior ? legacyExtractArgs(compilerPath) : extractArgs(compilerPath);
-                let potentialCompilerPath: string | undefined = potentialArgs.shift();
-                if (useLegacyBehavior && potentialCompilerPath) {
-                    const tempCompilerPath: string[] = extractArgs(potentialCompilerPath);
-                    if (tempCompilerPath?.length > 0) {
-                        potentialCompilerPath = tempCompilerPath[0];
-                    }
-                }
+                compilerPath = trimLegacyQuotes(potentialArgs.shift());
                 compilerArgsFromCommandLineInPath = potentialArgs;
-                compilerPath = potentialCompilerPath;
             }
             compilerName = path.basename(compilerPath ?? '');
         }
