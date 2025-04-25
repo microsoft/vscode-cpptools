@@ -2,8 +2,8 @@
 
 ## Version 1.25.2: April 25, 2025
 ### Bug Fixes
-* Fix a crash with `read_double`. [#13435](https://github.com/Microsoft/vscode-cpptools/issues/13435)
-* Fix a Copilot hover crash.
+* Fix a crash in `read_double`. [#13435](https://github.com/Microsoft/vscode-cpptools/issues/13435)
+* Fix a crash with Copilot hover.
 
 ## Version 1.25.1: April 22, 2025
 ### Enhancement
