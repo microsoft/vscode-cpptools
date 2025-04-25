@@ -7,12 +7,13 @@ import { describe, it } from 'mocha';
 import { deepEqual, equal, ok } from 'node:assert';
 import * as path from 'path';
 import { Uri } from 'vscode';
-import { CppProperties } from '../../../../src/LanguageServer/configurations';
-import { extractCompilerPathAndArgs } from '../../../../src/common';
+import { extractCompilerPathAndArgs, setExtensionPath } from '../../../../src/common';
 import { isWindows } from '../../../../src/constants';
+import { CppProperties } from '../../../../src/LanguageServer/configurations';
 
 const assetsFolder = Uri.file(path.normalize(path.join(__dirname.replace(/dist[\/\\]/, ''), '..', 'assets')));
 const assetsFolderFsPath = assetsFolder.fsPath;
+const extensionPath = path.normalize(path.join(__dirname.replace(/dist[\/\\]/, ''), '..', '..', '..', '..'));
 
 // A simple test counter for the tests that loop over several cases.
 // This is to make it easier to see which test failed in the output.
@@ -109,6 +110,10 @@ if (isWindows) {
     });
 } else {
     describe('extractCompilerPathAndArgs', () => {
+        // The extension is not initialized the same way during tests, so this needs to be set manually
+        // so the tests can find `cpptools-wordexp`.
+        setExtensionPath(extensionPath);
+
         // [compilerPath, useLegacyBehavior, additionalArgs, result.compilerName, result.allCompilerArgs]
         const tests: [string, boolean, string[] | undefined, string, string[]][] = [
             ['clang', false, undefined, 'clang', []],
@@ -172,6 +177,12 @@ if (isWindows) {
 }
 
 describe('validateCompilerPath', () => {
+    if (!isWindows) {
+        // The extension is not initialized the same way during tests, so this needs to be set manually
+        // so the tests can find `cpptools-wordexp`.
+        setExtensionPath(extensionPath);
+    }
+
     // [compilerPath, cwd, result.compilerName, result.allCompilerArgs, result.error, result.telemetry]
     const tests: [string, Uri, string, string[]][] = [
         ['cl.exe', assetsFolder, 'cl.exe', []],
