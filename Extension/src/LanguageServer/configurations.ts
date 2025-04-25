@@ -1802,7 +1802,7 @@ export class CppProperties {
         if (!this.configurationJson) {
             return;
         }
-        if ((this.configurationJson.enableConfigurationSquiggles !== undefined && !this.configurationJson.enableConfigurationSquiggles) ||
+        if ((this.configurationJson.enableConfigurationSquiggles === false) ||
             (this.configurationJson.enableConfigurationSquiggles === undefined && !settings.defaultEnableConfigurationSquiggles)) {
             this.diagnosticCollection.clear();
             return;

@@ -67,10 +67,10 @@
 	"limit.symbols.checkbox": "Quando {0} (ou marcado), o Analisador de Marca analisará somente os arquivos de código que foram diretamente ou indiretamente incluídos em um arquivo de origem no {1}. Quando {2} (ou não marcado), o Analisador de Marca analisará todos os arquivos de código encontrados nos caminhos especificados na lista de {3}.",
 	"database.filename": "Procurar: nome do arquivo do banco de dados",
 	"database.filename.description": "O caminho para o banco de dados de símbolo gerado. Isso instrui a extensão a salvar o banco de dados de símbolos do Analisador de Marca em algum lugar diferente do local de armazenamento padrão do workspace. Se um caminho relativo for especificado, ele será feito em relação ao local de armazenamento padrão do workspace, não à própria pasta do workspace. A {0} variável pode ser usada para especificar um caminho relativo à pasta do workspace (por exemplo, {1}).",
-	"recursiveIncludes.reduce": "Recursive includes: reduce",
+	"recursiveIncludes.reduce": "Inclusões recursivas: reduzir",
 	"recursiveIncludes.reduce.description": "Defina como {0} para reduzir o número de caminhos de inclusão recursivos fornecidos ao IntelliSense apenas para os caminhos atualmente referenciados por instruções #include. Isso requer primeiro a análise de arquivos para determinar quais arquivos estão incluídos. Defina como {1} para fornecer todos os caminhos de inclusão recursivos para o IntelliSense. Reduzir o número de caminhos de inclusão recursivos pode melhorar o desempenho do IntelliSense quando um número muito grande de caminhos de inclusão recursivos está envolvido. Não reduzir o número de caminhos de inclusão recursivos pode melhorar o desempenho do IntelliSense, evitando a necessidade de analisar arquivos para determinar quais caminhos de inclusão fornecer.",
 	"recursiveIncludes.priority": "Inclui recursiva: prioridade",
 	"recursiveIncludes.priority.description": "A prioridade dos caminhos de inclusão recursivo. Se definido como {0}, os caminhos de inclusão recursivos serão pesquisados antes que o sistema inclua caminhos. Se definido como {1}, os caminhos de inclusão recursivos serão pesquisados depois que o sistema incluir caminhos.",
-	"recursiveIncludes.order": "Recursive includes: order",
+	"recursiveIncludes.order": "Inclusões recursivas: pedido",
 	"recursiveIncludes.order.description": "A ordem na qual os subdiretórios em caminhos de inclusão recursivos são pesquisados."
 }

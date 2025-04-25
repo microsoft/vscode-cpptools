@@ -67,10 +67,10 @@
 	"limit.symbols.checkbox": "Quando è impostato su {0} (o selezionato), il parser tag analizzerà solo i file di codice che sono stati inclusi direttamente o indirettamente da un file di origine in {1}. Quando è impostato su {2} (o non è selezionato), il parser tag analizzerà tutti i file di codice trovati nei percorsi specificati nell'elenco di {3}.",
 	"database.filename": "Sfoglia: nome del file di database",
 	"database.filename.description": "Percorso del database dei simboli generato. Indica all'estensione di salvare il database dei simboli del parser di tag in una posizione diversa da quella di archiviazione predefinita dell'area di lavoro. Se viene specificato un percorso relativo, sarà relativo alla posizione di archiviazione predefinita dell'area di lavoro e non alla cartella dell'area di lavoro. È possibile usare la variabile {0} per specificare un percorso relativo alla cartella dell'area di lavoro, ad esempio {1}.",
-	"recursiveIncludes.reduce": "Recursive includes: reduce",
+	"recursiveIncludes.reduce": "Inclusioni ricorsive: riduzione",
 	"recursiveIncludes.reduce.description": "Imposta su {0} per ridurre il numero di percorsi di inclusione ricorsivi forniti a IntelliSense, limitandoli solo ai percorsi attualmente referenziati da istruzioni #include. Per determinare quali file sono inclusi, è necessario prima analizzare i file. Imposta su {1} per fornire tutti i percorsi di inclusione ricorsivi a IntelliSense. La riduzione del numero di percorsi di inclusione ricorsivi può migliorare le prestazioni di IntelliSense in caso di un numero molto elevato di percorsi di inclusione ricorsivi. Non ridurre il numero di percorsi di inclusione ricorsivi può migliorare le prestazioni di IntelliSense evitando la necessità di analizzare i file per determinare quali percorsi di inclusione fornire.",
 	"recursiveIncludes.priority": "Inclusioni ricorsive: priorità",
 	"recursiveIncludes.priority.description": "La priorità dei percorsi di inclusione ricorsivi. Se impostato su {0}, i percorsi di inclusione ricorsivi verranno cercati prima dei percorsi di inclusione di sistema. Se impostato su {1}, i percorsi di inclusione ricorsivi verranno cercati dopo i percorsi di inclusione di sistema.",
-	"recursiveIncludes.order": "Recursive includes: order",
+	"recursiveIncludes.order": "Inclusioni ricorsive: ordine",
 	"recursiveIncludes.order.description": "L'ordine in cui vengono cercate le sottodirectory nei percorsi di inclusione ricorsivi."
 }

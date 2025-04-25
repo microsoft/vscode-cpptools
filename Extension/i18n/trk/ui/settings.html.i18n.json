@@ -67,10 +67,10 @@
 	"limit.symbols.checkbox": "{0} (veya işaretli) olduğunda, Etiket Ayrıştırıcı yalnızca {1} içindeki bir kaynak dosya tarafından doğrudan veya dolaylı olarak dahil edilen kod dosyalarını ayrıştırır. {2} olduğunda (veya işaretlenmediğinde), Etiket Ayrıştırıcı {3} listesinde belirtilen yollarda bulunan tüm kod dosyalarını ayrıştırır.",
 	"database.filename": "Gözat: veritabanı dosya adı",
 	"database.filename.description": "Oluşturulan sembol veritabanının yolu. Bu, uzantının Etiket Ayrıştırıcısının sembol veritabanının çalışma alanı varsayılan depolama konumundan başka bir yerde kaydedilmesini sağlar. Göreli yol belirtilirse, çalışma alanı klasörünün kendisi değil, çalışma alanının varsayılan depolama konumuyla göreli olarak yapılır. {0} değişkeni, çalışma alanı klasörüne göreli bir yol belirtmek için kullanılabilir (örneğin, {1}).",
-	"recursiveIncludes.reduce": "Recursive includes: reduce",
+	"recursiveIncludes.reduce": "Özyinelemeli eklemeler: azalt",
 	"recursiveIncludes.reduce.description": "IntelliSense'e sağlanan özyinelemeli ekleme yollarının sayısını her zaman yalnızca o anda #include deyimleri tarafından başvurulan yollara indirgemek için {0} olarak ayarlayın. Bu, hangi dosyaların eklendiğini belirlemek için önce dosyaların ayrıştırılmasını gerektirir. IntelliSense'e tüm özyinelemeli ekleme yollarını sağlamak için {1} olarak ayarlayın. Özyinelemeli ekleme yollarının sayısının azaltılması, çok sayıda özyinelemeli ekleme yolu söz konusu olduğunda IntelliSense performansını artırabilir. Özyinelemeli ekleme yollarının sayısını azaltmamak, hangi ekleme yollarının sağlanacağını belirlemek için dosyaları ayrıştırma ihtiyacını ortadan kaldırarak IntelliSense performansını artırabilir.",
 	"recursiveIncludes.priority": "Özyinelemeli içerikler: öncelik",
 	"recursiveIncludes.priority.description": "Özyinelemeli ekleme yollarının önceliği. {0} olarak ayarlanırsa özyinelemeli ekleme yolları, sistem ekleme yollarından önce aranır. {1} olarak ayarlanırsa özyinelemeli ekleme yolları, sistem ekleme yollarından sonra aranır.",
-	"recursiveIncludes.order": "Recursive includes: order",
+	"recursiveIncludes.order": "Özyinelemeli eklemeler: düzenle",
 	"recursiveIncludes.order.description": "Özyinelemeli ekleme yolları altındaki alt dizinlerin aranma sırası."
 }

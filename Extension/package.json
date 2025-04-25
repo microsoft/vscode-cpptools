@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.25.0-main",
+    "version": "1.25.2-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -900,31 +900,31 @@
                     "C_Cpp.default.recursiveIncludes.reduce": {
                         "type": "string",
                         "enum": [
+                            "",
                             "always",
                             "never",
                             "default"
                         ],
-                        "default": "default",
                         "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.reduce.markdownDescription%",
                         "scope": "resource"
                     },
                     "C_Cpp.default.recursiveIncludes.priority": {
                         "type": "string",
                         "enum": [
+                            "",
                             "beforeSystemIncludes",
                             "afterSystemIncludes"
                         ],
-                        "default": "afterSystemIncludes",
                         "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.priority.markdownDescription%",
                         "scope": "resource"
                     },
                     "C_Cpp.default.recursiveIncludes.order": {
                         "type": "string",
                         "enum": [
+                            "",
                             "depthFirst",
                             "breadthFirst"
                         ],
-                        "default": "depthFirst",
                         "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.order.markdownDescription%",
                         "scope": "resource"
                     },

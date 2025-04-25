@@ -880,7 +880,9 @@
     "c_cpp.debuggers.showDisplayString.description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
     "c_cpp.debuggers.environment.description": {
         "message": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"config\", \"value\": \"Debug\" } ], not [ { \"config\": \"Debug\" } ].",
-        "comment": "{Locked=\"[ { \\\"name\": \\\"\"} {Locked=\"\\\", \\\"value\\\": \\\"\"} {Locked=\"\\\" } ]\"} {Locked=\"[ { \\\"\"} {Locked=\"\\\": \\\"\"} {Locked=\"\\\" } ]\"}"
+        "comment": [
+            "{Locked=\"[ { \\\"name\": \\\"\"} {Locked=\"\\\", \\\"value\\\": \\\"\"} {Locked=\"\\\" } ]\"} {Locked=\"[ { \\\"\"} {Locked=\"\\\": \\\"\"} {Locked=\"\\\" } ]\"}"
+        ]
     },
     "c_cpp.debuggers.envFile.description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE.",
     "c_cpp.debuggers.additionalSOLibSearchPath.description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
