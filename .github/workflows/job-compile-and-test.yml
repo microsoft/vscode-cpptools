@@ -21,9 +21,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Copy Published Extension Binaries
+      - name: Install latest version of the C++ extension
         if: ${{ inputs.platform != 'windows' }}
-        uses: ./.github/workflows/template-copy-published-binaries.yml
+        run: |
+          code --install-extension ms-vscode.cpptools --force --pre-release
+
+      - name: Copy binaries from the C++ extension
+        if: ${{ inputs.platform != 'windows' }}
+        run: |
+          cp -r ~/.vscode/extensions/ms-vscode.cpptools-1.*/bin/* ./Extension/bin
+        shell: bash
+
+      - name: Uninstall the C++ extension
+        if: ${{ inputs.platform != 'windows' }}
+        run: |
+          code --uninstall-extension ms-vscode.cpptools
 
       - name: Use Node.js 22
         uses: actions/setup-node@v4
