@@ -9,8 +9,7 @@ runs:
 
     - name: Copy binaries from the C++ extension
       run: |
-        cp -r ~/.vscode/extensions/ms-vscode.cpptools-1.*/bin/* bin
-      working-directory: Extension
+        cp -r ~/.vscode/extensions/ms-vscode.cpptools-1.*/bin/* ./Extension/bin
       shell: bash
 
     - name: Uninstall the C++ extension

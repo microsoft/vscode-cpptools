@@ -23,7 +23,7 @@ jobs:
 
       - name: Copy Published Extension Binaries
         if: ${{ inputs.platform != 'windows' }}
-        uses: .github/workflows/template-copy-published-binaries.yml
+        uses: ./.github/workflows/template-copy-published-binaries.yml
 
       - name: Use Node.js 22
         uses: actions/setup-node@v4
