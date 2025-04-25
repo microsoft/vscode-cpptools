@@ -21,6 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Copy Published Extension Binaries
+        if: ${{ inputs.platform != 'windows' }}
+        uses: .github/workflows/template-copy-published-binaries.yml
+
       - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
@@ -42,11 +46,7 @@ jobs:
         run: yarn test
         working-directory: Extension
 
-      # These tests don't require the binary.
-      # On Linux, it is failing (before the tests actually run) with: Test run terminated with signal SIGSEGV.
-      # But it works on Linux during the E2E test.
       - name: Run SingleRootProject tests
-        if: ${{ inputs.platform != 'linux' }}
         run: yarn test --scenario=SingleRootProject --skipCheckBinaries
         working-directory: Extension
 

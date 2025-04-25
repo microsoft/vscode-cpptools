@@ -1,0 +1,18 @@
+name: Copy Published Binaries Template
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install latest version of the C++ extension
+      run: |
+        code --install-extension ms-vscode.cpptools --force --pre-release
+
+    - name: Copy binaries from the C++ extension
+      run: |
+        cp -r ~/.vscode/extensions/ms-vscode.cpptools-1.*/bin/* bin
+      working-directory: Extension
+      shell: bash
+
+    - name: Uninstall the C++ extension
+      run: |
+        code --uninstall-extension ms-vscode.cpptools
