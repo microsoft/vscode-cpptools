@@ -14,6 +14,19 @@ import { isWindows } from '../../../../src/constants';
 const assetsFolder = Uri.file(path.normalize(path.join(__dirname.replace(/dist[\/\\]/, ''), '..', 'assets')));
 const assetsFolderFsPath = assetsFolder.fsPath;
 
+// A simple test counter for the tests that loop over several cases.
+// This is to make it easier to see which test failed in the output.
+// Start the counter with 1 instead of 0 since we're reporting on test cases, not arrays.
+class Counter {
+    private count: number = 1;
+    public next(): void {
+        this.count++;
+    }
+    public get str(): string {
+        return `(test ${this.count})`;
+    }
+}
+
 if (isWindows) {
     describe('extractCompilerPathAndArgs', () => {
         // [compilerPath, useLegacyBehavior, additionalArgs, result.compilerName, result.allCompilerArgs]
@@ -28,15 +41,19 @@ if (isWindows) {
             [path.join('bin', 'gcc'), false, undefined, 'gcc', []]
         ];
         it('Verify various compilerPath strings without args', () => {
+            const c = new Counter();
             nonArgsTests.forEach(test => {
                 const result = extractCompilerPathAndArgs(test[1], test[0], test[2], assetsFolderFsPath);
-                ok(result.compilerPath?.endsWith(test[0]), `compilerPath should end with ${test[0]}`);
-                equal(result.compilerName, test[3], 'compilerName should match');
-                deepEqual(result.compilerArgs, test[2], 'compilerArgs should match');
-                deepEqual(result.compilerArgsFromCommandLineInPath, [], 'compilerArgsFromCommandLineInPath should be empty');
-                deepEqual(result.allCompilerArgs, test[4], 'allCompilerArgs should match');
-                equal(result.error, undefined, 'error should be undefined');
-                equal(result.telemetry, undefined, 'telemetry should be undefined');
+                ok(result.compilerPath?.endsWith(test[0]), `${c.str} compilerPath should end with ${test[0]}`);
+                equal(result.compilerName, test[3], `${c.str} compilerName should match`);
+                deepEqual(result.compilerArgs, test[2], `${c.str} compilerArgs should match`);
+                deepEqual(result.compilerArgsFromCommandLineInPath, [], `${c.str} compilerArgsFromCommandLineInPath should be empty`);
+                deepEqual(result.allCompilerArgs, test[4], `${c.str} allCompilerArgs should match`);
+
+                // errors and telemetry are set by validateCompilerPath
+                equal(result.error, undefined, `${c.str} error should be undefined`);
+                equal(result.telemetry, undefined, `${c.str} telemetry should be undefined`);
+                c.next();
             });
         });
 
@@ -53,16 +70,20 @@ if (isWindows) {
             [`${path.join('bin', 'gcc.exe')} -O2`, true, undefined, 'gcc.exe', ['-O2']]
         ];
         it('Verify various compilerPath strings with args', () => {
+            const c = new Counter();
             argsTests.forEach(test => {
                 const result = extractCompilerPathAndArgs(test[1], test[0], test[2]);
                 const cp = test[0].substring(test[0].at(0) === '"' ? 1 : 0, test[0].indexOf(test[3]) + test[3].length);
-                ok(result.compilerPath?.endsWith(cp), `${result.compilerPath} !endswith ${cp}`);
-                equal(result.compilerName, test[3], 'compilerName should match');
-                deepEqual(result.compilerArgs, test[2], 'compilerArgs should match');
-                deepEqual(result.compilerArgsFromCommandLineInPath, test[4].filter(a => !test[2]?.includes(a)), 'compilerArgsFromCommandLineInPath should match those from the command line');
-                deepEqual(result.allCompilerArgs, test[4], 'allCompilerArgs should match');
-                equal(result.error, undefined, 'error should be undefined');
-                equal(result.telemetry, undefined, 'telemetry should be undefined');
+                ok(result.compilerPath?.endsWith(cp), `${c.str} ${result.compilerPath} !endswith ${cp}`);
+                equal(result.compilerName, test[3], `${c.str} compilerName should match`);
+                deepEqual(result.compilerArgs, test[2], `${c.str} compilerArgs should match`);
+                deepEqual(result.compilerArgsFromCommandLineInPath, test[4].filter(a => !test[2]?.includes(a)), `${c.str} compilerArgsFromCommandLineInPath should match those from the command line`);
+                deepEqual(result.allCompilerArgs, test[4], `${c.str} allCompilerArgs should match`);
+
+                // errors and telemetry are set by validateCompilerPath
+                equal(result.error, undefined, `${c.str} error should be undefined`);
+                equal(result.telemetry, undefined, `${c.str} telemetry should be undefined`);
+                c.next();
             });
         });
 
@@ -70,14 +91,19 @@ if (isWindows) {
             [`${path.join(assetsFolderFsPath, 'b i n', 'clang++.exe')} -std=c++20`, false, undefined, 'b', ['i', 'n\\clang++.exe', '-std=c++20']]
         ];
         it('Verify various compilerPath strings with args that should fail', () => {
+            const c = new Counter();
             negativeTests.forEach(test => {
                 const result = extractCompilerPathAndArgs(test[1], test[0], test[2]);
-                equal(result.compilerName, test[3], 'compilerName should match');
-                deepEqual(result.allCompilerArgs, test[4], 'allCompilerArgs should match');
+                ok(result.compilerPath?.endsWith(test[3]), `${c.str} ${result.compilerPath} !endswith ${test[3]}`);
+                equal(result.compilerName, test[3], `${c.str} compilerName should match`);
+                deepEqual(result.compilerArgs, test[2], `${c.str} compilerArgs should match`);
+                deepEqual(result.compilerArgsFromCommandLineInPath, test[4], `${c.str} allCompilerArgs should match`);
+                deepEqual(result.allCompilerArgs, test[4], `${c.str} allCompilerArgs should match`);
 
                 // errors and telemetry are set by validateCompilerPath
-                equal(result.error, undefined, 'error should be undefined');
-                equal(result.telemetry, undefined, 'telemetry should be undefined');
+                equal(result.error, undefined, `${c.str} error should be undefined`);
+                equal(result.telemetry, undefined, `${c.str} telemetry should be undefined`);
+                c.next();
             });
         });
     });
@@ -91,12 +117,14 @@ if (isWindows) {
             [path.join('bin', 'gcc'), false, undefined, 'gcc', []]
         ];
         it('Verify various compilerPath strings without args', () => {
+            const c = new Counter();
             tests.forEach(test => {
                 const result = extractCompilerPathAndArgs(test[1], test[0], test[2]);
-                equal(result.compilerName, test[3], 'compilerName should match');
-                deepEqual(result.allCompilerArgs, test[4], 'allCompilerArgs should match');
-                equal(result.error, undefined, 'error should be undefined');
-                equal(result.telemetry, undefined, 'telemetry should be undefined');
+                equal(result.compilerName, test[3], `${c.str} compilerName should match`);
+                deepEqual(result.allCompilerArgs, test[4], `${c.str} allCompilerArgs should match`);
+                equal(result.error, undefined, `${c.str} error should be undefined`);
+                equal(result.telemetry, undefined, `${c.str} telemetry should be undefined`);
+                c.next();
             });
         });
 
@@ -113,12 +141,14 @@ if (isWindows) {
             [`${path.join('bin', 'gcc')} -O2`, true, undefined, 'gcc', ['-O2']]
         ];
         it('Verify various compilerPath strings with args', () => {
+            const c = new Counter();
             argsTests.forEach(test => {
                 const result = extractCompilerPathAndArgs(test[1], test[0], test[2]);
-                equal(result.compilerName, test[3], 'compilerName should match');
-                deepEqual(result.allCompilerArgs, test[4], 'allCompilerArgs should match');
-                equal(result.error, undefined, 'error should be undefined');
-                equal(result.telemetry, undefined, 'telemetry should be undefined');
+                equal(result.compilerName, test[3], `${c.str} compilerName should match`);
+                deepEqual(result.allCompilerArgs, test[4], `${c.str} allCompilerArgs should match`);
+                equal(result.error, undefined, `${c.str} error should be undefined`);
+                equal(result.telemetry, undefined, `${c.str} telemetry should be undefined`);
+                c.next();
             });
         });
 
@@ -126,14 +156,16 @@ if (isWindows) {
             [`${path.join(assetsFolderFsPath, 'b i n', 'clang++')} -std=c++20`, false, undefined, 'b', ['i', 'n/clang++', '-std=c++20']]
         ];
         it('Verify various compilerPath strings with args that should fail', () => {
+            const c = new Counter();
             negativeTests.forEach(test => {
                 const result = extractCompilerPathAndArgs(test[1], test[0], test[2]);
-                equal(result.compilerName, test[3], 'compilerName should match');
-                deepEqual(result.allCompilerArgs, test[4], 'allCompilerArgs should match');
+                equal(result.compilerName, test[3], `${c.str} compilerName should match`);
+                deepEqual(result.allCompilerArgs, test[4], `${c.str} allCompilerArgs should match`);
 
                 // errors and telemetry are set by validateCompilerPath
-                equal(result.error, undefined, 'error should be undefined');
-                equal(result.telemetry, undefined, 'telemetry should be undefined');
+                equal(result.error, undefined, `${c.str} error should be undefined`);
+                equal(result.telemetry, undefined, `${c.str} telemetry should be undefined`);
+                c.next();
             });
         });
     });
@@ -155,17 +187,17 @@ describe('validateCompilerPath', () => {
         ['  cl.exe  ', assetsFolder, 'cl.exe', []]
     ];
     it('Verify various compilerPath strings without args', () => {
-        let index = -1;
+        const c = new Counter();
         tests.forEach(test => {
-            index++;
-            if (!isWindows && test[0].includes('clang-cl')) {
-                return; // This test is for checking the addition of .exe to the compiler name on Windows only.
+            // Skip the clang-cl test on non-Windows. That test is for checking the addition of .exe to the compiler name on Windows only.
+            if (isWindows || !test[0].includes('clang-cl')) {
+                const result = CppProperties.validateCompilerPath(test[0], test[1]);
+                equal(result.compilerName, test[2], `${c.str} compilerName should match`);
+                deepEqual(result.allCompilerArgs, test[3], `${c.str} allCompilerArgs should match`);
+                equal(result.error, undefined, `${c.str} error should be undefined`);
+                deepEqual(result.telemetry, test[0] === '' ? undefined : {}, `${c.str} telemetry should be empty`);
             }
-            const result = CppProperties.validateCompilerPath(test[0], test[1]);
-            equal(result.compilerName, test[2], `(test ${index}) compilerName should match`);
-            deepEqual(result.allCompilerArgs, test[3], `(test ${index}) allCompilerArgs should match`);
-            equal(result.error, undefined, `(test ${index}) error should be undefined`);
-            deepEqual(result.telemetry, test[0] === '' ? undefined : {}, `(test ${index}) telemetry should be empty`);
+            c.next();
         });
     });
 
@@ -176,14 +208,14 @@ describe('validateCompilerPath', () => {
         ['clang -O2 -Wall', assetsFolder, 'clang', ['-O2', '-Wall']]
     ];
     it('Verify various compilerPath strings with args', () => {
-        let index = -1;
+        const c = new Counter();
         argsTests.forEach(test => {
-            index++;
             const result = CppProperties.validateCompilerPath(test[0], test[1]);
-            equal(result.compilerName, test[2], `(test ${index}) compilerName should match`);
-            deepEqual(result.allCompilerArgs, test[3], `(test ${index}) allCompilerArgs should match`);
-            equal(result.error, undefined, `(test ${index} error should be undefined`);
-            deepEqual(result.telemetry, {}, `(test ${index}) telemetry should be empty`);
+            equal(result.compilerName, test[2], `${c.str} compilerName should match`);
+            deepEqual(result.allCompilerArgs, test[3], `${c.str} allCompilerArgs should match`);
+            equal(result.error, undefined, `${c.str} error should be undefined`);
+            deepEqual(result.telemetry, {}, `${c.str} telemetry should be empty`);
+            c.next();
         });
     });
 
@@ -194,6 +226,7 @@ describe('validateCompilerPath', () => {
         ok(result.error?.includes('Cannot find'), 'Should have an error for relative paths');
         equal(result.telemetry?.PathNonExistent, 1, 'Should have telemetry for relative paths');
         equal(result.telemetry?.PathNotAFile, undefined, 'Should not have telemetry for invalid paths');
+        equal(result.telemetry?.CompilerPathMissingQuotes, undefined, 'Should not have telemetry for missing quotes');
     });
 
     it('Verify errors with invalid absolute compiler path', async () => {
@@ -203,6 +236,7 @@ describe('validateCompilerPath', () => {
         ok(result.error?.includes('Cannot find'), 'Should have an error for absolute paths');
         equal(result.telemetry?.PathNonExistent, 1, 'Should have telemetry for absolute paths');
         equal(result.telemetry?.PathNotAFile, undefined, 'Should not have telemetry for invalid paths');
+        equal(result.telemetry?.CompilerPathMissingQuotes, undefined, 'Should not have telemetry for missing quotes');
     });
 
     it('Verify errors with non-file compilerPath', async () => {
@@ -212,6 +246,7 @@ describe('validateCompilerPath', () => {
         ok(result.error?.includes('Path is not a file'), 'Should have an error for non-file paths');
         equal(result.telemetry?.PathNonExistent, undefined, 'Should not have telemetry for relative paths');
         equal(result.telemetry?.PathNotAFile, 1, 'Should have telemetry for invalid paths');
+        equal(result.telemetry?.CompilerPathMissingQuotes, undefined, 'Should not have telemetry for missing quotes');
     });
 
     it('Verify errors with unknown compiler not in Path', async () => {
@@ -220,6 +255,7 @@ describe('validateCompilerPath', () => {
         equal(result.allCompilerArgs.length, 0, 'Should not have any args');
         equal(result.telemetry?.PathNonExistent, 1, 'Should have telemetry for relative paths');
         equal(result.telemetry?.PathNotAFile, undefined, 'Should not have telemetry for invalid paths');
+        equal(result.telemetry?.CompilerPathMissingQuotes, undefined, 'Should not have telemetry for missing quotes');
     });
 
     it('Verify errors with unknown compiler not in Path with args', async () => {
