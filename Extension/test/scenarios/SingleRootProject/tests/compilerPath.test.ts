@@ -114,7 +114,7 @@ if (isWindows) {
         // The extension is not initialized the same way during tests, so this needs to be set manually
         // so the tests can find `cpptools-wordexp`.
         setExtensionPath(extensionPath);
-        skip();
+        void skip();
         return;
 
         // [compilerPath, useLegacyBehavior, additionalArgs, result.compilerName, result.allCompilerArgs]
@@ -184,7 +184,7 @@ describe('validateCompilerPath', () => {
         // The extension is not initialized the same way during tests, so this needs to be set manually
         // so the tests can find `cpptools-wordexp`.
         setExtensionPath(extensionPath);
-        skip();
+        void skip();
         return;
     }
 
