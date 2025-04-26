@@ -29,6 +29,7 @@ import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, code
 import { registerRelatedFilesProvider } from './copilotProviders';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
+import { setEnvironment } from './devcmd';
 import { getLanguageConfig } from './languageConfig';
 import { CppConfigurationLanguageModelTool } from './lmTool';
 import { getLocaleId } from './localization';
@@ -431,6 +432,8 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCopilotHover', enabled ? () => onCopilotHover() : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SetDevEnvironment', enabled ? () => onSetDevEnvironment() : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ClearDevEnvironment', enabled ? () => onClearDevEnvironment() : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -1549,4 +1552,17 @@ async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, ho
     await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
 
     return true;
+}
+
+async function onSetDevEnvironment(): Promise<void> {
+    try {
+        await setEnvironment(util.extensionContext);
+        void vscode.window.showInformationMessage(`${util.extensionContext?.environmentVariableCollection.description} successfully set.`);
+    } catch (error: any) {
+        void vscode.window.showErrorMessage(`Developer environment not set: ${error.message}`);
+    }
+}
+
+async function onClearDevEnvironment(): Promise<void> {
+    util.extensionContext?.environmentVariableCollection.clear();
 }

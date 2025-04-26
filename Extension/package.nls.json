@@ -37,6 +37,8 @@
     "c_cpp.command.RemoveAllCodeAnalysisProblems.title": "Clear All Code Analysis Problems",
     "c_cpp.command.BuildAndDebugFile.title": "Debug C/C++ File",
     "c_cpp.command.BuildAndRunFile.title": "Run C/C++ File",
+    "c_cpp.command.SetDevEnvironment.title": "Set Developer Environment",
+    "c_cpp.command.ClearDevEnvironment.title": "Clear Developer Environment",
     "c_cpp.command.AddDebugConfiguration.title": "Add Debug Configuration",
     "c_cpp.command.GenerateDoxygenComment.title": "Generate Doxygen Comment",
     "c_cpp.command.addSshTarget.title": "Add SSH target",

@@ -3704,6 +3704,16 @@
                 "icon": "$(run)"
             },
             {
+                "command": "C_Cpp.SetDevEnvironment",
+                "title": "%c_cpp.command.SetDevEnvironment.title%",
+                "category": "C/C++"
+            },
+            {
+                "command": "C_Cpp.ClearDevEnvironment",
+                "title": "%c_cpp.command.ClearDevEnvironment.title%",
+                "category": "C/C++"
+            },
+            {
                 "command": "C_Cpp.AddDebugConfiguration",
                 "title": "%c_cpp.command.AddDebugConfiguration.title%",
                 "category": "C/C++",
@@ -6146,6 +6156,14 @@
                     "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile"
                 },
                 {
+                    "command": "C_Cpp.SetDevEnvironment",
+                    "when": "workspacePlatform == windows"
+                },
+                {
+                    "command": "C_Cpp.ClearDevEnvironment",
+                    "when": "workspacePlatform == windows"
+                },
+                {
                     "command": "C_Cpp.AddDebugConfiguration",
                     "when": "config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isFolderOpen"
                 },
@@ -6769,6 +6787,8 @@
         "node-fetch": "^2.7.0",
         "node-loader": "^2.0.0",
         "node-stream-zip": "^1.15.0",
+        "node-vcvarsall": "^1.0.1",
+        "node-vswhere": "^1.0.2",
         "plist": "^3.1.0",
         "posix-getopt": "^1.2.1",
         "shell-quote": "^1.8.1",
