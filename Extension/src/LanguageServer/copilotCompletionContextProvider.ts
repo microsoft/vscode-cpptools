@@ -355,7 +355,10 @@ response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotC
         try {
             featureFlag = await this.getEnabledFeatureFlag(context);
             telemetry.addRequestMetadata(context.documentContext.uri, context.documentContext.offset,
-                context.completionId, context.documentContext.languageId, { featureFlag, timeBudgetMs: cppTimeBudgetMs, maxCaretDistance });
+                context.completionId, context.documentContext.languageId, {
+                featureFlag, timeBudgetMs: cppTimeBudgetMs, maxCaretDistance,
+                maxSnippetCount, maxSnippetLength, doAggregateSnippets
+            });
             if (featureFlag === undefined) { return []; }
             const cacheEntry: CacheEntry | undefined = this.completionContextCache.get(docUri.toString());
             const defaultValue = cacheEntry?.[1];
