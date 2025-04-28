@@ -14,7 +14,7 @@
 	"cannot.find": "Nicht gefunden: {0}",
 	"cannot.resolve.compiler.path": "Ungültige Eingabe, Compilerpfad kann nicht aufgelöst werden.",
 	"path.is.not.a.file": "Der Pfad ist keine Datei: {0}",
-	"wrapped.with.quotes": "Do not add extra quotes around paths.",
+	"wrapped.with.quotes": "Fügen Sie keine zusätzlichen Anführungszeichen um Pfade hinzu.",
 	"path.is.not.a.directory": "Der Pfad ist kein Verzeichnis: {0}",
 	"duplicate.name": "\"{0}\" ist ein Duplikat. Der Konfigurationsname muss eindeutig sein.",
 	"multiple.paths.not.allowed": "Mehrere Pfade sind nicht zulässig.",

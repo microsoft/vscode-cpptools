@@ -14,7 +14,7 @@
 	"cannot.find": "Не удается найти: {0}",
 	"cannot.resolve.compiler.path": "Недопустимые входные данные; не удается разрешить путь компилятора",
 	"path.is.not.a.file": "Путь не является файлом: {0}",
-	"wrapped.with.quotes": "Do not add extra quotes around paths.",
+	"wrapped.with.quotes": "Не добавляйте лишние кавычки вокруг путей.",
 	"path.is.not.a.directory": "Путь не является каталогом: {0}",
 	"duplicate.name": "{0} является дубликатом. Имя конфигурации должно быть уникальным.",
 	"multiple.paths.not.allowed": "Запрещено использовать несколько путей.",

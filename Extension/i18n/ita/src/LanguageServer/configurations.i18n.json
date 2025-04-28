@@ -14,7 +14,7 @@
 	"cannot.find": "Non è possibile trovare: {0}",
 	"cannot.resolve.compiler.path": "Input non valido. Non è possibile risolvere il percorso del compilatore",
 	"path.is.not.a.file": "Il percorso non è un file: {0}",
-	"wrapped.with.quotes": "Do not add extra quotes around paths.",
+	"wrapped.with.quotes": "Non aggiungere virgolette aggiuntive intorno ai percorsi.",
 	"path.is.not.a.directory": "Il percorso non è una directory: {0}",
 	"duplicate.name": "{0} è duplicato. Il nome della configurazione deve essere univoco.",
 	"multiple.paths.not.allowed": "Più percorsi non sono consentiti.",

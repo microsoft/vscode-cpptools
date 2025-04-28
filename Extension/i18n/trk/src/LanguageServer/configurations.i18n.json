@@ -14,7 +14,7 @@
 	"cannot.find": "{0} bulunamıyor",
 	"cannot.resolve.compiler.path": "Giriş geçersiz, derleyici yolu çözümlenemiyor",
 	"path.is.not.a.file": "Yol bir dosya değil: {0}",
-	"wrapped.with.quotes": "Do not add extra quotes around paths.",
+	"wrapped.with.quotes": "Yolların etrafına fazladan tırnak işareti eklemeyin.",
 	"path.is.not.a.directory": "Yol bir dizin değil: {0}",
 	"duplicate.name": "{0} yineleniyor. Yapılandırma adı benzersiz olmalıdır.",
 	"multiple.paths.not.allowed": "Birden fazla yola izin verilmez.",
