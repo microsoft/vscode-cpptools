@@ -13,7 +13,6 @@ import { CppProperties } from '../../../../src/LanguageServer/configurations';
 
 const assetsFolder = Uri.file(path.normalize(path.join(__dirname.replace(/dist[\/\\]/, ''), '..', 'assets')));
 const assetsFolderFsPath = assetsFolder.fsPath;
-const extensionPath = path.normalize(path.join(__dirname.replace(/dist[\/\\]/, ''), '..', '..', '..', '..'));
 
 // A simple test counter for the tests that loop over several cases.
 // This is to make it easier to see which test failed in the output.
