@@ -1599,7 +1599,8 @@ export class CppProperties {
      * Get the compilerPath and args from a compilerPath string that has already passed through
      * `this.resolvePath`. If there are errors processing the path, those will also be returned.
      *
-     * @resolvedCompilerPath a compilerPath string that has already been resolved.
+     * @param resolvedCompilerPath a compilerPath string that has already been resolved.
+     * @param rootUri the workspace folder URI, if any.
      */
     public static validateCompilerPath(resolvedCompilerPath: string, rootUri?: vscode.Uri): util.CompilerPathAndArgs {
         if (!resolvedCompilerPath) {
@@ -1629,16 +1630,16 @@ export class CppProperties {
                         resolvedCompilerPath = pathLocation;
                         compilerPathAndArgs.compilerPath = pathLocation;
                     } else if (rootUri) {
-                        // Check again for a relative path.
-                        const relativePath: string = rootUri.fsPath + path.sep + resolvedCompilerPath;
-                        if (!fs.existsSync(relativePath)) {
-                            if (existsWithExeAdded(relativePath)) {
-                                resolvedCompilerPath = relativePath + ".exe";
+                        // Test if it was a relative path.
+                        const absolutePath: string = rootUri.fsPath + path.sep + resolvedCompilerPath;
+                        if (!fs.existsSync(absolutePath)) {
+                            if (existsWithExeAdded(absolutePath)) {
+                                resolvedCompilerPath = absolutePath + ".exe";
                             } else {
                                 pathExists = false;
                             }
                         } else {
-                            resolvedCompilerPath = relativePath;
+                            resolvedCompilerPath = absolutePath;
                         }
                     }
                 }

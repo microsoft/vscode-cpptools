@@ -1102,7 +1102,13 @@ export interface CompilerPathAndArgs {
 }
 
 /**
- * Parse the compiler path input into a compiler path and compiler args. If there are no args, the compilerPath will have been verified to exist.
+ * Parse the compiler path input into a compiler path and compiler args. If there are no args in the input string, this function will have
+ * verified that the compiler exists. (e.g. `compilerArgsFromCommandLineInPath` will be empty)
+ *
+ * @param useLegacyBehavior - If true, use the legacy behavior of separating the compilerPath from the args.
+ * @param inputCompilerPath - The compiler path input from the user.
+ * @param compilerArgs - The compiler args input from the user.
+ * @param cwd - The directory used to resolve relative paths.
  */
 export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string, compilerArgs?: string[], cwd?: string): CompilerPathAndArgs {
     let compilerPath: string | undefined = inputCompilerPath;
@@ -1137,7 +1143,7 @@ export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputComp
             }
         } else {
             if (compilerPath.includes(' ')) {
-                // There is no leading quote, so we'll treat it as a command line.
+                // There is no leading quote, but there is a space so we'll treat it as a command line.
                 const potentialArgs: string[] = useLegacyBehavior ? legacyExtractArgs(compilerPath) : extractArgs(compilerPath);
                 compilerPath = trimLegacyQuotes(potentialArgs.shift());
                 compilerArgsFromCommandLineInPath = potentialArgs;
