@@ -444,9 +444,9 @@ export class CppSettings extends Settings {
     public get defaultBrowsePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.browse.path"); }
     public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.browse.databaseFilename")); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
-    public get defaultRecursiveIncludesReduce(): string { return this.getAsString("default.recursiveIncludes.reduce"); }
-    public get defaultRecursiveIncludesPriority(): string { return this.getAsString("default.recursiveIncludes.priority"); }
-    public get defaultRecursiveIncludesOrder(): string { return this.getAsString("default.recursiveIncludes.order"); }
+    public get defaultRecursiveIncludesReduce(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.reduce"); }
+    public get defaultRecursiveIncludesPriority(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.priority"); }
+    public get defaultRecursiveIncludesOrder(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.order"); }
     public get defaultSystemIncludePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean { return this.getAsBoolean("default.enableConfigurationSquiggles"); }
     public get defaultCustomConfigurationVariables(): Associations | undefined { return this.getAsAssociations("default.customConfigurationVariables", true) ?? undefined; }
@@ -478,8 +478,8 @@ export class CppSettings extends Settings {
         }
         return this.getAsString("copilotHover");
     }
-    public get cppCodeSnippetsFeatureNames(): string | undefined {
-        const value = super.Section.get<any>("cppCodeSnippetsFeatureNames");
+    public get cppContextProviderParams(): string | undefined {
+        const value = super.Section.get<any>("copilotContextProviderParams");
         if (isString(value)) {
             return value;
         }
@@ -1098,4 +1098,18 @@ export class OtherSettings {
     };
     public get searchExclude(): Excludes { return this.getAsExcludes("search", "exclude", this.defaultSearchExcludes, this.resource); }
     public get workbenchSettingsEditor(): string { return this.getAsString("workbench.settings", "editor", this.resource, "ui"); }
+}
+
+export function hasFileAssociation(fileName: string): boolean {
+    const otherSettings: OtherSettings = new OtherSettings();
+    const associations: Associations = otherSettings.filesAssociations;
+    if (associations[fileName]) {
+        return true;
+    }
+    for (const pattern in associations) {
+        if (pattern.startsWith('*.') && fileName.endsWith(pattern.slice(1))) {
+            return true;
+        }
+    }
+    return false;
 }

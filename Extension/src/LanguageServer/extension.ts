@@ -191,8 +191,6 @@ export async function activate(): Promise<void> {
 
     vcpkgDbPromise = initVcpkgDatabase();
 
-    void clients.ActiveClient.ready.then(() => intervalTimer = global.setInterval(onInterval, 2500));
-
     await registerCommands(true);
 
     vscode.tasks.onDidStartTask(() => getActiveClient().PauseCodeAnalysis());
@@ -364,6 +362,10 @@ async function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor
 function onInterval(): void {
     // TODO: do we need to pump messages to all clients? depends on what we do with the icons, I suppose.
     clients.ActiveClient.onInterval();
+}
+
+export function initializeIntervalTimer(): void {
+    intervalTimer = global.setInterval(onInterval, 2500);
 }
 
 /**
@@ -1208,7 +1210,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         signalType = lines[crashStackStartLine] + "\n";
     } else {
         // The signal type may fail to be written.
-        signalType = "SIG-??\n"; // Intentionally different from SIG-? from cpptools.
+        // Intentionally different from SIGUNKNOWN from cpptools,
+        // and not SIG-? to avoid matching the regex in containsFilteredTelemetryData.
+        signalType = "SIGMISSING\n";
     }
     data = telemetryHeader + signalType;
     let crashCallStack: string = "";

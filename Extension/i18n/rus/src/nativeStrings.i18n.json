@@ -319,5 +319,5 @@
 	"file_not_found_in_path2": "\"{0}\" не найден в файлах compile_commands.json. Вместо него для этого файла будет использоваться \"includePath\" из файла c_cpp_properties.json в папке \"{1}\".",
 	"copilot_hover_link": "Создать сводку Copilot",
 	"browse_path_not_found": "Не удалось индексировать файлы из несуществующей папки: {0}",
-	"license_terms": "Расширение C/C++ можно использовать только с Microsoft Visual Studio, Visual Studio для Mac, Visual Studio Code, Azure DevOps, Team Foundation Server и более поздними продуктами и службами Майкрософт для разработки и тестирования приложений."
+	"license_terms": "Расширение C/C++ можно использовать только с Microsoft Visual Studio, Visual Studio для Mac, Visual Studio Code, Azure DevOps, Team Foundation Server и последующими продуктами и службами Майкрософт, предназначенными для разработки и тестирования приложений."
 }

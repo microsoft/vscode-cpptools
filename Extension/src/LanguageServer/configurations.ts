@@ -87,6 +87,9 @@ export interface Configuration {
     browse?: Browse;
     recursiveIncludes?: RecursiveIncludes;
     customConfigurationVariables?: { [key: string]: string };
+    recursiveIncludesReduceIsExplicit?: boolean;
+    recursiveIncludesPriorityIsExplicit?: boolean;
+    recursiveIncludesOrderIsExplicit?: boolean;
 }
 
 export interface ConfigurationErrors {
@@ -940,8 +943,11 @@ export class CppProperties {
                 configuration.recursiveIncludes = {};
             }
             configuration.recursiveIncludes.reduce = this.updateConfigurationString(configuration.recursiveIncludes.reduce, settings.defaultRecursiveIncludesReduce);
+            configuration.recursiveIncludesReduceIsExplicit = configuration.recursiveIncludesReduceIsExplicit || settings.defaultRecursiveIncludesReduce !== "";
             configuration.recursiveIncludes.priority = this.updateConfigurationString(configuration.recursiveIncludes.priority, settings.defaultRecursiveIncludesPriority);
+            configuration.recursiveIncludesPriorityIsExplicit = configuration.recursiveIncludesPriorityIsExplicit || settings.defaultRecursiveIncludesPriority !== "";
             configuration.recursiveIncludes.order = this.updateConfigurationString(configuration.recursiveIncludes.order, settings.defaultRecursiveIncludesOrder);
+            configuration.recursiveIncludesOrderIsExplicit = configuration.recursiveIncludesOrderIsExplicit || settings.defaultRecursiveIncludesOrder !== "";
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
@@ -1508,7 +1514,10 @@ export class CppProperties {
                 if ((this.configurationJson.configurations[i].compilerPathIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].cStandardIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].cppStandardIsExplicit !== undefined)
-                    || (this.configurationJson.configurations[i].intelliSenseModeIsExplicit !== undefined)) {
+                    || (this.configurationJson.configurations[i].intelliSenseModeIsExplicit !== undefined)
+                    || (this.configurationJson.configurations[i].recursiveIncludesReduceIsExplicit !== undefined)
+                    || (this.configurationJson.configurations[i].recursiveIncludesPriorityIsExplicit !== undefined)
+                    || (this.configurationJson.configurations[i].recursiveIncludesOrderIsExplicit !== undefined)) {
                     dirty = true;
                     break;
                 }
@@ -1529,6 +1538,9 @@ export class CppProperties {
                 e.cStandardIsExplicit = e.cStandard !== undefined;
                 e.cppStandardIsExplicit = e.cppStandard !== undefined;
                 e.intelliSenseModeIsExplicit = e.intelliSenseMode !== undefined;
+                e.recursiveIncludesReduceIsExplicit = e.recursiveIncludes?.reduce !== undefined;
+                e.recursiveIncludesPriorityIsExplicit = e.recursiveIncludes?.priority !== undefined;
+                e.recursiveIncludesOrderIsExplicit = e.recursiveIncludes?.order !== undefined;
             });
 
         } catch (errJS) {
@@ -1600,12 +1612,16 @@ export class CppProperties {
             resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true });
         }
 
-        if (resolvedCompilerPath === undefined) {
+        if (!resolvedCompilerPath) {
             resolvedCompilerPath = this.resolvePath(config.compilerPath);
         }
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
+
+        // compilerPath + args in the same string isn't working yet.
+        const skipFullCommandString = !compilerPathAndArgs.compilerName && resolvedCompilerPath.includes(" ");
         if (resolvedCompilerPath
+            && !skipFullCommandString
             // Don't error cl.exe paths because it could be for an older preview build.
             && compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe"
             && compilerPathAndArgs.compilerName.toLowerCase() !== "cl") {
@@ -1709,6 +1725,7 @@ export class CppProperties {
 
         for (const p of paths) {
             let pathExists: boolean = true;
+            let quotedPath: boolean = false;
             let resolvedPath: string = this.resolvePath(p);
             if (!resolvedPath) {
                 continue;
@@ -1716,7 +1733,10 @@ export class CppProperties {
 
             // Check if resolved path exists
             if (!fs.existsSync(resolvedPath)) {
-                if (assumeRelative && !path.isAbsolute(resolvedPath)) {
+                if (resolvedPath.match(/".*"/) !== null) {
+                    pathExists = false;
+                    quotedPath = true;
+                } else if (assumeRelative && !path.isAbsolute(resolvedPath)) {
                     continue;
                 } else if (!this.rootUri) {
                     pathExists = false;
@@ -1732,7 +1752,10 @@ export class CppProperties {
             }
 
             if (!pathExists) {
-                const message: string = localize('cannot.find', "Cannot find: {0}", resolvedPath);
+                let message: string = localize('cannot.find', "Cannot find: {0}", resolvedPath);
+                if (quotedPath) {
+                    message += '. ' + localize('wrapped.with.quotes', 'Do not add extra quotes around paths.');
+                }
                 errors.push(message);
                 continue;
             }
@@ -1776,7 +1799,7 @@ export class CppProperties {
         if (!this.configurationJson) {
             return;
         }
-        if ((this.configurationJson.enableConfigurationSquiggles !== undefined && !this.configurationJson.enableConfigurationSquiggles) ||
+        if ((this.configurationJson.enableConfigurationSquiggles === false) ||
             (this.configurationJson.enableConfigurationSquiggles === undefined && !settings.defaultEnableConfigurationSquiggles)) {
             this.diagnosticCollection.clear();
             return;
@@ -2120,6 +2143,9 @@ export class CppProperties {
                             badPath = `"${expandedPaths[0]}"`;
                         }
                         message = localize('cannot.find', "Cannot find: {0}", badPath);
+                        if (incorrectExpandedPaths.some(p => p.match(/".*"/) !== null)) {
+                            message += '.\n' + localize('wrapped.with.quotes', 'Do not add extra quotes around paths.');
+                        }
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
                         // Check for file versus path mismatches.
@@ -2296,6 +2322,9 @@ export class CppProperties {
         const savedCStandardIsExplicit: boolean[] = [];
         const savedCppStandardIsExplicit: boolean[] = [];
         const savedIntelliSenseModeIsExplicit: boolean[] = [];
+        const savedRecursiveIncludesReduceIsExplicit: boolean[] = [];
+        const savedRecursiveIncludesPriorityIsExplicit: boolean[] = [];
+        const savedRecursiveIncludesOrderIsExplicit: boolean[] = [];
 
         if (this.configurationJson) {
             this.configurationJson.configurations.forEach(e => {
@@ -2315,6 +2344,18 @@ export class CppProperties {
                 if (e.intelliSenseModeIsExplicit !== undefined) {
                     delete e.intelliSenseModeIsExplicit;
                 }
+                savedRecursiveIncludesReduceIsExplicit.push(!!e.recursiveIncludesReduceIsExplicit);
+                if (e.recursiveIncludesReduceIsExplicit !== undefined) {
+                    delete e.recursiveIncludesReduceIsExplicit;
+                }
+                savedRecursiveIncludesPriorityIsExplicit.push(!!e.recursiveIncludesPriorityIsExplicit);
+                if (e.recursiveIncludesPriorityIsExplicit !== undefined) {
+                    delete e.recursiveIncludesPriorityIsExplicit;
+                }
+                savedRecursiveIncludesOrderIsExplicit.push(!!e.recursiveIncludesOrderIsExplicit);
+                if (e.recursiveIncludesOrderIsExplicit !== undefined) {
+                    delete e.recursiveIncludesOrderIsExplicit;
+                }
             });
         }
 
@@ -2329,6 +2370,9 @@ export class CppProperties {
                 this.configurationJson.configurations[i].cStandardIsExplicit = savedCStandardIsExplicit[i];
                 this.configurationJson.configurations[i].cppStandardIsExplicit = savedCppStandardIsExplicit[i];
                 this.configurationJson.configurations[i].intelliSenseModeIsExplicit = savedIntelliSenseModeIsExplicit[i];
+                this.configurationJson.configurations[i].recursiveIncludesReduceIsExplicit = savedRecursiveIncludesReduceIsExplicit[i];
+                this.configurationJson.configurations[i].recursiveIncludesPriorityIsExplicit = savedRecursiveIncludesPriorityIsExplicit[i];
+                this.configurationJson.configurations[i].recursiveIncludesOrderIsExplicit = savedRecursiveIncludesOrderIsExplicit[i];
             }
         }
     }
