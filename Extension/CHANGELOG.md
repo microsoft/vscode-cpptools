@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.25.3; April 28, 2025
+## Version 1.25.3: April 28, 2025
 ### Enhancement
 * Add a configuration warning message explaining why paths in quotes can't be found. [#11955](https://github.com/microsoft/vscode-cpptools/issues/11955)
 * Improve the description of the `C_Cpp.copilotHover` setting. [PR #13461](https://github.com/microsoft/vscode-cpptools/pull/13461)
