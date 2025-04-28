@@ -14,7 +14,7 @@
 	"cannot.find": "No se encuentra {0}",
 	"cannot.resolve.compiler.path": "Entrada no válida. No se puede resolver la ruta de acceso del compilador.",
 	"path.is.not.a.file": "La ruta de acceso no es un archivo: {0}",
-	"wrapped.with.quotes": "Do not add extra quotes around paths.",
+	"wrapped.with.quotes": "No agregue comillas adicionales alrededor de las rutas de acceso.",
 	"path.is.not.a.directory": "La ruta de acceso no es un directorio: {0}",
 	"duplicate.name": "{0} es un duplicado. El nombre de la configuración debe ser único.",
 	"multiple.paths.not.allowed": "No se permiten varias rutas de acceso.",

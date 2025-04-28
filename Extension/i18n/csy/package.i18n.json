@@ -254,7 +254,7 @@
 	"c_cpp.configuration.hover.description": "Pokud je tato možnost zakázaná, podrobnosti o najetí myší už nebude poskytovat jazykový server.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Povolte integrační služby pro [správce závislostí vcpkg](https://aka.ms/vcpkg/).",
 	"c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription": "Pokud existují závislosti, přidejte cesty pro zahrnuté soubory z `nan` a `node-addon-api`.",
-	"c_cpp.configuration.copilotHover.markdownDescription": "Pokud je zakázáno (`disabled`), při najetí myší se nezobrazí možnost Vygenerovat souhrn Copilot.",
+	"c_cpp.configuration.copilotHover.markdownDescription": "Pokud je zakázáno (`disabled`), při najetí myší se nezobrazí možnost Vygenerovat souhrn Copilotu.",
 	"c_cpp.configuration.renameRequiresIdentifier.markdownDescription": "Když se tato hodnota nastaví na `true`, operace Přejmenovat symbol bude vyžadovat platný identifikátor C/C++.",
 	"c_cpp.configuration.autocompleteAddParentheses.markdownDescription": "Pokud je hodnota `true`, automatické dokončování automaticky přidá za volání funkcí znak `(`. V takovém případě se může přidat i znak `)`, což záleží na hodnotě nastavení `#editor.autoClosingBrackets#`.",
 	"c_cpp.configuration.filesExclude.markdownDescription": "Nakonfigurujte vzory glob pro vyloučení složek (a souborů, pokud se změní `#C_Cpp.exclusionPolicy#`). Ty jsou specifické pro rozšíření C/C++ a doplňují `#files.exclude#`, ale na rozdíl od `#files.exclude#` platí také pro cesty mimo aktuální složku pracovního prostoru a neodebírají se ze zobrazení Průzkumníka. Přečtěte si další informace o [vzorech glob](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options).",

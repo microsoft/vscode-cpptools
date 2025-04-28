@@ -14,7 +14,7 @@
 	"cannot.find": "{0} introuvable",
 	"cannot.resolve.compiler.path": "Entrée non valide, impossible de résoudre le chemin du compilateur",
 	"path.is.not.a.file": "Le chemin n'est pas un fichier : {0}",
-	"wrapped.with.quotes": "Do not add extra quotes around paths.",
+	"wrapped.with.quotes": "N’ajoutez pas de guillemets supplémentaires autour des chemins.",
 	"path.is.not.a.directory": "Le chemin n'est pas un répertoire : {0}",
 	"duplicate.name": "{0} est dupliqué. Le nom de configuration doit être unique.",
 	"multiple.paths.not.allowed": "Il est interdit d’utiliser plusieurs chemin d’accès.",
