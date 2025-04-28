@@ -14,7 +14,7 @@
 	"cannot.find": "Nie można znaleźć: {0}",
 	"cannot.resolve.compiler.path": "Nieprawidłowe dane wejściowe, nie można rozpoznać ścieżki kompilatora",
 	"path.is.not.a.file": "Ścieżka nie jest plikiem: {0}",
-	"wrapped.with.quotes": "Do not add extra quotes around paths.",
+	"wrapped.with.quotes": "Nie dodawaj dodatkowych cudzysłowów wokół ścieżek.",
 	"path.is.not.a.directory": "Ścieżka nie jest katalogiem: {0}",
 	"duplicate.name": "Element {0} jest duplikatem. Nazwa konfiguracji musi być unikatowa.",
 	"multiple.paths.not.allowed": "Wiele ścieżek jest niedozwolonych.",

@@ -303,7 +303,7 @@
 	"c_cpp.debuggers.cppdbg.svdPath.description": "埋め込みデバイスの SVD ファイルへの完全なパス。",
 	"c_cpp.debuggers.cppvsdbg.visualizerFile.description": "このプロセスをデバッグするときに使用する .natvis ファイルです。",
 	"c_cpp.debuggers.showDisplayString.description": "visualizerFile を指定すると、showDisplayString により表示文字列が有効になります。このオプションをオンにすると、デバッグ中にパフォーマンスが低下する可能性があります。",
-	"c_cpp.debuggers.environment.description": "プログラムの環境に追加する環境変数。例: [ { \"name\": \"config\", \"value\": \"Debug\" } ], ではなく [ { \"config\": \"Debug\" } ]。",
+	"c_cpp.debuggers.environment.description": "プログラムの環境に追加する環境変数。例: [ { \"name\": \"config\", \"value\": \"Debug\" } ], not [ { \"config\": \"Debug\" } ]。",
 	"c_cpp.debuggers.envFile.description": "環境変数の定義を含むファイルへの絶対パスです。このファイルには、行ごとに等号で区切られたキーと値のペアがあります。例: キー=値。",
 	"c_cpp.debuggers.additionalSOLibSearchPath.description": ".so ファイルの検索に使用する、セミコロンで区切られたディレクトリの一覧です。例: \"c:\\dir1;c:\\dir2\"。",
 	"c_cpp.debuggers.MIMode.description": "MIDebugEngine が接続するコンソール デバッガーを示します。許可されている値は \"gdb\" \"lldb\" です。",
