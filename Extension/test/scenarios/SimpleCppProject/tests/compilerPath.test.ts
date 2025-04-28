@@ -5,10 +5,9 @@
 
 import { describe, it } from 'mocha';
 import { deepEqual, equal, ok } from 'node:assert';
-import { skip } from 'node:test';
 import * as path from 'path';
 import { Uri } from 'vscode';
-import { extractCompilerPathAndArgs, setExtensionPath } from '../../../../src/common';
+import { extractCompilerPathAndArgs } from '../../../../src/common';
 import { isWindows } from '../../../../src/constants';
 import { CppProperties } from '../../../../src/LanguageServer/configurations';
 
@@ -111,12 +110,6 @@ if (isWindows) {
     });
 } else {
     describe('extractCompilerPathAndArgs', () => {
-        // The extension is not initialized the same way during tests, so this needs to be set manually
-        // so the tests can find `cpptools-wordexp`.
-        setExtensionPath(extensionPath);
-        void skip();
-        return;
-
         // [compilerPath, useLegacyBehavior, additionalArgs, result.compilerName, result.allCompilerArgs]
         const tests: [string, boolean, string[] | undefined, string, string[]][] = [
             ['clang', false, undefined, 'clang', []],
@@ -180,14 +173,6 @@ if (isWindows) {
 }
 
 describe('validateCompilerPath', () => {
-    if (!isWindows) {
-        // The extension is not initialized the same way during tests, so this needs to be set manually
-        // so the tests can find `cpptools-wordexp`.
-        setExtensionPath(extensionPath);
-        void skip();
-        return;
-    }
-
     // [compilerPath, cwd, result.compilerName, result.allCompilerArgs, result.error, result.telemetry]
     const tests: [string, Uri, string, string[]][] = [
         ['cl.exe', assetsFolder, 'cl.exe', []],
