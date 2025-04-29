@@ -194,7 +194,7 @@ response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotC
             return undefined;
         } finally {
             this.logger.
-                appendLineAtLevel(7, logMessage);
+                appendLineAtLevel(7, `[${new Date().toISOString().replace('T', ' ').replace('Z', '')}] ${logMessage}`);
             telemetry.send("cache");
         }
     }
@@ -414,7 +414,7 @@ response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotC
             telemetry.addResolvedElapsed(duration);
             telemetry.addCacheSize(this.completionContextCache.size);
             telemetry.send();
-            this.logger.appendLineAtLevel(7, logMessage);
+            this.logger.appendLineAtLevel(7, `[${new Date().toISOString().replace('T', ' ').replace('Z', '')}] ${logMessage}`);
         }
     }
 
