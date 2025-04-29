@@ -479,7 +479,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         newConfig.externalConsole = false;
                         break;
                     case DebuggerType.cppvsdbg:
-                        newConfig.externalConsole = false;
+                        newConfig.console = "integratedTerminal";
                         break;
                 }
 
