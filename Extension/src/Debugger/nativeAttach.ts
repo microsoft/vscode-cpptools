@@ -124,7 +124,7 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
 
 export class PsProcessParser {
     // Use a large fixed width - the default on MacOS is quite small.
-    private static fixedWidth = ''.padEnd(512, 'a');
+    static fixedWidth = ''.padEnd(512, 'a');
 
     // Note that comm on Linux systems is truncated to 16 characters:
     // https://bugzilla.redhat.com/show_bug.cgi?id=429565
