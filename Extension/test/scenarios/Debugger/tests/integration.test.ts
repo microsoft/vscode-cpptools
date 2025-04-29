@@ -8,10 +8,11 @@
 import * as assert from 'assert';
 import { suite } from 'mocha';
 import * as vscode from 'vscode';
+import { DebuggerType } from '../../../../src/Debugger/configurations';
 
-suite(`Debug Integration Test: `, function(): void {
+suite(`Debug Integration Test: `, function (): void {
 
-    suiteSetup(async function(): Promise<void> {
+    suiteSetup(async function (): Promise<void> {
         const extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools") || assert.fail("Extension not found");
         if (!extension.isActive) {
             await extension.activate();
@@ -27,7 +28,7 @@ suite(`Debug Integration Test: `, function(): void {
         });
 
         try {
-            assert.equal(vscode.debug.activeDebugSession?.type, "cppdbg");
+            assert.equal(vscode.debug.activeDebugSession?.type, DebuggerType.cppdbg);
         } catch (e) {
             assert.fail("Debugger failed to launch. Did the extension activate correctly?");
         }

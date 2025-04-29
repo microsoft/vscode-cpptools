@@ -5,25 +5,44 @@
 
 import * as child_process from 'child_process';
 import * as os from 'os';
+import { normalize } from 'path';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { findPowerShell } from '../common';
+import { isMacOS } from '../constants';
 import { AttachItem } from './attachQuickPick';
 import { AttachItemsProvider } from './attachToProcess';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-export class Process {
-    constructor(public name: string, public pid?: string, public commandLine?: string) { }
+export class Process implements AttachItem {
+    get label() {
+        return this.name;
+    }
 
-    public toAttachItem(): AttachItem {
-        return {
-            label: this.name,
-            description: this.pid,
-            detail: this.commandLine,
-            id: this.pid
-        };
+    get description() {
+        // If the fullPath is known and different than the process name, put that in the description after the pid
+        // to let the user can find the actual process they are looking for.
+        return this.fullPath && this.fullPath !== this.name ? `${this.pid} [${this.fullPath}]` : this.pid;
+    }
+
+    get detail() {
+        return this.commandLine;
+    }
+
+    get id() {
+        return this.pid;
+    }
+
+    constructor(public name: string, public pid?: string, public commandLine?: string, public fullPath?: string) {
+        if (this.fullPath) {
+            // If we have a full path, clean it up.
+            if (this.fullPath?.startsWith('"') && this.fullPath.endsWith('"')) {
+                this.fullPath = this.fullPath.slice(1, -1);
+            }
+            this.fullPath = normalize(this.fullPath);
+        }
     }
 }
 
@@ -62,8 +81,7 @@ abstract class NativeAttachItemsProvider implements AttachItemsProvider {
             }
             return aLower < bLower ? -1 : 1;
         });
-        const attachItems: AttachItem[] = processEntries.map(p => p.toAttachItem());
-        return attachItems;
+        return processEntries;
     }
 }
 
@@ -93,33 +111,26 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
     // QuickPick UI in VSCode.
 
     protected async getInternalProcessEntries(token?: vscode.CancellationToken): Promise<Process[]> {
-        let processCmd: string = '';
         switch (os.platform()) {
             case 'darwin':
-                processCmd = PsProcessParser.psDarwinCommand;
-                break;
+                return PsProcessParser.ParseProcessFromPs(await spawnChildProcess(PsProcessParser.psDarwinCommand, token));
             case 'linux':
-                processCmd = PsProcessParser.psLinuxCommand;
-                break;
+                return PsProcessParser.ParseProcessFromPs(await spawnChildProcess(PsProcessParser.psLinuxCommand, token));
             default:
                 throw new Error(localize("os.not.supported", 'Operating system "{0}" not supported.', os.platform()));
         }
-        const processes: string = await spawnChildProcess(processCmd, token);
-        return PsProcessParser.ParseProcessFromPs(processes);
     }
 }
 
 export class PsProcessParser {
-    private static get secondColumnCharacters(): number { return 50; }
-    private static get commColumnTitle(): string { return Array(PsProcessParser.secondColumnCharacters).join("a"); }
-    // the BSD version of ps uses '-c' to have 'comm' only output the executable name and not
-    // the full path. The Linux version of ps has 'comm' to only display the name of the executable
+    // Use a large fixed width - the default on MacOS is quite small.
+    private static fixedWidth = ''.padEnd(512, 'a');
+
     // Note that comm on Linux systems is truncated to 16 characters:
     // https://bugzilla.redhat.com/show_bug.cgi?id=429565
-    // Since 'args' contains the full path to the executable, even if truncated, searching will work as desired.
-    public static get psLinuxCommand(): string { return `ps axww -o pid=,comm=${PsProcessParser.commColumnTitle},args=`; }
-    public static get psDarwinCommand(): string { return `ps axww -o pid=,comm=${PsProcessParser.commColumnTitle},args= -c`; }
-    public static get psToyboxCommand(): string { return `ps -A -o pid=,comm=${PsProcessParser.commColumnTitle},args=`; }
+    public static get psLinuxCommand(): string { return `ps axww -o pid=,exe=${this.fixedWidth},args=${this.fixedWidth}`; }
+    public static get psDarwinCommand(): string { return `ps axww -o pid=,comm=${this.fixedWidth},args=${this.fixedWidth}`; }
+    public static get psToyboxCommand(): string { return `ps -A -o pid=,comm=${this.fixedWidth},args=${this.fixedWidth}`; }
 
     // Only public for tests.
     public static ParseProcessFromPs(processes: string): Process[] {
@@ -147,21 +158,40 @@ export class PsProcessParser {
     }
 
     private static parseLineFromPs(line: string): Process | undefined {
-        // Explanation of the regex:
-        //   - any leading whitespace
-        //   - PID
-        //   - whitespace
-        //   - executable name --> this is PsAttachItemsProvider.secondColumnCharacters - 1 because ps reserves one character
-        //     for the whitespace separator
-        //   - whitespace
-        //   - args (might be empty)
-        const psEntry: RegExp = new RegExp(`^\\s*([0-9]+)\\s+(.{${PsProcessParser.secondColumnCharacters - 1}})\\s+(.*)$`);
+        const psEntry = isMacOS ?
+            // ON MacOS, we're using fixed-width columns, so we have to use a fixed-width regex.
+            // <start>whitespace(NUMBERS)whitespace(FIXED-WIDTH)whitespace(EVERYTHING-ELSE)<end>
+            new RegExp(`^\\s*([0-9]+)\\s+(.{${PsProcessParser.fixedWidth.length - 1}})\\s+(.*)$`) :
+
+            // on Linux, column widths cannot be guaranteed - but we do get escaped spaces in the command line.
+            // <start>whitespace(NUMBERS)whitespace(NOTWHITESPACE)whitespace(EVERYTHING-ELSE)<end>
+            /^\s*(\d+)\s+((?:\\\s|\S)+)\s+([\s\S]*)$/;
+
         const matches: RegExpExecArray | null = psEntry.exec(line);
         if (matches && matches.length === 4) {
             const pid: string = matches[1].trim();
-            const executable: string = matches[2].trim();
-            const cmdline: string = matches[3].trim();
-            return new Process(executable, pid, cmdline);
+            let fullPath: string = matches[2].trim();
+            const rawCommandLine = matches[3].trim();
+
+            // Trim the full path off the command line so that we optimize for seeing '<cmd> <args>'.
+            const cmdline: string = rawCommandLine.replace(/^\s*[\/\\]*(?:(?:[^\\\/\s]|\\.)+[\/\\])*([^\\\/\s]+)(?=\s|$)/, "$1");
+
+            // If the fullPath == '-', let's grab the arg0 from the raw command line.
+            if (fullPath === '-') {
+                const args = /^((?:\\\s|\S)+)\s*([\s\S]*)$/.exec(rawCommandLine);
+                if (args) {
+                    fullPath = args[1];
+                }
+            }
+
+            const executable: string = fullPath.replace(/^.*\//, '');
+
+            // Skip processes that are '<defunct>'.
+            if (executable === '<defunct>' || cmdline.includes('<defunct>')) {
+                return undefined;
+            }
+
+            return new Process(executable, pid, cmdline, fullPath);
         }
     }
 }
@@ -337,7 +367,7 @@ export class CimAttachItemsProvider extends NativeAttachItemsProvider {
 
     protected async getInternalProcessEntries(token?: vscode.CancellationToken): Promise<Process[]> {
         const pwshCommand: string = `${this.pwsh} -NoProfile -Command`;
-        const cimCommand: string = 'Get-CimInstance Win32_Process | Select-Object Name,ProcessId,CommandLine | ConvertTo-JSON -Compress';
+        const cimCommand: string = 'Get-CimInstance Win32_Process | Select-Object Name,ProcessId,CommandLine,Path | ConvertTo-JSON -Compress';
         const processes: string = await spawnChildProcess(`${pwshCommand} "${cimCommand}"`, token);
         return CimProcessParser.ParseProcessFromCim(processes);
     }
@@ -347,6 +377,7 @@ type CimProcessInfo = {
     Name: string;
     ProcessId: number;
     CommandLine: string | null;
+    Path: string | null;
 };
 
 export class CimProcessParser {
@@ -364,7 +395,7 @@ export class CimProcessParser {
             if (cmdline?.startsWith(this.ntObjectManagerPathPrefix)) {
                 cmdline = cmdline.slice(this.ntObjectManagerPathPrefix.length);
             }
-            return new Process(info.Name, `${info.ProcessId}`, cmdline);
+            return new Process(info.Name, `${info.ProcessId}`, cmdline, info.Path || undefined);
         });
     }
 }

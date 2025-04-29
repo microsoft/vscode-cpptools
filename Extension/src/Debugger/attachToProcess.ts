@@ -21,12 +21,37 @@ export interface AttachItemsProvider {
     getAttachItems(token?: vscode.CancellationToken): Promise<AttachItem[]>;
 }
 
+export function processMatches(filterTo: string, processName: string, fullPath: string | undefined) {
+    const normalized = path.resolve(filterTo);
+    const executable = util.executableName(filterTo);
+
+    // Filter out the processes that do not somehow match.
+    return processName === filterTo || util.executableName(processName) === executable || fullPath === filterTo || fullPath === normalized;
+}
+
 export class AttachPicker {
     constructor(private attachItemsProvider: AttachItemsProvider) { }
 
     // We should not await on this function.
     public async ShowAttachEntries(token?: vscode.CancellationToken): Promise<string | undefined> {
         return showQuickPick(() => this.attachItemsProvider.getAttachItems(token));
+    }
+
+    /** Shows the Attach QuickPick, but if a valid filterTo process name/path is passed in, it only shows those entries. */
+    public async ShowAttachEntriesFiltered(filterTo?: string, token?: vscode.CancellationToken): Promise<string | undefined> {
+        return showQuickPick(async () => {
+
+            const items = await this.attachItemsProvider.getAttachItems(token);
+            if (filterTo) {
+                // Filter out the processes that do not somehow match.
+                const filtered = items.filter(each => processMatches(filterTo, each.label, each.fullPath));
+                if (filtered.length > 0) {
+                    // Only filter the list if we have actual matches.
+                    return filtered;
+                }
+            }
+            return items;
+        });
     }
 }
 
@@ -177,8 +202,7 @@ export class RemoteAttachPicker {
                             return 0;
                         }
                         return aLower < bLower ? -1 : 1;
-                    })
-                    .map(p => p.toAttachItem());
+                    });
             }
         }
     }

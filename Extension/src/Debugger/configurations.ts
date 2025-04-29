@@ -3,16 +3,16 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import * as os from 'os';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { configPrefix } from '../LanguageServer/extension';
+import { isWindows } from '../constants';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export function isDebugLaunchStr(str: string): boolean {
-    return str.startsWith("(gdb) ") || str.startsWith("(lldb) ") || str.startsWith("(Windows) ");
+    return str.startsWith("(gdb) ") || str.startsWith("(lldb") || str.startsWith("(Windows) ");
 }
 
 export interface ConfigMenu extends vscode.QuickPickItem {
@@ -22,6 +22,7 @@ export interface ConfigMenu extends vscode.QuickPickItem {
 export enum DebuggerType {
     cppvsdbg = "cppvsdbg",
     cppdbg = "cppdbg",
+    cpplldb = "cpplldb",
     all = "all"
 }
 
@@ -70,147 +71,121 @@ export interface CppDebugConfiguration extends vscode.DebugConfiguration {
 export interface IConfigurationSnippet {
     label: string;
     description: string;
-    bodyText: string;
+    body: Record<string, any>;
 
     // Internal
     isInitialConfiguration?: boolean;
     debuggerType: DebuggerType;
 }
 
-export function indentJsonString(json: string, numTabs: number = 1): string {
-    return json.split('\n').map(line => '\t'.repeat(numTabs) + line).join('\n').trim();
+function createLaunchBlock(name: string, type: string, executable: string): Record<string, any> {
+    return {
+        name: name,
+        type: type,
+        request: "launch",
+        program: localize("enter.program.name", "enter program name, for example {0}", "${workspaceFolder}" + "/" + executable).replace(/"/g, ''),
+        args: [],
+        stopAtEntry: false,
+        cwd: "${fileDirname}",
+        environment: [],
+        externalConsole: type === DebuggerType.cppdbg ? false : type === DebuggerType.cpplldb ? true : undefined,
+        console: type === DebuggerType.cppvsdbg ? "externalTerminal" : undefined
+    };
 }
 
-function formatString(format: string, args: string[]): string {
-    args.forEach((arg: string, index: number) => {
-        format = format.replace("{" + index + "}", arg);
-    });
-    return format;
+function createAttachBlock(name: string, type: string, executable: string): Record<string, any> {
+    return {
+        name: name,
+        type: type,
+        request: "attach",
+        program: type === DebuggerType.cppdbg ? localize("enter.program.name", "enter program name, for example {0}", "${workspaceFolder}" + "/" + executable).replace(/"/g, '') : undefined
+    };
 }
 
-function createLaunchString(name: string, type: string, executable: string): string {
-    return `"name": "${name}",
-"type": "${type}",
-"request": "launch",
-"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/"/g, '')}",
-"args": [],
-"stopAtEntry": false,
-"cwd": "$\{fileDirname\}",
-"environment": [],
-${ type === "cppdbg" ? `"externalConsole": false` : `"console": "externalTerminal"` }
-`;
+function createRemoteAttachBlock(name: string, type: string, executable: string): Record<string, any> {
+    return {
+        name: name,
+        type: type,
+        request: "attach",
+        program: localize("enter.program.name", "enter program name, for example {0}", "${workspaceFolder}" + "/" + executable).replace(/"/g, ''),
+        processId: "${command:pickRemoteProcess}"
+    };
 }
 
-function createAttachString(name: string, type: string, executable: string): string {
-    return formatString(`
-"name": "${name}",
-"type": "${type}",
-"request": "attach",{0}
-`, [type === "cppdbg" ? `${os.EOL}"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/"/g, '')}",` : ""]);
+function createPipeTransportBlock(pipeProgram: string, debuggerProgram: string, pipeArgs: string[] = []): Record<string, any> {
+    return {
+        pipeTransport: {
+            debuggerPath: `/usr/bin/${debuggerProgram}`,
+            pipeProgram: pipeProgram,
+            pipeArgs: pipeArgs,
+            pipeCwd: ""
+        }
+    };
 }
 
-function createRemoteAttachString(name: string, type: string, executable: string): string {
-    return `
-"name": "${name}",
-"type": "${type}",
-"request": "attach",
-"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/"/g, '')}",
-"processId": "$\{command:pickRemoteProcess\}"
-`;
-}
-
-function createPipeTransportString(pipeProgram: string, debuggerProgram: string, pipeArgs: string[] = []): string {
-    return `
-"pipeTransport": {
-\t"debuggerPath": "/usr/bin/${debuggerProgram}",
-\t"pipeProgram": "${pipeProgram}",
-\t"pipeArgs": ${JSON.stringify(pipeArgs)},
-\t"pipeCwd": ""
-}`;
-}
-
-export interface IConfiguration {
-    GetLaunchConfiguration(): IConfigurationSnippet;
-    GetAttachConfiguration(): IConfigurationSnippet;
-}
-
-abstract class Configuration implements IConfiguration {
-
-    public executable: string;
-    public pipeProgram: string;
-    public MIMode: string;
-    public additionalProperties: string;
-
-    public miDebugger = "cppdbg";
-    public windowsDebugger = "cppvsdbg";
-
-    constructor(MIMode: string, executable: string, pipeProgram: string, additionalProperties: string = "") {
-        this.MIMode = MIMode;
-        this.executable = executable;
-        this.pipeProgram = pipeProgram;
-        this.additionalProperties = additionalProperties;
-    }
-
+export abstract class Configuration {
     abstract GetLaunchConfiguration(): IConfigurationSnippet;
     abstract GetAttachConfiguration(): IConfigurationSnippet;
 }
 
+/** Creates Configurations for an MI debugger */
 export class MIConfigurations extends Configuration {
+
+    constructor(public MIMode: string, public executable: string, public additionalProperties: Record<string, any> = {}) {
+        super();
+    }
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
         const name: string = `(${this.MIMode}) ${localize("launch.string", "Launch").replace(/"/g, '')}`;
 
-        const body: string = formatString(`{
-\t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
-\t"MIMode": "${this.MIMode}"{0}{1}
-}`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "",
-            this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
-
         return {
-            "label": configPrefix + name,
-            "description": localize("launch.with", "Launch with {0}.", this.MIMode).replace(/"/g, ''),
-            "bodyText": body.trim(),
-            "isInitialConfiguration": true,
-            "debuggerType": DebuggerType.cppdbg
+            label: configPrefix + name,
+            description: localize("launch.with", "Launch with {0}.", this.MIMode).replace(/"/g, ''),
+            body: {
+                ...createLaunchBlock(name, DebuggerType.cppdbg, this.executable),
+                MIMode: this.MIMode,
+                miDebuggerPath: isWindows ? "/path/to/gdb" : undefined,
+                ...this.additionalProperties
+            },
+            isInitialConfiguration: true,
+            debuggerType: DebuggerType.cppdbg
         };
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
         const name: string = `(${this.MIMode}) ${localize("attach.string", "Attach").replace(/"/g, '')}`;
-
-        const body: string = formatString(`{
-\t${indentJsonString(createAttachString(name, this.miDebugger, this.executable))}
-\t"MIMode": "${this.MIMode}"{0}{1}
-}`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "",
-            this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
-
         return {
-            "label": configPrefix + name,
-            "description": localize("attach.with", "Attach with {0}.", this.MIMode).replace(/"/g, ''),
-            "bodyText": body.trim(),
-            "debuggerType": DebuggerType.cppdbg
+            label: configPrefix + name,
+            description: localize("attach.with", "Attach with {0}.", this.MIMode).replace(/"/g, ''),
+            body: {
+                ...createAttachBlock(name, DebuggerType.cppdbg, this.executable),
+                MIMode: this.MIMode,
+                miDebuggerPath: isWindows ? "/path/to/gdb" : undefined,
+                ...this.additionalProperties
+            },
+            debuggerType: DebuggerType.cppdbg
         };
-
     }
 }
 
 export class PipeTransportConfigurations extends Configuration {
 
+    constructor(public MIMode: string, public executable: string, public pipeProgram: string, public additionalProperties: Record<string, any> = {}) {
+        super();
+    }
     public GetLaunchConfiguration(): IConfigurationSnippet {
         const name: string = `(${this.MIMode}) ${localize("pipe.launch", "Pipe Launch").replace(/"/g, '')}`;
 
-        const body: string = formatString(`
-{
-\t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
-\t${indentJsonString(createPipeTransportString(this.pipeProgram, this.MIMode))},
-\t"MIMode": "${this.MIMode}"{0}
-}`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
-
         return {
-            "label": configPrefix + name,
-            "description": localize("pipe.launch.with", "Pipe Launch with {0}.", this.MIMode).replace(/"/g, ''),
-            "bodyText": body.trim(),
-            "debuggerType": DebuggerType.cppdbg
+            label: configPrefix + name,
+            description: localize("pipe.launch.with", "Pipe Launch with {0}.", this.MIMode).replace(/"/g, ''),
+            body: {
+                ...createLaunchBlock(name, DebuggerType.cppdbg, this.executable),
+                ...createPipeTransportBlock(this.pipeProgram, this.MIMode),
+                MIMode: this.MIMode,
+                ...this.additionalProperties
+            },
+            debuggerType: DebuggerType.cppdbg
         };
 
     }
@@ -218,38 +193,35 @@ export class PipeTransportConfigurations extends Configuration {
     public GetAttachConfiguration(): IConfigurationSnippet {
         const name: string = `(${this.MIMode}) ${localize("pipe.attach", "Pipe Attach").replace(/"/g, '')}`;
 
-        const body: string = formatString(`
-{
-\t${indentJsonString(createRemoteAttachString(name, this.miDebugger, this.executable))},
-\t${indentJsonString(createPipeTransportString(this.pipeProgram, this.MIMode))},
-\t"MIMode": "${this.MIMode}"{0}
-}`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
         return {
-            "label": configPrefix + name,
-            "description": localize("pipe.attach.with", "Pipe Attach with {0}.", this.MIMode).replace(/"/g, ''),
-            "bodyText": body.trim(),
-            "debuggerType": DebuggerType.cppdbg
+            label: configPrefix + name,
+            description: localize("pipe.attach.with", "Pipe Attach with {0}.", this.MIMode).replace(/"/g, ''),
+            body: {
+                ...createRemoteAttachBlock(name, DebuggerType.cppdbg, this.executable),
+                ...createPipeTransportBlock(this.pipeProgram, this.MIMode),
+                MIMode: this.MIMode,
+                ...this.additionalProperties
+            },
+            debuggerType: DebuggerType.cppdbg
         };
 
     }
 }
 
 export class WindowsConfigurations extends Configuration {
+    constructor(public executable: string, public additionalProperties: Record<string, any> = {}) {
+        super();
+    }
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
         const name: string = `(Windows) ${localize("launch.string", "Launch").replace(/"/g, '')}`;
 
-        const body: string = `
-{
-\t${indentJsonString(createLaunchString(name, this.windowsDebugger, this.executable))}
-}`;
-
         return {
-            "label": configPrefix + name,
-            "description": localize("launch.with.vs.debugger", "Launch with the Visual Studio C/C++ debugger.").replace(/"/g, ''),
-            "bodyText": body.trim(),
-            "isInitialConfiguration": true,
-            "debuggerType": DebuggerType.cppvsdbg
+            label: configPrefix + name,
+            description: localize("launch.with.vs.debugger", "Launch with the Visual Studio C/C++ debugger.").replace(/"/g, ''),
+            body: createLaunchBlock(name, DebuggerType.cppvsdbg, this.executable),
+            isInitialConfiguration: true,
+            debuggerType: DebuggerType.cppvsdbg
         };
 
     }
@@ -257,56 +229,85 @@ export class WindowsConfigurations extends Configuration {
     public GetAttachConfiguration(): IConfigurationSnippet {
         const name: string = `(Windows) ${localize("attach.string", "Attach").replace(/"/g, '')}`;
 
-        const body: string = `
-{
-\t${indentJsonString(createAttachString(name, this.windowsDebugger, this.executable))}
-}`;
-
         return {
-            "label": configPrefix + name,
-            "description": localize("attach.with.vs.debugger", "Attach to a process with the Visual Studio C/C++ debugger.").replace(/"/g, ''),
-            "bodyText": body.trim(),
-            "debuggerType": DebuggerType.cppvsdbg
+            label: configPrefix + name,
+            description: localize("attach.with.vs.debugger", "Attach to a process with the Visual Studio C/C++ debugger.").replace(/"/g, ''),
+            body: createAttachBlock(name, DebuggerType.cppvsdbg, this.executable),
+            debuggerType: DebuggerType.cppvsdbg
         };
 
     }
 }
 
 export class WSLConfigurations extends Configuration {
+    constructor(public MIMode: string, public executable: string, public additionalProperties: Record<string, any> = {}) {
+        super();
+    }
     // Detects if the current VSCode is 32-bit and uses the correct bash.exe
     public bashPipeProgram = process.arch === 'ia32' ? "${env:windir}\\\\sysnative\\\\bash.exe" : "${env:windir}\\\\system32\\\\bash.exe";
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
         const name: string = `(${this.MIMode}) ${localize("bash.on.windows.launch", "Bash on Windows Launch").replace(/"/g, '')}`;
 
-        const body: string = formatString(`
-{
-\t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
-\t${indentJsonString(createPipeTransportString(this.bashPipeProgram, this.MIMode, ["-c"]))}{0}
-}`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
-
         return {
-            "label": configPrefix + name,
-            "description": localize("launch.bash.windows", "Launch in Bash on Windows using {0}.", this.MIMode).replace(/"/g, ''),
-            "bodyText": body.trim(),
-            "debuggerType": DebuggerType.cppdbg
+            label: configPrefix + name,
+            description: localize("launch.bash.windows", "Launch in Bash on Windows using {0}.", this.MIMode).replace(/"/g, ''),
+            body: {
+                ...createLaunchBlock(name, DebuggerType.cppdbg, this.executable),
+                ...createPipeTransportBlock(this.bashPipeProgram, this.MIMode, ["-c"]),
+                ...this.additionalProperties
+            },
+            debuggerType: DebuggerType.cppdbg
         };
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
         const name: string = `(${this.MIMode}) ${localize("bash.on.windows.attach", "Bash on Windows Attach").replace(/"/g, '')}`;
+        return {
+            label: configPrefix + name,
+            description: localize("remote.attach.bash.windows", "Attach to a remote process running in Bash on Windows using {0}.", this.MIMode).replace(/"/g, ''),
+            body: {
+                ...createRemoteAttachBlock(name, DebuggerType.cppdbg, this.executable),
+                ...createPipeTransportBlock(this.bashPipeProgram, this.MIMode, ["-c"]),
+                ...this.additionalProperties
+            },
+            debuggerType: DebuggerType.cppdbg
+        };
+    }
+}
 
-        const body: string = formatString(`
-{
-\t${indentJsonString(createRemoteAttachString(name, this.miDebugger, this.executable))},
-\t${indentJsonString(createPipeTransportString(this.bashPipeProgram, this.MIMode, ["-c"]))}{0}
-}`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
+/** Creates Configurations for an LLDB-DAP debugger */
+export class LldbDapConfigurations extends Configuration {
+
+    constructor(public executable: string, public additionalProperties: Record<string, any> = {}) {
+        super();
+    }
+
+    public GetLaunchConfiguration(): IConfigurationSnippet {
+        const name: string = `(lldb-dap) ${localize("launch.string", "Launch").replace(/"/g, '')}`;
 
         return {
-            "label": configPrefix + name,
-            "description": localize("remote.attach.bash.windows", "Attach to a remote process running in Bash on Windows using {0}.", this.MIMode).replace(/"/g, ''),
-            "bodyText": body.trim(),
-            "debuggerType": DebuggerType.cppdbg
+            label: configPrefix + name,
+            description: localize("launch.with", "Launch with {0}.", "LLDB-DAP").replace(/"/g, ''),
+            body: {
+                ...createLaunchBlock(name, DebuggerType.cpplldb, this.executable),
+                ...this.additionalProperties
+            },
+            isInitialConfiguration: true,
+            debuggerType: DebuggerType.cpplldb
+        };
+    }
+
+    public GetAttachConfiguration(): IConfigurationSnippet {
+        const name: string = `(lldb-dap) ${localize("attach.string", "Attach").replace(/"/g, '')}`;
+        return {
+            label: configPrefix + name,
+            description: localize("attach.with", "Attach with {0}.", "LLDB-DAP").replace(/"/g, ''),
+            body: {
+                ...createAttachBlock(name, DebuggerType.cpplldb, this.executable),
+                ...this.additionalProperties
+            },
+            debuggerType: DebuggerType.cpplldb
         };
     }
 }

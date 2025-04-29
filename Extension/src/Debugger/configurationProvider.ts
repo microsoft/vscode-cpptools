@@ -21,8 +21,9 @@ import * as logger from '../logger';
 import { PlatformInformation } from '../platform';
 import { rsync, scp, ssh } from '../SSH/commands';
 import * as Telemetry from '../telemetry';
-import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
-import { ConfigMenu, ConfigMode, ConfigSource, CppDebugConfiguration, DebuggerEvent, DebuggerType, DebugType, IConfiguration, IConfigurationSnippet, isDebugLaunchStr, MIConfigurations, PipeTransportConfigurations, TaskStatus, WindowsConfigurations, WSLConfigurations } from './configurations';
+import { AttachItemsProvider, AttachPicker, processMatches, RemoteAttachPicker } from './attachToProcess';
+import { ConfigMenu, ConfigMode, ConfigSource, Configuration, CppDebugConfiguration, DebuggerEvent, DebuggerType, DebugType, IConfigurationSnippet, isDebugLaunchStr, LldbDapConfigurations, MIConfigurations, PipeTransportConfigurations, TaskStatus, WindowsConfigurations, WSLConfigurations } from './configurations';
+import { findLldbDap, translateToLldbDap } from './lldb-dap';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
 import * as debugUtils from './utils';
@@ -48,17 +49,13 @@ const globAsync: (pattern: string, options?: glob.IOptions | undefined) => Promi
  */
 export class DebugConfigurationProvider implements vscode.DebugConfigurationProvider {
 
-    private type: DebuggerType;
-    private assetProvider: IConfigurationAssetProvider;
     // Keep a list of tasks detected by cppBuildTaskProvider.
     private static detectedBuildTasks: CppBuildTask[] = [];
     private static detectedCppBuildTasks: CppBuildTask[] = [];
     private static detectedCBuildTasks: CppBuildTask[] = [];
     protected static recentBuildTaskLabel: string;
 
-    public constructor(assetProvider: IConfigurationAssetProvider, type: DebuggerType) {
-        this.assetProvider = assetProvider;
-        this.type = type;
+    public constructor(private assetProvider: ConfigurationAssetProvider, private type: DebuggerType) {
     }
 
     public static ClearDetectedBuildTasks(): void {
@@ -236,7 +233,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (config.type === DebuggerType.cppvsdbg) {
             // Fail if cppvsdbg type is running on non-Windows
             if (os.platform() !== 'win32') {
-                void logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
+                void logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' or '{2}' on the current OS platform.", DebuggerType.cppvsdbg, DebuggerType.cppdbg, DebuggerType.cpplldb));
                 return undefined; // Abort debugging silently.
             }
 
@@ -269,55 +266,57 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         this.resolveSourceFileMapVariables(config);
 
-        // Modify WSL config for OpenDebugAD7
-        if (os.platform() === 'win32' &&
-            config.pipeTransport &&
-            config.pipeTransport.pipeProgram) {
-            let replacedPipeProgram: string | undefined;
-            const pipeProgramStr: string = config.pipeTransport.pipeProgram.toLowerCase().trim();
+        if (config.type === DebuggerType.cppdbg) {
+            // Modify WSL config for OpenDebugAD7
+            if (os.platform() === 'win32' &&
+                config.pipeTransport &&
+                config.pipeTransport.pipeProgram) {
+                let replacedPipeProgram: string | undefined;
+                const pipeProgramStr: string = config.pipeTransport.pipeProgram.toLowerCase().trim();
 
-            // OpenDebugAD7 is a 32-bit process. Make sure the WSL pipe transport is using the correct program.
-            replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, debugUtils.ArchType.ia32);
+                // OpenDebugAD7 is a 32-bit process. Make sure the WSL pipe transport is using the correct program.
+                replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, debugUtils.ArchType.ia32);
 
-            // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
-            if (!replacedPipeProgram && !path.isAbsolute(pipeProgramStr) && config.pipeTransport.pipeCwd) {
-                const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
-                const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
+                // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
+                if (!replacedPipeProgram && !path.isAbsolute(pipeProgramStr) && config.pipeTransport.pipeCwd) {
+                    const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
+                    const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
 
-                replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, debugUtils.ArchType.ia32);
+                    replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, debugUtils.ArchType.ia32);
+                }
+
+                if (replacedPipeProgram) {
+                    config.pipeTransport.pipeProgram = replacedPipeProgram;
+                }
             }
 
-            if (replacedPipeProgram) {
-                config.pipeTransport.pipeProgram = replacedPipeProgram;
-            }
-        }
+            const macOSMIMode: string = config.osx?.MIMode ?? config.MIMode;
+            const macOSMIDebuggerPath: string = config.osx?.miDebuggerPath ?? config.miDebuggerPath;
 
-        const macOSMIMode: string = config.osx?.MIMode ?? config.MIMode;
-        const macOSMIDebuggerPath: string = config.osx?.miDebuggerPath ?? config.miDebuggerPath;
+            const lldb_mi_10_x_path: string = path.join(util.extensionPath, "debugAdapters", "lldb-mi", "bin", "lldb-mi");
 
-        const lldb_mi_10_x_path: string = path.join(util.extensionPath, "debugAdapters", "lldb-mi", "bin", "lldb-mi");
+            // Validate LLDB-MI
+            if (os.platform() === 'darwin' && // Check for macOS
+                fs.existsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
+                (!macOSMIMode || macOSMIMode === 'lldb') &&
+                !macOSMIDebuggerPath // User did not provide custom lldb-mi
+            ) {
+                const frameworkPath: string | undefined = this.getLLDBFrameworkPath();
 
-        // Validate LLDB-MI
-        if (os.platform() === 'darwin' && // Check for macOS
-            fs.existsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
-            (!macOSMIMode || macOSMIMode === 'lldb') &&
-            !macOSMIDebuggerPath // User did not provide custom lldb-mi
-        ) {
-            const frameworkPath: string | undefined = this.getLLDBFrameworkPath();
+                if (!frameworkPath) {
+                    const moreInfoButton: string = localize("lldb.framework.install.xcode", "More Info");
+                    const LLDBFrameworkMissingMessage: string = localize("lldb.framework.not.found", "Unable to locate 'LLDB.framework' for lldb-mi. Please install XCode or XCode Command Line Tools.");
 
-            if (!frameworkPath) {
-                const moreInfoButton: string = localize("lldb.framework.install.xcode", "More Info");
-                const LLDBFrameworkMissingMessage: string = localize("lldb.framework.not.found", "Unable to locate 'LLDB.framework' for lldb-mi. Please install XCode or XCode Command Line Tools.");
+                    void vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton)
+                        .then(value => {
+                            if (value === moreInfoButton) {
+                                const helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
+                                void vscode.env.openExternal(vscode.Uri.parse(helpURL));
+                            }
+                        });
 
-                void vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton)
-                    .then(value => {
-                        if (value === moreInfoButton) {
-                            const helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
-                            void vscode.env.openExternal(vscode.Uri.parse(helpURL));
-                        }
-                    });
-
-                return undefined;
+                    return undefined;
+                }
             }
         }
 
@@ -355,16 +354,62 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 processId = await remoteAttachPicker.ShowAttachEntries(config);
             } else {
                 const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
-                const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
-                processId = await attacher.ShowAttachEntries(token);
+
+                // LLDB-DAP supports attaching to process by pid or by name.
+                // If they do specify 'program', then we can check to see if there
+                // is a process that matches, or they are using 'waitFor' (on Linux/OSX).
+                if (config.program) {
+                    // If they specified 'program', get the tasks that match that.
+                    const items = (await attachItemsProvider.getAttachItems(token)).filter(each => processMatches(config.program, each.label, each.fullPath));
+
+                    switch (items.length) {
+                        case 0:
+                            // No matching processes
+                            if (config.type === DebuggerType.cpplldb && config.waitFor) {
+                                if (isWindows) {
+                                    // On Windows, waitFor on lldb-dap is not supported - so we'll let the user know.
+                                    void logger.getOutputChannelLogger().showWarningMessage(localize("waitFor.not.supported", "The {0} debugger does not support '{1}' on Windows.", "LLDB-DAP", "waitFor"));
+
+                                    // Drop the waitFor and program (which will just have the picker show all processes)
+                                    delete config.program;
+                                    delete config.waitFor;
+                                }
+
+                                // They did specify 'waitFor' so then let's get out fast and let lldb-dap handle it.
+                                logger.note(localize("waiting.for.process", "Waiting to attach process '{0}'", config.program));
+                                return translateToLldbDap(config);
+                            }
+
+                            // Just let the picker show all processes.
+                            break;
+
+                        case 1:
+                            // If there is only a single process that matches, auto-select it.
+                            processId = config.processId = items[0].id;
+                            break;
+                    }
+                }
+
+                // If they didn't specify a processId, we'll show the picker.
+                if (!processId) {
+                    // Show the picker to let the user select a process, but if they did specify a program, we'll narrow the list for them.
+                    const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
+                    processId = await attacher.ShowAttachEntriesFiltered(config.program, token);
+                }
             }
 
             if (processId) {
                 config.processId = processId;
+                delete config.program;
             } else {
                 void logger.getOutputChannelLogger().showErrorMessage("No process was selected.");
                 return undefined;
             }
+        }
+
+        // Finish translating the config for lldb-dap.
+        if (config.type === DebuggerType.cpplldb) {
+            translateToLldbDap(config);
         }
 
         return config;
@@ -394,7 +439,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 if (!command) {
                     return false;
                 }
-                if (defaultTemplateConfig.name.startsWith("(Windows) ")) {
+                if (defaultTemplateConfig?.name.startsWith("(Windows) ")) {
                     if (command.startsWith("cl.exe")) {
                         return true;
                     }
@@ -427,13 +472,17 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const newConfig: CppDebugConfiguration = { ...defaultTemplateConfig }; // Copy enumerables and properties
                 newConfig.existing = false;
 
-                newConfig.name = configPrefix + compilerName + " " + this.buildAndDebugActiveFileStr();
+                newConfig.name = `${configPrefix}${compilerName} [Debugger: ${newConfig.type}] ${this.buildAndDebugActiveFileStr()}`;
                 newConfig.preLaunchTask = task.name;
-                if (newConfig.type === DebuggerType.cppdbg) {
-                    newConfig.externalConsole = false;
-                } else {
-                    newConfig.console = "integratedTerminal";
+                switch (newConfig.type) {
+                    case DebuggerType.cppdbg:
+                        newConfig.externalConsole = false;
+                        break;
+                    case DebuggerType.cppvsdbg:
+                        newConfig.externalConsole = false;
+                        break;
                 }
+
                 // Extract the .exe path from the defined task.
                 const definedExePath: string | undefined = util.findExePathInArgs(task.definition.args);
                 newConfig.program = definedExePath ? definedExePath : util.defaultExePath();
@@ -473,10 +522,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         newConfig.type = DebuggerType.cppvsdbg;
                         return newConfig;
                     } else {
-                        debuggerName = "gdb";
-                    }
-                    if (isWindows) {
-                        debuggerName = debuggerName.endsWith(".exe") ? debuggerName : (debuggerName + ".exe");
+                        debuggerName = util.executableName("gdb");
                     }
                     const compilerDirname: string = path.dirname(compilerPath);
                     const debuggerPath: string = path.join(compilerDirname, debuggerName);
@@ -890,11 +936,12 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             await cppBuildTaskProvider.writeBuildTask(selectedConfig.preLaunchTask);
         }
         // Remove the extra properties that are not a part of the DebugConfiguration, as these properties will be written in launch.json.
-        selectedConfig.detail = undefined;
-        selectedConfig.taskStatus = undefined;
-        selectedConfig.isDefault = undefined;
-        selectedConfig.source = undefined;
-        selectedConfig.debuggerEvent = undefined;
+        // Use 'delete' instead of 'undefined' to remove the property from the object (undefined properties still exist!).
+        delete selectedConfig.detail;
+        delete selectedConfig.taskStatus;
+        delete selectedConfig.isDefault;
+        delete selectedConfig.source;
+        delete selectedConfig.debuggerEvent;
         // Write debug configuration in launch.json file.
         await this.writeDebugConfig(selectedConfig, isExistingConfig, folder);
         Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "true" });
@@ -934,10 +981,19 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         // Get debug configurations for all debugger types.
-        let configs: CppDebugConfiguration[] = await this.provideDebugConfigurationsForType(DebuggerType.cppdbg, folder);
-        if (os.platform() === 'win32') {
-            configs = configs.concat(await this.provideDebugConfigurationsForType(DebuggerType.cppvsdbg, folder));
+        let configs: CppDebugConfiguration[] = [];
+        if (isWindows) {
+            // When on windows - prefer cppvsdbg.
+            configs.push(...await this.provideDebugConfigurationsForType(DebuggerType.cppvsdbg, folder));
         }
+
+        if (!isWindows && await findLldbDap()) {
+            // Only include lldb-dap tasks if it's not windows and lldb-dap is actually available.
+            configs.push(...await this.provideDebugConfigurationsForType(DebuggerType.cpplldb, folder));
+        }
+
+        configs.push(...await this.provideDebugConfigurationsForType(DebuggerType.cppdbg, folder));
+
         if (onlyWorkspaceFolder) {
             configs = configs.filter(item => !item.configSource || item.configSource === ConfigSource.workspaceFolder);
         }
@@ -1113,13 +1169,26 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 }
 
-export interface IConfigurationAssetProvider {
-    getInitialConfigurations(debuggerType: DebuggerType): any;
-    getConfigurationSnippets(): vscode.CompletionItem[];
-}
+export class ConfigurationAssetProvider {
+    configurations: Configuration[] = [];
 
-export class ConfigurationAssetProviderFactory {
-    public static getConfigurationProvider(): IConfigurationAssetProvider {
+    protected constructor() {
+    }
+
+    public getInitialConfigurations(debuggerType: DebuggerType): any[] {
+        return this.configurations.map(configuration => configuration.GetLaunchConfiguration())
+            .filter(snippet => snippet.debuggerType === debuggerType && snippet.isInitialConfiguration)
+            .map(snippet => snippet.body);
+    }
+
+    public getConfigurationSnippets(): vscode.CompletionItem[] {
+        return this.configurations.map(configuration => [
+            convertConfigurationSnippetToCompletionItem(configuration.GetLaunchConfiguration()),
+            convertConfigurationSnippetToCompletionItem(configuration.GetAttachConfiguration())]
+        ).flat();
+    }
+
+    static getConfigurationAssetProvider(): ConfigurationAssetProvider {
         switch (os.platform()) {
             case 'win32':
                 return new WindowsConfigurationProvider();
@@ -1128,104 +1197,79 @@ export class ConfigurationAssetProviderFactory {
             case 'linux':
                 return new LinuxConfigurationProvider();
             default:
-                throw new Error(localize("unexpected.os", "Unexpected OS type"));
+                return new ConfigurationAssetProvider(); // at least this will return empty results if the platform is not recognized.
         }
     }
 }
 
-abstract class DefaultConfigurationProvider implements IConfigurationAssetProvider {
-    configurations: IConfiguration[] = [];
-
-    public getInitialConfigurations(debuggerType: DebuggerType): any {
-        const configurationSnippet: IConfigurationSnippet[] = [];
-
-        // Only launch configurations are initial configurations
-        this.configurations.forEach(configuration => {
-            configurationSnippet.push(configuration.GetLaunchConfiguration());
-        });
-
-        const initialConfigurations: any = configurationSnippet.filter(snippet => snippet.debuggerType === debuggerType && snippet.isInitialConfiguration)
-            .map(snippet => JSON.parse(snippet.bodyText));
-
-        // If configurations is empty, then it will only have an empty configurations array in launch.json. Users can still add snippets.
-        return initialConfigurations;
-    }
-
-    public getConfigurationSnippets(): vscode.CompletionItem[] {
-        const completionItems: vscode.CompletionItem[] = [];
-
-        this.configurations.forEach(configuration => {
-            completionItems.push(convertConfigurationSnippetToCompletionItem(configuration.GetLaunchConfiguration()));
-            completionItems.push(convertConfigurationSnippetToCompletionItem(configuration.GetAttachConfiguration()));
-        });
-
-        return completionItems;
-    }
-}
-
-class WindowsConfigurationProvider extends DefaultConfigurationProvider {
+class WindowsConfigurationProvider extends ConfigurationAssetProvider {
     private executable: string = "a.exe";
     private pipeProgram: string = "<" + localize("path.to.pipe.program", "full path to pipe program such as {0}", "plink.exe").replace(/"/g, '') + ">";
-    private MIMode: string = 'gdb';
-    private setupCommandsBlock: string = `"setupCommands": [
-    {
-        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/"/g, '')}",
-        "text": "-enable-pretty-printing",
-        "ignoreFailures": true
-    },
-    {
-        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/"/g, '')}",
-        "text": "-gdb-set disassembly-flavor intel",
-        "ignoreFailures": true
-    }
-]`;
+
+    private additionalProperties = {
+        setupCommands: [
+            {
+                description: localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/"/g, ''),
+                text: "-enable-pretty-printing",
+                ignoreFailures: true
+            },
+            {
+                description: localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/"/g, ''),
+                text: "-gdb-set disassembly-flavor intel",
+                ignoreFailures: true
+            }
+        ]
+    };
 
     constructor() {
         super();
         this.configurations = [
-            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
-            new PipeTransportConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
-            new WindowsConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
-            new WSLConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock)
+            new WindowsConfigurations(this.executable, this.additionalProperties),
+            new MIConfigurations('gdb', this.executable, this.additionalProperties),
+            new PipeTransportConfigurations('gdb', this.executable, this.pipeProgram, this.additionalProperties),
+            new WSLConfigurations('gdb', this.executable, this.additionalProperties),
+            new LldbDapConfigurations(this.executable)
         ];
     }
 }
 
-class OSXConfigurationProvider extends DefaultConfigurationProvider {
-    private MIMode: string = 'lldb';
+class OSXConfigurationProvider extends ConfigurationAssetProvider {
+
+    private executable: string = "a.out";
+
+    constructor() {
+        super();
+        this.configurations = [
+            new LldbDapConfigurations(this.executable),
+            new MIConfigurations('lldb', this.executable)
+        ];
+    }
+}
+
+class LinuxConfigurationProvider extends ConfigurationAssetProvider {
+    private additionalProperties = {
+        setupCommands: [
+            {
+                description: localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/"/g, ''),
+                text: "-enable-pretty-printing",
+                ignoreFailures: true
+            },
+            {
+                description: localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/"/g, ''),
+                text: "-gdb-set disassembly-flavor intel",
+                ignoreFailures: true
+            }
+        ]
+    };
     private executable: string = "a.out";
     private pipeProgram: string = "/usr/bin/ssh";
 
     constructor() {
         super();
         this.configurations = [
-            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram)
-        ];
-    }
-}
-
-class LinuxConfigurationProvider extends DefaultConfigurationProvider {
-    private MIMode: string = 'gdb';
-    private setupCommandsBlock: string = `"setupCommands": [
-    {
-        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/"/g, '')}",
-        "text": "-enable-pretty-printing",
-        "ignoreFailures": true
-    },
-    {
-        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/"/g, '')}",
-        "text": "-gdb-set disassembly-flavor intel",
-        "ignoreFailures": true
-    }
-]`;
-    private executable: string = "a.out";
-    private pipeProgram: string = "/usr/bin/ssh";
-
-    constructor() {
-        super();
-        this.configurations = [
-            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
-            new PipeTransportConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock)
+            new MIConfigurations('gdb', this.executable, this.additionalProperties),
+            new PipeTransportConfigurations('gdb', this.executable, this.pipeProgram, this.additionalProperties),
+            new LldbDapConfigurations(this.executable)
         ];
     }
 }
@@ -1233,17 +1277,15 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
 function convertConfigurationSnippetToCompletionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
     const item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Module);
 
-    item.insertText = snippet.bodyText;
+    item.insertText = JSON.stringify(snippet.body, null, '\t');
 
     return item;
 }
 
 export class ConfigurationSnippetProvider implements vscode.CompletionItemProvider {
-    private provider: IConfigurationAssetProvider;
     private snippets: vscode.CompletionItem[];
 
-    constructor(provider: IConfigurationAssetProvider) {
-        this.provider = provider;
+    constructor(private provider: ConfigurationAssetProvider) {
         this.snippets = this.provider.getConfigurationSnippets();
     }
     public resolveCompletionItem(item: vscode.CompletionItem, _token: vscode.CancellationToken): Thenable<vscode.CompletionItem> {
