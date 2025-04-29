@@ -14,7 +14,7 @@
 	"cannot.find": "Nepovedlo se najít: {0}",
 	"cannot.resolve.compiler.path": "Neplatný vstup, nedá se přeložit cesta ke kompilátoru.",
 	"path.is.not.a.file": "Cesta není soubor: {0}",
-	"wrapped.with.quotes": "Do not add extra quotes around paths.",
+	"wrapped.with.quotes": "Nepřidávejte nadbytečné uvozovky kolem cest.",
 	"path.is.not.a.directory": "Cesta není adresář: {0}",
 	"duplicate.name": "{0} je duplicitní. Název konfigurace by měl být jedinečný.",
 	"multiple.paths.not.allowed": "Více cest není povoleno.",

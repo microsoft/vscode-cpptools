@@ -14,7 +14,7 @@
 	"cannot.find": "Não é possível localizar: {0}",
 	"cannot.resolve.compiler.path": "Entrada inválida. Não é possível resolver o caminho do compilador",
 	"path.is.not.a.file": "O caminho não é um arquivo: {0}",
-	"wrapped.with.quotes": "Do not add extra quotes around paths.",
+	"wrapped.with.quotes": "Não adicione aspas extras ao redor de caminhos.",
 	"path.is.not.a.directory": "O caminho não é um diretório: {0}",
 	"duplicate.name": "{0} é uma duplicata. O nome da configuração deve ser exclusivo.",
 	"multiple.paths.not.allowed": "Vários caminhos não são permitidos.",

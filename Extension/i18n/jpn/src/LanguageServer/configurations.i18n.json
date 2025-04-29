@@ -14,7 +14,7 @@
 	"cannot.find": "{0} が見つかりません。",
 	"cannot.resolve.compiler.path": "無効な入力です。コンパイラ パスを解決できません",
 	"path.is.not.a.file": "パスがファイルではありません: {0}",
-	"wrapped.with.quotes": "Do not add extra quotes around paths.",
+	"wrapped.with.quotes": "パスの前後に余分な引用符を追加しないでください。",
 	"path.is.not.a.directory": "パスがディレクトリではありません: {0}",
 	"duplicate.name": "{0} が重複しています。構成名は一意である必要があります。",
 	"multiple.paths.not.allowed": "複数のパスは使用できません。",

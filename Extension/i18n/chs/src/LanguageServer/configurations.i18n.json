@@ -14,7 +14,7 @@
 	"cannot.find": "无法找到: {0}",
 	"cannot.resolve.compiler.path": "输入无效，无法解析编译器路径",
 	"path.is.not.a.file": "路径不是文件: {0}",
-	"wrapped.with.quotes": "Do not add extra quotes around paths.",
+	"wrapped.with.quotes": "不要在路径周围添加额外的引号。",
 	"path.is.not.a.directory": "路径不是目录: {0}",
 	"duplicate.name": "{0} 重复。配置名称应是唯一的。",
 	"multiple.paths.not.allowed": "不允许使用多个路径。",
