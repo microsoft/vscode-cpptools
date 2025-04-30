@@ -3651,7 +3651,7 @@
                             "program": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.program.description%",
-                                "default": "${workspaceRoot}/a.out"
+                                "default": "${workspaceFolder}/a.out"
                             },
                             "args": {
                                 "type": "array",
@@ -4606,7 +4606,7 @@
                             "program": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.program.description%",
-                                "default": "${workspaceRoot}/a.out"
+                                "default": "${workspaceFolder}/a.out"
                             },
                             "type": {
                                 "type": "string",
@@ -5411,7 +5411,7 @@
                             "program": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.program.description%",
-                                "default": "${workspaceRoot}/program.exe"
+                                "default": "${workspaceFolder}/program.exe"
                             },
                             "args": {
                                 "type": "array",
@@ -5429,7 +5429,7 @@
                             "cwd": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.cwd.description%",
-                                "default": "${workspaceRoot}"
+                                "default": "${workspaceFolder}"
                             },
                             "environment": {
                                 "type": "array",
@@ -5638,7 +5638,7 @@
                             "program": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.program.description%",
-                                "default": "${workspaceRoot}/program.exe"
+                                "default": "${workspaceFolder}/program.exe"
                             },
                             "type": {
                                 "type": "string",
@@ -5815,7 +5815,7 @@
                             "program": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.program.description%",
-                                "default": "${workspaceRoot}/a.out"
+                                "default": "${workspaceFolder}/a.out"
                             },
                             "args": {
                                 "type": "array",
@@ -5923,90 +5923,6 @@
                                         }
                                     }
                                 ]
-                            },
-                            "logging": {
-                                "description": "%c_cpp.debuggers.logging.description%",
-                                "type": "object",
-                                "default": {},
-                                "properties": {
-                                    "exceptions": {
-                                        "type": "boolean",
-                                        "description": "%c_cpp.debuggers.logging.exceptions.description%",
-                                        "default": true
-                                    },
-                                    "moduleLoad": {
-                                        "type": "boolean",
-                                        "description": "%c_cpp.debuggers.logging.moduleLoad.description%",
-                                        "default": true
-                                    },
-                                    "programOutput": {
-                                        "type": "boolean",
-                                        "description": "%c_cpp.debuggers.logging.programOutput.description%",
-                                        "default": true
-                                    },
-                                    "engineLogging": {
-                                        "anyOf": [
-                                            {
-                                                "type": "string",
-                                                "enum": [
-                                                    "verbose",
-                                                    "warning",
-                                                    "error",
-                                                    "none"
-                                                ],
-                                                "enumDescriptions": [
-                                                    "%c_cpp.debuggers.logging.category.verbose.description%",
-                                                    "%c_cpp.debuggers.logging.category.warning.description%",
-                                                    "%c_cpp.debuggers.logging.category.error.description%",
-                                                    "%c_cpp.debuggers.logging.category.none.description%"
-                                                ],
-                                                "description": "%c_cpp.debuggers.logging.engineLogging.description%",
-                                                "default": "none"
-                                            },
-                                            {
-                                                "type": "boolean",
-                                                "description": "%c_cpp.debuggers.logging.engineLogging.description%",
-                                                "default": false
-                                            }
-                                        ]
-                                    },
-                                    "trace": {
-                                        "type": "boolean",
-                                        "description": "%c_cpp.debuggers.logging.trace.description%",
-                                        "default": false
-                                    },
-                                    "traceResponse": {
-                                        "type": "boolean",
-                                        "description": "%c_cpp.debuggers.logging.traceResponse.description%",
-                                        "default": false
-                                    },
-                                    "natvisDiagnostics": {
-                                        "anyOf": [
-                                            {
-                                                "type": "string",
-                                                "enum": [
-                                                    "verbose",
-                                                    "warning",
-                                                    "error",
-                                                    "none"
-                                                ],
-                                                "enumDescriptions": [
-                                                    "%c_cpp.debuggers.logging.category.verbose.description%",
-                                                    "%c_cpp.debuggers.logging.category.warning.description%",
-                                                    "%c_cpp.debuggers.logging.category.error.description%",
-                                                    "%c_cpp.debuggers.logging.category.none.description%"
-                                                ],
-                                                "description": "%c_cpp.debuggers.logging.natvisDiagnostics.description%",
-                                                "default": "none"
-                                            },
-                                            {
-                                                "type": "boolean",
-                                                "description": "%c_cpp.debuggers.logging.natvisDiagnostics.description%",
-                                                "default": false
-                                            }
-                                        ]
-                                    }
-                                }
                             },
                             "deploySteps": {
                                 "type": "array",
@@ -6475,12 +6391,12 @@
                             },
                             "disableASLR": {
                                 "type": "boolean",
-                                "description": "%c_cpp.debuggers.cpplldb.disableaslr.description%",
+                                "description": "%c_cpp.debuggers.cpplldb.disableAslr.description%",
                                 "default": true
                             },
                             "disableSTDIO": {
                                 "type": "boolean",
-                                "description": "%c_cpp.debuggers.cpplldb.disablestdio.description%",
+                                "description": "%c_cpp.debuggers.cpplldb.disableStdio.description%",
                                 "default": false
                             },
                             "shellExpandArguments": {
@@ -6603,7 +6519,7 @@
                             "program": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.program.description%",
-                                "default": "${workspaceRoot}/a.out"
+                                "default": "${workspaceFolder}/a.out"
                             },
                             "type": {
                                 "type": "string",
@@ -6685,90 +6601,6 @@
                                 "type": "boolean",
                                 "description": "%c_cpp.debuggers.cpplldb.waitFor.description%",
                                 "default": true
-                            },
-                            "logging": {
-                                "description": "%c_cpp.debuggers.logging.description%",
-                                "type": "object",
-                                "default": {},
-                                "properties": {
-                                    "exceptions": {
-                                        "type": "boolean",
-                                        "description": "%c_cpp.debuggers.logging.exceptions.description%",
-                                        "default": true
-                                    },
-                                    "moduleLoad": {
-                                        "type": "boolean",
-                                        "description": "%c_cpp.debuggers.logging.moduleLoad.description%",
-                                        "default": true
-                                    },
-                                    "programOutput": {
-                                        "type": "boolean",
-                                        "description": "%c_cpp.debuggers.logging.programOutput.description%",
-                                        "default": true
-                                    },
-                                    "engineLogging": {
-                                        "anyOf": [
-                                            {
-                                                "type": "string",
-                                                "enum": [
-                                                    "verbose",
-                                                    "warning",
-                                                    "error",
-                                                    "none"
-                                                ],
-                                                "enumDescriptions": [
-                                                    "%c_cpp.debuggers.logging.category.verbose.description%",
-                                                    "%c_cpp.debuggers.logging.category.warning.description%",
-                                                    "%c_cpp.debuggers.logging.category.error.description%",
-                                                    "%c_cpp.debuggers.logging.category.none.description%"
-                                                ],
-                                                "description": "%c_cpp.debuggers.logging.engineLogging.description%",
-                                                "default": "none"
-                                            },
-                                            {
-                                                "type": "boolean",
-                                                "description": "%c_cpp.debuggers.logging.engineLogging.description%",
-                                                "default": false
-                                            }
-                                        ]
-                                    },
-                                    "trace": {
-                                        "type": "boolean",
-                                        "description": "%c_cpp.debuggers.logging.trace.description%",
-                                        "default": false
-                                    },
-                                    "traceResponse": {
-                                        "type": "boolean",
-                                        "description": "%c_cpp.debuggers.logging.traceResponse.description%",
-                                        "default": false
-                                    },
-                                    "natvisDiagnostics": {
-                                        "anyOf": [
-                                            {
-                                                "type": "string",
-                                                "enum": [
-                                                    "verbose",
-                                                    "warning",
-                                                    "error",
-                                                    "none"
-                                                ],
-                                                "enumDescriptions": [
-                                                    "%c_cpp.debuggers.logging.category.verbose.description%",
-                                                    "%c_cpp.debuggers.logging.category.warning.description%",
-                                                    "%c_cpp.debuggers.logging.category.error.description%",
-                                                    "%c_cpp.debuggers.logging.category.none.description%"
-                                                ],
-                                                "description": "%c_cpp.debuggers.logging.natvisDiagnostics.description%",
-                                                "default": "none"
-                                            },
-                                            {
-                                                "type": "boolean",
-                                                "description": "%c_cpp.debuggers.logging.natvisDiagnostics.description%",
-                                                "default": false
-                                            }
-                                        ]
-                                    }
-                                }
                             },
                             "deploySteps": {
                                 "type": "array",
@@ -7237,12 +7069,12 @@
                             },
                             "disableASLR": {
                                 "type": "boolean",
-                                "description": "%c_cpp.debuggers.cpplldb.disableaslr.description%",
+                                "description": "%c_cpp.debuggers.cpplldb.disableAslr.description%",
                                 "default": true
                             },
                             "disableSTDIO": {
                                 "type": "boolean",
-                                "description": "%c_cpp.debuggers.cpplldb.disablestdio.description%",
+                                "description": "%c_cpp.debuggers.cpplldb.disableStdio.description%",
                                 "default": false
                             },
                             "shellExpandArguments": {

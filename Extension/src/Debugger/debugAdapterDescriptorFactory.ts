@@ -65,9 +65,9 @@ export class CpplldbDebugAdapterDescriptorFactory extends AbstractDebugAdapterDe
             if (!await isValidLldbDap(adapter)) {
                 adapter = await findLldbDap();
                 if (adapter) {
-                    void vscode.window.showErrorMessage(localize("debugger.not.available", "The specified LLDB-DAP debuggerPath '{0}' is not valid, falling back to {1}.", session.configuration.debuggerPath, adapter));
+                    void vscode.window.showErrorMessage(localize("debugger.path.not.available.falling.back", "The specified LLDB-DAP debuggerPath '{0}' is not valid, falling back to {1}.", session.configuration.debuggerPath, adapter));
                 } else {
-                    void vscode.window.showErrorMessage(localize("debugger.not.available", "The specified LLDB-DAP debuggerPath '{0}' is not valid and no fallback was found.", session.configuration.debuggerPath));
+                    void vscode.window.showErrorMessage(localize("debugger.path.not.available", "The specified LLDB-DAP debuggerPath '{0}' is not valid and no fallback was found.", session.configuration.debuggerPath));
                     return null;
                 }
             }
@@ -78,7 +78,7 @@ export class CpplldbDebugAdapterDescriptorFactory extends AbstractDebugAdapterDe
         }
 
         if (!adapter) {
-            void vscode.window.showErrorMessage(localize("debugger.not.available", "No LLDB-DAP debugger found. Please add it to the path, or set the debuggerPath property in the launch.json file."));
+            void vscode.window.showErrorMessage(localize("lldbdap.debugger.not.available", "No LLDB-DAP debugger found. Please add it to the path, or set the debuggerPath property in the launch.json file."));
             return null;
         }
 

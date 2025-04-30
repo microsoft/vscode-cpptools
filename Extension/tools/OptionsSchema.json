@@ -602,7 +602,7 @@
         "program": {
           "type": "string",
           "description": "%c_cpp.debuggers.program.description%",
-          "default": "${workspaceRoot}/a.out"
+          "default": "${workspaceFolder}/a.out"
         },
         "args": {
           "type": "array",
@@ -843,7 +843,7 @@
         "program": {
           "type": "string",
           "description": "%c_cpp.debuggers.program.description%",
-          "default": "${workspaceRoot}/a.out"
+          "default": "${workspaceFolder}/a.out"
         },
         "type": {
           "type": "string",
@@ -971,7 +971,7 @@
         "program": {
           "type": "string",
           "description": "%c_cpp.debuggers.program.description%",
-          "default": "${workspaceRoot}/a.out"
+          "default": "${workspaceFolder}/a.out"
         },
         "args": {
           "type": "array",
@@ -1044,21 +1044,17 @@
             }
           ]
         },
-        "logging": {
-          "$ref": "#/definitions/Logging",
-          "description": "%c_cpp.debuggers.logging.description%"
-        },
         "deploySteps": {
           "$ref": "#/definitions/DeploySteps"
         },
         "disableASLR": {
           "type": "boolean",
-          "description": "%c_cpp.debuggers.cpplldb.disableaslr.description%",
+          "description": "%c_cpp.debuggers.cpplldb.disableAslr.description%",
           "default": true
         },
         "disableSTDIO": {
           "type": "boolean",
-          "description": "%c_cpp.debuggers.cpplldb.disablestdio.description%",
+          "description": "%c_cpp.debuggers.cpplldb.disableStdio.description%",
           "default": false
         },
         "shellExpandArguments": {
@@ -1181,7 +1177,7 @@
         "program": {
           "type": "string",
           "description": "%c_cpp.debuggers.program.description%",
-          "default": "${workspaceRoot}/a.out"
+          "default": "${workspaceFolder}/a.out"
         },
         "type": {
           "type": "string",
@@ -1237,21 +1233,17 @@
           "description": "%c_cpp.debuggers.cpplldb.waitFor.description%",
           "default": true
         },
-        "logging": {
-          "$ref": "#/definitions/Logging",
-          "description": "%c_cpp.debuggers.logging.description%"
-        },
         "deploySteps": {
           "$ref": "#/definitions/DeploySteps"
         },
         "disableASLR": {
           "type": "boolean",
-          "description": "%c_cpp.debuggers.cpplldb.disableaslr.description%",
+          "description": "%c_cpp.debuggers.cpplldb.disableAslr.description%",
           "default": true
         },
         "disableSTDIO": {
           "type": "boolean",
-          "description": "%c_cpp.debuggers.cpplldb.disablestdio.description%",
+          "description": "%c_cpp.debuggers.cpplldb.disableStdio.description%",
           "default": false
         },
         "shellExpandArguments": {
@@ -1389,7 +1381,7 @@
         "program": {
           "type": "string",
           "description": "%c_cpp.debuggers.program.description%",
-          "default": "${workspaceRoot}/program.exe"
+          "default": "${workspaceFolder}/program.exe"
         },
         "args": {
           "type": "array",
@@ -1407,7 +1399,7 @@
         "cwd": {
           "type": "string",
           "description": "%c_cpp.debuggers.cwd.description%",
-          "default": "${workspaceRoot}"
+          "default": "${workspaceFolder}"
         },
         "environment": {
           "type": "array",
@@ -1538,7 +1530,7 @@
         "program": {
           "type": "string",
           "description": "%c_cpp.debuggers.program.description%",
-          "default": "${workspaceRoot}/program.exe"
+          "default": "${workspaceFolder}/program.exe"
         },
         "type": {
           "type": "string",
