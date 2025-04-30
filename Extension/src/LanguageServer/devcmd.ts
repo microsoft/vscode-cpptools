@@ -16,7 +16,7 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 const ERROR_NO_CONTEXT = localize('no.context.provided', 'No context provided');
-const NOT_WINDOWS = localize('not.windows', 'This command is only available on Windows');
+const ERROR_NOT_WINDOWS = localize('not.windows', 'This command is only available on Windows');
 const ERROR_NO_VS_FOUND = localize('error.no.vs', 'A Visual Studio installation with the C++ compiler was not found');
 const ERROR_OPERATION_CANCELLED = localize('operation.cancelled', 'The operation was cancelled');
 const ERROR_NO_HOSTS_FOUND = localize('no.hosts', 'No hosts found');
@@ -33,7 +33,7 @@ export function isEnvironmentOverrideApplied(context?: vscode.ExtensionContext) 
 
 export async function setEnvironment(context?: vscode.ExtensionContext) {
     if (!isWindows) {
-        throw new Error(NOT_WINDOWS);
+        throw new Error(ERROR_NOT_WINDOWS);
     }
 
     if (!context) {
