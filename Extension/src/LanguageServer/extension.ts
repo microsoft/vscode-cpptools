@@ -432,8 +432,8 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCopilotHover', enabled ? () => onCopilotHover() : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SetDevEnvironment', enabled ? () => onSetDevEnvironment() : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ClearDevEnvironment', enabled ? () => onClearDevEnvironment() : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SetDevEnvironment', enabled ? onSetDevEnvironment : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ClearDevEnvironment', enabled ? onClearDevEnvironment : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -1554,14 +1554,17 @@ async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, ho
     return true;
 }
 
-async function onSetDevEnvironment(): Promise<void> {
+async function onSetDevEnvironment(sender?: any): Promise<void> {
+    let success: boolean = true;
     try {
         await setEnvironment(util.extensionContext);
         await vscode.commands.executeCommand('setContext', 'cpptools.msvcEnvironmentFound', util.hasMsvcEnvironment());
         void vscode.window.showInformationMessage(`${util.extensionContext?.environmentVariableCollection.description} successfully set.`);
     } catch (error: any) {
+        success = false;
         void vscode.window.showErrorMessage(`Developer environment not set: ${error.message}`);
     }
+    telemetry.logLanguageServerEvent("SetDevEnvironment", { "sender": util.getSenderType(sender), success: success.toString() });
 }
 
 async function onClearDevEnvironment(): Promise<void> {
