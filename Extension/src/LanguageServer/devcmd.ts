@@ -8,6 +8,11 @@ import { vcvars } from 'node-vcvarsall';
 import { vswhere } from 'node-vswhere';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { CppSettings } from './settings';
+
+export function isEnvironmentOverrideApplied(context?: vscode.ExtensionContext) {
+    return context?.environmentVariableCollection.get('VCToolsInstallDir') !== undefined;
+}
 
 export async function setEnvironment(context?: vscode.ExtensionContext) {
     if (!context) {
@@ -42,14 +47,15 @@ export async function setEnvironment(context?: vscode.ExtensionContext) {
         host: match(host, { 'x86': 'x86', 'x64': 'x64' }) ?? 'x64',
         target: match(target, { 'x86': 'x86', 'x64': 'x64', 'arm64': 'ARM64', 'arm': 'ARM' }) ?? 'x64'
     });
-    const persist = vscode.workspace.getConfiguration('devcmd').get<boolean>('persistEnvironment') === true;
+    const settings = new CppSettings(vscode.workspace.workspaceFolders?.at(0)?.uri);
 
     context.environmentVariableCollection.clear();
     for (const key of Object.keys(vars)) {
         context.environmentVariableCollection.replace(key, vars[key].replace(`%${key}%`, '${env:' + key + '}'));
     }
     context.environmentVariableCollection.description = (arch ? `${arch} ` : '') + 'Developer Command Prompt for ' + vs.displayName;
-    context.environmentVariableCollection.persistent = persist;
+    context.environmentVariableCollection.persistent = settings.persistDevEnvironment;
+
     return true;
 }
 

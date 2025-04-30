@@ -1565,7 +1565,10 @@ export function hasMsvcEnvironment(): boolean {
         'WindowsSDKLibVersion',
         'WindowsSDKVersion'
     ];
-    return msvcEnvVars.every((envVarName) => process.env[envVarName] !== undefined && process.env[envVarName] !== '');
+    return msvcEnvVars.every(envVarName =>
+        (process.env[envVarName] !== undefined && process.env[envVarName] !== '') ||
+        extensionContext?.environmentVariableCollection?.get(envVarName) !== undefined
+    );
 }
 
 function isIntegral(str: string): boolean {

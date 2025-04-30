@@ -121,7 +121,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         if (this.isClConfiguration(selection.label)) {
-            this.showErrorIfClNotAvailable(selection.label);
+            await this.showErrorIfClNotAvailable(selection.label);
         }
 
         return [selection.configuration];
@@ -582,12 +582,32 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         return configurationLabel.startsWith("C/C++: cl.exe");
     }
 
-    private showErrorIfClNotAvailable(_configurationLabel: string): boolean {
-        if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
-            void vscode.window.showErrorMessage(localize({
-                key: "cl.exe.not.available",
-                comment: ["{0} is a command option in a menu. {1} is the product name \"Developer Command Prompt for VS\"."]
-            }, "{0} is only usable when VS Code is run from the {1}.", `cl.exe ${this.buildAndDebugActiveFileStr()}`, "Developer Command Prompt for VS"));
+    /**
+     * @returns `true` if the Developer Environment is not available and an error was shown to the user, `false` if the Developer Environment is available or the user chose to apply it.
+     */
+    private async showErrorIfClNotAvailable(_configurationLabel: string): Promise<boolean> {
+        if (!util.hasMsvcEnvironment()) {
+            const applyDevEnv = localize("apply.dev.env", "Apply Developer Environment");
+            const cancel = localize("cancel", "Cancel");
+            const response = await vscode.window.showErrorMessage(
+                localize({
+                    key: "cl.exe.not.available",
+                    comment: ["{0} is a command option in a menu."]
+                }, "{0} requires the Visual Studio Developer Environment.", `cl.exe ${this.buildAndDebugActiveFileStr()}`),
+                applyDevEnv,
+                cancel);
+            if (response === applyDevEnv) {
+                try {
+                    await vscode.commands.executeCommand('C_Cpp.SetDevEnvironment');
+                } catch {
+                    // Ignore the error, the user will be prompted to apply the environment manually.
+                }
+            }
+            if (util.hasMsvcEnvironment()) {
+                return false;
+            }
+            void vscode.window.showErrorMessage(
+                localize('dev.env.not.applied', 'The Visual Studio Developer Environment was not applied. Please try again or run VS Code from the Developer Command Prompt for VS.'));
             return true;
         }
         return false;
@@ -967,7 +987,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 placeHolder: items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration")
             });
         }
-        if (selection && this.isClConfiguration(selection.configuration.name) && this.showErrorIfClNotAvailable(selection.configuration.name)) {
+        if (selection && this.isClConfiguration(selection.configuration.name) && await this.showErrorIfClNotAvailable(selection.configuration.name)) {
             return;
         }
         return selection?.configuration;

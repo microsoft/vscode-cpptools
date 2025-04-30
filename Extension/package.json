@@ -3538,6 +3538,12 @@
                         "default": "default",
                         "markdownDescription": "%c_cpp.configuration.windowsErrorReportingMode.markdownDescription%",
                         "scope": "window"
+                    },
+                    "C_Cpp.persistDevEnvironment": {
+                        "type": "boolean",
+                        "default": true,
+                        "markdownDescription": "%c_cpp.configuration.persistDevEnvironment.markdownDescription%",
+                        "scope": "resource"
                     }
                 }
             }
