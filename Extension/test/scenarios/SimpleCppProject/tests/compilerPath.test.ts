@@ -263,7 +263,7 @@ describe('validateCompilerPath', () => {
         equal(result.compilerName, 'icc', 'compilerName should be found');
         deepEqual(result.allCompilerArgs, ['-O2'], 'args should match');
         ok(result.error?.includes('Cannot find'), 'Should have an error for unknown compiler');
-        ok(result.error?.includes('missing double quotes'), 'Should have an error for missing double quotes');
+        ok(result.error?.includes('surround the compiler path with double quotes'), 'Should have an error for missing double quotes');
         equal(result.telemetry?.PathNonExistent, 1, 'Should have telemetry for relative paths');
         equal(result.telemetry?.PathNotAFile, undefined, 'Should not have telemetry for invalid paths');
         equal(result.telemetry?.CompilerPathMissingQuotes, 1, 'Should have telemetry for missing quotes');

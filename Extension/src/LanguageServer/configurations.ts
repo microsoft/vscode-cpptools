@@ -63,7 +63,7 @@ export interface ConfigurationJson {
 export interface Configuration {
     name: string;
     compilerPathInCppPropertiesJson?: string | null;
-    compilerPath?: string;
+    compilerPath?: string; // Can be set to null based on the schema, but it will be fixed in parsePropertiesFile.
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
     compilerArgsLegacy?: string[];
@@ -1443,10 +1443,17 @@ export class CppProperties {
                 }
             }
 
-            // Configuration.compileCommands is allowed to be defined as a string in the schema, but we send an array to the language server.
-            // For having a predictable behavior, we convert it here to an array of strings.
+            // Special sanitization of the newly parsed configuration file happens here:
             for (let i: number = 0; i < newJson.configurations.length; i++) {
+                // Configuration.compileCommands is allowed to be defined as a string in the schema, but we send an array to the language server.
+                // For having a predictable behavior, we convert it here to an array of strings.
                 newJson.configurations[i].compileCommands = this.forceCompileCommandsAsArray(<any>newJson.configurations[i].compileCommands);
+
+                // `compilerPath` is allowed to be set to null in the schema so that empty string is not the default value (which has another meaning).
+                // If we detect this, we treat it as undefined.
+                if (newJson.configurations[i].compilerPath === null) {
+                    delete newJson.configurations[i].compilerPath;
+                }
             }
 
             this.configurationJson = newJson;
@@ -1647,7 +1654,7 @@ export class CppProperties {
 
             const compilerPathErrors: string[] = [];
             if (compilerPathMayNeedQuotes && !pathExists) {
-                compilerPathErrors.push(localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.'));
+                compilerPathErrors.push(localize("path.with.spaces", 'Compiler path with spaces could not be found. If this was intended to include compiler arguments, surround the compiler path with double quotes (").'));
                 telemetry.CompilerPathMissingQuotes = 1;
             }
 
