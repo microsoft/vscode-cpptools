@@ -17,7 +17,7 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
-import { modelSelector } from '../constants';
+import { isWindows, modelSelector } from '../constants';
 import { instrument } from '../instrumentation';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
@@ -1562,6 +1562,9 @@ async function onSetDevEnvironment(sender?: any): Promise<void> {
         void vscode.window.showInformationMessage(`${util.extensionContext?.environmentVariableCollection.description} successfully set.`);
     } catch (error: any) {
         success = false;
+        if (!isWindows) {
+            throw error;
+        }
         void vscode.window.showErrorMessage(`Developer environment not set: ${error.message}`);
     }
     telemetry.logLanguageServerEvent("SetDevEnvironment", { "sender": util.getSenderType(sender), success: success.toString() });

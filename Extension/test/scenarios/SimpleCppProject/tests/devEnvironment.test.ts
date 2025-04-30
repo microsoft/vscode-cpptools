@@ -20,7 +20,15 @@ suite("set developer environment", () => {
             equal(util.hasMsvcEnvironment(), true, "MSVC environment not set correctly.");
         });
     } else {
-        test("set developer environment (Linux/macOS)", () => {
+        test("set developer environment (Linux/macOS)", async () => {
+            try {
+                await vscode.commands.executeCommand('C_Cpp.SetDevEnvironment', 'test');
+                equal(false, true, "Should not be able to set developer environment on non-Windows platform.");
+            }
+            catch (e) {
+                equal((e as Error).message, 'This command is only available on Windows', "Should throw error when trying to set developer environment on non-Windows platform.");
+            }
+            equal(util.hasMsvcEnvironment(), false, "MSVC environment should not be set on non-Windows platforms.");
         });
     }
 });
