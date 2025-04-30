@@ -15,17 +15,17 @@ import { CppSettings } from './settings';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-const ERROR_NO_CONTEXT = localize('no.context.provided', 'No context provided');
-const ERROR_NOT_WINDOWS = localize('not.windows', 'This command is only available on Windows');
-const ERROR_NO_VS_FOUND = localize('error.no.vs', 'A Visual Studio installation with the C++ compiler was not found');
-const ERROR_OPERATION_CANCELLED = localize('operation.cancelled', 'The operation was cancelled');
-const ERROR_NO_HOSTS_FOUND = localize('no.hosts', 'No hosts found');
-const CONFIGURING_DEV_ENV = localize('config.dev.env', 'Configuring Developer Environment...');
-const SELECT_VS_INSTALLATION = localize('select.vs.install', 'Select a Visual Studio installation');
-const ADVANCED_OPTIONS = localize('advanced.options', 'Advanced options...');
-const ADVANCED_OPTIONS_DESCRIPTION = localize('advanced.options.desc', 'Select a specific host/target architecture, toolset version, etc.');
-const SELECT_TOOLSET_VERSION = localize('select.toolset', 'Select a toolset version');
-const SELECT_HOST_TARGET_ARCH = localize('select.host.target', 'Select a host and target architecture');
+const errorNoContext = localize('no.context.provided', 'No context provided');
+const errorNotWindows = localize('not.windows', 'This command is only available on Windows');
+const errorNoVSFound = localize('error.no.vs', 'A Visual Studio installation with the C++ compiler was not found');
+const errorOperationCancelled = localize('operation.cancelled', 'The operation was cancelled');
+const errorNoHostsFound = localize('no.hosts', 'No hosts found');
+const configuringDevEnv = localize('config.dev.env', 'Configuring Developer Environment...');
+const selectVSInstallation = localize('select.vs.install', 'Select a Visual Studio installation');
+const advancedOptions = localize('advanced.options', 'Advanced options...');
+const advancedOptionsDescription = localize('advanced.options.desc', 'Select a specific host/target architecture, toolset version, etc.');
+const selectToolsetVersion = localize('select.toolset', 'Select a toolset version');
+const selectHostTargetArch = localize('select.host.target', 'Select a host and target architecture');
 
 export function isEnvironmentOverrideApplied(context?: vscode.ExtensionContext) {
     return context?.environmentVariableCollection.get('VCToolsInstallDir') !== undefined;
@@ -33,16 +33,16 @@ export function isEnvironmentOverrideApplied(context?: vscode.ExtensionContext) 
 
 export async function setEnvironment(context?: vscode.ExtensionContext) {
     if (!isWindows) {
-        throw new Error(ERROR_NOT_WINDOWS);
+        throw new Error(errorNotWindows);
     }
 
     if (!context) {
-        throw new Error(ERROR_NO_CONTEXT);
+        throw new Error(errorNoContext);
     }
 
     const vses = await getVSInstallations();
     if (!vses) {
-        throw new Error(ERROR_NO_VS_FOUND);
+        throw new Error(errorNoVSFound);
     }
 
     let vs = await chooseVSInstallation(vses);
@@ -55,7 +55,7 @@ export async function setEnvironment(context?: vscode.ExtensionContext) {
     const vars = await vscode.window.withProgress({
         cancellable: false,
         location: vscode.ProgressLocation.Notification,
-        title: CONFIGURING_DEV_ENV
+        title: configuringDevEnv
     }, () => vcvars.getVCVars(vs, options));
 
     if (!vars || !vars['INCLUDE']) {
@@ -89,7 +89,7 @@ async function getVSInstallations() {
     });
 
     if (installations.length === 0) {
-        throw new Error(ERROR_NO_VS_FOUND);
+        throw new Error(errorNoVSFound);
     }
     return installations;
 }
@@ -100,32 +100,32 @@ async function chooseVSInstallation(installations: vswhere.Installation[]): Prom
         description: localize('default.settings', 'Default settings for {0}', installation.displayName)
     });
     items.push({
-        label: ADVANCED_OPTIONS,
-        description: ADVANCED_OPTIONS_DESCRIPTION
+        label: advancedOptions,
+        description: advancedOptionsDescription
     });
     const selection = await vscode.window.showQuickPick(items, {
-        placeHolder: SELECT_VS_INSTALLATION
+        placeHolder: selectVSInstallation
     });
     if (!selection) {
-        throw new Error(ERROR_OPERATION_CANCELLED);
+        throw new Error(errorOperationCancelled);
     }
 
     return installations.find(installation => installation.displayName === selection.label);
-}
-
-async function getAdvancedConfiguration(vses: vswhere.Installation[]): Promise<Compiler> {
-    const compiler = await chooseCompiler(vses);
-    if (!compiler) {
-        throw new Error(ERROR_OPERATION_CANCELLED);
-    }
-    await setOptions(compiler);
-    return compiler;
 }
 
 interface Compiler {
     version: string;
     vs: vswhere.Installation;
     options: vcvars.Options;
+}
+
+async function getAdvancedConfiguration(vses: vswhere.Installation[]): Promise<Compiler> {
+    const compiler = await chooseCompiler(vses);
+    if (!compiler) {
+        throw new Error(errorOperationCancelled);
+    }
+    await setOptions(compiler);
+    return compiler;
 }
 
 async function chooseCompiler(vses: vswhere.Installation[]): Promise<Compiler | undefined> {
@@ -146,10 +146,10 @@ async function chooseCompiler(vses: vswhere.Installation[]): Promise<Compiler | 
         description: compiler.vs.displayName
     });
     const selection = await vscode.window.showQuickPick(items, {
-        placeHolder: SELECT_TOOLSET_VERSION
+        placeHolder: selectToolsetVersion
     });
     if (!selection) {
-        throw new Error(ERROR_OPERATION_CANCELLED);
+        throw new Error(errorOperationCancelled);
     }
     return compilers.find(compiler => compiler.version === selection.label && compiler.vs.displayName === selection.description);
 }
@@ -163,10 +163,10 @@ async function setOptions(compiler: Compiler): Promise<void> {
             description: localize('host.target', 'host = {0}, target = {1}', ht.host, ht.target)
         });
         const selection = await vscode.window.showQuickPick(items, {
-            placeHolder: SELECT_HOST_TARGET_ARCH
+            placeHolder: selectHostTargetArch
         });
         if (!selection) {
-            throw new Error(ERROR_OPERATION_CANCELLED);
+            throw new Error(errorOperationCancelled);
         }
         compiler.options.arch = <vcvars.Architecture>selection.label;
     }
@@ -175,7 +175,7 @@ async function setOptions(compiler: Compiler): Promise<void> {
 async function getHostsAndTargets(vcPath: string): Promise<vcvars.HostTarget[]> {
     const hosts = await fs.readdir(vcPath);
     if (hosts.length === 0) {
-        throw new Error(ERROR_NO_HOSTS_FOUND);
+        throw new Error(errorNoHostsFound);
     }
     const hostTargets: vcvars.HostTarget[] = [];
     for (const host of hosts) {
@@ -193,9 +193,6 @@ async function getHostsAndTargets(vcPath: string): Promise<vcvars.HostTarget[]> 
         }
     }
     return hostTargets;
-}
-
-export function deactivate() {
 }
 
 function match<T>(item: string, cases: { [key: string]: T }): T | undefined {
