@@ -16,9 +16,9 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 const errorNoContext = localize('no.context.provided', 'No context provided');
-const errorNotWindows = localize('not.windows', 'This command is only available on Windows');
+const errorNotWindows = localize('not.windows', 'The "Set Visual Studio Developer Environment" command is only available on Windows');
 const errorNoVSFound = localize('error.no.vs', 'A Visual Studio installation with the C++ compiler was not found');
-const errorOperationCancelled = localize('operation.cancelled', 'The operation was cancelled');
+export const errorOperationCancelled = localize('operation.cancelled', 'The operation was cancelled');
 const errorNoHostsFound = localize('no.hosts', 'No hosts found');
 const configuringDevEnv = localize('config.dev.env', 'Configuring Developer Environment...');
 const selectVSInstallation = localize('select.vs.install', 'Select a Visual Studio installation');
@@ -74,7 +74,7 @@ export async function setEnvironment(context?: vscode.ExtensionContext) {
     for (const key of Object.keys(vars)) {
         context.environmentVariableCollection.replace(key, vars[key].replace(`%${key}%`, '${env:' + key + '}'));
     }
-    context.environmentVariableCollection.description = localize('dev.env.for', '{0} Developer Environment for {1}', arch, vs.displayName);
+    context.environmentVariableCollection.description = localize('dev.env.for', '{0} Developer Environment for {1}', arch, vsDisplayNameWithSuffix(vs));
     context.environmentVariableCollection.persistent = settings.persistDevEnvironment;
 
     return true;
@@ -94,10 +94,24 @@ async function getVSInstallations() {
     return installations;
 }
 
+function vsDisplayNameWithSuffix(installation: vswhere.Installation): string {
+    const suffix = (() => {
+        if (installation.channelId.endsWith('.main')) {
+            return 'main';
+        } else if (installation.channelId.endsWith('.IntPreview')) {
+            return 'Int Preview';
+        } else if (installation.channelId.endsWith('.Preview')) {
+            return 'Preview';
+        }
+        return '';
+    })();
+    return `${installation.displayName}${suffix ? ` ${suffix}` : ''}`;
+}
+
 async function chooseVSInstallation(installations: vswhere.Installation[]): Promise<vswhere.Installation | undefined> {
     const items: vscode.QuickPickItem[] = installations.map(installation => <vscode.QuickPickItem>{
-        label: installation.displayName,
-        description: localize('default.settings', 'Default settings for {0}', installation.displayName)
+        label: vsDisplayNameWithSuffix(installation),
+        detail: localize('default.env', 'Default environment for {0}', installation.catalog.productDisplayVersion)
     });
     items.push({
         label: advancedOptions,
@@ -110,7 +124,7 @@ async function chooseVSInstallation(installations: vswhere.Installation[]): Prom
         throw new Error(errorOperationCancelled);
     }
 
-    return installations.find(installation => installation.displayName === selection.label);
+    return installations.find(installation => vsDisplayNameWithSuffix(installation) === selection.label);
 }
 
 interface Compiler {
@@ -143,7 +157,7 @@ async function chooseCompiler(vses: vswhere.Installation[]): Promise<Compiler | 
     }
     const items = compilers.map(compiler => <vscode.QuickPickItem>{
         label: compiler.version,
-        description: compiler.vs.displayName
+        description: vsDisplayNameWithSuffix(compiler.vs)
     });
     const selection = await vscode.window.showQuickPick(items, {
         placeHolder: selectToolsetVersion
@@ -151,7 +165,7 @@ async function chooseCompiler(vses: vswhere.Installation[]): Promise<Compiler | 
     if (!selection) {
         throw new Error(errorOperationCancelled);
     }
-    return compilers.find(compiler => compiler.version === selection.label && compiler.vs.displayName === selection.description);
+    return compilers.find(compiler => compiler.version === selection.label && vsDisplayNameWithSuffix(compiler.vs) === selection.description);
 }
 
 async function setOptions(compiler: Compiler): Promise<void> {

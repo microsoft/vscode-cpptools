@@ -29,7 +29,7 @@ import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, code
 import { registerRelatedFilesProvider } from './copilotProviders';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
-import { setEnvironment } from './devcmd';
+import { errorOperationCancelled, setEnvironment } from './devcmd';
 import { getLanguageConfig } from './languageConfig';
 import { CppConfigurationLanguageModelTool } from './lmTool';
 import { getLocaleId } from './localization';
@@ -432,8 +432,8 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCopilotHover', enabled ? () => onCopilotHover() : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SetDevEnvironment', enabled ? onSetDevEnvironment : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ClearDevEnvironment', enabled ? onClearDevEnvironment : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SetVSDevEnvironment', enabled ? onSetVSDevEnvironment : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ClearVSDevEnvironment', enabled ? onClearVSDevEnvironment : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -1554,23 +1554,27 @@ async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, ho
     return true;
 }
 
-async function onSetDevEnvironment(sender?: any): Promise<void> {
+async function onSetVSDevEnvironment(sender?: any): Promise<void> {
     let success: boolean = true;
     try {
         await setEnvironment(util.extensionContext);
         await vscode.commands.executeCommand('setContext', 'cpptools.msvcEnvironmentFound', util.hasMsvcEnvironment());
-        void vscode.window.showInformationMessage(`${util.extensionContext?.environmentVariableCollection.description} successfully set.`);
+        if (sender !== 'buildAndDebug') {
+            void vscode.window.showInformationMessage(`${util.extensionContext?.environmentVariableCollection.description} successfully set.`);
+        }
     } catch (error: any) {
         success = false;
         if (!isWindows) {
             throw error;
         }
-        void vscode.window.showErrorMessage(`Developer environment not set: ${error.message}`);
+        if (error.message !== errorOperationCancelled) {
+            void vscode.window.showErrorMessage(`Failed to apply VS developer environment: ${error.message}`);
+        }
     }
-    telemetry.logLanguageServerEvent("SetDevEnvironment", { "sender": util.getSenderType(sender), success: success.toString() });
+    telemetry.logLanguageServerEvent("SetVSDevEnvironment", { "sender": util.getSenderType(sender), success: success.toString() });
 }
 
-async function onClearDevEnvironment(): Promise<void> {
+async function onClearVSDevEnvironment(): Promise<void> {
     util.extensionContext?.environmentVariableCollection.clear();
     await vscode.commands.executeCommand('setContext', 'cpptools.msvcEnvironmentFound', util.hasMsvcEnvironment());
 }

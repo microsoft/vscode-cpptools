@@ -3539,10 +3539,10 @@
                         "markdownDescription": "%c_cpp.configuration.windowsErrorReportingMode.markdownDescription%",
                         "scope": "window"
                     },
-                    "C_Cpp.persistDevEnvironment": {
+                    "C_Cpp.persistVSDeveloperEnvironment": {
                         "type": "boolean",
                         "default": true,
-                        "markdownDescription": "%c_cpp.configuration.persistDevEnvironment.markdownDescription%",
+                        "markdownDescription": "%c_cpp.configuration.persistVSDeveloperEnvironment.markdownDescription%",
                         "scope": "window"
                     }
                 }
@@ -3710,13 +3710,13 @@
                 "icon": "$(run)"
             },
             {
-                "command": "C_Cpp.SetDevEnvironment",
-                "title": "%c_cpp.command.SetDevEnvironment.title%",
+                "command": "C_Cpp.SetVSDevEnvironment",
+                "title": "%c_cpp.command.SetVSDevEnvironment.title%",
                 "category": "C/C++"
             },
             {
-                "command": "C_Cpp.ClearDevEnvironment",
-                "title": "%c_cpp.command.ClearDevEnvironment.title%",
+                "command": "C_Cpp.ClearVSDevEnvironment",
+                "title": "%c_cpp.command.ClearVSDevEnvironment.title%",
                 "category": "C/C++"
             },
             {
@@ -6162,11 +6162,11 @@
                     "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile"
                 },
                 {
-                    "command": "C_Cpp.SetDevEnvironment",
+                    "command": "C_Cpp.SetVSDevEnvironment",
                     "when": "workspacePlatform == windows"
                 },
                 {
-                    "command": "C_Cpp.ClearDevEnvironment",
+                    "command": "C_Cpp.ClearVSDevEnvironment",
                     "when": "workspacePlatform == windows"
                 },
                 {

@@ -586,31 +586,37 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
      * @returns `true` if the Developer Environment is not available and an error was shown to the user, `false` if the Developer Environment is available or the user chose to apply it.
      */
     private async showErrorIfClNotAvailable(_configurationLabel: string): Promise<boolean> {
-        if (!util.hasMsvcEnvironment()) {
-            const applyDevEnv = localize("apply.dev.env", "Apply Developer Environment");
-            const cancel = localize("cancel", "Cancel");
-            const response = await vscode.window.showErrorMessage(
-                localize({
-                    key: "cl.exe.not.available",
-                    comment: ["{0} is a command option in a menu."]
-                }, "{0} requires the Visual Studio Developer Environment.", `cl.exe ${this.buildAndDebugActiveFileStr()}`),
-                applyDevEnv,
-                cancel);
-            if (response === applyDevEnv) {
-                try {
-                    await vscode.commands.executeCommand('C_Cpp.SetDevEnvironment', 'buildAndDebug');
-                } catch {
-                    // Ignore the error, the user will be prompted to apply the environment manually.
-                }
+        if (util.hasMsvcEnvironment()) {
+            return false; // No error to show
+        }
+
+        const applyDevEnv = localize("apply.dev.env", "Apply Developer Environment");
+        const cancel = localize("cancel", "Cancel");
+        const response = await vscode.window.showErrorMessage(
+            localize({
+                key: "cl.exe.not.available",
+                comment: ["{0} is a command option in a menu."]
+            }, "{0} requires the Visual Studio Developer Environment.", `cl.exe ${this.buildAndDebugActiveFileStr()}`),
+            applyDevEnv,
+            cancel);
+        if (response === applyDevEnv) {
+            try {
+                await vscode.commands.executeCommand('C_Cpp.SetVSDevEnvironment', 'buildAndDebug');
+            } catch (e: any) {
+                // Ignore the error, the user will be prompted to apply the environment manually.
             }
-            if (util.hasMsvcEnvironment()) {
-                return false;
-            }
-            void vscode.window.showErrorMessage(
-                localize('dev.env.not.applied', 'The Visual Studio Developer Environment was not applied. Please try again or run VS Code from the Developer Command Prompt for VS.'));
+        }
+        if (response === cancel) {
+            // A message was already shown, so exit early noting that the environment is not available. We don't need to show another error message.
             return true;
         }
-        return false;
+
+        if (util.hasMsvcEnvironment()) {
+            return false;
+        }
+        void vscode.window.showErrorMessage(
+            localize('dev.env.not.applied', 'The Visual Studio Developer Environment was not applied. Please try again or run VS Code from the Developer Command Prompt for VS.'));
+        return true;
     }
 
     private getLLDBFrameworkPath(): string | undefined {
