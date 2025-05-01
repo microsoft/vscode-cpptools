@@ -63,7 +63,7 @@ export interface ConfigurationJson {
 export interface Configuration {
     name: string;
     compilerPathInCppPropertiesJson?: string | null;
-    compilerPath?: string | null;
+    compilerPath?: string; // Can be set to null based on the schema, but it will be fixed in parsePropertiesFile.
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
     compilerArgsLegacy?: string[];
@@ -982,14 +982,13 @@ export class CppProperties {
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
                 if (configuration.compilerPath === "${default}") {
-                    configuration.compilerPath = settings.defaultCompilerPath;
-                }
-                if (configuration.compilerPath === null) {
+                    configuration.compilerPath = settings.defaultCompilerPath ?? undefined;
                     configuration.compilerPathIsExplicit = true;
-                } else if (configuration.compilerPath !== undefined) {
+                }
+                if (configuration.compilerPath) {
                     configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
                     configuration.compilerPathIsExplicit = true;
-                } else {
+                } else if (configuration.compilerPathIsExplicit === undefined) {
                     configuration.compilerPathIsExplicit = false;
                 }
             }
@@ -1444,10 +1443,17 @@ export class CppProperties {
                 }
             }
 
-            // Configuration.compileCommands is allowed to be defined as a string in the schema, but we send an array to the language server.
-            // For having a predictable behavior, we convert it here to an array of strings.
+            // Special sanitization of the newly parsed configuration file happens here:
             for (let i: number = 0; i < newJson.configurations.length; i++) {
+                // Configuration.compileCommands is allowed to be defined as a string in the schema, but we send an array to the language server.
+                // For having a predictable behavior, we convert it here to an array of strings.
                 newJson.configurations[i].compileCommands = this.forceCompileCommandsAsArray(<any>newJson.configurations[i].compileCommands);
+
+                // `compilerPath` is allowed to be set to null in the schema so that empty string is not the default value (which has another meaning).
+                // If we detect this, we treat it as undefined.
+                if (newJson.configurations[i].compilerPath === null) {
+                    delete newJson.configurations[i].compilerPath;
+                }
             }
 
             this.configurationJson = newJson;
@@ -1596,6 +1602,80 @@ export class CppProperties {
         return result;
     }
 
+    /**
+     * Get the compilerPath and args from a compilerPath string that has already passed through
+     * `this.resolvePath`. If there are errors processing the path, those will also be returned.
+     *
+     * @param resolvedCompilerPath a compilerPath string that has already been resolved.
+     * @param rootUri the workspace folder URI, if any.
+     */
+    public static validateCompilerPath(resolvedCompilerPath: string, rootUri?: vscode.Uri): util.CompilerPathAndArgs {
+        if (!resolvedCompilerPath) {
+            return { compilerName: '', allCompilerArgs: [], compilerArgsFromCommandLineInPath: [] };
+        }
+        resolvedCompilerPath = resolvedCompilerPath.trim();
+
+        const settings = new CppSettings(rootUri);
+        const compilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath, undefined, rootUri?.fsPath);
+        const compilerLowerCase: string = compilerPathAndArgs.compilerName.toLowerCase();
+        const isCl: boolean = compilerLowerCase === "cl" || compilerLowerCase === "cl.exe";
+        const telemetry: { [key: string]: number } = {};
+
+        // Don't error cl.exe paths because it could be for an older preview build.
+        if (!isCl && compilerPathAndArgs.compilerPath) {
+            const compilerPathMayNeedQuotes: boolean = !resolvedCompilerPath.startsWith('"') && resolvedCompilerPath.includes(" ") && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0;
+            let pathExists: boolean = true;
+            const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
+
+            resolvedCompilerPath = compilerPathAndArgs.compilerPath;
+            if (!fs.existsSync(resolvedCompilerPath)) {
+                if (existsWithExeAdded(resolvedCompilerPath)) {
+                    resolvedCompilerPath += ".exe";
+                } else {
+                    const pathLocation = which.sync(resolvedCompilerPath, { nothrow: true });
+                    if (pathLocation) {
+                        resolvedCompilerPath = pathLocation;
+                        compilerPathAndArgs.compilerPath = pathLocation;
+                    } else if (rootUri) {
+                        // Test if it was a relative path.
+                        const absolutePath: string = rootUri.fsPath + path.sep + resolvedCompilerPath;
+                        if (!fs.existsSync(absolutePath)) {
+                            if (existsWithExeAdded(absolutePath)) {
+                                resolvedCompilerPath = absolutePath + ".exe";
+                            } else {
+                                pathExists = false;
+                            }
+                        } else {
+                            resolvedCompilerPath = absolutePath;
+                        }
+                    }
+                }
+            }
+
+            const compilerPathErrors: string[] = [];
+            if (compilerPathMayNeedQuotes && !pathExists) {
+                compilerPathErrors.push(localize("path.with.spaces", 'Compiler path with spaces could not be found. If this was intended to include compiler arguments, surround the compiler path with double quotes (").'));
+                telemetry.CompilerPathMissingQuotes = 1;
+            }
+
+            if (!pathExists) {
+                const message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
+                compilerPathErrors.push(message);
+                telemetry.PathNonExistent = 1;
+            } else if (!util.checkExecutableWithoutExtensionExistsSync(resolvedCompilerPath)) {
+                const message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
+                compilerPathErrors.push(message);
+                telemetry.PathNotAFile = 1;
+            }
+
+            if (compilerPathErrors.length > 0) {
+                compilerPathAndArgs.error = compilerPathErrors.join('\n');
+            }
+        }
+        compilerPathAndArgs.telemetry = telemetry;
+        return compilerPathAndArgs;
+    }
+
     private getErrorsForConfigUI(configIndex: number): ConfigurationErrors {
         const errors: ConfigurationErrors = {};
         if (!this.configurationJson) {
@@ -1608,80 +1688,11 @@ export class CppProperties {
         errors.name = this.isConfigNameUnique(config.name);
         let resolvedCompilerPath: string | undefined | null;
         // Validate compilerPath
-        if (config.compilerPath) {
-            resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true });
-        }
-
         if (!resolvedCompilerPath) {
-            resolvedCompilerPath = this.resolvePath(config.compilerPath);
+            resolvedCompilerPath = this.resolvePath(config.compilerPath, false, false);
         }
-        const settings: CppSettings = new CppSettings(this.rootUri);
-        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
-
-        // compilerPath + args in the same string isn't working yet.
-        const skipFullCommandString = !compilerPathAndArgs.compilerName && resolvedCompilerPath.includes(" ");
-        if (resolvedCompilerPath
-            && !skipFullCommandString
-            // Don't error cl.exe paths because it could be for an older preview build.
-            && compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe"
-            && compilerPathAndArgs.compilerName.toLowerCase() !== "cl") {
-            resolvedCompilerPath = resolvedCompilerPath.trim();
-
-            // Error when the compiler's path has spaces without quotes but args are used.
-            // Except, exclude cl.exe paths because it could be for an older preview build.
-            const compilerPathNeedsQuotes: boolean =
-                (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0) &&
-                !resolvedCompilerPath.startsWith('"') &&
-                compilerPathAndArgs.compilerPath !== undefined &&
-                compilerPathAndArgs.compilerPath !== null &&
-                compilerPathAndArgs.compilerPath.includes(" ");
-
-            const compilerPathErrors: string[] = [];
-            if (compilerPathNeedsQuotes) {
-                compilerPathErrors.push(localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.'));
-            }
-
-            // Get compiler path without arguments before checking if it exists
-            resolvedCompilerPath = compilerPathAndArgs.compilerPath ?? undefined;
-            if (resolvedCompilerPath) {
-                let pathExists: boolean = true;
-                const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
-                if (!fs.existsSync(resolvedCompilerPath)) {
-                    if (existsWithExeAdded(resolvedCompilerPath)) {
-                        resolvedCompilerPath += ".exe";
-                    } else if (!this.rootUri) {
-                        pathExists = false;
-                    } else {
-                        // Check again for a relative path.
-                        const relativePath: string = this.rootUri.fsPath + path.sep + resolvedCompilerPath;
-                        if (!fs.existsSync(relativePath)) {
-                            if (existsWithExeAdded(resolvedCompilerPath)) {
-                                resolvedCompilerPath += ".exe";
-                            } else {
-                                pathExists = false;
-                            }
-                        } else {
-                            resolvedCompilerPath = relativePath;
-                        }
-                    }
-                }
-
-                if (!pathExists) {
-                    const message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
-                    compilerPathErrors.push(message);
-                } else if (compilerPathAndArgs.compilerPath === "") {
-                    const message: string = localize("cannot.resolve.compiler.path", "Invalid input, cannot resolve compiler path");
-                    compilerPathErrors.push(message);
-                } else if (!util.checkExecutableWithoutExtensionExistsSync(resolvedCompilerPath)) {
-                    const message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
-                    compilerPathErrors.push(message);
-                }
-
-                if (compilerPathErrors.length > 0) {
-                    errors.compilerPath = compilerPathErrors.join('\n');
-                }
-            }
-        }
+        const compilerPathAndArgs: util.CompilerPathAndArgs = CppProperties.validateCompilerPath(resolvedCompilerPath, this.rootUri);
+        errors.compilerPath = compilerPathAndArgs.error;
 
         // Validate paths (directories)
         errors.includePath = this.validatePath(config.includePath, { globPaths: true });
@@ -1932,7 +1943,6 @@ export class CppProperties {
 
         // Check for path-related squiggles.
         const paths: string[] = [];
-        let compilerPath: string | undefined;
         for (const pathArray of [currentConfiguration.browse ? currentConfiguration.browse.path : undefined, currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
             if (pathArray) {
                 for (const curPath of pathArray) {
@@ -1954,13 +1964,6 @@ export class CppProperties {
             paths.push(`${file}`);
         });
 
-        if (currentConfiguration.compilerPath) {
-            // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace and the possibility of compiler args.
-            compilerPath = currentConfiguration.compilerPath;
-        }
-
-        compilerPath = this.resolvePath(compilerPath).trim();
-
         // Get the start/end for properties that are file-only.
         const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
         const forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
@@ -1977,45 +1980,19 @@ export class CppProperties {
         const processedPaths: Set<string> = new Set<string>();
 
         // Validate compiler paths
-        let compilerPathNeedsQuotes: boolean = false;
-        let compilerMessage: string | undefined;
-        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, compilerPath);
-        const compilerLowerCase: string = compilerPathAndArgs.compilerName.toLowerCase();
-        const isClCompiler: boolean = compilerLowerCase === "cl" || compilerLowerCase === "cl.exe";
-        // Don't squiggle for invalid cl and cl.exe paths.
-        if (compilerPathAndArgs.compilerPath && !isClCompiler) {
-            // Squiggle when the compiler's path has spaces without quotes but args are used.
-            compilerPathNeedsQuotes = (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0)
-                && !compilerPath.startsWith('"')
-                && compilerPathAndArgs.compilerPath.includes(" ");
-            compilerPath = compilerPathAndArgs.compilerPath;
-            // Don't squiggle if compiler path is resolving with environment path.
-            if (compilerPathNeedsQuotes || (compilerPath && !which.sync(compilerPath, { nothrow: true }))) {
-                if (compilerPathNeedsQuotes) {
-                    compilerMessage = localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.');
-                    newSquiggleMetrics.CompilerPathMissingQuotes++;
-                } else if (!util.checkExecutableWithoutExtensionExistsSync(compilerPath)) {
-                    compilerMessage = localize("path.is.not.a.file", "Path is not a file: {0}", compilerPath);
-                    newSquiggleMetrics.PathNotAFile++;
-                }
-            }
-        }
-        let compilerPathExists: boolean = true;
-        if (this.rootUri && !isClCompiler) {
-            const checkPathExists: any = util.checkPathExistsSync(compilerPath, this.rootUri.fsPath + path.sep, isWindows, true);
-            compilerPathExists = checkPathExists.pathExists;
-            compilerPath = checkPathExists.path;
-        }
-        if (!compilerPathExists) {
-            compilerMessage = localize('cannot.find', "Cannot find: {0}", compilerPath);
-            newSquiggleMetrics.PathNonExistent++;
-        }
-        if (compilerMessage) {
+        const resolvedCompilerPath = this.resolvePath(currentConfiguration.compilerPath, false, false);
+        const compilerPathAndArgs: util.CompilerPathAndArgs = CppProperties.validateCompilerPath(resolvedCompilerPath, this.rootUri);
+        if (compilerPathAndArgs.error) {
             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                new vscode.Range(document.positionAt(curTextStartOffset + compilerPathValueStart),
-                    document.positionAt(curTextStartOffset + compilerPathEnd)),
-                compilerMessage, vscode.DiagnosticSeverity.Warning);
+                new vscode.Range(document.positionAt(curTextStartOffset + compilerPathValueStart), document.positionAt(curTextStartOffset + compilerPathEnd)),
+                compilerPathAndArgs.error,
+                vscode.DiagnosticSeverity.Warning);
             diagnostics.push(diagnostic);
+        }
+        if (compilerPathAndArgs.telemetry) {
+            for (const o of Object.keys(compilerPathAndArgs.telemetry)) {
+                newSquiggleMetrics[o] = compilerPathAndArgs.telemetry[o];
+            }
         }
 
         // validate .config path
