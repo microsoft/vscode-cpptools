@@ -3629,5 +3629,17 @@
     "'ext_vector_type' özniteliği yalnızca bool, tamsayı veya kayan nokta türleri için geçerlidir",
     "aynı birleşimde birden çok belirleyiciye izin verilmez",
     "test iletisi",
-    "'--ms_c++23' kullanabilmek için öykünülen Microsoft sürümü en az 1943 olmalıdır"
+    "'--ms_c++23' kullanabilmek için öykünülen Microsoft sürümü en az 1943 olmalıdır",
+    "invalid current working directory: %s",
+    "\"cleanup\" attribute within a constexpr function is not currently supported",
+    "the \"assume\" attribute can only apply to a null statement",
+    "assumption failed",
+    "variable templates are a C++14 feature",
+    "cannot take the address of a function with a parameter declared with the \"pass_object_size\" attribute",
+    "all arguments must have the same type",
+    "the final comparison was %s1 %s2 %s3",
+    "too many arguments for attribute %sq",
+    "mantissa string does not contain a valid number",
+    "floating-point error during constant evaluation",
+    "inheriting constructor %n ignored for copy/move-like operation"
 ]

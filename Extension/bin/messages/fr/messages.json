@@ -3629,5 +3629,17 @@
     "l'attribut 'ext_vector_type' s'applique uniquement aux types booléens, entiers ou à virgule flottante",
     "plusieurs désignateurs dans la même union ne sont pas autorisés",
     "message de test",
-    "la version émulée Microsoft doit être au moins la version 1943 pour permettre l'utilisation de « --ms_c++23 »"
+    "la version émulée Microsoft doit être au moins la version 1943 pour permettre l'utilisation de « --ms_c++23 »",
+    "invalid current working directory: %s",
+    "\"cleanup\" attribute within a constexpr function is not currently supported",
+    "the \"assume\" attribute can only apply to a null statement",
+    "assumption failed",
+    "variable templates are a C++14 feature",
+    "cannot take the address of a function with a parameter declared with the \"pass_object_size\" attribute",
+    "all arguments must have the same type",
+    "the final comparison was %s1 %s2 %s3",
+    "too many arguments for attribute %sq",
+    "mantissa string does not contain a valid number",
+    "floating-point error during constant evaluation",
+    "inheriting constructor %n ignored for copy/move-like operation"
 ]

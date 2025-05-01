@@ -3629,5 +3629,17 @@
     "\"ext_vector_type\" 属性仅适用于布尔值、整数或浮点类型",
     "不允许将多个指示符加入同一联合",
     "测试消息",
-    "正在模拟的 Microsoft 版本必须至少为 1943 才能使用“--ms_c++23”"
+    "正在模拟的 Microsoft 版本必须至少为 1943 才能使用“--ms_c++23”",
+    "invalid current working directory: %s",
+    "\"cleanup\" attribute within a constexpr function is not currently supported",
+    "the \"assume\" attribute can only apply to a null statement",
+    "assumption failed",
+    "variable templates are a C++14 feature",
+    "cannot take the address of a function with a parameter declared with the \"pass_object_size\" attribute",
+    "all arguments must have the same type",
+    "the final comparison was %s1 %s2 %s3",
+    "too many arguments for attribute %sq",
+    "mantissa string does not contain a valid number",
+    "floating-point error during constant evaluation",
+    "inheriting constructor %n ignored for copy/move-like operation"
 ]

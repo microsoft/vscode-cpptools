@@ -3629,5 +3629,17 @@
     "'ext_vector_type' 屬性只適用於布林值、整數或浮點數類型",
     "不允許多個指示者進入相同的聯集",
     "測試訊息",
-    "模擬的 Microsoft 版本至少須為 1943，才能使用 '--ms_c++23'"
+    "模擬的 Microsoft 版本至少須為 1943，才能使用 '--ms_c++23'",
+    "invalid current working directory: %s",
+    "\"cleanup\" attribute within a constexpr function is not currently supported",
+    "the \"assume\" attribute can only apply to a null statement",
+    "assumption failed",
+    "variable templates are a C++14 feature",
+    "cannot take the address of a function with a parameter declared with the \"pass_object_size\" attribute",
+    "all arguments must have the same type",
+    "the final comparison was %s1 %s2 %s3",
+    "too many arguments for attribute %sq",
+    "mantissa string does not contain a valid number",
+    "floating-point error during constant evaluation",
+    "inheriting constructor %n ignored for copy/move-like operation"
 ]

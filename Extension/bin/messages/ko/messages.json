@@ -3629,5 +3629,17 @@
     "'ext_vector_type' 특성은 부울, 정수 또는 부동 소수점 형식에만 적용됩니다",
     "동일한 공용 구조체에 여러 지정자를 사용할 수 없습니다.",
     "테스트 메시지",
-    "에뮬레이트되는 Microsoft 버전이 1943 이상이어야 '--ms_c++23'을 사용할 수 있습니다."
+    "에뮬레이트되는 Microsoft 버전이 1943 이상이어야 '--ms_c++23'을 사용할 수 있습니다.",
+    "invalid current working directory: %s",
+    "\"cleanup\" attribute within a constexpr function is not currently supported",
+    "the \"assume\" attribute can only apply to a null statement",
+    "assumption failed",
+    "variable templates are a C++14 feature",
+    "cannot take the address of a function with a parameter declared with the \"pass_object_size\" attribute",
+    "all arguments must have the same type",
+    "the final comparison was %s1 %s2 %s3",
+    "too many arguments for attribute %sq",
+    "mantissa string does not contain a valid number",
+    "floating-point error during constant evaluation",
+    "inheriting constructor %n ignored for copy/move-like operation"
 ]
