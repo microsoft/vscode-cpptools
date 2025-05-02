@@ -5079,10 +5079,10 @@ vinyl@^3.0.0:
     replace-ext "^2.0.0"
     teex "^1.0.1"
 
-vscode-cpptools@^6.1.0:
-  version "6.1.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-cpptools/-/vscode-cpptools-6.1.0.tgz#d89bb225f91da45dbee6acbf45f6940aa3926df1"
-  integrity sha1-2JuyJfkdpF2+5qy/RfaUCqOSbfE=
+vscode-cpptools@^6.2.0:
+  version "6.2.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-cpptools/-/vscode-cpptools-6.2.0.tgz#f5ce714fea83b00a9d01e880110ec53fbdbe4664"
+  integrity sha1-9c5xT+qDsAqdAeiAEQ7FP72+RmQ=
 
 vscode-jsonrpc@8.1.0:
   version "8.1.0"
