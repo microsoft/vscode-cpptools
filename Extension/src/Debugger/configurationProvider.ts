@@ -377,7 +377,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
                                 // They did specify 'waitFor' so then let's get out fast and let lldb-dap handle it.
                                 logger.note(localize("waiting.for.process", "Waiting to attach process '{0}'", config.program));
-                                return translateToLldbDap(config);
+                                translateToLldbDap(config);
+                                Telemetry.logDebuggerEvent(config.request, { "debuggerType": config.type });
+                                return config;
                             }
 
                             // Just let the picker show all processes.
@@ -410,8 +412,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Finish translating the config for lldb-dap.
         if (config.type === DebuggerType.cpplldb) {
             translateToLldbDap(config);
+            Telemetry.logDebuggerEvent(config.request, { "debuggerType": config.type });
+            return config;
         }
 
+        Telemetry.logDebuggerEvent(config.request, { "debuggerType": config.type, mimode: config.MIMode });
         return config;
     }
 
