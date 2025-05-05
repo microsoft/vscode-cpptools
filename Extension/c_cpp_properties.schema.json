@@ -19,8 +19,8 @@
                         "markdownDescription": "Full path of the compiler being used, e.g. `/usr/bin/gcc`, to enable more accurate IntelliSense.",
                         "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": [
-                            "string",
-                            "null"
+                            "null",
+                            "string"
                         ]
                     },
                     "compilerArgs": {

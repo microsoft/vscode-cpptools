@@ -585,6 +585,9 @@ export interface CopilotCompletionContextParams {
     uri: string;
     caretOffset: number;
     featureFlag: CopilotCompletionContextFeatures;
+    maxSnippetCount: number;
+    maxSnippetLength: number;
+    doAggregateSnippets: boolean;
 }
 
 // Requests
@@ -843,7 +846,7 @@ export interface Client {
     getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult>;
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult>;
     filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void;
-    getCompletionContext(fileName: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures, token: vscode.CancellationToken): Promise<CopilotCompletionContextResult>;
+    getCompletionContext(fileName: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures, maxSnippetCount: number, maxSnippetLength: number, doAggregateSnippets: boolean, token: vscode.CancellationToken): Promise<CopilotCompletionContextResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -1892,10 +1895,6 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
-            void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(document.uri));
-            void SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(document.uri));
-        } else {
-            void SessionState.buildAndDebugIsSourceFile.set(false);
         }
     }
 
@@ -2356,11 +2355,12 @@ export class DefaultClient implements Client {
     }
 
     public async getCompletionContext(file: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures,
+        maxSnippetCount: number, maxSnippetLength: number, doAggregateSnippets: boolean,
         token: vscode.CancellationToken): Promise<CopilotCompletionContextResult> {
         await withCancellation(this.ready, token);
         return DefaultClient.withLspCancellationHandling(
             () => this.languageClient.sendRequest(CopilotCompletionContextRequest,
-                { uri: file.toString(), caretOffset, featureFlag }, token), token);
+                { uri: file.toString(), caretOffset, featureFlag, maxSnippetCount, maxSnippetLength, doAggregateSnippets }, token), token);
     }
 
     /**
@@ -2742,7 +2742,8 @@ export class DefaultClient implements Client {
         util.setProgress(util.getProgressExecutableSuccess());
         const testHook: TestHook = getTestHook();
         if (message.endsWith("Idle")) {
-            // nothing to do
+            const status: IntelliSenseStatus = { status: Status.Idle };
+            testHook.updateStatus(status);
         } else if (message.endsWith("Parsing")) {
             this.model.isParsingWorkspace.Value = true;
             this.model.isInitializingWorkspace.Value = false;
@@ -4281,5 +4282,5 @@ class NullClient implements Client {
     getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
     filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void { }
-    getCompletionContext(file: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures, token: vscode.CancellationToken): Promise<CopilotCompletionContextResult> { return Promise.resolve({} as CopilotCompletionContextResult); }
+    getCompletionContext(file: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures, maxSnippetCount: number, maxSnippetLength: number, doAggregateSnippets: boolean, token: vscode.CancellationToken): Promise<CopilotCompletionContextResult> { return Promise.resolve({} as CopilotCompletionContextResult); }
 }
