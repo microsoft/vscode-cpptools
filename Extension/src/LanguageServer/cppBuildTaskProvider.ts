@@ -246,7 +246,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, ext.CppSourceStr);
             cppBuildTask.detail = task.detail;
             cppBuildTask.existing = true;
-            if (!util.isString(task.group) && task.group.isDefault) {
+            if (util.isObject(task.group) && task.group.isDefault) {
                 cppBuildTask.isDefault = true;
             }
             return cppBuildTask;

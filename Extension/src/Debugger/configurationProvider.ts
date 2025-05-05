@@ -87,6 +87,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         const defaultConfig: CppDebugConfiguration[] = this.findDefaultConfig(configs);
         // If there was only one config defined for the default task, choose that config, otherwise ask the user to choose.
         if (defaultConfig.length === 1) {
+            if (this.isClConfiguration(defaultConfig[0].name) && await this.showErrorIfClNotAvailable(defaultConfig[0].label)) {
+                return []; // Cannot continue with build/debug.
+            }
             return defaultConfig;
         }
 
@@ -120,8 +123,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return []; // User canceled it.
         }
 
-        if (this.isClConfiguration(selection.label)) {
-            await this.showErrorIfClNotAvailable(selection.label);
+        if (this.isClConfiguration(selection.label) && await this.showErrorIfClNotAvailable(selection.label)) {
+            return []; // Cannot continue with build/debug.
         }
 
         return [selection.configuration];
@@ -578,8 +581,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         return `${localize("build.and.debug.active.file", 'build and debug active file')}`;
     }
 
-    private isClConfiguration(configurationLabel: string): boolean {
-        return configurationLabel.startsWith("C/C++: cl.exe");
+    private isClConfiguration(configurationLabel?: string): boolean {
+        return !!configurationLabel?.startsWith("C/C++: cl.exe");
     }
 
     /**
@@ -606,7 +609,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 // Ignore the error, the user will be prompted to apply the environment manually.
             }
         }
-        if (response === cancel) {
+        if (response === cancel || response === undefined) {
             // A message was already shown, so exit early noting that the environment is not available. We don't need to show another error message.
             return true;
         }
@@ -615,7 +618,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return false;
         }
         void vscode.window.showErrorMessage(
-            localize('dev.env.not.applied', 'The Visual Studio Developer Environment was not applied. Please try again or run VS Code from the Developer Command Prompt for VS.'));
+            localize('dev.env.not.applied', 'The source code could not be built because the Visual Studio Developer Environment was not applied.'));
         return true;
     }
 
