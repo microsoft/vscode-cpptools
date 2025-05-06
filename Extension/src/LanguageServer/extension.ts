@@ -1571,7 +1571,7 @@ async function onSetVSDevEnvironment(sender?: any): Promise<void> {
             void vscode.window.showErrorMessage(`Failed to apply VS developer environment: ${error.message}`);
         }
     }
-    telemetry.logLanguageServerEvent("SetVSDevEnvironment", { "sender": util.getSenderType(sender), success: success.toString() });
+    telemetry.logLanguageServerEvent("SetVSDevEnvironment", { "sender": util.getSenderType(sender), "resultcode": success.toString() });
 }
 
 async function onClearVSDevEnvironment(): Promise<void> {
