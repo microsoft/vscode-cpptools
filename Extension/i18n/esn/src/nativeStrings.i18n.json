@@ -319,5 +319,5 @@
 	"file_not_found_in_path2": "\"{0}\" no se encuentra en compile_commands.json archivos. ''includePath'' de c_cpp_properties.json de la carpeta ''{1}'' se usará en su lugar para este archivo.",
 	"copilot_hover_link": "Generar resumen de Copilot",
 	"browse_path_not_found": "No se pueden indexar archivos de una carpeta inexistente: {0}",
-	"license_terms": "La extensión C/C++ solo se puede usar con Microsoft Visual Studio, Visual Studio para Mac, Visual Studio Code, Azure DevOps, Team Foundation Server y los productos y servicios de Microsoft sucesores para desarrollar y probar las aplicaciones."
+	"license_terms": "La extensión de C/C++ solo se puede utilizar con Microsoft Visual Studio, Visual Studio para Mac, Visual Studio Code, Azure DevOps, Team Foundation Server y productos y servicios sucesores de Microsoft para desarrollar y probar sus aplicaciones."
 }
