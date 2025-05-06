@@ -432,8 +432,8 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCopilotHover', enabled ? () => onCopilotHover() : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SetVSDevEnvironment', enabled ? onSetVSDevEnvironment : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ClearVSDevEnvironment', enabled ? onClearVSDevEnvironment : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SetVsDeveloperEnvironment', enabled ? onSetVsDeveloperEnvironment : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ClearVsDeveloperEnvironment', enabled ? onClearVsDeveloperEnvironment : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -1554,7 +1554,7 @@ async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, ho
     return true;
 }
 
-async function onSetVSDevEnvironment(sender?: any): Promise<void> {
+async function onSetVsDeveloperEnvironment(sender?: any): Promise<void> {
     let success: boolean = true;
     try {
         await setEnvironment(util.extensionContext);
@@ -1571,10 +1571,10 @@ async function onSetVSDevEnvironment(sender?: any): Promise<void> {
             void vscode.window.showErrorMessage(`Failed to apply VS developer environment: ${error.message}`);
         }
     }
-    telemetry.logLanguageServerEvent("SetVSDevEnvironment", { "sender": util.getSenderType(sender), "resultcode": success.toString() });
+    telemetry.logLanguageServerEvent("SetVsDeveloperEnvironment", { "sender": util.getSenderType(sender), "resultcode": success.toString() });
 }
 
-async function onClearVSDevEnvironment(): Promise<void> {
+async function onClearVsDeveloperEnvironment(): Promise<void> {
     util.extensionContext?.environmentVariableCollection.clear();
     await vscode.commands.executeCommand('setContext', 'cpptools.msvcEnvironmentFound', util.hasMsvcEnvironment());
 }

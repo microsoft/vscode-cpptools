@@ -37,8 +37,8 @@
     "c_cpp.command.RemoveAllCodeAnalysisProblems.title": "Clear All Code Analysis Problems",
     "c_cpp.command.BuildAndDebugFile.title": "Debug C/C++ File",
     "c_cpp.command.BuildAndRunFile.title": "Run C/C++ File",
-    "c_cpp.command.SetVSDevEnvironment.title": "Set Visual Studio Developer Environment",
-    "c_cpp.command.ClearVSDevEnvironment.title": "Clear Visual Studio Developer Environment",
+    "c_cpp.command.SetVsDeveloperEnvironment.title": "Set Visual Studio Developer Environment",
+    "c_cpp.command.ClearVsDeveloperEnvironment.title": "Clear Visual Studio Developer Environment",
     "c_cpp.command.AddDebugConfiguration.title": "Add Debug Configuration",
     "c_cpp.command.GenerateDoxygenComment.title": "Generate Doxygen Comment",
     "c_cpp.command.addSshTarget.title": "Add SSH target",
@@ -851,7 +851,7 @@
         ]
     },
     "c_cpp.configuration.debugShortcut.description": "Show the \"Run and Debug\" play button and \"Add Debug Configuration\" gear in the editor title bar for C++ files.",
-    "c_cpp.configuration.persistVSDeveloperEnvironment.markdownDescription": "Remember the last used Visual Studio developer environment for the current workspace. This setting is only applicable for Windows.",
+    "c_cpp.configuration.persistVsDeveloperEnvironment.markdownDescription": "Remember the last used Visual Studio developer environment for the current workspace. This setting is only applicable for Windows.",
     "c_cpp.debuggers.pipeTransport.description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
     "c_cpp.debuggers.pipeTransport.default.pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'.",
     "c_cpp.debuggers.pipeTransport.default.debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb.",
@@ -1068,9 +1068,9 @@
         ]
     },
     "c_cpp.walkthrough.command.prompt.description": {
-        "message": "When using the Microsoft Visual Studio C++ compiler, the Visual Studio Developer Environment must be present.\n\nFollow the instructions on the right to relaunch or click the button below.\n[Set Developer Environment](command:C_Cpp.SetVSDevEnvironment?%22walkthrough%22)",
+        "message": "When using the Microsoft Visual Studio C++ compiler, the Visual Studio Developer Environment must be present.\n\nFollow the instructions on the right to relaunch or click the button below.\n[Set Developer Environment](command:C_Cpp.SetVsDeveloperEnvironment?%22walkthrough%22)",
         "comment": [
-            "{Locked=\"Visual Studio\"} {Locked=\"C++\"} {Locked=\"\\\n[\"} {Locked=\"](C_Cpp.SetVSDevEnvironment?%22walkthrough%22)\"}"
+            "{Locked=\"Visual Studio\"} {Locked=\"C++\"} {Locked=\"\\\n[\"} {Locked=\"](C_Cpp.SetVsDeveloperEnvironment?%22walkthrough%22)\"}"
         ]
     },
     "c_cpp.walkthrough.run.debug.title": "Run and debug your C++ file",

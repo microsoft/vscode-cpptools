@@ -3539,10 +3539,10 @@
                         "markdownDescription": "%c_cpp.configuration.windowsErrorReportingMode.markdownDescription%",
                         "scope": "window"
                     },
-                    "C_Cpp.persistVSDeveloperEnvironment": {
+                    "C_Cpp.persistVsDeveloperEnvironment": {
                         "type": "boolean",
                         "default": true,
-                        "markdownDescription": "%c_cpp.configuration.persistVSDeveloperEnvironment.markdownDescription%",
+                        "markdownDescription": "%c_cpp.configuration.persistVsDeveloperEnvironment.markdownDescription%",
                         "scope": "window"
                     }
                 }
@@ -3710,13 +3710,13 @@
                 "icon": "$(run)"
             },
             {
-                "command": "C_Cpp.SetVSDevEnvironment",
-                "title": "%c_cpp.command.SetVSDevEnvironment.title%",
+                "command": "C_Cpp.SetVsDeveloperEnvironment",
+                "title": "%c_cpp.command.SetVsDeveloperEnvironment.title%",
                 "category": "C/C++"
             },
             {
-                "command": "C_Cpp.ClearVSDevEnvironment",
-                "title": "%c_cpp.command.ClearVSDevEnvironment.title%",
+                "command": "C_Cpp.ClearVsDeveloperEnvironment",
+                "title": "%c_cpp.command.ClearVsDeveloperEnvironment.title%",
                 "category": "C/C++"
             },
             {
@@ -6162,11 +6162,11 @@
                     "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile"
                 },
                 {
-                    "command": "C_Cpp.SetVSDevEnvironment",
+                    "command": "C_Cpp.SetVsDeveloperEnvironment",
                     "when": "workspacePlatform == windows"
                 },
                 {
-                    "command": "C_Cpp.ClearVSDevEnvironment",
+                    "command": "C_Cpp.ClearVsDeveloperEnvironment",
                     "when": "workspacePlatform == windows"
                 },
                 {
