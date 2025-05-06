@@ -1068,7 +1068,7 @@
         ]
     },
     "c_cpp.walkthrough.command.prompt.description": {
-        "message": "When using the Microsoft Visual Studio C++ compiler, the Visual Studio Developer Environment must be present.\n\nFollow the instructions on the right to relaunch or click the button below.\n[Set Developer Environment](command:C_Cpp.SetVsDeveloperEnvironment?%22walkthrough%22)",
+        "message": "When using the Microsoft Visual Studio C++ compiler, the Visual Studio developer environment must be present.\n\nFollow the instructions on the right to relaunch or click the button below.\n[Set Developer Environment](command:C_Cpp.SetVsDeveloperEnvironment?%22walkthrough%22)",
         "comment": [
             "{Locked=\"Visual Studio\"} {Locked=\"C++\"} {Locked=\"\\\n[\"} {Locked=\"](C_Cpp.SetVsDeveloperEnvironment?%22walkthrough%22)\"}"
         ]

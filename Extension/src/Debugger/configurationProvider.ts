@@ -586,7 +586,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     /**
-     * @returns `true` if the Developer Environment is not available and an error was shown to the user, `false` if the Developer Environment is available or the user chose to apply it.
+     * @returns `true` if the VS developer environment is not available and an error was shown to the user,
+     * `false` if the VS developer environment is available or the user chose to apply it.
      */
     private async showErrorIfClNotAvailable(_configurationLabel: string): Promise<boolean> {
         if (util.hasMsvcEnvironment()) {
@@ -599,7 +600,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             localize({
                 key: "cl.exe.not.available",
                 comment: ["{0} is a command option in a menu."]
-            }, "{0} requires the Visual Studio Developer Environment.", `cl.exe ${this.buildAndDebugActiveFileStr()}`),
+            }, "{0} requires the Visual Studio developer environment.", `cl.exe ${this.buildAndDebugActiveFileStr()}`),
             applyDevEnv,
             cancel);
         if (response === applyDevEnv) {
@@ -618,7 +619,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return false;
         }
         void vscode.window.showErrorMessage(
-            localize('dev.env.not.applied', 'The source code could not be built because the Visual Studio Developer Environment was not applied.'));
+            localize('dev.env.not.applied', 'The source code could not be built because the Visual Studio developer environment was not applied.'));
         return true;
     }
 

@@ -3,7 +3,7 @@
 <ul>
 <li><p data-loc-id="walkthrough.windows.start.from.dev.command">Start VS Code from the <span>Developer Command Prompt for VS</span></p>
 </li>
-<li><p data-loc-id="walkthrough.windows.run.dev.command">Run the <code data-loc-id="walkthrough.windows.set.dev.environment">C/C++: Set Developer Environment</code> command.</p>
+<li><p data-loc-id="walkthrough.windows.run.dev.command">Run the <code data-loc-id="walkthrough.windows.set.dev.environment">C/C++: Set Visual Studio Developer Environment</code> command.</p>
 </li>
 </ul>
 <h3 data-loc-id="walkthrough.windows.relaunch.command.prompt">To relaunch VS Code using the <span>Developer Command Prompt for VS</span></h3>
