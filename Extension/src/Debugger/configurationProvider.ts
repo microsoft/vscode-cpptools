@@ -604,7 +604,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             cancel);
         if (response === applyDevEnv) {
             try {
-                await vscode.commands.executeCommand('C_Cpp.SetVSDevEnvironment', 'buildAndDebug');
+                await vscode.commands.executeCommand('C_Cpp.SetVsDeveloperEnvironment', 'buildAndDebug');
             } catch (e: any) {
                 // Ignore the error, the user will be prompted to apply the environment manually.
             }

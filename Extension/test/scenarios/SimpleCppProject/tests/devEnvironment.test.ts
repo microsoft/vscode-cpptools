@@ -12,7 +12,7 @@ import { errorOperationCancelled } from '../../../../src/LanguageServer/devcmd';
 suite("set developer environment", () => {
     if (isWindows) {
         test("set developer environment (Windows)", async () => {
-            const promise = vscode.commands.executeCommand('C_Cpp.SetVSDevEnvironment', 'test');
+            const promise = vscode.commands.executeCommand('C_Cpp.SetVsDeveloperEnvironment', 'test');
             const timer = setInterval(() => {
                 void vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
             }, 1000);
@@ -20,10 +20,15 @@ suite("set developer environment", () => {
             clearInterval(timer);
             equal(util.hasMsvcEnvironment(), true, "MSVC environment not set correctly.");
         });
+
+        test("clear developer environment (Windows)", async () => {
+            await vscode.commands.executeCommand('C_Cpp.ClearVsDeveloperEnvironment');
+            equal(util.hasMsvcEnvironment(), false, "MSVC environment not cleared correctly.");
+        });
     } else {
-        test("set developer environment (Linux/macOS)", async () => {
+        test("should not be able to set developer environment (Linux/macOS)", async () => {
             try {
-                await vscode.commands.executeCommand('C_Cpp.SetVSDevEnvironment', 'test');
+                await vscode.commands.executeCommand('C_Cpp.SetVsDeveloperEnvironment', 'test');
                 equal(false, true, "Should not be able to set developer environment on non-Windows platform.");
             }
             catch (e) {
