@@ -432,7 +432,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
 
         if (isEnvironmentOverrideApplied(util.extensionContext)) {
-            // If the user has applied the Developer Environment to this workspace, it should apply to all newly opened terminals.
+            // If the user has applied the developer environment to this workspace, it should apply to all newly opened terminals.
             // However, this does not apply to processes that we spawn ourselves in the Pseudoterminal, so we need to specify the
             // correct environment in order to emulate the terminal behavior properly.
             const env = { ...process.env };
