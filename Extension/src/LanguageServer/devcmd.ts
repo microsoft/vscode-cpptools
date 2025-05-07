@@ -20,7 +20,7 @@ const errorNotWindows = localize('not.windows', 'The "Set Visual Studio Develope
 const errorNoVSFound = localize('error.no.vs', 'A Visual Studio installation with the C++ compiler was not found');
 export const errorOperationCancelled = localize('operation.cancelled', 'The operation was cancelled');
 const errorNoHostsFound = localize('no.hosts', 'No hosts found');
-const configuringDevEnv = localize('config.dev.env', 'Configuring Developer Environment...');
+const configuringDevEnv = localize('config.dev.env', 'Configuring developer environment...');
 const selectVSInstallation = localize('select.vs.install', 'Select a Visual Studio installation');
 const advancedOptions = localize('advanced.options', 'Advanced options...');
 const advancedOptionsDescription = localize('advanced.options.desc', 'Select a specific host/target architecture, toolset version, etc.');
@@ -74,7 +74,7 @@ export async function setEnvironment(context?: vscode.ExtensionContext) {
     for (const key of Object.keys(vars)) {
         context.environmentVariableCollection.replace(key, vars[key].replace(`%${key}%`, '${env:' + key + '}'));
     }
-    context.environmentVariableCollection.description = localize('dev.env.for', '{0} Developer Environment for {1}', arch, vsDisplayNameWithSuffix(vs));
+    context.environmentVariableCollection.description = localize('dev.env.for', '{0} developer environment for {1}', arch, vsDisplayNameWithSuffix(vs));
     context.environmentVariableCollection.persistent = settings.persistDevEnvironment;
 
     return true;
