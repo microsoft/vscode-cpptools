@@ -75,7 +75,7 @@ export async function setEnvironment(context?: vscode.ExtensionContext) {
         context.environmentVariableCollection.replace(key, vars[key].replace(`%${key}%`, '${env:' + key + '}'));
     }
     context.environmentVariableCollection.description = localize('dev.env.for', '{0} developer environment for {1}', arch, vsDisplayNameWithSuffix(vs));
-    context.environmentVariableCollection.persistent = settings.persistDevEnvironment;
+    context.environmentVariableCollection.persistent = settings.persistVSDeveloperEnvironment;
 
     return true;
 }
