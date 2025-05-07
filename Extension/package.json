@@ -3380,7 +3380,7 @@
                     "C_Cpp.persistVsDeveloperEnvironment": {
                         "type": "boolean",
                         "default": true,
-                        "markdownDescription": "%c_cpp.configuration.persistVsDeveloperEnvironment.markdownDescription%",
+                        "markdownDescription": "%c_cpp.configuration.persistVsDeveloperEnvironment.description%",
                         "scope": "window"
                     }
                 }
