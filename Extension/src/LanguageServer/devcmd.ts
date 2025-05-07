@@ -68,7 +68,7 @@ export async function setEnvironment(context?: vscode.ExtensionContext) {
         host: match(host, { 'x86': 'x86', 'x64': 'x64' }) ?? 'x64',
         target: match(target, { 'x86': 'x86', 'x64': 'x64', 'arm64': 'ARM64', 'arm': 'ARM' }) ?? 'x64'
     });
-    const settings = new CppSettings(vscode.workspace.workspaceFolders?.at(0)?.uri);
+    const settings = new CppSettings();
 
     context.environmentVariableCollection.clear();
     for (const key of Object.keys(vars)) {

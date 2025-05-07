@@ -851,7 +851,7 @@
         ]
     },
     "c_cpp.configuration.debugShortcut.description": "Show the \"Run and Debug\" play button and \"Add Debug Configuration\" gear in the editor title bar for C++ files.",
-    "c_cpp.configuration.persistVsDeveloperEnvironment.markdownDescription": "Remember the last used Visual Studio developer environment for the current workspace. This setting is only applicable for Windows.",
+    "c_cpp.configuration.persistVsDeveloperEnvironment.description": "Remember the last used Visual Studio developer environment for the current workspace. This setting is only applicable for Windows.",
     "c_cpp.debuggers.pipeTransport.description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
     "c_cpp.debuggers.pipeTransport.default.pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'.",
     "c_cpp.debuggers.pipeTransport.default.debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb.",
