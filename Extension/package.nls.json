@@ -1040,9 +1040,9 @@
     "c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
     "c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
     "c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages.",
-    "c_cpp.walkthrough.title": "Get Started with C++ Development",
+    "c_cpp.walkthrough.title": "Get started with C++ development",
     "c_cpp.walkthrough.description": "Dive into VS Code's rich C++ development experience.",
-    "c_cpp.walkthrough.set.up.title": "Set up your C++ Environment",
+    "c_cpp.walkthrough.set.up.title": "Set up your C++ environment",
     "c_cpp.walkthrough.activating.description": "Activating the C++ extension to determine whether your C++ Environment has been set up.\nActivating Extension...",
     "c_cpp.walkthrough.no.compilers.windows.description": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%22walkthrough%22)",
     "c_cpp.walkthrough.no.compilers.description": {
@@ -1062,7 +1062,7 @@
     },
     "c_cpp.walkthrough.create.cpp.file.altText": "Open a C++ file or a folder with a C++ project.",
     "c_cpp.walkthrough.command.prompt.title": {
-        "message": "Apply the Visual Studio Developer Environment",
+        "message": "Apply the Visual Studio developer environment",
         "comment": [
             "{Locked=\"Visual Studio\"}"
         ]

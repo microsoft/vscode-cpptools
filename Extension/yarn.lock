@@ -3559,10 +3559,10 @@ node-stream-zip@^1.15.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-stream-zip/-/node-stream-zip-1.15.0.tgz#158adb88ed8004c6c49a396b50a6a5de3bca33ea"
   integrity sha1-FYrbiO2ABMbEmjlrUKal3jvKM+o=
 
-node-vcvarsall@^1.0.1:
-  version "1.0.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-vcvarsall/-/node-vcvarsall-1.0.1.tgz#d7ee885e4ca41f0f0d814e3a277995cc95ff20b0"
-  integrity sha1-1+6IXkykHw8NgU46J3mVzJX/ILA=
+node-vcvarsall@^1.1.0:
+  version "1.1.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-vcvarsall/-/node-vcvarsall-1.1.0.tgz#4e0b3959f0d5bc6114c8c61e20ac0caab9dcbecf"
+  integrity sha1-Tgs5WfDVvGEUyMYeIKwMqrncvs8=
   dependencies:
     node-vswhere "^1.0.2"
     tmp "^0.2.1"
