@@ -3518,7 +3518,7 @@
     "vnitřní název %sq bude odsud považován za běžný identifikátor",
     "přístup k neinicializovanému podobjektu v indexu %d",
     "číslo řádku IFC (%u1) přeteče maximální povolenou hodnotu (%u2) %m",
-    "%m požaduje element %u oddílu %sq2; tato pozice v souboru překračuje maximální reprezentovatelnou hodnotu",
+    "%m požaduje element %u oddílu %sq; tato pozice v souboru překračuje maximální reprezentovatelnou hodnotu",
     "nesprávný počet argumentů",
     "Omezení kandidáta %n není splněno.",
     "Počet parametrů %n neodpovídá volání.",
