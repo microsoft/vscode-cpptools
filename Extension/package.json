@@ -6625,7 +6625,7 @@
         "xml2js": "^0.6.2"
     },
     "dependencies": {
-        "@github/copilot-language-server": "^1.266.0",
+        "@github/copilot-language-server": "^1.316.0",
         "@vscode/extension-telemetry": "^0.9.6",
         "chokidar": "^3.6.0",
         "comment-json": "^4.2.3",
