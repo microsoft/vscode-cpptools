@@ -339,6 +339,8 @@ response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotC
     }
 
     public async resolve(context: ResolveRequest, copilotCancel: vscode.CancellationToken): Promise<SupportedContextItem[]> {
+        const proposedEdits = context.documentContext.proposedEdits;
+        if (proposedEdits) { return []; } // Ignore the request if there are proposed edits.
         const resolveStartTime = performance.now();
         let logMessage = `Copilot: resolve(${context.documentContext.uri}: ${context.documentContext.offset}):`;
         const cppTimeBudgetMs = await this.fetchTimeBudgetMs(context);
