@@ -7,6 +7,7 @@ import * as assert from 'assert';
 import * as child_process from 'child_process';
 import * as jsonc from 'comment-json';
 import * as fs from 'fs';
+import { readdir, stat } from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
 import * as tmp from 'tmp';
@@ -15,11 +16,11 @@ import { DocumentFilter, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import * as which from "which";
-import { ManualPromise } from './Utility/Async/manualPromise';
 import { isWindows } from './constants';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
+import { ManualPromise } from './Utility/Async/manualPromise';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -846,6 +847,96 @@ export function pathAccessible(filePath: string, permission: number = fs.constan
 
 export function isExecutable(file: string): Promise<boolean> {
     return pathAccessible(file, fs.constants.X_OK);
+}
+
+/** When on windows, ensures that the given executable name ends in an '.exe'.
+ * @param executableName The name of the executable to check.
+ * @returns The executable name with .exe appended if on windows and the name does not already end in an '.exe'.
+ */
+export function executableName(executableName: string) {
+    return isWindows && !/\.exe$/i.test(executableName) ? `${executableName}.exe` : executableName;
+}
+
+/** Returns true if the path is a folder.
+ *
+ * @param path The path to check.
+ * @returns A promise that resolves to true if the path is a folder, false otherwise.
+*/
+export async function isFolder(path: string) {
+    try {
+        return (await stat(path)).isDirectory();
+    } catch {
+        //
+    }
+    return false;
+}
+
+/** Recursively searches for all the files that match the filename (string or RegExp) in a given folder, up to a maxiumum depth.
+ *
+ * This will parallelize the search for all files in the folder and its subfolders.
+ *
+ * @param folder The folder to search in.
+ * @param filename The filename to search for (string or RegExp).
+ * @param predicate A function that takes a binary file path and returns a boolean indicating whether to include it in the results.
+ * @param maxDepth The maximum depth to search (default is 4).
+ * @param results An array to store the results.
+ * @returns A promise that resolves to an array of file paths that match the filename.
+ */
+export async function searchFolder(folder: string, filename: string | RegExp, predicate?: (binary: string) => Promise<boolean>, maxDepth = 4, results = new Array<string>()): Promise<string[]> {
+    try {
+        const files: string[] = await readdir(folder);
+        const all = files.map(async (file) => {
+
+            const fullPath: string = path.resolve(folder, file);
+            if (await isFolder(fullPath) && maxDepth > 0) {
+                return searchFolder(fullPath, filename, predicate, maxDepth - 1, results);
+            }
+
+            if (file === filename || (filename instanceof RegExp && filename.test(file))) {
+                if (await isExecutable(fullPath)) {
+                    if (predicate && !await predicate(fullPath)) {
+                        return undefined;
+                    }
+                    results.push(fullPath);
+                }
+            }
+        });
+        await Promise.all(all);
+    } catch {
+        // Skip elements that can't be accessed.
+    }
+    return results;
+}
+
+/** Searches the PATH for a given executable program, using an optional predicate to control if the candidate is accepted.
+ * @param filename The name of the executable to search for (string or a regular expression).
+ * @param predicate A function that takes a binary file path and returns a boolean indicating whether to include it in the results.
+ * @returns A promise that resolves to the full path of the executable if found, or undefined if not found.
+ */
+export async function findInPath(filename: string | RegExp, predicate?: (binary: string) => Promise<boolean>): Promise<string | undefined> {
+    const folders = process.env["PATH"]?.split(path.delimiter) || [];
+
+    for (const folder of folders) {
+        try {
+            if (typeof filename === 'string') {
+                const fullPath = path.resolve(folder, executableName(filename));
+                if (await isExecutable(fullPath) ? predicate ? await predicate(fullPath) : true : false) {
+                    return fullPath;
+                }
+            } else {
+                // With a regex, read the directory entries and look for matches.
+                for (const item of (await readDir(folder)).filter(each => filename.test(each))) {
+                    const fullPath = path.resolve(folder, item);
+                    if (await isExecutable(fullPath) ? predicate ? await predicate(fullPath) : true : false) {
+                        return fullPath;
+                    }
+                }
+            }
+        } catch {
+            // Ignore attempts in this path.
+        }
+    }
+    return undefined;
 }
 
 export async function allowExecution(file: string): Promise<void> {

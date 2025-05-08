@@ -18,9 +18,9 @@ import { pathAccessible } from '../common';
 import { instrument } from '../instrumentation';
 import { getSshChannel } from '../logger';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
-import { ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, DebugConfigurationProvider, IConfigurationAssetProvider } from './configurationProvider';
+import { ConfigurationAssetProvider, ConfigurationSnippetProvider, DebugConfigurationProvider } from './configurationProvider';
 import { DebuggerType } from './configurations';
-import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
+import { CppdbgDebugAdapterDescriptorFactory, CpplldbDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensionContext.subscriptions.
@@ -40,17 +40,19 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     disposables.push(vscode.commands.registerCommand('extension.pickRemoteNativeProcess', (any) => remoteAttacher.ShowAttachEntries(any)));
 
     // Activate ConfigurationProvider
-    const assetProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
+    const assetProvider = ConfigurationAssetProvider.getConfigurationAssetProvider();
 
     // Register DebugConfigurationProviders for "Run and Debug" in Debug Panel.
     // On Windows platforms, the cppvsdbg debugger will also be registered for initial configurations.
-    let cppVsDebugProvider: DebugConfigurationProvider | null = null;
     if (os.platform() === 'win32') {
-        cppVsDebugProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppvsdbg);
+        const cppVsDebugProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppvsdbg);
         disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppvsdbg, instrument(cppVsDebugProvider), vscode.DebugConfigurationProviderTriggerKind.Dynamic));
     }
     const cppDebugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppdbg);
     disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppdbg, instrument(cppDebugProvider), vscode.DebugConfigurationProviderTriggerKind.Dynamic));
+
+    const cpplldbDebugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cpplldb);
+    disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cpplldb, instrument(cpplldbDebugProvider), vscode.DebugConfigurationProviderTriggerKind.Dynamic));
 
     // Register DebugConfigurationProviders for "Run and Debug" play button.
     const debugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.all);
@@ -81,6 +83,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     // Register Debug Adapters
     disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppvsdbg, new CppvsdbgDebugAdapterDescriptorFactory(context)));
     disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppdbg, new CppdbgDebugAdapterDescriptorFactory(context)));
+    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cpplldb, new CpplldbDebugAdapterDescriptorFactory(context)));
 
     // SSH Targets View
     await initializeSshTargets();
