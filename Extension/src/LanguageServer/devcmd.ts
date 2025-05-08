@@ -9,6 +9,7 @@ import { vswhere } from 'node-vswhere';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
+import { extensionContext, isString, resolveVariables, whichAsync } from '../common';
 import { isWindows } from '../constants';
 import { CppSettings } from './settings';
 
@@ -27,8 +28,31 @@ const advancedOptionsDescription = localize('advanced.options.desc', 'Select a s
 const selectToolsetVersion = localize('select.toolset', 'Select a toolset version');
 const selectHostTargetArch = localize('select.host.target', 'Select a host and target architecture');
 
-export function isEnvironmentOverrideApplied(context?: vscode.ExtensionContext) {
-    return context?.environmentVariableCollection.get('VCToolsInstallDir') !== undefined;
+export function isEnvironmentOverrideApplied(): boolean {
+    return extensionContext?.environmentVariableCollection.get('VCToolsInstallDir') !== undefined;
+}
+
+export function getEffectiveEnvironment(): { [key: string]: string | undefined } {
+    const env = { ...process.env };
+    extensionContext?.environmentVariableCollection.forEach((variable: string, mutator: vscode.EnvironmentVariableMutator) => {
+        if (variable.toLowerCase() === "path") {
+            // Path is special because it has a placeholder to insert the current Path into.
+            env[variable] = resolveVariables(mutator.value);
+        } else {
+            env[variable] = mutator.value;
+        }
+    });
+    return env;
+}
+
+export async function canFindCl(): Promise<boolean> {
+    if (!isWindows) {
+        return false;
+    }
+    const pathOverride = resolveVariables(extensionContext?.environmentVariableCollection.get('Path')?.value);
+    const path = pathOverride ?? process.env['Path'];
+    const found = await whichAsync('cl.exe', path);
+    return isString(found);
 }
 
 export async function setEnvironment(context?: vscode.ExtensionContext) {

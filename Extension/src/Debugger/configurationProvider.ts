@@ -15,6 +15,7 @@ import * as util from '../common';
 import { isWindows } from '../constants';
 import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
 import { CppBuildTask, CppBuildTaskDefinition, cppBuildTaskProvider } from '../LanguageServer/cppBuildTaskProvider';
+import { canFindCl } from '../LanguageServer/devcmd';
 import { configPrefix } from '../LanguageServer/extension';
 import { CppSettings, OtherSettings } from '../LanguageServer/settings';
 import * as logger from '../logger';
@@ -590,20 +591,34 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
      * `false` if the VS developer environment is available or the user chose to apply it.
      */
     private async showErrorIfClNotAvailable(_configurationLabel: string): Promise<boolean> {
-        if (util.hasMsvcEnvironment()) {
-            return false; // No error to show
+        const hasEnvironment = util.hasMsvcEnvironment();
+        if (hasEnvironment) {
+            if (await canFindCl()) {
+                return false; // No error to show
+            }
+            // The user has an environment but cl.exe cannot be found. Prompt the user to update the environment.
         }
 
-        const applyDevEnv = localize("apply.dev.env", "Apply Developer Environment");
-        const cancel = localize("cancel", "Cancel");
-        const response = await vscode.window.showErrorMessage(
-            localize({
+        const applyButton = localize("apply.dev.env", "Apply Developer Environment");
+        const applyMessage = localize(
+            {
                 key: "cl.exe.not.available",
                 comment: ["{0} is a command option in a menu."]
-            }, "{0} requires the Visual Studio developer environment.", `cl.exe ${this.buildAndDebugActiveFileStr()}`),
-            applyDevEnv,
+            },
+            "{0} requires the Visual Studio developer environment.", `cl.exe ${this.buildAndDebugActiveFileStr()}`);
+        const updateButton = localize("update.dev.env", "Update Developer Environment");
+        const updateMessage = localize(
+            {
+                key: "update.dev.env",
+                comment: ["{0} is a command option in a menu."]
+            },
+            "{0} requires the Visual Studio developer environment to be updated.", `cl.exe ${this.buildAndDebugActiveFileStr()}`);
+        const cancel = localize("cancel", "Cancel");
+        const response = await vscode.window.showErrorMessage(
+            hasEnvironment ? updateMessage : applyMessage,
+            hasEnvironment ? updateButton : applyButton,
             cancel);
-        if (response === applyDevEnv) {
+        if (response === applyButton || response === updateButton) {
             try {
                 await vscode.commands.executeCommand('C_Cpp.SetVsDeveloperEnvironment', 'buildAndDebug');
             } catch (e: any) {
@@ -615,11 +630,12 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return true;
         }
 
-        if (util.hasMsvcEnvironment()) {
+        if (util.hasMsvcEnvironment() && await canFindCl()) {
             return false;
         }
-        void vscode.window.showErrorMessage(
-            localize('dev.env.not.applied', 'The source code could not be built because the Visual Studio developer environment was not applied.'));
+        const notAppliedMessage = localize("dev.env.not.applied", "The source code could not be built because the Visual Studio developer environment was not applied.");
+        const notFoundMessage = localize("dev.env.not.found", "The source code could not be built because the Visual C++ compiler could not be found.");
+        void vscode.window.showErrorMessage(hasEnvironment ? notFoundMessage : notAppliedMessage);
         return true;
     }
 

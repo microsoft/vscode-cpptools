@@ -6,13 +6,13 @@
 import * as cp from "child_process";
 import * as os from 'os';
 import * as path from 'path';
-import { CustomExecution, Disposable, EnvironmentVariableMutator, Event, EventEmitter, ProcessExecution, Pseudoterminal, ShellExecution, Task, TaskDefinition, TaskEndEvent, TaskExecution, TaskGroup, TaskProvider, tasks, TaskScope, TerminalDimensions, TextEditor, window, workspace, WorkspaceFolder } from 'vscode';
+import { CustomExecution, Disposable, Event, EventEmitter, ProcessExecution, Pseudoterminal, ShellExecution, Task, TaskDefinition, TaskEndEvent, TaskExecution, TaskGroup, TaskProvider, tasks, TaskScope, TerminalDimensions, TextEditor, window, workspace, WorkspaceFolder } from 'vscode';
 import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { Client } from './client';
 import * as configs from './configurations';
-import { isEnvironmentOverrideApplied } from "./devcmd";
+import { getEffectiveEnvironment, isEnvironmentOverrideApplied } from "./devcmd";
 import * as ext from './extension';
 import { OtherSettings } from './settings';
 
@@ -431,20 +431,11 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             }
         }
 
-        if (isEnvironmentOverrideApplied(util.extensionContext)) {
+        if (isEnvironmentOverrideApplied()) {
             // If the user has applied the developer environment to this workspace, it should apply to all newly opened terminals.
             // However, this does not apply to processes that we spawn ourselves in the Pseudoterminal, so we need to specify the
             // correct environment in order to emulate the terminal behavior properly.
-            const env = { ...process.env };
-            util.extensionContext?.environmentVariableCollection.forEach((variable: string, mutator: EnvironmentVariableMutator) => {
-                if (variable.toLowerCase() === "path") {
-                    // Path is special because it has a placeholder to insert the current Path into.
-                    env[variable] = util.resolveVariables(mutator.value);
-                } else {
-                    env[variable] = mutator.value;
-                }
-            });
-            this.options.env = env;
+            this.options.env = getEffectiveEnvironment();
         }
 
         const splitWriteEmitter = (lines: string | Buffer) => {
