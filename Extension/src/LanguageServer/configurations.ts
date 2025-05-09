@@ -1654,7 +1654,8 @@ export class CppProperties {
 
             const compilerPathErrors: string[] = [];
             if (compilerPathMayNeedQuotes && !pathExists) {
-                compilerPathErrors.push(localize("path.with.spaces", 'Compiler path with spaces could not be found. If this was intended to include compiler arguments, surround the compiler path with double quotes (").'));
+                compilerPathErrors.push(localize({ key: "path.with.spaces", comment: ["{Locked=\"\"\"}"] },
+                    'Compiler path with spaces could not be found. If this was intended to include compiler arguments, surround the compiler path with double quotes (").'));
                 telemetry.CompilerPathMissingQuotes = 1;
             }
 
