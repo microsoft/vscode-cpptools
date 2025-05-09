@@ -76,6 +76,11 @@ export class CopilotCompletionContextTelemetry {
         this.addMetric('getClientForElapsedMs', duration);
     }
 
+    public addSpeculativeRequestMetadata(proposedEditsCount: number): void {
+        this.addProperty('request.isSpeculativeRequest', 'true');
+        this.addMetric('request.proposedEditsCount', proposedEditsCount);
+    }
+
     public addResponseMetadata(areSnippetsMissing: boolean, codeSnippetsCount?: number, traitsCount?: number, caretOffset?: number,
         featureFlag?: CopilotCompletionContextFeatures): void {
         this.addProperty('response.areCodeSnippetsMissing', areSnippetsMissing.toString());
