@@ -922,7 +922,7 @@
                         "type": "string",
                         "enum": [
                             "",
-                            "depthFirst",
+                            "preOrder",
                             "breadthFirst"
                         ],
                         "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.order.markdownDescription%",

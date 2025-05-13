@@ -239,7 +239,7 @@
                                 "markdownDescription": "The order in which subdirectories of recursive includes are searched.",
                                 "type": "string",
                                 "enum": [
-                                    "depthFirst",
+                                    "preOrder",
                                     "breadthFirst",
                                     "${default}"
                                 ]
