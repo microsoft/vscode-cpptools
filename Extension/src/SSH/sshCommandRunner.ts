@@ -265,7 +265,6 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
     let continueWithoutExiting: boolean = false;
 
     const clean = () => {
-
         if (terminalListener) {
             terminalListener.dispose();
             terminalListener = undefined;
