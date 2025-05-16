@@ -6,7 +6,8 @@
 import { constants } from 'fs';
 import { TreeItem } from "vscode";
 import * as nls from 'vscode-nls';
-import { extensionContext, ISshConfigHostInfo, pathAccessible } from "../../common";
+import { extensionContext, ISshConfigHostInfo } from "../../common";
+import { pathAccessible } from '../../common-remote-safe';
 import { LabelLeafNode } from "./common";
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();

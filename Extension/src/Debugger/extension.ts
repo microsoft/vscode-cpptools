@@ -14,7 +14,7 @@ import { SshTargetsProvider, getActiveSshTarget, initializeSshTargets, selectSsh
 import { TargetLeafNode, setActiveSshTarget } from '../SSH/TargetsView/targetNodes';
 import { sshCommandToConfig } from '../SSH/sshCommandToConfig';
 import { getSshConfiguration, getSshConfigurationFiles, parseFailures, writeSshConfiguration } from '../SSH/sshHosts';
-import { pathAccessible } from '../common';
+import { pathAccessible } from '../common-remote-safe';
 import { instrument } from '../instrumentation';
 import { getSshChannel } from '../logger';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';

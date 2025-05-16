@@ -12,6 +12,7 @@ import { promisify } from 'util';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as util from '../common';
+import { executableName, ProcessReturnType, spawnChildProcess } from '../common-remote-safe';
 import { isWindows } from '../constants';
 import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
 import { CppBuildTask, CppBuildTaskDefinition, cppBuildTaskProvider } from '../LanguageServer/cppBuildTaskProvider';
@@ -527,25 +528,27 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         newConfig.type = DebuggerType.cppvsdbg;
                         return newConfig;
                     } else {
-                        debuggerName = util.executableName("gdb");
+                        debuggerName = executableName("gdb");
                     }
                     const compilerDirname: string = path.dirname(compilerPath);
                     const debuggerPath: string = path.join(compilerDirname, debuggerName);
 
-                    // Check if debuggerPath exists.
-                    if (await util.checkFileExists(debuggerPath)) {
-                        newConfig.miDebuggerPath = debuggerPath;
-                    } else if (await util.whichAsync(debuggerName) !== undefined) {
-                        // Check if debuggerName exists on $PATH
-                        newConfig.miDebuggerPath = debuggerName;
-                    } else {
-                        // Try the usr path for non-Windows platforms.
-                        const usrDebuggerPath: string = path.join("/usr", "bin", debuggerName);
-                        if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
-                            newConfig.miDebuggerPath = usrDebuggerPath;
+                    if (newConfig.type === DebuggerType.cppdbg) {
+                        // Check if debuggerPath exists.
+                        if (await util.checkFileExists(debuggerPath)) {
+                            newConfig.miDebuggerPath = debuggerPath;
+                        } else if (await util.whichAsync(debuggerName) !== undefined) {
+                            // Check if debuggerName exists on $PATH
+                            newConfig.miDebuggerPath = debuggerName;
                         } else {
-                            logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {1} is ignored.", `\"${debuggerName}\"`, compilerName));
-                            return undefined;
+                            // Try the usr path for non-Windows platforms.
+                            const usrDebuggerPath: string = path.join("/usr", "bin", debuggerName);
+                            if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
+                                newConfig.miDebuggerPath = usrDebuggerPath;
+                            } else {
+                                logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {1} is ignored.", `\"${debuggerName}\"`, compilerName));
+                                return undefined;
+                            }
                         }
                     }
                 }
@@ -1126,7 +1129,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     return false;
                 }
 
-                let scpResult: util.ProcessReturnType;
+                let scpResult: ProcessReturnType;
                 if (isScp) {
                     scpResult = await scp(files, host, step.targetDir, config.scpPath, config.recursive, jumpHosts, cancellationToken);
                 } else {
@@ -1147,7 +1150,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
                 const localForwards: util.ISshLocalForwardInfo[] = step.host.localForwards;
                 const continueOn: string = step.continueOn;
-                const sshResult: util.ProcessReturnType = await ssh(host, step.command, config.sshPath, jumpHosts, localForwards, continueOn, cancellationToken);
+                const sshResult: ProcessReturnType = await ssh(host, step.command, config.sshPath, jumpHosts, localForwards, continueOn, cancellationToken);
                 if (!sshResult.succeeded || cancellationToken?.isCancellationRequested) {
                     return false;
                 }
@@ -1158,7 +1161,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     void logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.shell', '"command" is required for shell steps.'));
                     return false;
                 }
-                const taskResult: util.ProcessReturnType = await util.spawnChildProcess(step.command, undefined, step.continueOn);
+                const taskResult: ProcessReturnType = await spawnChildProcess(step.command, undefined, step.continueOn);
                 if (!taskResult.succeeded || cancellationToken?.isCancellationRequested) {
                     void logger.getOutputChannelLogger().showErrorMessage(taskResult.output);
                     return false;

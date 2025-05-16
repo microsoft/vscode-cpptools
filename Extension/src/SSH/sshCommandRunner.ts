@@ -9,7 +9,8 @@ import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { CppSettings } from '../LanguageServer/settings';
 import { ManualPromise } from '../Utility/Async/manualPromise';
-import { ISshHostInfo, ProcessReturnType, getNumericLoggingLevel, splitLines, stripEscapeSequences } from '../common';
+import { ISshHostInfo, getNumericLoggingLevel, splitLines, stripEscapeSequences } from '../common';
+import { ProcessReturnType } from '../common-remote-safe';
 import { isWindows } from '../constants';
 import { getSshChannel } from '../logger';
 import {

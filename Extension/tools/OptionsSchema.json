@@ -1170,9 +1170,6 @@
     "CpplldbAttachOptions": {
       "type": "object",
       "default": {},
-      "required": [
-        "program"
-      ],
       "properties": {
         "program": {
           "type": "string",
