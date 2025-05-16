@@ -17,6 +17,7 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
+import { ProcessReturnType, spawnChildProcess } from '../common-remote-safe';
 import { modelSelector } from '../constants';
 import { instrument } from '../instrumentation';
 import { getCrashCallStacksChannel } from '../logger';
@@ -1244,9 +1245,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 let funcStr: string = line.substring(startPos2, offsetPos);
                 let origFuncStr: string = "";
                 if (filtPath && filtPath.length !== 0) {
-                    let ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, ["--no-strip-underscore", funcStr], undefined, true).catch(logAndReturn.undefined);
+                    let ret: ProcessReturnType | undefined = await spawnChildProcess(filtPath, ["--no-strip-underscore", funcStr], undefined, true).catch(logAndReturn.undefined);
                     if (ret?.output === funcStr) {
-                        ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
+                        ret = await spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
                     }
                     if (ret !== undefined && ret.succeeded && !ret.output.startsWith("Could not open input file")) {
                         origFuncStr = funcStr;
