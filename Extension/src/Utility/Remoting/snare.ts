@@ -485,7 +485,7 @@ export function filteredClone(data: any, references = new Map<any, any>(), optio
             }
 
             if (data[Symbol.iterator]) {
-                const result = [];
+                const result: any[] = [];
                 references.set(data, result);
                 for (const item of data) {
                     result.push(filteredClone(item, references, options));
