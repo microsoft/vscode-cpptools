@@ -27,10 +27,14 @@ import { is } from './Utility/System/guards';
 let remoteConnection: RemoteConnection | undefined;
 
 // In the main thread, grab the logger and localize functions directly.
-const logFn = isMainThread ? require('./logger').log : () => { };
-const noteFn = isMainThread ? require('./logger').note : () => { };
-const localizeFn = isMainThread ? require('./localization').localize : (info: { key: string; comment: string[] } | string, message: string, ...args: (string | number | boolean | undefined | null)[]) => message.replace(/\{(\d+)\}/g, (_, index) => String(args[Number(index)] ?? 'undefined'));
-const getOutputChannelLoggerFn = isMainThread ? require('./logger').getOutputChannelLogger : () => undefined;
+import { localize as localizationLocalize } from './localization';
+import * as logger from './logger';
+import { getOutputChannelLogger, note as loggerNote } from './logger';
+
+const logFn = isMainThread ? logger.log : () => { };
+const noteFn = isMainThread ? loggerNote : () => { };
+const localizeFn = isMainThread ? localizationLocalize : (info: { key: string; comment: string[] } | string, message: string, ...args: (string | number | boolean | undefined | null)[]) => message.replace(/\{(\d+)\}/g, (_, index) => String(args[Number(index)] ?? 'undefined'));
+const getOutputChannelLoggerFn = isMainThread ? getOutputChannelLogger : () => undefined;
 
 /**
  * Used when this is imported in a module running in a worker thread.
@@ -79,17 +83,17 @@ export function note(message: string | Promise<string>) {
  * @param message The message to localize.
  * @param args The arguments for the message.
  */
-export function localize(info: { key: string; comment: string[] } | string, message: string, ...args: (string | number | boolean | undefined | null)[]): Promise<string> | string {
-    return isMainThread ?
-        // main thread uses localize directly
-        localizeFn(info, message, ...args) :
-
-        // worker (non-main) thread requests localization via remote connection
-        remoteConnection?.request('localize', info, message, ...args) ||
-
-        // fallback to simple replacement if no remote connection is available
+export const localize: AsyncLocalizeFunc = (infoOrKey, message, ...args) => {
+    if (isMainThread) {
+        if (typeof infoOrKey === 'string') {
+            return localizeFn(infoOrKey, message, ...args);
+        } else {
+            return localizeFn(infoOrKey as LocalizeInfo, message, ...args);
+        }
+    }
+    return remoteConnection?.request('localize', infoOrKey, message, ...args) ??
         message.replace(/\{(\d+)\}/g, (_, index) => String(args[Number(index)] ?? 'undefined'));
-}
+};
 
 export function appendLineAtLevel(level: number, message: string | Promise<string>): void {
     if (is.promise(message)) {
@@ -168,10 +172,11 @@ export interface LocalizeInfo {
 }
 
 /** The type for the localize function for string localization, but can work asynchronously (can be called via remoting). */
-export interface AsyncLocalizeFunc {
-    (info: LocalizeInfo, message: string, ...args: (string | number | boolean | undefined | null)[]): string | Promise<string>;
-    (key: string, message: string, ...args: (string | number | boolean | undefined | null)[]): string | Promise<string>;
-}
+export type AsyncLocalizeFunc = (
+    infoOrKey: LocalizeInfo | string,
+    message: string,
+    ...args: (string | number | boolean | undefined | null)[]
+) => string | Promise<string>;
 
 /**
  * A cancellation token is passed to an asynchronous or long running
@@ -436,7 +441,7 @@ export async function searchFolders(folders: string[], filename: string | RegExp
 
                     // If it is a file, check for a match.
                     case stats.isFile():
-                        if (nameMatches(item) && (predicate ? await predicate!(fullPath) : true)) {
+                        if (nameMatches(item) && (predicate ? await predicate(fullPath) : true)) {
                             return options.result ??= fullPath;
                         }
                         break;

@@ -226,9 +226,16 @@ export async function findLldbDapImpl() {
 
     // Only run one search at a time, so if we are already searching, return that.
     searching = new ManualPromise<string | undefined>();
-    searchForLldbDap().then(result => {
-        searching!.resolve(result);
-        searching = undefined;
+    searchForLldbDap().then((result: string | undefined): void => {
+        if (searching) {
+            searching.resolve(result);
+            searching = undefined;
+        }
+    }).catch(error => {
+        if (searching) {
+            searching.reject(error);
+            searching = undefined;
+        }
     });
     return searching;
 }

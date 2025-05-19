@@ -178,9 +178,9 @@ export function startRemoting(connection: Worker | MessagePort, endpoint: Endpoi
             let result: ManualPromise<any> | undefined;
             let payload: Payload | undefined;
             try {
-
-                ready ? ready = await ready : undefined;
-
+                if (ready) {
+                    await ready;
+                }
                 result = new ManualPromise<any>();
                 payload = { operation, parameters: sanitizeParameters(parameters), sequence: ++next };
                 results.set(payload.sequence, result);
@@ -188,15 +188,19 @@ export function startRemoting(connection: Worker | MessagePort, endpoint: Endpoi
                 connection.postMessage(payload);
             } catch (err) {
                 // If we can't post the message, then we need to reject the promise.
-                results.delete(payload!.sequence);
-                result!.reject(err);
+                if (payload) {
+                    results.delete(payload.sequence);
+                }
+                if (result) {
+                    result.reject(err);
+                }
             }
             return result;
         },
         notify: (operation: string, ...parameters: any[]) => {
             try {
                 if (ready) {
-                    ready.then(() => {
+                    void ready.then(() => {
                         ready = undefined;
                         connection.postMessage({ operation, parameters: sanitizeParameters(parameters), sequence: 0 });
                     });
@@ -295,7 +299,7 @@ function sanitizeParameters(parameters: any[]) {
  * @param p The value to check.
  * @returns True if the value is a reference object.
  */
-function isReference(p: any): p is reference {
+function isReference(p: any): p is Reference {
     return is.object(p) && 'identity' in p && 'kind' in p;
 }
 
@@ -303,7 +307,7 @@ function isReference(p: any): p is reference {
  * Interface representing a reference to an object or function in another thread.
  * References are used to represent values that cannot be cloned.
  */
-interface reference {
+interface Reference {
     /** Unique identifier for the referenced object. */
     identity: number;
 
@@ -334,7 +338,7 @@ export function getByRef<T = any>(identity: number): T {
  * @param instance A Promise resolving to the object to reference.
  * @returns A Promise resolving to a reference object, or undefined if the value can't be referenced.
  */
-export function ref(instance: Promise<any>): Promise<reference | undefined>;
+export function ref(instance: Promise<any>): Promise<Reference | undefined>;
 
 /**
  * Creates a reference to an object or function that can be sent to another thread.
@@ -342,7 +346,7 @@ export function ref(instance: Promise<any>): Promise<reference | undefined>;
  * @param instance The object to reference.
  * @returns A reference object, or undefined if the value can't be referenced.
  */
-export function ref(instance: any): reference | undefined;
+export function ref(instance: any): Reference | undefined;
 
 /**
  * Implementation of the ref function handling both synchronous and asynchronous cases.
@@ -350,7 +354,7 @@ export function ref(instance: any): reference | undefined;
  * @param instance The object or Promise to reference.
  * @returns A reference object, a Promise to a reference object, or undefined.
  */
-export function ref(instance: any | Promise<any>): reference | undefined | Promise<reference | undefined> {
+export function ref(instance: any | Promise<any>): Reference | undefined | Promise<Reference | undefined> {
     if (is.promise(instance)) {
         return instance.then(ref);
     }
