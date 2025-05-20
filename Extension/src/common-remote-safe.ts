@@ -11,6 +11,9 @@ import { basename, delimiter, dirname, isAbsolute, normalize, resolve } from 'no
 import { isMainThread } from 'node:worker_threads';
 
 import { isWindows } from './constants';
+import { localize as localizationLocalize } from './localization';
+import * as logger from './logger';
+import { getOutputChannelLogger, note as loggerNote } from './logger';
 import { ManualPromise } from './Utility/Async/manualPromise';
 import { RemoteConnection } from './Utility/Remoting/snare';
 import { is } from './Utility/System/guards';
@@ -27,10 +30,6 @@ import { is } from './Utility/System/guards';
 let remoteConnection: RemoteConnection | undefined;
 
 // In the main thread, grab the logger and localize functions directly.
-import { localize as localizationLocalize } from './localization';
-import * as logger from './logger';
-import { getOutputChannelLogger, note as loggerNote } from './logger';
-
 const logFn = isMainThread ? logger.log : () => { };
 const noteFn = isMainThread ? loggerNote : () => { };
 const localizeFn = isMainThread ? localizationLocalize : (info: { key: string; comment: string[] } | string, message: string, ...args: (string | number | boolean | undefined | null)[]) => message.replace(/\{(\d+)\}/g, (_, index) => String(args[Number(index)] ?? 'undefined'));
