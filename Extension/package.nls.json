@@ -476,7 +476,7 @@
     "c_cpp.configuration.autocomplete.markdownDescription": {
         "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (and similarly for `c` and `cuda-cpp` languages).",
         "comment": [
-            "{Locked=\"`disabled`\"} {Locked=\"`\"[cpp]\": {\"editor.wordBasedSuggestions\": <\"} {Locked=\">}`\"} Locked=\"`c`\"} Locked=\"`cuda-cpp`\"}"
+            "{Locked=\"`disabled`\"} {Locked=\"`\\\"[cpp]\\\": {\\\"editor.wordBasedSuggestions\\\": <\"} {Locked=\">}`\"} Locked=\"`c`\"} Locked=\"`cuda-cpp`\"}"
         ]
     },
     "c_cpp.configuration.autocomplete.default.description": "Uses the active IntelliSense engine.",
@@ -881,7 +881,7 @@
     "c_cpp.debuggers.environment.description": {
         "message": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"config\", \"value\": \"Debug\" } ], not [ { \"config\": \"Debug\" } ].",
         "comment": [
-            "{Locked=\"[ { \"name\": \"\"} {Locked=\"\", \"value\": \"\"} {Locked=\"\" } ]\"} {Locked=\"[ { \"\"} {Locked=\"\": \"\"} {Locked=\"\" } ]\"}"
+            "{Locked=\"[ { \\\"name\": \\\"\"} {Locked=\"\\\", \\\"value\\\": \\\"\"} {Locked=\"\\\" } ]\"} {Locked=\"[ { \\\"\"} {Locked=\"\\\": \\\"\"} {Locked=\"\\\" } ]\"}"
         ]
     },
     "c_cpp.debuggers.envFile.description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE.",
