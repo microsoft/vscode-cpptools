@@ -11,7 +11,7 @@
 	"switch.to.json": "Pokud chcete přepnout na soubor {0}, klikněte na odkaz na soubor nebo použijte příkaz:",
 	"edit.configurations.in.json": "Upravit konfigurace v souboru JSON",
 	"edit.configurations.json": "C/C++: Upravit konfigurace (JSON)",
-	"check.the.schema": "Další informace o vlastnostech jazyků C/C++ najdete tady: {0}",
+	"check.the.schema": "Další informace o vlastnostech C/C++ najdete tady: {0}.",
 	"cpp.properties.schema.reference": "Referenční informace ke schématu vlastností C/C++",
 	"view.schema.reference": "Referenční informace ke schématu vlastností",
 	"intellisense.configurations": "Konfigurace IntelliSense",
