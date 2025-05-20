@@ -11,9 +11,6 @@ import { basename, delimiter, dirname, isAbsolute, normalize, resolve } from 'no
 import { isMainThread } from 'node:worker_threads';
 
 import { isWindows } from './constants';
-import { localize as localizationLocalize } from './localization';
-import * as logger from './logger';
-import { getOutputChannelLogger, note as loggerNote } from './logger';
 import { ManualPromise } from './Utility/Async/manualPromise';
 import { RemoteConnection } from './Utility/Remoting/snare';
 import { is } from './Utility/System/guards';
@@ -30,10 +27,14 @@ import { is } from './Utility/System/guards';
 let remoteConnection: RemoteConnection | undefined;
 
 // In the main thread, grab the logger and localize functions directly.
-const logFn = isMainThread ? logger.log : () => { };
-const noteFn = isMainThread ? loggerNote : () => { };
-const localizeFn = isMainThread ? localizationLocalize : (info: { key: string; comment: string[] } | string, message: string, ...args: (string | number | boolean | undefined | null)[]) => message.replace(/\{(\d+)\}/g, (_, index) => String(args[Number(index)] ?? 'undefined'));
-const getOutputChannelLoggerFn = isMainThread ? getOutputChannelLogger : () => undefined;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const logFn = isMainThread ? require('./logger').log : () => { };
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const noteFn = isMainThread ? require('./logger').note : () => { };
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const localizeFn = isMainThread ? require('./localization').localize : (info: { key: string; comment: string[] } | string, message: string, ...args: (string | number | boolean | undefined | null)[]) => message.replace(/\{(\d+)\}/g, (_, index) => String(args[Number(index)] ?? 'undefined'));
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const getOutputChannelLoggerFn = isMainThread ? require('./logger').getOutputChannelLogger : () => undefined;
 
 /**
  * Used when this is imported in a module running in a worker thread.
