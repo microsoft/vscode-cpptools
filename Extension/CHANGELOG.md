@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.26.0: May 22, 2025
+### Enhancement
+* Add support for c++26/2c, gnu++26/2c, and c++23preview configurations. [#12963](https://github.com/microsoft/vscode-cpptools/issues/12963), [#13133](https://github.com/microsoft/vscode-cpptools/issues/13133)
+
+### Bug Fixes
+* Fix an invalid IntelliSense error with C++23 escape sequences. [#13338](https://github.com/microsoft/vscode-cpptools/issues/13338)
+* Fix switch header/source for CUDA files. [#13575](https://github.com/microsoft/vscode-cpptools/issues/13575)
+* Update Apple clang 16.4 to LLVM clang version mappings and fix incorrect mappings for Apple clang 14.
+* Update the bundled clang-tidy and clang-format from 1.20.3 to 1.20.5 (for bug fixes).
+
 ## Version 1.25.3: April 28, 2025
 ### Enhancements
 * Add a configuration warning message explaining why paths in quotes can't be found. [#11955](https://github.com/microsoft/vscode-cpptools/issues/11955)
