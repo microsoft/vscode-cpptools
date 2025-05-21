@@ -31,7 +31,7 @@ export interface CopilotApi {
             uri: vscode.Uri,
             context: { flags: Record<string, unknown> },
             cancellationToken: vscode.CancellationToken
-        ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>
+        ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] } | undefined>
     ): Disposable;
     getContextProviderAPI(version: string): Promise<ContextProviderApiV1 | undefined>;
 }
@@ -91,15 +91,18 @@ export async function registerRelatedFilesProvider(): Promise<void> {
                             return { entries: await includesPromise, traits: await traitsPromise };
                         }
                         catch (exception) {
-                            try {
-                                const err: Error = exception as Error;
-                                logger.getOutputChannelLogger().appendLine(localize("copilot.relatedfilesprovider.error", "Error while retrieving result. Reason: {0}", err.message));
+                            // Avoid logging the error message if it is a cancellation error.
+                            if (exception instanceof vscode.CancellationError) {
+                                telemetryProperties["error"] = "cancellation";
+                                telemetryProperties["cancellation"] = "true";
+                                throw exception; // Rethrow the cancellation error to be handled by the caller.
+                            } else if (exception instanceof Error) {
+                                telemetryProperties["error"] = "true";
+                                logger.getOutputChannelLogger().appendLine(localize("copilot.relatedfilesprovider.error", "Error while retrieving result. Reason: {0}", exception.message));
                             }
-                            catch {
-                                // Intentionally swallow any exception.
-                            }
-                            telemetryProperties["error"] = "true";
-                            throw exception; // Throw the exception for auto-retry.
+
+                            // In case of error retrieving the include files, we signal the caller of absence of the results by returning undefined.
+                            return undefined;
                         } finally {
                             telemetryMetrics['duration'] = performance.now() - start;
                             telemetry.logCopilotEvent('RelatedFilesProvider', telemetryProperties, telemetryMetrics);

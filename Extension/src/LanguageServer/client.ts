@@ -2742,7 +2742,8 @@ export class DefaultClient implements Client {
         util.setProgress(util.getProgressExecutableSuccess());
         const testHook: TestHook = getTestHook();
         if (message.endsWith("Idle")) {
-            // nothing to do
+            const status: IntelliSenseStatus = { status: Status.Idle };
+            testHook.updateStatus(status);
         } else if (message.endsWith("Parsing")) {
             this.model.isParsingWorkspace.Value = true;
             this.model.isInitializingWorkspace.Value = false;

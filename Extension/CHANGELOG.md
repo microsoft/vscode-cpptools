@@ -1,32 +1,34 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.25.2: April 25, 2025
-### Bug Fixes
-* Fix a crash in `read_double`. [#13435](https://github.com/Microsoft/vscode-cpptools/issues/13435)
-* Fix a crash with Copilot hover.
-
-## Version 1.25.1: April 22, 2025
+## Version 1.26.0: May 22, 2025
 ### Enhancement
+* Add support for c++26/2c, gnu++26/2c, and c++23preview configurations. [#12963](https://github.com/microsoft/vscode-cpptools/issues/12963), [#13133](https://github.com/microsoft/vscode-cpptools/issues/13133)
+
+### Bug Fixes
+* Fix an invalid IntelliSense error with C++23 escape sequences. [#13338](https://github.com/microsoft/vscode-cpptools/issues/13338)
+* Fix switch header/source for CUDA files. [#13575](https://github.com/microsoft/vscode-cpptools/issues/13575)
+* Update Apple clang 16.4 to LLVM clang version mappings and fix incorrect mappings for Apple clang 14.
+* Update the bundled clang-tidy and clang-format from 1.20.3 to 1.20.5 (for bug fixes).
+
+## Version 1.25.3: April 28, 2025
+### Enhancements
 * Add a configuration warning message explaining why paths in quotes can't be found. [#11955](https://github.com/microsoft/vscode-cpptools/issues/11955)
+* Improve the description of the `C_Cpp.copilotHover` setting. [PR #13461](https://github.com/microsoft/vscode-cpptools/pull/13461)
 
 ### Bug Fixes
 * Fix no error appearing in the configuration UI when an invalid `compilerPath` is used. [#12661](https://github.com/microsoft/vscode-cpptools/issues/12661)
 * Fix the 'Debug C/C++ File' button sometimes disappearing. [#13400](https://github.com/microsoft/vscode-cpptools/issues/13400)
-* Fix issues with the `recursiveIncludes` properties in the configuration UI editor. [PR #13498](https://github.com/microsoft/vscode-cpptools/pull/13498)
-* Update clang-tidy and clang-format from 20.1.2 to 20.1.3 (which has some bug fixes).
-* Fix some translation issues.
-
-## Version 1.25.0: April 10, 2025
-### Enhancement
-* Improve the description of the `C_Cpp.copilotHover` setting. [PR #13461](https://github.com/microsoft/vscode-cpptools/pull/13461)
-
-### Bug Fixes
+* Fix a crash in `read_double`. [#13435](https://github.com/Microsoft/vscode-cpptools/issues/13435)
 * Fix the handling of default file associations for certain file extensions. [PR #13455](https://github.com/microsoft/vscode-cpptools/pull/13455)
 * Fix shell parsing of the arguments of a full command line in `compilerPath`. [PR #13468](https://github.com/microsoft/vscode-cpptools/pull/13468)
 * Fix C and CUDA files being interpreted as C++ in `compile_commands.json`. [#13471](https://github.com/microsoft/vscode-cpptools/issues/13471)
 * Stop automatically mapping a `.C` file to C++ if it's already set in `files.associations`. [PR #13476](https://github.com/microsoft/vscode-cpptools/pull/13476)
+* Fix issues with the `recursiveIncludes` properties in the configuration UI editor. [PR #13498](https://github.com/microsoft/vscode-cpptools/pull/13498)
 * Fix IntelliSense not updating after the language ID is changed, and prevent the language ID from being changed if it's set from `compile_commands.json` or a configuration provider.
+* Update clang-tidy and clang-format from 20.1.2 to 20.1.3 (which has some bug fixes).
 * Fix a case where language server crash messages appear after 4 minutes.
+* Fix a crash with Copilot hover.
+* Fix some translation issues.
 
 ## Version 1.24.5: April 3, 2025
 ### New Feature

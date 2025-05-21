@@ -1092,74 +1092,66 @@ export function isCl(compilerPath: string): boolean {
 
 /** CompilerPathAndArgs retains original casing of text input for compiler path and args */
 export interface CompilerPathAndArgs {
-    compilerPath?: string | null;
+    compilerPath?: string;
     compilerName: string;
     compilerArgs?: string[];
     compilerArgsFromCommandLineInPath: string[];
     allCompilerArgs: string[];
+    error?: string;
+    telemetry?: { [key: string]: number };
 }
 
-export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string | null, compilerArgs?: string[]): CompilerPathAndArgs {
-    let compilerPath: string | undefined | null = inputCompilerPath;
+/**
+ * Parse the compiler path input into a compiler path and compiler args. If there are no args in the input string, this function will have
+ * verified that the compiler exists. (e.g. `compilerArgsFromCommandLineInPath` will be empty)
+ *
+ * @param useLegacyBehavior - If true, use the legacy behavior of separating the compilerPath from the args.
+ * @param inputCompilerPath - The compiler path input from the user.
+ * @param compilerArgs - The compiler args input from the user.
+ * @param cwd - The directory used to resolve relative paths.
+ */
+export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string, compilerArgs?: string[], cwd?: string): CompilerPathAndArgs {
+    let compilerPath: string | undefined = inputCompilerPath;
     let compilerName: string = "";
     let compilerArgsFromCommandLineInPath: string[] = [];
+    const trimLegacyQuotes = (compilerPath?: string): string | undefined => {
+        if (compilerPath && useLegacyBehavior) {
+            // Try to trim quotes from compiler path.
+            const tempCompilerPath: string[] = extractArgs(compilerPath);
+            if (tempCompilerPath.length > 0) {
+                return tempCompilerPath[0];
+            }
+        }
+        return compilerPath;
+    };
     if (compilerPath) {
         compilerPath = compilerPath.trim();
         if (isCl(compilerPath) || checkExecutableWithoutExtensionExistsSync(compilerPath)) {
             // If the path ends with cl, or if a file is found at that path, accept it without further validation.
             compilerName = path.basename(compilerPath);
+        } else if (cwd && checkExecutableWithoutExtensionExistsSync(path.join(cwd, compilerPath))) {
+            // If the path is relative and a file is found at that path, accept it without further validation.
+            compilerPath = path.join(cwd, compilerPath);
+            compilerName = path.basename(compilerPath);
         } else if (compilerPath.startsWith("\"") || (os.platform() !== 'win32' && compilerPath.startsWith("'"))) {
             // If the string starts with a quote, treat it as a command line.
             // Otherwise, a path with a leading quote would not be valid.
-            if (useLegacyBehavior) {
-                compilerArgsFromCommandLineInPath = legacyExtractArgs(compilerPath);
-                if (compilerArgsFromCommandLineInPath.length > 0) {
-                    compilerPath = compilerArgsFromCommandLineInPath.shift();
-                    if (compilerPath) {
-                        // Try to trim quotes from compiler path.
-                        const tempCompilerPath: string[] | undefined = extractArgs(compilerPath);
-                        if (tempCompilerPath && compilerPath.length > 0) {
-                            compilerPath = tempCompilerPath[0];
-                        }
-                        compilerName = path.basename(compilerPath);
-                    }
-                }
-            } else {
-                compilerArgsFromCommandLineInPath = extractArgs(compilerPath);
-                if (compilerArgsFromCommandLineInPath.length > 0) {
-                    compilerPath = compilerArgsFromCommandLineInPath.shift();
-                    if (compilerPath) {
-                        compilerName = path.basename(compilerPath);
-                    }
-                }
+            compilerArgsFromCommandLineInPath = useLegacyBehavior ? legacyExtractArgs(compilerPath) : extractArgs(compilerPath);
+            if (compilerArgsFromCommandLineInPath.length > 0) {
+                compilerPath = trimLegacyQuotes(compilerArgsFromCommandLineInPath.shift());
+                compilerName = path.basename(compilerPath ?? '');
             }
         } else {
-            const spaceStart: number = compilerPath.lastIndexOf(" ");
-            if (spaceStart !== -1) {
-                // There is no leading quote, but a space suggests it might be a command line.
-                // Try processing it as a command line, and validate that by checking for the executable.
+            if (compilerPath.includes(' ')) {
+                // There is no leading quote, but there is a space so we'll treat it as a command line.
                 const potentialArgs: string[] = useLegacyBehavior ? legacyExtractArgs(compilerPath) : extractArgs(compilerPath);
-                let potentialCompilerPath: string | undefined = potentialArgs.shift();
-                if (useLegacyBehavior) {
-                    if (potentialCompilerPath) {
-                        const tempCompilerPath: string[] | undefined = extractArgs(potentialCompilerPath);
-                        if (tempCompilerPath && compilerPath.length > 0) {
-                            potentialCompilerPath = tempCompilerPath[0];
-                        }
-                    }
-                }
-                if (potentialCompilerPath) {
-                    if (isCl(potentialCompilerPath) || checkExecutableWithoutExtensionExistsSync(potentialCompilerPath)) {
-                        compilerArgsFromCommandLineInPath = potentialArgs;
-                        compilerPath = potentialCompilerPath;
-                        compilerName = path.basename(compilerPath);
-                    }
-                }
+                compilerPath = trimLegacyQuotes(potentialArgs.shift());
+                compilerArgsFromCommandLineInPath = potentialArgs;
             }
+            compilerName = path.basename(compilerPath ?? '');
         }
     }
-    let allCompilerArgs: string[] = !compilerArgs ? [] : compilerArgs;
-    allCompilerArgs = allCompilerArgs.concat(compilerArgsFromCommandLineInPath);
+    const allCompilerArgs: string[] = (compilerArgs ?? []).concat(compilerArgsFromCommandLineInPath);
     return { compilerPath, compilerName, compilerArgs, compilerArgsFromCommandLineInPath, allCompilerArgs };
 }
 
