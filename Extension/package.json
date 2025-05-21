@@ -6561,25 +6561,13 @@
                 "when": "(config.C_Cpp.experimentalFeatures =~ /^[eE]nabled$/)"
             },
             {
-                "name": "run_in_dev_cmd_tool",
-                "displayName": "Run In Visual Studio Developer Command Prompt",
+                "name": "initialize_vs_dev_cmd_tool",
+                "displayName": "Initialize Visual Studio Developer Command Prompt Environment",
                 "canBeReferencedInPrompt": true,
-                "toolReferenceName": "cppRunInDevCmd",
+                "toolReferenceName": "InitializeDevCmdEnvironment",
                 "icon": "$(file-code)",
-                "userDescription": "Runs the Visual Studio Developer Command Prompt",
-                "modelDescription": "This tool allows you to execute shell commands in a Visual Studio Developer Command Prompt session, preserving environment variables, working directory, and other context across multiple commands.\n\nDirectory Management:\n- Use absolute paths to avoid navigation issues.\n- The working directory is set to the folder of the active file.\n\nCommand Execution:\n- Commands are executed in the order they are provided.\n- The output of each command is captured and returned.\n\nError Handling:\n- If a command fails, the tool will stop executing further commands.\n- The error message from the failed command will be returned.\n\nExample:\n```json\n{\n    \"prompt\": [\n        \"echo Hello World\",\n        \"dir\"\n    ]\n}\n```",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "prompt": {
-                            "type": "string",
-                            "description": "The given prompt to be executed in the Visual Studio Developer Command Prompt."
-                        }
-                    },
-                    "required": [
-                        "prompt"
-                    ]
-                }
+                "userDescription": "Initializes the Visual Studio Developer Command Prompt Environment",
+                "modelDescription": "This tool allows you to initializes the Visual Studio Developer Command Prompt environment for future use, preserving environment variables, working directory, and other context across multiple commands.\n\nThis is required to access Visual Studio components such as CMake, msbuild, and C++ compiler."
             },
             {
                 "name": "get_cpp_macros",

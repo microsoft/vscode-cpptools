@@ -296,8 +296,8 @@ export async function activate(): Promise<void> {
         });
         disposables.push(getCppMacrosTool);
 
-        const runInDevCmdTool = vscode.lm.registerTool('run_in_dev_cmd_tool', {
-            invoke: async (_options: vscode.LanguageModelToolInvocationOptions<{ prompt: string }>, _token: CancellationToken) => {
+        const runInDevCmdTool = vscode.lm.registerTool('initialize_vs_dev_cmd_tool', {
+            invoke: async (_options: vscode.LanguageModelToolInvocationOptions<void>, _token: CancellationToken) => {
                 const result: vscode.LanguageModelTextPart[] = [];
                 // Example: spawn a shell to run VsDevCmd.bat and capture output
                 // options.input.query
@@ -317,8 +317,8 @@ export async function activate(): Promise<void> {
                 terminal.show(); // Show the terminal
                 // Start the VS Dev Command prompt and wait for it to initialize before sending the prompt
                 terminal.sendText("cmd.exe /k " + vsDevCmdPath);
-
-
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                result.push(new vscode.LanguageModelTextPart(vsDevCmdPath + " started in terminal"));
 
                 // const cmd = `cmd.exe`;
                 // const args = ['/k', `${vsDevCmdPath}`];
