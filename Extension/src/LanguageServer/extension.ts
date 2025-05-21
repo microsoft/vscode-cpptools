@@ -10,6 +10,7 @@ import fetch from 'node-fetch';
 import * as StreamZip from 'node-stream-zip';
 import * as os from 'os';
 import * as path from 'path';
+import * as sqlite3 from 'sqlite3';
 import * as vscode from 'vscode';
 import { CancellationToken, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
@@ -37,6 +38,7 @@ import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -267,6 +269,158 @@ export async function activate(): Promise<void> {
             const tool = vscode.lm.registerTool('cpptools-lmtool-configuration', new CppConfigurationLanguageModelTool());
             disposables.push(tool);
         }
+
+        const getCppMacrosTool = vscode.lm.registerTool('get_cpp_macros', {
+            invoke: async (_options: vscode.LanguageModelToolInvocationOptions<void>, _token: CancellationToken) => {
+                const db = new sqlite3.Database("C:/src/OpenTTD/.vs/OpenTTD/v17/main/Browse.VC.db");
+                // const db = new sqlite3.Database("C:/Users/davidraygoza/source/repos/test1/.vs/test1/v17/main/Browse.VC.db");
+                const result: vscode.LanguageModelTextPart[] = [];
+                await new Promise<void>((resolve) => {
+                    db.serialize(() => {
+                        // db.each(`SELECT ci.name AS name, start_line, f.name AS file_path FROM code_items ci JOIN files f ON ci.file_id = f.id WHERE ci.kind = 37 AND f.name LIKE 'C:\\Users\\davidraygoza\\source\\repos\\test1\\test1%' AND ci.name NOT LIKE '%_H' AND ci.name NOT LIKE '%_HPP'`,
+                        db.each(`SELECT ci.name AS name, start_line, f.name AS file_path FROM code_items ci JOIN files f ON ci.file_id = f.id WHERE ci.kind = 37 AND f.name LIKE 'C:\\DEV\\AGENT-MODE-TESTING\\OPENTTD\\SRC%' AND f.name NOT LIKE 'C:\\DEV\\AGENT-MODE-TESTING\\OPENTTD\\SRC\\3RDPARTY%' AND ci.name NOT LIKE '%_H' AND ci.name NOT LIKE '%_HPP'`,
+                            (_err: any, row: any) => {
+                                const path = row.file_path;
+                                const content = fs.readFileSync(path, 'utf8').split(/\r\n|\r|\n/)[row.start_line - 1];
+                                result.push(new vscode.LanguageModelTextPart(`${row.name} is defined in ${path} as "${content}"`));
+                            },
+                            (_err: any, _count: number) => {
+                                resolve();
+                            }
+                        );
+                    });
+                });
+                db.close();
+                return new vscode.LanguageModelToolResult(result);
+            }
+        });
+        disposables.push(getCppMacrosTool);
+
+        const runInDevCmdTool = vscode.lm.registerTool('run_in_dev_cmd_tool', {
+            invoke: async (_options: vscode.LanguageModelToolInvocationOptions<{ prompt: string }>, _token: CancellationToken) => {
+                const result: vscode.LanguageModelTextPart[] = [];
+                // Example: spawn a shell to run VsDevCmd.bat and capture output
+                // options.input.query
+                const vsDevCmdPath = `"C:/Program Files/Microsoft Visual Studio/18/Preview/Common7/Tools/VsDevCmd.bat"`;
+                // Try to find an existing terminal named "Agent Mode Dev Cmd Terminal"
+                let terminal = vscode.window.terminals.find(t => t.name === "Copilot");
+                if (!terminal) {
+                    // If the Copilot terminal does not exist, fallback to the default terminal we will create.
+                    terminal = vscode.window.terminals.find(t => t.name === "Agent Mode Dev Cmd Terminal");
+                    if (!terminal) {
+                        terminal = vscode.window.createTerminal({
+                            name: "Agent Mode Dev Cmd Terminal",
+                            shellPath: "cmd.exe"
+                        });
+                    }
+                }
+                terminal.show(); // Show the terminal
+                // Start the VS Dev Command prompt and wait for it to initialize before sending the prompt
+                terminal.sendText("cmd.exe /k " + vsDevCmdPath);
+
+
+
+                // const cmd = `cmd.exe`;
+                // const args = ['/k', `${vsDevCmdPath}`];
+                // await new Promise<void>((resolve) => {
+                //     const child = spawn(cmd, args, { shell: true });
+                //     if (_options.input && _options.input.prompt) {
+                //         child.stdin.write(_options.input.prompt + '\n');
+                //     }
+                //     let output = '';
+                //     child.stdout.on('data', (data: Buffer) => {
+                //         output += data.toString();
+                //     });
+                //     child.stderr.on('data', (data: Buffer) => {
+                //         output += data.toString();
+                //     });
+                // result.push(new vscode.LanguageModelTextPart(output));
+                // resolve();
+                // child.on('close', () => {
+                //     result.push(new vscode.LanguageModelTextPart(output));
+                //     resolve();
+                // });
+                // });
+                return new vscode.LanguageModelToolResult(result);
+            }
+        });
+        disposables.push(runInDevCmdTool);
+
+        const getCppStringsTool = vscode.lm.registerTool('get_cpp_strings', {
+            invoke: async (_options: vscode.LanguageModelToolInvocationOptions<void>, _token: CancellationToken) => {
+                const db = new sqlite3.Database("C:/Users/davidraygoza/source/repos/test1/.vs/test1/v17/main/Browse.VC.db");
+                const result: vscode.LanguageModelTextPart[] = [];
+                await new Promise<void>((resolve) => {
+                    db.serialize(() => {
+                        db.each(`SELECT ci.name AS name, start_line, f.name AS file_path FROM code_items ci JOIN files f ON ci.file_id = f.id WHERE ci.kind = 28 AND f.name LIKE 'C:\\Users\\davidraygoza\\source\\repos\\test1\\test1%' AND ci.name NOT LIKE '%_H' AND ci.name NOT LIKE '%_HPP'`,
+                            (_err: any, row: any) => {
+                                const path = row.file_path;
+                                const content = fs.readFileSync(path, 'utf8').split(/\r\n|\r|\n/)[row.start_line - 1];
+                                result.push(new vscode.LanguageModelTextPart(`${row.name} is defined in ${path} as "${content}"`));
+                            },
+                            (_err: any, _count: number) => {
+                                resolve();
+                            }
+                        );
+                    });
+                });
+                db.close();
+                return new vscode.LanguageModelToolResult(result);
+            }
+        });
+        disposables.push(getCppStringsTool);
+
+        const tool3 = vscode.lm.registerTool('build_cmake_project', {
+            invoke: async (_options: vscode.LanguageModelToolInvocationOptions<void>, _token: CancellationToken) => {
+                const result: vscode.LanguageModelTextPart[] = [];
+                await vscode.commands.executeCommand('cmake.build');
+                result.push(new vscode.LanguageModelTextPart(vscode.workspace.textDocuments.map(doc => doc.getText()).filter(text => text.includes('[build]'))[0]));
+                return new vscode.LanguageModelToolResult(result);
+            }
+        });
+        disposables.push(tool3);
+
+        const tool4 = vscode.lm.registerTool('get_cpp_code_items', {
+            invoke: async (options: vscode.LanguageModelToolInvocationOptions<{ query: string }>, _token: CancellationToken) => {
+                const db = new sqlite3.Database("C:/Users/davidraygoza/source/repos/test1/.vs/test1/v17/main/Browse.VC.db");
+                const result: vscode.LanguageModelTextPart[] = [];
+                await new Promise<void>((resolve) => {
+                    db.serialize(() => {
+                        db.each(options.input.query,
+                            (_err: any, row: any) => {
+                                result.push(new vscode.LanguageModelTextPart(JSON.stringify(_err ?? row)));
+                            },
+                            (_err: any, _count: number) => {
+                                if (_err) {
+                                    result.push(new vscode.LanguageModelTextPart(JSON.stringify(_err)));
+                                }
+                                resolve();
+                            }
+                        );
+                    });
+                });
+                db.close();
+                return new vscode.LanguageModelToolResult(result);
+            }
+        });
+        disposables.push(tool4);
+
+        const tool5 = vscode.lm.registerTool('get_errors', {
+            invoke: async (_options: vscode.LanguageModelToolInvocationOptions<void>, _token: CancellationToken) => {
+                const result: vscode.LanguageModelTextPart[] = [];
+                // problems.update();
+                // const allDiagnostics = await problems.getProblems();
+                // allDiagnostics.forEach(error => {
+                //     const fileUri = error.relatedInformation?.[0]?.location.uri ?? undefined;
+                //     const filePath = fileUri?.fsPath ?? "undefined";
+                //     result.push(new vscode.LanguageModelTextPart(`${error.message} in file ${filePath} at line ${error.range.start.line + 1}`));
+                // });
+                return new vscode.LanguageModelToolResult(result);
+            }
+        });
+        disposables.push(tool5);
+
+        // cpptools = cppt.getCppToolsTestApi(cpp.Version.v6);
     }
 
     await registerRelatedFilesProvider();
@@ -280,6 +434,35 @@ export function updateLanguageConfigurations(): void {
     languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp')));
     languageConfigurations.push(vscode.languages.setLanguageConfiguration('cuda-cpp', getLanguageConfig('cuda-cpp')));
 }
+
+// class Problems {
+//     private problems?: vscode.Diagnostic[] = undefined;
+//     public update() {
+//         const activeEditor = vscode.window.activeTextEditor;
+//         if (activeEditor) {
+//             this.problems = vscode.languages.getDiagnostics(activeEditor.document.uri);
+//         } else {
+//             this.problems = [];
+//         }
+//     }
+//     public getProblems() {
+//         return new Promise<vscode.Diagnostic[]>(resolve => {
+//             const check = () => {
+//                 if (this.problems !== undefined) {
+//                     const filteredProblems = this.problems.filter(problem => problem.severity === vscode.DiagnosticSeverity.Error);
+//                     resolve(filteredProblems);
+//                     this.problems = undefined;
+//                 } else {
+//                     setTimeout(check, 5000);
+//                     void vscode.commands.executeCommand('C_Cpp.RestartIntelliSenseForFile');
+//                 }
+//             };
+//             check();
+//         });
+//     }
+// }
+
+// const problems = new Problems();
 
 /**
  * workspace events

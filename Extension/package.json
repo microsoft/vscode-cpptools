@@ -6542,6 +6542,15 @@
         ],
         "languageModelTools": [
             {
+                "name": "get_errors",
+                "displayName": "Get C++ errors",
+                "canBeReferencedInPrompt": true,
+                "toolReferenceName": "cppErrors",
+                "icon": "$(file-code)",
+                "userDescription": "Gets all C++ errors defined in the workspace.",
+                "modelDescription": "This tool gets all the C or C++ errors defined in the workspace. For each error, it provides the error name, path to the file where the error is defined, and the first line of the error definition."
+            },
+            {
                 "name": "cpptools-lmtool-configuration",
                 "toolReferenceName": "cpp",
                 "displayName": "%c_cpp.languageModelTools.configuration.displayName%",
@@ -6550,6 +6559,73 @@
                 "modelDescription": "For the active C or C++ file, this tool provides: the language (C, C++, or CUDA), the language standard version (such as C++11, C++14, C++17, or C++20), the compiler (such as GCC, Clang, or MSVC), the target platform (such as x86, x64, or ARM), and the target architecture (such as 32-bit or 64-bit).",
                 "icon": "$(file-code)",
                 "when": "(config.C_Cpp.experimentalFeatures =~ /^[eE]nabled$/)"
+            },
+            {
+                "name": "run_in_dev_cmd_tool",
+                "displayName": "Run In Visual Studio Developer Command Prompt",
+                "canBeReferencedInPrompt": true,
+                "toolReferenceName": "cppRunInDevCmd",
+                "icon": "$(file-code)",
+                "userDescription": "Runs the Visual Studio Developer Command Prompt",
+                "modelDescription": "This tool allows you to execute shell commands in a Visual Studio Developer Command Prompt session, preserving environment variables, working directory, and other context across multiple commands.\n\nDirectory Management:\n- Use absolute paths to avoid navigation issues.\n- The working directory is set to the folder of the active file.\n\nCommand Execution:\n- Commands are executed in the order they are provided.\n- The output of each command is captured and returned.\n\nError Handling:\n- If a command fails, the tool will stop executing further commands.\n- The error message from the failed command will be returned.\n\nExample:\n```json\n{\n    \"prompt\": [\n        \"echo Hello World\",\n        \"dir\"\n    ]\n}\n```",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "prompt": {
+                            "type": "string",
+                            "description": "The given prompt to be executed in the Visual Studio Developer Command Prompt."
+                        }
+                    },
+                    "required": [
+                        "prompt"
+                    ]
+                }
+            },
+            {
+                "name": "get_cpp_macros",
+                "displayName": "Get C++ macros",
+                "canBeReferencedInPrompt": true,
+                "toolReferenceName": "cppMacros",
+                "icon": "$(file-code)",
+                "userDescription": "Gets all C++ macros defined in the project.",
+                "modelDescription": "This tool gets all the C or C++ macros defined in the project. For each macro, it provides the macro name, path to the file where the macro is defined, and the first line of the macro definition."
+            },
+            {
+                "name": "get_cpp_strings",
+                "displayName": "Get C++ Strings",
+                "canBeReferencedInPrompt": true,
+                "toolReferenceName": "cppStrings",
+                "icon": "$(file-code)",
+                "userDescription": "Gets all C++ strings defined in the project.",
+                "modelDescription": "This tool gets all the C or C++ strings defined in the project so they can be converted to string_view. For each string, it provides the string name, path to the file where the string is defined, and the first line of the string definition."
+            },
+            {
+                "name": "build_cmake_project",
+                "displayName": "Build with CMake",
+                "canBeReferencedInPrompt": true,
+                "toolReferenceName": "cmakeBuild",
+                "icon": "$(tasklist)",
+                "userDescription": "Builds the project using CMake.",
+                "modelDescription": "This tool builds the current project using CMake. It provides the build output, including any errors or warnings that occur during the build. Prefer the build_cmake_project tool over the run_in_terminal tool."
+            },
+            {
+                "name": "get_cpp_code_items",
+                "displayName": "Get C++ code items",
+                "toolReferenceName": "cppItems",
+                "icon": "$(file-code)",
+                "userDescription": "Runs a SQL query to find C++ code items in the project.",
+                "modelDescription": "This tool gets C++ code items, like classes, macros, and functions. Given a SQLite query, the tool returns the results of the query. The query can access a table with this definition: CREATE TABLE items (id INTEGER, name TEXT, kind TEXT, type TEXT, path INTEGER, line INTEGER, parent_id INTEGER, parent_name TEXT); The table contains the following columns: id (the ID of the code item), name (the name of the code item), kind (the kind of code item: enum, enumerator, base_class, pound_include, parameter, function, template, template_type_parameter, attribute, macro_undef, using_alias, skipped, member_function, union, class, scope, template_argument, template_non_type_parameter, namespace, concept, unknown_decl, using_decl, template_template_parameter, attribute_argument, interface, pound_import, property), type (the C++ type of the code item), path (the path to the file where the code item is defined), line (the line number where the code item is defined), parent_id (the ID of the parent code item, if applicable), and parent_name (the name of the parent code item, if applicable).",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "query"
+                    ]
+                }
             }
         ]
     },
@@ -6627,6 +6703,7 @@
     "dependencies": {
         "@github/copilot-language-server": "^1.266.0",
         "@vscode/extension-telemetry": "^0.9.6",
+        "child_process": "^1.0.2",
         "chokidar": "^3.6.0",
         "comment-json": "^4.2.3",
         "escape-string-regexp": "^2.0.0",
@@ -6639,6 +6716,7 @@
         "plist": "^3.1.0",
         "posix-getopt": "^1.2.1",
         "shell-quote": "^1.8.1",
+        "sqlite3": "^5.1.7",
         "ssh-config": "^4.4.4",
         "tmp": "^0.2.3",
         "vscode-cpptools": "^6.1.0",
@@ -6650,5 +6728,6 @@
     "resolutions": {
         "postcss": "^8.4.31",
         "gulp-typescript/**/glob-parent": "^5.1.2"
-    }
+    },
+    "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
