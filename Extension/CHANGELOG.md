@@ -1,6 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
 ## Version 1.26.0: May 22, 2025
+### New Feature
+* Improve the context provided for C++ Copilot suggestions.
+
 ### Enhancement
 * Add support for c++26/2c, gnu++26/2c, and c++23preview configurations. [#12963](https://github.com/microsoft/vscode-cpptools/issues/12963), [#13133](https://github.com/microsoft/vscode-cpptools/issues/13133)
 
