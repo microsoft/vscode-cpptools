@@ -12,7 +12,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as sqlite3 from 'sqlite3';
 import * as vscode from 'vscode';
-import { CancellationToken, Range } from 'vscode-languageclient';
+import { CancellationToken, Range, integer } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
@@ -295,6 +295,31 @@ export async function activate(): Promise<void> {
             }
         });
         disposables.push(getCppMacrosTool);
+
+        const setBreakpointTool = vscode.lm.registerTool('set_breakpoint_tool', {
+            invoke: async (_options: vscode.LanguageModelToolInvocationOptions<{ filePath: string, lineNumber: integer, columnNumber: integer, condition: string }>, _token: CancellationToken) => {
+                const result: vscode.LanguageModelTextPart[] = [];
+                const fileUri = vscode.Uri.file(_options.input.filePath);
+                const location = new vscode.Location(fileUri, new vscode.Position(_options.input.lineNumber - 1, _options.input.columnNumber - 1)); // line 10 (0-based)
+                const condition = _options.input.condition ?? undefined; // expects a string or undefined
+                let breakpoint: vscode.SourceBreakpoint;
+                if (condition != undefined) {
+                    breakpoint = new vscode.SourceBreakpoint(location, true, condition);
+                }
+                else {
+                    breakpoint = new vscode.SourceBreakpoint(location, true);
+                }
+
+                try {
+                    await vscode.debug.addBreakpoints([breakpoint]);
+                    result.push(new vscode.LanguageModelTextPart("Breakpoint set at line " + _options.input.lineNumber + " in " + _options.input.filePath));
+                } catch (error) {
+                    result.push(new vscode.LanguageModelTextPart("Failed to set breakpoint: " + (error instanceof Error ? error.message : String(error))));
+                }
+                return new vscode.LanguageModelToolResult(result);
+            }
+        });
+        disposables.push(setBreakpointTool);
 
         const runInDevCmdTool = vscode.lm.registerTool('initialize_vs_dev_cmd_tool', {
             invoke: async (_options: vscode.LanguageModelToolInvocationOptions<void>, _token: CancellationToken) => {

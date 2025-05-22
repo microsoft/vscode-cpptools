@@ -6561,6 +6561,38 @@
                 "when": "(config.C_Cpp.experimentalFeatures =~ /^[eE]nabled$/)"
             },
             {
+                "name": "set_breakpoint_tool",
+                "displayName": "Set a Breakpoint",
+                "canBeReferencedInPrompt": true,
+                "toolReferenceName": "SetBreakpoint",
+                "icon": "$(file-code)",
+                "userDescription": "Sets a breakpoint at the specified line and column in a given file.",
+                "modelDescription": "This tool allows you to Sets a breakpoint at the specified line and column in a given file. The filepath, line number, and column number are required parameters. The 'condition' parameter is optional but allows for setting a breakpoint that only hits during a certain condition. The tool returns a success message if the breakpoint is set successfully, or an error message if it fails.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "filePath": {
+                            "type": "string"
+                        },
+                        "lineNumber": {
+                            "type": "integer"
+                        },
+                        "columnNumber": {
+                            "type": "integer"
+                        },
+                        "condition": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "filePath",
+                        "lineNumber",
+                        "columnNumber",
+                        "condition"
+                    ]
+                }
+            },
+            {
                 "name": "initialize_vs_dev_cmd_tool",
                 "displayName": "Initialize Visual Studio Developer Command Prompt Environment",
                 "canBeReferencedInPrompt": true,
