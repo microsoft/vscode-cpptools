@@ -11,7 +11,7 @@
 	"switch.to.json": "Przełącz do pliku {0}, klikając link pliku lub używając polecenia:",
 	"edit.configurations.in.json": "Edytuj konfiguracje w pliku JSON",
 	"edit.configurations.json": "C/C++: edytuj konfiguracje (JSON)",
-	"check.the.schema": "Dowiedz się więcej o właściwościach języka C/C++, przechodząc do: {0}.",
+	"check.the.schema": "Dowiedz się więcej o właściwościach C/C++, przechodząc do: {0}.",
 	"cpp.properties.schema.reference": "Odwołanie do schematu właściwości C/C++",
 	"view.schema.reference": "Odwołanie do schematu właściwości",
 	"intellisense.configurations": "Konfiguracje funkcji IntelliSense",

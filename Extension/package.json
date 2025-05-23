@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.25.3-main",
+    "version": "1.26.0-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -821,13 +821,15 @@
                             "c++17",
                             "c++20",
                             "c++23",
+                            "c++26",
                             "gnu++98",
                             "gnu++03",
                             "gnu++11",
                             "gnu++14",
                             "gnu++17",
                             "gnu++20",
-                            "gnu++23"
+                            "gnu++23",
+                            "gnu++26"
                         ],
                         "markdownDescription": "%c_cpp.configuration.default.cppStandard.markdownDescription%",
                         "scope": "resource"
@@ -6625,7 +6627,7 @@
         "xml2js": "^0.6.2"
     },
     "dependencies": {
-        "@github/copilot-language-server": "^1.266.0",
+        "@github/copilot-language-server": "^1.316.0",
         "@vscode/extension-telemetry": "^0.9.6",
         "chokidar": "^3.6.0",
         "comment-json": "^4.2.3",
@@ -6641,7 +6643,7 @@
         "shell-quote": "^1.8.1",
         "ssh-config": "^4.4.4",
         "tmp": "^0.2.3",
-        "vscode-cpptools": "^6.2.0",
+        "vscode-cpptools": "^6.3.0",
         "vscode-languageclient": "^8.1.0",
         "vscode-nls": "^5.2.0",
         "vscode-tas-client": "^0.1.84",

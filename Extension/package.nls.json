@@ -1011,7 +1011,7 @@
     "c_cpp.walkthrough.no.compilers.description": {
         "message": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Either select “Install a C++ Compiler” to have a compiler installed for you or follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Install a C++ Compiler](command:C_Cpp.InstallCompiler?%22walkthrough%22)\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%22walkthrough%22)",
         "comment": [
-            "{Locked=\"C++\"} {Locked=\"\\\n[\"} {Locked=\"](command:C_Cpp.InstallCompiler?%22walkthrough%22)\\\n[\"} {Locked=\"](command:C_Cpp.RescanCompilers?%22walkthrough%22)\"}"
+            "{Locked=\"C++\"} {Locked=\"\n[\"} {Locked=\"](command:C_Cpp.InstallCompiler?%22walkthrough%22)\n[\"} {Locked=\"](command:C_Cpp.RescanCompilers?%22walkthrough%22)\"}"
         ]
     },
     "c_cpp.walkthrough.compilers.found.description": "The C++ extension works with a C++ compiler. Select one from those already on your machine by clicking the button below.\n[Select my Default Compiler](command:C_Cpp.SelectIntelliSenseConfiguration?%22walkthrough%22)",
@@ -1020,7 +1020,7 @@
     "c_cpp.walkthrough.create.cpp.file.description": {
         "message": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D) a C++ file. Be sure to save it with the \".cpp\" extension, such as \"helloworld.cpp\". \n[Create a C++ File](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)",
         "comment": [
-            "{Locked=\"](command:toSide:workbench.action.files.openFile)\"} {Locked=\"](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)\"} {Locked=\"C++\"} {Locked=\".cpp\"} {Locked=\"\\\n[\"} {Locked=\"](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)\"}"
+            "{Locked=\"](command:toSide:workbench.action.files.openFile)\"} {Locked=\"](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)\"} {Locked=\"C++\"} {Locked=\".cpp\"} {Locked=\"\n[\"} {Locked=\"](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)\"}"
         ]
     },
     "c_cpp.walkthrough.create.cpp.file.altText": "Open a C++ file or a folder with a C++ project.",
@@ -1033,7 +1033,7 @@
     "c_cpp.walkthrough.command.prompt.description": {
         "message": "When using the Microsoft Visual Studio C++ compiler, the C++ extension requires you to launch VS Code from the Developer Command Prompt for VS. Follow the instructions on the right to relaunch.\n[Reload Window](command:workbench.action.reloadWindow)",
         "comment": [
-            "{Locked=\"Visual Studio\"} {Locked=\"C++\"} {Locked=\"VS Code\"} {Locked=\"Developer Command Prompt for VS\"} {Locked=\"\\\n[\"} {Locked=\"](command:workbench.action.reloadWindow)\"}"
+            "{Locked=\"Visual Studio\"} {Locked=\"C++\"} {Locked=\"VS Code\"} {Locked=\"Developer Command Prompt for VS\"} {Locked=\"\n[\"} {Locked=\"](command:workbench.action.reloadWindow)\"}"
         ]
     },
     "c_cpp.walkthrough.run.debug.title": "Run and debug your C++ file",
