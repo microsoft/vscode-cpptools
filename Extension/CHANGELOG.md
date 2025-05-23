@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.26.0: May 22, 2025
+## Version 1.26.1: May 22, 2025
 ### Bug Fixes
 * Fix include completion adding an extra `"` in `insert` mode. [#13615](https://github.com/microsoft/vscode-cpptools/issues/13615)
 * Fix a bug with compiler querying of MinGW. [#13622](https://github.com/microsoft/vscode-cpptools/issues/13622)
