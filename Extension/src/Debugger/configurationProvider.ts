@@ -22,7 +22,7 @@ import { PlatformInformation } from '../platform';
 import { rsync, scp, ssh } from '../SSH/commands';
 import * as Telemetry from '../telemetry';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
-import { AttachWaitFor } from './attachWaitFor';
+import { AttachWaitFor, PollProcessProviderFactory, WaitForProcessProvider } from './attachWaitFor';
 import { ConfigMenu, ConfigMode, ConfigSource, CppDebugConfiguration, DebuggerEvent, DebuggerType, DebugType, IConfiguration, IConfigurationSnippet, isDebugLaunchStr, MIConfigurations, PipeTransportConfigurations, TaskStatus, WindowsConfigurations, WSLConfigurations } from './configurations';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
@@ -351,8 +351,21 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (config.request === "attach" && !config.processId) {
             let processId: string | undefined;
             if (config.waitFor.enabled) {
-                const waitForAttach: AttachWaitFor = new AttachWaitFor()
-                processId = await waitForAttach.WaitForProcess(config.waitFor.pattern, config.waitFor.timeout)
+                const pollProvider: WaitForProcessProvider = PollProcessProviderFactory.Get();
+                const waitForAttach: AttachWaitFor = new AttachWaitFor(pollProvider);
+                if (config.waitFor.process === "") {
+                    void logger.getOutputChannelLogger().showErrorMessage(localize("waitfor.process.empty", "Wait for Process name is empty."));
+                    return undefined;
+                }
+                if (config.waitFor.timeout < 0) {
+                    void logger.getOutputChannelLogger().showErrorMessage(localize("waitfor.timeout.value", "Wait for Timeout value should be non zero."));
+                    return undefined;
+                }
+                if (config.waitFor.interval < 0) {
+                    void logger.getOutputChannelLogger().showErrorMessage(localize("waitfor.interval.value", "Wait for Interval value should be non zero."));
+                    return undefined;
+                }
+                processId = await waitForAttach.WaitForProcess(config.waitFor.process, config.waitFor.timeout, config.waitFor.interval, token);
             } else {
                 if (config.pipeTransport || config.useExtendedRemote) {
                     const remoteAttachPicker: RemoteAttachPicker = new RemoteAttachPicker();

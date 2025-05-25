@@ -1,6 +1,7 @@
 
 import * as os from 'os';
 import * as vscode from 'vscode';
+import { localize } from 'vscode-nls';
 import * as util from '../common';
 import { sleep } from '../Utility/Async/sleep';
 import { CimAttachItemsProvider, PsAttachItemsProvider, WmicAttachItemsProvider } from './nativeAttach';
@@ -26,10 +27,8 @@ export class PollProcProvider implements WaitForProcessProvider {
 
     constructor(itemsProvider: PsAttachItemsProvider) {
         this.itemsProvider = itemsProvider;
-        this._channel = vscode.window.createOutputChannel('waitfor-attach');
     }
 
-    private _channel: vscode.OutputChannel;
     private itemsProvider: PsAttachItemsProvider;
 
     async poll(program: string, timeout: number, interval: number, token?: vscode.CancellationToken): Promise<string | undefined> {
@@ -39,11 +38,11 @@ export class PollProcProvider implements WaitForProcessProvider {
             while (true) {
                 let elapsedTime = Date.now() - startTime;
                 if (elapsedTime >= timeout) {
-                    reject(new Error('Timeout reached. No process matched the pattern.'));
+                    reject(new Error(localize("waitfor.timeout", "Timeout reached. No process matched the pattern.")));
                 }
 
                 if (token?.isCancellationRequested) {
-                    reject(new Error('Operation cancelled.'));
+                    reject(new Error(localize("waitfor.cancelled", "Operation cancelled.")));
                 }
 
                 let procs = await this.itemsProvider.getAttachItems(token)
@@ -55,12 +54,14 @@ export class PollProcProvider implements WaitForProcessProvider {
                 }
 
                 if (process) {
-                    await util.execChildProcess(`kill -STOP ${process}`, undefined, this._channel);
-                    resolve(process)
+                    await util.execChildProcess(`kill -STOP ${process}`, undefined, undefined);
+                    break
                 }
 
                 sleep(interval)
             }
+
+            resolve(process)
         })
     }
 }
@@ -79,12 +80,12 @@ export class PollWindowsProvider implements WaitForProcessProvider {
             while (true) {
                 const elapsedTime = Date.now() - startTime;
                 if (elapsedTime >= timeout) {
-                    reject(new Error('Timeout reached. No process matched the pattern.'));
+                    reject(new Error(localize("waitfor.timeout", "Timeout reached. No process matched the pattern.")));
                 }
 
                 // Check for cancellation
                 if (token?.isCancellationRequested) {
-                    reject(new Error('Operation cancelled.'));
+                    reject(new Error(localize("waitfor.cancelled", "Operation cancelled.")));
                 }
 
                 let procs = await this.itemsProvider.getAttachItems(token)
@@ -98,28 +99,36 @@ export class PollWindowsProvider implements WaitForProcessProvider {
                 if (process) {
                     // Use pssupend to send SIGSTOP analogous in Windows
                     await util.execChildProcess(`pssuspend.exe /accepteula -nobanner ${process}`, undefined, undefined)
-                    resolve(process)
+                    break
                 }
 
                 sleep(interval)
             }
+            resolve(process)
         })
     }
 }
 
 
 export class AttachWaitFor {
-    constructor(private poller: WaitForProcessProvider) {
+    constructor(poller: WaitForProcessProvider) {
         //this._channel = vscode.window.createOutputChannel('waitfor-attach');
-        this.timeout = 30000
+        this.poller = poller;
+
     }
 
-    private timeout: number;
+    // Defaults: ms
+    private timeout: number = 10000;
+    private interval: number = 150;
+    private poller: WaitForProcessProvider;
 
     public async WaitForProcess(program: string, timeout: number, interval: number, token?: vscode.CancellationToken): Promise<string | undefined> {
         if (timeout) {
-            this.timeout = timeout
+            this.timeout = timeout;
         }
-        return await this.poller.poll(program, this.timeout, interval, token);
+        if (interval) {
+            this.interval = interval;
+        }
+        return await this.poller.poll(program, this.timeout, this.interval, token);
     }
 }

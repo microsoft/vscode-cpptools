@@ -106,7 +106,6 @@ function createAttachString(name: string, type: string, executable: string): str
 "name": "${name}",
 "type": "${type}",
 "request": "attach",{0}
-"waitFor": false,
 `, [type === "cppdbg" ? `${os.EOL}"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/"/g, '')}",` : ""]);
 }
 
@@ -115,7 +114,6 @@ function createRemoteAttachString(name: string, type: string, executable: string
 "name": "${name}",
 "type": "${type}",
 "request": "attach",
-"waitFor": false,
 "program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/"/g, '')}",
 "processId": "$\{command:pickRemoteProcess\}"
 `;
