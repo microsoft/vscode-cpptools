@@ -38,6 +38,7 @@ import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
+const cp = require('child_process');
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -272,13 +273,13 @@ export async function activate(): Promise<void> {
 
         const getCppMacrosTool = vscode.lm.registerTool('get_cpp_macros', {
             invoke: async (_options: vscode.LanguageModelToolInvocationOptions<void>, _token: CancellationToken) => {
-                const db = new sqlite3.Database("C:/src/OpenTTD/.vs/OpenTTD/v17/main/Browse.VC.db");
-                // const db = new sqlite3.Database("C:/Users/davidraygoza/source/repos/test1/.vs/test1/v17/main/Browse.VC.db");
+                // const db = new sqlite3.Database("C:/src/OpenTTD/.vs/OpenTTD/v17/main/Browse.VC.db");
+                const db = new sqlite3.Database("C:/Users/davidraygoza/source/repos/test1/.vs/test1/v17/Preview/Browse.VC.db");
                 const result: vscode.LanguageModelTextPart[] = [];
                 await new Promise<void>((resolve) => {
                     db.serialize(() => {
-                        // db.each(`SELECT ci.name AS name, start_line, f.name AS file_path FROM code_items ci JOIN files f ON ci.file_id = f.id WHERE ci.kind = 37 AND f.name LIKE 'C:\\Users\\davidraygoza\\source\\repos\\test1\\test1%' AND ci.name NOT LIKE '%_H' AND ci.name NOT LIKE '%_HPP'`,
-                        db.each(`SELECT ci.name AS name, start_line, f.name AS file_path FROM code_items ci JOIN files f ON ci.file_id = f.id WHERE ci.kind = 37 AND f.name LIKE 'C:\\DEV\\AGENT-MODE-TESTING\\OPENTTD\\SRC%' AND f.name NOT LIKE 'C:\\DEV\\AGENT-MODE-TESTING\\OPENTTD\\SRC\\3RDPARTY%' AND ci.name NOT LIKE '%_H' AND ci.name NOT LIKE '%_HPP'`,
+                        db.each(`SELECT ci.name AS name, start_line, f.name AS file_path FROM code_items ci JOIN files f ON ci.file_id = f.id WHERE ci.kind = 37 AND f.name LIKE 'C:\\Users\\davidraygoza\\source\\repos\\test1\\test1%' AND ci.name NOT LIKE '%_H' AND ci.name NOT LIKE '%_HPP'`,
+                            // db.each(`SELECT ci.name AS name, start_line, f.name AS file_path FROM code_items ci JOIN files f ON ci.file_id = f.id WHERE ci.kind = 37 AND f.name LIKE 'C:\\DEV\\AGENT-MODE-TESTING\\OPENTTD\\SRC%' AND f.name NOT LIKE 'C:\\DEV\\AGENT-MODE-TESTING\\OPENTTD\\SRC\\3RDPARTY%' AND ci.name NOT LIKE '%_H' AND ci.name NOT LIKE '%_HPP'`,
                             (_err: any, row: any) => {
                                 const path = row.file_path;
                                 const content = fs.readFileSync(path, 'utf8').split(/\r\n|\r|\n/)[row.start_line - 1];
@@ -295,6 +296,58 @@ export async function activate(): Promise<void> {
             }
         });
         disposables.push(getCppMacrosTool);
+
+        const runApplicationTool = vscode.lm.registerTool('run_application_tool', {
+            invoke: async (_options: vscode.LanguageModelToolInvocationOptions<void>, _token: CancellationToken) => {
+                const result: vscode.LanguageModelTextPart[] = [];
+                const configuration = {
+                    type: 'cppvsdbg',
+                    request: 'launch',
+                    name: 'C++ Debug',
+                    program: '${command:cmake.launchTargetPath}',
+                    args: [],
+                    stopAtEntry: false,
+                    cwd: '${workspaceFolder}',
+                    environment: [],
+                    console: 'externalTerminal'
+                };
+                // Run the application by calling the "C:/Users/davidraygoza/Desktop/VSCodeModulesProject/build/cpp_modules_demo.exe" executable directly.
+                const execPath = "C:/Users/davidraygoza/Desktop/VSCodeModulesProject/build/cpp_modules_demo.exe";
+                try {
+                    const output = cp.execFileSync(execPath, [], { encoding: 'utf8' });
+                    result.push(new vscode.LanguageModelTextPart(`Application output:\n${output}`));
+                } catch (err) {
+                    result.push(new vscode.LanguageModelTextPart(`Failed to run application: ${err instanceof Error ? err.message : String(err)}`));
+                }
+                // vscode.debug.startDebugging(vscode.workspace.workspaceFolders?.[0], configuration);
+                // vscode.debug.onDidTerminateDebugSession((session) => {
+                //     console.log(`Debug session terminated: ${session.id}`);
+                //     result.push(new vscode.LanguageModelTextPart(`Debug session terminated: ${session.id}`));
+                // });
+
+                // Instead of using a hardcoded configuration, show the user a list of existing launch configurations to pick from.
+                // const launchConfigs = vscode.workspace.getConfiguration('launch', vscode.workspace.workspaceFolders?.[0]?.uri);
+                // const configurations = launchConfigs.get<any[]>('configurations') ?? [];
+                // if (configurations.length === 0) {
+                //     result.push(new vscode.LanguageModelTextPart("No launch configurations found in launch.json."));
+                // } else {
+                //     const items = configurations.map(cfg => ({
+                //         label: cfg.name,
+                //         description: cfg.type,
+                //         config: cfg
+                //     }));
+                //     const picked = await vscode.window.showQuickPick(items, { placeHolder: 'Select a launch configuration to start debugging' });
+                //     if (picked) {
+                //         await vscode.debug.startDebugging(vscode.workspace.workspaceFolders?.[0], picked.config);
+                //         result.push(new vscode.LanguageModelTextPart(`Started debugging with configuration: ${picked.label}`));
+                //     } else {
+                //         result.push(new vscode.LanguageModelTextPart("No configuration selected."));
+                //     }
+                // }
+                return new vscode.LanguageModelToolResult(result);
+            }
+        });
+        disposables.push(runApplicationTool);
 
         const setBreakpointTool = vscode.lm.registerTool('set_breakpoint_tool', {
             invoke: async (_options: vscode.LanguageModelToolInvocationOptions<{ filePath: string, lineNumber: integer, columnNumber: integer, condition: string }>, _token: CancellationToken) => {

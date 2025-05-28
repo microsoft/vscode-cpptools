@@ -6561,6 +6561,15 @@
                 "when": "(config.C_Cpp.experimentalFeatures =~ /^[eE]nabled$/)"
             },
             {
+                "name": "run_application_tool",
+                "displayName": "Runs Application",
+                "canBeReferencedInPrompt": true,
+                "toolReferenceName": "RunApplication",
+                "icon": "$(file-code)",
+                "userDescription": "Runs the current application",
+                "modelDescription": "Runs current application by starting debugging session"
+            },
+            {
                 "name": "set_breakpoint_tool",
                 "displayName": "Set a Breakpoint",
                 "canBeReferencedInPrompt": true,
