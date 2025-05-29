@@ -937,12 +937,27 @@
     "c_cpp.debuggers.deploySteps.copyFile.files.description": "Files to be copied. Supports path pattern.",
     "c_cpp.debuggers.deploySteps.copyFile.targetDir.description": "Target directory.",
     "c_cpp.debuggers.deploySteps.copyFile.recursive.description": "If true, copies folders recursively.",
-    "c_cpp.debuggers.deploySteps.copyFile.scpPath.description": "Optional full path to SCP. Assumes SCP is on PATH if not specified",
-    "c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description": "Optional full path to rsync. Assumes rsync is on PATH if not specified",
+    "c_cpp.debuggers.deploySteps.copyFile.scpPath.description": {
+        "message": "Optional full path to SCP. Assumes SCP is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"SCP\"} {Locked=\"PATH\"}"
+        ]
+    },
+    "c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description": {
+        "message": "Optional full path to rsync. Assumes rsync is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"rsync\"} {Locked=\"PATH\"}"
+        ]
+    },
     "c_cpp.debuggers.deploySteps.debug": "If true, skip when starting without debugging. If false, skip when starting debugging. If undefined, never skip.",
     "c_cpp.debuggers.deploySteps.ssh.description": "SSH command step.",
     "c_cpp.debuggers.deploySteps.ssh.command.description": "Command to be executed via SSH. The command after '-c' in SSH command.",
-    "c_cpp.debuggers.deploySteps.ssh.sshPath.description": "Optional full path to SSH. Assumes SSH is on PATH if not specified",
+    "c_cpp.debuggers.deploySteps.ssh.sshPath.description": {
+        "message": "Optional full path to SSH. Assumes SSH is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"SSH\"} {Locked=\"PATH\"}"
+        ]
+    },
     "c_cpp.debuggers.deploySteps.continueOn.description": "An optional finish pattern in output. When this pattern is seen in the output, continue the deploy procedures regardless of whether this step returns.",
     "c_cpp.debuggers.deploySteps.shell.description": "Shell command step.",
     "c_cpp.debuggers.deploySteps.shell.command.description": "Shell command to be executed.",
