@@ -3662,11 +3662,6 @@
                                 },
                                 "default": []
                             },
-                            "type": {
-                                "type": "string",
-                                "description": "%c_cpp.debuggers.cppdbg.type.description%",
-                                "default": "cppdbg"
-                            },
                             "targetArchitecture": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.targetArchitecture.description%",
@@ -4611,11 +4606,6 @@
                                 "description": "%c_cpp.debuggers.program.description%",
                                 "default": "${workspaceRoot}/a.out"
                             },
-                            "type": {
-                                "type": "string",
-                                "description": "%c_cpp.debuggers.cppdbg.type.description%",
-                                "default": "cppdbg"
-                            },
                             "targetArchitecture": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.targetArchitecture.description%",
@@ -5426,11 +5416,6 @@
                                 },
                                 "default": []
                             },
-                            "type": {
-                                "type": "string",
-                                "description": "%c_cpp.debuggers.cppvsdbg.type.description%",
-                                "default": "cppvsdbg"
-                            },
                             "cwd": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.cwd.description%",
@@ -5640,11 +5625,6 @@
                             "processId"
                         ],
                         "properties": {
-                            "type": {
-                                "type": "string",
-                                "description": "%c_cpp.debuggers.cppvsdbg.type.description%",
-                                "default": "cppvsdbg"
-                            },
                             "symbolSearchPath": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.symbolSearchPath.description%",
