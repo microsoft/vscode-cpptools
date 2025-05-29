@@ -12,11 +12,11 @@ import { CppDebugConfiguration, DebuggerType } from './configurations';
 import { findLldbDapImpl } from './lldb-dap-worker';
 export { isValidLldbDap } from './lldb-dap-worker';
 
-/** Translates the cpplldb configuration to the lldb dap configuration.
+/** Translates the cpplldb configuration to the lldb-dap configuration.
  * Note: this modifies the existing configuration object in place.
  *
  * @param config The cpplldb configuration to translate.
- * @returns The translated lldb dap configuration.
+ * @returns The translated lldb-dap configuration.
  */
 export function translateToLldbDap(config: CppDebugConfiguration) {
     // Adapt the cpplldb config to the lldb-dap config.
@@ -87,9 +87,9 @@ export async function findLldbDap() {
 // This code must only run in the main thread.
 if (isMainThread && !remote) {
     try {
-        // find the entry point for the worker thread.
+        // Find the entry point for the worker thread.
         const file = resolve(__dirname.substring(0, __dirname.lastIndexOf('dist')), "dist", "src", "Debugger", 'lldb-dap-worker.js');
-        // create the worker and connection.
+        // Create the worker and connection.
         remote = startRemoting(startWorker(file), {
             // These are the functions that the main thread exposes to the worker thread.
             log,
@@ -100,7 +100,7 @@ if (isMainThread && !remote) {
         });
 
         if (!isWindows) {
-            // If we are not on Windows, we'll start it searching for the lldb dap executable as early as possible.
+            // If we are not on Windows, we'll start it searching for the lldb-dap executable as early as possible.
             // Mainly, because the LLDB-DAP debugger isn't a common standalone debugger for Windows.
             void findLldbDap();
         }

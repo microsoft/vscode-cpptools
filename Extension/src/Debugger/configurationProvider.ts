@@ -358,7 +358,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
                 // LLDB-DAP supports attaching to process by pid or by name.
                 // If they do specify 'program', then we can check to see if there
-                // is a process that matches, or they are using 'waitFor' (on Linux/OSX).
+                // is a process that matches, or they are using 'waitFor' (on Linux/macOS).
                 if (config.program) {
                     // If they specified 'program', get the tasks that match that.
                     const items = (await attachItemsProvider.getAttachItems(token)).filter(each => processMatches(config.program, each.label, each.fullPath));
@@ -991,12 +991,12 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Get debug configurations for all debugger types.
         let configs: CppDebugConfiguration[] = [];
         if (isWindows) {
-            // When on windows - prefer cppvsdbg.
+            // When on Windows - prefer cppvsdbg.
             configs.push(...await this.provideDebugConfigurationsForType(DebuggerType.cppvsdbg, folder));
         }
 
         if (!isWindows && await findLldbDap()) {
-            // Only include lldb-dap tasks if it's not windows and lldb-dap is actually available.
+            // Only include lldb-dap tasks if it's not Windows and lldb-dap is actually available.
             configs.push(...await this.provideDebugConfigurationsForType(DebuggerType.cpplldb, folder));
         }
 
@@ -1205,7 +1205,7 @@ export class ConfigurationAssetProvider {
             case 'linux':
                 return new LinuxConfigurationProvider();
             default:
-                return new ConfigurationAssetProvider(); // at least this will return empty results if the platform is not recognized.
+                return new ConfigurationAssetProvider(); // At least this will return empty results if the platform is not recognized.
         }
     }
 }

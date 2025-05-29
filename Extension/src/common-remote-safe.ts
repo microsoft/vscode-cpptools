@@ -119,9 +119,9 @@ export function appendLine(message: string | Promise<string>): void {
     }
 }
 
-/** When on windows, ensures that the given executable name ends in an '.exe'.
+/** When on Windows, ensures that the given executable name ends in an '.exe'.
  * @param executableName The name of the executable to check.
- * @returns The executable name with .exe appended if on windows and the name does not already end in an '.exe'.
+ * @returns The executable name with .exe appended if on Windows and the name does not already end in an '.exe'.
  */
 export function executableName(executableName: string) {
     return isWindows && !/\.exe$/i.test(executableName) ? `${executableName}.exe` : executableName;

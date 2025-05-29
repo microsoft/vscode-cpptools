@@ -82,11 +82,11 @@ export class CpplldbDebugAdapterDescriptorFactory extends AbstractDebugAdapterDe
             return null;
         }
 
-        // Prepare the command to run the lldb dap executable.
+        // Prepare the command to run the lldb-dap executable.
         const debuggerArgs = session.configuration.debuggerArgs || [];
 
         // Future: add support for pipeTransport (so that the lldb-dap executable can be run on a remote machine or wsl).
-        // Future: add support for --server mode (so that the lldb dap executable can be run in server mode).
+        // Future: add support for --server mode (so that the lldb-dap executable can be run in server mode).
 
         // Prepare the command to run the lldb-dap executable.
         return new vscode.DebugAdapterExecutable(adapter, [...debuggerArgs]);
