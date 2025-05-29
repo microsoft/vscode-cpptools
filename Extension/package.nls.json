@@ -866,8 +866,6 @@
     "c_cpp.debuggers.ignoreFailures.description": "If true, failures from the command should be ignored. Default value is false.",
     "c_cpp.debuggers.program.description": "Full path to program executable.",
     "c_cpp.debuggers.args.description": "Command line arguments passed to the program.",
-    "c_cpp.debuggers.cppdbg.type.description": "The type of the engine. Must be \"cppdbg\".",
-    "c_cpp.debuggers.cppvsdbg.type.description": "The type of the engine. Must be \"cppvsdbg\".",
     "c_cpp.debuggers.targetArchitecture.description": "The architecture of the debuggee. This will automatically be detected unless this parameter is set. Allowed values are x86, arm, arm64, mips, x64, amd64, x86_64.",
     "c_cpp.debuggers.cwd.description": "The working directory of the target.",
     "c_cpp.debuggers.setupCommands.description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
@@ -939,72 +937,94 @@
     "c_cpp.debuggers.deploySteps.copyFile.files.description": "Files to be copied. Supports path pattern.",
     "c_cpp.debuggers.deploySteps.copyFile.targetDir.description": "Target directory.",
     "c_cpp.debuggers.deploySteps.copyFile.recursive.description": "If true, copies folders recursively.",
-    "c_cpp.debuggers.deploySteps.copyFile.scpPath.description": "Optional full path to SCP. Assumes SCP is on PATH if not specified",
-    "c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description": "Optional full path to rsync. Assumes rsync is on PATH if not specified",
+    "c_cpp.debuggers.deploySteps.copyFile.scpPath.description": {
+        "message": "Optional full path to SCP. Assumes SCP is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"SCP\"} {Locked=\"PATH\"}"
+        ]
+    },
+    "c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description": {
+        "message": "Optional full path to rsync. Assumes rsync is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"rsync\"} {Locked=\"PATH\"}"
+        ]
+    },
     "c_cpp.debuggers.deploySteps.debug": "If true, skip when starting without debugging. If false, skip when starting debugging. If undefined, never skip.",
     "c_cpp.debuggers.deploySteps.ssh.description": "SSH command step.",
     "c_cpp.debuggers.deploySteps.ssh.command.description": "Command to be executed via SSH. The command after '-c' in SSH command.",
-    "c_cpp.debuggers.deploySteps.ssh.sshPath.description": "Optional full path to SSH. Assumes SSH is on PATH if not specified",
+    "c_cpp.debuggers.deploySteps.ssh.sshPath.description": {
+        "message": "Optional full path to SSH. Assumes SSH is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"SSH\"} {Locked=\"PATH\"}"
+        ]
+    },
     "c_cpp.debuggers.deploySteps.continueOn.description": "An optional finish pattern in output. When this pattern is seen in the output, continue the deploy procedures regardless of whether this step returns.",
     "c_cpp.debuggers.deploySteps.shell.description": "Shell command step.",
     "c_cpp.debuggers.deploySteps.shell.command.description": "Shell command to be executed.",
     "c_cpp.debuggers.vsCodeCommand.description": "VS Code command to be invoked. Can be a command in VS Code or an active extension.",
     "c_cpp.debuggers.vsCodeCommand.command.description": "VS Code command to be invoked.",
     "c_cpp.debuggers.vsCodeCommand.args.description": "Arguments to the VS Code command.",
-    "c_cpp.debuggers.cpplldb.type.description": "The type of the engine. Must be \"cpplldb\".",
-    "c_cpp.debuggers.debuggerPath.description": "Full path to the LLDB-DAP debugger executable. If not specified, the extension will search for the debugger in the system PATH.",
-    "c_cpp.debuggers.debuggerArgs.description": "Additional arguments for the LLDB-DAP debugger.",
+    "c_cpp.debuggers.cpplldb.debuggerPath.description": {
+        "message": "Full path to the LLDB-DAP debugger executable. If not specified, the extension will search for the debugger in the system PATH.",
+        "comment": [
+            "{Locked=\"LLDB-DAP\"} {Locked=\"PATH\"}"
+        ]
+    },
+    "c_cpp.debuggers.cpplldb.debuggerArgs.description": {
+        "message": "Additional arguments for the LLDB-DAP debugger.",
+        "comment": [
+            "{Locked=\"LLDB-DAP\"}"
+        ]
+    },
     "c_cpp.debuggers.cpplldb.externalConsole.description": "If true, launch the external console for the debugger.",
-    "c_cpp.debuggers.cpplldb.debuggerPath.description": "Full path to the LLDB-DAP debugger executable. If not specified, the extension will search for the debugger in the system PATH.",
-    "c_cpp.debuggers.cpplldb.debuggerArgs.description": "Additional arguments for the LLDB-DAP debugger.",
     "c_cpp.debuggers.cpplldb.disableAslr.description": "Disable Address Space Layout Randomization (if supported).",
     "c_cpp.debuggers.cpplldb.disableStdio.description": "Disables the standard input/output streams during debugging.",
-    "c_cpp.debuggers.cpplldb.expandShellArguments.description": "Expand program arguments as a shell would (does not actually launch the program in a shell).",
-    "c_cpp.debuggers.cpplldb.detachOnError.description": "Detach the debugger when an error occurs. ",
-    "c_cpp.debuggers.cpplldb.debuggerRoot.description": "The directory to where relative object files can be located.",
-    "c_cpp.debuggers.cpplldb.targetTriple.description": "Overrides the triplet of the target program",
-    "c_cpp.debuggers.cpplldb.platformName.description": "Overrides the platform name of the target program",
+    "c_cpp.debuggers.cpplldb.expandShellArguments.description": "Expands program arguments as a shell would (does not actually launch the program in a shell).",
+    "c_cpp.debuggers.cpplldb.detachOnError.description": "Detach the debugger when an error occurs.",
+    "c_cpp.debuggers.cpplldb.debuggerRoot.description": "The directory where relative object files can be located.",
+    "c_cpp.debuggers.cpplldb.targetTriple.description": "Overrides the target triple of the target program.",
+    "c_cpp.debuggers.cpplldb.platformName.description": "Overrides the platform name of the target program.",
     "c_cpp.debuggers.cpplldb.initCommands.description": "LLDB commands executed upon debugger startup prior to creating the LLDB target.",
     "c_cpp.debuggers.cpplldb.preRunCommands.description": "LLDB commands executed just before launching/attaching, after the LLDB target has been created.",
     "c_cpp.debuggers.cpplldb.postRunCommands.description": "LLDB commands executed after launching when it's in a stopped state prior to any automatic continuation.",
     "c_cpp.debuggers.cpplldb.launchCommands.description": "Custom LLDB commands that are executed instead of launching a process.",
     "c_cpp.debuggers.cpplldb.stopCommands.description": "LLDB commands executed each time the program stops.",
-    "c_cpp.debuggers.cpplldb.exitCommands.description": "LLDB ommands executed when the program exits.",
+    "c_cpp.debuggers.cpplldb.exitCommands.description": "LLDB commands executed when the program exits.",
     "c_cpp.debuggers.cpplldb.terminateCommands.description": "LLDB commands executed when the debugging session ends.",
-    "c_cpp.debuggers.cpplldb.enableAutoVariableSummaries.description": "Enable auto generated summaries for variables when no summaries exist for a given type. This feature can cause performance delays in large projects when viewing variables.",
+    "c_cpp.debuggers.cpplldb.enableAutoVariableSummaries.description": "Enable auto-generated summaries for variables when no summaries exist for a given type. This feature can cause performance delays in large projects when viewing variables.",
     "c_cpp.debuggers.cpplldb.displayExtendedBacktrace.description": "Enable language-specific extended backtraces.",
     "c_cpp.debuggers.cpplldb.enableSyntheticChildDebugging.description": "If a variable is displayed using synthetic children, also display the actual contents of the variable at the end under an entry. This is useful when creating synthetic child plug-ins as it lets you see the actual contents of the variable.",
     "c_cpp.debuggers.cpplldb.commandEscapePrefix.description": "The escape prefix character to use for executing regular LLDB commands in the Debug Console, instead of printing variables.",
-    "c_cpp.debuggers.cpplldb.customFrameFormat.description": {
-        "message": "When specified, stack frames will have descriptions generated based on the provided format. See https://lldb.llvm.org/use/formatting.html",
+    "c_cpp.debuggers.cpplldb.customFrameFormat.markdownDescription": {
+        "message": "When specified, stack frames will have descriptions generated based on the provided format. See https://lldb.llvm.org/use/formatting.html.",
         "comment": [
             "{Locked=\"https://lldb.llvm.org/use/formatting.html\"}"
         ]
     },
-    "c_cpp.debuggers.cpplldb.customThreadFormat.description": {
-        "message": "When specified, threads will have descriptions generated based on the provided format. See https://lldb.llvm.org/use/formatting.html",
+    "c_cpp.debuggers.cpplldb.customThreadFormat.markdownDescription": {
+        "message": "When specified, threads will have descriptions generated based on the provided format. See https://lldb.llvm.org/use/formatting.html.",
         "comment": [
             "{Locked=\"https://lldb.llvm.org/use/formatting.html\"}"
         ]
     },
     "c_cpp.debuggers.cpplldb.attachCommands.description": "Custom LLDB commands that are executed instead of attaching to a process ID or to a process by name.",
-    "c_cpp.debuggers.cpplldb.waitFor.description": {
+    "c_cpp.debuggers.cpplldb.waitFor.markdownDescription": {
         "message": "Wait for the process to launch by looking for a process with a basename that matches the value specified in `program`.",
         "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+            "{Locked=\"`program`\"}"
         ]
     },
     "c_cpp.debuggers.cpplldb.coreFile.description": "Path to the core file to debug.",
-    "c_cpp.debuggers.cpplldb.gdbRemotePort.description": {
+    "c_cpp.debuggers.cpplldb.gdbRemotePort.markdownDescription": {
         "message": "TCP/IP port to attach to a remote system. Specifying both `processId` and `port` is an error.",
         "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+            "{Locked=\"`processId`\"} {Locked=\"`port`\"}"
         ]
     },
-    "c_cpp.debuggers.cpplldb.gdbRemoteHost.description": {
+    "c_cpp.debuggers.cpplldb.gdbRemoteHost.markdownDescription": {
         "message": "The hostname to connect to a remote system. The default hostname is `localhost`.",
         "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+            "{Locked=\"`localhost`\"}"
         ]
     },
     "c_cpp.taskDefinitions.name.description": "The name of the task.",

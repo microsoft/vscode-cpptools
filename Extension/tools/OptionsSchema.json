@@ -612,11 +612,6 @@
           },
           "default": []
         },
-        "type": {
-          "type": "string",
-          "description": "%c_cpp.debuggers.cppdbg.type.description%",
-          "default": "cppdbg"
-        },
         "targetArchitecture": {
           "type": "string",
           "description": "%c_cpp.debuggers.targetArchitecture.description%",
@@ -845,11 +840,6 @@
           "description": "%c_cpp.debuggers.program.description%",
           "default": "${workspaceFolder}/a.out"
         },
-        "type": {
-          "type": "string",
-          "description": "%c_cpp.debuggers.cppdbg.type.description%",
-          "default": "cppdbg"
-        },
         "targetArchitecture": {
           "type": "string",
           "description": "%c_cpp.debuggers.targetArchitecture.description%",
@@ -981,11 +971,6 @@
           },
           "default": []
         },
-        "type": {
-          "type": "string",
-          "description": "%c_cpp.debuggers.cpplldb.type.description%",
-          "default": "cpplldb"
-        },
         "cwd": {
           "type": "string",
           "description": "%c_cpp.debuggers.cwd.description%",
@@ -993,12 +978,12 @@
         },
         "debuggerPath": {
           "type": "string",
-          "description": "%c_cpp.debuggers.debuggerPath.description%",
+          "description": "%c_cpp.debuggers.cpplldb.debuggerPath.description%",
           "default": "lldb-dap"
         },
         "debuggerArgs": {
           "type": "string",
-          "description": "%c_cpp.debuggers.debuggerArgs.description%",
+          "description": "%c_cpp.debuggers.cpplldb.debuggerArgs.description%",
           "default": ""
         },
         "environment": {
@@ -1142,7 +1127,7 @@
         },
         "displayExtendedBacktrace": {
           "type": "boolean",
-          "description": "Enable language specific extended backtraces.",
+          "description": "%c_cpp.debuggers.cpplldb.displayExtendedBacktrace.description%",
           "default": false
         },
         "enableSyntheticChildDebugging": {
@@ -1157,12 +1142,12 @@
         },
         "customFrameFormat": {
           "type": "string",
-          "description": "%c_cpp.debuggers.cpplldb.customFrameFormat.description%",
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.customFrameFormat.markdownDescription%",
           "default": ""
         },
         "customThreadFormat": {
           "type": "string",
-          "description": "%c_cpp.debuggers.cpplldb.customThreadFormat.description%",
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.customThreadFormat.markdownDescription%",
           "default": ""
         }
       }
@@ -1176,19 +1161,14 @@
           "description": "%c_cpp.debuggers.program.description%",
           "default": "${workspaceFolder}/a.out"
         },
-        "type": {
-          "type": "string",
-          "description": "%c_cpp.debuggers.cpplldb.type.description%",
-          "default": "cpplldb"
-        },
         "debuggerPath": {
           "type": "string",
-          "description": "%c_cpp.debuggers.debuggerPath.description%",
+          "description": "%c_cpp.debuggers.cpplldbdebuggerPath.description%",
           "default": "lldb-dap"
         },
         "debuggerArgs": {
           "type": "string",
-          "description": "%c_cpp.debuggers.debuggerArgs.description%",
+          "description": "%c_cpp.debuggers.cpplldb.debuggerArgs.description%",
           "default": ""
         },
         "processId": {
@@ -1227,7 +1207,7 @@
         },
         "waitFor": {
           "type": "boolean",
-          "description": "%c_cpp.debuggers.cpplldb.waitFor.description%",
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.waitFor.markdownDescription%",
           "default": true
         },
         "deploySteps": {
@@ -1330,11 +1310,11 @@
             "number",
             "string"
           ],
-          "description": "%c_cpp.debuggers.cpplldb.gdbRemotePort.description%"
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.gdbRemotePort.markdownDescription%"
         },
         "gdb-remote-hostname": {
           "type": "string",
-          "description": "%c_cpp.debuggers.cpplldb.gdbRemoteHost.description%"
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.gdbRemoteHost.markdownDescription%"
         },
         "enableAutoVariableSummaries": {
           "type": "boolean",
@@ -1358,12 +1338,12 @@
         },
         "customFrameFormat": {
           "type": "string",
-          "description": "%c_cpp.debuggers.cpplldb.customFrameFormat.description%",
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.customFrameFormat.markdownDescription%",
           "default": ""
         },
         "customThreadFormat": {
           "type": "string",
-          "description": "%c_cpp.debuggers.cpplldb.customThreadFormat.description%",
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.customThreadFormat.markdownDescription%",
           "default": ""
         }
       }
@@ -1387,11 +1367,6 @@
             "type": "string"
           },
           "default": []
-        },
-        "type": {
-          "type": "string",
-          "description": "%c_cpp.debuggers.cppvsdbg.type.description%",
-          "default": "cppvsdbg"
         },
         "cwd": {
           "type": "string",
@@ -1528,11 +1503,6 @@
           "type": "string",
           "description": "%c_cpp.debuggers.program.description%",
           "default": "${workspaceFolder}/program.exe"
-        },
-        "type": {
-          "type": "string",
-          "description": "%c_cpp.debuggers.cppvsdbg.type.description%",
-          "default": "cppvsdbg"
         },
         "symbolSearchPath": {
           "type": "string",
