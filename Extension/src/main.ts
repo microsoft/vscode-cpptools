@@ -41,6 +41,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         context: { cpptools: '', start: '' }
     });
 
+    if (util.extensionContext !== undefined) {
+        return cppTools; // The extension is already activated.
+    }
+
     util.setExtensionContext(context);
     Telemetry.activate();
     util.setProgress(0);
