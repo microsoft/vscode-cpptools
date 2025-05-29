@@ -144,7 +144,7 @@ export class MIConfigurations extends Configuration {
             body: {
                 ...createLaunchBlock(name, DebuggerType.cppdbg, this.executable),
                 MIMode: this.MIMode,
-                miDebuggerPath: isWindows ? "/path/to/gdb" : undefined,
+                miDebuggerPath: isWindows ? `<${localize("path.to.gdb", "path to gdb").replace(/"/g, '')}>` : undefined,
                 ...this.additionalProperties
             },
             isInitialConfiguration: true,
@@ -160,7 +160,7 @@ export class MIConfigurations extends Configuration {
             body: {
                 ...createAttachBlock(name, DebuggerType.cppdbg, this.executable),
                 MIMode: this.MIMode,
-                miDebuggerPath: isWindows ? "/path/to/gdb" : undefined,
+                miDebuggerPath: isWindows ? `<${localize("path.to.gdb", "path to gdb").replace(/"/g, '')}>` : undefined,
                 ...this.additionalProperties
             },
             debuggerType: DebuggerType.cppdbg
