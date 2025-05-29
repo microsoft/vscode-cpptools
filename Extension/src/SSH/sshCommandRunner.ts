@@ -343,9 +343,9 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
         }
     };
 
-    const handleTerminalOutput = async (dataWrite: vscode.TerminalDataWriteEvent): Promise<void> => {
+    const handleTerminalOutput = async (data: string): Promise<void> => {
         if (loggingLevel > 0) {
-            handleOutputLogging(dataWrite.data);
+            handleOutputLogging(data);
         }
 
         if (continueWithoutExiting) {
@@ -353,7 +353,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             return;
         }
 
-        stdout += dataWrite.data;
+        stdout += data;
 
         if (interactors) {
             for (const interactor of interactors) {
@@ -436,13 +436,14 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             hideFromUser: true
         };
 
-        let terminalDataHandlingQueue: Promise<void> = Promise.resolve();
-        terminalListener = systemInteractor.onDidWriteTerminalData(async e => {
+        terminalListener = systemInteractor.onDidStartTerminalShellExecution(async (e) => {
             if (e.terminal !== terminal) {
                 return;
             }
 
-            terminalDataHandlingQueue = terminalDataHandlingQueue.finally(() => void handleTerminalOutput(e));
+            for await (const data of e.execution.read()) {
+                void handleTerminalOutput(data);
+            }
         });
         terminal = systemInteractor.createTerminal(options);
 
