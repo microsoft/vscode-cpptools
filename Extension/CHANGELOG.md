@@ -1,8 +1,18 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.26.0: May 22, 2025
-### Enhancement
+## Version 1.26.1: May 22, 2025
+### Bug Fixes
+* Fix include completion adding an extra `"` in `insert` mode. [#13615](https://github.com/microsoft/vscode-cpptools/issues/13615)
+* Fix a bug with compiler querying of MinGW. [#13622](https://github.com/microsoft/vscode-cpptools/issues/13622)
+* Fix a tag parser crash regression.
+
+## Version 1.26.0: May 21, 2025
+### New Feature
+* Improve the context provided for C++ Copilot suggestions.
+
+### Enhancements
 * Add support for c++26/2c, gnu++26/2c, and c++23preview configurations. [#12963](https://github.com/microsoft/vscode-cpptools/issues/12963), [#13133](https://github.com/microsoft/vscode-cpptools/issues/13133)
+* IntelliSense parser updates.
 
 ### Bug Fixes
 * Fix an invalid IntelliSense error with C++23 escape sequences. [#13338](https://github.com/microsoft/vscode-cpptools/issues/13338)
