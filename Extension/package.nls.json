@@ -866,8 +866,6 @@
     "c_cpp.debuggers.ignoreFailures.description": "If true, failures from the command should be ignored. Default value is false.",
     "c_cpp.debuggers.program.description": "Full path to program executable.",
     "c_cpp.debuggers.args.description": "Command line arguments passed to the program.",
-    "c_cpp.debuggers.cppdbg.type.description": "The type of the engine. Must be \"cppdbg\".",
-    "c_cpp.debuggers.cppvsdbg.type.description": "The type of the engine. Must be \"cppvsdbg\".",
     "c_cpp.debuggers.targetArchitecture.description": "The architecture of the debuggee. This will automatically be detected unless this parameter is set. Allowed values are x86, arm, arm64, mips, x64, amd64, x86_64.",
     "c_cpp.debuggers.cwd.description": "The working directory of the target.",
     "c_cpp.debuggers.setupCommands.description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
@@ -939,12 +937,27 @@
     "c_cpp.debuggers.deploySteps.copyFile.files.description": "Files to be copied. Supports path pattern.",
     "c_cpp.debuggers.deploySteps.copyFile.targetDir.description": "Target directory.",
     "c_cpp.debuggers.deploySteps.copyFile.recursive.description": "If true, copies folders recursively.",
-    "c_cpp.debuggers.deploySteps.copyFile.scpPath.description": "Optional full path to SCP. Assumes SCP is on PATH if not specified",
-    "c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description": "Optional full path to rsync. Assumes rsync is on PATH if not specified",
+    "c_cpp.debuggers.deploySteps.copyFile.scpPath.description": {
+        "message": "Optional full path to SCP. Assumes SCP is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"SCP\"} {Locked=\"PATH\"}"
+        ]
+    },
+    "c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description": {
+        "message": "Optional full path to rsync. Assumes rsync is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"rsync\"} {Locked=\"PATH\"}"
+        ]
+    },
     "c_cpp.debuggers.deploySteps.debug": "If true, skip when starting without debugging. If false, skip when starting debugging. If undefined, never skip.",
     "c_cpp.debuggers.deploySteps.ssh.description": "SSH command step.",
     "c_cpp.debuggers.deploySteps.ssh.command.description": "Command to be executed via SSH. The command after '-c' in SSH command.",
-    "c_cpp.debuggers.deploySteps.ssh.sshPath.description": "Optional full path to SSH. Assumes SSH is on PATH if not specified",
+    "c_cpp.debuggers.deploySteps.ssh.sshPath.description": {
+        "message": "Optional full path to SSH. Assumes SSH is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"SSH\"} {Locked=\"PATH\"}"
+        ]
+    },
     "c_cpp.debuggers.deploySteps.continueOn.description": "An optional finish pattern in output. When this pattern is seen in the output, continue the deploy procedures regardless of whether this step returns.",
     "c_cpp.debuggers.deploySteps.shell.description": "Shell command step.",
     "c_cpp.debuggers.deploySteps.shell.command.description": "Shell command to be executed.",
