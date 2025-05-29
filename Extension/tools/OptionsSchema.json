@@ -726,7 +726,7 @@
         },
         "stopAtEntry": {
           "type": "boolean",
-          "description": "%c_cpp.debuggers.stopAtEntry.description%",
+          "markdownDescription": "%c_cpp.debuggers.stopAtEntry.markdownDescription%",
           "default": false
         },
         "debugServerPath": {
@@ -775,17 +775,16 @@
           "default": false
         },
         "sourceFileMap": {
+          "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
           "anyOf": [
             {
               "type": "object",
-              "description": "%c_cpp.debuggers.sourceFileMap.description%",
               "default": {
                 "<source-path>": "<target-path>"
               }
             },
             {
-              "$ref": "#/definitions/SourceFileMapEntry",
-              "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%"
+              "$ref": "#/definitions/SourceFileMapEntry"
             }
           ]
         },
@@ -886,15 +885,14 @@
           "default": false
         },
         "processId": {
+          "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
           "anyOf": [
             {
               "type": "string",
-              "description": "%c_cpp.debuggers.processId.anyOf.description%",
               "default": "${command:pickProcess}"
             },
             {
               "type": "integer",
-              "description": "%c_cpp.debuggers.processId.anyOf.description%",
               "default": 0
             }
           ]
@@ -910,17 +908,16 @@
           "default": false
         },
         "sourceFileMap": {
+          "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
           "anyOf": [
             {
               "type": "object",
-              "description": "%c_cpp.debuggers.sourceFileMap.description%",
               "default": {
                 "<source-path>": "<target-path>"
               }
             },
             {
-              "$ref": "#/definitions/SourceFileMapEntry",
-              "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%"
+              "$ref": "#/definitions/SourceFileMapEntry"
             }
           ]
         },
@@ -1001,7 +998,7 @@
         },
         "stopAtEntry": {
           "type": "boolean",
-          "description": "%c_cpp.debuggers.stopAtEntry.description%",
+          "markdownDescription": "%c_cpp.debuggers.stopAtEntry.markdownDescription%",
           "default": false
         },
         "serverLaunchTimeout": {
@@ -1015,17 +1012,16 @@
           "default": false
         },
         "sourceFileMap": {
+          "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
           "anyOf": [
             {
               "type": "object",
-              "description": "%c_cpp.debuggers.sourceFileMap.description%",
               "default": {
                 "<source-path>": "<target-path>"
               }
             },
             {
-              "$ref": "#/definitions/SourceFileMapEntry",
-              "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%"
+              "$ref": "#/definitions/SourceFileMapEntry"
             }
           ]
         },
@@ -1172,31 +1168,29 @@
           "default": ""
         },
         "processId": {
+          "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
           "anyOf": [
             {
               "type": "string",
-              "description": "%c_cpp.debuggers.processId.anyOf.description%",
               "default": "${command:pickProcess}"
             },
             {
               "type": "integer",
-              "description": "%c_cpp.debuggers.processId.anyOf.description%",
               "default": 0
             }
           ]
         },
         "sourceFileMap": {
+          "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
           "anyOf": [
             {
               "type": "object",
-              "description": "%c_cpp.debuggers.sourceFileMap.description%",
               "default": {
                 "<source-path>": "<target-path>"
               }
             },
             {
-              "$ref": "#/definitions/SourceFileMapEntry",
-              "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%"
+              "$ref": "#/definitions/SourceFileMapEntry"
             }
           ]
         },
@@ -1393,7 +1387,7 @@
         },
         "stopAtEntry": {
           "type": "boolean",
-          "description": "%c_cpp.debuggers.stopAtEntry.description%",
+          "markdownDescription": "%c_cpp.debuggers.stopAtEntry.markdownDescription%",
           "default": false
         },
         "dumpPath": {
@@ -1430,7 +1424,7 @@
         },
         "sourceFileMap": {
           "type": "object",
-          "description": "%c_cpp.debuggers.sourceFileMap.description%",
+          "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
           "default": {
             "<source-path>": "<target-path>"
           }
@@ -1510,15 +1504,14 @@
           "default": ""
         },
         "processId": {
+          "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
           "anyOf": [
             {
               "type": "string",
-              "description": "%c_cpp.debuggers.processId.anyOf.description%",
               "default": "${command:pickProcess}"
             },
             {
               "type": "integer",
-              "description": "%c_cpp.debuggers.processId.anyOf.description%",
               "default": 0
             }
           ]
@@ -1530,7 +1523,7 @@
         },
         "sourceFileMap": {
           "type": "object",
-          "description": "%c_cpp.debuggers.sourceFileMap.description%",
+          "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
           "default": {
             "<source-path>": "<target-path>"
           }
