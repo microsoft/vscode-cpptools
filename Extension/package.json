@@ -5378,7 +5378,6 @@
                 "label": "C++ (Windows)",
                 "when": "workspacePlatform == windows",
                 "languages": [
-                    "ada",
                     "c",
                     "cpp",
                     "cuda-cpp",
@@ -5771,7 +5770,6 @@
                 "type": "cpplldb",
                 "label": "C++ (LLDB-DAP)",
                 "languages": [
-                    "ada",
                     "c",
                     "cpp",
                     "cuda-cpp",
