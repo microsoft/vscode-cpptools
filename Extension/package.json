@@ -5381,7 +5381,6 @@
                 "label": "C++ (Windows)",
                 "when": "workspacePlatform == windows",
                 "languages": [
-                    "ada",
                     "c",
                     "cpp",
                     "cuda-cpp",
