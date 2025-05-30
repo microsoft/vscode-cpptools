@@ -193,3 +193,8 @@ export function disposeOutputChannels(): void {
         warningChannel.dispose();
     }
 }
+
+/** Sets a transient message in the vscode status bar. */
+export function note(message: string) {
+    vscode.window.setStatusBarMessage(message, 5000);
+}

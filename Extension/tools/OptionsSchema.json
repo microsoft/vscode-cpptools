@@ -47,11 +47,9 @@
           "default": {}
         },
         "quoteArgs": {
-          "exceptions": {
-            "type": "boolean",
-            "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
-            "default": true
-          }
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
+          "default": true
         }
       }
     },
@@ -604,7 +602,7 @@
         "program": {
           "type": "string",
           "description": "%c_cpp.debuggers.program.description%",
-          "default": "${workspaceRoot}/a.out"
+          "default": "${workspaceFolder}/a.out"
         },
         "args": {
           "type": "array",
@@ -839,7 +837,7 @@
         "program": {
           "type": "string",
           "description": "%c_cpp.debuggers.program.description%",
-          "default": "${workspaceRoot}/a.out"
+          "default": "${workspaceFolder}/a.out"
         },
         "targetArchitecture": {
           "type": "string",
@@ -951,17 +949,16 @@
         }
       }
     },
-    "CppvsdbgLaunchOptions": {
+    "CpplldbLaunchOptions": {
       "type": "object",
       "required": [
-        "program",
-        "cwd"
+        "program"
       ],
       "properties": {
         "program": {
           "type": "string",
           "description": "%c_cpp.debuggers.program.description%",
-          "default": "${workspaceRoot}/program.exe"
+          "default": "${workspaceFolder}/a.out"
         },
         "args": {
           "type": "array",
@@ -974,7 +971,401 @@
         "cwd": {
           "type": "string",
           "description": "%c_cpp.debuggers.cwd.description%",
-          "default": "${workspaceRoot}"
+          "default": "."
+        },
+        "debuggerPath": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.debuggerPath.description%",
+          "default": "lldb-dap"
+        },
+        "debuggerArgs": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.debuggerArgs.description%",
+          "default": ""
+        },
+        "environment": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.environment.description%",
+          "items": {
+            "$ref": "#/definitions/KeyValuePair"
+          },
+          "default": []
+        },
+        "envFile": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.envFile.description%",
+          "default": "${workspaceFolder}/.env"
+        },
+        "stopAtEntry": {
+          "type": "boolean",
+          "markdownDescription": "%c_cpp.debuggers.stopAtEntry.markdownDescription%",
+          "default": false
+        },
+        "serverLaunchTimeout": {
+          "type": "integer",
+          "description": "%c_cpp.debuggers.serverLaunchTimeout.description%",
+          "default": "10000"
+        },
+        "externalConsole": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.externalConsole.description%",
+          "default": false
+        },
+        "sourceFileMap": {
+          "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
+          "anyOf": [
+            {
+              "type": "object",
+              "default": {
+                "<source-path>": "<target-path>"
+              }
+            },
+            {
+              "$ref": "#/definitions/SourceFileMapEntry"
+            }
+          ]
+        },
+        "deploySteps": {
+          "$ref": "#/definitions/DeploySteps"
+        },
+        "disableASLR": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.disableAslr.description%",
+          "default": true
+        },
+        "disableSTDIO": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.disableStdio.description%",
+          "default": false
+        },
+        "shellExpandArguments": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.expandShellArguments.description%",
+          "default": false
+        },
+        "detachOnError": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.detachOnError.description%",
+          "default": false
+        },
+        "debuggerRoot": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.debuggerRoot.description%"
+        },
+        "targetTriple": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.targetTriple.description%"
+        },
+        "platformName": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.platformName.description%"
+        },
+        "initCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.initCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "preRunCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.preRunCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "postRunCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.postRunCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "launchCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.launchCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "stopCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.stopCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "exitCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.exitCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "terminateCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.terminateCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "enableAutoVariableSummaries": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.enableAutoVariableSummaries.description%",
+          "default": false
+        },
+        "displayExtendedBacktrace": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.displayExtendedBacktrace.description%",
+          "default": false
+        },
+        "enableSyntheticChildDebugging": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.enableSyntheticChildDebugging.description%",
+          "default": false
+        },
+        "commandEscapePrefix": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.commandEscapePrefix.description%",
+          "default": "`"
+        },
+        "customFrameFormat": {
+          "type": "string",
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.customFrameFormat.markdownDescription%",
+          "default": ""
+        },
+        "customThreadFormat": {
+          "type": "string",
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.customThreadFormat.markdownDescription%",
+          "default": ""
+        }
+      }
+    },
+    "CpplldbAttachOptions": {
+      "type": "object",
+      "default": {},
+      "properties": {
+        "program": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.program.description%",
+          "default": "${workspaceFolder}/a.out"
+        },
+        "debuggerPath": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldbdebuggerPath.description%",
+          "default": "lldb-dap"
+        },
+        "debuggerArgs": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.debuggerArgs.description%",
+          "default": ""
+        },
+        "processId": {
+          "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
+          "anyOf": [
+            {
+              "type": "string",
+              "default": "${command:pickProcess}"
+            },
+            {
+              "type": "integer",
+              "default": 0
+            }
+          ]
+        },
+        "sourceFileMap": {
+          "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
+          "anyOf": [
+            {
+              "type": "object",
+              "default": {
+                "<source-path>": "<target-path>"
+              }
+            },
+            {
+              "$ref": "#/definitions/SourceFileMapEntry"
+            }
+          ]
+        },
+        "serverLaunchTimeout": {
+          "type": "integer",
+          "description": "%c_cpp.debuggers.serverLaunchTimeout.description%",
+          "default": "10000"
+        },
+        "waitFor": {
+          "type": "boolean",
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.waitFor.markdownDescription%",
+          "default": true
+        },
+        "deploySteps": {
+          "$ref": "#/definitions/DeploySteps"
+        },
+        "disableASLR": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.disableAslr.description%",
+          "default": true
+        },
+        "disableSTDIO": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.disableStdio.description%",
+          "default": false
+        },
+        "shellExpandArguments": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.expandShellArguments.description%",
+          "default": false
+        },
+        "detachOnError": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.detachOnError.description%",
+          "default": false
+        },
+        "debuggerRoot": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.debuggerRoot.description%"
+        },
+        "targetTriple": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.targetTriple.description%"
+        },
+        "platformName": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.platformName.description%"
+        },
+        "attachCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.platformName.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "initCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.initCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "preRunCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.preRunCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "postRunCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.postRunCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "stopCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.stopCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "exitCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.exitCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "terminateCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.cpplldb.terminateCommands.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "coreFile": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.coreFile.description%"
+        },
+        "gdb-remote-port": {
+          "type": [
+            "number",
+            "string"
+          ],
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.gdbRemotePort.markdownDescription%"
+        },
+        "gdb-remote-hostname": {
+          "type": "string",
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.gdbRemoteHost.markdownDescription%"
+        },
+        "enableAutoVariableSummaries": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.enableAutoVariableSummaries.description%",
+          "default": false
+        },
+        "displayExtendedBacktrace": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.displayExtendedBacktrace.description%",
+          "default": false
+        },
+        "enableSyntheticChildDebugging": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cpplldb.enableSyntheticChildDebugging.description%",
+          "default": false
+        },
+        "commandEscapePrefix": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cpplldb.commandEscapePrefix.description%",
+          "default": "`"
+        },
+        "customFrameFormat": {
+          "type": "string",
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.customFrameFormat.markdownDescription%",
+          "default": ""
+        },
+        "customThreadFormat": {
+          "type": "string",
+          "markdownDescription": "%c_cpp.debuggers.cpplldb.customThreadFormat.markdownDescription%",
+          "default": ""
+        }
+      }
+    },
+    "CppvsdbgLaunchOptions": {
+      "type": "object",
+      "required": [
+        "program",
+        "cwd"
+      ],
+      "properties": {
+        "program": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.program.description%",
+          "default": "${workspaceFolder}/program.exe"
+        },
+        "args": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.args.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "cwd": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cwd.description%",
+          "default": "${workspaceFolder}"
         },
         "environment": {
           "type": "array",
@@ -1102,6 +1493,11 @@
         "processId"
       ],
       "properties": {
+        "program": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.program.description%",
+          "default": "${workspaceFolder}/program.exe"
+        },
         "symbolSearchPath": {
           "type": "string",
           "description": "%c_cpp.debuggers.symbolSearchPath.description%",

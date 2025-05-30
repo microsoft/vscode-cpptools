@@ -58,6 +58,7 @@
         "onCommand:extension.pickNativeProcess",
         "onCommand:extension.pickRemoteNativeProcess",
         "onDebugResolve:cppdbg",
+        "onDebugResolve:cpplldb",
         "onDebugResolve:cppvsdbg",
         "workspaceContains:/.vscode/c_cpp_properties.json",
         "onFileSystem:cpptools-schema"
@@ -3652,7 +3653,7 @@
                             "program": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.program.description%",
-                                "default": "${workspaceRoot}/a.out"
+                                "default": "${workspaceFolder}/a.out"
                             },
                             "args": {
                                 "type": "array",
@@ -4054,11 +4055,9 @@
                                         "default": {}
                                     },
                                     "quoteArgs": {
-                                        "exceptions": {
-                                            "type": "boolean",
-                                            "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
-                                            "default": true
-                                        }
+                                        "type": "boolean",
+                                        "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
+                                        "default": true
                                     }
                                 }
                             },
@@ -4603,7 +4602,7 @@
                             "program": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.program.description%",
-                                "default": "${workspaceRoot}/a.out"
+                                "default": "${workspaceFolder}/a.out"
                             },
                             "targetArchitecture": {
                                 "type": "string",
@@ -4840,11 +4839,9 @@
                                         "default": {}
                                     },
                                     "quoteArgs": {
-                                        "exceptions": {
-                                            "type": "boolean",
-                                            "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
-                                            "default": true
-                                        }
+                                        "type": "boolean",
+                                        "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
+                                        "default": true
                                     }
                                 }
                             },
@@ -5381,7 +5378,6 @@
                 "label": "C++ (Windows)",
                 "when": "workspacePlatform == windows",
                 "languages": [
-                    "ada",
                     "c",
                     "cpp",
                     "cuda-cpp",
@@ -5403,7 +5399,7 @@
                             "program": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.program.description%",
-                                "default": "${workspaceRoot}/program.exe"
+                                "default": "${workspaceFolder}/program.exe"
                             },
                             "args": {
                                 "type": "array",
@@ -5416,7 +5412,7 @@
                             "cwd": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.cwd.description%",
-                                "default": "${workspaceRoot}"
+                                "default": "${workspaceFolder}"
                             },
                             "environment": {
                                 "type": "array",
@@ -5622,6 +5618,11 @@
                             "processId"
                         ],
                         "properties": {
+                            "program": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.program.description%",
+                                "default": "${workspaceFolder}/program.exe"
+                            },
                             "symbolSearchPath": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.symbolSearchPath.description%",
@@ -5760,6 +5761,1402 @@
                                         }
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "cpplldb",
+                "label": "C++ (LLDB-DAP)",
+                "languages": [
+                    "c",
+                    "cpp",
+                    "cuda-cpp",
+                    "rust"
+                ],
+                "variables": {
+                    "pickProcess": "extension.pickNativeProcess",
+                    "pickRemoteProcess": "extension.pickRemoteNativeProcess"
+                },
+                "configurationAttributes": {
+                    "launch": {
+                        "type": "object",
+                        "required": [
+                            "program"
+                        ],
+                        "properties": {
+                            "program": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.program.description%",
+                                "default": "${workspaceFolder}/a.out"
+                            },
+                            "args": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.args.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "cwd": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cwd.description%",
+                                "default": "."
+                            },
+                            "debuggerPath": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.debuggerPath.description%",
+                                "default": "lldb-dap"
+                            },
+                            "debuggerArgs": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.debuggerArgs.description%",
+                                "default": ""
+                            },
+                            "environment": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.environment.description%",
+                                "items": {
+                                    "type": "object",
+                                    "default": {},
+                                    "properties": {
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "value": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "default": []
+                            },
+                            "envFile": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.envFile.description%",
+                                "default": "${workspaceFolder}/.env"
+                            },
+                            "stopAtEntry": {
+                                "type": "boolean",
+                                "markdownDescription": "%c_cpp.debuggers.stopAtEntry.markdownDescription%",
+                                "default": false
+                            },
+                            "serverLaunchTimeout": {
+                                "type": "integer",
+                                "description": "%c_cpp.debuggers.serverLaunchTimeout.description%",
+                                "default": "10000"
+                            },
+                            "externalConsole": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.externalConsole.description%",
+                                "default": false
+                            },
+                            "sourceFileMap": {
+                                "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
+                                "anyOf": [
+                                    {
+                                        "type": "object",
+                                        "default": {
+                                            "<source-path>": "<target-path>"
+                                        }
+                                    },
+                                    {
+                                        "type": "object",
+                                        "default": {
+                                            "<source-path>": {
+                                                "editorPath": "",
+                                                "useForBreakpoints": true
+                                            }
+                                        },
+                                        "properties": {
+                                            "<source-path>": {
+                                                "type": "object",
+                                                "default": {
+                                                    "editorPath": "",
+                                                    "useForBreakpoints": true
+                                                },
+                                                "properties": {
+                                                    "editorPath": {
+                                                        "type": "string",
+                                                        "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description%",
+                                                        "default": ""
+                                                    },
+                                                    "useForBreakpoints": {
+                                                        "type": "boolean",
+                                                        "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description%",
+                                                        "default": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "deploySteps": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.deploySteps.description%",
+                                "items": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "description": "%c_cpp.debuggers.deploySteps.copyFile.description%",
+                                            "default": {},
+                                            "required": [
+                                                "type",
+                                                "files",
+                                                "host",
+                                                "targetDir"
+                                            ],
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.copyFile.description%",
+                                                    "default": "",
+                                                    "enum": [
+                                                        "scp",
+                                                        "rsync"
+                                                    ]
+                                                },
+                                                "files": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "description": "%c_cpp.debuggers.deploySteps.copyFile.files.description%",
+                                                    "default": ""
+                                                },
+                                                "host": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string",
+                                                            "description": "%c_cpp.debuggers.host.description%",
+                                                            "default": "hello@microsoft.com"
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "description": "%c_cpp.debuggers.host.description%",
+                                                            "default": {},
+                                                            "required": [
+                                                                "hostName"
+                                                            ],
+                                                            "properties": {
+                                                                "user": {
+                                                                    "type": "string",
+                                                                    "description": "%c_cpp.debuggers.host.user.description%",
+                                                                    "default": ""
+                                                                },
+                                                                "hostName": {
+                                                                    "type": "string",
+                                                                    "description": "%c_cpp.debuggers.host.hostName.description%",
+                                                                    "default": ""
+                                                                },
+                                                                "port": {
+                                                                    "anyOf": [
+                                                                        {
+                                                                            "type": "number"
+                                                                        },
+                                                                        {
+                                                                            "type": "string",
+                                                                            "pattern": "^\\d+$|^\\${.+}$"
+                                                                        }
+                                                                    ],
+                                                                    "description": "%c_cpp.debuggers.host.port.description%",
+                                                                    "default": 22
+                                                                },
+                                                                "jumpHosts": {
+                                                                    "type": "array",
+                                                                    "description": "%c_cpp.debuggers.host.jumpHost.description%",
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "default": {},
+                                                                        "required": [
+                                                                            "hostName"
+                                                                        ],
+                                                                        "properties": {
+                                                                            "user": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.user.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "hostName": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.hostName.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "port": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.port.description%",
+                                                                                "default": 22
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "localForwards": {
+                                                                    "type": "array",
+                                                                    "description": "%c_cpp.debuggers.host.localForward.description%",
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "default": {},
+                                                                        "properties": {
+                                                                            "bindAddress": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "port": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                                                            },
+                                                                            "host": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "hostPort": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                                                            },
+                                                                            "localSocket": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "remoteSocket": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                                                                "default": ""
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                "targetDir": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.copyFile.targetDir.description%",
+                                                    "default": ""
+                                                },
+                                                "recursive": {
+                                                    "type": "boolean",
+                                                    "description": "%c_cpp.debuggers.deploySteps.copyFile.recursive.description%",
+                                                    "default": "true"
+                                                },
+                                                "debug": {
+                                                    "type": "boolean",
+                                                    "description": "%c_cpp.debuggers.deploySteps.debug%"
+                                                }
+                                            },
+                                            "allOf": [
+                                                {
+                                                    "if": {
+                                                        "properties": {
+                                                            "type": {
+                                                                "const": "scp"
+                                                            }
+                                                        }
+                                                    },
+                                                    "then": {
+                                                        "properties": {
+                                                            "scpPath": {
+                                                                "type": "string",
+                                                                "description": "%c_cpp.debuggers.deploySteps.copyFile.scpPath.description%",
+                                                                "default": ""
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "if": {
+                                                        "properties": {
+                                                            "type": {
+                                                                "const": "rsync"
+                                                            }
+                                                        }
+                                                    },
+                                                    "then": {
+                                                        "properties": {
+                                                            "rsyncPath": {
+                                                                "type": "string",
+                                                                "description": "%c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description%",
+                                                                "default": ""
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "description": "%c_cpp.debuggers.deploySteps.ssh.description%",
+                                            "default": {},
+                                            "required": [
+                                                "type",
+                                                "host",
+                                                "command"
+                                            ],
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.ssh.description%",
+                                                    "default": "",
+                                                    "enum": [
+                                                        "ssh"
+                                                    ]
+                                                },
+                                                "host": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string",
+                                                            "description": "%c_cpp.debuggers.host.description%",
+                                                            "default": "hello@microsoft.com"
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "description": "%c_cpp.debuggers.host.description%",
+                                                            "default": {},
+                                                            "required": [
+                                                                "hostName"
+                                                            ],
+                                                            "properties": {
+                                                                "user": {
+                                                                    "type": "string",
+                                                                    "description": "%c_cpp.debuggers.host.user.description%",
+                                                                    "default": ""
+                                                                },
+                                                                "hostName": {
+                                                                    "type": "string",
+                                                                    "description": "%c_cpp.debuggers.host.hostName.description%",
+                                                                    "default": ""
+                                                                },
+                                                                "port": {
+                                                                    "anyOf": [
+                                                                        {
+                                                                            "type": "number"
+                                                                        },
+                                                                        {
+                                                                            "type": "string",
+                                                                            "pattern": "^\\d+$|^\\${.+}$"
+                                                                        }
+                                                                    ],
+                                                                    "description": "%c_cpp.debuggers.host.port.description%",
+                                                                    "default": 22
+                                                                },
+                                                                "jumpHosts": {
+                                                                    "type": "array",
+                                                                    "description": "%c_cpp.debuggers.host.jumpHost.description%",
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "default": {},
+                                                                        "required": [
+                                                                            "hostName"
+                                                                        ],
+                                                                        "properties": {
+                                                                            "user": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.user.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "hostName": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.hostName.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "port": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.port.description%",
+                                                                                "default": 22
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "localForwards": {
+                                                                    "type": "array",
+                                                                    "description": "%c_cpp.debuggers.host.localForward.description%",
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "default": {},
+                                                                        "properties": {
+                                                                            "bindAddress": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "port": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                                                            },
+                                                                            "host": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "hostPort": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                                                            },
+                                                                            "localSocket": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "remoteSocket": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                                                                "default": ""
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                "command": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.ssh.command.description%",
+                                                    "default": ""
+                                                },
+                                                "sshPath": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.ssh.sshPath.description%",
+                                                    "default": ""
+                                                },
+                                                "continueOn": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.continueOn.description%",
+                                                    "default": ""
+                                                },
+                                                "debug": {
+                                                    "type": "boolean",
+                                                    "description": "%c_cpp.debuggers.deploySteps.debug%"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "type": "object",
+                                            "description": "%c_cpp.debuggers.deploySteps.shell.description%",
+                                            "default": {},
+                                            "required": [
+                                                "type",
+                                                "command"
+                                            ],
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.shell.description%",
+                                                    "default": "",
+                                                    "enum": [
+                                                        "shell"
+                                                    ]
+                                                },
+                                                "command": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.shell.command.description%",
+                                                    "default": ""
+                                                },
+                                                "continueOn": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.continueOn.description%",
+                                                    "default": ""
+                                                },
+                                                "debug": {
+                                                    "type": "boolean",
+                                                    "description": "%c_cpp.debuggers.deploySteps.debug%"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "type": "object",
+                                            "description": "%c_cpp.debuggers.vsCodeCommand.description%",
+                                            "default": {},
+                                            "required": [
+                                                "type",
+                                                "command"
+                                            ],
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.vsCodeCommand.description%",
+                                                    "default": "",
+                                                    "enum": [
+                                                        "command"
+                                                    ]
+                                                },
+                                                "command": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.vsCodeCommand.command.description%",
+                                                    "default": ""
+                                                },
+                                                "args": {
+                                                    "type": "array",
+                                                    "description": "%c_cpp.debuggers.vsCodeCommand.args.description%",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                },
+                                "default": []
+                            },
+                            "disableASLR": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.disableAslr.description%",
+                                "default": true
+                            },
+                            "disableSTDIO": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.disableStdio.description%",
+                                "default": false
+                            },
+                            "shellExpandArguments": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.expandShellArguments.description%",
+                                "default": false
+                            },
+                            "detachOnError": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.detachOnError.description%",
+                                "default": false
+                            },
+                            "debuggerRoot": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.debuggerRoot.description%"
+                            },
+                            "targetTriple": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.targetTriple.description%"
+                            },
+                            "platformName": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.platformName.description%"
+                            },
+                            "initCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.initCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "preRunCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.preRunCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "postRunCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.postRunCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "launchCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.launchCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "stopCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.stopCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "exitCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.exitCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "terminateCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.terminateCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "enableAutoVariableSummaries": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.enableAutoVariableSummaries.description%",
+                                "default": false
+                            },
+                            "displayExtendedBacktrace": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.displayExtendedBacktrace.description%",
+                                "default": false
+                            },
+                            "enableSyntheticChildDebugging": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.enableSyntheticChildDebugging.description%",
+                                "default": false
+                            },
+                            "commandEscapePrefix": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.commandEscapePrefix.description%",
+                                "default": "`"
+                            },
+                            "customFrameFormat": {
+                                "type": "string",
+                                "markdownDescription": "%c_cpp.debuggers.cpplldb.customFrameFormat.markdownDescription%",
+                                "default": ""
+                            },
+                            "customThreadFormat": {
+                                "type": "string",
+                                "markdownDescription": "%c_cpp.debuggers.cpplldb.customThreadFormat.markdownDescription%",
+                                "default": ""
+                            }
+                        }
+                    },
+                    "attach": {
+                        "type": "object",
+                        "default": {},
+                        "properties": {
+                            "program": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.program.description%",
+                                "default": "${workspaceFolder}/a.out"
+                            },
+                            "debuggerPath": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.debuggerPath.description%",
+                                "default": "lldb-dap"
+                            },
+                            "debuggerArgs": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.debuggerArgs.description%",
+                                "default": ""
+                            },
+                            "processId": {
+                                "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "default": "${command:pickProcess}"
+                                    },
+                                    {
+                                        "type": "integer",
+                                        "default": 0
+                                    }
+                                ]
+                            },
+                            "sourceFileMap": {
+                                "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
+                                "anyOf": [
+                                    {
+                                        "type": "object",
+                                        "default": {
+                                            "<source-path>": "<target-path>"
+                                        }
+                                    },
+                                    {
+                                        "type": "object",
+                                        "default": {
+                                            "<source-path>": {
+                                                "editorPath": "",
+                                                "useForBreakpoints": true
+                                            }
+                                        },
+                                        "properties": {
+                                            "<source-path>": {
+                                                "type": "object",
+                                                "default": {
+                                                    "editorPath": "",
+                                                    "useForBreakpoints": true
+                                                },
+                                                "properties": {
+                                                    "editorPath": {
+                                                        "type": "string",
+                                                        "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description%",
+                                                        "default": ""
+                                                    },
+                                                    "useForBreakpoints": {
+                                                        "type": "boolean",
+                                                        "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description%",
+                                                        "default": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "serverLaunchTimeout": {
+                                "type": "integer",
+                                "description": "%c_cpp.debuggers.serverLaunchTimeout.description%",
+                                "default": "10000"
+                            },
+                            "waitFor": {
+                                "type": "boolean",
+                                "markdownDescription": "%c_cpp.debuggers.cpplldb.waitFor.markdownDescription%",
+                                "default": true
+                            },
+                            "deploySteps": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.deploySteps.description%",
+                                "items": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "description": "%c_cpp.debuggers.deploySteps.copyFile.description%",
+                                            "default": {},
+                                            "required": [
+                                                "type",
+                                                "files",
+                                                "host",
+                                                "targetDir"
+                                            ],
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.copyFile.description%",
+                                                    "default": "",
+                                                    "enum": [
+                                                        "scp",
+                                                        "rsync"
+                                                    ]
+                                                },
+                                                "files": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "description": "%c_cpp.debuggers.deploySteps.copyFile.files.description%",
+                                                    "default": ""
+                                                },
+                                                "host": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string",
+                                                            "description": "%c_cpp.debuggers.host.description%",
+                                                            "default": "hello@microsoft.com"
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "description": "%c_cpp.debuggers.host.description%",
+                                                            "default": {},
+                                                            "required": [
+                                                                "hostName"
+                                                            ],
+                                                            "properties": {
+                                                                "user": {
+                                                                    "type": "string",
+                                                                    "description": "%c_cpp.debuggers.host.user.description%",
+                                                                    "default": ""
+                                                                },
+                                                                "hostName": {
+                                                                    "type": "string",
+                                                                    "description": "%c_cpp.debuggers.host.hostName.description%",
+                                                                    "default": ""
+                                                                },
+                                                                "port": {
+                                                                    "anyOf": [
+                                                                        {
+                                                                            "type": "number"
+                                                                        },
+                                                                        {
+                                                                            "type": "string",
+                                                                            "pattern": "^\\d+$|^\\${.+}$"
+                                                                        }
+                                                                    ],
+                                                                    "description": "%c_cpp.debuggers.host.port.description%",
+                                                                    "default": 22
+                                                                },
+                                                                "jumpHosts": {
+                                                                    "type": "array",
+                                                                    "description": "%c_cpp.debuggers.host.jumpHost.description%",
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "default": {},
+                                                                        "required": [
+                                                                            "hostName"
+                                                                        ],
+                                                                        "properties": {
+                                                                            "user": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.user.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "hostName": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.hostName.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "port": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.port.description%",
+                                                                                "default": 22
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "localForwards": {
+                                                                    "type": "array",
+                                                                    "description": "%c_cpp.debuggers.host.localForward.description%",
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "default": {},
+                                                                        "properties": {
+                                                                            "bindAddress": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "port": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                                                            },
+                                                                            "host": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "hostPort": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                                                            },
+                                                                            "localSocket": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "remoteSocket": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                                                                "default": ""
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                "targetDir": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.copyFile.targetDir.description%",
+                                                    "default": ""
+                                                },
+                                                "recursive": {
+                                                    "type": "boolean",
+                                                    "description": "%c_cpp.debuggers.deploySteps.copyFile.recursive.description%",
+                                                    "default": "true"
+                                                },
+                                                "debug": {
+                                                    "type": "boolean",
+                                                    "description": "%c_cpp.debuggers.deploySteps.debug%"
+                                                }
+                                            },
+                                            "allOf": [
+                                                {
+                                                    "if": {
+                                                        "properties": {
+                                                            "type": {
+                                                                "const": "scp"
+                                                            }
+                                                        }
+                                                    },
+                                                    "then": {
+                                                        "properties": {
+                                                            "scpPath": {
+                                                                "type": "string",
+                                                                "description": "%c_cpp.debuggers.deploySteps.copyFile.scpPath.description%",
+                                                                "default": ""
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "if": {
+                                                        "properties": {
+                                                            "type": {
+                                                                "const": "rsync"
+                                                            }
+                                                        }
+                                                    },
+                                                    "then": {
+                                                        "properties": {
+                                                            "rsyncPath": {
+                                                                "type": "string",
+                                                                "description": "%c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description%",
+                                                                "default": ""
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "description": "%c_cpp.debuggers.deploySteps.ssh.description%",
+                                            "default": {},
+                                            "required": [
+                                                "type",
+                                                "host",
+                                                "command"
+                                            ],
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.ssh.description%",
+                                                    "default": "",
+                                                    "enum": [
+                                                        "ssh"
+                                                    ]
+                                                },
+                                                "host": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string",
+                                                            "description": "%c_cpp.debuggers.host.description%",
+                                                            "default": "hello@microsoft.com"
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "description": "%c_cpp.debuggers.host.description%",
+                                                            "default": {},
+                                                            "required": [
+                                                                "hostName"
+                                                            ],
+                                                            "properties": {
+                                                                "user": {
+                                                                    "type": "string",
+                                                                    "description": "%c_cpp.debuggers.host.user.description%",
+                                                                    "default": ""
+                                                                },
+                                                                "hostName": {
+                                                                    "type": "string",
+                                                                    "description": "%c_cpp.debuggers.host.hostName.description%",
+                                                                    "default": ""
+                                                                },
+                                                                "port": {
+                                                                    "anyOf": [
+                                                                        {
+                                                                            "type": "number"
+                                                                        },
+                                                                        {
+                                                                            "type": "string",
+                                                                            "pattern": "^\\d+$|^\\${.+}$"
+                                                                        }
+                                                                    ],
+                                                                    "description": "%c_cpp.debuggers.host.port.description%",
+                                                                    "default": 22
+                                                                },
+                                                                "jumpHosts": {
+                                                                    "type": "array",
+                                                                    "description": "%c_cpp.debuggers.host.jumpHost.description%",
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "default": {},
+                                                                        "required": [
+                                                                            "hostName"
+                                                                        ],
+                                                                        "properties": {
+                                                                            "user": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.user.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "hostName": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.hostName.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "port": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.port.description%",
+                                                                                "default": 22
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "localForwards": {
+                                                                    "type": "array",
+                                                                    "description": "%c_cpp.debuggers.host.localForward.description%",
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "default": {},
+                                                                        "properties": {
+                                                                            "bindAddress": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "port": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                                                            },
+                                                                            "host": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "hostPort": {
+                                                                                "anyOf": [
+                                                                                    {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "string",
+                                                                                        "pattern": "^\\d+$|^\\${.+}$"
+                                                                                    }
+                                                                                ],
+                                                                                "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                                                            },
+                                                                            "localSocket": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                                                                "default": ""
+                                                                            },
+                                                                            "remoteSocket": {
+                                                                                "type": "string",
+                                                                                "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                                                                "default": ""
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                "command": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.ssh.command.description%",
+                                                    "default": ""
+                                                },
+                                                "sshPath": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.ssh.sshPath.description%",
+                                                    "default": ""
+                                                },
+                                                "continueOn": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.continueOn.description%",
+                                                    "default": ""
+                                                },
+                                                "debug": {
+                                                    "type": "boolean",
+                                                    "description": "%c_cpp.debuggers.deploySteps.debug%"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "type": "object",
+                                            "description": "%c_cpp.debuggers.deploySteps.shell.description%",
+                                            "default": {},
+                                            "required": [
+                                                "type",
+                                                "command"
+                                            ],
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.shell.description%",
+                                                    "default": "",
+                                                    "enum": [
+                                                        "shell"
+                                                    ]
+                                                },
+                                                "command": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.shell.command.description%",
+                                                    "default": ""
+                                                },
+                                                "continueOn": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.deploySteps.continueOn.description%",
+                                                    "default": ""
+                                                },
+                                                "debug": {
+                                                    "type": "boolean",
+                                                    "description": "%c_cpp.debuggers.deploySteps.debug%"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "type": "object",
+                                            "description": "%c_cpp.debuggers.vsCodeCommand.description%",
+                                            "default": {},
+                                            "required": [
+                                                "type",
+                                                "command"
+                                            ],
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.vsCodeCommand.description%",
+                                                    "default": "",
+                                                    "enum": [
+                                                        "command"
+                                                    ]
+                                                },
+                                                "command": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.debuggers.vsCodeCommand.command.description%",
+                                                    "default": ""
+                                                },
+                                                "args": {
+                                                    "type": "array",
+                                                    "description": "%c_cpp.debuggers.vsCodeCommand.args.description%",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                },
+                                "default": []
+                            },
+                            "disableASLR": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.disableAslr.description%",
+                                "default": true
+                            },
+                            "disableSTDIO": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.disableStdio.description%",
+                                "default": false
+                            },
+                            "shellExpandArguments": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.expandShellArguments.description%",
+                                "default": false
+                            },
+                            "detachOnError": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.detachOnError.description%",
+                                "default": false
+                            },
+                            "debuggerRoot": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.debuggerRoot.description%"
+                            },
+                            "targetTriple": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.targetTriple.description%"
+                            },
+                            "platformName": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.platformName.description%"
+                            },
+                            "attachCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.platformName.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "initCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.initCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "preRunCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.preRunCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "postRunCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.postRunCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "stopCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.stopCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "exitCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.exitCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "terminateCommands": {
+                                "type": "array",
+                                "description": "%c_cpp.debuggers.cpplldb.terminateCommands.description%",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": []
+                            },
+                            "coreFile": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.coreFile.description%"
+                            },
+                            "gdb-remote-port": {
+                                "type": [
+                                    "number",
+                                    "string"
+                                ],
+                                "markdownDescription": "%c_cpp.debuggers.cpplldb.gdbRemotePort.markdownDescription%"
+                            },
+                            "gdb-remote-hostname": {
+                                "type": "string",
+                                "markdownDescription": "%c_cpp.debuggers.cpplldb.gdbRemoteHost.markdownDescription%"
+                            },
+                            "enableAutoVariableSummaries": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.enableAutoVariableSummaries.description%",
+                                "default": false
+                            },
+                            "displayExtendedBacktrace": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.displayExtendedBacktrace.description%",
+                                "default": false
+                            },
+                            "enableSyntheticChildDebugging": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.cpplldb.enableSyntheticChildDebugging.description%",
+                                "default": false
+                            },
+                            "commandEscapePrefix": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.cpplldb.commandEscapePrefix.description%",
+                                "default": "`"
+                            },
+                            "customFrameFormat": {
+                                "type": "string",
+                                "markdownDescription": "%c_cpp.debuggers.cpplldb.customFrameFormat.markdownDescription%",
+                                "default": ""
+                            },
+                            "customThreadFormat": {
+                                "type": "string",
+                                "markdownDescription": "%c_cpp.debuggers.cpplldb.customThreadFormat.markdownDescription%",
+                                "default": ""
                             }
                         }
                     }

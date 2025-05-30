@@ -12,6 +12,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as util from '../common';
+import { executableName, ProcessReturnType, spawnChildProcess } from '../common-remote-safe';
 import * as debugUtils from './utils';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -21,12 +22,51 @@ export interface AttachItemsProvider {
     getAttachItems(token?: vscode.CancellationToken): Promise<AttachItem[]>;
 }
 
+/**
+ * Determines if a process matches the specified filter criteria.
+ *
+ * This function checks if the given process name or its full path matches
+ * the provided filter string. It also normalizes the filter string to handle
+ * relative paths and compares the executable name derived from the filter
+ * with the executable name of the process.
+ *
+ * @param filterTo - The filter string to match against. This can be a process name,
+ *                   an executable name, or a file path.
+ * @param processName - The name of the process to check.
+ * @param fullPath - The full path of the process executable, if available.
+ * @returns `true` if the process matches the filter criteria; otherwise, `false`.
+ */
+export function processMatches(filterTo: string, processName: string, fullPath: string | undefined) {
+    const normalized = path.resolve(filterTo);
+    const executable = executableName(filterTo);
+
+    // Filter out the processes that do not somehow match.
+    return processName === filterTo || executableName(processName) === executable || fullPath === filterTo || fullPath === normalized;
+}
+
 export class AttachPicker {
     constructor(private attachItemsProvider: AttachItemsProvider) { }
 
     // We should not await on this function.
     public async ShowAttachEntries(token?: vscode.CancellationToken): Promise<string | undefined> {
         return showQuickPick(() => this.attachItemsProvider.getAttachItems(token));
+    }
+
+    /** Shows the Attach QuickPick, but if a valid filterTo process name/path is passed in, it only shows those entries. */
+    public async ShowAttachEntriesFiltered(filterTo?: string, token?: vscode.CancellationToken): Promise<string | undefined> {
+        return showQuickPick(async () => {
+
+            const items = await this.attachItemsProvider.getAttachItems(token);
+            if (filterTo) {
+                // Filter out the processes that do not somehow match.
+                const filtered = items.filter(each => processMatches(filterTo, each.label, each.fullPath));
+                if (filtered.length > 0) {
+                    // Only filter the list if we have actual matches.
+                    return filtered;
+                }
+            }
+            return items;
+        });
     }
 }
 
@@ -177,18 +217,17 @@ export class RemoteAttachPicker {
                             return 0;
                         }
                         return aLower < bLower ? -1 : 1;
-                    })
-                    .map(p => p.toAttachItem());
+                    });
             }
         }
     }
 
     private async getRemoteProcessesExtendedRemote(miDebuggerPath: string, miDebuggerServerAddress: string): Promise<AttachItem[]> {
         const args: string[] = [`-ex "target extended-remote ${miDebuggerServerAddress}"`, '-ex "info os processes"', '-batch'];
-        let processListOutput: util.ProcessReturnType = await util.spawnChildProcess(miDebuggerPath, args);
+        let processListOutput: ProcessReturnType = await spawnChildProcess(miDebuggerPath, args);
         // The device may not be responsive for a while during the restart after image deploy. Retry 5 times.
         for (let i: number = 0; i < 5 && !processListOutput.succeeded && processListOutput.outputError.length === 0; i++) {
-            processListOutput = await util.spawnChildProcess(miDebuggerPath, args);
+            processListOutput = await spawnChildProcess(miDebuggerPath, args);
         }
 
         if (!processListOutput.succeeded) {
