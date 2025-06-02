@@ -164,7 +164,7 @@ async function searchForLldbDap() {
         }
     }
 
-    // Well-known-locations next.
+    // Well-known locations next.
     for (const candidate of candidates) {
         if (isMacOS) {
             // If that fails, use xcrun to find the path.
@@ -261,13 +261,13 @@ export async function isValidLldbDap(lldbDap: string | undefined) {
 }
 
 if (!isMainThread) {
-    // if this is loaded in a worker thread, we'll set up the remoting interface.
+    // If this is loaded in a worker thread, we'll set up the remoting interface.
     try {
         /** This is the SNARE remote call interface dispatcher that the worker thread supports  */
         remote = parentPort ? startRemoting(parentPort, {
-            // these are the functions that this worker exposes to the parent thread.
+            // These are the functions that this worker exposes to the parent thread.
             findLldbDapImpl
-        }) : undefined; // if we're not in a worker thread - then we don't really have a remote interface.
+        }) : undefined; // If we're not in a worker thread - then we don't really have a remote interface.
         initialize(remote);
     } catch (e) {
         if (e instanceof Error) {
