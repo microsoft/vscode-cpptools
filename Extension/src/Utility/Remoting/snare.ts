@@ -161,7 +161,8 @@ export function startRemoting(connection: Worker | MessagePort, endpoint: Endpoi
                 throw new Error(`Attempting to call unknown remote method on endpoint: ${operation}`);
             }
 
-            const retVal = endpoint[operation](...parameters); if (sequence) {
+            const retVal = endpoint[operation](...parameters);
+            if (sequence) {
                 // Is it a request? If so, post the result.
                 postResult(sequence, retVal);
             }
