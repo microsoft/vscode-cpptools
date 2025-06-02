@@ -93,7 +93,7 @@ let lldbDapPath: string | undefined;
 let xcRunPath: string | undefined;
 
 /**
- * On MacOS, calls xcrun to find a given xtools binary (usually they don't expose the binary to the PATH).
+ * On macOS, calls xcrun to find a given xtools binary (usually they don't expose the binary to the PATH).
  *
  * @param filename The name of the binary to find (e.g., lldb-vscode or lldb-dap).
  * @returns The path to the binary or undefined if it was not found.
@@ -139,7 +139,7 @@ const candidates = [
  *
  * We absolutely prefer an lldb-dap binary that is in the path.
  * Failing that, we'll:
- *  - Try xcrun on MacOS to see if xtools can give it to us
+ *  - Try xcrun on macOS to see if xtools can give it to us
  *  - Try searching the secure well-known locations for a binary
  *
  * And if we can't find the actual lldb-dap binary, we'll try the same thing
@@ -171,7 +171,7 @@ async function searchForLldbDap() {
             if (typeof candidate === 'string') {
                 lldbDapPath = await xcRun(candidate);
                 if (lldbDapPath) {
-                    appendLineAtLevel(6, `Discovered lldb-dap binary for MacOS at '${lldbDapPath}' ${Date.now() - start} msec`);
+                    appendLineAtLevel(6, `Discovered lldb-dap binary for macOS at '${lldbDapPath}' ${Date.now() - start} msec`);
                     return lldbDapPath;
                 }
             }
@@ -180,7 +180,7 @@ async function searchForLldbDap() {
             // we'll do a check of well known secured locations where it might be installed.
             lldbDapPath = await searchFolders(['/Applications', '/opt/homebrew'], candidate, isValidLldbDap, 8);
             if (lldbDapPath) {
-                appendLineAtLevel(6, `Discovered lldb-dap binary for MacOS at '${lldbDapPath}' ${Date.now() - start} msec`);
+                appendLineAtLevel(6, `Discovered lldb-dap binary for macOS at '${lldbDapPath}' ${Date.now() - start} msec`);
                 return lldbDapPath;
             }
         }

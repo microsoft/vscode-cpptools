@@ -371,7 +371,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                                     // On Windows, waitFor on lldb-dap is not supported - so we'll let the user know.
                                     void logger.getOutputChannelLogger().showWarningMessage(localize("waitFor.not.supported", "The {0} debugger does not support '{1}' on Windows.", "LLDB-DAP", "waitFor"));
 
-                                    // Drop the waitFor and program (which will just have the picker show all processes)
+                                    // Drop the waitFor and program (which will just have the picker show all processes).
                                     delete config.program;
                                     delete config.waitFor;
                                 }

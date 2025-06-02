@@ -363,7 +363,7 @@ export async function isFolder(path: string) {
     try {
         return (await stat(path)).isDirectory();
     } catch {
-        // ignore errors, if we can't access the path, it's not a folder.
+        // Ignore errors, if we can't access the path, it's not a folder.
     }
     return false;
 }
@@ -374,7 +374,7 @@ export async function searchFolders(folders: string[], filename: string | RegExp
     const nameMatches = is.string(filename) ? (item: string) => item === filename : (item: string) => filename.test(item);
 
     for (let folder of folders) {
-        // if the result was reached from anything going on asynchronously, we can stop searching.
+        // If the result was reached from anything going on asynchronously, we can stop searching.
         if (options.result) {
             return options.result;
         }
@@ -385,7 +385,7 @@ export async function searchFolders(folders: string[], filename: string | RegExp
             continue;
         }
 
-        // if we've been here before, skip this folder.
+        // If we've been here before, skip this folder.
         if (options.visited.has(folder) || !await isFolder(folder)) {
             continue;
         }

@@ -123,7 +123,7 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
 }
 
 export class PsProcessParser {
-    // Use a large fixed width - the default on MacOS is quite small.
+    // Use a large fixed width - the default on macOS is quite small.
     static fixedWidth = ''.padEnd(512, 'a');
 
     // Note that comm on Linux systems is truncated to 16 characters:
@@ -159,11 +159,11 @@ export class PsProcessParser {
 
     private static parseLineFromPs(line: string): Process | undefined {
         const psEntry = isMacOS ?
-            // ON MacOS, we're using fixed-width columns, so we have to use a fixed-width regex.
+            // On macOS, we're using fixed-width columns, so we have to use a fixed-width regex.
             // <start>whitespace(NUMBERS)whitespace(FIXED-WIDTH)whitespace(EVERYTHING-ELSE)<end>
             new RegExp(`^\\s*([0-9]+)\\s+(.{${PsProcessParser.fixedWidth.length - 1}})\\s+(.*)$`) :
 
-            // on Linux, column widths cannot be guaranteed - but we do get escaped spaces in the command line.
+            // On Linux, column widths cannot be guaranteed - but we do get escaped spaces in the command line.
             // <start>whitespace(NUMBERS)whitespace(NOTWHITESPACE)whitespace(EVERYTHING-ELSE)<end>
             /^\s*(\d+)\s+((?:\\\s|\S)+)\s+([\s\S]*)$/;
 
