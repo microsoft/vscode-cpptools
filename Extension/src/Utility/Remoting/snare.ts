@@ -70,27 +70,35 @@ export interface RemoteConnection {
     connection: Worker | MessagePort;
 
     /** Terminates the connection and cleans up resources. */
-    terminate(): void; /**
+    terminate(): void;
+
+    /**
      * Makes a request to the remote thread and awaits a response.
      *
      * @param operation The operation name to invoke.
      * @param parameters Parameters to pass to the remote operation.
      * @returns A promise that resolves with the operation result.
      */
-    request(operation: string, ...parameters: any[]): Promise<any>; /**
+    request(operation: string, ...parameters: any[]): Promise<any>;
+
+    /**
      * Sends a notification to the remote thread (fire and forget).
      *
      * @param operation The operation name to invoke.
      * @param parameters Parameters to pass to the remote operation.
      */
-    notify(operation: string, ...parameters: any[]): void; /**
+    notify(operation: string, ...parameters: any[]): void;
+
+    /**
      * Creates a proxy for a remote object.
      *
      * @param ctor Constructor for the proxy type.
      * @param instance Promise of a remote object instance ID.
      * @returns Promise of a proxy to the remote object.
      */
-    marshall<T extends MarshalByReference>(ctor: new (remote: RemoteConnection, instance: number) => T, instance: Promise<number>): Promise<T | undefined>; /**
+    marshall<T extends MarshalByReference>(ctor: new (remote: RemoteConnection, instance: number) => T, instance: Promise<number>): Promise<T | undefined>;
+
+    /**
      * Creates a proxy for a remote object.
      *
      * @param ctor Constructor for the proxy type.
@@ -286,8 +294,8 @@ function sanitize(value: any) {
 /**
  * Sanitizes an array of parameters for remoting.
  *
- * @param parameters Array of parameter values to sanitize
- * @returns Array of sanitized parameters
+ * @param parameters Array of parameter values to sanitize.
+ * @returns Array of sanitized parameters.
  */
 function sanitizeParameters(parameters: any[]) {
     return parameters.map(sanitize);
@@ -414,7 +422,9 @@ export function unref(identity: number) {
  */
 export class MarshalByReference implements Disposable {
     constructor(protected remote: RemoteConnection, protected instance: number) {
-    } /**
+    }
+
+    /**
      * This disposes the ByRef object and notifies the remote thread to reduce the refcount,
      * which would dispose the remote object if it was the last reference.
      */

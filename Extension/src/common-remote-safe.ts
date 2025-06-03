@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/** @file The functions here are safe to call from a worker thread or the main thread.  */
+/** @file The functions here are safe to call from a worker thread or the main thread. */
 
 import { ChildProcess, spawn } from 'node:child_process';
 import { access, constants, readdir, stat } from 'node:fs/promises';
@@ -149,16 +149,12 @@ export interface Disposable {
  *
  * @example
  * item.onDidChange(function(event) { console.log("Event happened: " + event); });
+ *
+ * @param listener The listener function will be called when the event happens.
+ * @param thisArgs The `this`-argument which will be used when calling the event listener.
+ * @param disposables An array to which a {@link Disposable} will be added.
+ * @returns A disposable which unsubscribes the event listener.
  */
-/**
-     * A function that represents an event to which you subscribe by calling it with
-     * a listener function as argument.
-     *
-     * @param listener The listener function will be called when the event happens.
-     * @param thisArgs The `this`-argument which will be used when calling the event listener.
-     * @param disposables An array to which a {@link Disposable} will be added.
-     * @returns A disposable which unsubscribes the event listener.
-     */
 export type Event<T> = (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) => Disposable;
 
 /** The key for a localize call.
@@ -296,7 +292,7 @@ interface ProcessOutput {
  * @param continueOn Optional string pattern that, when found in stdout, will cause the process to be considered complete before it exits.
  * @param skipLogging Optional flag to skip logging process output.
  * @param cancellationToken Optional token that can be used to cancel the process.
-  * @returns A promise that resolves to the process output, including stdout, stderr and exit code.
+ * @returns A promise that resolves to the process output, including stdout, stderr and exit code.
  */
 async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, skipLogging?: boolean, cancellationToken?: CancellationToken): Promise<ProcessOutput> {
     const result = new ManualPromise<ProcessOutput>();
@@ -313,7 +309,9 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
         appendLine(localize('killing.process', 'Killing process {0}', program));
 
         proc.kill();
-    }); /** Cleans up resources associated with the process.
+    });
+
+    /** Cleans up resources associated with the process.
      * Removes all event listeners and disposes the cancellation token listener.
      */
     const clean = () => {

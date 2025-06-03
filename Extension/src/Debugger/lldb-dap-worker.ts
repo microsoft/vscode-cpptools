@@ -263,7 +263,7 @@ export async function isValidLldbDap(lldbDap: string | undefined) {
 if (!isMainThread) {
     // If this is loaded in a worker thread, we'll set up the remoting interface.
     try {
-        /** This is the SNARE remote call interface dispatcher that the worker thread supports  */
+        /** This is the SNARE remote call interface dispatcher that the worker thread supports. */
         remote = parentPort ? startRemoting(parentPort, {
             // These are the functions that this worker exposes to the parent thread.
             findLldbDapImpl
