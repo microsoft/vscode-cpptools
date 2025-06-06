@@ -1,6 +1,5 @@
 {
   "defaults": [
-    "-D__building_module(x)=0",
     "-D__APPLE__=1",
     "-D__MACH__=1",
     "-D__x86_64=1",
