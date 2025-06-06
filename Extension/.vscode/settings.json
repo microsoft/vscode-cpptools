@@ -27,7 +27,7 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "vscode.json-language-features",
         "editor.tabSize": 4,
-        "files.insertFinalNewline": true
+        "files.insertFinalNewline": false
     },
     "[jsonc]": {
         "editor.formatOnSave": true,

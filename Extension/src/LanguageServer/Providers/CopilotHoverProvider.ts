@@ -33,9 +33,10 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         await this.client.ready;
 
         const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
+        const workspaceSettings: CppSettings = new CppSettings();
         if (settings.hover === "disabled" ||
-            settings.copilotHover === "disabled" ||
-            (settings.copilotHover === "default" && await telemetry.isFlightEnabled("CppCopilotHoverDisabled"))) {
+            workspaceSettings.copilotHover === "disabled" ||
+            (workspaceSettings.copilotHover === "default" && await telemetry.isFlightEnabled("CppCopilotHoverDisabled"))) {
             // Either disabled by the user or by the flight.
             return undefined;
         }
