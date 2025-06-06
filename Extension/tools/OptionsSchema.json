@@ -595,6 +595,28 @@
       },
       "default": []
     },
+    "WaitFor": {
+      "type": "object",
+      "description": "%c_cpp.debuggers.waitFor.description%",
+      "default": {},
+      "properties": {
+        "timeout": {
+          "type": "integer",
+          "description": "%c_cpp.debuggers.waitFor.timeout.description%",
+          "default": 10000
+        },
+        "interval": {
+          "type": "integer",
+          "description": "%c_cpp.debuggers.waitFor.interval.description%",
+          "default": 150
+        },
+        "pattern": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.waitFor.pattern.description%",
+          "default": ""
+        }
+      }
+    },
     "CppdbgLaunchOptions": {
       "type": "object",
       "required": [
@@ -922,6 +944,10 @@
               "$ref": "#/definitions/SourceFileMapEntry"
             }
           ]
+        },
+        "waitFor": {
+          "$ref": "#/definitions/WaitFor",
+          "description": "%c_cpp.debuggers.waitFor.description%"
         },
         "logging": {
           "$ref": "#/definitions/Logging",
