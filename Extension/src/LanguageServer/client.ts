@@ -244,6 +244,7 @@ interface CustomConfigurationParams extends WorkspaceFolderParams {
 
 interface CustomBrowseConfigurationParams extends WorkspaceFolderParams {
     browseConfiguration: InternalWorkspaceBrowseConfiguration;
+    mergeConfigurations: boolean;
 }
 
 interface CompileCommandsPaths extends WorkspaceFolderParams {
@@ -3349,7 +3350,8 @@ export class DefaultClient implements Client {
 
         const params: CustomBrowseConfigurationParams = {
             browseConfiguration: sanitized,
-            workspaceFolderUri: this.RootUri?.toString()
+            workspaceFolderUri: this.RootUri?.toString(),
+            mergeConfigurations: this.configuration.CurrentConfiguration?.mergeConfigurations ?? false
         };
 
         void this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params).catch(logAndReturn.undefined);
