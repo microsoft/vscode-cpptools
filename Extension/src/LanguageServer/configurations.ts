@@ -83,7 +83,7 @@ export interface Configuration {
     forcedInclude?: string[];
     configurationProviderInCppPropertiesJson?: string;
     configurationProvider?: string;
-    mergeConfigurations?: boolean | string;
+    mergeConfigurations?: boolean;
     browse?: Browse;
     recursiveIncludes?: RecursiveIncludes;
     customConfigurationVariables?: { [key: string]: string };
