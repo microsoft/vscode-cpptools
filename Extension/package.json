@@ -6616,7 +6616,6 @@
         "@types/shell-quote": "^1.7.5",
         "@types/sinon": "^17.0.3",
         "@types/tmp": "^0.2.6",
-        "@types/vscode": "^1.99.1",
         "@types/which": "^2.0.2",
         "@types/yauzl": "^2.10.3",
         "@typescript-eslint/eslint-plugin": "^6.1.0",
