@@ -3152,7 +3152,7 @@ export class DefaultClient implements Client {
         }
         if (newProvider !== undefined) {
             const newMergeConfigurations: boolean = this.configuration.CurrentMergeConfigurations;
-            if (this.mergeConfigurations != newMergeConfigurations) {
+            if (this.mergeConfigurations !== newMergeConfigurations) {
                 this.mergeConfigurations = newMergeConfigurations;
                 updateCustomConfigs = true;
             }
