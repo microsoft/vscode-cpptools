@@ -1810,3 +1810,21 @@ export function findExePathInArgs(args: CommandString[]): string | undefined {
 export function getVsCodeVersion(): number[] {
     return vscode.version.split('.').map(num => parseInt(num, undefined));
 }
+
+export function equals(array1: string[] | undefined, array2: string[] | undefined): boolean {
+    if (array1 === undefined && array2 === undefined) {
+        return true;
+    }
+    if (array1 === undefined || array2 === undefined) {
+        return false;
+    }
+    if (array1.length !== array2.length) {
+        return false;
+    }
+    for (let i: number = 0; i < array1.length; ++i) {
+        if (array1[i] !== array2[i]) {
+            return false;
+        }
+    }
+    return true;
+}

@@ -204,6 +204,41 @@ export class CppProperties {
         return new CppSettings(this.rootUri).defaultConfigurationProvider;
     }
 
+    public get CurrentMergeConfigurations(): boolean {
+        if (this.CurrentConfiguration?.mergeConfigurations) {
+            return this.CurrentConfiguration.mergeConfigurations;
+        }
+        return new CppSettings(this.rootUri).defaultMergeConfigurations;
+    }
+
+    public get CurrentIncludePath(): string[] | undefined {
+        if (this.CurrentConfiguration?.includePath) {
+            return this.CurrentConfiguration.includePath;
+        }
+        return new CppSettings(this.rootUri).defaultIncludePath;
+    }
+
+    public get CurrentDefines(): string[] | undefined {
+        if (this.CurrentConfiguration?.defines) {
+            return this.CurrentConfiguration.defines;
+        }
+        return new CppSettings(this.rootUri).defaultDefines;
+    }
+
+    public get CurrentForcedInclude(): string[] | undefined {
+        if (this.CurrentConfiguration?.forcedInclude) {
+            return this.CurrentConfiguration.forcedInclude;
+        }
+        return new CppSettings(this.rootUri).defaultForcedInclude;
+    }
+
+    public get CurrentBrowsePath(): string[] | undefined {
+        if (this.CurrentConfiguration?.browse?.path) {
+            return this.CurrentConfiguration.browse.path;
+        }
+        return new CppSettings(this.rootUri).defaultBrowsePath;
+    }
+
     public get ConfigurationNames(): string[] | undefined {
         const result: string[] = [];
         if (this.configurationJson) {

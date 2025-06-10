@@ -180,8 +180,8 @@
                         "type": "string"
                     },
                     "mergeConfigurations": {
-                        "markdownDescription": "Set to `true` to merge `includePath`, `defines`, `forcedInclude`, and `browse.path` with those received from the configuration provider. Changes to `mergeConfigurations` won't take effect until the configuration provider resends the configuration.",
-                        "descriptionHint": "{Locked=\"`true`\"} {Locked=\"`includePath`\"} {Locked=\"`defines`\"} {Locked=\"`forcedInclude`\"} {Locked=\"`browse.path`\"} {Locked=\"`mergeConfigurations`\"}",
+                        "markdownDescription": "Set to `true` to merge `includePath`, `defines`, `forcedInclude`, and `browse.path` with those received from the configuration provider.",
+                        "descriptionHint": "{Locked=\"`true`\"} {Locked=\"`includePath`\"} {Locked=\"`defines`\"} {Locked=\"`forcedInclude`\"} {Locked=\"`browse.path`\"}",
                         "type": "boolean"
                     },
                     "browse": {

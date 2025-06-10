@@ -440,7 +440,7 @@ export class CppSettings extends Settings {
     public get defaultCStandard(): string | undefined { return this.getAsStringOrUndefined("default.cStandard"); }
     public get defaultCppStandard(): string | undefined { return this.getAsStringOrUndefined("default.cppStandard"); }
     public get defaultConfigurationProvider(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.configurationProvider")); }
-    public get defaultMergeConfigurations(): boolean | undefined { return this.getAsBooleanOrUndefined("default.mergeConfigurations"); }
+    public get defaultMergeConfigurations(): boolean { return this.getAsBoolean("default.mergeConfigurations"); }
     public get defaultBrowsePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.browse.path"); }
     public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.browse.databaseFilename")); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
@@ -563,21 +563,6 @@ export class CppSettings extends Settings {
                 return value;
             }
         } else if (isString(value)) {
-            return value;
-        }
-
-        return undefined;
-    }
-
-    // Returns the value of a setting as a boolean with proper type validation and checks for valid enum values while returning an undefined value if necessary.
-    private getAsBooleanOrUndefined(settingName: string): boolean | undefined {
-        const value: any = super.Section.get<any>(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName, true);
-        if (setting.default !== undefined) {
-            console.error(`Default value for ${settingName} is expected to be undefined.`);
-        }
-
-        if (isBoolean(value)) {
             return value;
         }
 

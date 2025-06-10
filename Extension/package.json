@@ -841,6 +841,7 @@
                     },
                     "C_Cpp.default.mergeConfigurations": {
                         "type": "boolean",
+                        "default": false,
                         "markdownDescription": "%c_cpp.configuration.default.mergeConfigurations.markdownDescription%",
                         "scope": "resource"
                     },
