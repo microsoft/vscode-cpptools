@@ -43,14 +43,14 @@ export class ManualPromise<T = void> implements Promise<T> {
      * A method to manually resolve the Promise.
      */
     public resolve: (value?: T | PromiseLike<T> | undefined) => void = (v) => {
-        void v; /* */
+        void v;
     };
 
     /**
      * A method to manually reject the Promise
      */
     public reject: (e: any) => void = (e) => {
-        void e; /* */
+        void e;
     };
 
     private state: 'pending' | 'resolved' | 'rejected' = 'pending';
