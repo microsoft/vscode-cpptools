@@ -97,7 +97,7 @@ function createLaunchString(name: string, type: string, executable: string): str
 "stopAtEntry": false,
 "cwd": "$\{fileDirname\}",
 "environment": [],
-${ type === "cppdbg" ? `"externalConsole": false` : `"console": "externalTerminal"` }
+${type === "cppdbg" ? `"externalConsole": false` : `"console": "externalTerminal"`}
 `;
 }
 
@@ -118,6 +118,7 @@ function createRemoteAttachString(name: string, type: string, executable: string
 "processId": "$\{command:pickRemoteProcess\}"
 `;
 }
+
 
 function createPipeTransportString(pipeProgram: string, debuggerProgram: string, pipeArgs: string[] = []): string {
     return `
@@ -164,7 +165,7 @@ export class MIConfigurations extends Configuration {
 \t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
 \t"MIMode": "${this.MIMode}"{0}{1}
 }`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "",
-            this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
+        this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
             "label": configPrefix + name,
@@ -182,7 +183,7 @@ export class MIConfigurations extends Configuration {
 \t${indentJsonString(createAttachString(name, this.miDebugger, this.executable))}
 \t"MIMode": "${this.MIMode}"{0}{1}
 }`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "",
-            this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
+        this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
             "label": configPrefix + name,
