@@ -1195,7 +1195,7 @@ bl@^5.0.0:
     inherits "^2.0.4"
     readable-stream "^3.4.0"
 
-brace-expansion@1.1.7@1.1.12, brace-expansion@^1.1.7:
+brace-expansion@^1.1.7:
   version "1.1.12"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-1.1.12.tgz#ab9b454466e5a8cc3a187beaad580412a9c5b843"
   integrity sha1-q5tFRGblqMw6GHvqrVgEEqnFuEM=
@@ -1203,7 +1203,7 @@ brace-expansion@1.1.7@1.1.12, brace-expansion@^1.1.7:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
 
-brace-expansion@^2.0.1, brace-expansion@^2.0.1@2.0.2:
+brace-expansion@^2.0.1:
   version "2.0.2"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-2.0.2.tgz#54fc53237a613d854c7bd37463aad17df87214e7"
   integrity sha1-VPxTI3phPYVMe9N0Y6rRffhyFOc=
