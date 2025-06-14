@@ -183,7 +183,7 @@
 	"c_cpp.configuration.intelliSenseEngine.default.description": "Proporciona resultados que reconocen el contexto a través de un proceso de IntelliSense independiente.",
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "Proporciona resultados \"fuzzy\" que no tienen en cuenta el contexto.",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "Desactiva las características del servicio de lenguaje C/C++.",
-	"c_cpp.configuration.autocomplete.markdownDescription": "Controla el proveedor de finalización automática. Si está `disabled` y desea completarse con palabras, también tendrá que establecer `\"[cpp]\": {\"editor.wordBasedSuggestions\": <valor>}` (y de forma similar para los lenguajes `c` y `cuda-cpp`).",
+	"c_cpp.configuration.autocomplete.markdownDescription": "Controla el proveedor de finalización automática. Si está `disabled` y desea completarse con palabras, también tendrá que establecer `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (y de forma similar para los lenguajes `c` y `cuda-cpp`).",
 	"c_cpp.configuration.autocomplete.default.description": "Usa el motor de IntelliSense activo.",
 	"c_cpp.configuration.autocomplete.disabled.description": "Usa la finalización basada en palabras proporcionada por Visual Studio Code.",
 	"c_cpp.configuration.errorSquiggles.description": "Controla si los posibles errores de compilación detectados por el motor de IntelliSense se notificarán al editor. También controla si se notifican advertencias de análisis de código si no se encuentran las inclusiones. El motor del analizador de etiquetas omite esta configuración.",
