@@ -6619,7 +6619,7 @@
         "shell-quote": "^1.8.1",
         "ssh-config": "^4.4.4",
         "tmp": "^0.2.3",
-        "vscode-cpptools": "^7.0.2",
+        "vscode-cpptools": "^7.0.3",
         "vscode-languageclient": "^8.1.0",
         "vscode-nls": "^5.2.0",
         "vscode-tas-client": "^0.1.84",
