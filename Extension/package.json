@@ -19,7 +19,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Microsoft/vscode-cpptools.git"
+        "url": "git+https://github.com/Microsoft/vscode-cpptools.git"
     },
     "homepage": "https://github.com/Microsoft/vscode-cpptools",
     "qna": "https://github.com/Microsoft/vscode-cpptools/issues",

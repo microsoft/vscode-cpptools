@@ -5081,8 +5081,8 @@ vinyl@^3.0.0:
 
 vscode-cpptools@^7.0.0:
   version "7.0.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-cpptools/-/vscode-cpptools-7.0.0.tgz#671243ac977d9a6b4ffdcf0e4090075af60c6051"
-  integrity sha1-ZxJDrJd9mmtP/c8OQJAHWvYMYFE=
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-cpptools/-/vscode-cpptools-7.0.0.tgz#db0a3f209ff6d16cd7d9d8e376338d484bac9085"
+  integrity sha1-2wo/IJ/20WzX2djjdjONSEuskIU=
 
 vscode-jsonrpc@8.1.0:
   version "8.1.0"
