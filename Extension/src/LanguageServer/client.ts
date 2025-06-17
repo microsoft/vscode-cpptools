@@ -590,6 +590,21 @@ export interface CopilotCompletionContextParams {
     doAggregateSnippets: boolean;
 }
 
+export interface CopilotRefactorContextParams {
+    uri: string;
+    position: Position;
+}
+
+export interface CodeReferenceEntry {
+    uri: string;
+    range: Range;
+}
+
+export interface CopilotRefactorContextResult {
+    requestId: number;
+    entries: CodeReferenceEntry[];
+}
+
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, CppInitializationResult, void> = new RequestType<CppInitializationParams, CppInitializationResult, void>('cpptools/initialize');
@@ -612,6 +627,7 @@ const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> =
 const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
 const CppContextRequest: RequestType<TextDocumentIdentifier, ChatContextResult, void> = new RequestType<TextDocumentIdentifier, ChatContextResult, void>('cpptools/getChatContext');
 const CopilotCompletionContextRequest: RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void> = new RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void>('cpptools/getCompletionContext');
+const CopilotRefactorContextRequest: RequestType<CopilotRefactorContextParams, CopilotRefactorContextResult, void> = new RequestType<CopilotRefactorContextParams, CopilotRefactorContextResult, void>('cpptools/getRefactorContext');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
@@ -2367,6 +2383,13 @@ export class DefaultClient implements Client {
         return DefaultClient.withLspCancellationHandling(
             () => this.languageClient.sendRequest(CopilotCompletionContextRequest,
                 { uri: file.toString(), caretOffset, featureFlag, maxSnippetCount, maxSnippetLength, doAggregateSnippets }, token), token);
+    }
+
+    public async getRefactorContext(file: vscode.Uri, position: Position,
+        token: vscode.CancellationToken): Promise<CopilotRefactorContextResult> {
+        await withCancellation(this.ready, token);
+        return DefaultClient.withLspCancellationHandling(
+            () => this.languageClient.sendRequest(CopilotRefactorContextRequest, { uri: file.toString(), position }, token), token);
     }
 
     /**
