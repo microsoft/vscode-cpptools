@@ -4664,6 +4664,33 @@
                                     }
                                 ]
                             },
+                            "waitFor": {
+                                "description": "%c_cpp.debuggers.waitFor.description%",
+                                "type": "object",
+                                "default": {},
+                                "properties": {
+                                    "enabled": {
+                                        "type": "boolean",
+                                        "description": "%c_cpp.debuggers.waitFor.enabled.description%",
+                                        "default": false
+                                    },
+                                    "pattern": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.waitFor.pattern.description%",
+                                        "default": ""
+                                    },
+                                    "timeout": {
+                                        "type": "number",
+                                        "description": "%c_cpp.debuggers.waitFor.timeout.description%",
+                                        "default": 30000
+                                    },
+                                    "interval": {
+                                        "type": "number",
+                                        "description": "%c_cpp.debuggers.waitFor.interval.description%",
+                                        "default": 150
+                                    }
+                                }
+                            },
                             "filterStdout": {
                                 "type": "boolean",
                                 "description": "%c_cpp.debuggers.filterStdout.description%",
