@@ -1,5 +1,21 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.26.2: June 19, 2025
+### Enhancement
+* Add more return code and error logging when compiler querying fails. [#13679](https://github.com/microsoft/vscode-cpptools/issues/13679)
+
+### Bug Fixes
+* Fix completion triggering from `.` on the last column of a multi-line comment block. [#13288](https://github.com/microsoft/vscode-cpptools/issues/13288)
+* Fix `-iquote` not working after `-isystem`. [#13638](https://github.com/microsoft/vscode-cpptools/issues/13638)
+* Minor debugger fixes. [PR #13654](https://github.com/microsoft/vscode-cpptools/pull/13654), [PR #13671](https://github.com/microsoft/vscode-cpptools/pull/13671)
+* Fix `browse.path` merging with the configuration provider's `browse.path` with `"mergeConfigurations": false`. [#13660](https://github.com/microsoft/vscode-cpptools/issues/13660)
+* Fix doxygen comments with `[in]`, `[in,out]`, etc. attributes. [#13682](https://github.com/microsoft/vscode-cpptools/issues/13682), [#13698](https://github.com/microsoft/vscode-cpptools/issues/13698)
+* Fix old `defines` accumulating after `defines` are changed with `"mergeConfigurations": true`. [#13687](https://github.com/microsoft/vscode-cpptools/issues/13687)
+* Fix changes to mergeable properties in `c_cpp_properties.json` not being used until a new configuration is requested with `"mergeConfigurations": true`. [#13688](https://github.com/microsoft/vscode-cpptools/issues/13688)
+* Update the bundled `clang-format` and `clang-tidy` from 20.1.5 to 20.1.7 (for bug fixes).
+* Fix an IntelliSense crash when calling `save_class_members`.
+* Update and fix some translations.
+
 ## Version 1.26.1: May 22, 2025
 ### Bug Fixes
 * Fix include completion adding an extra `"` in `insert` mode. [#13615](https://github.com/microsoft/vscode-cpptools/issues/13615)
