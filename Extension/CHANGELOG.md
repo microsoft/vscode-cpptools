@@ -6,8 +6,8 @@
 
 ### Enhancements
 * Add support for c++26/2c, gnu++26/2c, and c++23preview configurations. [#12963](https://github.com/microsoft/vscode-cpptools/issues/12963), [#13133](https://github.com/microsoft/vscode-cpptools/issues/13133)
-* IntelliSense parser updates.
 * Add more return code and error logging when compiler querying fails. [#13679](https://github.com/microsoft/vscode-cpptools/issues/13679)
+* IntelliSense parser updates.
 
 ### Bug Fixes
 * Fix completion triggering from `.` on the last column of a multi-line comment block. [#13288](https://github.com/microsoft/vscode-cpptools/issues/13288)
