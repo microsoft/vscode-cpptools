@@ -325,7 +325,7 @@
 	"c_cpp.debuggers.cppvsdbg.console.externalTerminal.description": "控制台应用程序将在外部终端窗口中启动。该窗口将在重新启动方案中重复使用，并且在应用程序退出时不会自动消失。",
 	"c_cpp.debuggers.cppvsdbg.console.newExternalWindow.description": "控制台应用程序将在自身的外部控制台窗口中启动，该窗口将在应用程序停止时结束。非控制台应用程序将在没有终端的情况下运行，并且 stdout/stderr 将被忽略。",
 	"c_cpp.debuggers.avoidWindowsConsoleRedirection.description": "如果为 true，则禁用集成终端支持所需的调试对象控制台重定向。",
-	"c_cpp.debuggers.sourceFileMap.markdownDescription": "传递到调试引擎的可选源文件映射。示例: `{ \"<original source path>\": \"<current source path>\" }`。",
+	"c_cpp.debuggers.sourceFileMap.markdownDescription": "传递到调试引擎的可选源文件映射。示例: `{ \"<原始源路径>\": \"<当前源路径>\" }`。",
 	"c_cpp.debuggers.processId.anyOf.markdownDescription": "要将调试程序附加到的可选进程 ID。使用 `${command:pickProcess}` 获取要附加到的本地运行进程的列表。请注意，一些平台需要管理员权限才能附加到进程。",
 	"c_cpp.debuggers.symbolSearchPath.description": "用于搜索符号(即 pdb)文件的目录列表(以分号分隔)。示例: \"c:\\dir1;c:\\dir2\"。",
 	"c_cpp.debuggers.dumpPath.description": "指定程序的转储文件的可选完整路径。例如: \"c:\\temp\\app.dmp\"。默认为 null。",
