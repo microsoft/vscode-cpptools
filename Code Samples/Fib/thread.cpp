@@ -24,7 +24,8 @@ void * thread_proc(void* ctx)
     int tid = g_tid++;
 
     char thread_name[16];
-    sprintf(thread_name, "Thread %d", tid);
+    snprintf(thread_name, sizeof(thread_name), "Thread %d", tid);  // ✅ replaced sprintf with snprintf
+
 #ifdef __APPLE__
     pthread_setname_np(thread_name);
 #else
@@ -45,4 +46,6 @@ void * thread_proc(void* ctx)
     }
 
     std::cout << thread_name << " exited!" << std::endl;
+
+    return nullptr;  // ✅ fixed missing return
 }
