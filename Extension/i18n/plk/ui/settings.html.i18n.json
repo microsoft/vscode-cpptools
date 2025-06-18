@@ -59,7 +59,7 @@
 	"compile.commands.description": "Lista ścieżek do plików {0} dla obszaru roboczego. Ścieżki uwzględniania i definicje wykryte w tych plikach będą używane zamiast wartości określonych dla ustawień {1} i {2}. Jeśli baza danych poleceń kompilacji nie zawiera wpisu dla jednostki translacji odpowiadającej plikowi, który został otwarty w edytorze, pojawi się komunikat ostrzegawczy, a rozszerzenie użyje zamiast tego ustawień {3} i {4}.",
 	"one.compile.commands.path.per.line": "Jedna ścieżka poleceń kompilacji na wiersz.",
 	"merge.configurations": "Scal konfiguracje",
-	"merge.configurations.description": "Jeśli wartość jest równa {0} (lub jest zaznaczona), scala ścieżki dołączenia, definiuje i wymusza dołączenie ze ścieżkami od dostawcy konfiguracji.",
+	"merge.configurations.description": "Gdy {0} (lub zaznaczono), scal {1}, {2}, {3} i {4} z tymi otrzymanymi od dostawcy konfiguracji.",
 	"browse.path": "Przeglądaj: ścieżka",
 	"browse.path.description": "Lista ścieżek, w których analizator tagów ma wyszukiwać nagłówki dołączane przez pliki źródłowe. W przypadku pominięcia tego ustawienia zostanie użyte ustawienie: {0} jako: {1}. Wyszukiwanie w tych ścieżkach jest domyślnie rekurencyjne. Użyj wartości {2}, aby określić wyszukiwanie nierekurencyjne. Na przykład wartość {3} spowoduje przeszukanie wszystkich podkatalogów, w przeciwieństwie do wartości {4}.",
 	"one.browse.path.per.line": "Jedna ścieżka przeglądania na wiersz.",

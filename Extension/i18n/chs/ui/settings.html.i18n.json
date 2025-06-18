@@ -59,7 +59,7 @@
 	"compile.commands.description": "工作区的 {0} 文件的路径列表。将使用在这些文件中发现的包含路径和定义，而不是为 {1} 和 {2} 设置设定的值。如果编译命令数据库不包含与你在编辑器中打开的文件对应的翻译单元条目，则将显示一条警告消息，并且扩展将转而使用 {3} 和 {4} 设置。",
 	"one.compile.commands.path.per.line": "每行一个编译命令路径。",
 	"merge.configurations": "合并配置",
-	"merge.configurations.description": "如果为 {0} (或已选中)，则将包含路径、定义和强制包含与来自配置提供程序包含路径、定义和强制包含合并。",
+	"merge.configurations.description": "当 {0} (或选中)时，将 {1}、{2}、{3} 和 {4} 与从配置提供程序接收的内容合并。",
 	"browse.path": "浏览: 路径",
 	"browse.path.description": "标记分析器的路径列表，它用于搜索源文件所包含的标头。如果省略，{0} 将用作 {1}。默认情况下，以递归方式搜索这些路径。指定 {2} 可指示非递归搜索。例如: {3} 将在所有子目录中搜索，而 {4} 不会。",
 	"one.browse.path.per.line": "每行一个浏览路径。",
