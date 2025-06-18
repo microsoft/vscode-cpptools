@@ -595,14 +595,14 @@ export interface CopilotRefactorContextParams {
     position: Position;
 }
 
-export interface CodeReferenceEntry {
+export interface CopilotSymbolRefEntry {
     uri: string;
-    range: Range;
+    position: Position;
 }
 
 export interface CopilotRefactorContextResult {
     requestId: number;
-    entries: CodeReferenceEntry[];
+    symbolRefs: CopilotSymbolRefEntry[];
 }
 
 // Requests
