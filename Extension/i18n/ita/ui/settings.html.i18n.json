@@ -59,7 +59,7 @@
 	"compile.commands.description": "Elenco di percorsi per {0} file per l'area di lavoro. Verranno usati i percorsi di inclusione e le definizioni individuati in questi file invece dei valori impostati per le impostazioni {1} e {2}. Se il database dei comandi di compilazione non contiene una voce per l'unità di conversione corrispondente al file aperto nell'editor, allora verrà visualizzato un messaggio di avviso e l'estensione userà le impostazioni {3} e {4}.",
 	"one.compile.commands.path.per.line": "Percorso di un comando di compilazione per riga.",
 	"merge.configurations": "Unire configurazioni",
-	"merge.configurations.description": "Quando è impostato su {0} (o selezionato), l'unione include percorsi di inclusione, definizioni e inclusioni forzate con quelli di un provider di configurazione.",
+	"merge.configurations.description": "Se {0} (o selezionato), unire {1}, {2}, {3}e {4} con quelli ricevuti dal provider di configurazione.",
 	"browse.path": "Sfoglia: percorso",
 	"browse.path.description": "Elenco di percorsi in cui il parser di tag può cercare le intestazioni incluse dai file di origine. Se omesso, come {1} verrà usato {0}. Per impostazione predefinita, la ricerca in questi percorsi è ricorsiva. Specificare {2} per indicare la ricerca non ricorsiva. Ad esempio: con {3} la ricerca verrà estesa in tutte le sottodirectory, mentre con {4} sarà limitata a quella corrente.",
 	"one.browse.path.per.line": "Un percorso di esplorazione per riga.",
