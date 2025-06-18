@@ -59,7 +59,7 @@
 	"compile.commands.description": "Çalışma alanıyla ilgili {0} dosyalarına giden yolların listesi. Bu dosyalarda bulunan ekleme yolları ve tanımları {1} ve {2} ayarları için belirlenen değerlerin yerine kullanılır. Derleme komutları veritabanı düzenleyicide açtığınız dosyaya karşılık gelen çeviri birimi için bir giriş içermiyorsa, bir uyarı iletisi görünür ve bu durumda uzantı {3} ve {4} ayarlarını kullanır.",
 	"one.compile.commands.path.per.line": "Satır başına bir derleme komutları yolu.",
 	"merge.configurations": "Yapılandırmaları birleştir",
-	"merge.configurations.description": "{0} (veya işaretli) olduğunda, dahil etme yollarını, tanımları ve bir yapılandırma sağlayıcısından gelenlerle zorunlu dahil etmeleri birleştir.",
+	"merge.configurations.description": "{0} olduğunda (veya işaretlendiğinde), {1}, {2}, {3} ve {4} öğelerini, yapılandırma sağlayıcısından alınanlarla birleştirin.",
 	"browse.path": "Gözat: yol",
 	"browse.path.description": "Etiket Ayrıştırıcısının kaynak dosyalarınızın içerdiği üst bilgileri arayacağı yolların listesi. Atlanırsa, {1} olarak {0} kullanılır. Bu yollarda arama varsayılan olarak özyinelemelidir. Özyinelemeli olmayan aramayı belirtmek için {2} belirtin. Örneğin: {3}, tüm alt dizinlerde arar ancak {4} aramaz.",
 	"one.browse.path.per.line": "Satır başına bir gözatma yolu.",

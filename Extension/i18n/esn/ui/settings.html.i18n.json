@@ -59,7 +59,7 @@
 	"compile.commands.description": "Una lista de rutas de acceso a {0} archivos para el área de trabajo. Se usarán las definiciones y rutas de acceso de inclusión detectadas en estos archivos, en lugar de los valores establecidos para las opciones {1} y {2}. Si la base de datos de comandos de compilación no contiene una entrada para la unidad de traducción que se corresponda con el archivo que ha abierto en el editor, se mostrará un mensaje de advertencia y la extensión usará las opciones {3} y {4} en su lugar.",
 	"one.compile.commands.path.per.line": "Una ruta de acceso de comandos de compilación por línea.",
 	"merge.configurations": "Combinar configuraciones",
-	"merge.configurations.description": "Cuando {0} (o activado), la combinación incluye rutas de acceso, define e incluye forzadas con las de un proveedor de configuración.",
+	"merge.configurations.description": "Cuando {0} (o activado), combine {1}, {2}, {3}, y {4} con los recibidos del proveedor de configuración.",
 	"browse.path": "Examinar: ruta de acceso",
 	"browse.path.description": "Lista de rutas de acceso para que el analizador de etiquetas busque los encabezados incluidos por los archivos de código fuente. Si se omite, se usará {0} como el elemento {1}. De forma predeterminada, la búsqueda en estas rutas de acceso es recursiva. Especifique {2} para indicar una búsqueda no recursiva. Por ejemplo, {3} buscará en todos los subdirectorios, mientras que {4} no lo hará.",
 	"one.browse.path.per.line": "Una ruta de acceso de exploración por línea.",
