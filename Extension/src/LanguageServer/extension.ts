@@ -37,6 +37,7 @@ import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
+import { invokeRefactoringAgent } from './refactoring-agent';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -166,6 +167,20 @@ export async function activate(): Promise<void> {
 
     clients = new ClientCollection();
     ui = getUI();
+
+    const refactoringAgenthandler: vscode.ChatRequestHandler = async (
+		request: vscode.ChatRequest,
+		context: vscode.ChatContext,
+		stream: vscode.ChatResponseStream,
+		token: vscode.CancellationToken
+		) =>
+    {
+        await invokeRefactoringAgent(request, context, stream, token);
+        return;
+    };
+
+    // Create refactoring agent chat participant.
+	vscode.chat.createChatParticipant('chat.refactoring-agent', refactoringAgenthandler);
 
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.

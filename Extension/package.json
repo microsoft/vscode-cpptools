@@ -3601,6 +3601,15 @@
                 "icon": "$(terminal)"
             }
         ],
+        "chatParticipants": [
+            {
+                "id": "chat.refactoring-agent",
+                "fullName": "Refactoring Agent",
+                "name": "refactor",
+                "description": "What refactoring task can I help with?",
+                "isSticky": true
+            }
+        ],
         "keybindings": [
             {
                 "command": "C_Cpp.SwitchHeaderSource",
