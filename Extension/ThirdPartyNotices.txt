@@ -2393,7 +2393,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-cpptools 7.0.4 - MIT
+vscode-cpptools 7.1.1 - MIT
 https://github.com/Microsoft/vscode-cpptools-api#readme
 
 Copyright (c) Microsoft Corporation
