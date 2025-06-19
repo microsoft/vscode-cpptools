@@ -11,12 +11,9 @@
 </ol>
 <h2 data-loc-id="walkthrough.windows.verify.compiler">Verifying the compiler installation</h2>
 <ol>
-<li><p data-loc-id="walkthrough.windows.open.command.prompt">Open the <strong>Developer Command Prompt for VS</strong> by typing &#39;<code>developer</code>&#39; in the Windows Start menu.</p>
+<li><p data-loc-id="walkthrough.windows.open.command.prompt">Open the <strong>Developer Command Prompt for VS</strong> by typing <code>developer</code> in the Windows Start menu.</p>
 </li>
 <li><p data-loc-id="walkthrough.windows.check.install">Check your MSVC installation by typing <code>cl</code> into the <span>Developer Command Prompt for VS</span>. You should see a copyright message with the version and basic usage description.</p>
-<blockquote>
-<p><strong data-loc-id="walkthrough.windows.note2">Note</strong>: <span data-loc-id="walkthrough.windows.note2.text">To use MSVC from the command line or VS Code, you must run from a <strong>Developer Command Prompt for VS</strong>. An ordinary shell such as <span>PowerShell</span>, <span>Bash</span>, or the Windows command prompt does not have the necessary path environment variables set.</span></p>
-</blockquote>
 </li>
 </ol>
 <h2 data-loc-id="walkthrough.windows.other.compilers">Other compiler options</h2>
