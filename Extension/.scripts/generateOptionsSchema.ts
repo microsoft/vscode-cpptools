@@ -134,6 +134,10 @@ export async function main() {
     packageJSON.contributes.debuggers[1].configurationAttributes.launch = schemaJSON.definitions.CppvsdbgLaunchOptions;
     packageJSON.contributes.debuggers[1].configurationAttributes.attach = schemaJSON.definitions.CppvsdbgAttachOptions;
 
+    // cpplldb
+    packageJSON.contributes.debuggers[2].configurationAttributes.launch = schemaJSON.definitions.CpplldbLaunchOptions;
+    packageJSON.contributes.debuggers[2].configurationAttributes.attach = schemaJSON.definitions.CpplldbAttachOptions;
+
     let content: string = JSON.stringify(packageJSON, null, 4);
 
     // We use '\u200b' (unicode zero-length space character) to break VS Code's URL detection regex for URLs that are examples. This process will

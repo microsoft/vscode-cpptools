@@ -5,7 +5,8 @@
 
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { getFullHostAddress, getFullHostAddressNoPort, ISshHostInfo, ISshLocalForwardInfo, ProcessReturnType } from '../common';
+import { getFullHostAddress, getFullHostAddressNoPort, ISshHostInfo, ISshLocalForwardInfo } from '../common';
+import { ProcessReturnType } from '../common-remote-safe';
 import { defaultSystemInteractor } from './commandInteractors';
 import { runSshTerminalCommandWithLogin } from './sshCommandRunner';
 

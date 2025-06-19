@@ -28,6 +28,10 @@ class RefreshButton implements vscode.QuickInputButton {
 
 export interface AttachItem extends vscode.QuickPickItem {
     id?: string;
+    name?: string;
+    pid?: string;
+    commandLine?: string;
+    fullPath?: string;
 }
 
 // We should not await on this function.

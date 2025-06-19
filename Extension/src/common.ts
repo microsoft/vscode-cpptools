@@ -15,7 +15,7 @@ import { DocumentFilter, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import * as which from "which";
-import { ManualPromise } from './Utility/Async/manualPromise';
+import { isExecutable } from './common-remote-safe';
 import { isWindows } from './constants';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import { PlatformInformation } from './platform';
@@ -747,105 +747,6 @@ export function execChildProcess(process: string, workingDirectory?: string, cha
             resolve(stdout);
         });
     });
-}
-
-export interface ProcessReturnType {
-    succeeded: boolean;
-    exitCode?: number | NodeJS.Signals;
-    output: string;
-    outputError: string;
-}
-
-export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
-    // Do not use CppSettings to avoid circular require()
-    if (skipLogging === undefined || !skipLogging) {
-        getOutputChannelLogger().appendLineAtLevel(5, `$ ${program} ${args.join(' ')}`);
-    }
-    const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, skipLogging, cancellationToken);
-    const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
-    if (programOutput.exitCode) {
-        return { succeeded: false, exitCode, outputError: programOutput.stderr, output: programOutput.stderr || programOutput.stdout || localize('process.exited', 'Process exited with code {0}', exitCode) };
-    } else {
-        let stdout: string;
-        if (programOutput.stdout.length) {
-            // Type system doesn't work very well here, so we need call toString
-            stdout = programOutput.stdout;
-        } else {
-            stdout = localize('process.succeeded', 'Process executed successfully.');
-        }
-        return { succeeded: true, exitCode, outputError: programOutput.stderr, output: stdout };
-    }
-}
-
-interface ProcessOutput {
-    exitCode?: number | NodeJS.Signals;
-    stdout: string;
-    stderr: string;
-}
-
-async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
-    const result = new ManualPromise<ProcessOutput>();
-
-    let proc: child_process.ChildProcess;
-    if (await isExecutable(program)) {
-        proc = child_process.spawn(`.${isWindows ? '\\' : '/'}${path.basename(program)}`, args, { shell: true, cwd: path.dirname(program) });
-    } else {
-        proc = child_process.spawn(program, args, { shell: true });
-    }
-
-    const cancellationTokenListener: vscode.Disposable | undefined = cancellationToken?.onCancellationRequested(() => {
-        getOutputChannelLogger().appendLine(localize('killing.process', 'Killing process {0}', program));
-        proc.kill();
-    });
-
-    const clean = () => {
-        proc.removeAllListeners();
-        if (cancellationTokenListener) {
-            cancellationTokenListener.dispose();
-        }
-    };
-
-    let stdout: string = '';
-    let stderr: string = '';
-    if (proc.stdout) {
-        proc.stdout.on('data', data => {
-            const str: string = data.toString();
-            if (skipLogging === undefined || !skipLogging) {
-                getOutputChannelLogger().appendAtLevel(1, str);
-            }
-            stdout += str;
-            if (continueOn) {
-                const continueOnReg: string = escapeStringForRegex(continueOn);
-                if (stdout.search(continueOnReg)) {
-                    result.resolve({ stdout: stdout.trim(), stderr: stderr.trim() });
-                }
-            }
-        });
-    }
-    if (proc.stderr) {
-        proc.stderr.on('data', data => stderr += data.toString());
-    }
-    proc.on('close', (code, signal) => {
-        clean();
-        result.resolve({ exitCode: code || signal || undefined, stdout: stdout.trim(), stderr: stderr.trim() });
-    });
-    proc.on('error', error => {
-        clean();
-        result.reject(error);
-    });
-    return result;
-}
-
-/**
- * @param permission fs file access constants: https://nodejs.org/api/fs.html#file-access-constants
- */
-export function pathAccessible(filePath: string, permission: number = fs.constants.F_OK): Promise<boolean> {
-    if (!filePath) { return Promise.resolve(false); }
-    return new Promise(resolve => fs.access(filePath, permission, err => resolve(!err)));
-}
-
-export function isExecutable(file: string): Promise<boolean> {
-    return pathAccessible(file, fs.constants.X_OK);
 }
 
 export async function allowExecution(file: string): Promise<void> {
