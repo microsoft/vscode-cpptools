@@ -592,12 +592,12 @@ export interface CopilotCompletionContextParams {
 
 export interface CopilotRefactorContextParams {
     uri: string;
-    position: Position;
+    offset: number;
 }
 
 export interface CopilotSymbolRefEntry {
     uri: string;
-    position: Position;
+    offset: number;
 }
 
 export interface CopilotRefactorContextResult {
@@ -863,6 +863,7 @@ export interface Client {
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult>;
     filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void;
     getCompletionContext(fileName: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures, maxSnippetCount: number, maxSnippetLength: number, doAggregateSnippets: boolean, token: vscode.CancellationToken): Promise<CopilotCompletionContextResult>;
+    getRefactorContext(file: vscode.Uri, offset: number, token: vscode.CancellationToken): Promise<CopilotRefactorContextResult>
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -2385,11 +2386,11 @@ export class DefaultClient implements Client {
                 { uri: file.toString(), caretOffset, featureFlag, maxSnippetCount, maxSnippetLength, doAggregateSnippets }, token), token);
     }
 
-    public async getRefactorContext(file: vscode.Uri, position: Position,
+    public async getRefactorContext(file: vscode.Uri, offset: number,
         token: vscode.CancellationToken): Promise<CopilotRefactorContextResult> {
         await withCancellation(this.ready, token);
         return DefaultClient.withLspCancellationHandling(
-            () => this.languageClient.sendRequest(CopilotRefactorContextRequest, { uri: file.toString(), position }, token), token);
+            () => this.languageClient.sendRequest(CopilotRefactorContextRequest, { uri: file.toString(), offset }, token), token);
     }
 
     /**
@@ -4346,4 +4347,5 @@ class NullClient implements Client {
     getChatContext(uri: vscode.Uri, token: vscode.CancellationToken): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
     filesEncodingChanged(filesEncodingChanged: FilesEncodingChanged): void { }
     getCompletionContext(file: vscode.Uri, caretOffset: number, featureFlag: CopilotCompletionContextFeatures, maxSnippetCount: number, maxSnippetLength: number, doAggregateSnippets: boolean, token: vscode.CancellationToken): Promise<CopilotCompletionContextResult> { return Promise.resolve({} as CopilotCompletionContextResult); }
+    getRefactorContext(file: vscode.Uri, offset: number, token: vscode.CancellationToken): Promise<CopilotRefactorContextResult> { return Promise.resolve({} as CopilotRefactorContextResult); }
 }
