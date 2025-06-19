@@ -19,8 +19,8 @@
                         "markdownDescription": "Full path of the compiler being used, e.g. `/usr/bin/gcc`, to enable more accurate IntelliSense.",
                         "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": [
-                            "string",
-                            "null"
+                            "null",
+                            "string"
                         ]
                     },
                     "compilerArgs": {
@@ -59,6 +59,7 @@
                             "c++17",
                             "c++20",
                             "c++23",
+                            "c++26",
                             "gnu++98",
                             "gnu++03",
                             "gnu++11",
@@ -66,6 +67,7 @@
                             "gnu++17",
                             "gnu++20",
                             "gnu++23",
+                            "gnu++26",
                             "${default}"
                         ]
                     },
@@ -178,12 +180,9 @@
                         "type": "string"
                     },
                     "mergeConfigurations": {
-                        "markdownDescription": "Set to `true` to merge include paths, defines, and forced includes with those from a configuration provider.",
-                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
-                        "type": [
-                            "boolean",
-                            "string"
-                        ]
+                        "markdownDescription": "Set to `true` to merge `includePath`, `defines`, `forcedInclude`, and `browse.path` with those received from the configuration provider.",
+                        "descriptionHint": "{Locked=\"`true`\"} {Locked=\"`includePath`\"} {Locked=\"`defines`\"} {Locked=\"`forcedInclude`\"} {Locked=\"`browse.path`\"}",
+                        "type": "boolean"
                     },
                     "browse": {
                         "type": "object",

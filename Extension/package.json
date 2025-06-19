@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.25.3-main",
+    "version": "1.26.3-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -19,7 +19,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Microsoft/vscode-cpptools.git"
+        "url": "git+https://github.com/Microsoft/vscode-cpptools.git"
     },
     "homepage": "https://github.com/Microsoft/vscode-cpptools",
     "qna": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -821,13 +821,15 @@
                             "c++17",
                             "c++20",
                             "c++23",
+                            "c++26",
                             "gnu++98",
                             "gnu++03",
                             "gnu++11",
                             "gnu++14",
                             "gnu++17",
                             "gnu++20",
-                            "gnu++23"
+                            "gnu++23",
+                            "gnu++26"
                         ],
                         "markdownDescription": "%c_cpp.configuration.default.cppStandard.markdownDescription%",
                         "scope": "resource"
@@ -839,6 +841,7 @@
                     },
                     "C_Cpp.default.mergeConfigurations": {
                         "type": "boolean",
+                        "default": false,
                         "markdownDescription": "%c_cpp.configuration.default.mergeConfigurations.markdownDescription%",
                         "scope": "resource"
                     },
@@ -3660,11 +3663,6 @@
                                 },
                                 "default": []
                             },
-                            "type": {
-                                "type": "string",
-                                "description": "%c_cpp.debuggers.cppdbg.type.description%",
-                                "default": "cppdbg"
-                            },
                             "targetArchitecture": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.targetArchitecture.description%",
@@ -3842,7 +3840,7 @@
                             },
                             "stopAtEntry": {
                                 "type": "boolean",
-                                "description": "%c_cpp.debuggers.stopAtEntry.description%",
+                                "markdownDescription": "%c_cpp.debuggers.stopAtEntry.markdownDescription%",
                                 "default": false
                             },
                             "debugServerPath": {
@@ -3891,16 +3889,15 @@
                                 "default": false
                             },
                             "sourceFileMap": {
+                                "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
                                 "anyOf": [
                                     {
                                         "type": "object",
-                                        "description": "%c_cpp.debuggers.sourceFileMap.description%",
                                         "default": {
                                             "<source-path>": "<target-path>"
                                         }
                                     },
                                     {
-                                        "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%",
                                         "type": "object",
                                         "default": {
                                             "<source-path>": {
@@ -4609,11 +4606,6 @@
                                 "description": "%c_cpp.debuggers.program.description%",
                                 "default": "${workspaceRoot}/a.out"
                             },
-                            "type": {
-                                "type": "string",
-                                "description": "%c_cpp.debuggers.cppdbg.type.description%",
-                                "default": "cppdbg"
-                            },
                             "targetArchitecture": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.targetArchitecture.description%",
@@ -4660,15 +4652,14 @@
                                 "default": false
                             },
                             "processId": {
+                                "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
                                 "anyOf": [
                                     {
                                         "type": "string",
-                                        "description": "%c_cpp.debuggers.processId.anyOf.description%",
                                         "default": "${command:pickProcess}"
                                     },
                                     {
                                         "type": "integer",
-                                        "description": "%c_cpp.debuggers.processId.anyOf.description%",
                                         "default": 0
                                     }
                                 ]
@@ -4684,16 +4675,15 @@
                                 "default": false
                             },
                             "sourceFileMap": {
+                                "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
                                 "anyOf": [
                                     {
                                         "type": "object",
-                                        "description": "%c_cpp.debuggers.sourceFileMap.description%",
                                         "default": {
                                             "<source-path>": "<target-path>"
                                         }
                                     },
                                     {
-                                        "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%",
                                         "type": "object",
                                         "default": {
                                             "<source-path>": {
@@ -5392,7 +5382,6 @@
                 "label": "C++ (Windows)",
                 "when": "workspacePlatform == windows",
                 "languages": [
-                    "ada",
                     "c",
                     "cpp",
                     "cuda-cpp",
@@ -5423,11 +5412,6 @@
                                     "type": "string"
                                 },
                                 "default": []
-                            },
-                            "type": {
-                                "type": "string",
-                                "description": "%c_cpp.debuggers.cppvsdbg.type.description%",
-                                "default": "cppvsdbg"
                             },
                             "cwd": {
                                 "type": "string",
@@ -5463,7 +5447,7 @@
                             },
                             "stopAtEntry": {
                                 "type": "boolean",
-                                "description": "%c_cpp.debuggers.stopAtEntry.description%",
+                                "markdownDescription": "%c_cpp.debuggers.stopAtEntry.markdownDescription%",
                                 "default": false
                             },
                             "dumpPath": {
@@ -5500,7 +5484,7 @@
                             },
                             "sourceFileMap": {
                                 "type": "object",
-                                "description": "%c_cpp.debuggers.sourceFileMap.description%",
+                                "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
                                 "default": {
                                     "<source-path>": "<target-path>"
                                 }
@@ -5638,26 +5622,20 @@
                             "processId"
                         ],
                         "properties": {
-                            "type": {
-                                "type": "string",
-                                "description": "%c_cpp.debuggers.cppvsdbg.type.description%",
-                                "default": "cppvsdbg"
-                            },
                             "symbolSearchPath": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.symbolSearchPath.description%",
                                 "default": ""
                             },
                             "processId": {
+                                "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
                                 "anyOf": [
                                     {
                                         "type": "string",
-                                        "description": "%c_cpp.debuggers.processId.anyOf.description%",
                                         "default": "${command:pickProcess}"
                                     },
                                     {
                                         "type": "integer",
-                                        "description": "%c_cpp.debuggers.processId.anyOf.description%",
                                         "default": 0
                                     }
                                 ]
@@ -5669,7 +5647,7 @@
                             },
                             "sourceFileMap": {
                                 "type": "object",
-                                "description": "%c_cpp.debuggers.sourceFileMap.description%",
+                                "markdownDescription": "%c_cpp.debuggers.sourceFileMap.markdownDescription%",
                                 "default": {
                                     "<source-path>": "<target-path>"
                                 }
@@ -6549,7 +6527,7 @@
                 "userDescription": "%c_cpp.languageModelTools.configuration.userDescription%",
                 "modelDescription": "For the active C or C++ file, this tool provides: the language (C, C++, or CUDA), the language standard version (such as C++11, C++14, C++17, or C++20), the compiler (such as GCC, Clang, or MSVC), the target platform (such as x86, x64, or ARM), and the target architecture (such as 32-bit or 64-bit).",
                 "icon": "$(file-code)",
-                "when": "(config.C_Cpp.experimentalFeatures =~ /^[eE]nabled$/)"
+                "when": "(config.C_Cpp.experimental.configuration_lmtool =~ /^[eE]nabled$/)"
             }
         ]
     },
@@ -6625,7 +6603,7 @@
         "xml2js": "^0.6.2"
     },
     "dependencies": {
-        "@github/copilot-language-server": "^1.266.0",
+        "@github/copilot-language-server": "^1.316.0",
         "@vscode/extension-telemetry": "^0.9.6",
         "chokidar": "^3.6.0",
         "comment-json": "^4.2.3",
@@ -6641,7 +6619,7 @@
         "shell-quote": "^1.8.1",
         "ssh-config": "^4.4.4",
         "tmp": "^0.2.3",
-        "vscode-cpptools": "^6.1.0",
+        "vscode-cpptools": "^7.1.1",
         "vscode-languageclient": "^8.1.0",
         "vscode-nls": "^5.2.0",
         "vscode-tas-client": "^0.1.84",

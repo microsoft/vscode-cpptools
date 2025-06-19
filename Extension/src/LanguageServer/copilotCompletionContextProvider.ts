@@ -79,8 +79,8 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
     private static readonly defaultTimeBudgetMs: number = 7;
     // Assume the cache is stale when the distance to the current caret is greater than this value.
     private static readonly defaultMaxCaretDistance = 8192;
-    private static readonly defaultMaxSnippetCount = 15;
-    private static readonly defaultMaxSnippetLength = 10 * 1024; // 10KB
+    private static readonly defaultMaxSnippetCount = 7;
+    private static readonly defaultMaxSnippetLength = 3 * 1024;
     private static readonly defaultDoAggregateSnippets = true;
     private completionContextCancellation = new vscode.CancellationTokenSource();
     private contextProviderDisposable: vscode.Disposable | undefined;
@@ -152,25 +152,24 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
             telemetry.addGetClientForElapsed(getClientForDuration);
             if (!client) { throw WellKnownErrors.clientNotFound(); }
             const getCompletionContextStartTime = performance.now();
-
             const copilotCompletionContext: CopilotCompletionContextResult =
                 await client.getCompletionContext(docUri, caretOffset, snippetsFeatureFlag, maxSnippetCount, maxSnippetLength, doAggregateSnippets, internalToken);
             telemetry.addRequestId(copilotCompletionContext.requestId);
-            logMessage += `(id:${copilotCompletionContext.requestId}) (getClientFor elapsed:${getClientForDuration}ms)`;
+            logMessage += `(id: ${copilotCompletionContext.requestId})(getClientFor elapsed:${getClientForDuration}ms)`;
             if (!copilotCompletionContext.areSnippetsMissing) {
                 const resultMismatch = copilotCompletionContext.sourceFileUri !== docUri.toString();
-                if (resultMismatch) { logMessage += ` (mismatch TU vs result)`; }
+                if (resultMismatch) { logMessage += `(mismatch TU vs result)`; }
             }
             const cacheEntryId = randomUUID().toString();
             this.completionContextCache.set(copilotCompletionContext.sourceFileUri, [cacheEntryId, copilotCompletionContext]);
             const duration = CopilotCompletionContextProvider.getRoundedDuration(startTime);
             telemetry.addCacheComputedData(duration, cacheEntryId);
             logMessage += ` cached in ${duration}ms ${copilotCompletionContext.traits.length} trait(s)`;
-            if (copilotCompletionContext.areSnippetsMissing) { logMessage += ` (missing code snippets) `; }
+            if (copilotCompletionContext.areSnippetsMissing) { logMessage += `(missing code snippets)`; }
             else {
                 logMessage += ` and ${copilotCompletionContext.snippets.length} snippet(s)`;
-                logMessage += `, response.featureFlag:${copilotCompletionContext.featureFlag}, \
-response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotCompletionContext.caretOffset} `;
+                logMessage += `(response.featureFlag:${copilotCompletionContext.featureFlag})`;
+                logMessage += `(response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotCompletionContext.caretOffset})`;
             }
 
             telemetry.addResponseMetadata(copilotCompletionContext.areSnippetsMissing, copilotCompletionContext.snippets.length,
@@ -181,7 +180,7 @@ response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotC
         } catch (e: any) {
             if (e instanceof vscode.CancellationError || e.message === CancellationError.Canceled) {
                 telemetry.addInternalCanceled(CopilotCompletionContextProvider.getRoundedDuration(startTime));
-                logMessage += ` (internal cancellation) `;
+                logMessage += `(internal cancellation)`;
                 throw InternalCancellationError;
             }
 
@@ -194,7 +193,7 @@ response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotC
             return undefined;
         } finally {
             this.logger.
-                appendLineAtLevel(7, logMessage);
+                appendLineAtLevel(7, `[${new Date().toISOString().replace('T', ' ').replace('Z', '')}] ${logMessage}`);
             telemetry.send("cache");
         }
     }
@@ -338,9 +337,18 @@ response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotC
         } else { return [defaultValue, defaultValue ? CopilotCompletionKind.GotFromCache : CopilotCompletionKind.MissingCacheMiss]; }
     }
 
+    private static isStaleCacheHit(caretOffset: number, cacheCaretOffset: number, maxCaretDistance: number): boolean {
+        return Math.abs(caretOffset - caretOffset) > maxCaretDistance;
+    }
+
+    private static createContextItems(copilotCompletionContext: CopilotCompletionContextResult | undefined): SupportedContextItem[] {
+        return [...copilotCompletionContext?.snippets ?? [], ...copilotCompletionContext?.traits ?? []] as SupportedContextItem[];
+    }
+
     public async resolve(context: ResolveRequest, copilotCancel: vscode.CancellationToken): Promise<SupportedContextItem[]> {
+        const proposedEdits = context.documentContext.proposedEdits;
         const resolveStartTime = performance.now();
-        let logMessage = `Copilot: resolve(${context.documentContext.uri}: ${context.documentContext.offset}):`;
+        let logMessage = `Copilot: resolve(${context.documentContext.uri}:${context.documentContext.offset}):`;
         const cppTimeBudgetMs = await this.fetchTimeBudgetMs(context);
         const maxCaretDistance = await this.fetchMaxDistanceToCaret(context);
         const maxSnippetCount = await this.fetchMaxSnippetCount(context);
@@ -361,37 +369,49 @@ response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotC
             });
             if (featureFlag === undefined) { return []; }
             const cacheEntry: CacheEntry | undefined = this.completionContextCache.get(docUri.toString());
-            const defaultValue = cacheEntry?.[1];
-            [copilotCompletionContext, copilotCompletionContextKind] = await this.resolveResultAndKind(context, featureFlag,
-                telemetry.fork(), defaultValue, resolveStartTime, cppTimeBudgetMs, maxSnippetCount, maxSnippetLength, doAggregateSnippets, copilotCancel);
+            if (proposedEdits) {
+                const defaultValue = cacheEntry?.[1];
+                const isStaleCache = defaultValue !== undefined ? CopilotCompletionContextProvider.isStaleCacheHit(docOffset, defaultValue.caretOffset, maxCaretDistance) : true;
+                const contextItems = isStaleCache ? [] : CopilotCompletionContextProvider.createContextItems(defaultValue);
+                copilotCompletionContext = isStaleCache ? undefined : defaultValue;
+                copilotCompletionContextKind = isStaleCache ? CopilotCompletionKind.StaleCacheHit : CopilotCompletionKind.GotFromCache;
+                telemetry.addSpeculativeRequestMetadata(proposedEdits.length);
+                if (cacheEntry?.[0]) {
+                    telemetry.addCacheHitEntryGuid(cacheEntry[0]);
+                }
+                return contextItems;
+            }
+            const [resultContext, resultKind] = await this.resolveResultAndKind(context, featureFlag,
+                telemetry.fork(), cacheEntry?.[1], resolveStartTime, cppTimeBudgetMs, maxSnippetCount, maxSnippetLength, doAggregateSnippets, copilotCancel);
+            copilotCompletionContext = resultContext;
+            copilotCompletionContextKind = resultKind;
+            logMessage += `(id: ${copilotCompletionContext?.requestId})`;
             // Fix up copilotCompletionContextKind accounting for stale-cache-hits.
             if (copilotCompletionContextKind === CopilotCompletionKind.GotFromCache &&
                 copilotCompletionContext && cacheEntry) {
                 telemetry.addCacheHitEntryGuid(cacheEntry[0]);
                 const cachedData = cacheEntry[1];
-                if (Math.abs(cachedData.caretOffset - context.documentContext.offset) > maxCaretDistance) {
+                if (CopilotCompletionContextProvider.isStaleCacheHit(docOffset, cachedData.caretOffset, maxCaretDistance)) {
                     copilotCompletionContextKind = CopilotCompletionKind.StaleCacheHit;
                     copilotCompletionContext.snippets = [];
                 }
             }
-            telemetry.addCompletionContextKind(copilotCompletionContextKind);
             // Handle cancellation.
             if (copilotCompletionContextKind === CopilotCompletionKind.Canceled) {
                 const duration: number = CopilotCompletionContextProvider.getRoundedDuration(resolveStartTime);
                 telemetry.addCopilotCanceled(duration);
                 throw new CopilotCancellationError();
             }
-            logMessage += ` (id: ${copilotCompletionContext?.requestId})`;
-            return [...copilotCompletionContext?.snippets ?? [], ...copilotCompletionContext?.traits ?? []] as SupportedContextItem[];
+            return CopilotCompletionContextProvider.createContextItems(copilotCompletionContext);
         } catch (e: any) {
             if (e instanceof CopilotCancellationError) {
                 telemetry.addCopilotCanceled(CopilotCompletionContextProvider.getRoundedDuration(resolveStartTime));
-                logMessage += ` (copilot cancellation)`;
+                logMessage += `(copilot cancellation)`;
                 throw e;
             }
             if (e instanceof InternalCancellationError) {
                 telemetry.addInternalCanceled(CopilotCompletionContextProvider.getRoundedDuration(resolveStartTime));
-                logMessage += ` (internal cancellation) `;
+                logMessage += `(internal cancellation)`;
                 throw e;
             }
             if (e instanceof CancellationError) { throw e; }
@@ -401,20 +421,22 @@ response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotC
             throw e;
         } finally {
             const duration: number = CopilotCompletionContextProvider.getRoundedDuration(resolveStartTime);
-            logMessage += `featureFlag:${featureFlag?.toString()}, `;
+            logMessage += `(featureFlag:${featureFlag?.toString()})`;
+            if (proposedEdits) { logMessage += `(speculative request, proposedEdits:${proposedEdits.length})`; }
             if (copilotCompletionContext === undefined) {
                 logMessage += `result is undefined and no code snippets provided(${copilotCompletionContextKind.toString()}), elapsed time:${duration} ms`;
             } else {
                 logMessage += `for ${docUri}:${docOffset} provided ${copilotCompletionContext.snippets.length} code snippet(s)(${copilotCompletionContextKind.toString()}\
- ${copilotCompletionContext?.areSnippetsMissing ? ", missing code snippets" : ""}) and ${copilotCompletionContext.traits.length} trait(s), elapsed time:${duration} ms`;
+${copilotCompletionContext?.areSnippetsMissing ? "(missing code snippets)" : ""}) and ${copilotCompletionContext.traits.length} trait(s), elapsed time:${duration} ms`;
             }
+            telemetry.addCompletionContextKind(copilotCompletionContextKind);
             telemetry.addResponseMetadata(copilotCompletionContext?.areSnippetsMissing ?? true,
                 copilotCompletionContext?.snippets.length, copilotCompletionContext?.traits.length,
                 copilotCompletionContext?.caretOffset, copilotCompletionContext?.featureFlag);
             telemetry.addResolvedElapsed(duration);
             telemetry.addCacheSize(this.completionContextCache.size);
             telemetry.send();
-            this.logger.appendLineAtLevel(7, logMessage);
+            this.logger.appendLineAtLevel(7, `[${new Date().toISOString().replace('T', ' ').replace('Z', '')}] ${logMessage}`);
         }
     }
 
@@ -445,4 +467,3 @@ response.uri:${copilotCompletionContext.sourceFileUri || "<not-set>"}:${copilotC
         }
     }
 }
-
