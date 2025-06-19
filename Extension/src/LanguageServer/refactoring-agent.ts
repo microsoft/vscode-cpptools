@@ -2,15 +2,13 @@ import * as vscode from 'vscode';
 const path = require('path'); // Import Node.js path module
 import { initialCodeSnippetInput } from './hard-coded-refactoring-agent-inputs';
 import { codeSnippetInputs } from './hard-coded-refactoring-agent-inputs';
-
-let suffixPrompt = " Output the changed code along with the rest of the entire input code snippet unchanged. Output each code snippet individually.";
+let suffixPrompt = " Output the changed code along with the rest of the entire input code snippet unchanged. Make sure entire output is formatted correctly";
 
 interface ErrorDiagnostic {
 	filePath: string;
 	message: string;
 	range: vscode.Range;
 }
-
 
 export interface CodeSnippetInput {
 	textSpan: string;
@@ -40,7 +38,7 @@ async function parseChatResponse(chatResponse: vscode.LanguageModelChatResponse)
 	}
 
 	if (codeSnippets.length === 0) {
-		vscode.window.showErrorMessage('No code blocks found in the response.');
+		// vscode.window.showErrorMessage('No code blocks found in the response.');
 	}
 
 	return codeSnippets;
@@ -49,6 +47,8 @@ async function parseChatResponse(chatResponse: vscode.LanguageModelChatResponse)
 async function validateEdits(): Promise<boolean> {
 	// execute CMake: Build command and check if build output is exit code 0 for pass or 1 for failure.
 	try {
+		// TODO: Need to add a clean here for a full rebuild? Misses errors sometimes if not.
+		await vscode.commands.executeCommand('cmake.clean');
 		var buildResult = await vscode.commands.executeCommand('cmake.build');
 		if (buildResult === 0) {
 			return true;
@@ -60,7 +60,17 @@ async function validateEdits(): Promise<boolean> {
 	}
 }
 
+// Purposely ignore if, else keywords since Copilot is not always accuraete with those responses.
+const foldableKeyWords: { [keyWord: string]: boolean } = {
+	"public": true,
+	"do": true,
+	"while": true,
+	"for": true,
+	"switch": true
+};
+
 async function getClosestFoldingRange(editor: vscode.TextEditor, startLine: number): Promise<vscode.FoldingRange | undefined> {
+	await new Promise(resolve => setTimeout(resolve, 1000));
 	const foldingRanges = await vscode.commands.executeCommand<vscode.FoldingRange[]>('vscode.executeFoldingRangeProvider', editor.document.uri);
 	let closestRange: vscode.FoldingRange | undefined;
 	if (foldingRanges && foldingRanges.length > 0) {
@@ -72,12 +82,51 @@ async function getClosestFoldingRange(editor: vscode.TextEditor, startLine: numb
 				(!closestRange ||
 					(range.start >= closestRange.start && range.end <= closestRange.end))
 			) {
-				closestRange = range;
+				const start = editor.document.lineAt(range.start).range.start;
+				const end = editor.document.lineAt(range.end).range.end;
+				var snippetInputRange = new vscode.Range(start, end);
+				var nearestRangeTextSpan = editor.document.getText(snippetInputRange);
+				const startsWithKeyword = Object.keys(foldableKeyWords).some(keyword => nearestRangeTextSpan.trim().startsWith(keyword));
+				const startsWithBracket = nearestRangeTextSpan.trim().startsWith('{');
+				if (startsWithBracket)
+				{
+					closestRange = range;
+					closestRange.start += 1; // Increment start by 1 if it starts with a bracket to avoid adding bracket into the snippet.
+				}
+				else if (startsWithKeyword)
+				{
+					closestRange = range;
+				}
 			}
 		}
 	}
 
+	if (!closestRange) {
+		return closestRange;
+	}
+
+	// check if nearestRangeTextSpan contains an opening brace '{' at the start of the text span.
+	// if (nearestRangeTextSpan.trim().startsWith('{')) {
+	// 	closestRange.start += 1;
+	// }
+
 	return closestRange;
+}
+
+async function fallsWithinPreviouslyEditedRanges(previouslyEditedRanges: { [filePath: string]: vscode.Range[] }, closestRange: vscode.FoldingRange, fileVisiting: string): Promise<boolean> {
+	if (!previouslyEditedRanges[fileVisiting] || !closestRange) {
+		return false;
+	}
+
+	for (const range of previouslyEditedRanges[fileVisiting]) {
+		if (
+			closestRange.start >= range.start.line &&
+			closestRange.end <= range.end.line
+		) {
+			return true;
+		}
+	}
+	return false;
 }
 
 async function reiterate(
@@ -104,7 +153,7 @@ async function reiterate(
 		snippetInputRange = new vscode.Range(start, end);
 		nearestRangeTextSpan = editor.document.getText(snippetInputRange);
 	}
-	let errorReiterationPrompt = `@refactor The build failed with the following error:\n\n\`\`\`cpp\n${buildError.message}\n\`\`\`\n\Fix the error in the following code snippet.${suffixPrompt}\n\n${nearestRangeTextSpan}`;
+	let errorReiterationPrompt = `@refactor The build failed with the following error:\n\n\`\`\`cpp\n${buildError.message}\n\`\`\`\n\Fix the error in the following code snippet.${suffixPrompt}Could it be there are missing #includes?\n\n${nearestRangeTextSpan}`;
 	var messages = [vscode.LanguageModelChatMessage.User(errorReiterationPrompt)];
 	const reiterationResponse = await request.model.sendRequest(messages, { }, token);
 	var reiteratedCodeSnippets = await parseChatResponse(reiterationResponse);
@@ -114,7 +163,7 @@ async function reiterate(
 		var includeRegex = /#include\s*["<](.*?)[">]/g;
 		var includes: string[] = [];
 		let match: RegExpExecArray | null;
-		while ((match = includeRegex.exec(reiteratedCodeSnippets[0])) !== null) {
+		while ((match = includeRegex.exec(reiteratedCodeSnippets[reiteratedCodeSnippets.length - 1])) !== null) {
 			includes.push(match[0]);
 		}
 
@@ -125,7 +174,10 @@ async function reiterate(
 			const includesText = includes.join('\n') + '\n';
 			await applyDynamicEdit(buildError.filePath, topOfFileRange, includesText);
 		}
-		// await applyDynamicEdit(buildError.filePath, snippetInputRange, reiteratedCodeSnippets[0]);
+		else
+		{
+			await applyDynamicEdit(buildError.filePath, snippetInputRange, reiteratedCodeSnippets[reiteratedCodeSnippets.length - 1]);
+		}
 	}
 }
 
@@ -155,7 +207,9 @@ async function applyDynamicEdit(filePath: string, range: vscode.Range | undefine
 			await new Promise(resolve => setTimeout(resolve, 1000));
 			singleEdit.replace(editor.document.uri, range, updatedTextSpan);
 			await vscode.workspace.applyEdit(singleEdit);
+			await new Promise(resolve => setTimeout(resolve, 1000));
 			await editor.document.save();
+			await new Promise(resolve => setTimeout(resolve, 1000));
 		}
 	}
 }
@@ -163,7 +217,6 @@ async function applyDynamicEdit(filePath: string, range: vscode.Range | undefine
 // This method is called when your extension is activated
 export async function invokeRefactoringAgent(request: vscode.ChatRequest, context: vscode.ChatContext, stream: vscode.ChatResponseStream, token: vscode.CancellationToken): Promise<void> {
 	const batchableEditCount = 1;
-	
 	// Initialize the prompt.
 	let prompt = "";
 
@@ -230,35 +283,67 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 	// TODO: Later: Extract the symbol from this prompt or selected text to run FAR on it. Ben M. is working on something similar. 
 
 	var numEditsMade = 0;
+	const previouslyEditedRanges: { [filePath: string]: vscode.Range[] } = {};
 	while (codeSnippetInputs.length > 0) {
 		const numEditsToBeBatched = Math.min(batchableEditCount, codeSnippetInputs.length);
 		const batchedCodeSnippets = codeSnippetInputs.splice(-numEditsToBeBatched, numEditsToBeBatched);
 		// TODO: Try to adjust prompting to only update call site locations, might need to pass those in as an array? Or try passing in only a fixed range of code around the reference location?
 		var generateEditsPrompt: string = `@refactor Now update all of the FillShader::Fill references below to reflect the new functionality of \"${usersPrompt}\".${suffixPrompt}`;
-
+		var shouldExecuteRequest: boolean = false;
+		var leadingWhiteSpace: string = '';
 		for(let i = batchedCodeSnippets.length - 1; i >= 0; i--) {
 			var codeSnippetInput = batchedCodeSnippets[i];
-			const document = await vscode.workspace.openTextDocument(batchedCodeSnippets[i].filePath);
-			await vscode.window.showTextDocument(document, { preview: false });
-			const editor = vscode.window.activeTextEditor;
+			var editor = vscode.window.activeTextEditor;
+			if (batchedCodeSnippets[i].filePath != editor?.document.uri.fsPath)
+			{
+				const document = await vscode.workspace.openTextDocument(batchedCodeSnippets[i].filePath);
+				await vscode.window.showTextDocument(document, { preview: false });
+				editor = vscode.window.activeTextEditor;
+			}
+
 			if (!editor || editor.document.languageId !== 'cpp') {
 				return;
 			}
 
-
 			var closestRange = await getClosestFoldingRange(editor, codeSnippetInput.startLine);
 			var nearestRangeTextSpan: string = '';
+
+			if (closestRange) {
+				if (!previouslyEditedRanges[codeSnippetInput.filePath.toLowerCase()]) {
+					previouslyEditedRanges[codeSnippetInput.filePath.toLowerCase()] = [];
+				}
+
+				const start = editor.document.lineAt(closestRange.start).range.start;
+				const end = editor.document.lineAt(closestRange.end).range.end;
+				const range = new vscode.Range(start, end);
+				if (await fallsWithinPreviouslyEditedRanges(previouslyEditedRanges, closestRange, codeSnippetInput.filePath.toLowerCase()))
+				{
+					continue; // If already edited this range, then skip it.
+				}
+
+				previouslyEditedRanges[codeSnippetInput.filePath.toLowerCase()].push(range);
+			}
+
 			if (closestRange) {
 				// Store text span of closestRange in nearestRangeTextSpan.
 				const start = editor.document.lineAt(closestRange.start).range.start;
 				const end = editor.document.lineAt(closestRange.end).range.end;
 				let snippetInputRange = new vscode.Range(start, end);
 				nearestRangeTextSpan = editor.document.getText(snippetInputRange);
+				// trim leading whitespace, indentation, and newlines from nearestRangeTextSpan and store in leadingWhiteSpace.
+				const matchLeadingWhitespace = nearestRangeTextSpan.match(/^\s*/);
+				leadingWhiteSpace = matchLeadingWhitespace ? matchLeadingWhitespace[0] : '';
 				batchedCodeSnippets[i].closestRange = snippetInputRange;
 			}
 
 			stream.progress("Updating code snippets in " + path.basename(batchedCodeSnippets[i].filePath) + " at line " + batchedCodeSnippets[i].startLine + "...");
 			generateEditsPrompt += `\n\n\`\`\`${nearestRangeTextSpan}\`\`\``;
+			var shouldExecuteRequest: boolean = true;
+		}
+
+		if (!shouldExecuteRequest) {
+			// Usually occurs if there was no new range(s) that needed to be edited.
+			continue;
 		}
 
 		// Send dynamic request and get response for each context item.
@@ -270,9 +355,10 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 
 		const generateEditsChatResponse = await request.model.sendRequest(messages, { }, token);
 		var codeSnippets = await parseChatResponse(generateEditsChatResponse);
-		if (codeSnippets.length === 0) {
-			stream.markdown("\n\nNo code snippets found in the response. Please try again.");
-			return;
+
+		if (codeSnippets.length === 0)
+		{
+			continue;
 		}
 
 		// Apply the edits one at a time.
@@ -280,7 +366,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 		for(let i = batchedCodeSnippets.length - 1; i >= 0; i--) {
 			batchedCodeSnippets[i].updatedTextSpan = codeSnippets[codeSnippetResponseCounter].toString();
 			var codeSnippetInput = batchedCodeSnippets[i];
-			await applyDynamicEdit(codeSnippetInput.filePath, codeSnippetInput.closestRange, codeSnippetInput.updatedTextSpan);
+			await applyDynamicEdit(codeSnippetInput.filePath, codeSnippetInput.closestRange, leadingWhiteSpace + codeSnippetInput.updatedTextSpan);
 			numEditsMade++;
 			stream.markdown("\n\nSuccessfully updated code snippet in \`" + path.basename(batchedCodeSnippets[i].filePath) + "\` at line \`" + batchedCodeSnippets[i].startLine);
 
@@ -299,7 +385,8 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 		let buildErrorsInSourceFiles: ErrorDiagnostic[] = [];
 		for (const [uri, diagnostics] of allDiagnostics) {
 			for (const diagnostic of diagnostics) {
-				if (diagnostic.severity === vscode.DiagnosticSeverity.Error) {
+				const normalizedFsPath = uri.fsPath.replace(/\\/g, '/');
+				if (diagnostic.severity === vscode.DiagnosticSeverity.Error && normalizedFsPath.toLowerCase() in previouslyEditedRanges) {
 					const isHeader = uri.fsPath.endsWith('.h') || uri.fsPath.endsWith('.hpp');
 					if (isHeader)
 					{
@@ -344,6 +431,13 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 	// Build has fully succeeded.
 	stream.markdown("\n\n\nBuild succeeded. All edits applied successfully.");
 	stream.markdown(`\n\n\nSuccessfully applied \`${numEditsMade}\` edits.`);
+	
+	// Launch the git diff viewer tool to show all the changes made.
+	try {
+		await vscode.commands.executeCommand('workbench.view.scm');
+	} catch (err) {
+		console.error('Failed to open Source Control view:', err);
+	}
 
 	return;
 }
