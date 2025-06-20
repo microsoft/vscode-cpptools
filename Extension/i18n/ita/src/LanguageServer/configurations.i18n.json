@@ -10,7 +10,7 @@
 	"unknown.properties.version": "È stato trovato un numero di versione sconosciuto in c_cpp_properties.json. Alcune funzionalità potrebbero non funzionare come previsto.",
 	"update.properties.failed": "Il tentativo di aggiornamento di \"{0}\" non è riuscito. L'accesso in scrittura è disponibile?",
 	"failed.to.parse.properties": "Non è stato possibile analizzare \"{0}\"",
-	"path.with.spaces": "Non è possibile trovare il percorso del compilatore contenente spazi. Se l'intenzione era includere argomenti del compilatore, racchiudi il percorso del compilatore tra doppie virgolette ({0})",
+	"path.with.spaces": "Non è possibile trovare il percorso del compilatore contenente spazi. Se l'intenzione era includere argomenti del compilatore, racchiudi il percorso del compilatore tra doppie virgolette ({0}).",
 	"cannot.find": "Non è possibile trovare: {0}",
 	"path.is.not.a.file": "Il percorso non è un file: {0}",
 	"wrapped.with.quotes": "Non aggiungere virgolette aggiuntive intorno ai percorsi.",

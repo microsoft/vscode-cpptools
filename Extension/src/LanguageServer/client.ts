@@ -32,7 +32,6 @@ import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOpti
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
-import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from '../LanguageServer/customProviders';
 import { ManualPromise } from '../Utility/Async/manualPromise';
 import { ManualSignal } from '../Utility/Async/manualSignal';
 import { logAndReturn } from '../Utility/Async/returns';
@@ -57,6 +56,7 @@ import {
 import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import * as configs from './configurations';
 import { CopilotCompletionContextFeatures, CopilotCompletionContextProvider } from './copilotCompletionContextProvider';
+import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from './customProviders';
 import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
@@ -889,6 +889,11 @@ export class DefaultClient implements Client {
     private settingsTracker: SettingsTracker;
     private loggingLevel: number = 1;
     private configurationProvider?: string;
+    private mergeConfigurations: boolean = false;
+    private includePath?: string[];
+    private defines?: string[];
+    private forcedInclude?: string[];
+    private browsePath?: string[];
     private hoverProvider: HoverProvider | undefined;
     private copilotHoverProvider: CopilotHoverProvider | undefined;
     private copilotCompletionProvider?: CopilotCompletionContextProvider;
@@ -2181,6 +2186,7 @@ export class DefaultClient implements Client {
             if (configs && configs.length > 0 && configs[0]) {
                 const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
                 if (fileConfiguration?.mergeConfigurations) {
+                    configs = deepCopy(configs);
                     configs.forEach(config => {
                         if (fileConfiguration.includePath) {
                             fileConfiguration.includePath.forEach(p => {
@@ -3139,11 +3145,45 @@ export class DefaultClient implements Client {
         const configName: string | undefined = configurations[params.currentConfiguration].name ?? "";
         this.model.activeConfigName.setValueIfActive(configName);
         const newProvider: string | undefined = this.configuration.CurrentConfigurationProvider;
-        if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
-            if (this.configurationProvider) {
+        const previousProvider: string | undefined = this.configurationProvider;
+        let updateCustomConfigs: boolean = false;
+        if (!isSameProviderExtensionId(previousProvider, newProvider)) {
+            this.configurationProvider = newProvider;
+            updateCustomConfigs = true;
+        }
+        if (newProvider !== undefined) {
+            const newMergeConfigurations: boolean = this.configuration.CurrentMergeConfigurations;
+            if (this.mergeConfigurations !== newMergeConfigurations) {
+                this.mergeConfigurations = newMergeConfigurations;
+                updateCustomConfigs = true;
+            }
+            if (newMergeConfigurations) {
+                const newIncludePath: string[] | undefined = this.configuration.CurrentIncludePath;
+                if (!util.equals(this.includePath, newIncludePath)) {
+                    this.includePath = newIncludePath;
+                    updateCustomConfigs = true;
+                }
+                const newDefines: string[] | undefined = this.configuration.CurrentDefines;
+                if (!util.equals(this.defines, newDefines)) {
+                    this.defines = newDefines;
+                    updateCustomConfigs = true;
+                }
+                const newForcedInclude: string[] | undefined = this.configuration.CurrentForcedInclude;
+                if (!util.equals(this.forcedInclude, newForcedInclude)) {
+                    this.forcedInclude = newForcedInclude;
+                    updateCustomConfigs = true;
+                }
+                const newBrowsePath: string[] | undefined = this.configuration.CurrentBrowsePath;
+                if (!util.equals(this.browsePath, newBrowsePath)) {
+                    this.browsePath = newBrowsePath;
+                    updateCustomConfigs = true;
+                }
+            }
+        }
+        if (updateCustomConfigs) {
+            if (previousProvider) {
                 void this.clearCustomBrowseConfiguration().catch(logAndReturn.undefined);
             }
-            this.configurationProvider = newProvider;
             void this.updateCustomBrowseConfiguration().catch(logAndReturn.undefined);
             void this.updateCustomConfigurations().catch(logAndReturn.undefined);
         }
