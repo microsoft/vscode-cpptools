@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 const path = require('path'); // Import Node.js path module
 import { initialCodeSnippetInput } from './hard-coded-refactoring-agent-inputs';
 import { codeSnippetInputs } from './hard-coded-refactoring-agent-inputs';
+import { integer } from 'vscode-languageclient';
 let suffixPrompt = " Output the changed code along with the rest of the entire input code snippet unchanged. Make sure entire output is formatted correctly";
 
 interface ErrorDiagnostic {
@@ -101,15 +102,6 @@ async function getClosestFoldingRange(editor: vscode.TextEditor, startLine: numb
 		}
 	}
 
-	if (!closestRange) {
-		return closestRange;
-	}
-
-	// check if nearestRangeTextSpan contains an opening brace '{' at the start of the text span.
-	// if (nearestRangeTextSpan.trim().startsWith('{')) {
-	// 	closestRange.start += 1;
-	// }
-
 	return closestRange;
 }
 
@@ -172,16 +164,16 @@ async function reiterate(
 		if (includes.length > 0) {
 			const topOfFileRange = new vscode.Range(0, 0, 0, 0);
 			const includesText = includes.join('\n') + '\n';
-			await applyDynamicEdit(buildError.filePath, topOfFileRange, includesText);
+			await applyDynamicEdit(buildError.filePath, topOfFileRange, includesText, stream);
 		}
 		else
 		{
-			await applyDynamicEdit(buildError.filePath, snippetInputRange, reiteratedCodeSnippets[reiteratedCodeSnippets.length - 1]);
+			await applyDynamicEdit(buildError.filePath, snippetInputRange, reiteratedCodeSnippets[reiteratedCodeSnippets.length - 1], stream);
 		}
 	}
 }
 
-async function applyDynamicEdit(filePath: string, range: vscode.Range | undefined, updatedTextSpan: string| undefined): Promise<void> {
+async function applyDynamicEdit(filePath: string, range: vscode.Range | undefined, updatedTextSpan: string | undefined, stream: vscode.ChatResponseStream): Promise<void> {
 	const document = await vscode.workspace.openTextDocument(filePath);
 	await vscode.window.showTextDocument(document, { preview: false });
 	const editor = vscode.window.activeTextEditor;
@@ -210,6 +202,7 @@ async function applyDynamicEdit(filePath: string, range: vscode.Range | undefine
 			await new Promise(resolve => setTimeout(resolve, 1000));
 			await editor.document.save();
 			await new Promise(resolve => setTimeout(resolve, 1000));
+			stream.markdown("\n\nUpdated code snippet in \`" + path.basename(filePath) + "\` at line \`" + range.start.line + "\`");
 		}
 	}
 }
@@ -269,7 +262,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 			initialCodeSnippetInput[0].endLine,
 			initialCodeSnippetInput[0].endColumn
 		);
-		await applyDynamicEdit(activeFilePath, initialCodeSnippetRange, initialCodeSnippetInput[0].updatedTextSpan);
+		await applyDynamicEdit(activeFilePath, initialCodeSnippetRange, initialCodeSnippetInput[0].updatedTextSpan, stream);
 	}
 
 	// Stream the initial chat response to the Copilot Chat UI.
@@ -282,7 +275,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 	// TODO: Later: Generate an example and ask user to confirm if it is correct before applying edits to all refs based on that example.
 	// TODO: Later: Extract the symbol from this prompt or selected text to run FAR on it. Ben M. is working on something similar. 
 
-	var numEditsMade = 0;
+	var numContextItemsUpdated = codeSnippetInputs.length;
 	const previouslyEditedRanges: { [filePath: string]: vscode.Range[] } = {};
 	while (codeSnippetInputs.length > 0) {
 		const numEditsToBeBatched = Math.min(batchableEditCount, codeSnippetInputs.length);
@@ -336,7 +329,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 				batchedCodeSnippets[i].closestRange = snippetInputRange;
 			}
 
-			stream.progress("Updating code snippets in " + path.basename(batchedCodeSnippets[i].filePath) + " at line " + batchedCodeSnippets[i].startLine + "...");
+			stream.progress("Updating code snippet in " + path.basename(batchedCodeSnippets[i].filePath) + " at line " + batchedCodeSnippets[i].startLine + "...");
 			generateEditsPrompt += `\n\n\`\`\`${nearestRangeTextSpan}\`\`\``;
 			var shouldExecuteRequest: boolean = true;
 		}
@@ -366,9 +359,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 		for(let i = batchedCodeSnippets.length - 1; i >= 0; i--) {
 			batchedCodeSnippets[i].updatedTextSpan = codeSnippets[codeSnippetResponseCounter].toString();
 			var codeSnippetInput = batchedCodeSnippets[i];
-			await applyDynamicEdit(codeSnippetInput.filePath, codeSnippetInput.closestRange, leadingWhiteSpace + codeSnippetInput.updatedTextSpan);
-			numEditsMade++;
-			stream.markdown("\n\nSuccessfully updated code snippet in \`" + path.basename(batchedCodeSnippets[i].filePath) + "\` at line \`" + batchedCodeSnippets[i].startLine);
+			await applyDynamicEdit(codeSnippetInput.filePath, codeSnippetInput.closestRange, leadingWhiteSpace + codeSnippetInput.updatedTextSpan, stream);
 
 			// TODO: Each time an edit is applied, we should validate it using build, and if fails then validate using error list.
 			// TODO: Reiterate if necessary.
@@ -377,9 +368,17 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 	} // End of while loop foriterating through all codeSnippetInputs.
 
 
+	stream.progress("\n\nBuilding project...");
 	var buildResult = await validateEdits();
+	var reiterationAttemptsCounter: integer = 0;
 	while (!buildResult) {
-		stream.markdown("\n\n\nBuild failed. Please check the output for errors.");
+		if (reiterationAttemptsCounter >= 3)
+		{
+			reiterationAttemptsCounter = 0;
+			// TODO: Ask user to manually fix errors, then click this button to continue the agent.
+		}
+
+		stream.markdown("\n\nBuild failed. Agent will attempt to fix error(s)...");
 		const allDiagnostics = vscode.languages.getDiagnostics();
 		let buildErrorsInHeaderFiles: ErrorDiagnostic[] = [];
 		let buildErrorsInSourceFiles: ErrorDiagnostic[] = [];
@@ -424,13 +423,14 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 		if (buildErrorToReiterateOn) {
 			// Reiterate and build again to validate new edits.
 			await reiterate(buildErrorToReiterateOn, stream, request, context, token);
+			stream.progress("\n\nBuilding project...");
 			buildResult = await validateEdits();
+			reiterationAttemptsCounter++;
 		}
 	} // while loop for validating edits and reiterating.
 
 	// Build has fully succeeded.
-	stream.markdown("\n\n\nBuild succeeded. All edits applied successfully.");
-	stream.markdown(`\n\n\nSuccessfully applied \`${numEditsMade}\` edits.`);
+	stream.markdown(`\n\nBuild succeeded. Successfully applied \`${numContextItemsUpdated}\` edits`);
 	
 	// Launch the git diff viewer tool to show all the changes made.
 	try {
@@ -441,6 +441,26 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 
 	return;
 }
+
+// Code to convert from offsets to line nubmbers.
+/*
+// open this file in the editor: C:\Users\davidraygoza\source\repos\test1\test1\test1.cpp
+	const fileToOpen = 'C:\\Users\\davidraygoza\\source\\repos\\test1\\test1\\test1.cpp';
+	try {
+		const doc = await vscode.workspace.openTextDocument(fileToOpen);
+		await vscode.window.showTextDocument(doc, { preview: false });
+		let activeEditor = vscode.window.activeTextEditor;
+		if (activeEditor)
+		{
+			let document = activeEditor.document;
+			let offset = 106; // Example offset
+			let position = document.positionAt(offset);
+			console.log(`Opening file at position: ${position.line}:${position.character}`);
+		}
+	} catch (err) {
+		console.error(`Failed to open file: ${fileToOpen}`, err);
+	}
+*/
 
 // Temporary code to apply a patch using patch.exe
 /*
