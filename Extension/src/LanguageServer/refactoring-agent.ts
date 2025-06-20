@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { integer } from 'vscode-languageclient';
-import { codeSnippetInputs, initialCodeSnippetInput } from './hard-coded-refactoring-agent-inputs';
+import { clients } from './extension';
+import { initialCodeSnippetInput } from './hard-coded-refactoring-agent-inputs';
 const path = require('path'); // Import Node.js path module
 let suffixPrompt = " Output the changed code along with the rest of the entire input code snippet unchanged. Make sure entire output is formatted correctly";
 
@@ -10,14 +11,10 @@ interface ErrorDiagnostic {
 	range: vscode.Range;
 }
 
-export interface CodeSnippetInput {
-	textSpan: string;
+export interface ContextItem {
 	updatedTextSpan?: string,
 	filePath: string;
 	startLine: number;
-	startColumn: number;
-	endLine: number;
-	endColumn: number;
 	closestRange?: vscode.Range;
 }
 
@@ -61,13 +58,15 @@ async function validateEdits(): Promise<boolean> {
 }
 
 // Purposely ignore if, else keywords since Copilot is not always accuraete with those responses.
-// const foldableKeyWords: { [keyWord: string]: boolean } = {
-// 	"public": true,
-// 	"do": true,
-// 	"while": true,
-// 	"for": true,
-// 	"switch": true
-// };
+const foldableKeyWords: { [keyWord: string]: boolean } = {
+	"if": true,
+	"else": true,
+	"while": true,
+	"for": true,
+	"switch": true,
+	"case": true,
+	"do": true,
+};
 
 async function getClosestFoldingRange(editor: vscode.TextEditor, startLine: number): Promise<vscode.FoldingRange | undefined> {
 	await new Promise(resolve => setTimeout(resolve, 1000));
@@ -82,20 +81,19 @@ async function getClosestFoldingRange(editor: vscode.TextEditor, startLine: numb
 				(!closestRange ||
 					(range.start >= closestRange.start && range.end <= closestRange.end))
 			) {
-				closestRange = range;
-				// const start = editor.document.lineAt(range.start).range.start;
-				// const end = editor.document.lineAt(range.end).range.end;
-				// var snippetInputRange = new vscode.Range(start, end);
-				// var nearestRangeTextSpan = editor.document.getText(snippetInputRange);
-				// const startsWithKeyword = Object.keys(foldableKeyWords).some(keyword => nearestRangeTextSpan.trim().startsWith(keyword));
+				const start = editor.document.lineAt(range.start).range.start;
+				const end = editor.document.lineAt(range.end).range.end;
+				var snippetInputRange = new vscode.Range(start, end);
+				var nearestRangeTextSpan = editor.document.getText(snippetInputRange);
+				const startsWithKeyword = Object.keys(foldableKeyWords).some(keyword => nearestRangeTextSpan.trim().startsWith(keyword));
 				// const startsWithBracket = nearestRangeTextSpan.trim().startsWith('{');
 				// if (startsWithBracket) {
 				// 	closestRange = range;
 				// 	closestRange.start += 1; // Increment start by 1 if it starts with a bracket to avoid adding bracket into the snippet.
 				// }
-				// else if (startsWithKeyword) {
-				// 	closestRange = range;
-				// }
+				if (!startsWithKeyword) {
+					closestRange = range;
+				}
 			}
 		}
 	}
@@ -236,10 +234,13 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 	messages.push(vscode.LanguageModelChatMessage.User(suffixPrompt));
 	let selectedText = '';
 	const activeEditor = vscode.window.activeTextEditor;
-	let activeFilePath = '';
-	if (activeEditor) {
-		activeFilePath = activeEditor.document.uri.fsPath;
+	let primaryFilePath = '';
+	let primaryOffset = 1852;
+	if (!activeEditor) {
+		return;
 	}
+
+	primaryFilePath = activeEditor.document.uri.fsPath;
 	if (activeEditor && !activeEditor.selection.isEmpty) {
 		selectedText = activeEditor.document.getText(activeEditor.selection);
 		messages.push(vscode.LanguageModelChatMessage.User(`\n\n\`\`\`cpp\n${selectedText}\n\`\`\``));
@@ -247,6 +248,42 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 		const entireActiveFileText = activeEditor.document.getText();
 		messages.push(vscode.LanguageModelChatMessage.User(`\n\n\`\`\`cpp\n${entireActiveFileText}\n\`\`\``));
 	}
+
+	if (!activeEditor || activeEditor.document.languageId !== 'cpp') {
+		return;
+	}
+
+	const client = clients.getClientFor(activeEditor.document.uri);
+	if (!client) { throw new Error('No active client found'); }
+	const cancellationToken = new vscode.CancellationTokenSource().token;
+	var symbolRefs = await client.getRefactorContext(activeEditor.document.uri, primaryOffset, cancellationToken);
+
+	// Convert symbol references to ContextItems with file paths and line numbers.
+	// AVoid the current offset position and file to not touch definition again.
+	var FARContextItems: ContextItem[] = [];
+	for (const symbolRef of symbolRefs.symbolRefs) {
+		const uri = vscode.Uri.parse(symbolRef.uri);
+		const filePath = uri.fsPath;
+		const document = await vscode.workspace.openTextDocument(filePath);
+		await vscode.window.showTextDocument(document, { preview: false });
+		editor = vscode.window.activeTextEditor;
+		if (!editor || editor.document.languageId !== 'cpp') {
+			continue;
+		}
+
+		var lineNumber = editor.document.positionAt(symbolRef.offset).line;
+		if (filePath.toLowerCase() != primaryFilePath.toLowerCase() && symbolRef.offset != primaryOffset) {
+			{
+				FARContextItems.push({
+					filePath: filePath,
+					startLine: lineNumber,
+				});
+			}
+		}
+	}
+
+	var document = await vscode.workspace.openTextDocument(primaryFilePath);
+	await vscode.window.showTextDocument(document, { preview: false });
 
 	const initialChatResponse = await request.model.sendRequest(messages, {}, token);
 	var initialChatResponseSnippet = await parseChatResponse(initialChatResponse);
@@ -258,7 +295,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 			initialCodeSnippetInput[0].endLine,
 			initialCodeSnippetInput[0].endColumn
 		);
-		await applyDynamicEdit(activeFilePath, initialCodeSnippetRange, initialCodeSnippetInput[0].updatedTextSpan, stream);
+		await applyDynamicEdit(primaryFilePath, initialCodeSnippetRange, initialCodeSnippetInput[0].updatedTextSpan, stream);
 	}
 
 	// Stream the initial chat response to the Copilot Chat UI.
@@ -270,18 +307,12 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 	// TODO: Later: Generate an example and ask user to confirm if it is correct before applying edits to all refs based on that example.
 	// TODO: Later: Extract the symbol from this prompt or selected text to run FAR on it. Ben M. is working on something similar. 
 
-	if (!activeEditor || activeEditor.document.languageId !== 'cpp') {
-		return;
-	}
-	// const client = clients.getClientFor(activeEditor.document.uri);
-	// if (!client) { throw new Error('No active client found'); }
-	// const cancellationToken = new vscode.CancellationTokenSource().token;
-	// var symbolRefs = await client.getRefactorContext(activeEditor.document.uri, 1902, cancellationToken);
-	var numContextItemsUpdated = codeSnippetInputs.length;
+	stream.markdown("\n\nFound \`" + symbolRefs.symbolRefs.length + "\` references in database");
+	var numContextItemsUpdated = symbolRefs.symbolRefs.length;
 	const previouslyEditedRanges: { [filePath: string]: vscode.Range[] } = {};
-	while (codeSnippetInputs.length > 0) {
-		const numEditsToBeBatched = Math.min(batchableEditCount, codeSnippetInputs.length);
-		const batchedCodeSnippets = codeSnippetInputs.splice(-numEditsToBeBatched, numEditsToBeBatched);
+	while (FARContextItems.length > 0) {
+		const numEditsToBeBatched = Math.min(batchableEditCount, FARContextItems.length);
+		const batchedCodeSnippets = FARContextItems.splice(-numEditsToBeBatched, numEditsToBeBatched);
 		// TODO: Try to adjust prompting to only update call site locations, might need to pass those in as an array? Or try passing in only a fixed range of code around the reference location?
 		var generateEditsPrompt: string = `@refactor Now update all of the FillShader::Fill references below to reflect the new functionality of \"${usersPrompt}\".${suffixPrompt}`;
 		var shouldExecuteRequest: boolean = false;
@@ -364,7 +395,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 			// TODO: Reiterate if necessary.
 			codeSnippetResponseCounter++;
 		}
-	} // End of while loop foriterating through all codeSnippetInputs.
+	} // End of while loop foriterating through all FARContextItems.
 
 
 	stream.progress("\n\nBuilding project...");
@@ -382,8 +413,8 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 		let buildErrorsInSourceFiles: ErrorDiagnostic[] = [];
 		for (const [uri, diagnostics] of allDiagnostics) {
 			for (const diagnostic of diagnostics) {
-				const normalizedFsPath = uri.fsPath.replace(/\\/g, '/');
-				if (diagnostic.severity === vscode.DiagnosticSeverity.Error && normalizedFsPath.toLowerCase() in previouslyEditedRanges) {
+				// const normalizedFsPath = uri.fsPath.replace(/\\/g, '/');
+				if (diagnostic.severity === vscode.DiagnosticSeverity.Error && uri.fsPath.toLowerCase() in previouslyEditedRanges) {
 					const isHeader = uri.fsPath.endsWith('.h') || uri.fsPath.endsWith('.hpp');
 					if (isHeader) {
 						const error: ErrorDiagnostic = {
@@ -427,6 +458,9 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 	// Build has fully succeeded.
 	stream.markdown(`\n\nBuild succeeded. Successfully applied \`${numContextItemsUpdated}\` edits`);
 
+	// Rescan workspace to get rid of any stuck diagnostics left over.
+	await vscode.commands.executeCommand('C_Cpp.RescanWorkspace');
+
 	// Launch the git diff viewer tool to show all the changes made.
 	try {
 		await vscode.commands.executeCommand('workbench.view.scm');
@@ -436,26 +470,6 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 
 	return;
 }
-
-// Code to convert from offsets to line nubmbers.
-/*
-// open this file in the editor: C:\Users\davidraygoza\source\repos\test1\test1\test1.cpp
-	const fileToOpen = 'C:\\Users\\davidraygoza\\source\\repos\\test1\\test1\\test1.cpp';
-	try {
-		const doc = await vscode.workspace.openTextDocument(fileToOpen);
-		await vscode.window.showTextDocument(doc, { preview: false });
-		let activeEditor = vscode.window.activeTextEditor;
-		if (activeEditor)
-		{
-			let document = activeEditor.document;
-			let offset = 106; // Example offset
-			let position = document.positionAt(offset);
-			console.log(`Opening file at position: ${position.line}:${position.character}`);
-		}
-	} catch (err) {
-		console.error(`Failed to open file: ${fileToOpen}`, err);
-	}
-*/
 
 // Temporary code to apply a patch using patch.exe
 /*

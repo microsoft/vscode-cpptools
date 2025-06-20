@@ -3606,7 +3606,7 @@
                 "id": "chat.refactoring-agent",
                 "fullName": "Refactoring Agent",
                 "name": "cppRefactor",
-                "description": "What Cpp refactoring task can I help with?",
+                "description": "Enter your C++ refactoring task",
                 "isSticky": true
             }
         ],
