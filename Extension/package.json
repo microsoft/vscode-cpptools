@@ -3605,8 +3605,8 @@
             {
                 "id": "chat.refactoring-agent",
                 "fullName": "Refactoring Agent",
-                "name": "refactor",
-                "description": "What refactoring task can I help with?",
+                "name": "cppRefactor",
+                "description": "What Cpp refactoring task can I help with?",
                 "isSticky": true
             }
         ],

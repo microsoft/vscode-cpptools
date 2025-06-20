@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-const path = require('path'); // Import Node.js path module
-import { initialCodeSnippetInput } from './hard-coded-refactoring-agent-inputs';
-import { codeSnippetInputs } from './hard-coded-refactoring-agent-inputs';
 import { integer } from 'vscode-languageclient';
+import { codeSnippetInputs, initialCodeSnippetInput } from './hard-coded-refactoring-agent-inputs';
+const path = require('path'); // Import Node.js path module
 let suffixPrompt = " Output the changed code along with the rest of the entire input code snippet unchanged. Make sure entire output is formatted correctly";
 
 interface ErrorDiagnostic {
@@ -62,13 +61,13 @@ async function validateEdits(): Promise<boolean> {
 }
 
 // Purposely ignore if, else keywords since Copilot is not always accuraete with those responses.
-const foldableKeyWords: { [keyWord: string]: boolean } = {
-	"public": true,
-	"do": true,
-	"while": true,
-	"for": true,
-	"switch": true
-};
+// const foldableKeyWords: { [keyWord: string]: boolean } = {
+// 	"public": true,
+// 	"do": true,
+// 	"while": true,
+// 	"for": true,
+// 	"switch": true
+// };
 
 async function getClosestFoldingRange(editor: vscode.TextEditor, startLine: number): Promise<vscode.FoldingRange | undefined> {
 	await new Promise(resolve => setTimeout(resolve, 1000));
@@ -83,21 +82,20 @@ async function getClosestFoldingRange(editor: vscode.TextEditor, startLine: numb
 				(!closestRange ||
 					(range.start >= closestRange.start && range.end <= closestRange.end))
 			) {
-				const start = editor.document.lineAt(range.start).range.start;
-				const end = editor.document.lineAt(range.end).range.end;
-				var snippetInputRange = new vscode.Range(start, end);
-				var nearestRangeTextSpan = editor.document.getText(snippetInputRange);
-				const startsWithKeyword = Object.keys(foldableKeyWords).some(keyword => nearestRangeTextSpan.trim().startsWith(keyword));
-				const startsWithBracket = nearestRangeTextSpan.trim().startsWith('{');
-				if (startsWithBracket)
-				{
-					closestRange = range;
-					closestRange.start += 1; // Increment start by 1 if it starts with a bracket to avoid adding bracket into the snippet.
-				}
-				else if (startsWithKeyword)
-				{
-					closestRange = range;
-				}
+				closestRange = range;
+				// const start = editor.document.lineAt(range.start).range.start;
+				// const end = editor.document.lineAt(range.end).range.end;
+				// var snippetInputRange = new vscode.Range(start, end);
+				// var nearestRangeTextSpan = editor.document.getText(snippetInputRange);
+				// const startsWithKeyword = Object.keys(foldableKeyWords).some(keyword => nearestRangeTextSpan.trim().startsWith(keyword));
+				// const startsWithBracket = nearestRangeTextSpan.trim().startsWith('{');
+				// if (startsWithBracket) {
+				// 	closestRange = range;
+				// 	closestRange.start += 1; // Increment start by 1 if it starts with a bracket to avoid adding bracket into the snippet.
+				// }
+				// else if (startsWithKeyword) {
+				// 	closestRange = range;
+				// }
 			}
 		}
 	}
@@ -147,7 +145,7 @@ async function reiterate(
 	}
 	let errorReiterationPrompt = `@refactor The build failed with the following error:\n\n\`\`\`cpp\n${buildError.message}\n\`\`\`\n\Fix the error in the following code snippet.${suffixPrompt}Could it be there are missing #includes?\n\n${nearestRangeTextSpan}`;
 	var messages = [vscode.LanguageModelChatMessage.User(errorReiterationPrompt)];
-	const reiterationResponse = await request.model.sendRequest(messages, { }, token);
+	const reiterationResponse = await request.model.sendRequest(messages, {}, token);
 	var reiteratedCodeSnippets = await parseChatResponse(reiterationResponse);
 
 	if (reiteratedCodeSnippets.length > 0) {
@@ -166,8 +164,7 @@ async function reiterate(
 			const includesText = includes.join('\n') + '\n';
 			await applyDynamicEdit(buildError.filePath, topOfFileRange, includesText, stream);
 		}
-		else
-		{
+		else {
 			await applyDynamicEdit(buildError.filePath, snippetInputRange, reiteratedCodeSnippets[reiteratedCodeSnippets.length - 1], stream);
 		}
 	}
@@ -227,8 +224,8 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 	previousMessages.forEach(m => {
 		let fullMessage = '';
 		m.response.forEach(r => {
-		const mdPart = r as vscode.ChatResponseMarkdownPart;
-		fullMessage += mdPart.value.value;
+			const mdPart = r as vscode.ChatResponseMarkdownPart;
+			fullMessage += mdPart.value.value;
 		});
 		messages.push(vscode.LanguageModelChatMessage.Assistant(fullMessage));
 	});
@@ -253,8 +250,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 
 	const initialChatResponse = await request.model.sendRequest(messages, {}, token);
 	var initialChatResponseSnippet = await parseChatResponse(initialChatResponse);
-	if (initialChatResponseSnippet.length > 0)
-	{
+	if (initialChatResponseSnippet.length > 0) {
 		initialCodeSnippetInput[0].updatedTextSpan = initialChatResponseSnippet[0].toString();
 		let initialCodeSnippetRange = new vscode.Range(
 			initialCodeSnippetInput[0].startLine,
@@ -270,11 +266,17 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 		stream.markdown(fragment);
 	}
 
-	// TODO: Run FAR and get codeSnippetLocations for references.
 	// TODO: Later: Ask user if that is the result they expected?
 	// TODO: Later: Generate an example and ask user to confirm if it is correct before applying edits to all refs based on that example.
 	// TODO: Later: Extract the symbol from this prompt or selected text to run FAR on it. Ben M. is working on something similar. 
 
+	if (!activeEditor || activeEditor.document.languageId !== 'cpp') {
+		return;
+	}
+	// const client = clients.getClientFor(activeEditor.document.uri);
+	// if (!client) { throw new Error('No active client found'); }
+	// const cancellationToken = new vscode.CancellationTokenSource().token;
+	// var symbolRefs = await client.getRefactorContext(activeEditor.document.uri, 1902, cancellationToken);
 	var numContextItemsUpdated = codeSnippetInputs.length;
 	const previouslyEditedRanges: { [filePath: string]: vscode.Range[] } = {};
 	while (codeSnippetInputs.length > 0) {
@@ -284,11 +286,10 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 		var generateEditsPrompt: string = `@refactor Now update all of the FillShader::Fill references below to reflect the new functionality of \"${usersPrompt}\".${suffixPrompt}`;
 		var shouldExecuteRequest: boolean = false;
 		var leadingWhiteSpace: string = '';
-		for(let i = batchedCodeSnippets.length - 1; i >= 0; i--) {
+		for (let i = batchedCodeSnippets.length - 1; i >= 0; i--) {
 			var codeSnippetInput = batchedCodeSnippets[i];
 			var editor = vscode.window.activeTextEditor;
-			if (batchedCodeSnippets[i].filePath != editor?.document.uri.fsPath)
-			{
+			if (batchedCodeSnippets[i].filePath != editor?.document.uri.fsPath) {
 				const document = await vscode.workspace.openTextDocument(batchedCodeSnippets[i].filePath);
 				await vscode.window.showTextDocument(document, { preview: false });
 				editor = vscode.window.activeTextEditor;
@@ -309,8 +310,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 				const start = editor.document.lineAt(closestRange.start).range.start;
 				const end = editor.document.lineAt(closestRange.end).range.end;
 				const range = new vscode.Range(start, end);
-				if (await fallsWithinPreviouslyEditedRanges(previouslyEditedRanges, closestRange, codeSnippetInput.filePath.toLowerCase()))
-				{
+				if (await fallsWithinPreviouslyEditedRanges(previouslyEditedRanges, closestRange, codeSnippetInput.filePath.toLowerCase())) {
 					continue; // If already edited this range, then skip it.
 				}
 
@@ -346,17 +346,16 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 		// TODO: Use tokenCount to determine if request needs to be split into smaller requests instead of batching.
 		// const tokenCount = await request.model.countTokens(generateEditsPrompt);
 
-		const generateEditsChatResponse = await request.model.sendRequest(messages, { }, token);
+		const generateEditsChatResponse = await request.model.sendRequest(messages, {}, token);
 		var codeSnippets = await parseChatResponse(generateEditsChatResponse);
 
-		if (codeSnippets.length === 0)
-		{
+		if (codeSnippets.length === 0) {
 			continue;
 		}
 
 		// Apply the edits one at a time.
 		var codeSnippetResponseCounter = 0;
-		for(let i = batchedCodeSnippets.length - 1; i >= 0; i--) {
+		for (let i = batchedCodeSnippets.length - 1; i >= 0; i--) {
 			batchedCodeSnippets[i].updatedTextSpan = codeSnippets[codeSnippetResponseCounter].toString();
 			var codeSnippetInput = batchedCodeSnippets[i];
 			await applyDynamicEdit(codeSnippetInput.filePath, codeSnippetInput.closestRange, leadingWhiteSpace + codeSnippetInput.updatedTextSpan, stream);
@@ -372,8 +371,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 	var buildResult = await validateEdits();
 	var reiterationAttemptsCounter: integer = 0;
 	while (!buildResult) {
-		if (reiterationAttemptsCounter >= 3)
-		{
+		if (reiterationAttemptsCounter >= 3) {
 			reiterationAttemptsCounter = 0;
 			// TODO: Ask user to manually fix errors, then click this button to continue the agent.
 		}
@@ -387,8 +385,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 				const normalizedFsPath = uri.fsPath.replace(/\\/g, '/');
 				if (diagnostic.severity === vscode.DiagnosticSeverity.Error && normalizedFsPath.toLowerCase() in previouslyEditedRanges) {
 					const isHeader = uri.fsPath.endsWith('.h') || uri.fsPath.endsWith('.hpp');
-					if (isHeader)
-					{
+					if (isHeader) {
 						const error: ErrorDiagnostic = {
 							filePath: uri.fsPath,
 							message: diagnostic.message,
@@ -396,8 +393,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 						};
 						buildErrorsInHeaderFiles.push(error);
 					}
-					else
-					{
+					else {
 						const error: ErrorDiagnostic = {
 							filePath: uri.fsPath,
 							message: diagnostic.message,
@@ -415,8 +411,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 			// Iterate through errors from header files first from top to bottom since those are more likely to be the root cause of cascading issues.
 			buildErrorToReiterateOn = buildErrorsInHeaderFiles[0];
 		}
-		else if (buildErrorsInSourceFiles.length > 0)
-		{
+		else if (buildErrorsInSourceFiles.length > 0) {
 			buildErrorToReiterateOn = buildErrorsInSourceFiles[0];
 		}
 
@@ -431,7 +426,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 
 	// Build has fully succeeded.
 	stream.markdown(`\n\nBuild succeeded. Successfully applied \`${numContextItemsUpdated}\` edits`);
-	
+
 	// Launch the git diff viewer tool to show all the changes made.
 	try {
 		await vscode.commands.executeCommand('workbench.view.scm');
