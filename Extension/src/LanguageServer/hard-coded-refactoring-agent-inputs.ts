@@ -1,7 +1,18 @@
-import { CodeSnippetInput } from './refactoring-agent';
+import * as vscode from 'vscode';
+
+interface HardCodedContextItem {
+	textSpan: string,
+	updatedTextSpan?: string,
+	filePath: string;
+	startLine: number;
+	endLine: number;
+	startColumn: number;
+	endColumn: number;
+	closestRange?: vscode.Range;
+}
 
 // Hard-coded initial input.
-export const initialCodeSnippetInput: CodeSnippetInput[] = [
+export const initialCodeSnippetInput: HardCodedContextItem[] = [
 	{
 		textSpan: ``,
 		filePath: 'C:/src/endless-sky/source/shader/FillShader.cpp',
@@ -15,7 +26,7 @@ export const initialCodeSnippetInput: CodeSnippetInput[] = [
 // Hard-coded FAR results for individual reference locations.
 // TODO: Add more hard-coded FAR results to test with.
 
-export const codeSnippetInputs: CodeSnippetInput[] = [
+export const hardCodedContextItems: HardCodedContextItem[] = [
 	{
 		textSpan: ``,
 		filePath: 'C:/src/endless-sky/source/BoardingPanel.cpp',
@@ -439,107 +450,107 @@ export const codeSnippetInputs: CodeSnippetInput[] = [
 // Hard-coded FAR results for entire function scopes.
 // TODO: Add more hard-coded FAR results to test with.
 
-export const codeSnippetInputs: CodeSnippetInput[] = [
+export const codeSnippetInputs: HardCodedContextItem[] = [
 	{
 		textSpan: `void BoardingPanel::Draw()
 {
-    // Draw a translucent black scrim over everything beneath this panel.
-    DrawBackdrop();
+	// Draw a translucent black scrim over everything beneath this panel.
+	DrawBackdrop();
 
-    // Draw the list of plunder.
-    const Color &opaque = *GameData::Colors().Get("panel background");
-    const Color &back = *GameData::Colors().Get("faint");
-    const Color &dim = *GameData::Colors().Get("dim");
-    const Color &medium = *GameData::Colors().Get("medium");
-    const Color &bright = *GameData::Colors().Get("bright");
-    FillShader::Fill(Point(-155., -60.), Point(360., 250.), opaque);
+	// Draw the list of plunder.
+	const Color &opaque = *GameData::Colors().Get("panel background");
+	const Color &back = *GameData::Colors().Get("faint");
+	const Color &dim = *GameData::Colors().Get("dim");
+	const Color &medium = *GameData::Colors().Get("medium");
+	const Color &bright = *GameData::Colors().Get("bright");
+	FillShader::Fill(Point(-155., -60.), Point(360., 250.), opaque);
 
-    int index = (scroll - 10) / 20;
-    int y = -170 - scroll + 20 * index;
-    int endY = 60;
+	int index = (scroll - 10) / 20;
+	int y = -170 - scroll + 20 * index;
+	int endY = 60;
 
-    const Font &font = FontSet::Get(14);
-    // Y offset to center the text in a 20-pixel high row.
-    double fontOff = .5 * (20 - font.Height());
-    for( ; y < endY && static_cast<unsigned>(index) < plunder.size(); y += 20, ++index)
-    {
-        const Plunder &item = plunder[index];
+	const Font &font = FontSet::Get(14);
+	// Y offset to center the text in a 20-pixel high row.
+	double fontOff = .5 * (20 - font.Height());
+	for( ; y < endY && static_cast<unsigned>(index) < plunder.size(); y += 20, ++index)
+	{
+		const Plunder &item = plunder[index];
 
-        // Check if this is the selected row.
-        bool isSelected = (index == selected);
-        if(isSelected)
-            FillShader::Fill(Point(-155., y + 10.), Point(360., 20.), back);
+		// Check if this is the selected row.
+		bool isSelected = (index == selected);
+		if(isSelected)
+			FillShader::Fill(Point(-155., y + 10.), Point(360., 20.), back);
 
-        // Color the item based on whether you have space for it.
-        const Color &color = item.CanTake(*you) ? isSelected ? bright : medium : dim;
-        Point pos(-320., y + fontOff);
-        font.Draw(item.Name(), pos, color);
-        font.Draw({item.Value(), {260, Alignment::RIGHT}}, pos, color);
-        font.Draw({item.Size(), {330, Alignment::RIGHT}}, pos, color);
-    }
+		// Color the item based on whether you have space for it.
+		const Color &color = item.CanTake(*you) ? isSelected ? bright : medium : dim;
+		Point pos(-320., y + fontOff);
+		font.Draw(item.Name(), pos, color);
+		font.Draw({item.Value(), {260, Alignment::RIGHT}}, pos, color);
+		font.Draw({item.Size(), {330, Alignment::RIGHT}}, pos, color);
+	}
 
-    // Set which buttons are active.
-    Information info;
-    if(CanExit())
-        info.SetCondition("can exit");
-    if(CanTake() == CanTakeResult::CAN_TAKE)
-        info.SetCondition("can take");
-    if(CanCapture())
-        info.SetCondition("can capture");
-    if(CanAttack() && (you->Crew() > 1 || !victim->RequiredCrew()))
-        info.SetCondition("can attack");
-    if(CanAttack())
-        info.SetCondition("can defend");
+	// Set which buttons are active.
+	Information info;
+	if(CanExit())
+		info.SetCondition("can exit");
+	if(CanTake() == CanTakeResult::CAN_TAKE)
+		info.SetCondition("can take");
+	if(CanCapture())
+		info.SetCondition("can capture");
+	if(CanAttack() && (you->Crew() > 1 || !victim->RequiredCrew()))
+		info.SetCondition("can attack");
+	if(CanAttack())
+		info.SetCondition("can defend");
 
-    // This should always be true, but double check.
-    int crew = 0;
-    if(you)
-    {
-        crew = you->Crew();
-        info.SetString("cargo space", to_string(you->Cargo().Free()));
-        info.SetString("your crew", to_string(crew));
-        info.SetString("your attack",
-            Round(attackOdds.AttackerPower(crew)));
-        info.SetString("your defense",
-            Round(defenseOdds.DefenderPower(crew)));
-    }
-    int vCrew = victim ? victim->Crew() : 0;
-    if(victim && (canCapture || victim->IsYours()))
-    {
-        info.SetString("enemy crew", to_string(vCrew));
-        info.SetString("enemy attack",
-            Round(defenseOdds.AttackerPower(vCrew)));
-        info.SetString("enemy defense",
-            Round(attackOdds.DefenderPower(vCrew)));
-    }
-    if(victim && canCapture && !victim->IsYours())
-    {
-        // If you haven't initiated capture yet, show the self destruct odds in
-        // the attack odds. It's illogical for you to have access to that info,
-        // but not knowing what your true odds are is annoying.
-        double odds = attackOdds.Odds(crew, vCrew);
-        if(!isCapturing)
-            odds *= (1. - victim->Attributes().Get("self destruct"));
-        info.SetString("attack odds",
-            Round(100. * odds) + "%");
-        info.SetString("attack casualties",
-            Round(attackOdds.AttackerCasualties(crew, vCrew)));
-        info.SetString("defense odds",
-            Round(100. * (1. - defenseOdds.Odds(vCrew, crew))) + "%");
-        info.SetString("defense casualties",
-            Round(defenseOdds.DefenderCasualties(vCrew, crew)));
-    }
+	// This should always be true, but double check.
+	int crew = 0;
+	if(you)
+	{
+		crew = you->Crew();
+		info.SetString("cargo space", to_string(you->Cargo().Free()));
+		info.SetString("your crew", to_string(crew));
+		info.SetString("your attack",
+			Round(attackOdds.AttackerPower(crew)));
+		info.SetString("your defense",
+			Round(defenseOdds.DefenderPower(crew)));
+	}
+	int vCrew = victim ? victim->Crew() : 0;
+	if(victim && (canCapture || victim->IsYours()))
+	{
+		info.SetString("enemy crew", to_string(vCrew));
+		info.SetString("enemy attack",
+			Round(defenseOdds.AttackerPower(vCrew)));
+		info.SetString("enemy defense",
+			Round(attackOdds.DefenderPower(vCrew)));
+	}
+	if(victim && canCapture && !victim->IsYours())
+	{
+		// If you haven't initiated capture yet, show the self destruct odds in
+		// the attack odds. It's illogical for you to have access to that info,
+		// but not knowing what your true odds are is annoying.
+		double odds = attackOdds.Odds(crew, vCrew);
+		if(!isCapturing)
+			odds *= (1. - victim->Attributes().Get("self destruct"));
+		info.SetString("attack odds",
+			Round(100. * odds) + "%");
+		info.SetString("attack casualties",
+			Round(attackOdds.AttackerCasualties(crew, vCrew)));
+		info.SetString("defense odds",
+			Round(100. * (1. - defenseOdds.Odds(vCrew, crew))) + "%");
+		info.SetString("defense casualties",
+			Round(defenseOdds.DefenderCasualties(vCrew, crew)));
+	}
 
-    const Interface *boarding = GameData::Interfaces().Get("boarding");
-    boarding->Draw(info, this);
+	const Interface *boarding = GameData::Interfaces().Get("boarding");
+	boarding->Draw(info, this);
 
-    // Draw the status messages from hand to hand combat.
-    Point messagePos(50., 55.);
-    for(const string &message : messages)
-    {
-        font.Draw(message, messagePos, bright);
-        messagePos.Y() += 20.;
-    }
+	// Draw the status messages from hand to hand combat.
+	Point messagePos(50., 55.);
+	for(const string &message : messages)
+	{
+		font.Draw(message, messagePos, bright);
+		messagePos.Y() += 20.;
+	}
 }`,
 		filePath: 'C:/src/endless-sky/source/BoardingPanel.cpp',
 		startLine: 117,
@@ -550,125 +561,125 @@ export const codeSnippetInputs: CodeSnippetInput[] = [
 	{
 		textSpan: `void ConversationPanel::Draw()
 {
-    // Dim out everything outside this panel.
-    DrawBackdrop();
+	// Dim out everything outside this panel.
+	DrawBackdrop();
 
-    // Draw the panel itself, stretching from top to bottom of the screen on
-    // the left side. The edge sprite contains 10 pixels of the margin; the rest
-    // of the margin is included in the filled rectangle drawn here:
-    const Color &back = *GameData::Colors().Get("conversation background");
-    double boxWidth = WIDTH + 2. * MARGIN - 10.;
-    FillShader::Fill(
-        Point(Screen::Left() + .5 * boxWidth, 0.),
-        Point(boxWidth, Screen::Height()),
-        back);
+	// Draw the panel itself, stretching from top to bottom of the screen on
+	// the left side. The edge sprite contains 10 pixels of the margin; the rest
+	// of the margin is included in the filled rectangle drawn here:
+	const Color &back = *GameData::Colors().Get("conversation background");
+	double boxWidth = WIDTH + 2. * MARGIN - 10.;
+	FillShader::Fill(
+		Point(Screen::Left() + .5 * boxWidth, 0.),
+		Point(boxWidth, Screen::Height()),
+		back);
 
-    Panel::DrawEdgeSprite(SpriteSet::Get("ui/right edge"), Screen::Left() + boxWidth);
+	Panel::DrawEdgeSprite(SpriteSet::Get("ui/right edge"), Screen::Left() + boxWidth);
 
-    // Get the font and colors we'll need for drawing everything.
-    const Font &font = FontSet::Get(14);
-    const Color &selectionColor = *GameData::Colors().Get("faint");
-    const Color &dim = *GameData::Colors().Get("dim");
-    const Color &gray = *GameData::Colors().Get("medium");
-    const Color &bright = *GameData::Colors().Get("bright");
-    const Color &dark = *GameData::Colors().Get("dark");
+	// Get the font and colors we'll need for drawing everything.
+	const Font &font = FontSet::Get(14);
+	const Color &selectionColor = *GameData::Colors().Get("faint");
+	const Color &dim = *GameData::Colors().Get("dim");
+	const Color &gray = *GameData::Colors().Get("medium");
+	const Color &bright = *GameData::Colors().Get("bright");
+	const Color &dark = *GameData::Colors().Get("dark");
 
-    // Figure out where we should start drawing.
-    Point point(
-        Screen::Left() + MARGIN,
-        Screen::Top() + MARGIN + scroll);
-    // Draw all the conversation text up to this point.
-    for(const Paragraph &it : text)
-        point = it.Draw(point, gray);
+	// Figure out where we should start drawing.
+	Point point(
+		Screen::Left() + MARGIN,
+		Screen::Top() + MARGIN + scroll);
+	// Draw all the conversation text up to this point.
+	for(const Paragraph &it : text)
+		point = it.Draw(point, gray);
 
-    // Draw whatever choices are being presented.
-    if(node < 0)
-    {
-        // The conversation has already ended. Draw a "done" button.
-        static const string done = "[done]";
-        int width = font.Width(done);
-        int height = font.Height();
-        Point off(Screen::Left() + MARGIN + WIDTH - width, point.Y());
-        font.Draw(done, off, bright);
+	// Draw whatever choices are being presented.
+	if(node < 0)
+	{
+		// The conversation has already ended. Draw a "done" button.
+		static const string done = "[done]";
+		int width = font.Width(done);
+		int height = font.Height();
+		Point off(Screen::Left() + MARGIN + WIDTH - width, point.Y());
+		font.Draw(done, off, bright);
 
-        // Handle clicks on this button.
-        AddZone(Rectangle::FromCorner(off, Point(width, height)), [this](){ this->Exit(); });
-    }
-    else if(choices.empty())
-    {
-        // This conversation node is prompting the player to enter their name.
-        Point fieldSize(150, 20);
-        const auto layout = Layout(fieldSize.X() - 10, Truncate::FRONT);
-        for(int side = 0; side < 2; ++side)
-        {
-            Point center = point + Point(side ? 420 : 190, 7);
-            Point unselected = point + Point(side ? 190 : 420, 7);
-            // Handle mouse clicks in whatever field is not selected.
-            if(side != choice)
-            {
-                AddZone(Rectangle(center, fieldSize), [this, side](){ this->ClickName(side); });
-                continue;
-            }
+		// Handle clicks on this button.
+		AddZone(Rectangle::FromCorner(off, Point(width, height)), [this](){ this->Exit(); });
+	}
+	else if(choices.empty())
+	{
+		// This conversation node is prompting the player to enter their name.
+		Point fieldSize(150, 20);
+		const auto layout = Layout(fieldSize.X() - 10, Truncate::FRONT);
+		for(int side = 0; side < 2; ++side)
+		{
+			Point center = point + Point(side ? 420 : 190, 7);
+			Point unselected = point + Point(side ? 190 : 420, 7);
+			// Handle mouse clicks in whatever field is not selected.
+			if(side != choice)
+			{
+				AddZone(Rectangle(center, fieldSize), [this, side](){ this->ClickName(side); });
+				continue;
+			}
 
-            // Color selected text box, or flicker if user attempts an error.
-            FillShader::Fill(center, fieldSize, (flickerTime % 6 > 3) ? dim : selectionColor);
-            if(flickerTime)
-                --flickerTime;
-            // Fill non-selected text box with dimmer color.
-            FillShader::Fill(unselected, fieldSize, dark);
-            // Draw the text cursor.
-            center.X() += font.FormattedWidth({choice ? lastName : firstName, layout}) - 67;
-            FillShader::Fill(center, Point(1., 16.), dim);
-        }
+			// Color selected text box, or flicker if user attempts an error.
+			FillShader::Fill(center, fieldSize, (flickerTime % 6 > 3) ? dim : selectionColor);
+			if(flickerTime)
+				--flickerTime;
+			// Fill non-selected text box with dimmer color.
+			FillShader::Fill(unselected, fieldSize, dark);
+			// Draw the text cursor.
+			center.X() += font.FormattedWidth({choice ? lastName : firstName, layout}) - 67;
+			FillShader::Fill(center, Point(1., 16.), dim);
+		}
 
-        font.Draw("First name:", point + Point(40, 0), dim);
-        font.Draw({firstName, layout}, point + Point(120, 0), choice ? gray : bright);
+		font.Draw("First name:", point + Point(40, 0), dim);
+		font.Draw({firstName, layout}, point + Point(120, 0), choice ? gray : bright);
 
-        font.Draw("Last name:", point + Point(270, 0), dim);
-        font.Draw({lastName, layout}, point + Point(350, 0), choice ? bright : gray);
+		font.Draw("Last name:", point + Point(270, 0), dim);
+		font.Draw({lastName, layout}, point + Point(350, 0), choice ? bright : gray);
 
-        // Draw the OK button, and remember its location.
-        static const string ok = "[ok]";
-        int width = font.Width(ok);
-        int height = font.Height();
-        Point off(Screen::Left() + MARGIN + WIDTH - width, point.Y());
-        font.Draw(ok, off, bright);
+		// Draw the OK button, and remember its location.
+		static const string ok = "[ok]";
+		int width = font.Width(ok);
+		int height = font.Height();
+		Point off(Screen::Left() + MARGIN + WIDTH - width, point.Y());
+		font.Draw(ok, off, bright);
 
-        // Handle clicks on this button.
-        AddZone(Rectangle::FromCorner(off, Point(width, height)), SDLK_RETURN);
-    }
-    else
-    {
-        string label = "0:";
-        int index = 0;
-        for(const auto &it : choices)
-        {
-            ++label[0];
+		// Handle clicks on this button.
+		AddZone(Rectangle::FromCorner(off, Point(width, height)), SDLK_RETURN);
+	}
+	else
+	{
+		string label = "0:";
+		int index = 0;
+		for(const auto &it : choices)
+		{
+			++label[0];
 
-            const auto &paragraph = it.first;
+			const auto &paragraph = it.first;
 
-            Point center = point + paragraph.Center();
-            Point size(WIDTH, paragraph.Height());
+			Point center = point + paragraph.Center();
+			Point size(WIDTH, paragraph.Height());
 
-            auto zone = Rectangle::FromCorner(point, size);
-            // If the mouse is hovering over this choice then we need to highlight it.
-            if(isHovering && zone.Contains(hoverPoint))
-                choice = index;
+			auto zone = Rectangle::FromCorner(point, size);
+			// If the mouse is hovering over this choice then we need to highlight it.
+			if(isHovering && zone.Contains(hoverPoint))
+				choice = index;
 
-            if(index == choice)
-                FillShader::Fill(center + Point(-5, 0), size + Point(30, 0), selectionColor);
-            AddZone(zone, [this, index](){ this->ClickChoice(index); });
-            ++index;
+			if(index == choice)
+				FillShader::Fill(center + Point(-5, 0), size + Point(30, 0), selectionColor);
+			AddZone(zone, [this, index](){ this->ClickChoice(index); });
+			++index;
 
-            font.Draw(label, point + Point(-15, 0), dim);
-            point = paragraph.Draw(point, bright);
-        }
-    }
-    // Store the total height of the text.
-    maxScroll = min(0., Screen::Top() - (point.Y() - scroll) + font.Height() + 15.);
+			font.Draw(label, point + Point(-15, 0), dim);
+			point = paragraph.Draw(point, bright);
+		}
+	}
+	// Store the total height of the text.
+	maxScroll = min(0., Screen::Top() - (point.Y() - scroll) + font.Height() + 15.);
 
-    // Reset the hover flag. If the mouse is still moving than the flag will be set in the next frame.
-    isHovering = false;
+	// Reset the hover flag. If the mouse is still moving than the flag will be set in the next frame.
+	isHovering = false;
 }`,
 		filePath: 'C:/src/endless-sky/source/ConversationPanel.cpp',
 		startLine: 121,
@@ -679,118 +690,118 @@ export const codeSnippetInputs: CodeSnippetInput[] = [
 	{
 		textSpan: `void Dialog::Draw()
 {
-    DrawBackdrop();
+	DrawBackdrop();
 
-    const Sprite *top = SpriteSet::Get(isWide ? "ui/dialog top wide" : "ui/dialog top");
-    const Sprite *middle = SpriteSet::Get(isWide ? "ui/dialog middle wide" : "ui/dialog middle");
-    const Sprite *bottom = SpriteSet::Get(isWide ? "ui/dialog bottom wide" : "ui/dialog bottom");
-    const Sprite *cancel = SpriteSet::Get("ui/dialog cancel");
+	const Sprite *top = SpriteSet::Get(isWide ? "ui/dialog top wide" : "ui/dialog top");
+	const Sprite *middle = SpriteSet::Get(isWide ? "ui/dialog middle wide" : "ui/dialog middle");
+	const Sprite *bottom = SpriteSet::Get(isWide ? "ui/dialog bottom wide" : "ui/dialog bottom");
+	const Sprite *cancel = SpriteSet::Get("ui/dialog cancel");
 
-    // If the dialog is too tall, then switch to wide mode.
-    Point textRectSize(Width() - HORIZONTAL_PADDING, 0);
-    int maxHeight = Screen::Height() * 3 / 4;
-    if(text->GetTextHeight(false) > maxHeight)
-    {
-        textRectSize.Y() = maxHeight;
-        isWide = true;
-        // Re-wrap with the new width.
-        textRectSize.X() = Width() - HORIZONTAL_PADDING;
-        text->SetRect(Rectangle(Point{}, textRectSize));
+	// If the dialog is too tall, then switch to wide mode.
+	Point textRectSize(Width() - HORIZONTAL_PADDING, 0);
+	int maxHeight = Screen::Height() * 3 / 4;
+	if(text->GetTextHeight(false) > maxHeight)
+	{
+		textRectSize.Y() = maxHeight;
+		isWide = true;
+		// Re-wrap with the new width.
+		textRectSize.X() = Width() - HORIZONTAL_PADDING;
+		text->SetRect(Rectangle(Point{}, textRectSize));
 
-        if(text->GetLongestLineWidth() <= top->Width() - HORIZONTAL_MARGIN - HORIZONTAL_PADDING)
-        {
-            // Formatted text is long and skinny (e.g. scan result dialog). Go back
-            // to using the default width, since the wide width doesn't help.
-            isWide = false;
-            textRectSize.X() = Width() - HORIZONTAL_PADDING;
-            text->SetRect(Rectangle(Point{}, textRectSize));
-        }
-    }
-    else
-        textRectSize.Y() = text->GetTextHeight(false);
+		if(text->GetLongestLineWidth() <= top->Width() - HORIZONTAL_MARGIN - HORIZONTAL_PADDING)
+		{
+			// Formatted text is long and skinny (e.g. scan result dialog). Go back
+			// to using the default width, since the wide width doesn't help.
+			isWide = false;
+			textRectSize.X() = Width() - HORIZONTAL_PADDING;
+			text->SetRect(Rectangle(Point{}, textRectSize));
+		}
+	}
+	else
+		textRectSize.Y() = text->GetTextHeight(false);
 
-    // The height of the bottom sprite without the included button's height.
-    const int realBottomHeight = bottom->Height() - cancel->Height();
+	// The height of the bottom sprite without the included button's height.
+	const int realBottomHeight = bottom->Height() - cancel->Height();
 
-    int height = TOP_PADDING + textRectSize.Y() + BOTTOM_PADDING +
-            (realBottomHeight - BOTTOM_PADDING) * (!isMission && (intFun || stringFun));
-    // Determine how many extension panels we need.
-    if(height <= realBottomHeight + top->Height())
-        extensionCount = 0;
-    else
-        extensionCount = (height - middle->Height()) / middle->Height();
+	int height = TOP_PADDING + textRectSize.Y() + BOTTOM_PADDING +
+			(realBottomHeight - BOTTOM_PADDING) * (!isMission && (intFun || stringFun));
+	// Determine how many extension panels we need.
+	if(height <= realBottomHeight + top->Height())
+		extensionCount = 0;
+	else
+		extensionCount = (height - middle->Height()) / middle->Height();
 
-    // Now that we know how big we want to render the text, position the text area.
+	// Now that we know how big we want to render the text, position the text area.
 
-    // Get the position of the top of this dialog, and of the input.
-    Point pos(0., (top->Height() + extensionCount * middle->Height() + bottom->Height()) * -.5f);
-    Point inputPos = Point(0., -(cancel->Height() + INPUT_HEIGHT)) - pos;
-    // Resize textRectSize to match the visual height of the dialog, which will
-    // be rounded up from the actual text height by the number of panels that
-    // were added. This helps correctly position the TextArea scroll buttons.
-    textRectSize.Y() = (top->Height() + realBottomHeight - VERTICAL_PADDING) + extensionCount * middle->Height() -
-            (realBottomHeight - BOTTOM_PADDING) * (!isMission && (intFun || stringFun));
+	// Get the position of the top of this dialog, and of the input.
+	Point pos(0., (top->Height() + extensionCount * middle->Height() + bottom->Height()) * -.5f);
+	Point inputPos = Point(0., -(cancel->Height() + INPUT_HEIGHT)) - pos;
+	// Resize textRectSize to match the visual height of the dialog, which will
+	// be rounded up from the actual text height by the number of panels that
+	// were added. This helps correctly position the TextArea scroll buttons.
+	textRectSize.Y() = (top->Height() + realBottomHeight - VERTICAL_PADDING) + extensionCount * middle->Height() -
+			(realBottomHeight - BOTTOM_PADDING) * (!isMission && (intFun || stringFun));
 
-    Point textPos(Width() * -.5 + LEFT_PADDING, pos.Y() + VERTICAL_PADDING);
-    Rectangle textRect = Rectangle::FromCorner(textPos, textRectSize);
-    text->SetRect(textRect);
+	Point textPos(Width() * -.5 + LEFT_PADDING, pos.Y() + VERTICAL_PADDING);
+	Rectangle textRect = Rectangle::FromCorner(textPos, textRectSize);
+	text->SetRect(textRect);
 
-    // Draw the top section of the dialog box.
-    pos.Y() += top->Height() * .5;
-    SpriteShader::Draw(top, pos);
-    pos.Y() += top->Height() * .5;
+	// Draw the top section of the dialog box.
+	pos.Y() += top->Height() * .5;
+	SpriteShader::Draw(top, pos);
+	pos.Y() += top->Height() * .5;
 
-    // The middle section is duplicated depending on how long the text is.
-    for(int i = 0; i < extensionCount; ++i)
-    {
-        pos.Y() += middle->Height() * .5;
-        SpriteShader::Draw(middle, pos);
-        pos.Y() += middle->Height() * .5;
-    }
+	// The middle section is duplicated depending on how long the text is.
+	for(int i = 0; i < extensionCount; ++i)
+	{
+		pos.Y() += middle->Height() * .5;
+		SpriteShader::Draw(middle, pos);
+		pos.Y() += middle->Height() * .5;
+	}
 
-    // Draw the bottom section.
-    const Font &font = FontSet::Get(14);
-    pos.Y() += bottom->Height() * .5;
-    SpriteShader::Draw(bottom, pos);
-    pos.Y() += (bottom->Height() - cancel->Height()) * .5;
+	// Draw the bottom section.
+	const Font &font = FontSet::Get(14);
+	pos.Y() += bottom->Height() * .5;
+	SpriteShader::Draw(bottom, pos);
+	pos.Y() += (bottom->Height() - cancel->Height()) * .5;
 
-    // Draw the buttons, including optionally the cancel button.
-    const Color &bright = *GameData::Colors().Get("bright");
-    const Color &dim = *GameData::Colors().Get("medium");
-    const Color &back = *GameData::Colors().Get("faint");
-    const Color &inactive = *GameData::Colors().Get("inactive");
-    const string okText = isMission ? "Accept" : "OK";
-    okPos = pos + Point((top->Width() - RIGHT_MARGIN - cancel->Width()) * .5, 0.);
-    Point labelPos(
-        okPos.X() - .5 * font.Width(okText),
-        okPos.Y() - .5 * font.Height());
-    font.Draw(okText, labelPos, isOkDisabled ? inactive : (okIsActive ? bright : dim));
-    if(canCancel)
-    {
-        string cancelText = isMission ? "Decline" : "Cancel";
-        cancelPos = pos + Point(okPos.X() - cancel->Width() + BUTTON_RIGHT_MARGIN, 0.);
-        SpriteShader::Draw(cancel, cancelPos);
-        labelPos = {
-                cancelPos.X() - .5 * font.Width(cancelText),
-                cancelPos.Y() - .5 * font.Height()};
-        font.Draw(cancelText, labelPos, !okIsActive ? bright : dim);
-    }
+	// Draw the buttons, including optionally the cancel button.
+	const Color &bright = *GameData::Colors().Get("bright");
+	const Color &dim = *GameData::Colors().Get("medium");
+	const Color &back = *GameData::Colors().Get("faint");
+	const Color &inactive = *GameData::Colors().Get("inactive");
+	const string okText = isMission ? "Accept" : "OK";
+	okPos = pos + Point((top->Width() - RIGHT_MARGIN - cancel->Width()) * .5, 0.);
+	Point labelPos(
+		okPos.X() - .5 * font.Width(okText),
+		okPos.Y() - .5 * font.Height());
+	font.Draw(okText, labelPos, isOkDisabled ? inactive : (okIsActive ? bright : dim));
+	if(canCancel)
+	{
+		string cancelText = isMission ? "Decline" : "Cancel";
+		cancelPos = pos + Point(okPos.X() - cancel->Width() + BUTTON_RIGHT_MARGIN, 0.);
+		SpriteShader::Draw(cancel, cancelPos);
+		labelPos = {
+				cancelPos.X() - .5 * font.Width(cancelText),
+				cancelPos.Y() - .5 * font.Height()};
+		font.Draw(cancelText, labelPos, !okIsActive ? bright : dim);
+	}
 
-    // Draw the input, if any.
-    if(!isMission && (intFun || stringFun))
-    {
-        FillShader::Fill(inputPos, Point(Width() - HORIZONTAL_PADDING, INPUT_HEIGHT), back);
+	// Draw the input, if any.
+	if(!isMission && (intFun || stringFun))
+	{
+		FillShader::Fill(inputPos, Point(Width() - HORIZONTAL_PADDING, INPUT_HEIGHT), back);
 
-        Point stringPos(
-            inputPos.X() - (Width() - HORIZONTAL_PADDING) * .5 + INPUT_LEFT_PADDING,
-            inputPos.Y() - .5 * font.Height());
-        const auto inputText = DisplayText(input, {static_cast<int>(Width() - HORIZONTAL_PADDING - INPUT_HORIZONTAL_PADDING),
-                Truncate::FRONT});
-        font.Draw(inputText, stringPos, bright);
+		Point stringPos(
+			inputPos.X() - (Width() - HORIZONTAL_PADDING) * .5 + INPUT_LEFT_PADDING,
+			inputPos.Y() - .5 * font.Height());
+		const auto inputText = DisplayText(input, {static_cast<int>(Width() - HORIZONTAL_PADDING - INPUT_HORIZONTAL_PADDING),
+				Truncate::FRONT});
+		font.Draw(inputText, stringPos, bright);
 
-        Point barPos(stringPos.X() + font.FormattedWidth(inputText) + INPUT_TOP_PADDING, inputPos.Y());
-        FillShader::Fill(barPos, Point(1., INPUT_HEIGHT - INPUT_VERTICAL_PADDING), dim);
-    }
+		Point barPos(stringPos.X() + font.FormattedWidth(inputText) + INPUT_TOP_PADDING, inputPos.Y());
+		FillShader::Fill(barPos, Point(1., INPUT_HEIGHT - INPUT_VERTICAL_PADDING), dim);
+	}
 }`,
 		filePath: 'C:/src/endless-sky/source/Dialog.cpp',
 		startLine: 163,
