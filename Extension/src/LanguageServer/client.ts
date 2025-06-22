@@ -602,6 +602,9 @@ export interface CopilotSymbolRefEntry {
 
 export interface CopilotRefactorContextResult {
     requestId: number;
+    defUri: string;
+    defStartOffset: number;
+    defEndOffset: number;
     symbolRefs: CopilotSymbolRefEntry[];
 }
 
