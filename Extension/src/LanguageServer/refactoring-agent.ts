@@ -68,7 +68,7 @@ const foldableKeyWords: { [keyWord: string]: boolean } = {
 };
 
 async function getClosestFoldingRange(editor: vscode.TextEditor, startLine: number): Promise<vscode.FoldingRange | undefined> {
-	// await new Promise(resolve => setTimeout(resolve, 1000));
+	await new Promise(resolve => setTimeout(resolve, 1000));
 	const foldingRanges = await vscode.commands.executeCommand<vscode.FoldingRange[]>('vscode.executeFoldingRangeProvider', editor.document.uri);
 	let closestRange: vscode.FoldingRange | undefined;
 	if (foldingRanges && foldingRanges.length > 0) {
@@ -108,8 +108,9 @@ async function fallsWithinPreviouslyEditedRanges(previouslyEditedRanges: { [file
 
 	for (const range of previouslyEditedRanges[fileVisiting]) {
 		if (
-			closestRange.start >= range.start.line &&
-			closestRange.end <= range.end.line
+			(closestRange.start >= range.start.line &&
+				closestRange.end <= range.end.line) ||
+			closestRange.start === range.start.line // when a range is updated the end line may change, but the start line remains the same.
 		) {
 			return true;
 		}
@@ -160,15 +161,15 @@ async function reiterate(
 		if (includes.length > 0) {
 			const topOfFileRange = new vscode.Range(0, 0, 0, 0);
 			const includesText = includes.join('\n') + '\n';
-			await applyDynamicEdit(buildError.filePath, topOfFileRange, includesText, stream);
+			await applyDynamicEdit(buildError.filePath, topOfFileRange, includesText, stream, undefined, true);
 		}
 		else {
-			await applyDynamicEdit(buildError.filePath, snippetInputRange, reiteratedCodeSnippets[reiteratedCodeSnippets.length - 1], stream);
+			await applyDynamicEdit(buildError.filePath, snippetInputRange, reiteratedCodeSnippets[reiteratedCodeSnippets.length - 1], stream, undefined, true);
 		}
 	}
 }
 
-async function applyDynamicEdit(filePath: string, range: vscode.Range | undefined, updatedTextSpan: string | undefined, stream: vscode.ChatResponseStream): Promise<void> {
+async function applyDynamicEdit(filePath: string, range: vscode.Range | undefined, updatedTextSpan: string | undefined, stream: vscode.ChatResponseStream, refStartLine: number | undefined, reiterationEdit: boolean): Promise<void> {
 	const document = await vscode.workspace.openTextDocument(filePath);
 	await vscode.window.showTextDocument(document, { preview: false });
 	const editor = vscode.window.activeTextEditor;
@@ -183,13 +184,22 @@ async function applyDynamicEdit(filePath: string, range: vscode.Range | undefine
 		// Replace the range with updatedTextSpan if it exists
 		if (updatedTextSpan) {
 			const singleEdit = new vscode.WorkspaceEdit();
-			// await new Promise(resolve => setTimeout(resolve, 1000));
+			await new Promise(resolve => setTimeout(resolve, 1000));
 			singleEdit.replace(editor.document.uri, range, updatedTextSpan);
 			await vscode.workspace.applyEdit(singleEdit);
-			// await new Promise(resolve => setTimeout(resolve, 1000));
+			await new Promise(resolve => setTimeout(resolve, 1000));
 			await editor.document.save();
 			await new Promise(resolve => setTimeout(resolve, 1000));
-			stream.markdown(`\n\nUpdated code snippet in \`${path.basename(filePath)}\` at line \`${range.start.line}\``);
+			var startLine: number = range.start.line;
+			if (refStartLine !== undefined) {
+				startLine = refStartLine; // Use the provided start line if it exists.
+			}
+
+			var messageText: string = "Updated code snippet in";
+			if (reiterationEdit) {
+				messageText = "Applied fix in";
+			}
+			stream.markdown(`\n\n${messageText} \`${path.basename(filePath)}\` at line \`${startLine + 1}\``);
 		}
 
 		editor.selection = new vscode.Selection(range.end, range.end);
@@ -249,7 +259,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 	var initialChatResponseSnippet = await parseChatResponse(initialChatResponse);
 	if (initialChatResponseSnippet.length > 0) {
 		const updatedTextSpan = initialChatResponseSnippet[0].toString();
-		await applyDynamicEdit(primaryFilePath, primaryMethodRange, updatedTextSpan, stream);
+		await applyDynamicEdit(primaryFilePath, primaryMethodRange, updatedTextSpan, stream, undefined, false);
 	}
 
 	stream.progress("\n\nSearching for references in database...");
@@ -324,7 +334,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 				currentContextItemClosestFoldingRange = snippetInputRange;
 			}
 
-			stream.progress("Updating code snippet in " + path.basename(currentContextItemFilePath) + " at line " + currentContextItemStartLine + "...");
+			stream.progress("Updating code snippet in " + path.basename(currentContextItemFilePath) + " at line " + (currentContextItemStartLine + 1) + "...");
 			generateEditsPrompt += `\n\n\`\`\`${nearestRangeTextSpan}\`\`\``;
 			var shouldExecuteRequest: boolean = true;
 		}
@@ -353,7 +363,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 		for (let i = batchedCodeSnippets.length - 1; i >= 0; i--) {
 			var updatedTextSpan: string = codeSnippets[codeSnippetResponseCounter].toString();
 			var codeSnippetInput = batchedCodeSnippets[i];
-			await applyDynamicEdit(currentContextItemFilePath, currentContextItemClosestFoldingRange, leadingWhiteSpace + updatedTextSpan, stream);
+			await applyDynamicEdit(currentContextItemFilePath, currentContextItemClosestFoldingRange, leadingWhiteSpace + updatedTextSpan, stream, currentContextItemStartLine, false);
 			codeSnippetResponseCounter++;
 		}
 	} // End of while loop foriterating through all FARContextItems.
@@ -368,7 +378,7 @@ export async function invokeRefactoringAgent(request: vscode.ChatRequest, contex
 			// TODO: Ask user to manually fix errors, then click this button to continue the agent.
 		}
 
-		stream.markdown("\n\nBuild failed. Agent will attempt to fix error(s)...");
+		stream.progress("\n\nBuild failed. Agent will attempt to fix error(s)...");
 		const allDiagnostics = vscode.languages.getDiagnostics();
 		let buildErrorsInHeaderFiles: ErrorDiagnostic[] = [];
 		let buildErrorsInSourceFiles: ErrorDiagnostic[] = [];
