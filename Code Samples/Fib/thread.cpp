@@ -1,48 +1,54 @@
-#include <iostream>
-#include <unistd.h>
-#include <sys/types.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
-
 #include "thread.h"
+#include <iostream>
+#include <thread>
+#include <chrono>
+#include <atomic>
+#include <string>
+#include <random>
+#include <pthread.h>
 
-static int g_tid = 0;
+// Thread-safe counter for thread IDs
+static std::atomic<int> g_tid{0};
 
-static int fib(int n){
+// Generate fibonacci numbers recursively
+static int fib(int n) {
     switch (n) {
         case 0: return 1;
         case 1: return 1;
-        default: return (fib(n-2) + fib(n-1));
+        default: return fib(n - 1) + fib(n - 2);
     }
 }
 
-void * thread_proc(void* ctx)
-{
-    int tid = g_tid++;
-
-    char thread_name[16];
-    sprintf(thread_name, "Thread %d", tid);
-#ifdef __APPLE__
-    pthread_setname_np(thread_name);
-#else
-    pthread_setname_np(pthread_self(), thread_name);
+// Set thread name (platform-specific) with Linux truncation
+static void set_thread_name(const std::string& name) {
+#if defined(__APPLE__)
+    pthread_setname_np(name.c_str());
+#elif defined(__linux__)
+    std::string n = name.substr(0, 15);  // limit ≤15 chars plus null (Linux limit) :contentReference[oaicite:0]{index=0}
+    pthread_setname_np(pthread_self(), n.c_str());
 #endif
+}
 
-    // Random delay, 0 - 0.5 sec
-    timespec ts;
-    ts.tv_sec = 0;
-    ts.tv_nsec = 500000000 + ((float)rand() / (float)RAND_MAX) * 500000000;
-    nanosleep(&ts, NULL);
+// Thread-local RNG for good random delays
+static thread_local std::mt19937_64 rng{std::random_device{}()};
 
-    volatile int i = 0;
-    while (i <= 30) {
-        std::cout << "Thread " << tid << ": fib(" << i << ") = " << fib(i) << std::endl;
-        i++;
-        nanosleep(&ts, NULL);
+// Uniform integer generator
+static int intRand(int min, int max) {
+    return std::uniform_int_distribution<int>(min, max)(rng);
+}
+
+void thread_proc() {
+    int tid = g_tid.fetch_add(1, std::memory_order_relaxed);
+    std::string thread_name = "Thread " + std::to_string(tid);
+    set_thread_name(thread_name);
+
+    auto delay = std::chrono::nanoseconds(500000000 + intRand(0, 500000000));
+
+    std::this_thread::sleep_for(delay);
+    for (int i = 0; i <= 30; ++i) {
+        std::cout << thread_name << ": fib(" << i << ") = " << fib(i) << "\n";
+        std::this_thread::sleep_for(delay);
     }
 
-    std::cout << thread_name << " exited!" << std::endl;
+    std::cout << thread_name << " exited!\n";
 }
