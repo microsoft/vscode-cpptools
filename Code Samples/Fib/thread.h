@@ -1,1 +1,8 @@
-void * thread_proc(void* ctx);
+#pragma once
+
+/**
+ * @brief Launches a background thread computing Fibonacci numbers with random delays.
+ */
+void thread_proc();
+
+
