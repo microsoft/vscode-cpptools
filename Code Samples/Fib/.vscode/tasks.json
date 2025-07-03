@@ -1,50 +1,30 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
+        // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
         {
             "label": "build",
             "type": "shell",
+            "command": "make",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
+            "problemMatcher": ["$gcc"],
+            "options": {
+                "cwd": "${workspaceFolder}/Code Samples/Fib"
             },
-            "windows": {
-                "command": "${workspaceRoot}/build.cmd",
-                "args": [
-                    "<Path/To/MinGW/Cygwin/Bin/Folder>",    // Path to the bin folder containing g++ to compile
-                    "fib.exe"                               // Output executable name
-                ]
-            },
-            "linux": {
-                "command": "g++",
-                "args": [
-                    "-g",
-                    "*.cpp",
-                    "-lpthread",
-                    "--std=c++11",
-                    "-o",
-                    "fib.out"
-                ]
-            },
-            "osx": {
-                "command": "g++",
-                "args": [
-                    "-g",
-                    "*.cpp",
-                    "-lpthread",
-                    "--std=c++11",
-                    "-o",
-                    "fib.out"
-                ]
+            "detail": "Build C++ Fibonacci sample using Makefile"
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "make clean",
+            "options": {
+                "cwd": "${workspaceFolder}/Code Samples/Fib"
             }
         }
     ]
 }
+
