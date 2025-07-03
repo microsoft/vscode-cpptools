@@ -4,47 +4,25 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
-            "type": "shell",
+            "label": "compile",
+            "type": "npm",
+            "script": "compile",
+            "problemMatcher": "$tsc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "watch",
+            "type": "npm",
+            "script": "watch",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "windows": {
-                "command": "${workspaceRoot}/build.cmd",
-                "args": [
-                    "<Path/To/MinGW/Cygwin/Bin/Folder>",    // Path to the bin folder containing g++ to compile
-                    "fib.exe"                               // Output executable name
-                ]
-            },
-            "linux": {
-                "command": "g++",
-                "args": [
-                    "-g",
-                    "*.cpp",
-                    "-lpthread",
-                    "--std=c++11",
-                    "-o",
-                    "fib.out"
-                ]
-            },
-            "osx": {
-                "command": "g++",
-                "args": [
-                    "-g",
-                    "*.cpp",
-                    "-lpthread",
-                    "--std=c++11",
-                    "-o",
-                    "fib.out"
-                ]
-            }
+            "isBackground": true,
+            "problemMatcher": "$tsc-watch",
         }
     ]
 }
