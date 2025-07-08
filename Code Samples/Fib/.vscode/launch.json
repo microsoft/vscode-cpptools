@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/fib.out",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "windows": {
+                "program": "${workspaceFolder}/fib.exe",
+                "miDebuggerPath": "<Path/To/GDB>" // Path to gdb on windows
+            },
+            "linux": {
+                "program": "${workspaceRoot}/fib.out"
+            }
+        }
+    ]
+}
