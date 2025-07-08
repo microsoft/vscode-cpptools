@@ -121,6 +121,7 @@ export class SettingsPanel {
             {
                 enableCommandUris: true,
                 enableScripts: true,
+                retainContextWhenHidden: true,
 
                 // Restrict the webview to only loading content from these directories
                 localResourceRoots: [
