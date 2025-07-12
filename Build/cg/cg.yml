@@ -37,6 +37,8 @@ extends:
         name: AzurePipelines-EO
         image: AzurePipelinesWindows2022compliantGPT
         os: windows
+      binskim:
+        preReleaseVersion: '4.3.1'
       tsa:
         enabled: true
         config:
