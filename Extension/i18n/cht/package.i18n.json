@@ -325,7 +325,7 @@
 	"c_cpp.debuggers.cppvsdbg.console.externalTerminal.description": "主控台應用程式將會在外部終端視窗中啟動。此視窗將在重新啟動情節中重複使用，且在應用程式結束時不會自動消失。",
 	"c_cpp.debuggers.cppvsdbg.console.newExternalWindow.description": "主控台應用程式將會在其本身的外部主控台視窗中啟動，該視窗會在應用程式停止時結束。非主控台應用程式將在沒有終端的情況下執行，而且將忽略 stdout/stderr。",
 	"c_cpp.debuggers.avoidWindowsConsoleRedirection.description": "若為 true，則停用整合式終端機支援需要的偵錯項目主控台重新導向。",
-	"c_cpp.debuggers.sourceFileMap.markdownDescription": "傳遞至偵錯引擎的選擇性來源檔案對應。範例: `{ \"<original source path>\": \"<current source path>\" }`。",
+	"c_cpp.debuggers.sourceFileMap.markdownDescription": "傳遞至偵錯引擎的選擇性來源檔案對應。範例: `{ \"<原始來源路徑>\": \"<目前來源路徑>\" }`。",
 	"c_cpp.debuggers.processId.anyOf.markdownDescription": "要附加偵錯工具的選擇性處理序識別碼。使用 `${command:pickProcess}` 可取得要附加的本機執行中處理序清單。請注意，某些平台需要系統管理員權限才能附加至處理序。",
 	"c_cpp.debuggers.symbolSearchPath.description": "要用於搜尋符號 (即 pdb) 檔案的目錄清單 (以分號分隔)。範例: \"c:\\dir1;c:\\dir2\"。",
 	"c_cpp.debuggers.dumpPath.description": "指定程式之傾印檔案的選擇性完整路徑。範例: \"c:\\temp\\app.dmp\"。預設為 null。",
