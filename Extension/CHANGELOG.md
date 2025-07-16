@@ -1,24 +1,39 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.26.1: May 22, 2025
+## Version 1.27.0: July 15, 2025
 ### Bug Fixes
-* Fix include completion adding an extra `"` in `insert` mode. [#13615](https://github.com/microsoft/vscode-cpptools/issues/13615)
-* Fix a bug with compiler querying of MinGW. [#13622](https://github.com/microsoft/vscode-cpptools/issues/13622)
-* Fix a tag parser crash regression.
+* Fix IntelliSense crash in `find_subobject_for_interpreter_address`. [#12464](https://github.com/microsoft/vscode-cpptools/issues/12464)
+* Fix changes to the active field being lost in the configuration UI when navigating away. [#13636](https://github.com/microsoft/vscode-cpptools/issues/13636)
+* Fix compiler query failing on Windows if optional job-related API calls fail. [#13679](https://github.com/microsoft/vscode-cpptools/issues/13679)
+* Fix bugs with Doxygen comments. [#13725](https://github.com/microsoft/vscode-cpptools/issues/13725), [#13726](https://github.com/microsoft/vscode-cpptools/issues/13726), [#13745](https://github.com/microsoft/vscode-cpptools/issues/13745)
+* Fix a bug with 'Create Definition'. [#13741](https://github.com/microsoft/vscode-cpptools/issues/13741)
 
-## Version 1.26.0: May 21, 2025
+## Version 1.26.3: June 24, 2025
 ### New Feature
 * Improve the context provided for C++ Copilot suggestions.
 
 ### Enhancements
 * Add support for c++26/2c, gnu++26/2c, and c++23preview configurations. [#12963](https://github.com/microsoft/vscode-cpptools/issues/12963), [#13133](https://github.com/microsoft/vscode-cpptools/issues/13133)
+* Add more return code and error logging when compiler querying fails. [#13679](https://github.com/microsoft/vscode-cpptools/issues/13679)
 * IntelliSense parser updates.
 
 ### Bug Fixes
+* Fix completion triggering from `.` on the last column of a multi-line comment block. [#13288](https://github.com/microsoft/vscode-cpptools/issues/13288)
 * Fix an invalid IntelliSense error with C++23 escape sequences. [#13338](https://github.com/microsoft/vscode-cpptools/issues/13338)
 * Fix switch header/source for CUDA files. [#13575](https://github.com/microsoft/vscode-cpptools/issues/13575)
+* Fix include completion adding an extra `"` in `insert` mode. [#13615](https://github.com/microsoft/vscode-cpptools/issues/13615)
+* Fix a bug with compiler querying of MinGW. [#13622](https://github.com/microsoft/vscode-cpptools/issues/13622)
+* Fix `-iquote` not working after `-isystem`. [#13638](https://github.com/microsoft/vscode-cpptools/issues/13638)
+* Minor debugger fixes. [PR #13654](https://github.com/microsoft/vscode-cpptools/pull/13654), [PR #13671](https://github.com/microsoft/vscode-cpptools/pull/13671)
+* Fix `browse.path` merging with the configuration provider's `browse.path` with `"mergeConfigurations": false`. [#13660](https://github.com/microsoft/vscode-cpptools/issues/13660)
+* Fix Doxygen comments with `[in]`, `[in,out]`, etc. attributes. [#13682](https://github.com/microsoft/vscode-cpptools/issues/13682), [#13698](https://github.com/microsoft/vscode-cpptools/issues/13698)
+* Fix old `defines` accumulating after `defines` are changed with `"mergeConfigurations": true`. [#13687](https://github.com/microsoft/vscode-cpptools/issues/13687)
+* Fix changes to mergeable properties in `c_cpp_properties.json` not being used until a new configuration is requested with `"mergeConfigurations": true`. [#13688](https://github.com/microsoft/vscode-cpptools/issues/13688)
 * Update Apple clang 16.4 to LLVM clang version mappings and fix incorrect mappings for Apple clang 14.
-* Update the bundled clang-tidy and clang-format from 1.20.3 to 1.20.5 (for bug fixes).
+* Update the bundled `clang-format` and `clang-tidy` from 20.1.3 to 20.1.7 (for bug fixes).
+* Fix an IntelliSense crash when calling `save_class_members`.
+* Fix a tag parser crash regression.
+* Update and fix some translations.
 
 ## Version 1.25.3: April 28, 2025
 ### Enhancements
@@ -261,13 +276,13 @@
 * Stop logging file watch events for excluded files. [#11455](https://github.com/microsoft/vscode-cpptools/issues/11455)
 * Fix a crash if the Ryzen 3000 doesn't have updated drivers. [#12201](https://github.com/microsoft/vscode-cpptools/issues/12201)
 * Fix handling of `-isystem` and `-iquote` for IntelliSense configuration. [#12207](https://github.com/microsoft/vscode-cpptools/issues/12207)
-* Fix doxygen comment generation when `/**` comments are used. [#12249](https://github.com/microsoft/vscode-cpptools/issues/12249)
+* Fix Doxygen comment generation when `/**` comments are used. [#12249](https://github.com/microsoft/vscode-cpptools/issues/12249)
 * Fix a code analysis crash on Linux if the message is too long. [#12285](https://github.com/microsoft/vscode-cpptools/issues/12285)
 * Fix relative paths in `compile_commands.json` to be relative to the `compile_commands.json`'s directory. [#12290](https://github.com/microsoft/vscode-cpptools/issues/12290)
 * Fix a tag parser performance regression. [#12292](https://github.com/microsoft/vscode-cpptools/issues/12292)
 * Fix a regression with cl.exe system include path detection. [#12293](https://github.com/microsoft/vscode-cpptools/issues/12293)
 * Fix code analysis, find all references, and rename from getting the wrong configuration for non-open files on the first run when using a configuration provider. [#12313](https://github.com/microsoft/vscode-cpptools/issues/12313)
-* Fix handling of doxygen comment blocks with `*//*` in them. [#12316](https://github.com/microsoft/vscode-cpptools/issues/12316)
+* Fix handling of Doxygen comment blocks with `*//*` in them. [#12316](https://github.com/microsoft/vscode-cpptools/issues/12316)
 * Fix potential crashes during IntelliSense process shutdown. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
 * Fix the language status not showing it's busy while the tag parser is initializing. [#12403](https://github.com/microsoft/vscode-cpptools/issues/12403)
 * Fix the vcpkg code action not appearing for missing headers available via vcpkg. [#12413](https://github.com/microsoft/vscode-cpptools/issues/12413)
