@@ -7,7 +7,8 @@
 #include <atomic>
 #include <chrono>
 #include <csignal>
-#include <unistd.h>  // Required for getpid()
+#include <unistd.h>  
+
 #include "thread.h"
 
 #define THREAD_COUNT 10
@@ -24,10 +25,8 @@ void signal_handler(int signal) {
 
 int main(int argc, char **argv)
 {
-    // Register signal handler for clean interruption
     std::signal(SIGINT, signal_handler);
 
-    // Initialize random seed
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     std::cout << "Hello World!" << std::endl;
@@ -47,28 +46,24 @@ int main(int argc, char **argv)
         else if (std::strcmp(crash, argv[1]) == 0) {
             std::cout << "Triggering intentional crash..." << std::endl;
             volatile int foo = 0;
-            volatile int bar = 1 / foo;  // Guaranteed crash
-            (void)bar;                    // Suppress unused-variable warning
-            return 1;                     // Unreachable after crash
+            volatile int bar = 1 / foo;  
+            (void)bar;                   
+            return 1;                     
         }
         else if (std::strcmp(test_flag, argv[1]) == 0) {
             std::cout << "Running in test mode" << std::endl;
-            // Add any test-specific code here
         }
     }
 
-    // Thread management
     std::vector<std::thread> threads;
     threads.reserve(THREAD_COUNT);
 
     try {
-        // Create and launch threads
         for (int i = 0; i < THREAD_COUNT; ++i) {
             std::cout << "Launching thread " << i << std::endl;
             threads.emplace_back(thread_proc);
         }
 
-        // Join all threads
         for (auto& t : threads) {
             if (t.joinable()) {
                 t.join();
