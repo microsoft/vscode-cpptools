@@ -30,12 +30,12 @@ extends:
   parameters:
     pool:
       name: AzurePipelines-EO
-      image: AzurePipelinesWindows2022compliantGPT
+      image: 1ESPT-Windows2022
       os: windows
     sdl:
       sourceAnalysisPool: 
         name: AzurePipelines-EO
-        image: AzurePipelinesWindows2022compliantGPT
+        image: 1ESPT-Windows2022
         os: windows
     stages:
     - stage: stage
