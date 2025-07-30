@@ -8,9 +8,11 @@
 * Fix compiler query failing on Windows if optional job-related API calls fail. [#13679](https://github.com/microsoft/vscode-cpptools/issues/13679)
 * Fix bugs with Doxygen comments. [#13725](https://github.com/microsoft/vscode-cpptools/issues/13725), [#13726](https://github.com/microsoft/vscode-cpptools/issues/13726), [#13745](https://github.com/microsoft/vscode-cpptools/issues/13745)
 * Fix bugs with 'Create Definition'. [#13741](https://github.com/microsoft/vscode-cpptools/issues/13741), [#13773](https://github.com/microsoft/vscode-cpptools/issues/13773)
-* Fix IntelliSense crashes when there are duplicate constexpr template functions in a TU. [#13775](https://github.com/microsoft/vscode-cpptools/issues/13775).
+* Fix IntelliSense crashes when there are duplicate constexpr template functions in a TU. [#13775](https://github.com/microsoft/vscode-cpptools/issues/13775)
 * Fix the description of `debugServerPath`. [PR #13778](https://github.com/microsoft/vscode-cpptools/pull/13778)
-  * Thank you for the contribution. [@redstrate (Joshua Goins)](https://github.com/redstrate) 
+  * Thank you for the contribution. [@redstrate (Joshua Goins)](https://github.com/redstrate)
+* Remove `-fmodule-mapper`, `-fdeps-format`, and some additional unnecessary args from compiler queries. [#13782](https://github.com/microsoft/vscode-cpptools/issues/13782)
+* Fix `-imacro` not configuring IntelliSense correctly. [#13785](https://github.com/microsoft/vscode-cpptools/issues/13785)
 * Fix an IntelliSense bug that could cause incorrect string lengths to be reported for string literals in files that use certain file encodings.
 
 ## Version 1.26.3: June 24, 2025
