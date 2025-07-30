@@ -28,7 +28,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, ResponseError, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
+import { CloseAction, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, ResponseError, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -590,6 +590,18 @@ export interface CopilotCompletionContextParams {
     doAggregateSnippets: boolean;
 }
 
+export interface TextDocumentItemWithOriginalEncoding {
+    uri: string;
+    languageId: string;
+    version: number;
+    text: string;
+    originalEncoding: string;
+}
+
+export interface DidOpenTextDocumentParamsWithOriginalEncoding {
+    textDocument: TextDocumentItemWithOriginalEncoding;
+}
+
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, CppInitializationResult, void> = new RequestType<CppInitializationParams, CppInitializationResult, void>('cpptools/initialize');
@@ -614,7 +626,7 @@ const CppContextRequest: RequestType<TextDocumentIdentifier, ChatContextResult, 
 const CopilotCompletionContextRequest: RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void> = new RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void>('cpptools/getCompletionContext');
 
 // Notifications to the server
-const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
+const DidOpenNotification: NotificationType<DidOpenTextDocumentParamsWithOriginalEncoding> = new NotificationType<DidOpenTextDocumentParamsWithOriginalEncoding>('cpptools/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileCreated');
 const FileChangedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileChanged');
 const FileDeletedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileDeleted');
@@ -2327,12 +2339,13 @@ export class DefaultClient implements Client {
 
     // Only used in crash recovery. Otherwise, VS Code sends didOpen directly to native process (through the protocolFilter).
     public async sendDidOpen(document: vscode.TextDocument): Promise<void> {
-        const params: DidOpenTextDocumentParams = {
+        const params: DidOpenTextDocumentParamsWithOriginalEncoding = {
             textDocument: {
                 uri: document.uri.toString(),
                 languageId: document.languageId,
                 version: document.version,
-                text: document.getText()
+                text: document.getText(),
+                originalEncoding: document.encoding
             }
         };
         await this.ready;
