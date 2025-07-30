@@ -132,7 +132,7 @@ export class RemoteAttachPicker {
         }
 
         // If the pipeTransport settings indicate "quoteArgs": "false", we need to skip the outer quotes.
-        if (quoteArgs === false) {
+        if (!quoteArgs) {
             outerQuote = ``;
         }
 
