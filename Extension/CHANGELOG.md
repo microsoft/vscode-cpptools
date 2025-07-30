@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.27.0: July 31, 2025
+## Version 1.27.0: August 4, 2025
 ### Bug Fixes
 * Fix an IntelliSense crash in `add_cached_tokens_to_string`. [#11900](https://github.com/microsoft/vscode-cpptools/issues/11900)
 * Fix an IntelliSense crash in `find_subobject_for_interpreter_address`. [#12464](https://github.com/microsoft/vscode-cpptools/issues/12464)
@@ -11,6 +11,7 @@
 * Fix IntelliSense crashes when there are duplicate constexpr template functions in a TU. [#13775](https://github.com/microsoft/vscode-cpptools/issues/13775).
 * Fix the description of `debugServerPath`. [PR #13778](https://github.com/microsoft/vscode-cpptools/pull/13778)
   * Thank you for the contribution. [@redstrate (Joshua Goins)](https://github.com/redstrate) 
+* Fix an IntelliSense bug that could cause incorrect string lengths to be reported for string literals in files that use certain file encodings.
 
 ## Version 1.26.3: June 24, 2025
 ### New Feature
