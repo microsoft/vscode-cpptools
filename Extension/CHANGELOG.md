@@ -13,6 +13,8 @@
   * Thank you for the contribution. [@redstrate (Joshua Goins)](https://github.com/redstrate)
 * Remove `-fmodule-mapper`, `-fdeps-format`, and some additional unnecessary args from compiler queries. [#13782](https://github.com/microsoft/vscode-cpptools/issues/13782)
 * Fix `-imacro` not configuring IntelliSense correctly. [#13785](https://github.com/microsoft/vscode-cpptools/issues/13785)
+* Fix `pipeTransport.quoteArgs` not being handled correctly. [#13791](https://github.com/microsoft/vscode-cpptools/issues/13791)
+  * Thank you for the contribution. [@mrjist (Matt)](https://github.com/mrjist) [PR #13794](https://github.com/microsoft/vscode-cpptools/pull/13794)
 * Fix an IntelliSense bug that could cause incorrect string lengths to be reported for string literals in files that use certain file encodings.
 
 ## Version 1.26.3: June 24, 2025
