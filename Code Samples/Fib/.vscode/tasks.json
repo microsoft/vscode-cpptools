@@ -1,5 +1,5 @@
 {
-      // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
@@ -20,21 +20,17 @@
         {
             "label": "build (Windows)",
             "type": "shell",
-            "command": "g++ -std=c++11 -pthread -o fib.exe main.cpp thread.cpp",
+            "command": "build.cmd",
             "group": "build",
-            "problemMatcher": ["$gcc"],
+            "problemMatcher": ["$msCompile"],
             "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "detail": "Build using g++ (Windows/MinGW)",
-            "windows": {
-                "options": {
-                    "shell": {
-                        "executable": "cmd.exe",
-                        "args": ["/C"]
-                    }
+                "cwd": "${workspaceFolder}",
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": ["/C"]
                 }
-            }
+            },
+            "detail": "Build using build.cmd for Windows (ensures g++ environment is set up)"
         },
         {
             "label": "clean (Unix)",
@@ -49,14 +45,10 @@
             "type": "shell",
             "command": "del /Q fib.exe",
             "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "windows": {
-                "options": {
-                    "shell": {
-                        "executable": "cmd.exe",
-                        "args": ["/C"]
-                    }
+                "cwd": "${workspaceFolder}",
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": ["/C"]
                 }
             }
         }
