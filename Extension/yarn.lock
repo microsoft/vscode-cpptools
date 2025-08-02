@@ -3559,6 +3559,19 @@ node-stream-zip@^1.15.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-stream-zip/-/node-stream-zip-1.15.0.tgz#158adb88ed8004c6c49a396b50a6a5de3bca33ea"
   integrity sha1-FYrbiO2ABMbEmjlrUKal3jvKM+o=
 
+node-vcvarsall@^1.1.0:
+  version "1.1.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-vcvarsall/-/node-vcvarsall-1.1.0.tgz#4e0b3959f0d5bc6114c8c61e20ac0caab9dcbecf"
+  integrity sha1-Tgs5WfDVvGEUyMYeIKwMqrncvs8=
+  dependencies:
+    node-vswhere "^1.0.2"
+    tmp "^0.2.1"
+
+node-vswhere@^1.0.2:
+  version "1.0.2"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-vswhere/-/node-vswhere-1.0.2.tgz#f6cac2bd288042f0ab4ee7904e534e04d2f55d2c"
+  integrity sha1-9srCvSiAQvCrTueQTlNOBNL1XSw=
+
 normalize-path@3.0.0, normalize-path@^3.0.0, normalize-path@~3.0.0:
   version "3.0.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/normalize-path/-/normalize-path-3.0.0.tgz#0dcd69ff23a1c9b11fd0978316644a0388216a65"
@@ -4712,7 +4725,7 @@ timers-ext@^0.1.7:
     es5-ext "^0.10.64"
     next-tick "^1.1.0"
 
-tmp@^0.2.3:
+tmp@^0.2.1, tmp@^0.2.3:
   version "0.2.3"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/tmp/-/tmp-0.2.3.tgz#eb783cc22bc1e8bebd0671476d46ea4eb32a79ae"
   integrity sha1-63g8wivB6L69BnFHbUbqTrMqea4=
