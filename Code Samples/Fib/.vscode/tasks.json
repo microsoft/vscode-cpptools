@@ -4,46 +4,52 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build (Unix)",
             "type": "shell",
+            "command": "make",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
+            "problemMatcher": ["$gcc"],
+            "options": {
+                "cwd": "${workspaceFolder}"
             },
-            "windows": {
-                "command": "${workspaceRoot}/build.cmd",
-                "args": [
-                    "<Path/To/MinGW/Cygwin/Bin/Folder>",    // Path to the bin folder containing g++ to compile
-                    "fib.exe"                               // Output executable name
-                ]
+            "detail": "Build using Makefile (Linux/macOS)"
+        },
+        {
+            "label": "build (Windows)",
+            "type": "shell",
+            "command": "build.cmd",
+            "group": "build",
+            "problemMatcher": ["$msCompile"],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": ["/C"]
+                }
             },
-            "linux": {
-                "command": "g++",
-                "args": [
-                    "-g",
-                    "*.cpp",
-                    "-lpthread",
-                    "--std=c++11",
-                    "-o",
-                    "fib.out"
-                ]
-            },
-            "osx": {
-                "command": "g++",
-                "args": [
-                    "-g",
-                    "*.cpp",
-                    "-lpthread",
-                    "--std=c++11",
-                    "-o",
-                    "fib.out"
-                ]
+            "detail": "Build using build.cmd for Windows (ensures g++ environment is set up)"
+        },
+        {
+            "label": "clean (Unix)",
+            "type": "shell",
+            "command": "make clean",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "clean (Windows)",
+            "type": "shell",
+            "command": "del /Q fib.exe",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": ["/C"]
+                }
             }
         }
     ]
