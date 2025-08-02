@@ -310,7 +310,7 @@
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Endereço de rede do Servidor de Depurador MI ao qual se conectar (exemplo: localhost:1234).",
 	"c_cpp.debuggers.useExtendedRemote.description": "Conecte-se ao MI Debugger Server com o modo remoto estendido de destino.",
 	"c_cpp.debuggers.stopAtEntry.markdownDescription": "Parâmetro opcional. Se for `true`, o depurador deverá parar no ponto de entrada do destino. Se `processId` for passado, isso não terá efeito.",
-	"c_cpp.debuggers.debugServerPath.description": "Caminho completo opcional para o servidor de depuração a ser lançado. O padrão é nulo. É usado em conjunto com \"miDebugServerAddress\" ou seu próprio servidor com um \"customSetupCommand\" que executa \"-target-select remote <server:port>\".",
+	"c_cpp.debuggers.debugServerPath.description": "Caminho completo opcional para o servidor de depuração a ser lançado. O padrão é nulo. É usado em conjunto com \"miDebuggerServerAddress\" ou seu próprio servidor com um \"customSetupCommand\" que executa \"-target-select remote <server:port>\".",
 	"c_cpp.debuggers.debugServerArgs.description": "Args opcionais do servidor de depuração. O padrão é null.",
 	"c_cpp.debuggers.serverStarted.description": "Padrão iniciado pelo servidor opcional para procurar na saída do servidor de depuração. O padrão é null.",
 	"c_cpp.debuggers.filterStdout.description": "Pesquise o fluxo stdout para o padrão iniciado pelo servidor e log stdout para depurar a saída. O padrão é true.",

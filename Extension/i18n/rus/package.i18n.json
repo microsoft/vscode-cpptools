@@ -310,7 +310,7 @@
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Сетевой адрес сервера отладчика MI, к которому требуется подключиться (пример: localhost:1234).",
 	"c_cpp.debuggers.useExtendedRemote.description": "Подключение к серверу отладчика MI в целевом расширенном удаленном режиме.",
 	"c_cpp.debuggers.stopAtEntry.markdownDescription": "Необязательный параметр. Если задано значение `true`, отладчик должен остановиться в точке входа целевого объекта.. Если передается идентификатор процесса `processId`, этот параметр не действует.",
-	"c_cpp.debuggers.debugServerPath.description": "Необязательный полный путь к запускаемому серверу отладки. Значение по умолчанию — NULL. Применяется с параметром miDebugServerAddress или с вашим собственным сервером через команду customSetupCommand, использующую -target-select remote <server:port>.",
+	"c_cpp.debuggers.debugServerPath.description": "Необязательный полный путь к запускаемому серверу отладки. Значение по умолчанию — NULL. Применяется с параметром miDebuggerServerAddress или с вашим собственным сервером через команду customSetupCommand, использующую -target-select remote <server:port>.",
 	"c_cpp.debuggers.debugServerArgs.description": "Необязательные аргументы сервера отладки. Значение по умолчанию: null.",
 	"c_cpp.debuggers.serverStarted.description": "Дополнительный запускаемый сервером шаблон для поиска в выходных данных сервера отладки. Значение по умолчанию: null.",
 	"c_cpp.debuggers.filterStdout.description": "Поиск запущенного сервером шаблона в потоке stdout и регистрация stdout в выходных данных отладки. Значение по умолчанию: true.",

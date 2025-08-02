@@ -47,11 +47,9 @@
           "default": {}
         },
         "quoteArgs": {
-          "exceptions": {
-            "type": "boolean",
-            "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
-            "default": true
-          }
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
+          "default": true
         }
       }
     },

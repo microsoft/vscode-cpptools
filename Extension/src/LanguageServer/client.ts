@@ -28,7 +28,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, ResponseError, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
+import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, ResponseError, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -517,10 +517,15 @@ interface TagParseStatus {
     isPaused: boolean;
 }
 
+interface VisibleEditorInfo {
+    visibleRanges: Range[];
+    originalEncoding: string;
+}
+
 interface DidChangeVisibleTextEditorsParams {
     activeUri?: string;
     activeSelection?: Range;
-    visibleRanges?: { [uri: string]: Range[] };
+    visibleEditorInfo?: { [uri: string]: VisibleEditorInfo };
 }
 
 interface DidChangeTextEditorVisibleRangesParams {
@@ -590,16 +595,9 @@ export interface CopilotCompletionContextParams {
     doAggregateSnippets: boolean;
 }
 
-export interface TextDocumentItemWithOriginalEncoding {
+export interface SetOpenFileOriginalEncodingParams {
     uri: string;
-    languageId: string;
-    version: number;
-    text: string;
     originalEncoding: string;
-}
-
-export interface DidOpenTextDocumentParamsWithOriginalEncoding {
-    textDocument: TextDocumentItemWithOriginalEncoding;
 }
 
 // Requests
@@ -626,8 +624,7 @@ const CppContextRequest: RequestType<TextDocumentIdentifier, ChatContextResult, 
 const CopilotCompletionContextRequest: RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void> = new RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void>('cpptools/getCompletionContext');
 
 // Notifications to the server
-const DidOpenNotification: NotificationType<DidOpenTextDocumentParamsWithOriginalEncoding> = new NotificationType<DidOpenTextDocumentParamsWithOriginalEncoding>('cpptools/didOpen');
-const FileCreatedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileCreated');
+const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen'); const FileCreatedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileCreated');
 const FileChangedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileChanged');
 const FileDeletedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileDeleted');
 const ResetDatabaseNotification: NotificationType<void> = new NotificationType<void>('cpptools/resetDatabase');
@@ -650,6 +647,7 @@ const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigP
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const DidChangeVisibleTextEditorsNotification: NotificationType<DidChangeVisibleTextEditorsParams> = new NotificationType<DidChangeVisibleTextEditorsParams>('cpptools/didChangeVisibleTextEditors');
 const DidChangeTextEditorVisibleRangesNotification: NotificationType<DidChangeTextEditorVisibleRangesParams> = new NotificationType<DidChangeTextEditorVisibleRangesParams>('cpptools/didChangeTextEditorVisibleRanges');
+const SetOpenFileOriginalEncodingNotification: NotificationType<SetOpenFileOriginalEncodingParams> = new NotificationType<SetOpenFileOriginalEncodingParams>('cpptools/setOpenFileOriginalEncoding');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -1831,32 +1829,35 @@ export class DefaultClient implements Client {
         return changedSettings;
     }
 
-    private prepareVisibleRanges(editors: readonly vscode.TextEditor[]): { [uri: string]: Range[] } {
-        const visibleRanges: { [uri: string]: Range[] } = {};
+    private prepareVisibleEditorInfo(editors: readonly vscode.TextEditor[]): { [uri: string]: VisibleEditorInfo } {
+        const visibileEditorInfo: { [uri: string]: VisibleEditorInfo } = {};
         editors.forEach(editor => {
             // Use a map, to account for multiple editors for the same file.
             // First, we just concat all ranges for the same file.
             const uri: string = editor.document.uri.toString();
-            if (!visibleRanges[uri]) {
-                visibleRanges[uri] = [];
+            if (!visibileEditorInfo[uri]) {
+                visibileEditorInfo[uri] = {
+                    visibleRanges: [],
+                    originalEncoding: editor.document.encoding
+                };
             }
-            visibleRanges[uri] = visibleRanges[uri].concat(editor.visibleRanges.map(makeLspRange));
+            visibileEditorInfo[uri].visibleRanges = visibileEditorInfo[uri].visibleRanges.concat(editor.visibleRanges.map(makeLspRange));
         });
 
         // We may need to merge visible ranges, if there are multiple editors for the same file,
         // and some of the ranges overlap.
-        Object.keys(visibleRanges).forEach(uri => {
-            visibleRanges[uri] = util.mergeOverlappingRanges(visibleRanges[uri]);
+        Object.keys(visibileEditorInfo).forEach(uri => {
+            visibileEditorInfo[uri].visibleRanges = util.mergeOverlappingRanges(visibileEditorInfo[uri].visibleRanges);
         });
 
-        return visibleRanges;
+        return visibileEditorInfo;
     }
 
     // Handles changes to visible files/ranges, changes to current selection/position,
     // and changes to the active text editor. Should only be called on the primary client.
     public async onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): Promise<void> {
         const params: DidChangeVisibleTextEditorsParams = {
-            visibleRanges: this.prepareVisibleRanges(editors)
+            visibleEditorInfo: this.prepareVisibleEditorInfo(editors)
         };
         if (vscode.window.activeTextEditor) {
             if (util.isCpp(vscode.window.activeTextEditor.document)) {
@@ -2339,17 +2340,23 @@ export class DefaultClient implements Client {
 
     // Only used in crash recovery. Otherwise, VS Code sends didOpen directly to native process (through the protocolFilter).
     public async sendDidOpen(document: vscode.TextDocument): Promise<void> {
-        const params: DidOpenTextDocumentParamsWithOriginalEncoding = {
+        const params: DidOpenTextDocumentParams = {
             textDocument: {
                 uri: document.uri.toString(),
                 languageId: document.languageId,
                 version: document.version,
-                text: document.getText(),
-                originalEncoding: document.encoding
+                text: document.getText()
             }
         };
-        await this.ready;
         await this.languageClient.sendNotification(DidOpenNotification, params);
+    }
+
+    public async sendOpenFileOriginalEncoding(document: vscode.TextDocument): Promise<void> {
+        const params: SetOpenFileOriginalEncodingParams = {
+            uri: document.uri.toString(),
+            originalEncoding: document.encoding
+        };
+        await this.languageClient.sendNotification(SetOpenFileOriginalEncodingNotification, params);
     }
 
     /**
