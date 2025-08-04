@@ -310,7 +310,7 @@
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Indirizzo di rete del server del debugger MI a cui connettersi. Esempio: localhost:1234.",
 	"c_cpp.debuggers.useExtendedRemote.description": "Connettersi al server del debugger MI con la modalità estesa-remota di destinazione.",
 	"c_cpp.debuggers.stopAtEntry.markdownDescription": "Parametro facoltativo. Se è `true`, il debugger deve arrestarsi in corrispondenza del punto di ingresso della destinazione. Se viene passato `processId`, non ha alcun effetto.",
-	"c_cpp.debuggers.debugServerPath.description": "Percorso completo facoltativo del server di debug da avviare. L'impostazione predefinita è Null. Viene usata insieme a \"miDebuggerServerAddress\" o al proprio server con un comando \"customSetupCommand\" che esegue \"-target-select remote <server:port>\".",
+	"c_cpp.debuggers.debugServerPath.description": "Percorso completo facoltativo del server di debug da avviare. L'impostazione predefinita è Null. Viene usata insieme a \"miDebugServerAddress\" o al proprio server con un comando \"customSetupCommand\" che esegue \"-target-select remote <server:port>\".",
 	"c_cpp.debuggers.debugServerArgs.description": "Argomenti facoltativi del server di debug. L'impostazione predefinita è null.",
 	"c_cpp.debuggers.serverStarted.description": "Criterio facoltativo avviato dal server per cercare nell'output del server di debug. L'impostazione predefinita è null.",
 	"c_cpp.debuggers.filterStdout.description": "Cerca il criterio avviato dal server nel flusso stdout e registra stdout nell'output di debug. L'impostazione predefinita è true.",

@@ -517,15 +517,10 @@ interface TagParseStatus {
     isPaused: boolean;
 }
 
-interface VisibleEditorInfo {
-    visibleRanges: Range[];
-    originalEncoding: string;
-}
-
 interface DidChangeVisibleTextEditorsParams {
     activeUri?: string;
     activeSelection?: Range;
-    visibleEditorInfo?: { [uri: string]: VisibleEditorInfo };
+    visibleRanges?: { [uri: string]: Range[] };
 }
 
 interface DidChangeTextEditorVisibleRangesParams {
@@ -595,11 +590,6 @@ export interface CopilotCompletionContextParams {
     doAggregateSnippets: boolean;
 }
 
-export interface SetOpenFileOriginalEncodingParams {
-    uri: string;
-    originalEncoding: string;
-}
-
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, CppInitializationResult, void> = new RequestType<CppInitializationParams, CppInitializationResult, void>('cpptools/initialize');
@@ -624,7 +614,8 @@ const CppContextRequest: RequestType<TextDocumentIdentifier, ChatContextResult, 
 const CopilotCompletionContextRequest: RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void> = new RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void>('cpptools/getCompletionContext');
 
 // Notifications to the server
-const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen'); const FileCreatedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileCreated');
+const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
+const FileCreatedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileCreated');
 const FileChangedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileChanged');
 const FileDeletedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileDeleted');
 const ResetDatabaseNotification: NotificationType<void> = new NotificationType<void>('cpptools/resetDatabase');
@@ -647,7 +638,6 @@ const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigP
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const DidChangeVisibleTextEditorsNotification: NotificationType<DidChangeVisibleTextEditorsParams> = new NotificationType<DidChangeVisibleTextEditorsParams>('cpptools/didChangeVisibleTextEditors');
 const DidChangeTextEditorVisibleRangesNotification: NotificationType<DidChangeTextEditorVisibleRangesParams> = new NotificationType<DidChangeTextEditorVisibleRangesParams>('cpptools/didChangeTextEditorVisibleRanges');
-const SetOpenFileOriginalEncodingNotification: NotificationType<SetOpenFileOriginalEncodingParams> = new NotificationType<SetOpenFileOriginalEncodingParams>('cpptools/setOpenFileOriginalEncoding');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -1829,35 +1819,32 @@ export class DefaultClient implements Client {
         return changedSettings;
     }
 
-    private prepareVisibleEditorInfo(editors: readonly vscode.TextEditor[]): { [uri: string]: VisibleEditorInfo } {
-        const visibileEditorInfo: { [uri: string]: VisibleEditorInfo } = {};
+    private prepareVisibleRanges(editors: readonly vscode.TextEditor[]): { [uri: string]: Range[] } {
+        const visibleRanges: { [uri: string]: Range[] } = {};
         editors.forEach(editor => {
             // Use a map, to account for multiple editors for the same file.
             // First, we just concat all ranges for the same file.
             const uri: string = editor.document.uri.toString();
-            if (!visibileEditorInfo[uri]) {
-                visibileEditorInfo[uri] = {
-                    visibleRanges: [],
-                    originalEncoding: editor.document.encoding
-                };
+            if (!visibleRanges[uri]) {
+                visibleRanges[uri] = [];
             }
-            visibileEditorInfo[uri].visibleRanges = visibileEditorInfo[uri].visibleRanges.concat(editor.visibleRanges.map(makeLspRange));
+            visibleRanges[uri] = visibleRanges[uri].concat(editor.visibleRanges.map(makeLspRange));
         });
 
         // We may need to merge visible ranges, if there are multiple editors for the same file,
         // and some of the ranges overlap.
-        Object.keys(visibileEditorInfo).forEach(uri => {
-            visibileEditorInfo[uri].visibleRanges = util.mergeOverlappingRanges(visibileEditorInfo[uri].visibleRanges);
+        Object.keys(visibleRanges).forEach(uri => {
+            visibleRanges[uri] = util.mergeOverlappingRanges(visibleRanges[uri]);
         });
 
-        return visibileEditorInfo;
+        return visibleRanges;
     }
 
     // Handles changes to visible files/ranges, changes to current selection/position,
     // and changes to the active text editor. Should only be called on the primary client.
     public async onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): Promise<void> {
         const params: DidChangeVisibleTextEditorsParams = {
-            visibleEditorInfo: this.prepareVisibleEditorInfo(editors)
+            visibleRanges: this.prepareVisibleRanges(editors)
         };
         if (vscode.window.activeTextEditor) {
             if (util.isCpp(vscode.window.activeTextEditor.document)) {
@@ -2348,15 +2335,8 @@ export class DefaultClient implements Client {
                 text: document.getText()
             }
         };
+        await this.ready;
         await this.languageClient.sendNotification(DidOpenNotification, params);
-    }
-
-    public async sendOpenFileOriginalEncoding(document: vscode.TextDocument): Promise<void> {
-        const params: SetOpenFileOriginalEncodingParams = {
-            uri: document.uri.toString(),
-            originalEncoding: document.encoding
-        };
-        await this.languageClient.sendNotification(SetOpenFileOriginalEncodingNotification, params);
     }
 
     /**

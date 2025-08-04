@@ -47,9 +47,11 @@
           "default": {}
         },
         "quoteArgs": {
-          "type": "boolean",
-          "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
-          "default": true
+          "exceptions": {
+            "type": "boolean",
+            "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
+            "default": true
+          }
         }
       }
     },

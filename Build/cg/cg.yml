@@ -30,12 +30,12 @@ extends:
   parameters:
     pool:
       name: AzurePipelines-EO
-      image: 1ESPT-Windows2022
+      image: AzurePipelinesWindows2022compliantGPT
       os: windows
     sdl:
       sourceAnalysisPool:
         name: AzurePipelines-EO
-        image: 1ESPT-Windows2022
+        image: AzurePipelinesWindows2022compliantGPT
         os: windows
       binskim:
         preReleaseVersion: '4.3.1'

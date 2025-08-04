@@ -81,10 +81,7 @@ export class RemoteAttachPicker {
 
             const pipeCmd: string = `"${pipeProgram}" ${argList}`;
 
-            // If unspecified quoteArgs defaults to true.
-            const quoteArgs: boolean = pipeTransport.quoteArgs ?? true;
-
-            processes = await this.getRemoteOSAndProcesses(pipeCmd, quoteArgs);
+            processes = await this.getRemoteOSAndProcesses(pipeCmd);
         } else if (!pipeTransport && useExtendedRemote) {
             if (!miDebuggerPath || !miDebuggerServerAddress) {
                 throw new Error(localize("debugger.path.and.server.address.required", "{0} in debug configuration requires {1} and {2}", "useExtendedRemote", "miDebuggerPath", "miDebuggerServerAddress"));
@@ -109,7 +106,7 @@ export class RemoteAttachPicker {
     }
 
     // Creates a string to run on the host machine which will execute a shell script on the remote machine to retrieve OS and processes
-    private getRemoteProcessCommand(quoteArgs: boolean): string {
+    private getRemoteProcessCommand(): string {
         let innerQuote: string = `'`;
         let outerQuote: string = `"`;
         let parameterBegin: string = `$(`;
@@ -130,12 +127,6 @@ export class RemoteAttachPicker {
             innerQuote = `"`;
             outerQuote = `'`;
         }
-
-        // If the pipeTransport settings indicate "quoteArgs": "false", we need to skip the outer quotes.
-        if (!quoteArgs) {
-            outerQuote = ``;
-        }
-
         // Also use a full path on Linux, so that we can use transports that need a full path such as 'machinectl' to connect to nspawn containers.
         if (os.platform() === "linux") {
             shPrefix = `/bin/`;
@@ -147,9 +138,9 @@ export class RemoteAttachPicker {
             `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
 
-    private async getRemoteOSAndProcesses(pipeCmd: string, quoteArgs: boolean): Promise<AttachItem[]> {
+    private async getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
         // Do not add any quoting in execCommand.
-        const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand(quoteArgs)}`;
+        const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand()}`;
 
         const output: string = await util.execChildProcess(execCommand, undefined, this._channel);
         // OS will be on first line
