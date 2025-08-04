@@ -310,7 +310,7 @@
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "MI 偵錯工具伺服器要連線至的網路位址 (範例: localhost:1234)。",
 	"c_cpp.debuggers.useExtendedRemote.description": "使用目標延伸的遠端模式連線到 MI 偵錯工具伺服器。",
 	"c_cpp.debuggers.stopAtEntry.markdownDescription": "選擇性參數。若為 `true`，則偵錯工具應該在目標的進入點停止。如果已傳遞 `processId`，則這就無效。",
-	"c_cpp.debuggers.debugServerPath.description": "要啟動的偵錯伺服器選用完整路徑。預設為 Null。使用時，會將 \"miDebuggerServerAddress\" 或您自己的伺服器與 \"customSetupCommand\" 連接，以執行 \"-target-select remote <伺服器:連接埠>\"。",
+	"c_cpp.debuggers.debugServerPath.description": "要啟動的偵錯伺服器選用完整路徑。預設為 Null。使用時，會將 \"miDebugServerAddress\" 或您自己的伺服器與 \"customSetupCommand\" 連接，以執行 \"-target-select remote <伺服器:連接埠>\"。",
 	"c_cpp.debuggers.debugServerArgs.description": "選擇性偵錯伺服器引數。預設為 null。",
 	"c_cpp.debuggers.serverStarted.description": "要在偵錯伺服器輸出中尋找的選擇性伺服器啟動模式。預設為 null。",
 	"c_cpp.debuggers.filterStdout.description": "搜尋 stdout 資料流以取得伺服器啟動的模式，並將 stdout 記錄到偵錯輸出。預設為 true。",

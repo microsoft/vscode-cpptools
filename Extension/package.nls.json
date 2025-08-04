@@ -895,7 +895,7 @@
             "{Locked=\"`true`\"} {Locked=\"`processId`\"}"
         ]
     },
-    "c_cpp.debuggers.debugServerPath.description": "Optional full path to the debug server to launch. Defaults to null. It is used in conjunction with either \"miDebuggerServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\".",
+    "c_cpp.debuggers.debugServerPath.description": "Optional full path to the debug server to launch. Defaults to null. It is used in conjunction with either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\".",
     "c_cpp.debuggers.debugServerArgs.description": "Optional debug server args. Defaults to null.",
     "c_cpp.debuggers.serverStarted.description": "Optional server-started pattern to look for in the debug server output. Defaults to null.",
     "c_cpp.debuggers.filterStdout.description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
