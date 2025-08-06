@@ -4,6 +4,7 @@ trigger:
     include:
     - main
     - release
+    - insiders
 
 schedules:
 - cron: 30 5 * * 0
@@ -30,12 +31,12 @@ extends:
   parameters:
     pool:
       name: AzurePipelines-EO
-      image: AzurePipelinesWindows2022compliantGPT
+      image: 1ESPT-Windows2022
       os: windows
     sdl:
       sourceAnalysisPool:
         name: AzurePipelines-EO
-        image: AzurePipelinesWindows2022compliantGPT
+        image: 1ESPT-Windows2022
         os: windows
       binskim:
         preReleaseVersion: '4.3.1'

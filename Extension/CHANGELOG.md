@@ -1,12 +1,21 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.27.0: July 15, 2025
+## Version 1.27.0: August 4, 2025
 ### Bug Fixes
-* Fix IntelliSense crash in `find_subobject_for_interpreter_address`. [#12464](https://github.com/microsoft/vscode-cpptools/issues/12464)
+* Fix an IntelliSense crash in `add_cached_tokens_to_string`. [#11900](https://github.com/microsoft/vscode-cpptools/issues/11900)
+* Fix an IntelliSense crash in `find_subobject_for_interpreter_address`. [#12464](https://github.com/microsoft/vscode-cpptools/issues/12464)
 * Fix changes to the active field being lost in the configuration UI when navigating away. [#13636](https://github.com/microsoft/vscode-cpptools/issues/13636)
 * Fix compiler query failing on Windows if optional job-related API calls fail. [#13679](https://github.com/microsoft/vscode-cpptools/issues/13679)
 * Fix bugs with Doxygen comments. [#13725](https://github.com/microsoft/vscode-cpptools/issues/13725), [#13726](https://github.com/microsoft/vscode-cpptools/issues/13726), [#13745](https://github.com/microsoft/vscode-cpptools/issues/13745)
-* Fix a bug with 'Create Definition'. [#13741](https://github.com/microsoft/vscode-cpptools/issues/13741)
+* Fix bugs with 'Create Definition'. [#13741](https://github.com/microsoft/vscode-cpptools/issues/13741), [#13773](https://github.com/microsoft/vscode-cpptools/issues/13773)
+* Fix IntelliSense crashes when there are duplicate constexpr template functions in a TU. [#13775](https://github.com/microsoft/vscode-cpptools/issues/13775)
+* Fix the description of `debugServerPath`. [PR #13778](https://github.com/microsoft/vscode-cpptools/pull/13778)
+  * Thank you for the contribution. [@redstrate (Joshua Goins)](https://github.com/redstrate)
+* Remove `-fmodule-mapper`, `-fdeps-format`, and some additional unnecessary args from compiler queries. [#13782](https://github.com/microsoft/vscode-cpptools/issues/13782)
+* Fix `-imacro` not configuring IntelliSense correctly. [#13785](https://github.com/microsoft/vscode-cpptools/issues/13785)
+* Fix `pipeTransport.quoteArgs` not being handled correctly. [#13791](https://github.com/microsoft/vscode-cpptools/issues/13791)
+  * Thank you for the contribution. [@mrjist (Matt)](https://github.com/mrjist) [PR #13794](https://github.com/microsoft/vscode-cpptools/pull/13794)
+* Fix an IntelliSense bug that could cause incorrect string lengths to be reported for string literals in files that use certain file encodings.
 
 ## Version 1.26.3: June 24, 2025
 ### New Feature

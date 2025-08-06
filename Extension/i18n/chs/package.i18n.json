@@ -310,7 +310,7 @@
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "要连接到的 MI 调试程序服务器的网络地址(示例: localhost:1234)。",
 	"c_cpp.debuggers.useExtendedRemote.description": "使用目标扩展远程模式连接到 MI 调试器服务器。",
 	"c_cpp.debuggers.stopAtEntry.markdownDescription": "可选参数。如果为 `true`，则调试程序应在目标的入口点处停止。如果传递了 `processId`，则不起任何作用。",
-	"c_cpp.debuggers.debugServerPath.description": "到要启动的调试服务器的可选完整路径。默认值为 null。该路径与 “miDebugServerAddress” 或带有运行 “-target-select remote <server:port>” 的 “customSetupCommand” 的自有服务器配合使用。",
+	"c_cpp.debuggers.debugServerPath.description": "到要启动的调试服务器的可选完整路径。默认值为 null。该路径与 “miDebuggerServerAddress” 或带有运行 “-target-select remote <server:port>” 的 “customSetupCommand” 的自有服务器配合使用。",
 	"c_cpp.debuggers.debugServerArgs.description": "可选调试服务器参数。默认为 null。",
 	"c_cpp.debuggers.serverStarted.description": "要在调试服务器输出中查找的可选服务器启动模式。默认为 null。",
 	"c_cpp.debuggers.filterStdout.description": "在 stdout 流中搜索服务器启动模式，并将 stdout 记录到默认输出。默认为 true。",
