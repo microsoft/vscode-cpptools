@@ -4,6 +4,7 @@ trigger:
     include:
     - main
     - release
+    - insiders
 
 schedules:
 - cron: 30 5 * * 0
