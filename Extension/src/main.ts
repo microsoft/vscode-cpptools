@@ -125,9 +125,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
             const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
             if (await util.checkFileExists(config)) {
-                const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
-                void vscode.languages.setTextDocumentLanguage(doc, "jsonc");
-                util.setWorkspaceIsCpp();
+                try {
+                    const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
+                    void vscode.languages.setTextDocumentLanguage(doc, "jsonc");
+                    util.setWorkspaceIsCpp();
+                } catch (err) {
+                    // The c_cpp_properties.json might not be openable (e.g. an executable).
+                    // Catching the exception prevents our extension activation from failing.
+                    // VS Code itself will report an error message. 
+                }
             }
         }
     }
