@@ -165,7 +165,7 @@ export function getVcpkgRoot(): string {
 export function isHeaderFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
-    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".inl", ".ipp", ".tcc", ".tlh", ".tli", ""].some(ext => fileExtLower === ext);
+    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".inl", ".ipp", ".tcc", ".txx", ".tpp", ".tlh", ".tli", ""].some(ext => fileExtLower === ext);
 }
 
 export function isCppFile(uri: vscode.Uri): boolean {
@@ -1827,4 +1827,17 @@ export function equals(array1: string[] | undefined, array2: string[] | undefine
         }
     }
     return true;
+}
+
+export function getVSCodeLanguageModel(): any | undefined {
+    // Check if the user has access to vscode language model.
+    const vscodelm = (vscode as any).lm;
+    if (!vscodelm) {
+        return undefined;
+    }
+    // Check that vscodelm has a method called 'selectChatModels'
+    if (!vscodelm.selectChatModels || typeof vscodelm.selectChatModels !== 'function') {
+        return undefined;
+    }
+    return vscodelm;
 }
