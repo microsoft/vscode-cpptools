@@ -1828,3 +1828,16 @@ export function equals(array1: string[] | undefined, array2: string[] | undefine
     }
     return true;
 }
+
+export function getVSCodeLanguageModel(): any | undefined {
+    // Check if the user has access to vscode language model.
+    const vscodelm = (vscode as any).lm;
+    if (!vscodelm) {
+        return undefined;
+    }
+    // Check that vscodelm has a method called 'selectChatModels'
+    if (!vscodelm.selectChatModels || typeof vscodelm.selectChatModels !== 'function') {
+        return undefined;
+    }
+    return vscodelm;
+}

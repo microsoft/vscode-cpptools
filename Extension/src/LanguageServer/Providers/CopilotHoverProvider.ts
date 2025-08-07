@@ -5,6 +5,7 @@
 import * as vscode from 'vscode';
 import { Position, ResponseError } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
+import { getVSCodeLanguageModel } from '../../common';
 import { modelSelector } from '../../constants';
 import * as telemetry from '../../telemetry';
 import { DefaultClient, GetCopilotHoverInfoParams, GetCopilotHoverInfoRequest, GetCopilotHoverInfoResult } from '../client';
@@ -42,7 +43,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         }
 
         // Ensure the user has access to Copilot.
-        const vscodelm = (vscode as any).lm;
+        const vscodelm = getVSCodeLanguageModel();
         if (vscodelm) {
             const [model] = await vscodelm.selectChatModels(modelSelector);
             if (!model) {
