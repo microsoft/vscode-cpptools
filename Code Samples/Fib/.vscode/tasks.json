@@ -1,56 +1,63 @@
 {
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "build (Unix)",
-            "type": "shell",
-            "command": "make",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": ["$gcc"],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "detail": "Build using Makefile (Linux/macOS)"
-        },
-        {
-            "label": "build (Windows)",
-            "type": "shell",
-            "command": "build.cmd",
-            "group": "build",
-            "problemMatcher": ["$msCompile"],
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "shell": {
-                    "executable": "cmd.exe",
-                    "args": ["/C"]
-                }
-            },
-            "detail": "Build using build.cmd for Windows (ensures g++ environment is set up)"
-        },
-        {
-            "label": "clean (Unix)",
-            "type": "shell",
-            "command": "make clean",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "clean (Windows)",
-            "type": "shell",
-            "command": "del /Q fib.exe",
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "shell": {
-                    "executable": "cmd.exe",
-                    "args": ["/C"]
-                }
-            }
+    
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build (Windows)",
+      "type": "shell",
+      "command": "build.cmd",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "windows": {
+        "command": "build.cmd"
+      },
+      "problemMatcher": ["$msCompile"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "build (Linux/macOS)",
+      "type": "shell",
+      "command": "make",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "linux": {
+        "command": "make"
+      },
+      "osx": {
+        "command": "make"
+      },
+      "problemMatcher": ["$gcc"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "clean (Windows)",
+      "type": "shell",
+      "command": "del /Q fib.exe",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "cmd.exe",
+          "args": ["/C"]
         }
-    ]
+      }
+    },
+    {
+      "label": "clean (Linux/macOS)",
+      "type": "shell",
+      "command": "make clean",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    }
+  ]
 }
