@@ -1413,8 +1413,7 @@ export async function preReleaseCheck(): Promise<void> {
 async function onCopilotHover(): Promise<void> {
     telemetry.logLanguageServerEvent("CopilotHover");
 
-    // Check if the user has access to vscode language model.
-    const vscodelm = (vscode as any).lm;
+    const vscodelm = util.getVSCodeLanguageModel();
     if (!vscodelm) {
         return;
     }
@@ -1477,6 +1476,7 @@ async function onCopilotHover(): Promise<void> {
 
     let chatResponse: vscode.LanguageModelChatResponse | undefined;
     try {
+        // Select the chat model.
         const [model] = await vscodelm.selectChatModels(modelSelector);
 
         chatResponse = await model.sendRequest(
