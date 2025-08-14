@@ -952,7 +952,7 @@ function reportMacCrashes(): void {
             // vscode.workspace.createFileSystemWatcher only works in workspace folders.
             try {
                 fs.watch(crashFolder, (event, filename) => {
-                    if (event !== "rename") {
+                    if (event !== "change") {
                         return;
                     }
                     if (!filename || filename === prevMacCrashFile) {
