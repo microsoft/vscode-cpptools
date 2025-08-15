@@ -3,37 +3,28 @@
     "configurations": [
         {
             "name": "(gdb) Launch",
-            "preLaunchTask": "build",
             "type": "cppdbg",
             "request": "launch",
+            "program": "${workspaceFolder}/fib.out",
             "args": [],
-            "stopAtEntry": true,
-            "cwd": "${workspaceRoot}",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
+            "MIMode": "gdb",
             "setupCommands": [
                 {
-                    "description": "Enable pretty-printing for gdb",
+                    "description": "Enable pretty-printing",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
             ],
-            "logging": {
-                "engineLogging": false,
-                "trace": false
-            },
             "windows": {
-                "program": "${workspaceRoot}/fib.exe",
-                "MIMode": "gdb",
+                "program": "${workspaceFolder}/fib.exe",
                 "miDebuggerPath": "<Path/To/GDB>" // Path to gdb on windows
             },
             "linux": {
-                "program": "${workspaceRoot}/fib.out",
-                "MIMode": "gdb"
-            },
-            "osx": {
-                "program": "${workspaceRoot}/fib.out",
-                "MIMode": "lldb"
+                "program": "${workspaceRoot}/fib.out"
             }
         }
     ]
