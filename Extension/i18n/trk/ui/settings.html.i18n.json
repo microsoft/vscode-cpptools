@@ -44,7 +44,7 @@
 	"cpp.standard.description": "IntelliSense için kullanılacak C++ dil standardı sürümü. Not: GNU standartları yalnızca GNU tanımlarını almak için ayarlanan derleyiciyi sorgulamak amacıyla kullanılır ve IntelliSense, eşdeğer C++ standart sürümüne öykünür.",
 	"advanced.settings": "Gelişmiş Ayarlar",
 	"configuration.provider": "Yapılandırma sağlayıcısı",
-	"configuration.provider.description": "Kaynak dosyalar için IntelliSense yapılandırma bilgilerini sağlayabilecek VS Code uzantısının kimliği. Örneğin, CMake Araçları uzantısındaki yapılandırma bilgilerini sağlamak için VS Code {0} uzantı kimliğini kullanın.",
+	"configuration.provider.description": "Kaynak dosyalar için IntelliSense yapılandırma bilgilerini sağlayabilecek VS Code uzantısının kimliği. Örneğin, Cmake Tools uzantısındaki yapılandırma bilgilerini sağlamak için VS Code {0} uzantı kimliğini kullanın.",
 	"windows.sdk.version": "Windows SDK sürümü",
 	"windows.sdk.version.description": "Windows üzerinde kullanılacak Windows SDK ekleme yolu sürümü, örneğin {0}.",
 	"mac.framework.path": "Mac çerçevesi yolu",
