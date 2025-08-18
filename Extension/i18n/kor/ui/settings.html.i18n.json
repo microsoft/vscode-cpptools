@@ -44,7 +44,7 @@
 	"cpp.standard.description": "IntelliSense에 사용할 C++ 언어 표준의 버전입니다. 참고: GNU 표준은 GNU 정의를 가져오기 위해 설정된 컴파일러를 쿼리하는 데만 사용되며, IntelliSense는 해당 C++ 표준 버전을 에뮬레이트합니다.",
 	"advanced.settings": "고급 설정",
 	"configuration.provider": "구성 공급자",
-	"configuration.provider.description": "소스 파일에 대한 IntelliSense 구성 정보를 제공할 수 있는 VS Code 확장의 ID입니다. 예를 들어 VS Code 확장 ID {0} 을(를) 사용하여 CMake 도구 확장의 구성 정보를 제공합니다.",
+	"configuration.provider.description": "소스 파일에 대한 IntelliSense 구성 정보를 제공할 수 있는 VS Code 확장의 ID입니다. 예를 들어 VS Code 확장 ID {0}을(를) 사용하여 CMake Tools 확장의 구성 정보를 제공합니다.",
 	"windows.sdk.version": "Windows SDK 버전",
 	"windows.sdk.version.description": "Windows에서 사용할 Windows SDK 포함 경로의 버전입니다(예: {0}).",
 	"mac.framework.path": "Mac 프레임워크 경로",
