@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.27.1: August 19, 2025
+### Bug Fixes
+* Fix the `__FILE_NAME__` macro being undefined with IntelliSense when using GCC/Clang. [#11164](https://github.com/microsoft/vscode-cpptools/issues/11164)
+* Fix Doxygen generation overwriting a function signature. [#13839](https://github.com/microsoft/vscode-cpptools/issues/13839)
+* Fix a crash on Windows 7, 8, and 10 (Server 2008, 2012, and 2016). [#13851](https://github.com/microsoft/vscode-cpptools/issues/13851)
+* Fix "CMake Tools" translations. [PR #13854](https://github.com/microsoft/vscode-cpptools/pull/13854)
+
 ## Version 1.27.0: August 7, 2025
 ### Bug Fixes
 * Fix an IntelliSense crash in `add_cached_tokens_to_string`. [#11900](https://github.com/microsoft/vscode-cpptools/issues/11900)
