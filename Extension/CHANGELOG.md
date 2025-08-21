@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.27.1: August 21, 2025
+## Version 1.27.2: August 21, 2025
 ### Bug Fix
 * Fix a crash regression with `__BASE_FILE__`. [#13866](https://github.com/microsoft/vscode-cpptools/issues/13866)
 
