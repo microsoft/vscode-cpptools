@@ -1012,7 +1012,7 @@ export function watchForCrashes(crashDirectory: string): void {
             // vscode.workspace.createFileSystemWatcher only works in workspace folders.
             try {
                 fs.watch(crashDirectory, (event, filename) => {
-                    if (event !== "rename") {
+                    if (event !== "change") {
                         return;
                     }
                     if (!filename || filename === prevCppCrashFile) {
@@ -1177,7 +1177,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
 
     const lines: string[] = data.split("\n");
-    let addressData: string = ".\n";
+    let addressData: string;
     const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
     const telemetryHeader: string = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
@@ -1207,17 +1207,20 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         crashStackStartLine = ++crashLogLine;
     }
     if (lines[crashStackStartLine].startsWith("SIG")) {
-        signalType = lines[crashStackStartLine] + "\n";
+        signalType = `${lines[crashStackStartLine]}\n`;
+        addressData = `${lines[crashStackStartLine + 1]}:${lines[crashStackStartLine + 2]}\n`; // signalCode:signalAddr
+        crashStackStartLine += 3;
     } else {
         // The signal type may fail to be written.
         // Intentionally different from SIGUNKNOWN from cpptools,
         // and not SIG-? to avoid matching the regex in containsFilteredTelemetryData.
         signalType = "SIGMISSING\n";
+        addressData = ".\n";
     }
     data = telemetryHeader + signalType;
     let crashCallStack: string = "";
     let validFrameFound: boolean = false;
-    for (let lineNum: number = crashStackStartLine + 1; lineNum < lines.length - 3; ++lineNum) { // skip last lines
+    for (let lineNum: number = crashStackStartLine; lineNum < lines.length - 3; ++lineNum) { // skip last lines
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
         let pendingCallStack: string = "";
