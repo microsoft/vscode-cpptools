@@ -1,1 +1,2 @@
-void * thread_proc(void* ctx);
+#pragma once
+void thread_proc();
