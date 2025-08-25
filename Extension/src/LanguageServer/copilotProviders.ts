@@ -24,7 +24,11 @@ export interface CopilotTrait {
     promptTextOverride?: string;
 }
 
-export interface CopilotApi {
+export interface CopilotChatApi {
+    getContextProviderAPI(version: string): Promise<ContextProviderApiV1 | undefined>;
+}
+
+export interface CopilotApi extends CopilotChatApi {
     registerRelatedFilesProvider(
         providerId: { extensionId: string; languageId: string },
         callback: (
@@ -33,7 +37,6 @@ export interface CopilotApi {
             cancellationToken: vscode.CancellationToken
         ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] } | undefined>
     ): Disposable;
-    getContextProviderAPI(version: string): Promise<ContextProviderApiV1 | undefined>;
 }
 
 export async function registerRelatedFilesProvider(): Promise<void> {
@@ -131,6 +134,23 @@ async function getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetInclud
 
 export async function getCopilotApi(): Promise<CopilotApi | undefined> {
     const copilotExtension = vscode.extensions.getExtension<CopilotApi>('github.copilot');
+    if (!copilotExtension) {
+        return undefined;
+    }
+
+    if (!copilotExtension.isActive) {
+        try {
+            return await copilotExtension.activate();
+        } catch {
+            return undefined;
+        }
+    } else {
+        return copilotExtension.exports;
+    }
+}
+
+export async function getCopilotChatApi(): Promise<CopilotChatApi | undefined> {
+    const copilotExtension = vscode.extensions.getExtension<CopilotChatApi>('github.copilot-chat');
     if (!copilotExtension) {
         return undefined;
     }

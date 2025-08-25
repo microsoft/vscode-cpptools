@@ -2,7 +2,7 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import { ContextResolver, ResolveRequest, SupportedContextItem } from '@github/copilot-language-server';
+import { ContextResolver, ResolveRequest, SupportedContextItem, type ContextProvider } from '@github/copilot-language-server';
 import { randomUUID } from 'crypto';
 import * as vscode from 'vscode';
 import { DocumentSelector } from 'vscode-languageserver-protocol';
@@ -11,7 +11,7 @@ import { getOutputChannelLogger, Logger } from '../logger';
 import * as telemetry from '../telemetry';
 import { CopilotCompletionContextResult } from './client';
 import { CopilotCompletionContextTelemetry } from './copilotCompletionContextTelemetry';
-import { getCopilotApi } from './copilotProviders';
+import { getCopilotApi, getCopilotChatApi, type CopilotChatApi } from './copilotProviders';
 import { clients } from './extension';
 import { CppSettings } from './settings';
 
@@ -83,7 +83,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
     private static readonly defaultMaxSnippetLength = 3 * 1024;
     private static readonly defaultDoAggregateSnippets = true;
     private completionContextCancellation = new vscode.CancellationTokenSource();
-    private contextProviderDisposable: vscode.Disposable | undefined;
+    private contextProviderDisposables: vscode.Disposable[] | undefined;
     static readonly CppContextProviderEnabledFeatures = 'enabledFeatures';
     static readonly CppContextProviderTimeBudgetMs = 'timeBudgetMs';
     static readonly CppContextProviderMaxSnippetCount = 'maxSnippetCount';
@@ -312,7 +312,12 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
 
     public dispose(): void {
         this.completionContextCancellation.cancel();
-        this.contextProviderDisposable?.dispose();
+        if (this.contextProviderDisposables) {
+            for (const disposable of this.contextProviderDisposables) {
+                disposable.dispose();
+            }
+            this.contextProviderDisposables = undefined;
+        }
     }
 
     public removeFile(fileUri: string): void {
@@ -445,17 +450,31 @@ ${copilotCompletionContext?.areSnippetsMissing ? "(missing code snippets)" : ""}
         const registerCopilotContextProvider = 'registerCopilotContextProvider';
         try {
             const copilotApi = await getCopilotApi();
-            if (!copilotApi) { throw new CopilotContextProviderException("getCopilotApi() returned null, Copilot is missing or inactive."); }
-            const hasGetContextProviderAPI = "getContextProviderAPI" in copilotApi;
-            if (!hasGetContextProviderAPI) { throw new CopilotContextProviderException("getContextProviderAPI() is not available."); }
-            const contextAPI = await copilotApi.getContextProviderAPI("v1");
-            if (!contextAPI) { throw new CopilotContextProviderException("getContextProviderAPI(v1) returned null."); }
-            this.contextProviderDisposable = contextAPI.registerContextProvider({
+            const copilotChatApi = await getCopilotChatApi();
+            if (!copilotApi && !copilotChatApi) { throw new CopilotContextProviderException("getCopilotApi() returned null, Copilot is missing or inactive."); }
+            const contextProvider = {
                 id: CopilotCompletionContextProvider.providerId,
                 selector: CopilotCompletionContextProvider.defaultCppDocumentSelector,
                 resolver: this
-            });
-            properties["cppCodeSnippetsProviderRegistered"] = "true";
+            };
+            type InstallSummary = { hasGetContextProviderAPI: boolean; hasAPI: boolean };
+            const installSummary: { client?: InstallSummary; chat?: InstallSummary } = {};
+            if (copilotApi) {
+                installSummary.client = await this.installContextProvider(copilotApi, contextProvider);
+            }
+            if (copilotChatApi) {
+                installSummary.chat = await this.installContextProvider(copilotChatApi, contextProvider);
+            }
+            if (installSummary.client?.hasAPI || installSummary.chat?.hasAPI) {
+                properties["cppCodeSnippetsProviderRegistered"] = "true";
+            } else {
+                if (installSummary.client?.hasGetContextProviderAPI === false &&
+                    installSummary.chat?.hasGetContextProviderAPI === false) {
+                    throw new CopilotContextProviderException("getContextProviderAPI() is not available.");
+                } else {
+                    throw new CopilotContextProviderException("getContextProviderAPI(v1) returned null.");
+                }
+            }
         } catch (e) {
             console.debug("Failed to register the Copilot Context Provider.");
             properties["error"] = "Failed to register the Copilot Context Provider";
@@ -464,6 +483,20 @@ ${copilotCompletionContext?.areSnippetsMissing ? "(missing code snippets)" : ""}
             }
         } finally {
             telemetry.logCopilotEvent(registerCopilotContextProvider, { ...properties });
+        }
+    }
+
+    private async installContextProvider(copilotAPI: CopilotChatApi, contextProvider: ContextProvider<SupportedContextItem>): Promise<{ hasGetContextProviderAPI: boolean; hasAPI: boolean }> {
+        const hasGetContextProviderAPI = "getContextProviderAPI" in copilotAPI;
+        if (hasGetContextProviderAPI) {
+            const contextAPI = await copilotAPI.getContextProviderAPI("v1");
+            if (contextAPI) {
+                this.contextProviderDisposables = this.contextProviderDisposables ?? [];
+                this.contextProviderDisposables.push(contextAPI.registerContextProvider(contextProvider));
+            }
+            return { hasGetContextProviderAPI, hasAPI: contextAPI !== undefined };
+        } else {
+            return { hasGetContextProviderAPI: false, hasAPI: false };
         }
     }
 }
