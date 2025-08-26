@@ -24,11 +24,11 @@ export interface CopilotTrait {
     promptTextOverride?: string;
 }
 
-export interface CopilotChatApi {
+export interface CopilotContextProviderAPI {
     getContextProviderAPI(version: string): Promise<ContextProviderApiV1 | undefined>;
 }
 
-export interface CopilotApi extends CopilotChatApi {
+export interface CopilotApi extends CopilotContextProviderAPI {
     registerRelatedFilesProvider(
         providerId: { extensionId: string; languageId: string },
         callback: (
@@ -40,7 +40,7 @@ export interface CopilotApi extends CopilotChatApi {
 }
 
 export async function registerRelatedFilesProvider(): Promise<void> {
-    const api = await getCopilotApi();
+    const api = await getCopilotClientApi();
     if (util.extensionContext && api) {
         try {
             for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
@@ -132,7 +132,7 @@ async function getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetInclud
     return includes;
 }
 
-export async function getCopilotApi(): Promise<CopilotApi | undefined> {
+export async function getCopilotClientApi(): Promise<CopilotApi | undefined> {
     const copilotExtension = vscode.extensions.getExtension<CopilotApi>('github.copilot');
     if (!copilotExtension) {
         return undefined;
@@ -149,19 +149,30 @@ export async function getCopilotApi(): Promise<CopilotApi | undefined> {
     }
 }
 
-export async function getCopilotChatApi(): Promise<CopilotChatApi | undefined> {
+export async function getCopilotChatApi(): Promise<CopilotContextProviderAPI | undefined> {
+    type CopilotChatApi = { getAPI?(version: number): CopilotContextProviderAPI | undefined };
     const copilotExtension = vscode.extensions.getExtension<CopilotChatApi>('github.copilot-chat');
     if (!copilotExtension) {
         return undefined;
     }
 
+    let exports: CopilotChatApi | undefined;
     if (!copilotExtension.isActive) {
         try {
-            return await copilotExtension.activate();
+            exports = await copilotExtension.activate();
         } catch {
             return undefined;
         }
     } else {
-        return copilotExtension.exports;
+        exports = copilotExtension.exports;
     }
+    if (!exports || typeof exports.getAPI !== 'function') {
+        return undefined;
+    }
+    const result = exports.getAPI(1);
+    return result;
+}
+
+interface Disposable {
+    dispose(): void;
 }

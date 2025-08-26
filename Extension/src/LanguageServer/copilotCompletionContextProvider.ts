@@ -11,7 +11,7 @@ import { getOutputChannelLogger, Logger } from '../logger';
 import * as telemetry from '../telemetry';
 import { CopilotCompletionContextResult } from './client';
 import { CopilotCompletionContextTelemetry } from './copilotCompletionContextTelemetry';
-import { getCopilotApi, getCopilotChatApi, type CopilotChatApi } from './copilotProviders';
+import { getCopilotChatApi, getCopilotClientApi, type CopilotContextProviderAPI } from './copilotProviders';
 import { clients } from './extension';
 import { CppSettings } from './settings';
 
@@ -449,7 +449,7 @@ ${copilotCompletionContext?.areSnippetsMissing ? "(missing code snippets)" : ""}
         const properties: Record<string, string> = {};
         const registerCopilotContextProvider = 'registerCopilotContextProvider';
         try {
-            const copilotApi = await getCopilotApi();
+            const copilotApi = await getCopilotClientApi();
             const copilotChatApi = await getCopilotChatApi();
             if (!copilotApi && !copilotChatApi) { throw new CopilotContextProviderException("getCopilotApi() returned null, Copilot is missing or inactive."); }
             const contextProvider = {
@@ -486,8 +486,8 @@ ${copilotCompletionContext?.areSnippetsMissing ? "(missing code snippets)" : ""}
         }
     }
 
-    private async installContextProvider(copilotAPI: CopilotChatApi, contextProvider: ContextProvider<SupportedContextItem>): Promise<{ hasGetContextProviderAPI: boolean; hasAPI: boolean }> {
-        const hasGetContextProviderAPI = "getContextProviderAPI" in copilotAPI;
+    private async installContextProvider(copilotAPI: CopilotContextProviderAPI, contextProvider: ContextProvider<SupportedContextItem>): Promise<{ hasGetContextProviderAPI: boolean; hasAPI: boolean }> {
+        const hasGetContextProviderAPI = typeof copilotAPI.getContextProviderAPI === 'function';
         if (hasGetContextProviderAPI) {
             const contextAPI = await copilotAPI.getContextProviderAPI("v1");
             if (contextAPI) {
