@@ -24,6 +24,7 @@ import { PersistentFolderState } from './persistentState';
 import { CppSettings, OtherSettings } from './settings';
 import { SettingsPanel } from './settingsPanel';
 import { ConfigurationType, getUI } from './ui';
+import { Deferral } from './utils';
 import escapeStringRegExp = require('escape-string-regexp');
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -279,13 +280,13 @@ export class CppProperties {
 
         vscode.workspace.onDidChangeTextDocument((e) => {
             if (e.document.uri.fsPath === settingsPath) {
-                void this.handleSquiggles().catch(logAndReturn.undefined);
+                this.handleSquiggles(e.document);
             }
         });
 
         vscode.workspace.onDidOpenTextDocument(document => {
             if (document.uri.fsPath === settingsPath) {
-                void this.handleSquiggles().catch(logAndReturn.undefined);
+                this.handleSquiggles(document);
             }
         });
 
@@ -352,7 +353,7 @@ export class CppProperties {
 
     private onSelectionChanged(): void {
         this.selectionChanged.fire(this.CurrentConfigurationIndex);
-        void this.handleSquiggles().catch(logAndReturn.undefined);
+        this.handleSquiggles();
     }
 
     private onCompileCommandsChanged(path: string): void {
@@ -1590,8 +1591,9 @@ export class CppProperties {
             if (firstParse) {
                 // Check documents that are already open since no event will fire for them.
                 const fsPath = this.propertiesFile.fsPath;
-                if (vscode.workspace.textDocuments.some(doc => doc.uri.fsPath === fsPath)) {
-                    void this.handleSquiggles().catch(logAndReturn.undefined);
+                const document = vscode.workspace.textDocuments.find(doc => doc.uri.fsPath === fsPath);
+                if (document) {
+                    this.handleSquiggles(document);
                 }
             }
         } catch (errJS) {
@@ -1859,7 +1861,22 @@ export class CppProperties {
         return errorMsg;
     }
 
-    private async handleSquiggles(): Promise<void> {
+    private lastConfigurationVersion: number = 0;
+    private handleSquigglesDeferral: Deferral | undefined;
+
+    private handleSquiggles(doc?: vscode.TextDocument): void {
+        // When the active config changes, we don't pass the doc in since the version would not have changed.
+        if (doc?.version !== this.lastConfigurationVersion) {
+            this.lastConfigurationVersion = doc?.version ?? 0;
+            this.handleSquigglesDeferral?.cancel();
+            this.handleSquigglesDeferral = new Deferral(() => void this.handleSquigglesImpl().catch(logAndReturn.undefined), 1000);
+        }
+    }
+
+    /**
+     * Not to be called directly. Use the `handleSquiggles` method instead which will debounce the calls.
+     */
+    private async handleSquigglesImpl(): Promise<void> {
         if (!this.propertiesFile) {
             return;
         }
