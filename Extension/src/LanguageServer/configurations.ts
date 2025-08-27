@@ -1786,7 +1786,7 @@ export class CppProperties {
 
     private async validatePath(input: string | string[] | undefined, { isDirectory = true, assumeRelative = true, globPaths = false } = {}): Promise<string | undefined> {
         if (!input) {
-            return Promise.resolve(undefined);
+            return undefined;
         }
 
         let errorMsg: string | undefined;
