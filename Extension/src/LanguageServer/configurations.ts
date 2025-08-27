@@ -1731,8 +1731,13 @@ export class CppProperties {
      * @returns The result of the operation and the time it took to complete in seconds.
      */
     private async timeOperation<T>(operation: () => Promise<T | undefined>): Promise<{ result: T | undefined; duration: number }> {
+        let result: T | undefined;
         const start = process.hrtime();
-        const result = await Promise.resolve(operation());
+        try {
+            result = await operation();
+        } catch {
+            // Suppress errors
+        }
         const diff = process.hrtime(start);
         const duration = diff[0] + diff[1] / 1e9; // diff[0] is in seconds, diff[1] is in nanoseconds
         return { result, duration };
