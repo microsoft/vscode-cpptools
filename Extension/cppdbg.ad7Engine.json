@@ -1,6 +1,0 @@
-﻿{
-  "engineAssemblyName": "Microsoft.MIDebugEngine",
-  "engineClassName": "Microsoft.MIDebugEngine.AD7Engine",
-  "conditionalBP": true,
-  "functionBP": true
-}
