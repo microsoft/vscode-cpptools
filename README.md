@@ -1,4 +1,4 @@
-# C/C++ for Visual Studio Code
+#repo C/C++ for Visual Studio Code
 
 #### [Repository](https://github.com/microsoft/vscode-cpptools)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/microsoft/vscode-cpptools/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Documentation](https://code.visualstudio.com/docs/languages/cpp)&nbsp;&nbsp;|&nbsp;&nbsp;[Code Samples](https://github.com/microsoft/vscode-cpptools/tree/main/Code%20Samples)
 
@@ -26,7 +26,7 @@ For more information about installing the required tools or setting up the exten
 <br/>
 
 ## Overview and tutorials
-* [C/C++ extension overview](https://code.visualstudio.com/docs/languages/cpp)
+* repo[C/C++ extension overview](https://code.visualstudio.com/docs/languages/cpp)
 * [Introductory Videos](https://code.visualstudio.com/docs/cpp/introvideos-cpp)
 
 C/C++ extension tutorials per compiler and platform
