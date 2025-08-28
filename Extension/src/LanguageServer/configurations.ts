@@ -286,7 +286,7 @@ export class CppProperties {
 
         vscode.workspace.onDidOpenTextDocument(document => {
             if (document.uri.fsPath === settingsPath) {
-                this.handleSquiggles(document);
+                this.handleSquiggles();
             }
         });
 
@@ -1731,13 +1731,8 @@ export class CppProperties {
      * @returns The result of the operation and the time it took to complete in seconds.
      */
     private async timeOperation<T>(operation: () => Promise<T | undefined>): Promise<{ result: T | undefined; duration: number }> {
-        let result: T | undefined;
         const start = process.hrtime();
-        try {
-            result = await operation();
-        } catch {
-            // Suppress errors
-        }
+        const result = await operation();
         const diff = process.hrtime(start);
         const duration = diff[0] + diff[1] / 1e9; // diff[0] is in seconds, diff[1] is in nanoseconds
         return { result, duration };
@@ -1762,8 +1757,12 @@ export class CppProperties {
         errors.compilerPath = compilerPathAndArgs.error;
 
         // Validate paths (directories)
-        const { result, duration } = await this.timeOperation(() => this.validatePath(config.includePath, { globPaths: true }));
-        errors.includePath = result ?? duration >= 10 ? localize('resolve.includePath.took.too.long', "The include path validation took {0}s to evaluate", duration) : undefined;
+        try {
+            const { result, duration } = await this.timeOperation(() => this.validatePath(config.includePath, { globPaths: true }));
+            errors.includePath = result ?? duration >= 10 ? localize('resolve.includePath.took.too.long', "The include path validation took {0}s to evaluate", duration) : undefined;
+        } catch (e) {
+            errors.includePath = localize('resolve.includePath.failed', "Failed to resolve include path. Error: {0}", (e as Error).message);
+        }
         errors.macFrameworkPath = await this.validatePath(config.macFrameworkPath);
         errors.browsePath = await this.validatePath(config.browse ? config.browse.path : undefined);
 
@@ -1870,9 +1869,11 @@ export class CppProperties {
     private handleSquigglesDeferral: Deferral | undefined;
 
     private handleSquiggles(doc?: vscode.TextDocument): void {
-        // When the active config changes, we don't pass the doc in since the version would not have changed.
+        // When we open the doc or the active config changes, we don't pass the doc in since we always want to process squiggles.
         if (doc?.version !== this.lastConfigurationVersion) {
             this.lastConfigurationVersion = doc?.version ?? 0;
+
+            // Debounce the squiggles requests.
             this.handleSquigglesDeferral?.cancel();
             this.handleSquigglesDeferral = new Deferral(() => void this.handleSquigglesImpl().catch(logAndReturn.undefined), 1000);
         }
@@ -2132,18 +2133,32 @@ export class CppProperties {
             // and extend that pattern to the next quote before and next quote after it.
             const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
             const configMatches: string[] | null = curText.match(pattern);
+            let expandedPaths: string[];
 
-            const { result, duration } = await this.timeOperation(() => this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, true));
-            const expandedPaths: string[] = result ?? [];
-            if (duration > 10 && configMatches) {
-                newSquiggleMetrics.SlowPathResolution++;
-                const curOffset = curText.indexOf(configMatches[0]);
-                const endOffset = curOffset + curPath.length;
-                const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                    new vscode.Range(document.positionAt(curTextStartOffset + curOffset), document.positionAt(curTextStartOffset + endOffset)),
-                    localize('resolve.path.took.too.long', "Path took {0}s to evaluate", duration),
-                    vscode.DiagnosticSeverity.Warning);
-                diagnostics.push(diagnostic);
+            try {
+                const { result, duration } = await this.timeOperation(() => this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, true));
+                expandedPaths = result ?? [];
+                if (duration > 10 && configMatches) {
+                    newSquiggleMetrics.SlowPathResolution++;
+                    const curOffset = curText.indexOf(configMatches[0]);
+                    const endOffset = curOffset + curPath.length;
+                    const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset), document.positionAt(curTextStartOffset + endOffset)),
+                        localize('resolve.path.took.too.long', "Path took {0}s to evaluate", duration),
+                        vscode.DiagnosticSeverity.Warning);
+                    diagnostics.push(diagnostic);
+                }
+            } catch (e) {
+                expandedPaths = [];
+                if (configMatches) {
+                    const curOffset = curText.indexOf(configMatches[0]);
+                    const endOffset = curOffset + curPath.length;
+                    const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset), document.positionAt(curTextStartOffset + endOffset)),
+                        localize('resolve.path.failed', "Failed to resolve path {0}. Error: {1}", curPath, (e as Error).message),
+                        vscode.DiagnosticSeverity.Warning);
+                    diagnostics.push(diagnostic);
+                }
             }
             const incorrectExpandedPaths: string[] = [];
 
