@@ -59,7 +59,7 @@ import { CopilotCompletionContextFeatures, CopilotCompletionContextProvider } fr
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from './customProviders';
 import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
-import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
+import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, isWritingCrashCallStack, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
 import { RequestCancelled, ServerCancelled, createProtocolFilter } from './protocolFilter';
@@ -1688,7 +1688,6 @@ export class DefaultClient implements Client {
                 closed: () => {
                     languageClientCrashTimes.push(Date.now());
                     languageClientCrashedNeedsRestart = true;
-                    telemetry.logLanguageServerEvent("languageClientCrash");
                     let restart: boolean = true;
                     if (languageClientCrashTimes.length < 5) {
                         void clients.recreateClients();
@@ -1702,6 +1701,21 @@ export class DefaultClient implements Client {
                             void clients.recreateClients();
                         }
                     }
+
+                    // Wait 1 seconds to allow time for the file watcher to signal a crash call stack write.
+                    setTimeout(() => {
+                        telemetry.logLanguageServerEvent("languageClientCrash", undefined, {
+                            restarting: Number(restart),
+                            writingCrashCallStack: Number(isWritingCrashCallStack),
+                            initializingWorkspace: Number(this.model.isInitializingWorkspace.Value),
+                            indexingWorkspace: Number(this.model.isIndexingWorkspace.Value),
+                            parsingWorkspace: Number(this.model.isParsingWorkspace.Value),
+                            parsingFiles: Number(this.model.isParsingFiles.Value),
+                            updatingIntelliSense: Number(this.model.isUpdatingIntelliSense.Value),
+                            runningCodeAnalysis: Number(this.model.isRunningCodeAnalysis.Value)
+                        });
+                    }, 1000);
+
                     const message: string = restart ? localize('server.crashed.restart', 'The language server crashed. Restarting...')
                         : localize('server.crashed2', 'The language server crashed 5 times in the last 3 minutes. It will not be restarted.');
 
