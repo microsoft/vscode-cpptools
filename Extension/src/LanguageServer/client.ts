@@ -2764,7 +2764,7 @@ export class DefaultClient implements Client {
         }
 
         const showExcessiveFilesWarning = new PersistentWorkspaceState<boolean>('CPP.showExcessiveFilesWarning', true);
-        if (!this.excessiveFilesWarningShown && notificationBody.event === 'ParsingStats' && showExcessiveFilesWarning.Value) {
+        if (!this.excessiveFilesWarningShown && showExcessiveFilesWarning.Value && notificationBody.event === 'ParsingStats') {
             const filesDiscovered = notificationBody.metrics?.filesDiscovered ?? 0;
             const parsableFiles = notificationBody.metrics?.parsableFiles ?? 0;
             if (filesDiscovered > 250000 || parsableFiles > 100000) {
