@@ -1704,7 +1704,7 @@ export class DefaultClient implements Client {
                         }
                     }
 
-                    // Wait 1 seconds to allow time for the file watcher to signal a crash call stack write has occurred.
+                    // Wait 1 second to allow time for the file watcher to signal a crash call stack write has occurred.
                     setTimeout(() => {
                         telemetry.logLanguageServerEvent("languageClientCrash",
                             {
