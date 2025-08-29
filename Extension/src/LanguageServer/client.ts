@@ -2772,7 +2772,7 @@ export class DefaultClient implements Client {
 
                 const message = localize(
                     "parsing.stats.large.project",
-                    'Enumerated {0} files with {1} source files detected. You may want to consider excluding some files for better performance.',
+                    'Enumerated {0} files with {1} C/C++ source files detected. You may want to consider excluding some files for better performance.',
                     filesDiscovered,
                     parsableFiles);
                 const learnMore = localize('learn.more', 'Learn More');
@@ -2780,7 +2780,7 @@ export class DefaultClient implements Client {
 
                 // We only want to show this once per session.
                 this.excessiveFilesWarningShown = true;
-                const response = await vscode.window.showWarningMessage(message, learnMore, dontShowAgain);
+                const response = await vscode.window.showInformationMessage(message, learnMore, dontShowAgain);
 
                 if (response === dontShowAgain) {
                     showExcessiveFilesWarning.Value = false;
