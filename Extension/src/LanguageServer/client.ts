@@ -953,7 +953,7 @@ export class DefaultClient implements Client {
     public getShowConfigureIntelliSenseButton(): boolean { return this.showConfigureIntelliSenseButton; }
     public setShowConfigureIntelliSenseButton(show: boolean): void { this.showConfigureIntelliSenseButton = show; }
 
-    private lastInvokedLspMessage: string = "";
+    private lastInvokedLspMessage: string = ""; // e.g. cpptools/hover
 
     /**
      * don't use this.rootFolder directly since it can be undefined
