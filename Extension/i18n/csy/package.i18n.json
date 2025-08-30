@@ -310,7 +310,7 @@
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Síťová adresa MI Debugger Serveru, ke kterému se má připojit (příklad: localhost:1234)",
 	"c_cpp.debuggers.useExtendedRemote.description": "Připojení k serveru ladicího programu MI přes cílový rozšířený vzdálený režim.",
 	"c_cpp.debuggers.stopAtEntry.markdownDescription": "Nepovinný parametr. Pokud je `true`, ladicí program by se měl zastavit na vstupním bodu cíle. Pokud je předán parametr `processId`, nemá to žádný vliv.",
-	"c_cpp.debuggers.debugServerPath.description": "Volitelná úplná cesta k ladicímu serveru, který se má spustit. Výchozí hodnota je null. Používá se ve spojení buď s miDebuggerServerAddress, nebo s vlastním serverem s customSetupCommand, na kterém běží \"-target-select remote <server:port>\".",
+	"c_cpp.debuggers.debugServerPath.description": "Volitelná úplná cesta k ladicímu serveru, který se má spustit. Výchozí hodnota je null. Používá se ve spojení s parametrem „miDebuggerServerAddressL nebo s vlastním serverem s příkazem „customSetupCommand“, který spouští „-target-select remote <server:port>“.",
 	"c_cpp.debuggers.debugServerArgs.description": "Volitelné argumenty ladicího serveru. Výchozí hodnota je null.",
 	"c_cpp.debuggers.serverStarted.description": "Volitelný vzorek spuštěný na serveru, který se má vyhledat ve výstupu ladicího serveru. Výchozí hodnota je null.",
 	"c_cpp.debuggers.filterStdout.description": "Vyhledá ve vzorku spuštěném na serveru stream stdout a zaznamená stdout do výstupu ladění. Výchozí hodnota je true.",
