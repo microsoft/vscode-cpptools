@@ -1,10 +1,12 @@
 # C/C++ for Visual Studio Code Changelog
 
 ## Version 1.27.3: September 3, 2025
-### Enhancement
+### Enhancements
 * Show a warning when too many files are processed in a workspace. [#10828](https://github.com/microsoft/vscode-cpptools/issues/10828)
+* Update GitHub Copilot APIs. [PR #13877](https://github.com/microsoft/vscode-cpptools/pull/13877)
 
 ### Bug Fixes
+* Fix input delays when editing c_cpp_properties.json. [#13591](https://github.com/microsoft/vscode-cpptools/issues/13591)
 * Fix non-recursive browse paths from configuration providers. [#13886](https://github.com/microsoft/vscode-cpptools/issues/13886)
 * Fix an IntelliSense process crash involving `requires` expressions and templates.
 * Fix an IntelliSense process crash with `class_has_mutable_member`.
