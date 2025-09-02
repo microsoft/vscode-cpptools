@@ -55,6 +55,7 @@ let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timeout;
 let codeActionProvider: vscode.Disposable;
 export const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
+export let isWritingCrashCallStack: boolean = false;
 
 type VcpkgDatabase = Record<string, string[]>; // Stored as <header file entry> -> [<port name>]
 let vcpkgDbPromise: Promise<VcpkgDatabase>;
@@ -1023,9 +1024,11 @@ export function watchForCrashes(crashDirectory: string): void {
                         return;
                     }
                     const crashDate: Date = new Date();
+                    isWritingCrashCallStack = true;
 
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
+                        isWritingCrashCallStack = false;
                         fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
                             void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
                         });
