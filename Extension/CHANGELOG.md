@@ -1,5 +1,14 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.27.3: September 3, 2025
+### Enhancements
+* Show a warning when too many files are processed in a workspace. [#10828](https://github.com/microsoft/vscode-cpptools/issues/10828)
+
+### Bug Fixes
+* Fix non-recursive browse paths from configuration providers. [#13886](https://github.com/microsoft/vscode-cpptools/issues/13886)
+* Fix an IntelliSense process crash involving `requires` expressions and templates.
+* Fix an IntelliSense process crash with `class_has_mutable_member`.
+
 ## Version 1.27.2: August 21, 2025
 ### Bug Fix
 * Fix a crash regression with `__BASE_FILE__`. [#13866](https://github.com/microsoft/vscode-cpptools/issues/13866)
