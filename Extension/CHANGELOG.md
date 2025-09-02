@@ -1,7 +1,7 @@
 # C/C++ for Visual Studio Code Changelog
 
 ## Version 1.27.3: September 3, 2025
-### Enhancements
+### Enhancement
 * Show a warning when too many files are processed in a workspace. [#10828](https://github.com/microsoft/vscode-cpptools/issues/10828)
 
 ### Bug Fixes
