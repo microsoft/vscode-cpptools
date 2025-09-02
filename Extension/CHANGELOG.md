@@ -6,7 +6,7 @@
 * Update GitHub Copilot APIs. [PR #13877](https://github.com/microsoft/vscode-cpptools/pull/13877)
 
 ### Bug Fixes
-* Fix input delays when editing c_cpp_properties.json. [#13591](https://github.com/microsoft/vscode-cpptools/issues/13591)
+* Fix input delays when editing `c_cpp_properties.json`. [#13591](https://github.com/microsoft/vscode-cpptools/issues/13591)
 * Fix non-recursive browse paths from configuration providers. [#13886](https://github.com/microsoft/vscode-cpptools/issues/13886)
 * Fix an IntelliSense process crash involving `requires` expressions and templates.
 * Fix an IntelliSense process crash with `class_has_mutable_member`.
