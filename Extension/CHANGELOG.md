@@ -4,6 +4,7 @@
 ### Enhancements
 * Show a warning when too many files are processed in a workspace. [#10828](https://github.com/microsoft/vscode-cpptools/issues/10828)
 * Update GitHub Copilot APIs. [PR #13877](https://github.com/microsoft/vscode-cpptools/pull/13877)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer)
 
 ### Bug Fixes
 * Fix input delays when editing `c_cpp_properties.json`. [#13591](https://github.com/microsoft/vscode-cpptools/issues/13591)
