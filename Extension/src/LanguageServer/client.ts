@@ -1695,9 +1695,10 @@ export class DefaultClient implements Client {
 
                     // Wait 1 second to allow time for the file watcher to signal a crash call stack write has occurred.
                     setTimeout(() => {
+                        const sanitizedLspMessage = this.lastInvokedLspMessage.replace('/', '.');
                         telemetry.logLanguageServerEvent("languageClientCrash",
                             {
-                                lastInvokedLspMessage: this.lastInvokedLspMessage
+                                lastInvokedLspMessage: sanitizedLspMessage
                             },
                             {
                                 restarting: Number(restart),
