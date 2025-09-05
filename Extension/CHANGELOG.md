@@ -2,6 +2,7 @@
 
 ## Version 1.27.4: September 8, 2025
 ### Bug Fixes
+* Fix crash recovery. [#13838](https://github.com/microsoft/vscode-cpptools/issues/13838)
 * Fix a case of unintialized memory in cpptools-srv.
 * Fix excessive cpptools messages when scrolling.
 
