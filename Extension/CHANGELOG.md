@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.27.4: September 8, 2025
+### Bug Fixes
+* Fix a case of unintialized memory in cpptools-srv.
+* Fix excessive cpptools messages when scrolling.
+
 ## Version 1.27.3: September 3, 2025
 ### Enhancements
 * Show a warning when too many files are processed in a workspace. [#10828](https://github.com/microsoft/vscode-cpptools/issues/10828)
