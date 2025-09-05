@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.26.4: September 8, 2025
+* Update GitHub Copilot APIs. [PR #13877](https://github.com/microsoft/vscode-cpptools/pull/13877)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer)
+
 ## Version 1.26.3: June 24, 2025
 ### New Feature
 * Improve the context provided for C++ Copilot suggestions.
