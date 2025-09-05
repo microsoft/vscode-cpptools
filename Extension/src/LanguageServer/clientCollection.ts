@@ -121,6 +121,7 @@ export class ClientCollection {
             const client: cpptools.Client = pair[1];
 
             const newClient: cpptools.Client = this.createClient(client.RootFolder, true);
+            await newClient.ready;
             for (const document of client.TrackedDocuments.values()) {
                 this.transferOwnership(document, client);
                 await newClient.sendDidOpen(document);
