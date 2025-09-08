@@ -2284,9 +2284,12 @@ export class DefaultClient implements Client {
                     message += ` (${err})`;
                 }
 
-                if (await vscode.window.showInformationMessage(message, dismiss, disable) === disable) {
-                    settings.toggleSetting("configurationWarnings", "enabled", "disabled");
-                }
+                // Do not await here, as that would prevent the function from returning until the user dismisses the message.
+                vscode.window.showInformationMessage(message, dismiss, disable).then(result => {
+                    if (result === disable) {
+                        settings.toggleSetting("configurationWarnings", "enabled", "disabled");
+                    }
+                });
             }
         }
         return result;
