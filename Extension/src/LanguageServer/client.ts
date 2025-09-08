@@ -2285,7 +2285,7 @@ export class DefaultClient implements Client {
                 }
 
                 // Do not await here, as that would prevent the function from returning until the user dismisses the message.
-                vscode.window.showInformationMessage(message, dismiss, disable).then(result => {
+                void vscode.window.showInformationMessage(message, dismiss, disable).then(result => {
                     if (result === disable) {
                         settings.toggleSetting("configurationWarnings", "enabled", "disabled");
                     }
