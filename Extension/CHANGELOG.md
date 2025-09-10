@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.27.5: September 10, 2025
+### Bug Fix
+* Fix extension activation getting stuck by GitHub Copilot activation. [#13914](https://github.com/microsoft/vscode-cpptools/issues/13914)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer) [PR #13918](https://github.com/microsoft/vscode-cpptools/pull/13918)
+
 ## Version 1.27.4: September 9, 2025
 ### Bug Fixes
 * Fix crash recovery. [#13838](https://github.com/microsoft/vscode-cpptools/issues/13838)
@@ -50,7 +55,13 @@
 * Fix activation failing if the `c_cpp_properties.json` exists but fails to be opened. [#13829](https://github.com/microsoft/vscode-cpptools/issues/13829)
 * Fix an IntelliSense bug that could cause incorrect string lengths to be reported for string literals in files that use certain file encodings.
 
+## Version 1.26.5: September 10, 2025
+### Bug Fix
+* Fix extension activation getting stuck by GitHub Copilot activation. [#13914](https://github.com/microsoft/vscode-cpptools/issues/13914)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer) [PR #13918](https://github.com/microsoft/vscode-cpptools/pull/13918)
+
 ## Version 1.26.4: September 9, 2025
+### Enhancement
 * Update GitHub Copilot APIs. [PR #13877](https://github.com/microsoft/vscode-cpptools/pull/13877)
   * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer)
 
