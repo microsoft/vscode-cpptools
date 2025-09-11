@@ -478,21 +478,7 @@ async function onSwitchHeaderSource(): Promise<void> {
         }
     });
     const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
-    const workbenchConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("workbench");
-    let foundEditor: boolean = false;
-    if (workbenchConfig.get("editor.revealIfOpen")) {
-        // If the document is already visible in another column, open it there.
-        vscode.window.visibleTextEditors.forEach(editor => {
-            if (editor.document === document && !foundEditor) {
-                foundEditor = true;
-                void vscode.window.showTextDocument(document, editor.viewColumn).then(undefined, logAndReturn.undefined);
-            }
-        });
-    }
-
-    if (!foundEditor) {
-        void vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
-    }
+    void vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
 }
 
 /**
