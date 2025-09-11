@@ -159,14 +159,7 @@ export async function getCopilotChatApi(): Promise<CopilotContextProviderAPI | u
     let exports: CopilotChatApi | undefined;
     if (!copilotExtension.isActive) {
         try {
-            exports = await Promise.race([
-                copilotExtension.activate(),
-                new Promise<undefined>(resolve => {
-                    setTimeout(() => {
-                        resolve(undefined);
-                    }, 3000);
-                })
-            ]);
+            exports = await copilotExtension.activate();
         } catch {
             return undefined;
         }

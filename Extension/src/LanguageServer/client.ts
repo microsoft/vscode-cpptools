@@ -1389,7 +1389,7 @@ export class DefaultClient implements Client {
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                 }
 
-                this.copilotCompletionProvider = await CopilotCompletionContextProvider.Create();
+                this.copilotCompletionProvider = CopilotCompletionContextProvider.Create();
                 this.disposables.push(this.copilotCompletionProvider);
 
                 // Listen for messages from the language server.
