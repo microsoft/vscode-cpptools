@@ -1,5 +1,29 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.27.5: September 10, 2025
+### Bug Fix
+* Fix extension activation getting stuck by GitHub Copilot activation. [#13914](https://github.com/microsoft/vscode-cpptools/issues/13914)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer) [PR #13918](https://github.com/microsoft/vscode-cpptools/pull/13918)
+
+## Version 1.27.4: September 9, 2025
+### Bug Fixes
+* Fix crash recovery. [#13838](https://github.com/microsoft/vscode-cpptools/issues/13838)
+* Fix the language server getting stuck by a notification message box after a configuration provider times out. [#13862](https://github.com/microsoft/vscode-cpptools/issues/13862)
+* Fix a case of unintialized memory in cpptools-srv.
+* Fix excessive cpptools messages when scrolling.
+
+## Version 1.27.3: September 3, 2025
+### Enhancements
+* Show a warning when too many files are processed in a workspace. [#10828](https://github.com/microsoft/vscode-cpptools/issues/10828)
+* Update GitHub Copilot APIs. [PR #13877](https://github.com/microsoft/vscode-cpptools/pull/13877)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer)
+
+### Bug Fixes
+* Fix input delays when editing `c_cpp_properties.json`. [#13591](https://github.com/microsoft/vscode-cpptools/issues/13591)
+* Fix non-recursive browse paths from configuration providers. [#13886](https://github.com/microsoft/vscode-cpptools/issues/13886)
+* Fix an IntelliSense process crash involving `requires` expressions and templates.
+* Fix an IntelliSense process crash with `class_has_mutable_member`.
+
 ## Version 1.27.2: August 21, 2025
 ### Bug Fix
 * Fix a crash regression with `__BASE_FILE__`. [#13866](https://github.com/microsoft/vscode-cpptools/issues/13866)
@@ -30,6 +54,16 @@
 * Fix an error when using GitHub Copilot with VS Code older than 1.90.0. [#13818](https://github.com/microsoft/vscode-cpptools/issues/13818)
 * Fix activation failing if the `c_cpp_properties.json` exists but fails to be opened. [#13829](https://github.com/microsoft/vscode-cpptools/issues/13829)
 * Fix an IntelliSense bug that could cause incorrect string lengths to be reported for string literals in files that use certain file encodings.
+
+## Version 1.26.5: September 10, 2025
+### Bug Fix
+* Fix extension activation getting stuck by GitHub Copilot activation. [#13914](https://github.com/microsoft/vscode-cpptools/issues/13914)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer) [PR #13918](https://github.com/microsoft/vscode-cpptools/pull/13918)
+
+## Version 1.26.4: September 9, 2025
+### Enhancement
+* Update GitHub Copilot APIs. [PR #13877](https://github.com/microsoft/vscode-cpptools/pull/13877)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer)
 
 ## Version 1.26.3: June 24, 2025
 ### New Feature
