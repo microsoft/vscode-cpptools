@@ -3379,6 +3379,17 @@
                         "default": "default",
                         "markdownDescription": "%c_cpp.configuration.copilotHover.markdownDescription%",
                         "scope": "window"
+                    },
+                    "C_Cpp.windowsErrorReportingMode": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "enabled",
+                            "disabled"
+                        ],
+                        "default": "default",
+                        "markdownDescription": "%c_cpp.configuration.windowsErrorReportingMode.markdownDescription%",
+                        "scope": "window"
                     }
                 }
             }
