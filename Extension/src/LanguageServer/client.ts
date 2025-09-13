@@ -1757,8 +1757,8 @@ export class DefaultClient implements Client {
             watchForCrashes(await languageClient.sendRequest(PreInitializationRequest, null));
         } else if (os.platform() === "win32") {
             const settings: CppSettings = new CppSettings();
-            if ((settings.windowsErrorReportingMode == "default" && !languageClientHasCrashed) ||
-                settings.windowsErrorReportingMode == "enabled") {
+            if ((settings.windowsErrorReportingMode === "default" && !languageClientHasCrashed) ||
+                settings.windowsErrorReportingMode === "enabled") {
                 await languageClient.sendRequest(PreInitializationRequest, null);
             }
         }
