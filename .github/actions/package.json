@@ -15,7 +15,7 @@
     "@octokit/rest": "^21.1.1",
     "@slack/web-api": "^6.9.1",
     "applicationinsights": "^2.5.1",
-    "axios": "^1.8.2",
+    "axios": "^1.12.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

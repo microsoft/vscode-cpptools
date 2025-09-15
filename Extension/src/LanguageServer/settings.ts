@@ -164,6 +164,7 @@ export interface SettingsParams {
     codeAnalysisUpdateDelay: number;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
     copilotHover: string;
+    windowsErrorReportingMode: string;
 }
 
 function getTarget(): vscode.ConfigurationTarget {
@@ -478,6 +479,7 @@ export class CppSettings extends Settings {
         }
         return this.getAsString("copilotHover");
     }
+    public get windowsErrorReportingMode(): string { return this.getAsString("windowsErrorReportingMode"); }
     public get cppContextProviderParams(): string | undefined {
         const value = super.Section.get<any>("copilotContextProviderParams");
         if (isString(value)) {
