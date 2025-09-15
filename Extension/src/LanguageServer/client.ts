@@ -90,6 +90,7 @@ export function hasTrustedCompilerPaths(): boolean {
 // Data shared by all clients.
 let languageClient: LanguageClient;
 let firstClientStarted: Promise<{ wasShutdown: boolean }>;
+let languageClientHasCrashed: boolean = false;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let compilerDefaults: configs.CompilerDefaults | undefined;
@@ -1389,7 +1390,7 @@ export class DefaultClient implements Client {
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                 }
 
-                this.copilotCompletionProvider = await CopilotCompletionContextProvider.Create();
+                this.copilotCompletionProvider = CopilotCompletionContextProvider.Create();
                 this.disposables.push(this.copilotCompletionProvider);
 
                 // Listen for messages from the language server.
@@ -1600,6 +1601,7 @@ export class DefaultClient implements Client {
             codeAnalysisMaxMemory: workspaceSettings.codeAnalysisMaxMemory,
             codeAnalysisUpdateDelay: workspaceSettings.codeAnalysisUpdateDelay,
             copilotHover: workspaceSettings.copilotHover,
+            windowsErrorReportingMode: workspaceSettings.windowsErrorReportingMode,
             workspaceFolderSettings: workspaceFolderSettingsParams
         };
     }
@@ -1688,6 +1690,7 @@ export class DefaultClient implements Client {
             errorHandler: {
                 error: (_error, _message, _count) => ({ action: ErrorAction.Continue }),
                 closed: () => {
+                    languageClientHasCrashed = true;
                     languageClientCrashTimes.push(Date.now());
                     languageClientCrashedNeedsRestart = true;
                     let restart: boolean = true;
@@ -1752,6 +1755,12 @@ export class DefaultClient implements Client {
 
         if (usesCrashHandler()) {
             watchForCrashes(await languageClient.sendRequest(PreInitializationRequest, null));
+        } else if (os.platform() === "win32") {
+            const settings: CppSettings = new CppSettings();
+            if ((settings.windowsErrorReportingMode === "default" && !languageClientHasCrashed) ||
+                settings.windowsErrorReportingMode === "enabled") {
+                await languageClient.sendRequest(PreInitializationRequest, null);
+            }
         }
 
         // Move initialization to a separate message, so we can see log output from it.
