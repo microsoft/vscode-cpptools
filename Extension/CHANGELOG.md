@@ -1,5 +1,16 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.27.6: September 16, 2025
+### Enhancements
+* Improvements to GitHub Copilot activation. [PR #13924](https://github.com/microsoft/vscode-cpptools/pull/13924)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer)
+* Add a `C_Cpp.windowsErrorReportingMode` setting and default to only enabling WER for the first crash in a session. [#13928](https://github.com/microsoft/vscode-cpptools/issues/13928)
+
+### Bug Fixes
+* Fix an infinite recursion IntelliSense crash. [#13908](https://github.com/microsoft/vscode-cpptools/issues/13908)
+* Fix an IntelliSense crash during completion when using GCC ARM compilers. [#13925](https://github.com/microsoft/vscode-cpptools/issues/13925)
+* Fix an IntelliSense process crash from deleting memory that is still in use.
+
 ## Version 1.27.5: September 10, 2025
 ### Bug Fix
 * Fix extension activation getting stuck by GitHub Copilot activation. [#13914](https://github.com/microsoft/vscode-cpptools/issues/13914)
