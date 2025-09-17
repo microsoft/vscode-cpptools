@@ -3656,5 +3656,20 @@
     "troppi argomenti per l'attributo %sq",
     "la stringa mantissa non contiene un numero valido",
     "errore di virgola mobile durante la valutazione costante",
-    "eredità del costruttore %n ignorata per l'operazione analoga a copia/spostamento"
+    "eredità del costruttore %n ignorata per l'operazione analoga a copia/spostamento",
+    "impossibile determinare le dimensioni del file %s",
+    "impossibile leggere %s",
+    "incorporare",
+    "nome del parametro non riconosciuto",
+    "parametro specificato più di una volta",
+    "non è possibile specificare __has_embed all'esterno di #if",
+    "impossibile impostare le impostazioni locali LC_NUMERIC su C",
+    "elifdef e elifndef non sono abilitati in questa modalità e vengono ignorati nel testo saltato",
+    "una dichiarazione alias non è standard in questo contesto",
+    "l'ABI di destinazione può allocare membri non statici in un ordine non corrispondente all'ordine di dichiarazione, il che non è conforme allo standard in C++23 e versioni successive",
+    "unità di interfaccia del modulo EDG IFC",
+    "unità di partizione del modulo IFC EDG",
+    "la dichiarazione del modulo non può essere esportata da questa unità di conversione a meno che non si crei un file di interfaccia del modulo",
+    "la dichiarazione del modulo deve essere esportata da questa unità di conversione per creare un file di interfaccia del modulo",
+    "è stata richiesta la generazione di file di modulo, ma non è stato dichiarato alcun modulo nell'unità di conversione"
 ]

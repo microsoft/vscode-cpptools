@@ -3656,5 +3656,20 @@
     "zbyt wiele argumentów dla atrybutu %sq",
     "ciąg mantysy nie zawiera prawidłowej liczby",
     "błąd zmiennoprzecinkowy podczas obliczania stałej",
-    "dziedziczenie konstruktora %n zostało zignorowane dla operacji kopiowania/przenoszenia"
+    "dziedziczenie konstruktora %n zostało zignorowane dla operacji kopiowania/przenoszenia",
+    "nie można określić rozmiaru pliku %s",
+    "nie można odczytać %s",
+    "osadź",
+    "nierozpoznana nazwa parametru",
+    "parametr określony co najmniej raz",
+    "element __has_embed nie może występować poza wyrażeniem #if",
+    "nie można ustawić parametru C dla ustawień regionalnych z parametrem LC_NUMERIC",
+    "dyrektywy elifdef i elifndef nie są włączone w tym trybie i są ignorowane w pomijanym tekście",
+    "deklaracja aliasu jest niestandardowa w tym kontekście",
+    "docelowy zestaw instrukcji ABI może przydzielać niestatyczne składowe w kolejności, która nie odpowiada ich kolejności w deklaracji, co jest niestandardowe w wersji języka C++23 i nowszych wersjach",
+    "jednostka interfejsu modułu EDG IFC",
+    "jednostka partycji modułu EDG IFC",
+    "deklaracja modułu nie może być wyeksportowana z tej jednostki translacji, chyba że zostanie utworzony plik interfejsu modułu",
+    "deklaracja modułu musi być wyeksportowana z tej jednostki translacji, aby utworzyć plik interfejsu modułu",
+    "zażądano wygenerowania pliku modułu, ale w jednostce translacji nie zadeklarowano żadnego modułu"
 ]

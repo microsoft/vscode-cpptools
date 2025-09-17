@@ -3656,5 +3656,20 @@
     "trop d’arguments pour l’attribut %sq",
     "la chaîne de mantisse ne contient pas de nombre valide",
     "erreur de point flottant lors de l’évaluation constante",
-    "le constructeur d’héritage %n a été ignoré pour l’opération qui ressemble à copier/déplacer"
+    "le constructeur d’héritage %n a été ignoré pour l’opération qui ressemble à copier/déplacer",
+    "impossible de déterminer la taille du fichier %s",
+    "impossible de lire %s",
+    "incorporer",
+    "nom de paramètre non reconnu",
+    "paramètre spécifié plusieurs fois",
+    "__has_embed ne peut pas apparaître en dehors de #if",
+    "impossible de définir la locale LC_NUMERIC sur C",
+    "elifdef et elifndef ne sont pas activés dans ce mode et sont ignorés dans le texte qui est omis",
+    "une déclaration d’alias n’est pas standard dans ce contexte",
+    "l’ABI cible peut allouer des membres non statiques dans un ordre qui ne correspond pas à leur ordre de déclaration, ce qui n’est pas standard dans C++23 et versions ultérieures",
+    "Unité d’interface de module IFC EDG",
+    "Unité de partition de module IFC EDG",
+    "la déclaration de module ne peut pas être exportée à partir de cette unité de traduction, sauf si vous créez un fichier d’interface de module",
+    "la déclaration de module doit être exportée depuis cette unité de traduction pour créer un fichier d’interface de module",
+    "la génération du fichier de module a été demandée, mais aucun module n’a été déclaré dans l’unité de traduction"
 ]

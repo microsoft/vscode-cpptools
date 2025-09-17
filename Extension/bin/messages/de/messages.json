@@ -3656,5 +3656,20 @@
     "Zu viele Argumente für %sq-Attribut",
     "Die Zeichenfolge der Mantisse enthält keine gültige Zahl",
     "Gleitkommafehler während der Konstantenauswertung",
-    "Der vererbende Konstruktor %n wird bei einem Vorgang wie Kopieren/Verschieben ignoriert"
+    "Der vererbende Konstruktor %n wird bei einem Vorgang wie Kopieren/Verschieben ignoriert",
+    "Die Größe der Datei \"%s\" kann nicht bestimmt werden.",
+    "\"%s\" kann nicht gelesen werden.",
+    "Einbetten",
+    "Unbekannter Parametername",
+    "Der Parameter wurde mehrfach angegeben.",
+    "__has_embed kann nicht außerhalb von \"#if\" vorkommen.",
+    "Das LC_NUMERIC-Gebietsschema konnte nicht auf C festgelegt werden.",
+    "\"elifdef\" und \"elifndef\" sind in diesem Modus nicht aktiviert und werden ignoriert, wenn Text übersprungen wird.",
+    "Eine Alias-Deklaration entspricht in diesem Kontext nicht dem Standard.",
+    "Die Ziel-ABI kann nicht-statische Mitglieder in einer Reihenfolge zuweisen, die nicht mit ihrer Deklarationsreihenfolge übereinstimmt, was in C++23 und später nicht standardkonform ist.",
+    "EDG-IFC-Modulschnittstelleneinheit",
+    "EDG-IFC-Modulpartitionseinheit",
+    "Die Moduldeklaration kann aus dieser Übersetzungseinheit exportiert werden, wenn eine Modulschnittstellendatei erstellt werden.",
+    "Die Moduldeklaration muss aus dieser Übersetzungseinheit exportiert werden, um eine Modulschnittstellendatei zu erstellen.",
+    "Die Moduldateigenerierung wurde angefordert, aber in der Übersetzungseinheit wurde kein Modul deklariert."
 ]

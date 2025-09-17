@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.26.5-main",
+    "version": "1.27.7-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -3379,6 +3379,17 @@
                         "default": "default",
                         "markdownDescription": "%c_cpp.configuration.copilotHover.markdownDescription%",
                         "scope": "window"
+                    },
+                    "C_Cpp.windowsErrorReportingMode": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "enabled",
+                            "disabled"
+                        ],
+                        "default": "default",
+                        "markdownDescription": "%c_cpp.configuration.windowsErrorReportingMode.markdownDescription%",
+                        "scope": "window"
                     }
                 }
             }
@@ -4055,11 +4066,9 @@
                                         "default": {}
                                     },
                                     "quoteArgs": {
-                                        "exceptions": {
-                                            "type": "boolean",
-                                            "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
-                                            "default": true
-                                        }
+                                        "type": "boolean",
+                                        "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
+                                        "default": true
                                     }
                                 }
                             },
@@ -4841,11 +4850,9 @@
                                         "default": {}
                                     },
                                     "quoteArgs": {
-                                        "exceptions": {
-                                            "type": "boolean",
-                                            "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
-                                            "default": true
-                                        }
+                                        "type": "boolean",
+                                        "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
+                                        "default": true
                                     }
                                 }
                             },
@@ -6560,7 +6567,7 @@
         "@types/glob": "^7.2.0",
         "@types/mocha": "^10.0.6",
         "@types/node": "^20.14.2",
-        "@types/node-fetch": "^2.6.11",
+        "@types/node-fetch": "^2.6.13",
         "@types/plist": "^3.0.5",
         "@types/proxyquire": "^1.3.31",
         "@types/semver": "^7.5.8",
@@ -6618,7 +6625,7 @@
         "posix-getopt": "^1.2.1",
         "shell-quote": "^1.8.1",
         "ssh-config": "^4.4.4",
-        "tmp": "^0.2.3",
+        "tmp": "^0.2.4",
         "vscode-cpptools": "^7.1.1",
         "vscode-languageclient": "^8.1.0",
         "vscode-nls": "^5.2.0",
