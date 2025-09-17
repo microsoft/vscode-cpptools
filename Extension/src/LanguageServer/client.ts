@@ -90,6 +90,7 @@ export function hasTrustedCompilerPaths(): boolean {
 // Data shared by all clients.
 let languageClient: LanguageClient;
 let firstClientStarted: Promise<{ wasShutdown: boolean }>;
+let languageClientHasCrashed: boolean = false;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let compilerDefaults: configs.CompilerDefaults | undefined;
@@ -517,10 +518,15 @@ interface TagParseStatus {
     isPaused: boolean;
 }
 
+interface VisibleEditorInfo {
+    visibleRanges: Range[];
+    originalEncoding: string;
+}
+
 interface DidChangeVisibleTextEditorsParams {
     activeUri?: string;
     activeSelection?: Range;
-    visibleRanges?: { [uri: string]: Range[] };
+    visibleEditorInfo?: { [uri: string]: VisibleEditorInfo };
 }
 
 interface DidChangeTextEditorVisibleRangesParams {
@@ -590,6 +596,11 @@ export interface CopilotCompletionContextParams {
     doAggregateSnippets: boolean;
 }
 
+export interface SetOpenFileOriginalEncodingParams {
+    uri: string;
+    originalEncoding: string;
+}
+
 // Requests
 const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, CppInitializationResult, void> = new RequestType<CppInitializationParams, CppInitializationResult, void>('cpptools/initialize');
@@ -638,6 +649,7 @@ const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigP
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const DidChangeVisibleTextEditorsNotification: NotificationType<DidChangeVisibleTextEditorsParams> = new NotificationType<DidChangeVisibleTextEditorsParams>('cpptools/didChangeVisibleTextEditors');
 const DidChangeTextEditorVisibleRangesNotification: NotificationType<DidChangeTextEditorVisibleRangesParams> = new NotificationType<DidChangeTextEditorVisibleRangesParams>('cpptools/didChangeTextEditorVisibleRanges');
+const SetOpenFileOriginalEncodingNotification: NotificationType<SetOpenFileOriginalEncodingParams> = new NotificationType<SetOpenFileOriginalEncodingParams>('cpptools/setOpenFileOriginalEncoding');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -1378,7 +1390,7 @@ export class DefaultClient implements Client {
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                 }
 
-                this.copilotCompletionProvider = await CopilotCompletionContextProvider.Create();
+                this.copilotCompletionProvider = CopilotCompletionContextProvider.Create();
                 this.disposables.push(this.copilotCompletionProvider);
 
                 // Listen for messages from the language server.
@@ -1589,6 +1601,7 @@ export class DefaultClient implements Client {
             codeAnalysisMaxMemory: workspaceSettings.codeAnalysisMaxMemory,
             codeAnalysisUpdateDelay: workspaceSettings.codeAnalysisUpdateDelay,
             copilotHover: workspaceSettings.copilotHover,
+            windowsErrorReportingMode: workspaceSettings.windowsErrorReportingMode,
             workspaceFolderSettings: workspaceFolderSettingsParams
         };
     }
@@ -1677,6 +1690,7 @@ export class DefaultClient implements Client {
             errorHandler: {
                 error: (_error, _message, _count) => ({ action: ErrorAction.Continue }),
                 closed: () => {
+                    languageClientHasCrashed = true;
                     languageClientCrashTimes.push(Date.now());
                     languageClientCrashedNeedsRestart = true;
                     let restart: boolean = true;
@@ -1734,13 +1748,19 @@ export class DefaultClient implements Client {
         languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
         languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
         languageClient.onNotification(DebugLogNotification, logLocalized);
-        languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
+        languageClient.onNotification(LogTelemetryNotification, (e) => void this.logTelemetry(e));
         languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         languageClient.registerProposedFeatures();
         await languageClient.start();
 
         if (usesCrashHandler()) {
             watchForCrashes(await languageClient.sendRequest(PreInitializationRequest, null));
+        } else if (os.platform() === "win32") {
+            const settings: CppSettings = new CppSettings();
+            if ((settings.windowsErrorReportingMode === "default" && !languageClientHasCrashed) ||
+                settings.windowsErrorReportingMode === "enabled") {
+                await languageClient.sendRequest(PreInitializationRequest, null);
+            }
         }
 
         // Move initialization to a separate message, so we can see log output from it.
@@ -1841,32 +1861,35 @@ export class DefaultClient implements Client {
         return changedSettings;
     }
 
-    private prepareVisibleRanges(editors: readonly vscode.TextEditor[]): { [uri: string]: Range[] } {
-        const visibleRanges: { [uri: string]: Range[] } = {};
+    private prepareVisibleEditorInfo(editors: readonly vscode.TextEditor[]): { [uri: string]: VisibleEditorInfo } {
+        const visibileEditorInfo: { [uri: string]: VisibleEditorInfo } = {};
         editors.forEach(editor => {
             // Use a map, to account for multiple editors for the same file.
             // First, we just concat all ranges for the same file.
             const uri: string = editor.document.uri.toString();
-            if (!visibleRanges[uri]) {
-                visibleRanges[uri] = [];
+            if (!visibileEditorInfo[uri]) {
+                visibileEditorInfo[uri] = {
+                    visibleRanges: [],
+                    originalEncoding: editor.document.encoding
+                };
             }
-            visibleRanges[uri] = visibleRanges[uri].concat(editor.visibleRanges.map(makeLspRange));
+            visibileEditorInfo[uri].visibleRanges = visibileEditorInfo[uri].visibleRanges.concat(editor.visibleRanges.map(makeLspRange));
         });
 
         // We may need to merge visible ranges, if there are multiple editors for the same file,
         // and some of the ranges overlap.
-        Object.keys(visibleRanges).forEach(uri => {
-            visibleRanges[uri] = util.mergeOverlappingRanges(visibleRanges[uri]);
+        Object.keys(visibileEditorInfo).forEach(uri => {
+            visibileEditorInfo[uri].visibleRanges = util.mergeOverlappingRanges(visibileEditorInfo[uri].visibleRanges);
         });
 
-        return visibleRanges;
+        return visibileEditorInfo;
     }
 
     // Handles changes to visible files/ranges, changes to current selection/position,
     // and changes to the active text editor. Should only be called on the primary client.
     public async onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): Promise<void> {
         const params: DidChangeVisibleTextEditorsParams = {
-            visibleRanges: this.prepareVisibleRanges(editors)
+            visibleEditorInfo: this.prepareVisibleEditorInfo(editors)
         };
         if (vscode.window.activeTextEditor) {
             if (util.isCpp(vscode.window.activeTextEditor.document)) {
@@ -2270,9 +2293,12 @@ export class DefaultClient implements Client {
                     message += ` (${err})`;
                 }
 
-                if (await vscode.window.showInformationMessage(message, dismiss, disable) === disable) {
-                    settings.toggleSetting("configurationWarnings", "enabled", "disabled");
-                }
+                // Do not await here, as that would prevent the function from returning until the user dismisses the message.
+                void vscode.window.showInformationMessage(message, dismiss, disable).then(result => {
+                    if (result === disable) {
+                        settings.toggleSetting("configurationWarnings", "enabled", "disabled");
+                    }
+                });
             }
         }
         return result;
@@ -2357,8 +2383,15 @@ export class DefaultClient implements Client {
                 text: document.getText()
             }
         };
-        await this.ready;
         await this.languageClient.sendNotification(DidOpenNotification, params);
+    }
+
+    public async sendOpenFileOriginalEncoding(document: vscode.TextDocument): Promise<void> {
+        const params: SetOpenFileOriginalEncodingParams = {
+            uri: document.uri.toString(),
+            originalEncoding: document.encoding
+        };
+        await this.languageClient.sendNotification(SetOpenFileOriginalEncodingNotification, params);
     }
 
     /**
@@ -2656,7 +2689,7 @@ export class DefaultClient implements Client {
             });
 
             // TODO: Handle new associations without a reload.
-            this.associations_for_did_change = new Set<string>(["cu", "cuh", "c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
+            this.associations_for_did_change = new Set<string>(["cu", "cuh", "c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "txx", "tpp", "idl"]);
             const assocs: any = new OtherSettings().filesAssociations;
             for (const assoc in assocs) {
                 const dotIndex: number = assoc.lastIndexOf('.');
@@ -2758,9 +2791,37 @@ export class DefaultClient implements Client {
         }
     }
 
-    private logTelemetry(notificationBody: TelemetryPayload): void {
+    private excessiveFilesWarningShown: boolean = false;
+    private async logTelemetry(notificationBody: TelemetryPayload): Promise<void> {
         if (notificationBody.event === "includeSquiggles" && this.configurationProvider && notificationBody.properties) {
             notificationBody.properties["providerId"] = this.configurationProvider;
+        }
+
+        const showExcessiveFilesWarning = new PersistentWorkspaceState<boolean>('CPP.showExcessiveFilesWarning', true);
+        if (!this.excessiveFilesWarningShown && showExcessiveFilesWarning.Value && notificationBody.event === 'ParsingStats') {
+            const filesDiscovered = notificationBody.metrics?.filesDiscovered ?? 0;
+            const parsableFiles = notificationBody.metrics?.parsableFiles ?? 0;
+            if (filesDiscovered > 250000 || parsableFiles > 100000) {
+                // According to telemetry, less than 3% of workspaces have this many files so it seems like a reasonable threshold.
+
+                const message = localize(
+                    "parsing.stats.large.project",
+                    'Enumerated {0} files with {1} C/C++ source files detected. You may want to consider excluding some files for better performance.',
+                    filesDiscovered,
+                    parsableFiles);
+                const learnMore = localize('learn.more', 'Learn More');
+                const dontShowAgain = localize('dont.show.again', 'Don\'t Show Again');
+
+                // We only want to show this once per session.
+                this.excessiveFilesWarningShown = true;
+                const response = await vscode.window.showInformationMessage(message, learnMore, dontShowAgain);
+
+                if (response === dontShowAgain) {
+                    showExcessiveFilesWarning.Value = false;
+                } else if (response === learnMore) {
+                    void vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://go.microsoft.com/fwlink/?linkid=2333292'));
+                }
+            }
         }
         telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
     }

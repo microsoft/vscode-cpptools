@@ -44,7 +44,7 @@
 	"cpp.standard.description": "Versión del estándar del lenguaje C++ que se va a usar para IntelliSense. Nota: Los estándares GNU solo se usan para consultar el compilador de conjuntos a fin de obtener definiciones GNU e IntelliSense emulará la versión del estándar C++ equivalente.",
 	"advanced.settings": "Configuración avanzada",
 	"configuration.provider": "Proveedor de configuración",
-	"configuration.provider.description": "Id. de una extensión de VS Code que puede proporcionar información de configuración de IntelliSense para los archivos de código fuente. Por ejemplo, use el id. de extensión de VS Code {0} para proporcionar información de configuración de la extensión Herramientas de CMake.",
+	"configuration.provider.description": "Id. de una extensión de VS Code que puede proporcionar información de configuración de IntelliSense para los archivos de código fuente. Por ejemplo, use el id. de extensión de VS Code {0} para proporcionar información de configuración de la extensión CMake Tools.",
 	"windows.sdk.version": "Versión del SDK de Windows",
 	"windows.sdk.version.description": "Versión de la ruta de acceso de inclusión del SDK de Windows SDK que debe usarse en Windows; por ejemplo, {0}.",
 	"mac.framework.path": "Ruta de acceso de la plataforma Mac",

@@ -3656,5 +3656,20 @@
     "%sq özniteliği için çok fazla bağımsız değişken var",
     "mantissa dizesi geçerli bir sayı içermiyor",
     "sabit değerlendirme sırasında kayan nokta hatası",
-    "kopyalama/taşıma benzeri işlem için %n oluşturucusunu devralma yoksayıldı"
+    "kopyalama/taşıma benzeri işlem için %n oluşturucusunu devralma yoksayıldı",
+    "%s dosyasının boyutu belirlenemiyor",
+    "%s okunamıyor",
+    "ekle",
+    "tanınmayan parametre adı",
+    "parametre birden fazla kez belirtildi",
+    "__has_embed, #if dışında görünemez.",
+    "LC_NUMERIC yerel ayarı C olarak ayarlanamadı.",
+    "elifdef ve elifndef bu modda etkin değildir ve atlanan metinde yok sayılır.",
+    "Bu bağlamda bir takma ad bildirimi standart değildir.",
+    "Hedef ABI, statik olmayan üyeleri, C++23 ve sonraki sürümlerde standart olmayan, bildirim sırasına uymayan bir sırayla tahsis edebilir.",
+    "EDG IFC modülü arabirim ünitesi",
+    "EDG IFC modül bölme ünitesi",
+    "modül arabirimi dosyası oluşturulmadıkça, modül bildirimi bu çeviri biriminden dışa aktarılamaz",
+    "modül arabirim dosyası oluşturmak için modül bildirimi bu çeviri biriminden dışa aktarılmalıdır",
+    "modül dosyası oluşturulması istendi, ancak çeviri biriminde hiçbir modül bildirilmedi"
 ]

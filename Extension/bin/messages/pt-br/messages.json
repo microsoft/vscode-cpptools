@@ -3656,5 +3656,20 @@
     "muitos argumentos para o atributo %sq",
     "cadeia de mantissa não contém um número válido",
     "erro de ponto flutuante durante a avaliação da constante",
-    "construtor herdado %n ignorado para operação do tipo cópia/movimento"
+    "construtor herdado %n ignorado para operação do tipo cópia/movimento",
+    "não é possível determinar o tamanho do arquivo %s",
+    "não é possível ler %s",
+    "inserir",
+    "nome do parâmetro não reconhecido",
+    "parâmetro especificado mais de uma vez",
+    "__has_embed não pode aparecer fora de #if",
+    "não foi possível definir a localidade LC_NUMERIC como C",
+    "elifdef e elifndef não estão habilitados neste modo e são ignorados no texto que está sendo pulado",
+    "uma declaração de alias não é padrão neste contexto",
+    "a ABI de destino pode alocar membros não estáticos em uma ordem que não corresponde à ordem de declaração, que não é padrão no C++23 e posterior",
+    "Unidade de interface do módulo EDG IFC",
+    "Unidade de partição do módulo EDG IFC",
+    "a declaração de módulo não pode ser exportada desta unidade de tradução, a menos que crie um arquivo de interface de módulo",
+    "a declaração do módulo deve ser exportada desta unidade de tradução para criar um arquivo de interface de módulo",
+    "a geração de arquivo de módulo foi solicitada, mas nenhum módulo foi declarado na unidade de tradução"
 ]

@@ -3656,5 +3656,20 @@
     "příliš mnoho argumentů pro atribut %sq",
     "řetězec mantissa neobsahuje platné číslo",
     "chyba v pohyblivé desetinné čárce při vyhodnocování konstanty",
-    "ignorován dědičný konstruktor %n pro operace podobné kopírování/přesouvání"
+    "ignorován dědičný konstruktor %n pro operace podobné kopírování/přesouvání",
+    "Nelze určit velikost souboru %s.",
+    "%s nejde přečíst.",
+    "vložit",
+    "Nerozpoznaný název parametru",
+    "Parametr byl zadán více než jednou.",
+    "__has_embed se nemůže objevit mimo #if",
+    "Národní prostředí LC_NUMERIC nelze nastavit na C.",
+    "Direktivy elifdef a elifndef nejsou v tomto režimu povolené a v textu, který se přeskočí, se ignorují.",
+    "Deklarace aliasu je v tomto kontextu nestandardní.",
+    "Cílová sada instrukcí ABI může přidělit nestatické členy v pořadí, které neodpovídá jejich pořadí deklarací, což není v jazyce C++23 a novějších standardní.",
+    "Jednotka rozhraní modulu EDG IFC",
+    "Jednotka oddílu modulu EDG IFC",
+    "Deklaraci modulu nelze z této jednotky překladu exportovat, pokud není vytvořen soubor rozhraní modulu.",
+    "Deklarace modulu se musí exportovat z této jednotky překladu, aby se vytvořil soubor rozhraní modulu.",
+    "Bylo požadováno generování souboru modulu, ale v jednotce překladu nebyl deklarován žádný modul."
 ]

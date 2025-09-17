@@ -478,21 +478,7 @@ async function onSwitchHeaderSource(): Promise<void> {
         }
     });
     const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
-    const workbenchConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("workbench");
-    let foundEditor: boolean = false;
-    if (workbenchConfig.get("editor.revealIfOpen")) {
-        // If the document is already visible in another column, open it there.
-        vscode.window.visibleTextEditors.forEach(editor => {
-            if (editor.document === document && !foundEditor) {
-                foundEditor = true;
-                void vscode.window.showTextDocument(document, editor.viewColumn).then(undefined, logAndReturn.undefined);
-            }
-        });
-    }
-
-    if (!foundEditor) {
-        void vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
-    }
+    void vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
 }
 
 /**
@@ -1013,7 +999,7 @@ export function watchForCrashes(crashDirectory: string): void {
             // vscode.workspace.createFileSystemWatcher only works in workspace folders.
             try {
                 fs.watch(crashDirectory, (event, filename) => {
-                    if (event !== "rename") {
+                    if (event !== "change") {
                         return;
                     }
                     if (!filename || filename === prevCppCrashFile) {
@@ -1180,7 +1166,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
 
     const lines: string[] = data.split("\n");
-    let addressData: string = ".\n";
+    let addressData: string;
     const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
     const telemetryHeader: string = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
@@ -1210,17 +1196,20 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         crashStackStartLine = ++crashLogLine;
     }
     if (lines[crashStackStartLine].startsWith("SIG")) {
-        signalType = lines[crashStackStartLine] + "\n";
+        signalType = `${lines[crashStackStartLine]}\n`;
+        addressData = `${lines[crashStackStartLine + 1]}:${lines[crashStackStartLine + 2]}\n`; // signalCode:signalAddr
+        crashStackStartLine += 3;
     } else {
         // The signal type may fail to be written.
         // Intentionally different from SIGUNKNOWN from cpptools,
         // and not SIG-? to avoid matching the regex in containsFilteredTelemetryData.
         signalType = "SIGMISSING\n";
+        addressData = ".\n";
     }
     data = telemetryHeader + signalType;
     let crashCallStack: string = "";
     let validFrameFound: boolean = false;
-    for (let lineNum: number = crashStackStartLine + 1; lineNum < lines.length - 3; ++lineNum) { // skip last lines
+    for (let lineNum: number = crashStackStartLine; lineNum < lines.length - 3; ++lineNum) { // skip last lines
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
         let pendingCallStack: string = "";
@@ -1416,8 +1405,7 @@ export async function preReleaseCheck(): Promise<void> {
 async function onCopilotHover(): Promise<void> {
     telemetry.logLanguageServerEvent("CopilotHover");
 
-    // Check if the user has access to vscode language model.
-    const vscodelm = (vscode as any).lm;
+    const vscodelm = util.getVSCodeLanguageModel();
     if (!vscodelm) {
         return;
     }
@@ -1480,6 +1468,7 @@ async function onCopilotHover(): Promise<void> {
 
     let chatResponse: vscode.LanguageModelChatResponse | undefined;
     try {
+        // Select the chat model.
         const [model] = await vscodelm.selectChatModels(modelSelector);
 
         chatResponse = await model.sendRequest(
