@@ -535,18 +535,4 @@ ${copilotCompletionContext?.areSnippetsMissing ? "(missing code snippets)" : ""}
             return undefined;
         }
     }
-
-    private async installContextProvider(copilotAPI: CopilotContextProviderAPI, contextProvider: ContextProvider<SupportedContextItem>): Promise<{ hasGetContextProviderAPI: boolean; hasAPI: boolean }> {
-        const hasGetContextProviderAPI = typeof copilotAPI.getContextProviderAPI === 'function';
-        if (hasGetContextProviderAPI) {
-            const contextAPI = await copilotAPI.getContextProviderAPI("v1");
-            if (contextAPI) {
-                this.contextProviderDisposables = this.contextProviderDisposables ?? [];
-                this.contextProviderDisposables.push(contextAPI.registerContextProvider(contextProvider));
-            }
-            return { hasGetContextProviderAPI, hasAPI: contextAPI !== undefined };
-        } else {
-            return { hasGetContextProviderAPI: false, hasAPI: false };
-        }
-    }
 }
