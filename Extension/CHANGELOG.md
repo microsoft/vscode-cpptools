@@ -3,7 +3,7 @@
 ## Version 1.27.7: September 18, 2025
 ### Enhancements
 * Show a warning when too many files are processed in a workspace. [#10828](https://github.com/microsoft/vscode-cpptools/issues/10828)
-* Update GitHub Copilot APIs. [PR #13877](https://github.com/microsoft/vscode-cpptools/pull/13877), [PR #13924](https://github.com/microsoft/vscode-cpptools/pull/13924)
+* Improvements to GitHub Copilot activation. [PR #13924](https://github.com/microsoft/vscode-cpptools/pull/13924)
   * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer)
 * Add a `C_Cpp.windowsErrorReportingMode` setting and default to only enabling WER for the first crash in a session. [#13928](https://github.com/microsoft/vscode-cpptools/issues/13928)
 
