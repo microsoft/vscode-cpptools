@@ -255,6 +255,7 @@
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "[vcpkg 依存関係マネージャー](https://aka.ms/vcpkg/) の統合サービスを有効にします。",
 	"c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription": "依存関係である場合は、`nan` および `node-addon-api` のインクルード パスを追加してください。",
 	"c_cpp.configuration.copilotHover.markdownDescription": "`disabled` にすると、ホバー時に [Copilot 要約を生成] オプションは表示されません。",
+	"c_cpp.configuration.windowsErrorReportingMode.markdownDescription": "`disabled` の場合、Windows エラー報告は無効になります。`default` の場合、Windows エラー報告は有効になりますが、現在のセッションで最初にクラッシュした後に無効になります。設定を変更しても、現在実行中の IntelliSense プロセスには影響しません。",
 	"c_cpp.configuration.renameRequiresIdentifier.markdownDescription": "`true` の場合、'シンボルの名前変更' には有効な C/C++ 識別子が必要です。",
 	"c_cpp.configuration.autocompleteAddParentheses.markdownDescription": "`true` の場合、関数呼び出しの後に `(` が自動的に追加されます。その場合は、`#editor.autoClosingBrackets#` 設定の値に応じて、`)` も追加される場合があります。",
 	"c_cpp.configuration.filesExclude.markdownDescription": "フォルダー (および `#C_Cpp.exclusionPolicy#` が変更されている場合はファイル) を除外するための glob パターンを構成します。これらは C/C++ 拡張機能に固有であり、`#files.exclude#` に加えてありますが、`#files.exclude#` とは異なり、現在のワークスペース フォルダーの外部のパスにも適用され、エクスプローラー ビューからは削除されません。[glob パターン](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options) についての詳細をご確認ください。",
