@@ -1383,7 +1383,7 @@ export async function preReleaseCheck(): Promise<void> {
 
         const data: any = await response?.json().catch(logAndReturn.undefined);
 
-        const preReleaseAvailable = data?.results[0]?.extensions[0]?.versions[0]?.properties?.some((e: object) => Object.values(e).includes("Microsoft.VisualStudio.Code.PreRelease"));
+        const preReleaseAvailable = data?.results?.[0]?.extensions?.[0]?.versions?.[0]?.properties?.some((e: object) => Object.values(e).includes("Microsoft.VisualStudio.Code.PreRelease"));
 
         // If the user isn't on the pre-release version, but one is available, prompt them to install it.
         if (preReleaseAvailable) {
