@@ -1,58 +1,69 @@
 #include <iostream>
-#include <unistd.h>
-#include <sys/types.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
-
+#include <thread>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <cstring>
+#include <atomic>
+#include <chrono>
+#include <csignal>
+#include <unistd.h>  
 #include "thread.h"
 
 #define THREAD_COUNT 10
 
-static char block[] = "--block";
-int test = 0;
+static constexpr char block[] = "--block";
+static constexpr char crash[] = "--crash";
+static constexpr char test_flag[] = "--test";
+
+volatile std::sig_atomic_t g_signal_status = 0;
+
+void signal_handler(int signal) {
+    g_signal_status = signal;
+}
 
 int main(int argc, char **argv)
 {
-    srand(time(NULL));
-
-    static char pidText[] = "PID: ";
-    std::string helpText = "Attach a debugger and execute 'set foo=0' to continue";
-    char helloText[] = "Hello World!";
-
-    std::cout << helloText << std::endl;
-
-    pthread_t threads[THREAD_COUNT];
-
-    if (argc == 2 && !strcmp(block, argv[1]))
-    {
-        std::cout << helpText << std::endl;
-        volatile int foo = 1;
-        while (foo)
-            ;
+    std::signal(SIGINT, signal_handler);
+    std::cout << "Hello World!" << std::endl;
+    
+    if (argc == 2) {
+        if (std::strcmp(block, argv[1]) == 0) {
+            std::cout << "Attach a debugger and set foo=0 to continue" << std::endl;
+            std::cout << "Process ID: " << getpid() << std::endl;
+            std::atomic<int> foo{1};  // Changed from volatile
+            while (foo.load() && g_signal_status == 0) {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                std::cout << "Waiting... (press Ctrl-C to quit)" << std::endl;
+            }
+            return 0;
+        }
+        else if (std::strcmp(crash, argv[1]) == 0) {
+            std::cout << "Triggering intentional crash..." << std::endl;
+            std::atomic<int> foo{0};  // Changed from volatile
+            std::atomic<int> bar{1 / foo.load()};  // Changed from volatile and added .load()
+            (void)bar;                   
+            return 1;                     
+        }
+        else if (std::strcmp(test_flag, argv[1]) == 0) {
+            std::cout << "Running in test mode" << std::endl;
+        }
     }
-
-    if (argc == 2 && !strcmp("--crash", argv[1]))
-    {
-        int foo = 0;
-        int bar = 1 / foo;
+    
+    std::vector<std::thread> threads;
+    threads.reserve(THREAD_COUNT);
+    
+    for (int i = 0; i < THREAD_COUNT; ++i) {
+        std::cout << "Launching thread " << i << std::endl;
+        threads.emplace_back(thread_proc);
     }
-
-    for (int i = 0; i < THREAD_COUNT; i++)
-    {
-        std::cout << "Test " << i << std::endl;
-        pthread_create(&threads[i], NULL, &thread_proc, NULL);
+    
+    for (auto& t : threads) {
+        if (t.joinable()) {
+            t.join();
+        }
     }
-
-    for (int i = 0; i < THREAD_COUNT; i++)
-    {
-        pthread_join(threads[i], NULL);
-        test++;
-    }
-
-    std::cout << "All threads exited!" << std::endl;
-
-    return 1;
+    
+    std::cout << "\nAll " << threads.size() << " threads completed successfully!" << std::endl;
+    return 0;
 }

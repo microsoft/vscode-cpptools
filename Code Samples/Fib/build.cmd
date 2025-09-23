@@ -1,2 +1,2 @@
-SET PATH=%PATH%;%1
-g++ -g *.cpp -lpthread --std=c++11 -O0 -o %2
+@echo off
+g++ -std=c++11 -pthread -g -O0 -o fib.exe main.cpp thread.cpp
