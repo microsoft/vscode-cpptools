@@ -55,6 +55,7 @@ let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timeout;
 let codeActionProvider: vscode.Disposable;
 export const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
+export let isWritingCrashCallStack: boolean = false;
 
 type VcpkgDatabase = Record<string, string[]>; // Stored as <header file entry> -> [<port name>]
 let vcpkgDbPromise: Promise<VcpkgDatabase>;
@@ -477,21 +478,7 @@ async function onSwitchHeaderSource(): Promise<void> {
         }
     });
     const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
-    const workbenchConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("workbench");
-    let foundEditor: boolean = false;
-    if (workbenchConfig.get("editor.revealIfOpen")) {
-        // If the document is already visible in another column, open it there.
-        vscode.window.visibleTextEditors.forEach(editor => {
-            if (editor.document === document && !foundEditor) {
-                foundEditor = true;
-                void vscode.window.showTextDocument(document, editor.viewColumn).then(undefined, logAndReturn.undefined);
-            }
-        });
-    }
-
-    if (!foundEditor) {
-        void vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
-    }
+    void vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
 }
 
 /**
@@ -1012,7 +999,7 @@ export function watchForCrashes(crashDirectory: string): void {
             // vscode.workspace.createFileSystemWatcher only works in workspace folders.
             try {
                 fs.watch(crashDirectory, (event, filename) => {
-                    if (event !== "rename") {
+                    if (event !== "change") {
                         return;
                     }
                     if (!filename || filename === prevCppCrashFile) {
@@ -1023,9 +1010,11 @@ export function watchForCrashes(crashDirectory: string): void {
                         return;
                     }
                     const crashDate: Date = new Date();
+                    isWritingCrashCallStack = true;
 
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
+                        isWritingCrashCallStack = false;
                         fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
                             void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
                         });
@@ -1177,7 +1166,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
 
     const lines: string[] = data.split("\n");
-    let addressData: string = ".\n";
+    let addressData: string;
     const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
     const telemetryHeader: string = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
@@ -1207,17 +1196,20 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         crashStackStartLine = ++crashLogLine;
     }
     if (lines[crashStackStartLine].startsWith("SIG")) {
-        signalType = lines[crashStackStartLine] + "\n";
+        signalType = `${lines[crashStackStartLine]}\n`;
+        addressData = `${lines[crashStackStartLine + 1]}:${lines[crashStackStartLine + 2]}\n`; // signalCode:signalAddr
+        crashStackStartLine += 3;
     } else {
         // The signal type may fail to be written.
         // Intentionally different from SIGUNKNOWN from cpptools,
         // and not SIG-? to avoid matching the regex in containsFilteredTelemetryData.
         signalType = "SIGMISSING\n";
+        addressData = ".\n";
     }
     data = telemetryHeader + signalType;
     let crashCallStack: string = "";
     let validFrameFound: boolean = false;
-    for (let lineNum: number = crashStackStartLine + 1; lineNum < lines.length - 3; ++lineNum) { // skip last lines
+    for (let lineNum: number = crashStackStartLine; lineNum < lines.length - 3; ++lineNum) { // skip last lines
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
         let pendingCallStack: string = "";
@@ -1391,7 +1383,7 @@ export async function preReleaseCheck(): Promise<void> {
 
         const data: any = await response?.json().catch(logAndReturn.undefined);
 
-        const preReleaseAvailable = data?.results[0].extensions[0].versions[0].properties.some((e: object) => Object.values(e).includes("Microsoft.VisualStudio.Code.PreRelease"));
+        const preReleaseAvailable = data?.results?.[0]?.extensions?.[0]?.versions?.[0]?.properties?.some((e: object) => Object.values(e).includes("Microsoft.VisualStudio.Code.PreRelease"));
 
         // If the user isn't on the pre-release version, but one is available, prompt them to install it.
         if (preReleaseAvailable) {

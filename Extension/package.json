@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.27.0-main",
+    "version": "1.27.7-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -3378,6 +3378,17 @@
                         ],
                         "default": "default",
                         "markdownDescription": "%c_cpp.configuration.copilotHover.markdownDescription%",
+                        "scope": "window"
+                    },
+                    "C_Cpp.windowsErrorReportingMode": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "enabled",
+                            "disabled"
+                        ],
+                        "default": "default",
+                        "markdownDescription": "%c_cpp.configuration.windowsErrorReportingMode.markdownDescription%",
                         "scope": "window"
                     }
                 }
