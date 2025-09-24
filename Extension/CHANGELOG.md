@@ -8,7 +8,7 @@
 ### Bug Fixes
 * Fix `cpptools` getting stuck when `clang-format` is invoked on a file in a `.clang-format-ignore`. [#13937](https://github.com/microsoft/vscode-cpptools/issues/13937)
 * Fix the `C/C++ Properties Schema Reference` link in the configuration UI editor. [#13949](https://github.com/microsoft/vscode-cpptools/issues/13949)
-* Fix a `TypeError` with `preReleaseCheck` during activation. [#13953](https://github.com/microsoft/vscode-cpptools/issues/13953)
+* Fix a crash with `preReleaseCheck`. [#13953](https://github.com/microsoft/vscode-cpptools/issues/13953)
 
 ## Version 1.27.7: September 18, 2025
 ### Enhancements
