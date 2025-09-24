@@ -59,7 +59,7 @@ import { CopilotCompletionContextFeatures, CopilotCompletionContextProvider } fr
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from './customProviders';
 import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
-import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
+import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, isWritingCrashCallStack, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
 import { RequestCancelled, ServerCancelled, createProtocolFilter } from './protocolFilter';
@@ -90,6 +90,7 @@ export function hasTrustedCompilerPaths(): boolean {
 // Data shared by all clients.
 let languageClient: LanguageClient;
 let firstClientStarted: Promise<{ wasShutdown: boolean }>;
+let languageClientHasCrashed: boolean = false;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let compilerDefaults: configs.CompilerDefaults | undefined;
@@ -953,6 +954,8 @@ export class DefaultClient implements Client {
     public getShowConfigureIntelliSenseButton(): boolean { return this.showConfigureIntelliSenseButton; }
     public setShowConfigureIntelliSenseButton(show: boolean): void { this.showConfigureIntelliSenseButton = show; }
 
+    private lastInvokedLspMessage: string = ""; // e.g. cpptools/hover
+
     /**
      * don't use this.rootFolder directly since it can be undefined
      */
@@ -1387,7 +1390,7 @@ export class DefaultClient implements Client {
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                 }
 
-                this.copilotCompletionProvider = await CopilotCompletionContextProvider.Create();
+                this.copilotCompletionProvider = CopilotCompletionContextProvider.Create();
                 this.disposables.push(this.copilotCompletionProvider);
 
                 // Listen for messages from the language server.
@@ -1598,6 +1601,7 @@ export class DefaultClient implements Client {
             codeAnalysisMaxMemory: workspaceSettings.codeAnalysisMaxMemory,
             codeAnalysisUpdateDelay: workspaceSettings.codeAnalysisUpdateDelay,
             copilotHover: workspaceSettings.copilotHover,
+            windowsErrorReportingMode: workspaceSettings.windowsErrorReportingMode,
             workspaceFolderSettings: workspaceFolderSettingsParams
         };
     }
@@ -1686,9 +1690,9 @@ export class DefaultClient implements Client {
             errorHandler: {
                 error: (_error, _message, _count) => ({ action: ErrorAction.Continue }),
                 closed: () => {
+                    languageClientHasCrashed = true;
                     languageClientCrashTimes.push(Date.now());
                     languageClientCrashedNeedsRestart = true;
-                    telemetry.logLanguageServerEvent("languageClientCrash");
                     let restart: boolean = true;
                     if (languageClientCrashTimes.length < 5) {
                         void clients.recreateClients();
@@ -1702,6 +1706,27 @@ export class DefaultClient implements Client {
                             void clients.recreateClients();
                         }
                     }
+
+                    // Wait 1 second to allow time for the file watcher to signal a crash call stack write has occurred.
+                    setTimeout(() => {
+                        const sanitizedLspMessage = this.lastInvokedLspMessage.replace('/', '.');
+                        telemetry.logLanguageServerEvent("languageClientCrash",
+                            {
+                                lastInvokedLspMessage: sanitizedLspMessage
+                            },
+                            {
+                                restarting: Number(restart),
+                                writingCrashCallStack: Number(isWritingCrashCallStack),
+                                initializingWorkspace: Number(this.model.isInitializingWorkspace.Value),
+                                indexingWorkspace: Number(this.model.isIndexingWorkspace.Value),
+                                parsingWorkspace: Number(this.model.isParsingWorkspace.Value),
+                                parsingFiles: Number(this.model.isParsingFiles.Value),
+                                updatingIntelliSense: Number(this.model.isUpdatingIntelliSense.Value),
+                                runningCodeAnalysis: Number(this.model.isRunningCodeAnalysis.Value)
+                            }
+                        );
+                    }, 1000);
+
                     const message: string = restart ? localize('server.crashed.restart', 'The language server crashed. Restarting...')
                         : localize('server.crashed2', 'The language server crashed 5 times in the last 3 minutes. It will not be restarted.');
 
@@ -1723,13 +1748,19 @@ export class DefaultClient implements Client {
         languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
         languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
         languageClient.onNotification(DebugLogNotification, logLocalized);
-        languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
+        languageClient.onNotification(LogTelemetryNotification, (e) => void this.logTelemetry(e));
         languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         languageClient.registerProposedFeatures();
         await languageClient.start();
 
         if (usesCrashHandler()) {
             watchForCrashes(await languageClient.sendRequest(PreInitializationRequest, null));
+        } else if (os.platform() === "win32") {
+            const settings: CppSettings = new CppSettings();
+            if ((settings.windowsErrorReportingMode === "default" && !languageClientHasCrashed) ||
+                settings.windowsErrorReportingMode === "enabled") {
+                await languageClient.sendRequest(PreInitializationRequest, null);
+            }
         }
 
         // Move initialization to a separate message, so we can see log output from it.
@@ -2262,9 +2293,12 @@ export class DefaultClient implements Client {
                     message += ` (${err})`;
                 }
 
-                if (await vscode.window.showInformationMessage(message, dismiss, disable) === disable) {
-                    settings.toggleSetting("configurationWarnings", "enabled", "disabled");
-                }
+                // Do not await here, as that would prevent the function from returning until the user dismisses the message.
+                void vscode.window.showInformationMessage(message, dismiss, disable).then(result => {
+                    if (result === disable) {
+                        settings.toggleSetting("configurationWarnings", "enabled", "disabled");
+                    }
+                });
             }
         }
         return result;
@@ -2757,9 +2791,37 @@ export class DefaultClient implements Client {
         }
     }
 
-    private logTelemetry(notificationBody: TelemetryPayload): void {
+    private excessiveFilesWarningShown: boolean = false;
+    private async logTelemetry(notificationBody: TelemetryPayload): Promise<void> {
         if (notificationBody.event === "includeSquiggles" && this.configurationProvider && notificationBody.properties) {
             notificationBody.properties["providerId"] = this.configurationProvider;
+        }
+
+        const showExcessiveFilesWarning = new PersistentWorkspaceState<boolean>('CPP.showExcessiveFilesWarning', true);
+        if (!this.excessiveFilesWarningShown && showExcessiveFilesWarning.Value && notificationBody.event === 'ParsingStats') {
+            const filesDiscovered = notificationBody.metrics?.filesDiscovered ?? 0;
+            const parsableFiles = notificationBody.metrics?.parsableFiles ?? 0;
+            if (filesDiscovered > 250000 || parsableFiles > 100000) {
+                // According to telemetry, less than 3% of workspaces have this many files so it seems like a reasonable threshold.
+
+                const message = localize(
+                    "parsing.stats.large.project",
+                    'Enumerated {0} files with {1} C/C++ source files detected. You may want to consider excluding some files for better performance.',
+                    filesDiscovered,
+                    parsableFiles);
+                const learnMore = localize('learn.more', 'Learn More');
+                const dontShowAgain = localize('dont.show.again', 'Don\'t Show Again');
+
+                // We only want to show this once per session.
+                this.excessiveFilesWarningShown = true;
+                const response = await vscode.window.showInformationMessage(message, learnMore, dontShowAgain);
+
+                if (response === dontShowAgain) {
+                    showExcessiveFilesWarning.Value = false;
+                } else if (response === learnMore) {
+                    void vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://go.microsoft.com/fwlink/?linkid=2333292'));
+                }
+            }
         }
         telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
     }
@@ -2768,55 +2830,59 @@ export class DefaultClient implements Client {
         const message: string = notificationBody.status;
         util.setProgress(util.getProgressExecutableSuccess());
         const testHook: TestHook = getTestHook();
-        if (message.endsWith("Idle")) {
-            const status: IntelliSenseStatus = { status: Status.Idle };
-            testHook.updateStatus(status);
-        } else if (message.endsWith("Parsing")) {
-            this.model.isParsingWorkspace.Value = true;
-            this.model.isInitializingWorkspace.Value = false;
-            this.model.isIndexingWorkspace.Value = false;
-            const status: IntelliSenseStatus = { status: Status.TagParsingBegun };
-            testHook.updateStatus(status);
-        } else if (message.endsWith("Initializing")) {
-            this.model.isInitializingWorkspace.Value = true;
-            this.model.isIndexingWorkspace.Value = false;
-            this.model.isParsingWorkspace.Value = false;
-        } else if (message.endsWith("Indexing")) {
-            this.model.isIndexingWorkspace.Value = true;
-            this.model.isInitializingWorkspace.Value = false;
-            this.model.isParsingWorkspace.Value = false;
-        } else if (message.endsWith("files")) {
-            this.model.isParsingFiles.Value = true;
-        } else if (message.endsWith("IntelliSense")) {
-            timeStamp = Date.now();
-            this.model.isUpdatingIntelliSense.Value = true;
-            const status: IntelliSenseStatus = { status: Status.IntelliSenseCompiling };
-            testHook.updateStatus(status);
-        } else if (message.endsWith("IntelliSense done")) {
-            getOutputChannelLogger().appendLineAtLevel(6, localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", (Date.now() - timeStamp) / 1000));
-            this.model.isUpdatingIntelliSense.Value = false;
-            const status: IntelliSenseStatus = { status: Status.IntelliSenseReady };
-            testHook.updateStatus(status);
-        } else if (message.endsWith("Parsing done")) { // Tag Parser Ready
-            this.model.isParsingWorkspace.Value = false;
-            const status: IntelliSenseStatus = { status: Status.TagParsingDone };
-            testHook.updateStatus(status);
-            util.setProgress(util.getProgressParseRootSuccess());
-        } else if (message.endsWith("files done")) {
-            this.model.isParsingFiles.Value = false;
-        } else if (message.endsWith("Analysis")) {
-            this.model.isRunningCodeAnalysis.Value = true;
-            this.model.codeAnalysisTotal.Value = 1;
-            this.model.codeAnalysisProcessed.Value = 0;
-        } else if (message.endsWith("Analysis done")) {
-            this.model.isRunningCodeAnalysis.Value = false;
-        } else if (message.includes("Squiggles Finished - File name:")) {
-            const index: number = message.lastIndexOf(":");
-            const name: string = message.substring(index + 2);
-            const status: IntelliSenseStatus = { status: Status.IntelliSenseReady, filename: name };
-            testHook.updateStatus(status);
-        } else if (message.endsWith("No Squiggles")) {
-            util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
+        if (message.startsWith("C_Cpp: ")) {
+            if (message.endsWith("Idle")) {
+                const status: IntelliSenseStatus = { status: Status.Idle };
+                testHook.updateStatus(status);
+            } else if (message.endsWith("Parsing")) {
+                this.model.isParsingWorkspace.Value = true;
+                this.model.isInitializingWorkspace.Value = false;
+                this.model.isIndexingWorkspace.Value = false;
+                const status: IntelliSenseStatus = { status: Status.TagParsingBegun };
+                testHook.updateStatus(status);
+            } else if (message.endsWith("Initializing")) {
+                this.model.isInitializingWorkspace.Value = true;
+                this.model.isIndexingWorkspace.Value = false;
+                this.model.isParsingWorkspace.Value = false;
+            } else if (message.endsWith("Indexing")) {
+                this.model.isIndexingWorkspace.Value = true;
+                this.model.isInitializingWorkspace.Value = false;
+                this.model.isParsingWorkspace.Value = false;
+            } else if (message.endsWith("files")) {
+                this.model.isParsingFiles.Value = true;
+            } else if (message.endsWith("IntelliSense")) {
+                timeStamp = Date.now();
+                this.model.isUpdatingIntelliSense.Value = true;
+                const status: IntelliSenseStatus = { status: Status.IntelliSenseCompiling };
+                testHook.updateStatus(status);
+            } else if (message.endsWith("IntelliSense done")) {
+                getOutputChannelLogger().appendLineAtLevel(6, localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", (Date.now() - timeStamp) / 1000));
+                this.model.isUpdatingIntelliSense.Value = false;
+                const status: IntelliSenseStatus = { status: Status.IntelliSenseReady };
+                testHook.updateStatus(status);
+            } else if (message.endsWith("Parsing done")) { // Tag Parser Ready
+                this.model.isParsingWorkspace.Value = false;
+                const status: IntelliSenseStatus = { status: Status.TagParsingDone };
+                testHook.updateStatus(status);
+                util.setProgress(util.getProgressParseRootSuccess());
+            } else if (message.endsWith("files done")) {
+                this.model.isParsingFiles.Value = false;
+            } else if (message.endsWith("Analysis")) {
+                this.model.isRunningCodeAnalysis.Value = true;
+                this.model.codeAnalysisTotal.Value = 1;
+                this.model.codeAnalysisProcessed.Value = 0;
+            } else if (message.endsWith("Analysis done")) {
+                this.model.isRunningCodeAnalysis.Value = false;
+            } else if (message.includes("Squiggles Finished - File name:")) {
+                const index: number = message.lastIndexOf(":");
+                const name: string = message.substring(index + 2);
+                const status: IntelliSenseStatus = { status: Status.IntelliSenseReady, filename: name };
+                testHook.updateStatus(status);
+            } else if (message.endsWith("No Squiggles")) {
+                util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
+            }
+        } else if (message.includes("/")) {
+            this.lastInvokedLspMessage = message;
         }
     }
 

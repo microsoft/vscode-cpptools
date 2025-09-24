@@ -1,9 +1,17 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.27.0: August 4, 2025
+## Version 1.27.7: September 18, 2025
+### Enhancements
+* Show a warning when too many files are processed in a workspace. [#10828](https://github.com/microsoft/vscode-cpptools/issues/10828)
+* Improvements to GitHub Copilot activation. [PR #13924](https://github.com/microsoft/vscode-cpptools/pull/13924)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer)
+* Add a `C_Cpp.windowsErrorReportingMode` setting and default to only enabling WER for the first crash in a session. [#13928](https://github.com/microsoft/vscode-cpptools/issues/13928)
+
 ### Bug Fixes
+* Fix the `__FILE_NAME__` macro being undefined with IntelliSense when using GCC/Clang. [#11164](https://github.com/microsoft/vscode-cpptools/issues/11164)
 * Fix an IntelliSense crash in `add_cached_tokens_to_string`. [#11900](https://github.com/microsoft/vscode-cpptools/issues/11900)
 * Fix an IntelliSense crash in `find_subobject_for_interpreter_address`. [#12464](https://github.com/microsoft/vscode-cpptools/issues/12464)
+* Fix input delays when editing `c_cpp_properties.json`. [#13591](https://github.com/microsoft/vscode-cpptools/issues/13591)
 * Fix changes to the active field being lost in the configuration UI when navigating away. [#13636](https://github.com/microsoft/vscode-cpptools/issues/13636)
 * Fix compiler query failing on Windows if optional job-related API calls fail. [#13679](https://github.com/microsoft/vscode-cpptools/issues/13679)
 * Fix bugs with Doxygen comments. [#13725](https://github.com/microsoft/vscode-cpptools/issues/13725), [#13726](https://github.com/microsoft/vscode-cpptools/issues/13726), [#13745](https://github.com/microsoft/vscode-cpptools/issues/13745)
@@ -15,7 +23,33 @@
 * Fix `-imacro` not configuring IntelliSense correctly. [#13785](https://github.com/microsoft/vscode-cpptools/issues/13785)
 * Fix `pipeTransport.quoteArgs` not being handled correctly. [#13791](https://github.com/microsoft/vscode-cpptools/issues/13791)
   * Thank you for the contribution. [@mrjist (Matt)](https://github.com/mrjist) [PR #13794](https://github.com/microsoft/vscode-cpptools/pull/13794)
+* Fix `.txx` and `.tpp` not being handled as C++ header files. [#13808](https://github.com/microsoft/vscode-cpptools/issues/13808)
+* Fix an error when using GitHub Copilot with VS Code older than 1.90.0. [#13818](https://github.com/microsoft/vscode-cpptools/issues/13818)
+* Fix activation failing if the `c_cpp_properties.json` exists but fails to be opened. [#13829](https://github.com/microsoft/vscode-cpptools/issues/13829)
+* Fix crash recovery. [#13838](https://github.com/microsoft/vscode-cpptools/issues/13838)
+* Fix Doxygen generation overwriting a function signature. [#13839](https://github.com/microsoft/vscode-cpptools/issues/13839)
+* Fix a crash on Windows 7, 8, and 10 (Server 2008, 2012, and 2016). [#13851](https://github.com/microsoft/vscode-cpptools/issues/13851)
+* Fix "CMake Tools" translations. [PR #13854](https://github.com/microsoft/vscode-cpptools/pull/13854)
+* Fix the language server getting stuck by a notification message box after a configuration provider times out. [#13862](https://github.com/microsoft/vscode-cpptools/issues/13862)
+* Fix a crash regression with `__BASE_FILE__`. [#13866](https://github.com/microsoft/vscode-cpptools/issues/13866)
+* Fix non-recursive browse paths from configuration providers. [#13886](https://github.com/microsoft/vscode-cpptools/issues/13886)
+* Fix an infinite recursion IntelliSense crash. [#13908](https://github.com/microsoft/vscode-cpptools/issues/13908)
+* Fix an IntelliSense crash during completion when using GCC ARM compilers. [#13925](https://github.com/microsoft/vscode-cpptools/issues/13925)
 * Fix an IntelliSense bug that could cause incorrect string lengths to be reported for string literals in files that use certain file encodings.
+* Fix an IntelliSense process crash involving `requires` expressions and templates.
+* Fix an IntelliSense process crash from deleting memory that is still in use.
+* Fix an IntelliSense process crash with `class_has_mutable_member`.
+* Fix a case of uninitialized memory in `cpptools-srv`.
+
+## Version 1.26.5: September 10, 2025
+### Bug Fix
+* Fix extension activation getting stuck by GitHub Copilot activation. [#13914](https://github.com/microsoft/vscode-cpptools/issues/13914)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer) [PR #13918](https://github.com/microsoft/vscode-cpptools/pull/13918)
+
+## Version 1.26.4: September 9, 2025
+### Enhancement
+* Update GitHub Copilot APIs. [PR #13877](https://github.com/microsoft/vscode-cpptools/pull/13877)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer)
 
 ## Version 1.26.3: June 24, 2025
 ### New Feature
@@ -52,7 +86,7 @@
 ### Bug Fixes
 * Fix no error appearing in the configuration UI when an invalid `compilerPath` is used. [#12661](https://github.com/microsoft/vscode-cpptools/issues/12661)
 * Fix the 'Debug C/C++ File' button sometimes disappearing. [#13400](https://github.com/microsoft/vscode-cpptools/issues/13400)
-* Fix a crash in `read_double`. [#13435](https://github.com/Microsoft/vscode-cpptools/issues/13435)
+* Fix a crash in `read_double`. [#13435](https://github.com/microsoft/vscode-cpptools/issues/13435)
 * Fix the handling of default file associations for certain file extensions. [PR #13455](https://github.com/microsoft/vscode-cpptools/pull/13455)
 * Fix shell parsing of the arguments of a full command line in `compilerPath`. [PR #13468](https://github.com/microsoft/vscode-cpptools/pull/13468)
 * Fix C and CUDA files being interpreted as C++ in `compile_commands.json`. [#13471](https://github.com/microsoft/vscode-cpptools/issues/13471)
@@ -98,7 +132,7 @@
 * Fix a potential deadlock after using 'Reset IntelliSense Database'. [#13337](https://github.com/microsoft/vscode-cpptools/issues/13337)
 * Fix some localization bugs. [PR #13373](https://github.com/microsoft/vscode-cpptools/pull/13373)
 * Fix IntelliSense showing the wrong size of objects. [#13375](https://github.com/microsoft/vscode-cpptools/issues/13375)
-* Fix the `get_mangled_function_name` IntelliSense process crash. [#13358](https://github.com/Microsoft/vscode-cpptools/issues/13358)
+* Fix the `get_mangled_function_name` IntelliSense process crash. [#13358](https://github.com/microsoft/vscode-cpptools/issues/13358)
 * Fix an issue with duplicate forced includes being removed. Multiple forced includes of the same file should now properly be included multiple times.
 * Fix an issue in which the base configuration browse paths may not get populated when using a custom configuration provider.
 * Fix an issue with forced includes not being resolved against the same include path search order as a compiler would.
@@ -157,7 +191,7 @@
 * Fix a compile commands fallback logic issue. [#12947](https://github.com/microsoft/vscode-cpptools/issues/12947)
   * Thank you for the contribution. [@yiftahw](https://github.com/yiftahw) [PR #12948](https://github.com/microsoft/vscode-cpptools/pull/12948)
 * Fix an issue in which a `didOpen` event was processed before the language client was fully started. [#12954](https://github.com/microsoft/vscode-cpptools/issues/12954)
-* Fix the IntelliSense mode being `macos` instead of `windows` when `_WIN32` is defined on macOS. [#13016](https://github.com/Microsoft/vscode-cpptools/issues/13016)
+* Fix the IntelliSense mode being `macos` instead of `windows` when `_WIN32` is defined on macOS. [#13016](https://github.com/microsoft/vscode-cpptools/issues/13016)
 * Fix IntelliSense bugs when using non-UTF8 file encodings. [#13028](https://github.com/microsoft/vscode-cpptools/issues/13028), [#13044](https://github.com/microsoft/vscode-cpptools/issues/13044)
 * Fix an incorrect translation for "binary operator". [#13048](https://github.com/microsoft/vscode-cpptools/issues/13048)
 * Fix the "references may be missing" logging pane being shown when the `C_Cpp.loggingLevel` is `Error` or `None`. [#13066](https://github.com/microsoft/vscode-cpptools/issues/13066)
