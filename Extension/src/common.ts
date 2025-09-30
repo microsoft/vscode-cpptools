@@ -306,7 +306,7 @@ export function setIntelliSenseProgress(progress: number): void {
     }
 }
 
-export function getProgressDebuggerStarted(): number { return progressDebuggerStarted; } // Debugger was successfully initialized.
+export function getProgressDebuggerStarted(): number { return progressDebuggerStarted; } // Debugger initialization was started.
 export function getProgressDebuggerSuccess(): number { return progressDebuggerSuccess; } // Debugger was successfully initialized.
 export function getProgressExecutableStarted(): number { return progressExecutableStarted; } // The extension was activated and starting the executable was attempted.
 export function getProgressCopilotSuccess(): number { return progressCopilotSuccess; } // Copilot activation was successful.
