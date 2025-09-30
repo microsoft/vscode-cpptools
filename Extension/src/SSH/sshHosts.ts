@@ -99,7 +99,15 @@ export async function getSshConfiguration(configurationPath: string, resolveIncl
     return config;
 }
 
+function getProcessedPathKey(filePath: string): string {
+    const absolutePath: string = path.resolve(filePath);
+    const normalizedPath: string = path.normalize(absolutePath);
+    return isWindows ? normalizedPath.toLowerCase() : normalizedPath;
+}
+
 async function resolveConfigIncludes(config: Configuration, configPath: string): Promise<void> {
+    const processedIncludePaths: Set<string> = new Set<string>();
+    processedIncludePaths.add(getProcessedPathKey(configPath));
     for (const entry of config) {
         if (isDirective(entry) && entry.param === 'Include') {
             let includePath: string = resolveHome(entry.value);
@@ -114,6 +122,11 @@ async function resolveConfigIncludes(config: Configuration, configPath: string):
             const pathsToGetFilesFrom: string[] = await globAsync(includePath);
 
             for (const filePath of pathsToGetFilesFrom) {
+                const includeKey: string = getProcessedPathKey(filePath);
+                if (processedIncludePaths.has(includeKey)) {
+                    continue;
+                }
+                processedIncludePaths.add(includeKey);
                 await getIncludedConfigFile(config, filePath);
             }
         }
