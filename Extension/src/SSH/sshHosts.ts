@@ -99,28 +99,64 @@ export async function getSshConfiguration(configurationPath: string, resolveIncl
     return config;
 }
 
-async function resolveConfigIncludes(config: Configuration, configPath: string): Promise<void> {
-    for (const entry of config) {
-        if (isDirective(entry) && entry.param === 'Include') {
-            let includePath: string = resolveHome(entry.value);
-            if (isWindows && !!includePath.match(/^\/[a-z]:/i)) {
-                includePath = includePath.substr(1);
-            }
+function getProcessedPathKey(filePath: string): string {
+    const absolutePath: string = path.resolve(filePath);
+    const normalizedPath: string = path.normalize(absolutePath);
+    return isWindows ? normalizedPath.toLowerCase() : normalizedPath;
+}
 
-            if (!path.isAbsolute(includePath)) {
-                includePath = path.resolve(path.dirname(configPath), includePath);
-            }
+async function resolveConfigIncludes(
+    config: Configuration,
+    configPath: string,
+    processedIncludePaths?: Set<string>,
+    processedIncludeEntries?: WeakSet<ConfigurationDirective>
+): Promise<void> {
+    processedIncludePaths = processedIncludePaths ?? new Set<string>();
+    processedIncludeEntries = processedIncludeEntries ?? new WeakSet<ConfigurationDirective>();
+    const configKey: string = getProcessedPathKey(configPath);
+    if (processedIncludePaths.has(configKey)) {
+        return;
+    }
+    processedIncludePaths.add(configKey);
+    try {
+        for (const entry of config) {
+            if (isDirective(entry) && entry.param === 'Include') {
+                // Prevent duplicate expansion of the same Include directive within a single resolution pass.
+                if (processedIncludeEntries.has(entry)) {
+                    continue;
+                }
+                processedIncludeEntries.add(entry);
+                let includePath: string = resolveHome(entry.value);
+                if (isWindows && !!includePath.match(/^\/[a-z]:/i)) {
+                    includePath = includePath.slice(1);
+                }
 
-            const pathsToGetFilesFrom: string[] = await globAsync(includePath);
+                if (!path.isAbsolute(includePath)) {
+                    includePath = path.resolve(path.dirname(configPath), includePath);
+                }
 
-            for (const filePath of pathsToGetFilesFrom) {
-                await getIncludedConfigFile(config, filePath);
+                const pathsToGetFilesFrom: string[] = await globAsync(includePath);
+
+                for (const filePath of pathsToGetFilesFrom) {
+                    const includeKey: string = getProcessedPathKey(filePath);
+                    if (processedIncludePaths.has(includeKey)) {
+                        continue;
+                    }
+                    await getIncludedConfigFile(config, filePath, processedIncludePaths, processedIncludeEntries);
+                }
             }
         }
+    } finally {
+        processedIncludePaths.delete(configKey);
     }
 }
 
-async function getIncludedConfigFile(config: Configuration, includePath: string): Promise<void> {
+async function getIncludedConfigFile(
+    config: Configuration,
+    includePath: string,
+    processedIncludePaths: Set<string>,
+    processedIncludeEntries: WeakSet<ConfigurationDirective>
+): Promise<void> {
     let includedContents: string;
     try {
         includedContents = (await fs.readFile(includePath)).toString();
@@ -136,6 +172,7 @@ async function getIncludedConfigFile(config: Configuration, includePath: string)
         getSshChannel().appendLine(localize("failed.to.parse.SSH.config", "Failed to parse SSH configuration file {0}: {1}", includePath, (err as Error).message));
         return;
     }
+    await resolveConfigIncludes(parsedIncludedContents, includePath, processedIncludePaths, processedIncludeEntries);
     config.push(...parsedIncludedContents);
 }
 
