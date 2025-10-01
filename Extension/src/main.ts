@@ -42,8 +42,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     });
 
     util.setExtensionContext(context);
-    Telemetry.activate();
     util.setProgress(0);
+    Telemetry.activate();
 
     // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
     class SchemaProvider implements vscode.TextDocumentContentProvider {
@@ -63,7 +63,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', instrument(new SchemaProvider()));
 
     // Initialize the DebuggerExtension and register the related commands and providers.
+    util.setProgress(util.getProgressDebuggerStarted());
     await DebuggerExtension.initialize(context);
+    util.setProgress(util.getProgressDebuggerSuccess());
 
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     sendTelemetry(info);
@@ -161,6 +163,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         // The check here for isIntelliSenseEngineDisabled avoids logging
         // the message on old Macs that we've already displayed a warning for.
         log(localize("intellisense.disabled", "intelliSenseEngine is disabled"));
+        util.setProgress(util.getProgressLanguageServiceDisabled());
     }
 
     // Send an instrumentation message upon completing activation.
