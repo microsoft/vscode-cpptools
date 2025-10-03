@@ -1,5 +1,11 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.28.1: October 6, 2025
+### Bug Fixes
+* Fix extension activation getting stuck when certain SSH config files are processed (by the SSH targets view feature). [#13966](https://github.com/microsoft/vscode-cpptools/issues/13966)
+* Fix document symbols randomly showing previous versions of symbols after they are modified. [#13967](https://github.com/microsoft/vscode-cpptools/issues/13967)
+* A potential fix for a crash.
+
 ## Version 1.28.0: September 25, 2025
 ### Enhancements
 * Add IntelliSense support for c23 `bool`, `true`, and `false`. [#13737](https://github.com/microsoft/vscode-cpptools/issues/13737)
