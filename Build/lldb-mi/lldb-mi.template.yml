@@ -19,7 +19,7 @@ parameters:
 
 # Note: Make sure lldb_mi_commit is the same as the one in Extension/cgmanifest.json 
 # 'CommitHash' for lldb-mi.
-  lldb_mi_commit: 2388bd74133bc21eac59b2e2bf97f2a30770a315
+  lldb_mi_commit: 31ed003a15a4a8e44881401d065217dfb2642406
 
   lldb_mi_additional_parameters: "-DUSE_LLDB_FRAMEWORK=1"
 
