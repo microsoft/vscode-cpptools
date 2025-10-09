@@ -245,7 +245,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, ext.CppSourceStr);
             cppBuildTask.detail = task.detail;
             cppBuildTask.existing = true;
-            if (task.group.isDefault) {
+            if (!util.isString(task.group) && task.group.isDefault) {
                 cppBuildTask.isDefault = true;
             }
             return cppBuildTask;
@@ -292,9 +292,9 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (setAsDefault) {
             rawTasksJson.tasks.forEach((task: any) => {
                 if (task.label === selectedTask?.definition.label) {
-                    task.group = { kind: "build", "isDefault": true };
-                } else if (task.group.kind && task.group.kind === "build" && task.group.isDefault && task.group.isDefault === true) {
-                    task.group = "build";
+                    task.group = { kind: "build", isDefault: true };
+                } else if (!util.isString(task.group) && task.group?.kind === "build" && task.group?.isDefault) {
+                    task.group.isDefault = false;
                 }
             });
         }
