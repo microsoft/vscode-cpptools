@@ -13,6 +13,7 @@
 * Fix document symbols randomly showing previous versions of symbols after they are modified. [#13967](https://github.com/microsoft/vscode-cpptools/issues/13967)
 * Prevent tag parsing of .js files to avoid a crash. [#13980](https://github.com/microsoft/vscode-cpptools/issues/13980)
 * Fix missing C/C++ keyword completions for newer language standards. [#13982](https://github.com/microsoft/vscode-cpptools/issues/13982)
+* Fix some invalid assumptions for cppbuild tasks. [PR #13989](https://github.com/microsoft/vscode-cpptools/pull/13989)
 * A potential fix for a crash (involving `line_offset_t`).
 
 ## Version 1.27.7: September 18, 2025
