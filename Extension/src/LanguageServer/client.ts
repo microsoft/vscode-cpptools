@@ -1391,6 +1391,7 @@ export class DefaultClient implements Client {
                 }
 
                 this.copilotCompletionProvider = CopilotCompletionContextProvider.Create();
+                util.setProgress(util.getProgressCopilotSuccess());
                 this.disposables.push(this.copilotCompletionProvider);
 
                 // Listen for messages from the language server.
