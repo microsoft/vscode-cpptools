@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.28.2: October 14, 2025
+## Version 1.28.3: October 16, 2025
 ### Enhancements
 * Add IntelliSense support for c23 `bool`, `true`, and `false`. [#13737](https://github.com/microsoft/vscode-cpptools/issues/13737)
 * Add missing C/C++ keyword completions for newer language standards. [#13982](https://github.com/microsoft/vscode-cpptools/issues/13982)
