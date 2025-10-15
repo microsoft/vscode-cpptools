@@ -14,6 +14,7 @@
 * Fix document symbols randomly showing previous versions of symbols after they are modified. [#13967](https://github.com/microsoft/vscode-cpptools/issues/13967)
 * Prevent tag parsing of .js files to avoid a crash. [#13980](https://github.com/microsoft/vscode-cpptools/issues/13980)
 * Fix some invalid assumptions for cppbuild tasks. [PR #13989](https://github.com/microsoft/vscode-cpptools/pull/13989)
+* Fix a random crash after changing settings while code analysis is running.
 * Fix a random memory corruption and deadlock (involving `task_deque`).
 * A potential fix for a crash (involving `line_offset_t`).
 
