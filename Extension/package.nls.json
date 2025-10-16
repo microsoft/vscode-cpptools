@@ -300,7 +300,7 @@
     },
     "c_cpp.configuration.vcFormat.indent.gotoLabels.description": "The position of goto labels.",
     "c_cpp.configuration.vcFormat.indent.gotoLabels.oneLeft.markdownDescription": {
-        "message": "Position goto labels to the left of the current code indentation, by the amount specified in the `#editor.tabSize#` setting.",
+        "message": "Position goto labels to the left of the current code indentation by the amount specified in the `#editor.tabSize#` setting.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -319,7 +319,7 @@
     },
     "c_cpp.configuration.vcFormat.indent.preprocessor.description": "The position of preprocessor directives.",
     "c_cpp.configuration.vcFormat.indent.preprocessor.oneLeft.markdownDescription": {
-        "message": "Preprocessor directives are positioned to the left of the current code indentation, by the amount specified in the `#editor.tabSize#` setting.",
+        "message": "Preprocessor directives are positioned to the left of the current code indentation by the amount specified in the `#editor.tabSize#` setting.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
