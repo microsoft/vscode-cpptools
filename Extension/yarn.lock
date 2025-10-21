@@ -537,11 +537,6 @@
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@types/sinonjs__fake-timers/-/sinonjs__fake-timers-8.1.5.tgz#5fd3592ff10c1e9695d377020c033116cc2889f2"
   integrity sha1-X9NZL/EMHpaV03cCDAMxFswoifI=
 
-"@types/tmp@^0.2.6":
-  version "0.2.6"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@types/tmp/-/tmp-0.2.6.tgz#d785ee90c52d7cc020e249c948c36f7b32d1e217"
-  integrity sha1-14XukMUtfMAg4knJSMNvezLR4hc=
-
 "@types/which@^2.0.2":
   version "2.0.2"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@types/which/-/which-2.0.2.tgz#54541d02d6b1daee5ec01ac0d1b37cecf37db1ae"
@@ -3559,13 +3554,13 @@ node-stream-zip@^1.15.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-stream-zip/-/node-stream-zip-1.15.0.tgz#158adb88ed8004c6c49a396b50a6a5de3bca33ea"
   integrity sha1-FYrbiO2ABMbEmjlrUKal3jvKM+o=
 
-node-vcvarsall@^1.1.0:
-  version "1.1.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-vcvarsall/-/node-vcvarsall-1.1.0.tgz#4e0b3959f0d5bc6114c8c61e20ac0caab9dcbecf"
-  integrity sha1-Tgs5WfDVvGEUyMYeIKwMqrncvs8=
+node-vcvarsall@^1.1.1:
+  version "1.1.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-vcvarsall/-/node-vcvarsall-1.1.1.tgz#ec10a9fafcc7fd4033f716f82a04a2a5a13e1a62"
+  integrity sha1-7BCp+vzH/UAz9xb4KgSipaE+GmI=
   dependencies:
     node-vswhere "^1.0.2"
-    tmp "^0.2.1"
+    tmp "^0.2.5"
 
 node-vswhere@^1.0.2:
   version "1.0.2"
@@ -4725,10 +4720,10 @@ timers-ext@^0.1.7:
     es5-ext "^0.10.64"
     next-tick "^1.1.0"
 
-tmp@^0.2.4:
-  version "0.2.4"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/tmp/-/tmp-0.2.4.tgz#c6db987a2ccc97f812f17137b36af2b6521b0d13"
-  integrity sha1-xtuYeizMl/gS8XE3s2rytlIbDRM=
+tmp@^0.2.5:
+  version "0.2.5"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/tmp/-/tmp-0.2.5.tgz#b06bcd23f0f3c8357b426891726d16015abfd8f8"
+  integrity sha1-sGvNI/DzyDV7QmiRcm0WAVq/2Pg=
 
 to-absolute-glob@^2.0.0, to-absolute-glob@^2.0.2:
   version "2.0.2"
