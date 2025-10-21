@@ -37,6 +37,8 @@
     "c_cpp.command.RemoveAllCodeAnalysisProblems.title": "Clear All Code Analysis Problems",
     "c_cpp.command.BuildAndDebugFile.title": "Debug C/C++ File",
     "c_cpp.command.BuildAndRunFile.title": "Run C/C++ File",
+    "c_cpp.command.SetVsDeveloperEnvironment.title": "Set Visual Studio Developer Environment",
+    "c_cpp.command.ClearVsDeveloperEnvironment.title": "Clear Visual Studio Developer Environment",
     "c_cpp.command.AddDebugConfiguration.title": "Add Debug Configuration",
     "c_cpp.command.GenerateDoxygenComment.title": "Generate Doxygen Comment",
     "c_cpp.command.addSshTarget.title": "Add SSH target",
@@ -849,6 +851,7 @@
         ]
     },
     "c_cpp.configuration.debugShortcut.description": "Show the \"Run and Debug\" play button and \"Add Debug Configuration\" gear in the editor title bar for C++ files.",
+    "c_cpp.configuration.persistVsDeveloperEnvironment.description": "Remember the last used Visual Studio developer environment for the current workspace. This setting is only applicable for Windows.",
     "c_cpp.debuggers.pipeTransport.description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
     "c_cpp.debuggers.pipeTransport.default.pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'.",
     "c_cpp.debuggers.pipeTransport.default.debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb.",
@@ -1037,9 +1040,9 @@
     "c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
     "c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
     "c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages.",
-    "c_cpp.walkthrough.title": "Get Started with C++ Development",
+    "c_cpp.walkthrough.title": "Get started with C++ development",
     "c_cpp.walkthrough.description": "Dive into VS Code's rich C++ development experience.",
-    "c_cpp.walkthrough.set.up.title": "Set up your C++ Environment",
+    "c_cpp.walkthrough.set.up.title": "Set up your C++ environment",
     "c_cpp.walkthrough.activating.description": "Activating the C++ extension to determine whether your C++ Environment has been set up.\nActivating Extension...",
     "c_cpp.walkthrough.no.compilers.windows.description": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%22walkthrough%22)",
     "c_cpp.walkthrough.no.compilers.description": {
@@ -1059,15 +1062,15 @@
     },
     "c_cpp.walkthrough.create.cpp.file.altText": "Open a C++ file or a folder with a C++ project.",
     "c_cpp.walkthrough.command.prompt.title": {
-        "message": "Launch from the Developer Command Prompt for VS",
+        "message": "Apply the Visual Studio developer environment",
         "comment": [
-            "{Locked=\"Developer Command Prompt for VS\"}"
+            "{Locked=\"Visual Studio\"}"
         ]
     },
     "c_cpp.walkthrough.command.prompt.description": {
-        "message": "When using the Microsoft Visual Studio C++ compiler, the C++ extension requires you to launch VS Code from the Developer Command Prompt for VS. Follow the instructions on the right to relaunch.\n[Reload Window](command:workbench.action.reloadWindow)",
+        "message": "When using the Microsoft Visual Studio C++ compiler, the Visual Studio developer environment must be present.\n\nFollow the instructions on the right to relaunch or click the button below.\n[Set Developer Environment](command:C_Cpp.SetVsDeveloperEnvironment?%22walkthrough%22)",
         "comment": [
-            "{Locked=\"Visual Studio\"} {Locked=\"C++\"} {Locked=\"VS Code\"} {Locked=\"Developer Command Prompt for VS\"} {Locked=\"\n[\"} {Locked=\"](command:workbench.action.reloadWindow)\"}"
+            "{Locked=\"Visual Studio\"} {Locked=\"C++\"} {Locked=\"\n\n\"} {Locked=\"\n[\"} {Locked=\"](command:C_Cpp.SetVsDeveloperEnvironment?%22walkthrough%22)\"}"
         ]
     },
     "c_cpp.walkthrough.run.debug.title": "Run and debug your C++ file",
