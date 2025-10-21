@@ -24,7 +24,7 @@ const errorNoHostsFound = localize('no.hosts', 'No hosts found');
 const configuringDevEnv = localize('config.dev.env', 'Configuring developer environment...');
 const selectVSInstallation = localize('select.vs.install', 'Select a Visual Studio installation');
 const advancedOptions = localize('advanced.options', 'Advanced options...');
-const advancedOptionsDescription = localize('advanced.options.desc', 'Select a specific host/target architecture, toolset version, etc.');
+const advancedOptionsDescription = localize('advanced.options.desc', 'Select a specific host and target architecture, toolset version, etc.');
 const selectToolsetVersion = localize('select.toolset', 'Select a toolset version');
 const selectHostTargetArch = localize('select.host.target', 'Select a host and target architecture');
 
