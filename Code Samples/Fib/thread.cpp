@@ -1,48 +1,42 @@
 #include <iostream>
-#include <unistd.h>
-#include <sys/types.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
+#include <thread>
+#include <chrono>
+#include <atomic>
+#include <string>
+#include <random>
+#include <mutex>
 
-#include "thread.h"
+static std::atomic<int> g_tid{0};
+static std::mutex cout_mutex;
 
-static int g_tid = 0;
-
-static int fib(int n){
-    switch (n) {
-        case 0: return 1;
-        case 1: return 1;
-        default: return (fib(n-2) + fib(n-1));
-    }
+static int fib(int n) {
+    if (n <= 1) return 1;
+    return fib(n - 1) + fib(n - 2);
 }
 
-void * thread_proc(void* ctx)
-{
-    int tid = g_tid++;
+static thread_local std::mt19937_64 rng{std::random_device{}()};
 
-    char thread_name[16];
-    sprintf(thread_name, "Thread %d", tid);
-#ifdef __APPLE__
-    pthread_setname_np(thread_name);
-#else
-    pthread_setname_np(pthread_self(), thread_name);
-#endif
+static int intRand(int min, int max) {
+    return std::uniform_int_distribution<int>(min, max)(rng);
+}
 
-    // Random delay, 0 - 0.5 sec
-    timespec ts;
-    ts.tv_sec = 0;
-    ts.tv_nsec = 500000000 + ((float)rand() / (float)RAND_MAX) * 500000000;
-    nanosleep(&ts, NULL);
-
-    volatile int i = 0;
-    while (i <= 30) {
-        std::cout << "Thread " << tid << ": fib(" << i << ") = " << fib(i) << std::endl;
-        i++;
-        nanosleep(&ts, NULL);
+void thread_proc() {
+    const int tid = g_tid.fetch_add(1, std::memory_order_relaxed);
+    const std::string thread_name = "Thread " + std::to_string(tid);
+    
+    const auto delay = std::chrono::nanoseconds(500000000 + intRand(0, 500000000));
+    std::this_thread::sleep_for(delay);
+    
+    for (int i = 0; i <= 30; ++i) {
+        {
+            std::lock_guard<std::mutex> lock(cout_mutex);
+            std::cout << thread_name << ": fib(" << i << ") = " << fib(i) << std::endl;
+        }
+        std::this_thread::sleep_for(delay);
     }
-
-    std::cout << thread_name << " exited!" << std::endl;
+    
+    {
+        std::lock_guard<std::mutex> lock(cout_mutex);
+        std::cout << thread_name << " exited!" << std::endl;
+    }
 }
