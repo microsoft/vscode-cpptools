@@ -1,20 +1,35 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.27.2: August 21, 2025
-### Bug Fix
-* Fix a crash regression with `__BASE_FILE__`. [#13866](https://github.com/microsoft/vscode-cpptools/issues/13866)
+## Version 1.28.3: October 16, 2025
+### Enhancements
+* Add IntelliSense support for c23 `bool`, `true`, and `false`. [#13737](https://github.com/microsoft/vscode-cpptools/issues/13737)
+* Add missing C/C++ keyword completions for newer language standards. [#13982](https://github.com/microsoft/vscode-cpptools/issues/13982)
+* Update the bundled `clang-tidy` and `clang-format` from 20.1.7 to 21.1.3.
 
-## Version 1.27.1: August 20, 2025
+### Bug Fixes
+* Fix `cpptools` getting stuck when `clang-format` is invoked on a file in a `.clang-format-ignore`. [#13937](https://github.com/microsoft/vscode-cpptools/issues/13937)
+* Fix the `C/C++ Properties Schema Reference` link in the configuration UI editor. [#13949](https://github.com/microsoft/vscode-cpptools/issues/13949)
+* Fix a crash with `preReleaseCheck`. [#13953](https://github.com/microsoft/vscode-cpptools/issues/13953)
+* Fix extension activation getting stuck when certain SSH config files are processed (by the SSH targets view feature). [#13966](https://github.com/microsoft/vscode-cpptools/issues/13966)
+* Fix document symbols randomly showing previous versions of symbols after they are modified. [#13967](https://github.com/microsoft/vscode-cpptools/issues/13967)
+* Prevent tag parsing of .js files to avoid a crash. [#13980](https://github.com/microsoft/vscode-cpptools/issues/13980)
+* Fix some invalid assumptions for cppbuild tasks. [PR #13989](https://github.com/microsoft/vscode-cpptools/pull/13989)
+* Fix a random crash after changing settings while code analysis is running.
+* Fix a random memory corruption and deadlock (involving `task_deque`).
+* A potential fix for a crash (involving `line_offset_t`).
+
+## Version 1.27.7: September 18, 2025
+### Enhancements
+* Show a warning when too many files are processed in a workspace. [#10828](https://github.com/microsoft/vscode-cpptools/issues/10828)
+* Improvements to GitHub Copilot activation. [PR #13924](https://github.com/microsoft/vscode-cpptools/pull/13924)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer)
+* Add a `C_Cpp.windowsErrorReportingMode` setting and default to only enabling WER for the first crash in a session. [#13928](https://github.com/microsoft/vscode-cpptools/issues/13928)
+
 ### Bug Fixes
 * Fix the `__FILE_NAME__` macro being undefined with IntelliSense when using GCC/Clang. [#11164](https://github.com/microsoft/vscode-cpptools/issues/11164)
-* Fix Doxygen generation overwriting a function signature. [#13839](https://github.com/microsoft/vscode-cpptools/issues/13839)
-* Fix a crash on Windows 7, 8, and 10 (Server 2008, 2012, and 2016). [#13851](https://github.com/microsoft/vscode-cpptools/issues/13851)
-* Fix "CMake Tools" translations. [PR #13854](https://github.com/microsoft/vscode-cpptools/pull/13854)
-
-## Version 1.27.0: August 7, 2025
-### Bug Fixes
 * Fix an IntelliSense crash in `add_cached_tokens_to_string`. [#11900](https://github.com/microsoft/vscode-cpptools/issues/11900)
 * Fix an IntelliSense crash in `find_subobject_for_interpreter_address`. [#12464](https://github.com/microsoft/vscode-cpptools/issues/12464)
+* Fix input delays when editing `c_cpp_properties.json`. [#13591](https://github.com/microsoft/vscode-cpptools/issues/13591)
 * Fix changes to the active field being lost in the configuration UI when navigating away. [#13636](https://github.com/microsoft/vscode-cpptools/issues/13636)
 * Fix compiler query failing on Windows if optional job-related API calls fail. [#13679](https://github.com/microsoft/vscode-cpptools/issues/13679)
 * Fix bugs with Doxygen comments. [#13725](https://github.com/microsoft/vscode-cpptools/issues/13725), [#13726](https://github.com/microsoft/vscode-cpptools/issues/13726), [#13745](https://github.com/microsoft/vscode-cpptools/issues/13745)
@@ -29,7 +44,30 @@
 * Fix `.txx` and `.tpp` not being handled as C++ header files. [#13808](https://github.com/microsoft/vscode-cpptools/issues/13808)
 * Fix an error when using GitHub Copilot with VS Code older than 1.90.0. [#13818](https://github.com/microsoft/vscode-cpptools/issues/13818)
 * Fix activation failing if the `c_cpp_properties.json` exists but fails to be opened. [#13829](https://github.com/microsoft/vscode-cpptools/issues/13829)
+* Fix crash recovery. [#13838](https://github.com/microsoft/vscode-cpptools/issues/13838)
+* Fix Doxygen generation overwriting a function signature. [#13839](https://github.com/microsoft/vscode-cpptools/issues/13839)
+* Fix a crash on Windows 7, 8, and 10 (Server 2008, 2012, and 2016). [#13851](https://github.com/microsoft/vscode-cpptools/issues/13851)
+* Fix "CMake Tools" translations. [PR #13854](https://github.com/microsoft/vscode-cpptools/pull/13854)
+* Fix the language server getting stuck by a notification message box after a configuration provider times out. [#13862](https://github.com/microsoft/vscode-cpptools/issues/13862)
+* Fix a crash regression with `__BASE_FILE__`. [#13866](https://github.com/microsoft/vscode-cpptools/issues/13866)
+* Fix non-recursive browse paths from configuration providers. [#13886](https://github.com/microsoft/vscode-cpptools/issues/13886)
+* Fix an infinite recursion IntelliSense crash. [#13908](https://github.com/microsoft/vscode-cpptools/issues/13908)
+* Fix an IntelliSense crash during completion when using GCC ARM compilers. [#13925](https://github.com/microsoft/vscode-cpptools/issues/13925)
 * Fix an IntelliSense bug that could cause incorrect string lengths to be reported for string literals in files that use certain file encodings.
+* Fix an IntelliSense process crash involving `requires` expressions and templates.
+* Fix an IntelliSense process crash from deleting memory that is still in use.
+* Fix an IntelliSense process crash with `class_has_mutable_member`.
+* Fix a case of uninitialized memory in `cpptools-srv`.
+
+## Version 1.26.5: September 10, 2025
+### Bug Fix
+* Fix extension activation getting stuck by GitHub Copilot activation. [#13914](https://github.com/microsoft/vscode-cpptools/issues/13914)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer) [PR #13918](https://github.com/microsoft/vscode-cpptools/pull/13918)
+
+## Version 1.26.4: September 9, 2025
+### Enhancement
+* Update GitHub Copilot APIs. [PR #13877](https://github.com/microsoft/vscode-cpptools/pull/13877)
+  * Thank you for the contribution. [@dbaeumer (Dirk Bäumer)](https://github.com/dbaeumer)
 
 ## Version 1.26.3: June 24, 2025
 ### New Feature

@@ -5,6 +5,9 @@ parameters:
 - name: srcDir
   type: string
   default: ''
+- name: signType
+  type: string
+  default: 'real'
 
 jobs:
 - job: package
@@ -12,6 +15,15 @@ jobs:
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 1
   templateContext:
+    mb: # Enable the MicroBuild Signing toolset
+      signing:
+        enabled: true
+        signType: ${{ parameters.signType }}
+        zipSources: false
+        ${{ if eq(parameters.signType, 'real') }}:
+          signWithProd: true
+    featureFlags:
+      autoBaseline: false
     outputs:
     - output: pipelineArtifact
       displayName: '${{ parameters.vsixName }}'

@@ -55,6 +55,7 @@ let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timeout;
 let codeActionProvider: vscode.Disposable;
 export const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
+export let isWritingCrashCallStack: boolean = false;
 
 type VcpkgDatabase = Record<string, string[]>; // Stored as <header file entry> -> [<port name>]
 let vcpkgDbPromise: Promise<VcpkgDatabase>;
@@ -477,21 +478,7 @@ async function onSwitchHeaderSource(): Promise<void> {
         }
     });
     const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
-    const workbenchConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("workbench");
-    let foundEditor: boolean = false;
-    if (workbenchConfig.get("editor.revealIfOpen")) {
-        // If the document is already visible in another column, open it there.
-        vscode.window.visibleTextEditors.forEach(editor => {
-            if (editor.document === document && !foundEditor) {
-                foundEditor = true;
-                void vscode.window.showTextDocument(document, editor.viewColumn).then(undefined, logAndReturn.undefined);
-            }
-        });
-    }
-
-    if (!foundEditor) {
-        void vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
-    }
+    void vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
 }
 
 /**
@@ -1023,9 +1010,11 @@ export function watchForCrashes(crashDirectory: string): void {
                         return;
                     }
                     const crashDate: Date = new Date();
+                    isWritingCrashCallStack = true;
 
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
+                        isWritingCrashCallStack = false;
                         fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
                             void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
                         });
@@ -1394,7 +1383,7 @@ export async function preReleaseCheck(): Promise<void> {
 
         const data: any = await response?.json().catch(logAndReturn.undefined);
 
-        const preReleaseAvailable = data?.results[0].extensions[0].versions[0].properties.some((e: object) => Object.values(e).includes("Microsoft.VisualStudio.Code.PreRelease"));
+        const preReleaseAvailable = data?.results?.[0]?.extensions?.[0]?.versions?.[0]?.properties?.some((e: object) => Object.values(e).includes("Microsoft.VisualStudio.Code.PreRelease"));
 
         // If the user isn't on the pre-release version, but one is available, prompt them to install it.
         if (preReleaseAvailable) {

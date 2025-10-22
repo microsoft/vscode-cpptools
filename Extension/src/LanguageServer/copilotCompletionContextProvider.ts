@@ -2,7 +2,7 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import { ContextResolver, ResolveRequest, SupportedContextItem } from '@github/copilot-language-server';
+import { ContextResolver, ResolveRequest, SupportedContextItem, type ContextProvider } from '@github/copilot-language-server';
 import { randomUUID } from 'crypto';
 import * as vscode from 'vscode';
 import { DocumentSelector } from 'vscode-languageserver-protocol';
@@ -11,7 +11,7 @@ import { getOutputChannelLogger, Logger } from '../logger';
 import * as telemetry from '../telemetry';
 import { CopilotCompletionContextResult } from './client';
 import { CopilotCompletionContextTelemetry } from './copilotCompletionContextTelemetry';
-import { getCopilotApi } from './copilotProviders';
+import { getCopilotChatApi, getCopilotClientApi, type CopilotContextProviderAPI } from './copilotProviders';
 import { clients } from './extension';
 import { CppSettings } from './settings';
 
@@ -83,7 +83,7 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
     private static readonly defaultMaxSnippetLength = 3 * 1024;
     private static readonly defaultDoAggregateSnippets = true;
     private completionContextCancellation = new vscode.CancellationTokenSource();
-    private contextProviderDisposable: vscode.Disposable | undefined;
+    private contextProviderDisposables: vscode.Disposable[] | undefined;
     static readonly CppContextProviderEnabledFeatures = 'enabledFeatures';
     static readonly CppContextProviderTimeBudgetMs = 'timeBudgetMs';
     static readonly CppContextProviderMaxSnippetCount = 'maxSnippetCount';
@@ -304,15 +304,20 @@ export class CopilotCompletionContextProvider implements ContextResolver<Support
         return Math.round(performance.now() - startTime);
     }
 
-    public static async Create() {
+    public static Create() {
         const copilotCompletionProvider = new CopilotCompletionContextProvider(getOutputChannelLogger());
-        await copilotCompletionProvider.registerCopilotContextProvider();
+        copilotCompletionProvider.registerCopilotContextProvider();
         return copilotCompletionProvider;
     }
 
     public dispose(): void {
         this.completionContextCancellation.cancel();
-        this.contextProviderDisposable?.dispose();
+        if (this.contextProviderDisposables) {
+            for (const disposable of this.contextProviderDisposables) {
+                disposable.dispose();
+            }
+            this.contextProviderDisposables = undefined;
+        }
     }
 
     public removeFile(fileUri: string): void {
@@ -440,30 +445,94 @@ ${copilotCompletionContext?.areSnippetsMissing ? "(missing code snippets)" : ""}
         }
     }
 
-    public async registerCopilotContextProvider(): Promise<void> {
-        const properties: Record<string, string> = {};
+    public registerCopilotContextProvider(): void {
         const registerCopilotContextProvider = 'registerCopilotContextProvider';
-        try {
-            const copilotApi = await getCopilotApi();
-            if (!copilotApi) { throw new CopilotContextProviderException("getCopilotApi() returned null, Copilot is missing or inactive."); }
-            const hasGetContextProviderAPI = "getContextProviderAPI" in copilotApi;
-            if (!hasGetContextProviderAPI) { throw new CopilotContextProviderException("getContextProviderAPI() is not available."); }
-            const contextAPI = await copilotApi.getContextProviderAPI("v1");
-            if (!contextAPI) { throw new CopilotContextProviderException("getContextProviderAPI(v1) returned null."); }
-            this.contextProviderDisposable = contextAPI.registerContextProvider({
-                id: CopilotCompletionContextProvider.providerId,
-                selector: CopilotCompletionContextProvider.defaultCppDocumentSelector,
-                resolver: this
-            });
-            properties["cppCodeSnippetsProviderRegistered"] = "true";
-        } catch (e) {
-            console.debug("Failed to register the Copilot Context Provider.");
-            properties["error"] = "Failed to register the Copilot Context Provider";
-            if (e instanceof CopilotContextProviderException) {
-                properties["error"] += `: ${e.message} `;
+        const contextProvider = {
+            id: CopilotCompletionContextProvider.providerId,
+            selector: CopilotCompletionContextProvider.defaultCppDocumentSelector,
+            resolver: this
+        };
+        type RegistrationResult = { message: string } | boolean;
+        const clientPromise: Promise<RegistrationResult> = getCopilotClientApi().then(async (api) => {
+            if (!api) {
+                throw new CopilotContextProviderException("getCopilotApi() returned null, Copilot client is missing or inactive.");
             }
-        } finally {
+            const disposable = await this.installContextProvider(api, contextProvider);
+            if (disposable) {
+                this.contextProviderDisposables = this.contextProviderDisposables ?? [];
+                this.contextProviderDisposables.push(disposable);
+                return true;
+            } else {
+                throw new CopilotContextProviderException("getContextProviderAPI() is not available in Copilot client.");
+            }
+        }).catch((e) => {
+            console.debug("Failed to register the Copilot Context Provider with Copilot client.");
+            let message = "Failed to register the Copilot Context Provider with Copilot client";
+            if (e instanceof CopilotContextProviderException) {
+                message += `: ${e.message} `;
+            }
+            return { message };
+        });
+        const chatPromise: Promise<RegistrationResult> = getCopilotChatApi().then(async (api) => {
+            if (!api) {
+                throw new CopilotContextProviderException("getCopilotChatApi() returned null, Copilot Chat is missing or inactive.");
+            }
+            const disposable = await this.installContextProvider(api, contextProvider);
+            if (disposable) {
+                this.contextProviderDisposables = this.contextProviderDisposables ?? [];
+                this.contextProviderDisposables.push(disposable);
+                return true;
+            } else {
+                throw new CopilotContextProviderException("getContextProviderAPI() is not available in Copilot Chat.");
+            }
+        }).catch((e) => {
+            console.debug("Failed to register the Copilot Context Provider with Copilot Chat.");
+            let message = "Failed to register the Copilot Context Provider with Copilot Chat";
+            if (e instanceof CopilotContextProviderException) {
+                message += `: ${e.message} `;
+            }
+            return { message };
+        });
+        // The client usually doesn't block. So test it first.
+        clientPromise.then((clientResult) => {
+            const properties: Record<string, string> = {};
+            if (isBoolean(clientResult) && clientResult) {
+                properties["cppCodeSnippetsProviderRegistered"] = "true";
+                telemetry.logCopilotEvent(registerCopilotContextProvider, { ...properties });
+                return;
+            }
+            return chatPromise.then((chatResult) => {
+                const properties: Record<string, string> = {};
+                if (isBoolean(chatResult) && chatResult) {
+                    properties["cppCodeSnippetsProviderRegistered"] = "true";
+                    telemetry.logCopilotEvent(registerCopilotContextProvider, { ...properties });
+                    return;
+                } else if (!isBoolean(clientResult) && isString(clientResult.message)) {
+                    properties["error"] = clientResult.message;
+                } else if (!isBoolean(chatResult) && isString(chatResult.message)) {
+                    properties["error"] = chatResult.message;
+                } else {
+                    properties["error"] = "Failed to register the Copilot Context Provider for unknown reason.";
+                }
+                telemetry.logCopilotEvent(registerCopilotContextProvider, { ...properties });
+            });
+        }).catch((e) => {
+            const properties: Record<string, string> = {};
+            properties["error"] = `Failed to register the Copilot Context Provider with exception: ${e}`;
             telemetry.logCopilotEvent(registerCopilotContextProvider, { ...properties });
+        });
+    }
+
+    private async installContextProvider(copilotAPI: CopilotContextProviderAPI, contextProvider: ContextProvider<SupportedContextItem>): Promise<vscode.Disposable | undefined> {
+        const hasGetContextProviderAPI = typeof copilotAPI.getContextProviderAPI === 'function';
+        if (hasGetContextProviderAPI) {
+            const contextAPI = await copilotAPI.getContextProviderAPI("v1");
+            if (contextAPI) {
+                return contextAPI.registerContextProvider(contextProvider);
+            }
+            return undefined;
+        } else {
+            return undefined;
         }
     }
 }
