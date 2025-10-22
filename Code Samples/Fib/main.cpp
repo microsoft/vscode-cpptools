@@ -54,5 +54,5 @@ int main(int argc, char **argv)
 
     std::cout << "All threads exited!" << std::endl;
 
-    return 1;
+    return 0;
 }
