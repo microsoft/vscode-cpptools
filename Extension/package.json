@@ -3538,6 +3538,12 @@
                         "default": "default",
                         "markdownDescription": "%c_cpp.configuration.windowsErrorReportingMode.markdownDescription%",
                         "scope": "window"
+                    },
+                    "C_Cpp.persistVsDeveloperEnvironment": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "%c_cpp.configuration.persistVsDeveloperEnvironment.description%",
+                        "scope": "window"
                     }
                 }
             }
@@ -3702,6 +3708,16 @@
                 "title": "%c_cpp.command.BuildAndRunFile.title%",
                 "category": "C/C++",
                 "icon": "$(run)"
+            },
+            {
+                "command": "C_Cpp.SetVsDeveloperEnvironment",
+                "title": "%c_cpp.command.SetVsDeveloperEnvironment.title%",
+                "category": "C/C++"
+            },
+            {
+                "command": "C_Cpp.ClearVsDeveloperEnvironment",
+                "title": "%c_cpp.command.ClearVsDeveloperEnvironment.title%",
+                "category": "C/C++"
             },
             {
                 "command": "C_Cpp.AddDebugConfiguration",
@@ -6146,6 +6162,14 @@
                     "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile"
                 },
                 {
+                    "command": "C_Cpp.SetVsDeveloperEnvironment",
+                    "when": "workspacePlatform == windows"
+                },
+                {
+                    "command": "C_Cpp.ClearVsDeveloperEnvironment",
+                    "when": "workspacePlatform == windows"
+                },
+                {
                     "command": "C_Cpp.AddDebugConfiguration",
                     "when": "config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isFolderOpen"
                 },
@@ -6769,11 +6793,13 @@
         "node-fetch": "^2.7.0",
         "node-loader": "^2.0.0",
         "node-stream-zip": "^1.15.0",
+        "node-vcvarsall": "^1.2.0",
+        "node-vswhere": "^1.0.2",
         "plist": "^3.1.0",
         "posix-getopt": "^1.2.1",
         "shell-quote": "^1.8.1",
         "ssh-config": "^4.4.4",
-        "tmp": "^0.2.4",
+        "tmp": "^0.2.5",
         "vscode-cpptools": "^7.1.1",
         "vscode-languageclient": "^8.1.0",
         "vscode-nls": "^5.2.0",

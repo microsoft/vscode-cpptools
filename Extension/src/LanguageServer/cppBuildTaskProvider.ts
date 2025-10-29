@@ -12,6 +12,7 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { Client } from './client';
 import * as configs from './configurations';
+import { getEffectiveEnvironment, isEnvironmentOverrideApplied } from "./devcmd";
 import * as ext from './extension';
 import { OtherSettings } from './settings';
 
@@ -245,7 +246,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, ext.CppSourceStr);
             cppBuildTask.detail = task.detail;
             cppBuildTask.existing = true;
-            if (!util.isString(task.group) && task.group.isDefault) {
+            if (util.isObject(task.group) && task.group.isDefault) {
                 cppBuildTask.isDefault = true;
             }
             return cppBuildTask;
@@ -428,6 +429,13 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             if (folder) {
                 this.options.cwd = folder.uri.fsPath;
             }
+        }
+
+        if (isEnvironmentOverrideApplied()) {
+            // If the user has applied the developer environment to this workspace, it should apply to all newly opened terminals.
+            // However, this does not apply to processes that we spawn ourselves in the Pseudoterminal, so we need to specify the
+            // correct environment in order to emulate the terminal behavior properly.
+            this.options.env = getEffectiveEnvironment();
         }
 
         const splitWriteEmitter = (lines: string | Buffer) => {
