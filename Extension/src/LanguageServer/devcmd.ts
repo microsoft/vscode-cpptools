@@ -126,6 +126,9 @@ function vsDisplayNameWithSuffix(installation: vswhere.Installation): string {
         } else if (installation.channelId.endsWith('.IntPreview')) {
             return 'Int Preview';
         } else if (installation.channelId.endsWith('.Preview')) {
+            if (parseInt(installation.installationVersion) >= 18) {
+                return 'Insiders';
+            }
             return 'Preview';
         }
         return '';
