@@ -3559,12 +3559,13 @@ node-stream-zip@^1.15.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-stream-zip/-/node-stream-zip-1.15.0.tgz#158adb88ed8004c6c49a396b50a6a5de3bca33ea"
   integrity sha1-FYrbiO2ABMbEmjlrUKal3jvKM+o=
 
-node-vcvarsall@^1.1.1:
-  version "1.1.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-vcvarsall/-/node-vcvarsall-1.1.1.tgz#ec10a9fafcc7fd4033f716f82a04a2a5a13e1a62"
-  integrity sha1-7BCp+vzH/UAz9xb4KgSipaE+GmI=
+node-vcvarsall@^1.2.0:
+  version "1.2.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/node-vcvarsall/-/node-vcvarsall-1.2.0.tgz#995a5a8e49467f9c45ed83a71c1aa45adb44421a"
+  integrity sha1-mVpajklGf5xF7YOnHBqkWttEQho=
   dependencies:
     node-vswhere "^1.0.2"
+    semver "^7.7.3"
     tmp "^0.2.5"
 
 node-vswhere@^1.0.2:
@@ -4245,6 +4246,11 @@ semver@^7.3.4, semver@^7.3.7, semver@^7.5.4, semver@^7.6.2, semver@^7.6.3:
   version "7.7.1"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/semver/-/semver-7.7.1.tgz#abd5098d82b18c6c81f6074ff2647fd3e7220c9f"
   integrity sha1-q9UJjYKxjGyB9gdP8mR/0+ciDJ8=
+
+semver@^7.7.3:
+  version "7.7.3"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/semver/-/semver-7.7.3.tgz#4b5f4143d007633a8dc671cd0a6ef9147b8bb946"
+  integrity sha1-S19BQ9AHYzqNxnHNCm75FHuLuUY=
 
 serialize-javascript@^6.0.2:
   version "6.0.2"

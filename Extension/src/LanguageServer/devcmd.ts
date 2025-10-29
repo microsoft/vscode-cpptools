@@ -89,7 +89,7 @@ export async function setEnvironment(context?: vscode.ExtensionContext) {
     const host = vars['VSCMD_ARG_HOST_ARCH'];
     const target = vars['VSCMD_ARG_TGT_ARCH'];
     const arch = vcvars.getArchitecture({
-        host: match(host, { 'x86': 'x86', 'x64': 'x64' }) ?? 'x64',
+        host: match(host, { 'x86': 'x86', 'x64': 'x64', 'arm64': 'arm64' }) ?? 'x64',
         target: match(target, { 'x86': 'x86', 'x64': 'x64', 'arm64': 'ARM64', 'arm': 'ARM' }) ?? 'x64'
     });
     const settings = new CppSettings();
@@ -109,7 +109,8 @@ async function getVSInstallations() {
         all: true,
         prerelease: true,
         sort: true,
-        requires: ['Microsoft.VisualStudio.Component.VC.Tools.x86.x64']
+        requires: ['Microsoft.VisualStudio.Component.VC.Tools.x86.x64', 'Microsoft.VisualStudio.Component.VC.Tools.ARM64'],
+        requiresAny: true
     });
 
     if (installations.length === 0) {
@@ -217,9 +218,9 @@ async function getHostsAndTargets(vcPath: string): Promise<vcvars.HostTarget[]> 
     }
     const hostTargets: vcvars.HostTarget[] = [];
     for (const host of hosts) {
-        const h = match<'x86' | 'x64' | undefined>(host.toLowerCase(), { 'hostx86': 'x86', 'hostx64': 'x64' });
+        const h = match<'x86' | 'x64' | 'arm64' | undefined>(host.toLowerCase(), { 'hostx86': 'x86', 'hostx64': 'x64', 'hostarm64': 'arm64' });
         if (!h) {
-            // skip any arm/arm64 folders because there is no arm compiler
+            // skip any non-matching folders
             continue;
         }
         const targets = await fs.readdir(path.join(vcPath, host));
