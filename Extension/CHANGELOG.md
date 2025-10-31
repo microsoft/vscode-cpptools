@@ -1,5 +1,23 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.28.3: October 16, 2025
+### Enhancements
+* Add IntelliSense support for c23 `bool`, `true`, and `false`. [#13737](https://github.com/microsoft/vscode-cpptools/issues/13737)
+* Add missing C/C++ keyword completions for newer language standards. [#13982](https://github.com/microsoft/vscode-cpptools/issues/13982)
+* Update the bundled `clang-tidy` and `clang-format` from 20.1.7 to 21.1.3.
+
+### Bug Fixes
+* Fix `cpptools` getting stuck when `clang-format` is invoked on a file in a `.clang-format-ignore`. [#13937](https://github.com/microsoft/vscode-cpptools/issues/13937)
+* Fix the `C/C++ Properties Schema Reference` link in the configuration UI editor. [#13949](https://github.com/microsoft/vscode-cpptools/issues/13949)
+* Fix a crash with `preReleaseCheck`. [#13953](https://github.com/microsoft/vscode-cpptools/issues/13953)
+* Fix extension activation getting stuck when certain SSH config files are processed (by the SSH targets view feature). [#13966](https://github.com/microsoft/vscode-cpptools/issues/13966)
+* Fix document symbols randomly showing previous versions of symbols after they are modified. [#13967](https://github.com/microsoft/vscode-cpptools/issues/13967)
+* Prevent tag parsing of .js files to avoid a crash. [#13980](https://github.com/microsoft/vscode-cpptools/issues/13980)
+* Fix some invalid assumptions for cppbuild tasks. [PR #13989](https://github.com/microsoft/vscode-cpptools/pull/13989)
+* Fix a random crash after changing settings while code analysis is running.
+* Fix a random memory corruption and deadlock (involving `task_deque`).
+* A potential fix for a crash (involving `line_offset_t`).
+
 ## Version 1.27.7: September 18, 2025
 ### Enhancements
 * Show a warning when too many files are processed in a workspace. [#10828](https://github.com/microsoft/vscode-cpptools/issues/10828)
