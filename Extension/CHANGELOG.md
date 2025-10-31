@@ -9,7 +9,7 @@
 ### Bug Fixes
 * Fix 'Find All References' and 'Rename' on `#define` macro definitions. [#6194](https://github.com/microsoft/vscode-cpptools/issues/6194)
 * Fix anonymous enums not working in gcc/clang modes. [#10436](https://github.com/microsoft/vscode-cpptools/issues/10436)
-* Fix mac framework search path detection to include paths passed in the `includePath`. [#13993](https://github.com/microsoft/vscode-cpptools/issues/13993)
+* Fix mac framework search path detection to include paths passed in the `includePath` from a configuration provider. [#13993](https://github.com/microsoft/vscode-cpptools/issues/13993)
 * Fix formatting with `clang-tidy` randomly getting stuck on Windows (on a call to `GetOverlappedResult`). [#14025](https://github.com/microsoft/vscode-cpptools/issues/14025)
 * Fix code analysis re-running automatically after a settings change when diagnostics already exist if it was manually instead of automatically invoked.
 * Reduce the memory usage in a couple cases to reduce the chance of a `bad_alloc` in cpptools.
