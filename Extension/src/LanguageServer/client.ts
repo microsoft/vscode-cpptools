@@ -1391,6 +1391,7 @@ export class DefaultClient implements Client {
                 }
 
                 this.copilotCompletionProvider = CopilotCompletionContextProvider.Create();
+                util.setProgress(util.getProgressCopilotSuccess());
                 this.disposables.push(this.copilotCompletionProvider);
 
                 // Listen for messages from the language server.
@@ -1795,10 +1796,10 @@ export class DefaultClient implements Client {
 
         if (Object.keys(changedSettings).length > 0) {
             if (this === defaultClient) {
-                if (changedSettings.commentContinuationPatterns) {
+                if (changedSettings.commentContinuationPatterns !== undefined) {
                     updateLanguageConfigurations();
                 }
-                if (changedSettings.loggingLevel) {
+                if (changedSettings.loggingLevel !== undefined) {
                     const oldLoggingLevelLogged: boolean = this.loggingLevel > 1;
                     this.loggingLevel = util.getNumericLoggingLevel(changedSettings.loggingLevel);
                     if (oldLoggingLevelLogged || this.loggingLevel > 1) {
@@ -1806,7 +1807,7 @@ export class DefaultClient implements Client {
                     }
                 }
                 const settings: CppSettings = new CppSettings();
-                if (changedSettings.enhancedColorization) {
+                if (changedSettings.enhancedColorization !== undefined) {
                     if (settings.isEnhancedColorizationEnabled && semanticTokensLegend) {
                         this.semanticTokensProvider = new SemanticTokensProvider();
                         this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
@@ -1848,11 +1849,17 @@ export class DefaultClient implements Client {
                     void ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, showButtonSender);
                 }
             }
-            if (changedSettings.legacyCompilerArgsBehavior) {
+            if (changedSettings.legacyCompilerArgsBehavior !== undefined) {
                 this.configuration.handleConfigurationChange();
             }
             if (changedSettings["default.compilerPath"] !== undefined || changedSettings["default.compileCommands"] !== undefined || changedSettings["default.configurationProvider"] !== undefined) {
                 void ui.ShowConfigureIntelliSenseButton(false, this).catch(logAndReturn.undefined);
+            }
+            if (changedSettings.persistVsDeveloperEnvironment !== undefined) {
+                if (util.extensionContext) {
+                    const settings: CppSettings = new CppSettings();
+                    util.extensionContext.environmentVariableCollection.persistent = settings.persistVSDeveloperEnvironment;
+                }
             }
             this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
