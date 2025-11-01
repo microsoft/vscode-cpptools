@@ -16,6 +16,6 @@
 	"walkthrough.windows.link.install": "Installa",
 	"walkthrough.windows.note1": "Nota",
 	"walkthrough.windows.note1.text": "È possibile usare il set di strumenti C++ di Visual Studio Build Tools insieme a Visual Studio Code per compilare, creare e verificare qualsiasi codebase C++, purché sia disponibile una licenza di Visual Studio valida (Community, Pro o Enterprise) usata attivamente per sviluppare la codebase C++.",
-	"walkthrough.windows.open.command.prompt": "Aprire {0} digitando '{1}' nel menu Start di Windows.",
+	"walkthrough.windows.open.command.prompt": "Open the {0} by typing {1} in the Windows Start menu.",
 	"walkthrough.windows.check.install": "Controllare l'installazione di MSVC digitando {0} in {1}. Verranno visualizzati un messaggio di copyright, la versione e la descrizione sulla sintassi di base."
 }
