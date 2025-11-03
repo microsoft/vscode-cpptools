@@ -1,6 +1,25 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.28.2: October 14, 2025
+## Version 1.29.0: November 4, 2025
+### Enhancements
+* Add built-in file associations for C++ extensionless system headers and set `C_Cpp.autoAddFileAssociations` to `false` by default. [#4077](https://github.com/microsoft/vscode-cpptools/issues/4077)
+* Enable setting the VS developer environment without running VS Code from the developer command prompt. [#4742](https://github.com/microsoft/vscode-cpptools/issues/4742)
+* Add IntelliSense support for `c23` enums with an underlying type. [#13675](https://github.com/microsoft/vscode-cpptools/issues/13675)
+
+### Bug Fixes
+* Fix 'Find All References' and 'Rename' on `#define` macro definitions. [#6194](https://github.com/microsoft/vscode-cpptools/issues/6194)
+* Fix anonymous enums not working in gcc/clang modes. [#10436](https://github.com/microsoft/vscode-cpptools/issues/10436)
+* Fix Doxygen comments at the end of a function. [#13725](https://github.com/microsoft/vscode-cpptools/issues/13725)
+* Fix mac framework search path detection to include paths passed in the `includePath` from a configuration provider. [#13993](https://github.com/microsoft/vscode-cpptools/issues/13993)
+* Fix formatting with `clang-tidy` randomly getting stuck on Windows (on a call to `GetOverlappedResult`). [#14025](https://github.com/microsoft/vscode-cpptools/issues/14025)
+* Fix code analysis re-running automatically after a settings change when diagnostics already exist if it was manually instead of automatically invoked.
+* Reduce the memory usage in a couple cases to reduce the chance of a `bad_alloc` in cpptools.
+* Update `clang-format` and `clang-tidy` from 21.1.3 to 21.1.4 (fixes some formatting bugs).
+* Fix a case where a large file could cause a `bad_alloc` in cpptools-srv on Windows.
+* Update the default compiler search to include newer versions of clang/gcc.
+* Fix a crash in `detect_encoding`.
+
+## Version 1.28.3: October 16, 2025
 ### Enhancements
 * Add IntelliSense support for c23 `bool`, `true`, and `false`. [#13737](https://github.com/microsoft/vscode-cpptools/issues/13737)
 * Add missing C/C++ keyword completions for newer language standards. [#13982](https://github.com/microsoft/vscode-cpptools/issues/13982)
@@ -14,6 +33,7 @@
 * Fix document symbols randomly showing previous versions of symbols after they are modified. [#13967](https://github.com/microsoft/vscode-cpptools/issues/13967)
 * Prevent tag parsing of .js files to avoid a crash. [#13980](https://github.com/microsoft/vscode-cpptools/issues/13980)
 * Fix some invalid assumptions for cppbuild tasks. [PR #13989](https://github.com/microsoft/vscode-cpptools/pull/13989)
+* Fix a random crash after changing settings while code analysis is running.
 * Fix a random memory corruption and deadlock (involving `task_deque`).
 * A potential fix for a crash (involving `line_offset_t`).
 

@@ -12,6 +12,7 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { Client } from './client';
 import * as configs from './configurations';
+import { getEffectiveEnvironment, isEnvironmentOverrideApplied } from "./devcmd";
 import * as ext from './extension';
 import { OtherSettings } from './settings';
 
@@ -245,7 +246,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, ext.CppSourceStr);
             cppBuildTask.detail = task.detail;
             cppBuildTask.existing = true;
-            if (!util.isString(task.group) && task.group.isDefault) {
+            if (util.isObject(task.group) && task.group.isDefault) {
                 cppBuildTask.isDefault = true;
             }
             return cppBuildTask;
@@ -430,6 +431,14 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             }
         }
 
+        if (isEnvironmentOverrideApplied()) {
+            // If the user has applied the developer environment to this workspace, it should apply to all newly opened terminals.
+            // However, this does not apply to processes that we spawn ourselves in the Pseudoterminal, so we need to specify the
+            // correct environment in order to emulate the terminal behavior properly.
+            this.options.env = getEffectiveEnvironment();
+            telemetry.logLanguageServerEvent('buildUsesEnvironmentOverride');
+        }
+
         const splitWriteEmitter = (lines: string | Buffer) => {
             const splitLines: string[] = lines.toString().split(/\r?\n/g);
             for (let i: number = 0; i < splitLines.length; i++) {
@@ -490,18 +499,15 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
 
     private printBuildSummary(error: string, stdout: string, stderr: string, spawnResult: number): number {
         if (spawnResult !== 0) {
-            telemetry.logLanguageServerEvent("cppBuildTaskError");
             this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);
             return -1;
         }
         if (error || (!stdout && stderr && stderr.includes("error")) ||
             (stdout && (stdout.includes("error C") || stdout.includes("LINK : fatal error")))) { // cl.exe compiler errors
-            telemetry.logLanguageServerEvent("cppBuildTaskError");
             this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);
             return -1;
         } else if ((!stdout && stderr) || // gcc/clang
             (stdout && stdout.includes("warning C"))) { // cl.exe compiler warnings
-            telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
             this.writeEmitter.fire(localize("build.finished.with.warnings", "Build finished with warning(s).") + this.endOfLine);
             return 0;
         } else {
