@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.29.0: November 3, 2025
+## Version 1.29.0: November 4, 2025
 ### Enhancements
 * Add built-in file associations for C++ extensionless system headers and set `C_Cpp.autoAddFileAssociations` to `false` by default. [#4077](https://github.com/microsoft/vscode-cpptools/issues/4077)
 * Enable setting the VS developer environment without running VS Code from the developer command prompt. [#4742](https://github.com/microsoft/vscode-cpptools/issues/4742)
@@ -9,6 +9,7 @@
 ### Bug Fixes
 * Fix 'Find All References' and 'Rename' on `#define` macro definitions. [#6194](https://github.com/microsoft/vscode-cpptools/issues/6194)
 * Fix anonymous enums not working in gcc/clang modes. [#10436](https://github.com/microsoft/vscode-cpptools/issues/10436)
+* Fix Doxygen comments at the end of a function. [#13725](https://github.com/microsoft/vscode-cpptools/issues/13725)
 * Fix mac framework search path detection to include paths passed in the `includePath` from a configuration provider. [#13993](https://github.com/microsoft/vscode-cpptools/issues/13993)
 * Fix formatting with `clang-tidy` randomly getting stuck on Windows (on a call to `GetOverlappedResult`). [#14025](https://github.com/microsoft/vscode-cpptools/issues/14025)
 * Fix code analysis re-running automatically after a settings change when diagnostics already exist if it was manually instead of automatically invoked.
