@@ -12,8 +12,6 @@
 	"walkthrough.windows.verify.compiler": "Comprobación de la instalación del compilador",
 	"walkthrough.windows.open.command.prompt": "Abra {0} escribiendo '{1}' en el menú Inicio de Windows.",
 	"walkthrough.windows.check.install": "Compruebe la instalación de MSVC escribiendo {0} en {1}. Debería ver un mensaje de copyright con la versión y la descripción de uso básica.",
-	"walkthrough.windows.note2": "Nota",
-	"walkthrough.windows.note2.text": "Para usar MSVC desde la línea de comandos o VS Code, debe ejecutar desde un {0}. Un shell normal como {1}, {2}, o el símbolo del sistema de Windows no tiene establecidas las variables de entorno de ruta de acceso necesarias.",
 	"walkthrough.windows.other.compilers": "Otras opciones del compilador",
 	"walkthrough.windows.text3": "Si su objetivo es Linux desde Windows, consulte {0}. O bien, consulte {1}.",
 	"walkthrough.windows.link.title1": "Uso de C++ y Subsistema de Windows para Linux (WSL) en VS Code",
