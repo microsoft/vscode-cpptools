@@ -13,3 +13,7 @@ OneLocBuild
 
 # ignore imported localization xlf directory
 vscode-translations-import
+
+# Ignore Fib sample build artifacts
+Code Samples/Fib/fib.out
+Code Samples/Fib/fib.out.dSYM/
