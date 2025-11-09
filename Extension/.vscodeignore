@@ -29,25 +29,25 @@ jobs/**
 cgmanifest.json
 
 # ignore development files
-tsconfig.json
-test.tsconfig.json
-ui.tsconfig.json
-tslint.json
+.eslintignore
 .eslintrc.js
-webpack.config.js
-tscCompileList.txt
-gulpfile.js
 .gitattributes
 .gitignore
+gulpfile.js
+localized_string_ids.h
+readme.developer.md
+Reinstalling the Extension.md
+test.tsconfig.json
+translations_auto_pr.js
+tsconfig.json
+tslint.json
+tscCompileList.txt
+ui.tsconfig.json
+webpack.config.js
 CMakeLists.txt
 debugAdapters/install.lock*
 typings/**
 **/*.map
-import_edge_strings.js
-localized_string_ids.h
-translations_auto_pr.js
-readme.developer.md
-Reinstalling the Extension.md
 *.d.ts
 
 # ignore i18n language files

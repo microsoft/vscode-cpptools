@@ -165,7 +165,7 @@ export function getVcpkgRoot(): string {
 export function isHeaderFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
-    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".inl", ".ipp", ".tcc", ".tlh", ".tli", ""].some(ext => fileExtLower === ext);
+    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".inl", ".ipp", ".tcc", ".txx", ".tpp", ".tlh", ".tli", ""].some(ext => fileExtLower === ext);
 }
 
 export function isCppFile(uri: vscode.Uri): boolean {
@@ -247,19 +247,22 @@ export function displayExtensionNotReadyPrompt(): void {
 // Users start with a progress of 0 and it increases as they get further along in using the tool.
 // This eliminates noise/problems due to re-installs, terminated installs that don't send errors,
 // errors followed by workarounds that lead to success, etc.
-const progressInstallSuccess: number = 100;
+const progressDebuggerStarted: number = 50;
+const progressDebuggerSuccess: number = 100;
 const progressExecutableStarted: number = 150;
+const progressCopilotSuccess: number = 180;
 const progressExecutableSuccess: number = 200;
 const progressParseRootSuccess: number = 300;
+const progressLanguageServiceDisabled: number = 400;
 const progressIntelliSenseNoSquiggles: number = 1000;
 // Might add more IntelliSense progress measurements later.
-// IntelliSense progress is separate from the install progress, because parse root can occur afterwards.
+// IntelliSense progress is separate from the activation progress, because parse root can occur afterwards.
 
-const installProgressStr: string = "CPP." + packageJson.version + ".Progress";
+const activationProgressStr: string = "CPP." + packageJson.version + ".Progress";
 const intelliSenseProgressStr: string = "CPP." + packageJson.version + ".IntelliSenseProgress";
 
 export function getProgress(): number {
-    return extensionContext ? extensionContext.globalState.get<number>(installProgressStr, -1) : -1;
+    return extensionContext ? extensionContext.globalState.get<number>(activationProgressStr, -1) : -1;
 }
 
 export function getIntelliSenseProgress(): number {
@@ -268,15 +271,18 @@ export function getIntelliSenseProgress(): number {
 
 export function setProgress(progress: number): void {
     if (extensionContext && getProgress() < progress) {
-        void extensionContext.globalState.update(installProgressStr, progress);
+        void extensionContext.globalState.update(activationProgressStr, progress);
         const telemetryProperties: Record<string, string> = {};
         let progressName: string | undefined;
         switch (progress) {
-            case 0: progressName = "install started"; break;
-            case progressInstallSuccess: progressName = "install succeeded"; break;
+            case 0: progressName = "activation started"; break;
+            case progressDebuggerStarted: progressName = "debugger started"; break;
+            case progressDebuggerSuccess: progressName = "debugger succeeded"; break;
             case progressExecutableStarted: progressName = "executable started"; break;
+            case progressCopilotSuccess: progressName = "copilot succeeded"; break;
             case progressExecutableSuccess: progressName = "executable succeeded"; break;
             case progressParseRootSuccess: progressName = "parse root succeeded"; break;
+            case progressLanguageServiceDisabled: progressName = "language service disabled"; break;
         }
         if (progressName) {
             telemetryProperties.progress = progressName;
@@ -300,10 +306,13 @@ export function setIntelliSenseProgress(progress: number): void {
     }
 }
 
-export function getProgressInstallSuccess(): number { return progressInstallSuccess; } // Download/install was successful (i.e. not blocked by component acquisition).
+export function getProgressDebuggerStarted(): number { return progressDebuggerStarted; } // Debugger initialization was started.
+export function getProgressDebuggerSuccess(): number { return progressDebuggerSuccess; } // Debugger was successfully initialized.
 export function getProgressExecutableStarted(): number { return progressExecutableStarted; } // The extension was activated and starting the executable was attempted.
+export function getProgressCopilotSuccess(): number { return progressCopilotSuccess; } // Copilot activation was successful.
 export function getProgressExecutableSuccess(): number { return progressExecutableSuccess; } // Starting the exe was successful (i.e. not blocked by 32-bit or glibc < 2.18 on Linux)
 export function getProgressParseRootSuccess(): number { return progressParseRootSuccess; } // Parse root was successful (i.e. not blocked by processing taking too long).
+export function getProgressLanguageServiceDisabled(): number { return progressLanguageServiceDisabled; } // The user disabled the language service.
 export function getProgressIntelliSenseNoSquiggles(): number { return progressIntelliSenseNoSquiggles; } // IntelliSense was successful and the user got no squiggles.
 
 export function isUri(input: any): input is vscode.Uri {
@@ -1515,9 +1524,9 @@ export interface ISshLocalForwardInfo {
     remoteSocket?: string;
 }
 
-export function whichAsync(name: string): Promise<string | undefined> {
+export function whichAsync(name: string, path?: string): Promise<string | undefined> {
     return new Promise<string | undefined>(resolve => {
-        which(name, (err, resolved) => {
+        which(name, path ? { path } : {}, (err, resolved) => {
             if (err) {
                 resolve(undefined);
             } else {
@@ -1556,7 +1565,10 @@ export function hasMsvcEnvironment(): boolean {
         'WindowsSDKLibVersion',
         'WindowsSDKVersion'
     ];
-    return msvcEnvVars.every((envVarName) => process.env[envVarName] !== undefined && process.env[envVarName] !== '');
+    return msvcEnvVars.every(envVarName =>
+        (process.env[envVarName] !== undefined && process.env[envVarName] !== '') ||
+        extensionContext?.environmentVariableCollection?.get(envVarName) !== undefined
+    );
 }
 
 function isIntegral(str: string): boolean {
@@ -1827,4 +1839,17 @@ export function equals(array1: string[] | undefined, array2: string[] | undefine
         }
     }
     return true;
+}
+
+export function getVSCodeLanguageModel(): any | undefined {
+    // Check if the user has access to vscode language model.
+    const vscodelm = (vscode as any).lm;
+    if (!vscodelm) {
+        return undefined;
+    }
+    // Check that vscodelm has a method called 'selectChatModels'
+    if (!vscodelm.selectChatModels || typeof vscodelm.selectChatModels !== 'function') {
+        return undefined;
+    }
+    return vscodelm;
 }

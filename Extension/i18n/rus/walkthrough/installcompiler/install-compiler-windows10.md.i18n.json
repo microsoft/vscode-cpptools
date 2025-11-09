@@ -12,8 +12,6 @@
 	"walkthrough.windows.verify.compiler": "Проверка установки компилятора",
 	"walkthrough.windows.open.command.prompt": "Откройте {0}, введя \"{1}\" в меню \"Пуск\" в Windows.",
 	"walkthrough.windows.check.install": "Проверьте установку MSVC, введя \"{0}\" в {1}. Должно появиться сообщение об авторских правах с номером версии и кратким описанием использования.",
-	"walkthrough.windows.note2": "Примечание",
-	"walkthrough.windows.note2.text": "Чтобы использовать MSVC из командной строки или VS Code, требуется запуск из {0}. В обычной среде, например в {1}, в {2} или в командной строке Windows, не заданы необходимые переменные среды \"path\".",
 	"walkthrough.windows.other.compilers": "Другие параметры компилятора",
 	"walkthrough.windows.text3": "Если вы нацеливаетесь на Linux из Windows, ознакомьтесь с {0}. Также вы можете {1}.",
 	"walkthrough.windows.link.title1": "Использование C++ и подсистемы Windows для Linux в VS Code",

@@ -164,6 +164,7 @@ export interface SettingsParams {
     codeAnalysisUpdateDelay: number;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
     copilotHover: string;
+    windowsErrorReportingMode: string;
 }
 
 function getTarget(): vscode.ConfigurationTarget {
@@ -478,6 +479,7 @@ export class CppSettings extends Settings {
         }
         return this.getAsString("copilotHover");
     }
+    public get windowsErrorReportingMode(): string { return this.getAsString("windowsErrorReportingMode"); }
     public get cppContextProviderParams(): string | undefined {
         const value = super.Section.get<any>("copilotContextProviderParams");
         if (isString(value)) {
@@ -549,6 +551,7 @@ export class CppSettings extends Settings {
             && this.intelliSenseEngine.toLowerCase() === "default" && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
     }
     public get sshTargetsView(): string { return this.getAsString("sshTargetsView"); }
+    public get persistVSDeveloperEnvironment(): boolean { return this.getAsBoolean("persistVsDeveloperEnvironment"); }
 
     // Returns the value of a setting as a string with proper type validation and checks for valid enum values while returning an undefined value if necessary.
     private getAsStringOrUndefined(settingName: string): string | undefined {
