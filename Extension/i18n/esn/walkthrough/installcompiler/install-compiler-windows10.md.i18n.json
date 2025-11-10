@@ -10,7 +10,7 @@
 	"walkthrough.windows.note1": "Nota",
 	"walkthrough.windows.note1.text": "Puede usar el conjunto de herramientas de C++ de Visual Studio Build Tools junto con Visual Studio Code para compilar y comprobar cualquier código base de C++, siempre que también tenga una licencia de Visual Studio válida (Community, Pro o Enterprise) que esté usando de manera activa para desarrollar ese código base de C++.",
 	"walkthrough.windows.verify.compiler": "Comprobación de la instalación del compilador",
-	"walkthrough.windows.open.command.prompt": "Abra {0} escribiendo '{1}' en el menú Inicio de Windows.",
+	"walkthrough.windows.open.command.prompt": "Abra el {0} escribiendo {1} en el menú Inicio de Windows.",
 	"walkthrough.windows.check.install": "Compruebe la instalación de MSVC escribiendo {0} en {1}. Debería ver un mensaje de copyright con la versión y la descripción de uso básica.",
 	"walkthrough.windows.other.compilers": "Otras opciones del compilador",
 	"walkthrough.windows.text3": "Si su objetivo es Linux desde Windows, consulte {0}. O bien, consulte {1}.",
