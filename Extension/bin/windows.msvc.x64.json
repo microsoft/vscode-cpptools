@@ -4,10 +4,10 @@
     "--microsoft",
     "--microsoft_bugs",
     "--microsoft_version",
-    "1943",
+    "1950",
     "-D_CPPUNWIND=1",
-    "-D_MSC_VER=1943",
-    "-D_MSC_FULL_VER=194334604",
+    "-D_MSC_VER=1950",
+    "-D_MSC_FULL_VER=195035717",
     "-D_MSC_BUILD=0",
     "-D_M_X64=100",
     "-D_M_AMD64=100"
