@@ -16,6 +16,6 @@
 	"walkthrough.windows.link.install": "Instalar",
 	"walkthrough.windows.note1": "Observação",
 	"walkthrough.windows.note1.text": "Você pode usar o conjunto de ferramentas C++ das Ferramentas de Build do Visual Studio junto com o Visual Studio Code para compilar, construir e verificar qualquer base de código C++, contanto que também tenha uma licença válida do Visual Studio (Community, Pro ou Enterprise) que esteja ativamente usando para desenvolver essa base de código C++.",
-	"walkthrough.windows.open.command.prompt": "Abra o {0} digitando '{1}' no menu Iniciar do Windows.",
+	"walkthrough.windows.open.command.prompt": "Abra o {0} digitando \"{1}\" no menu Iniciar do Windows.",
 	"walkthrough.windows.check.install": "Verifique sua instalação do MSVC digitando {0} no {1}. Você deverá ver uma mensagem de copyright com a versão e a descrição básica de uso."
 }
