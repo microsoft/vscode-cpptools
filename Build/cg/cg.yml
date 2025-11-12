@@ -103,9 +103,9 @@ extends:
           inputs:
             targetType: 'inline'
             script: |
+              cd $(Build.SourcesDirectory)/Extension
               yarn run vsix-prepublish
           retryCountOnTaskFailure: 3
-          workingDirectory: $(Build.SourcesDirectory)/Extension
 
         - script: |
             cd $(Build.SourcesDirectory)\Extension
