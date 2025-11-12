@@ -16,6 +16,6 @@
 	"walkthrough.windows.link.install": "Установка",
 	"walkthrough.windows.note1": "Примечание",
 	"walkthrough.windows.note1.text": "Вы можете использовать набор инструментов C++ из пакета Visual Studio Build Tools вместе с Visual Studio Code для компиляции, сборки и проверки любой базы кода C++, если у вас есть действующая лицензия Visual Studio (Community, Pro или Enterprise), которой вы активно пользуетесь для разработки этой базы кода C++.",
-	"walkthrough.windows.open.command.prompt": "Откройте {0}, введя \"{1}\" в меню \"Пуск\" в Windows.",
+	"walkthrough.windows.open.command.prompt": "Откройте {0} путем ввода {1} в меню \"Пуск\" в Windows.",
 	"walkthrough.windows.check.install": "Проверьте установку MSVC, введя \"{0}\" в {1}. Должно появиться сообщение об авторских правах с номером версии и кратким описанием использования."
 }
