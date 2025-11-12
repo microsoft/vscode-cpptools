@@ -98,26 +98,13 @@ extends:
         - script: mkdir $(Build.ArtifactStagingDirectory)\Extension
           displayName: Create Extension Staging Directory
 
-        - bash: |
-            TRY_COUNT=3
-            EXIT_CODE=1
-            for attempt in $(seq 1 $TRY_COUNT); do
-              yarn run vsix-prepublish
-              EXIT_CODE=$?
-              if [ $EXIT_CODE -eq 0 ]; then
-                break
-              fi
-              if [ $attempt -lt $TRY_COUNT ]; then
-                echo "Attempt $attempt/$TRY_COUNT failed, retrying in 10s..."
-                sleep 10
-              fi
-            done
-            # Check if the last command succeeded
-            if [ $EXIT_CODE -ne 0 ]; then
-              echo "vsix-prepublish failed after $TRY_COUNT attempts."
-              exit 1
-            fi
+        - task: Bash@3
           displayName: Build files
+          inputs:
+            targetType: 'inline'
+            script: |
+              yarn run vsix-prepublish
+          retryCountOnTaskFailure: 3
           workingDirectory: $(Build.SourcesDirectory)/Extension
 
         - script: |
