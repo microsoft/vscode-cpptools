@@ -119,6 +119,7 @@ extends:
             fi
           displayName: Build files
           workingDirectory: $(Build.SourcesDirectory)\Extension
+        # retryCountOnTaskFailure doesn't sleep and may fail repeatedly.
 
         - script: |
             cd $(Build.SourcesDirectory)\Extension
