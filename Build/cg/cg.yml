@@ -103,7 +103,8 @@ extends:
           inputs:
             targetType: 'inline'
             script: |
-              cd $(Build.SourcesDirectory)/Extension
+              export SRC_DIR=$(echo $BUILD_SOURCESDIRECTORY | sed 's|\\|/|g')
+              cd "$SRC_DIR/Extension"
               yarn run vsix-prepublish
               if [ $? -ne 0 ]; then
                 echo "yarn run vsix-prepublish failed, sleeping for 30s before retrying..."
