@@ -16,6 +16,6 @@
 	"walkthrough.windows.link.install": "Yükle",
 	"walkthrough.windows.note1": "Not",
 	"walkthrough.windows.note1.text": "Herhangi bir C++ kod temelini derlemek, oluşturmak ve doğrulamak için Visual Studio Code ile birlikte Visual Studio Derleme Araçları’nda bulunan C++ araç takımını kullanabilirsiniz. Bunun yanı sıra, bu C++ kod temelini geliştirmek için etkin olarak kullandığınız geçerli bir Visual Studio lisansına (Community, Pro veya Enterprise) sahip olursunuz.",
-	"walkthrough.windows.open.command.prompt": "Windows Başlat menüsüne '{1}' yazarak {0} öğesini açın.",
+	"walkthrough.windows.open.command.prompt": "Windows Başlat menüsünde {1} yazarak {0}'i açın.",
 	"walkthrough.windows.check.install": "{1} içine {0} yazarak MSVC yüklemenizi kontrol edin. Sürüm ve temel kullanım açıklamasını içeren bir telif hakkı iletisi göreceksiniz."
 }
