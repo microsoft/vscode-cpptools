@@ -1910,7 +1910,7 @@ export class DefaultClient implements Client {
 
     public async onDidChangeTextEditorVisibleRanges(uri: vscode.Uri): Promise<void> {
         // VS Code will notify us of a particular editor, but same file may be open in
-        // multiple editors, so we coalesc those visible ranges.
+        // multiple editors, so we coalesce those visible ranges.
         const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(editor => editor.document.uri === uri);
 
         let visibleRanges: Range[] = [];
@@ -2969,7 +2969,7 @@ export class DefaultClient implements Client {
     public async handleConfigStatus(sender?: string): Promise<void> {
         if (!this.configStateReceived.timeout
             && (!this.configStateReceived.compilers || !this.configStateReceived.compileCommands || !this.configStateReceived.configProviders)) {
-            return; // Wait till the config state is recevied or timed out.
+            return; // Wait till the config state is received or timed out.
         }
 
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
