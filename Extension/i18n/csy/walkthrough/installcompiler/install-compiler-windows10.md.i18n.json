@@ -10,7 +10,7 @@
 	"walkthrough.windows.note1": "Poznámka",
 	"walkthrough.windows.note1.text": "Můžete použít sadu nástrojů C++ z Visual Studio Build Tools spolu s Visual Studio Code ke kompilaci, sestavení a ověření jakékoli kódové báze C++, pokud máte také platnou licenci Visual Studio (buď Community, Pro nebo Enterprise), kterou aktivně používáte k vývoji kódové báze C++.",
 	"walkthrough.windows.verify.compiler": "Ověřování instalace kompilátoru",
-	"walkthrough.windows.open.command.prompt": "Otevřete ho {0} zadáním '{1}' v nabídce Start ve Windows.",
+	"walkthrough.windows.open.command.prompt": "Otevřete {0} zadáním {1} v nabídce Start ve Windows.",
 	"walkthrough.windows.check.install": "Zkontrolujte instalaci MSVC zadáním {0} do nástroje {1}. Měla by se zobrazit zpráva o autorských právech v popisu verze a základního použití.",
 	"walkthrough.windows.other.compilers": "Další možnosti kompilátoru",
 	"walkthrough.windows.text3": "Pokud cílíte na Linux z Windows, podívejte se na {0}. Nebo můžete {1}.",
