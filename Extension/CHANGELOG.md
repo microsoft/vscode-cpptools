@@ -1,9 +1,19 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.29.1: November 24, 2025
+### Bug Fixes
+* Fix omission of unpopulated Mac framework paths. [#13993](https://github.com/microsoft/vscode-cpptools/issues/13993)
+* Fix IntelliSense with MSVC mode C++23 deduced type construction with `auto`. [#14041](https://github.com/microsoft/vscode-cpptools/issues/14041)
+* Fix the handling of the cl.exe `/external:I` argument for IntelliSense configuration.
+* Fix a potential memory corruption crash of cpptools-srv (related to PCH).
+* Add translations of strings added in 1.29.0.
+
 ## Version 1.29.0: November 4, 2025
+### New Feature
+* Enable setting the VS developer environment without running VS Code from the developer command prompt. [#4742](https://github.com/microsoft/vscode-cpptools/issues/4742)
+
 ### Enhancements
 * Add built-in file associations for C++ extensionless system headers and set `C_Cpp.autoAddFileAssociations` to `false` by default. [#4077](https://github.com/microsoft/vscode-cpptools/issues/4077)
-* Enable setting the VS developer environment without running VS Code from the developer command prompt. [#4742](https://github.com/microsoft/vscode-cpptools/issues/4742)
 * Add IntelliSense support for `c23` enums with an underlying type. [#13675](https://github.com/microsoft/vscode-cpptools/issues/13675)
 
 ### Bug Fixes
