@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "正在终止根位置的标记分析",
 	"unable_to_retrieve_to_reset_timestamps": "无法检索数据库记录以重置时间戳: 错误 = {0}",
 	"failed_to_reset_timestamps_for": "未能为 {0} 重置时间戳: 错误 = {1}",
-	"no_suitable_complier": "未找到合适的编译器。请在 c_cpp_properties.json 中设置 \"compilerPath\"。",
+	"no_suitable_compiler": "未找到合适的编译器。请在 c_cpp_properties.json 中设置 \"compilerPath\"。",
 	"compiler_include_not_found": "未找到编译器包含路径: {0}",
 	"intellisense_not_responding": "IntelliSense 引擎未响应。改为使用标记分析器。",
 	"tag_parser_will_be_used": "标记分析器将用于以下项中的 IntelliSense 操作: {0}",

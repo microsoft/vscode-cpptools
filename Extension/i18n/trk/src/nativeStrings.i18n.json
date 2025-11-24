@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "Kökte etiket ayrıştırma durduruluyor",
 	"unable_to_retrieve_to_reset_timestamps": "Zaman damgalarını sıfırlamak için veritabanı kayıtları alınamıyor: hata = {0}",
 	"failed_to_reset_timestamps_for": "{0} için zaman damgası sıfırlanamadı: hata = {1}",
-	"no_suitable_complier": "Uygun derleyici bulunamadı. Lütfen c_cpp_properties.json dosyasında \"compilerPath\" öğesini ayarlayın.",
+	"no_suitable_compiler": "Uygun derleyici bulunamadı. Lütfen c_cpp_properties.json dosyasında \"compilerPath\" öğesini ayarlayın.",
 	"compiler_include_not_found": "Derleyici ekleme yolu bulunamadı: {0}",
 	"intellisense_not_responding": "IntelliSense altyapısı yanıt vermiyor. Bunun yerine Etiket Ayrıştırıcısı kullanılıyor.",
 	"tag_parser_will_be_used": "Etiket Ayrıştırıcısı, şurada IntelliSense işlemleri için kullanılacak: {0}",
