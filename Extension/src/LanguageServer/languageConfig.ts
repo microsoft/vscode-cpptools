@@ -55,8 +55,7 @@ function getMLSplitAfterPattern(): string {
 
 function getMLPreviousLinePattern(insert: string): string | undefined {
     if (insert.startsWith("/*")) {
-        const match: string = escape(insert);
-        return `(?=^(\\s*(${match}|\\*)).*)(?=(?!(\\s*\\*\\/)))`;
+        return `(?=^(\\s*(\\/\\*\\*|\\*)).*)(?=(?!(\\s*\\*\\/)))`;
     }
     return undefined;
 }
@@ -239,9 +238,8 @@ export function getLanguageConfig(languageId: string): vscode.LanguageConfigurat
 }
 
 export function getLanguageConfigFromPatterns(languageId: string, patterns?: (string | CommentPattern)[]): vscode.LanguageConfiguration {
-    const beginPatterns: string[] = []; // avoid duplicate begin rules
-    const continuePatterns: string[] = []; // avoid duplicate continue rules
-    const endPatterns: string[] = []; // avoid duplicate end rules
+    const beginPatterns: string[] = []; // avoid duplicate rules
+    const continuePatterns: string[] = []; // avoid duplicate rules
     let duplicates: boolean = false;
     let beginRules: vscode.OnEnterRule[] = [];
     let continueRules: vscode.OnEnterRule[] = [];
@@ -260,17 +258,14 @@ export function getLanguageConfigFromPatterns(languageId: string, patterns?: (st
         } else {
             duplicates = true;
         }
-        if (continuePatterns.indexOf(`${c.begin}\0${c.continue}`) < 0) {
+        if (continuePatterns.indexOf(c.continue) < 0) {
             if (r.continue && r.continue.length > 0) {
                 continueRules = continueRules.concat(r.continue);
             }
-            continuePatterns.push(`${c.begin}\0${c.continue}`);
-        }
-        if (endPatterns.indexOf(c.continue) < 0) {
             if (r.end && r.end.length > 0) {
                 endRules = endRules.concat(r.end);
             }
-            endPatterns.push(c.continue);
+            continuePatterns.push(c.continue);
         }
     });
     if (duplicates) {
