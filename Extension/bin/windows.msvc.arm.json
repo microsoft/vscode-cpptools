@@ -4,9 +4,9 @@
     "--microsoft",
     "--microsoft_bugs",
     "--microsoft_version",
-    "1943",
-    "-D_MSC_VER=1943",
-    "-D_MSC_FULL_VER=194334604",
+    "1950",
+    "-D_MSC_VER=1950",
+    "-D_MSC_FULL_VER=195035717",
     "-D_MSC_BUILD=0",
     "-D_M_ARM=7"
   ],
