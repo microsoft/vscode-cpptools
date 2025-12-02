@@ -260,7 +260,7 @@ export function getLanguageConfigFromPatterns(languageId: string, patterns?: (st
         } else {
             duplicates = true;
         }
-        if (continuePatterns.indexOf(`${c.begin}\0${c.continue}`)) {
+        if (continuePatterns.indexOf(`${c.begin}\0${c.continue}`) < 0) {
             if (r.continue && r.continue.length > 0) {
                 continueRules = continueRules.concat(r.continue);
             }
