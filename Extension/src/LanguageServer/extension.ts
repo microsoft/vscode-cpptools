@@ -17,7 +17,7 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
-import { modelSelector } from '../constants';
+import { isWindows, modelSelector } from '../constants';
 import { instrument } from '../instrumentation';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
@@ -29,6 +29,7 @@ import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, code
 import { registerRelatedFilesProvider } from './copilotProviders';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { getCustomConfigProviders } from './customProviders';
+import { errorOperationCancelled, setEnvironment } from './devcmd';
 import { getLanguageConfig } from './languageConfig';
 import { CppConfigurationLanguageModelTool } from './lmTool';
 import { getLocaleId } from './localization';
@@ -431,6 +432,8 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCopilotHover', enabled ? () => onCopilotHover() : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SetVsDeveloperEnvironment', enabled ? onSetVsDeveloperEnvironment : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ClearVsDeveloperEnvironment', enabled ? onClearVsDeveloperEnvironment : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -1549,4 +1552,29 @@ async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, ho
     await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
 
     return true;
+}
+
+async function onSetVsDeveloperEnvironment(sender?: any): Promise<void> {
+    let success: boolean = true;
+    try {
+        await setEnvironment(util.extensionContext);
+        await vscode.commands.executeCommand('setContext', 'cpptools.msvcEnvironmentFound', util.hasMsvcEnvironment());
+        if (sender !== 'buildAndDebug') {
+            void vscode.window.showInformationMessage(`${util.extensionContext?.environmentVariableCollection.description} successfully set.`);
+        }
+    } catch (error: any) {
+        success = false;
+        if (!isWindows) {
+            throw error;
+        }
+        if (error.message !== errorOperationCancelled) {
+            void vscode.window.showErrorMessage(`Failed to apply the VS developer environment: ${error.message}`);
+        }
+    }
+    telemetry.logLanguageServerEvent("SetVsDeveloperEnvironment", { "sender": util.getSenderType(sender), "resultcode": success.toString() });
+}
+
+async function onClearVsDeveloperEnvironment(): Promise<void> {
+    util.extensionContext?.environmentVariableCollection.clear();
+    await vscode.commands.executeCommand('setContext', 'cpptools.msvcEnvironmentFound', util.hasMsvcEnvironment());
 }

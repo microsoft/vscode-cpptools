@@ -1524,9 +1524,9 @@ export interface ISshLocalForwardInfo {
     remoteSocket?: string;
 }
 
-export function whichAsync(name: string): Promise<string | undefined> {
+export function whichAsync(name: string, path?: string): Promise<string | undefined> {
     return new Promise<string | undefined>(resolve => {
-        which(name, (err, resolved) => {
+        which(name, path ? { path } : {}, (err, resolved) => {
             if (err) {
                 resolve(undefined);
             } else {
@@ -1565,7 +1565,10 @@ export function hasMsvcEnvironment(): boolean {
         'WindowsSDKLibVersion',
         'WindowsSDKVersion'
     ];
-    return msvcEnvVars.every((envVarName) => process.env[envVarName] !== undefined && process.env[envVarName] !== '');
+    return msvcEnvVars.every(envVarName =>
+        (process.env[envVarName] !== undefined && process.env[envVarName] !== '') ||
+        extensionContext?.environmentVariableCollection?.get(envVarName) !== undefined
+    );
 }
 
 function isIntegral(str: string): boolean {
