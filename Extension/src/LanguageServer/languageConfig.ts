@@ -55,7 +55,8 @@ function getMLSplitAfterPattern(): string {
 
 function getMLPreviousLinePattern(insert: string): string | undefined {
     if (insert.startsWith("/*")) {
-        return `(?=^(\\s*(\\/\\*\\*|\\*)).*)(?=(?!(\\s*\\*\\/)))`;
+        const match: string = escape(insert);
+        return `(?=^(\\s*(${match}|\\*)).*)(?=(?!(\\s*\\*\\/)))`;
     }
     return undefined;
 }
@@ -258,15 +259,13 @@ export function getLanguageConfigFromPatterns(languageId: string, patterns?: (st
         } else {
             duplicates = true;
         }
-        if (continuePatterns.indexOf(c.continue) < 0) {
-            if (r.continue && r.continue.length > 0) {
-                continueRules = continueRules.concat(r.continue);
-            }
-            if (r.end && r.end.length > 0) {
-                endRules = endRules.concat(r.end);
-            }
-            continuePatterns.push(c.continue);
+        if (r.continue && r.continue.length > 0) {
+            continueRules = continueRules.concat(r.continue);
         }
+        if (r.end && r.end.length > 0) {
+            endRules = endRules.concat(r.end);
+        }
+        continuePatterns.push(c.continue);
     });
     if (duplicates) {
         getOutputChannel().appendLine(localize("duplicate.multiline.patterns", "Duplicate multiline comment patterns detected."));
