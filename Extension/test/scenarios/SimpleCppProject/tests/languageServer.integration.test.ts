@@ -94,7 +94,7 @@ suite("multiline comment setting tests", function(): void {
     });
 
     test("Check the OnEnterRules for C++ with an additional option", () => {
-        const rules = getLanguageConfigFromPatterns('cpp', ["/**", "/*!"]).onEnterRules;
+        const rules = getLanguageConfigFromPatterns('cpp', [ "/**", "/*!" ]).onEnterRules;
         assert.deepStrictEqual(rules, multipleMLRules);
     });
 
@@ -200,7 +200,7 @@ suite("extensibility tests v3", function(): void {
             configurations: [ {name: "test3", configurationProvider: provider.extensionId} ],
             version: 4
         },
-            disposables);
+        disposables);
     });
 
     suiteTeardown(function(): void {
@@ -296,7 +296,7 @@ suite("extensibility tests v2", function(): void {
             configurations: [ {name: "test2", configurationProvider: provider.extensionId} ],
             version: 4
         },
-            disposables);
+        disposables);
     });
 
     suiteTeardown(function(): void {
@@ -378,7 +378,7 @@ suite("extensibility tests v1", function(): void {
             configurations: [ {name: "test1", configurationProvider: provider.extensionId} ],
             version: 4
         },
-            disposables);
+        disposables);
     });
 
     suiteTeardown(function(): void {
@@ -454,7 +454,7 @@ suite("extensibility tests v0", function(): void {
             configurations: [ { name: "test0", configurationProvider: provider.name } ],
             version: 4
         },
-            disposables);
+        disposables);
     });
 
     suiteTeardown(async function(): Promise<void> {
