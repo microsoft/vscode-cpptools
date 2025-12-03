@@ -1796,7 +1796,7 @@ export class DefaultClient implements Client {
 
         if (Object.keys(changedSettings).length > 0) {
             if (this === defaultClient) {
-                if (changedSettings.commentContinuationPatterns !== undefined) {
+                if (changedSettings.commentContinuationPatterns2 !== undefined) {
                     updateLanguageConfigurations();
                 }
                 if (changedSettings.loggingLevel !== undefined) {
