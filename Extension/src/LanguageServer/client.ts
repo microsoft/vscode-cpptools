@@ -1003,7 +1003,8 @@ export class DefaultClient implements Client {
             workspaceFolderBasename: this.Name,
             workspaceStorage: this.workspaceStoragePath,
             execPath: process.execPath,
-            pathSeparator: (os.platform() === 'win32') ? "\\" : "/"
+            pathSeparator: (os.platform() === 'win32') ? "\\" : "/",
+            userHome: os.homedir()
         };
     }
 
