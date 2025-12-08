@@ -2,7 +2,7 @@
 
 ## Version 1.29.3: December 8, 2025
 ### Bug Fix
-* Fix `NETFXSDKDir` being used to check for a developer command prompt being used. [#14084](https://github.com/microsoft/vscode-cpptools/issues/14084)
+* Remove `NETFXSDKDir` from the developer environment check. [#14084](https://github.com/microsoft/vscode-cpptools/issues/14084)
 
 ## Version 1.29.2: December 3, 2025
 ### New Feature
