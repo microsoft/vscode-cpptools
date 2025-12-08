@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.29.3: December 8, 2025
+### Bug Fix
+* Fix `NETFXSDKDir` being used to check for a developer command prompt being used. [#14084](https://github.com/microsoft/vscode-cpptools/issues/14084)
+
 ## Version 1.29.2: December 3, 2025
 ### New Feature
 * Enable setting the VS developer environment without running VS Code from the developer command prompt. [#4742](https://github.com/microsoft/vscode-cpptools/issues/4742)
