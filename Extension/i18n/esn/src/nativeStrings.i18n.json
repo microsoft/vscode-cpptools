@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "Anulando el análisis de etiquetas en el directorio raíz",
 	"unable_to_retrieve_to_reset_timestamps": "No se pueden recuperar los registros de la base de datos para restablecer las marcas de tiempo. Error = {0}",
 	"failed_to_reset_timestamps_for": "No se pudo restablecer la marca de tiempo de {0}. Error = {1}",
-	"no_suitable_complier": "No se encontró ningún compilador adecuado. Establezca \"compilerPath\" en c_cpp_properties.json.",
+	"no_suitable_compiler": "No se encontró ningún compilador adecuado. Establezca \"compilerPath\" en c_cpp_properties.json.",
 	"compiler_include_not_found": "No se encontró la ruta de acceso de inclusión del compilador: {0}",
 	"intellisense_not_responding": "El motor de IntelliSense no responde. Se usará el analizador de etiquetas en su lugar.",
 	"tag_parser_will_be_used": "Se usará el analizador de etiquetas para las operaciones de IntelliSense en {0}",

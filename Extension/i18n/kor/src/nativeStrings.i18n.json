@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "루트에서 태그 구문 분석을 중단합니다.",
 	"unable_to_retrieve_to_reset_timestamps": "타임스탬프를 다시 설정할 DB 레코드를 검색할 수 없습니다. 오류 = {0}",
 	"failed_to_reset_timestamps_for": "{0} 에 대한 타임스탬프를 다시 설정하지 못했습니다. 오류 = {1}",
-	"no_suitable_complier": "적합한 컴파일러를 찾을 수 없습니다. c_cpp_properties.json에서 \"compilerPath\"를 설정하세요.",
+	"no_suitable_compiler": "적합한 컴파일러를 찾을 수 없습니다. c_cpp_properties.json에서 \"compilerPath\"를 설정하세요.",
 	"compiler_include_not_found": "컴파일러 포함 경로를 찾을 수 없음: {0}",
 	"intellisense_not_responding": "IntelliSense 엔진이 응답하지 않습니다. 태그 파서를 대신 사용합니다.",
 	"tag_parser_will_be_used": "태그 파서가 다음의 IntelliSense 작업에서 사용됨: {0}",

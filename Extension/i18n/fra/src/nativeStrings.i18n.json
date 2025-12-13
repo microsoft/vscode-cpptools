@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "Annulation de l'analyse des balises à la racine",
 	"unable_to_retrieve_to_reset_timestamps": "Impossible de récupérer les enregistrements de base de données pour réinitialiser les horodatages : erreur = {0}",
 	"failed_to_reset_timestamps_for": "La réinitialisation de l'horodatage a échoué pour {0} : erreur = {1}",
-	"no_suitable_complier": "Aucun compilateur approprié. Définissez \"compilerPath\" dans c_cpp_properties.json.",
+	"no_suitable_compiler": "Aucun compilateur approprié. Définissez \"compilerPath\" dans c_cpp_properties.json.",
 	"compiler_include_not_found": "Le chemin d'inclusion du compilateur est introuvable : {0}",
 	"intellisense_not_responding": "Le moteur IntelliSense ne répond pas. Utilisation de l'analyseur de balises à la place.",
 	"tag_parser_will_be_used": "L'analyseur de balises est utilisé pour les opérations IntelliSense dans {0}",

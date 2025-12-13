@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "Interruzione dell'analisi dei tag in corrispondenza della radice",
 	"unable_to_retrieve_to_reset_timestamps": "Non è possibile recuperare i record del database per reimpostare i timestamp. Errore = {0}",
 	"failed_to_reset_timestamps_for": "Non è stato possibile reimpostare il timestamp per {0}. Errore = {1}",
-	"no_suitable_complier": "Non sono stati trovati compilatore appropriati. Impostare \"compilerPath\" in c_cpp_properties.json.",
+	"no_suitable_compiler": "Non sono stati trovati compilatore appropriati. Impostare \"compilerPath\" in c_cpp_properties.json.",
 	"compiler_include_not_found": "Il percorso di inclusione del compilatore non è stato trovato: {0}",
 	"intellisense_not_responding": "Il motore IntelliSense non risponde. Verrà usato il parser di tag.",
 	"tag_parser_will_be_used": "Il parser di tag verrà usato per le operazioni IntelliSense in: {0}",
