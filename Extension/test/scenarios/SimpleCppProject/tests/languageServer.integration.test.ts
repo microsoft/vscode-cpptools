@@ -45,6 +45,27 @@ suite("multiline comment setting tests", function(): void {
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         }
     ];
+    const multipleMLRules: vscode.OnEnterRule[] = [
+        defaultMLRules[0], // e.g. /** | */
+        defaultMLRules[1], // e.g. /** ...|
+        { // e.g. /*! | */
+            beforeText: /^\s*\/\*\!(?!\/)([^\*]|\*(?!\/))*$/,
+            afterText: /^\s*\*\/$/,
+            action: { indentAction: vscode.IndentAction.IndentOutdent, appendText: ' * ' }
+        },
+        { // e.g. /*! ...|
+            beforeText: /^\s*\/\*\!(?!\/)([^\*]|\*(?!\/))*$/,
+            action: { indentAction: vscode.IndentAction.None, appendText: ' * ' }
+        },
+        defaultMLRules[2], // e.g.  * ...|
+        { // e.g.  * ...|
+            beforeText: /^(\t|[ ])*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
+            previousLineText: /(?=^(\s*(\/\*\!|\*)).*)(?=(?!(\s*\*\/)))/,
+            action: { indentAction: vscode.IndentAction.None, appendText: '* ' }
+        },
+        defaultMLRules[3], // e.g.  */|
+        defaultMLRules[4] // e.g.  *-----*/|
+    ];
     const defaultSLRules: vscode.OnEnterRule[] = [
         {
             beforeText: /^\s*\/\/\/.+$/,
@@ -70,6 +91,11 @@ suite("multiline comment setting tests", function(): void {
     test("Check the default OnEnterRules for C++", () => {
         const rules = getLanguageConfigFromPatterns('cpp', [ "/**" ]).onEnterRules;
         assert.deepStrictEqual(rules, defaultMLRules);
+    });
+
+    test("Check the OnEnterRules for C++ with an additional option", () => {
+        const rules = getLanguageConfigFromPatterns('cpp', [ "/**", "/*!" ]).onEnterRules;
+        assert.deepStrictEqual(rules, multipleMLRules);
     });
 
     test("Make sure duplicate rules are removed", () => {

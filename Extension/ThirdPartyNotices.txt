@@ -298,6 +298,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE
 SOFTWARE.
 
+
+
+---------------------------------------------------------
+
 ---------------------------------------------------------
 
 webidl-conversions 3.0.1 - BSD-2-Clause
@@ -649,6 +653,33 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
+semver 7.7.3 - ISC
+https://github.com/npm/node-semver#readme
+
+Copyright Isaac Z. Schlueter
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+The ISC License
+
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
 which 2.0.2 - ISC
 https://github.com/isaacs/node-which#readme
 
@@ -751,6 +782,67 @@ the licensed code:
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
   DEALINGS IN THE SOFTWARE.
 
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+vscode-cpptools 7.1.1 - LicenseRef-scancode-generic-cla AND MIT
+https://github.com/Microsoft/vscode-cpptools-api#readme
+
+Copyright (c) Microsoft Corporation
+
+vscode-cpptools-api 
+
+Copyright (c) Microsoft Corporation
+All rights reserved.
+
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the Software), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+@github/copilot-language-server 1.316.0 - LicenseRef-scancode-unknown
+https://github.com/github/copilot-language-server-release
+
+COPYRIGHT Zone Model
+Copyright Deno authors
+(c) 2012 by Cedric Mesnil
+Copyright (c) 2018 Agoric
+Copyright Domenic Denicola
+Copyright (c) 2011 Google Inc.
+Copyright (c) 2012 Google Inc.
+Copyright 1995-2022 Mark Adler
+Copyright 1995-2023 Mark Adler
+Copyright Node.js contributors
+Copyright (c) 2016, Contributors
+Copyright (c) 2014, StrongLoop Inc.
+Copyright 2009 the V8 project authors
+Copyright 2011 the V8 project authors
+Copyright 2012 the V8 project authors
+Copyright 2013 the V8 project authors
+Copyright 2017 the V8 project authors
+Copyright (c) Microsoft and contributors
+Copyright (c) 2016 Unicode, Inc. and others
+Copyright (c) 2012-2018 by various contributors
+Copyright (c) 2009 Thomas Robinson <280north.com>
+Copyright Joyent, Inc. and other Node contributors
+Copyright 1995-2022 Jean-loup Gailly and Mark Adler
+Copyright 1995-2023 Jean-loup Gailly and Mark Adler
+Copyright (c) 1996-2016 Free Software Foundation, Inc.
+Copyright (c) NevWare21 Solutions LLC and contributors
+Copyright 1995-2023 Jean-loup Gailly and Mark Adler Qkkbal
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+
+LicenseRef-scancode-unknown
 
 ---------------------------------------------------------
 
@@ -1323,7 +1415,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-brace-expansion 1.1.11 - MIT
+brace-expansion 1.1.12 - MIT
 https://github.com/juliangruber/brace-expansion
 
 Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>
@@ -1355,7 +1447,7 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-brace-expansion 2.0.1 - MIT
+brace-expansion 2.0.2 - MIT
 https://github.com/juliangruber/brace-expansion
 
 Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>
@@ -2309,7 +2401,7 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-tmp 0.2.3 - MIT
+tmp 0.2.5 - MIT
 http://github.com/raszi/node-tmp
 
 Copyright (c) 2014 KARASZI Istvan
@@ -2388,29 +2480,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
----------------------------------------------------------
-
----------------------------------------------------------
-
-vscode-cpptools 6.3.0 - MIT
-https://github.com/Microsoft/vscode-cpptools-api#readme
-
-Copyright (c) Microsoft Corporation
-
-vscode-cpptools-api 
-
-Copyright (c) Microsoft Corporation
-All rights reserved.
-
-MIT License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the Software), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 
 ---------------------------------------------------------
 
@@ -2603,7 +2672,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 whatwg-url 5.0.0 - MIT
 https://github.com/jsdom/whatwg-url#readme
 
-(c) extraPathPercentEncodeSet.has
 Copyright (c) 2015-2016 Sebastian Mayr
 
 The MIT License (MIT)

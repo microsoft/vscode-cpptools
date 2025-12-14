@@ -42,8 +42,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     });
 
     util.setExtensionContext(context);
-    Telemetry.activate();
     util.setProgress(0);
+    Telemetry.activate();
 
     // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
     class SchemaProvider implements vscode.TextDocumentContentProvider {
@@ -63,7 +63,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', instrument(new SchemaProvider()));
 
     // Initialize the DebuggerExtension and register the related commands and providers.
+    util.setProgress(util.getProgressDebuggerStarted());
     await DebuggerExtension.initialize(context);
+    util.setProgress(util.getProgressDebuggerSuccess());
 
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     sendTelemetry(info);
@@ -125,9 +127,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
             const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
             if (await util.checkFileExists(config)) {
-                const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
-                void vscode.languages.setTextDocumentLanguage(doc, "jsonc");
-                util.setWorkspaceIsCpp();
+                try {
+                    const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
+                    void vscode.languages.setTextDocumentLanguage(doc, "jsonc");
+                    util.setWorkspaceIsCpp();
+                } catch (err) {
+                    // The c_cpp_properties.json might not be openable (e.g. an executable).
+                    // Catching the exception prevents our extension activation from failing.
+                    // VS Code itself will report an error message.
+                }
             }
         }
     }
@@ -155,6 +163,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         // The check here for isIntelliSenseEngineDisabled avoids logging
         // the message on old Macs that we've already displayed a warning for.
         log(localize("intellisense.disabled", "intelliSenseEngine is disabled"));
+        util.setProgress(util.getProgressLanguageServiceDisabled());
     }
 
     // Send an instrumentation message upon completing activation.

@@ -15,6 +15,7 @@ import * as util from '../common';
 import { isWindows } from '../constants';
 import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
 import { CppBuildTask, CppBuildTaskDefinition, cppBuildTaskProvider } from '../LanguageServer/cppBuildTaskProvider';
+import { canFindCl } from '../LanguageServer/devcmd';
 import { configPrefix } from '../LanguageServer/extension';
 import { CppSettings, OtherSettings } from '../LanguageServer/settings';
 import * as logger from '../logger';
@@ -88,6 +89,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         const defaultConfig: CppDebugConfiguration[] = this.findDefaultConfig(configs);
         // If there was only one config defined for the default task, choose that config, otherwise ask the user to choose.
         if (defaultConfig.length === 1) {
+            if (this.isClConfiguration(defaultConfig[0].name) && await this.showErrorIfClNotAvailable(defaultConfig[0].label)) {
+                return []; // Cannot continue with build/debug.
+            }
             return defaultConfig;
         }
 
@@ -121,8 +125,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return []; // User canceled it.
         }
 
-        if (this.isClConfiguration(selection.label)) {
-            this.showErrorIfClNotAvailable(selection.label);
+        if (this.isClConfiguration(selection.label) && await this.showErrorIfClNotAvailable(selection.label)) {
+            return []; // Cannot continue with build/debug.
         }
 
         return [selection.configuration];
@@ -590,19 +594,61 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         return `${localize("build.and.debug.active.file", 'build and debug active file')}`;
     }
 
-    private isClConfiguration(configurationLabel: string): boolean {
-        return configurationLabel.startsWith("C/C++: cl.exe");
+    private isClConfiguration(configurationLabel?: string): boolean {
+        return !!configurationLabel?.startsWith("C/C++: cl.exe");
     }
 
-    private showErrorIfClNotAvailable(_configurationLabel: string): boolean {
-        if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
-            void vscode.window.showErrorMessage(localize({
+    /**
+     * @returns `true` if the VS developer environment is not available and an error was shown to the user,
+     * `false` if the VS developer environment is available or the user chose to apply it.
+     */
+    private async showErrorIfClNotAvailable(_configurationLabel: string): Promise<boolean> {
+        const hasEnvironment = util.hasMsvcEnvironment();
+        if (hasEnvironment) {
+            if (await canFindCl()) {
+                return false; // No error to show
+            }
+            // The user has an environment but cl.exe cannot be found. Prompt the user to update the environment.
+        }
+
+        const applyButton = localize("apply.dev.env", "Apply Developer Environment");
+        const applyMessage = localize(
+            {
                 key: "cl.exe.not.available",
-                comment: ["{0} is a command option in a menu. {1} is the product name \"Developer Command Prompt for VS\"."]
-            }, "{0} is only usable when VS Code is run from the {1}.", `cl.exe ${this.buildAndDebugActiveFileStr()}`, "Developer Command Prompt for VS"));
+                comment: ["{0} is a command option in a menu."]
+            },
+            "{0} requires the Visual Studio developer environment.", `cl.exe ${this.buildAndDebugActiveFileStr()}`);
+        const updateButton = localize("update.dev.env", "Update Developer Environment");
+        const updateMessage = localize(
+            {
+                key: "update.dev.env",
+                comment: ["{0} is a command option in a menu."]
+            },
+            "{0} requires the Visual Studio developer environment to be updated.", `cl.exe ${this.buildAndDebugActiveFileStr()}`);
+        const cancel = localize("cancel", "Cancel");
+        const response = await vscode.window.showErrorMessage(
+            hasEnvironment ? updateMessage : applyMessage,
+            hasEnvironment ? updateButton : applyButton,
+            cancel);
+        if (response === applyButton || response === updateButton) {
+            try {
+                await vscode.commands.executeCommand('C_Cpp.SetVsDeveloperEnvironment', 'buildAndDebug');
+            } catch (e: any) {
+                // Ignore the error, the user will be prompted to apply the environment manually.
+            }
+        }
+        if (response === cancel || response === undefined) {
+            // A message was already shown, so exit early noting that the environment is not available. We don't need to show another error message.
             return true;
         }
-        return false;
+
+        if (util.hasMsvcEnvironment() && await canFindCl()) {
+            return false;
+        }
+        const notAppliedMessage = localize("dev.env.not.applied", "The source code could not be built because the Visual Studio developer environment was not applied.");
+        const notFoundMessage = localize("dev.env.not.found", "The source code could not be built because the Visual C++ compiler could not be found.");
+        void vscode.window.showErrorMessage(hasEnvironment ? notFoundMessage : notAppliedMessage);
+        return true;
     }
 
     private getLLDBFrameworkPath(): string | undefined {
@@ -979,7 +1025,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 placeHolder: items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration")
             });
         }
-        if (selection && this.isClConfiguration(selection.configuration.name) && this.showErrorIfClNotAvailable(selection.configuration.name)) {
+        if (selection && this.isClConfiguration(selection.configuration.name) && await this.showErrorIfClNotAvailable(selection.configuration.name)) {
             return;
         }
         return selection?.configuration;

@@ -164,6 +164,7 @@ export interface SettingsParams {
     codeAnalysisUpdateDelay: number;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
     copilotHover: string;
+    windowsErrorReportingMode: string;
 }
 
 function getTarget(): vscode.ConfigurationTarget {
@@ -385,6 +386,13 @@ export class CppSettings extends Settings {
     public get commentContinuationPatterns(): (string | CommentPattern)[] {
         const value: any = super.Section.get<any>("commentContinuationPatterns");
         if (this.isArrayOfCommentContinuationPatterns(value)) {
+            // Needs to be sorted with longer patterns first so it takes precedence and
+            // doesn't apply the shorter pattern if it's a prefix (e.g. // matching ///).
+            value.sort((a: string | CommentPattern, b: string | CommentPattern) => {
+                const aStr: string = isString(a) ? a : a.begin;
+                const bStr: string = isString(b) ? b : b.begin;
+                return bStr.length - aStr.length;
+            });
             return value;
         }
         const setting = getRawSetting("C_Cpp.commentContinuationPatterns", true);
@@ -478,6 +486,7 @@ export class CppSettings extends Settings {
         }
         return this.getAsString("copilotHover");
     }
+    public get windowsErrorReportingMode(): string { return this.getAsString("windowsErrorReportingMode"); }
     public get cppContextProviderParams(): string | undefined {
         const value = super.Section.get<any>("copilotContextProviderParams");
         if (isString(value)) {
@@ -549,6 +558,7 @@ export class CppSettings extends Settings {
             && this.intelliSenseEngine.toLowerCase() === "default" && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
     }
     public get sshTargetsView(): string { return this.getAsString("sshTargetsView"); }
+    public get persistVSDeveloperEnvironment(): boolean { return this.getAsBoolean("persistVsDeveloperEnvironment"); }
 
     // Returns the value of a setting as a string with proper type validation and checks for valid enum values while returning an undefined value if necessary.
     private getAsStringOrUndefined(settingName: string): string | undefined {

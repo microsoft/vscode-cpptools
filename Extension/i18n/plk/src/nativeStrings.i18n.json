@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "Przerywanie analizowania tagów w elemencie głównym",
 	"unable_to_retrieve_to_reset_timestamps": "Nie można pobrać rekordów bazy danych w celu zresetowania znaczników czasu: błąd = {0}",
 	"failed_to_reset_timestamps_for": "Nie można zresetować znacznika czasu dla elementu {0}: błąd = {1}",
-	"no_suitable_complier": "Nie znaleziono odpowiedniego kompilatora. Ustaw element „compilerPath” w pliku c_cpp_properties.json.",
+	"no_suitable_compiler": "Nie znaleziono odpowiedniego kompilatora. Ustaw element „compilerPath” w pliku c_cpp_properties.json.",
 	"compiler_include_not_found": "Nie znaleziono ścieżki dołączania kompilatora: {0}",
 	"intellisense_not_responding": "Aparat funkcji IntelliSense nie odpowiada. W zamian użyj analizatora tagów.",
 	"tag_parser_will_be_used": "Analizator tagów będzie używany na potrzeby operacji funkcji IntelliSense w: {0}",

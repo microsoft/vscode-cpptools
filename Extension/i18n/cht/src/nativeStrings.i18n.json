@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "正在中止根目錄處的標籤剖析",
 	"unable_to_retrieve_to_reset_timestamps": "無法取得 DB 記錄以重設時間戳記: 錯誤 = {0}",
 	"failed_to_reset_timestamps_for": "無法重設 {0} 的時間戳記: 錯誤 = {1}",
-	"no_suitable_complier": "找不到任何適合的編譯器。請設定 c_cpp_properties.json 中的 \"compilerPath\"。",
+	"no_suitable_compiler": "找不到任何適合的編譯器。請設定 c_cpp_properties.json 中的 \"compilerPath\"。",
 	"compiler_include_not_found": "找不到編譯器包含路徑: {0}",
 	"intellisense_not_responding": "IntelliSense 引擎未回應。改為使用標籤剖析器。",
 	"tag_parser_will_be_used": "標籤剖析器將用於 {0} 中的 IntelliSense 作業",

@@ -4,6 +4,7 @@ trigger:
     include:
     - main
     - release
+    - insiders
 
 schedules:
 - cron: 30 5 * * 0
@@ -30,13 +31,15 @@ extends:
   parameters:
     pool:
       name: AzurePipelines-EO
-      image: AzurePipelinesWindows2022compliantGPT
+      image: 1ESPT-Windows2022
       os: windows
     sdl:
       sourceAnalysisPool:
         name: AzurePipelines-EO
-        image: AzurePipelinesWindows2022compliantGPT
+        image: 1ESPT-Windows2022
         os: windows
+      binskim:
+        preReleaseVersion: '4.3.1'
       tsa:
         enabled: true
         config:
@@ -95,9 +98,20 @@ extends:
         - script: mkdir $(Build.ArtifactStagingDirectory)\Extension
           displayName: Create Extension Staging Directory
 
-        - script: yarn run vsix-prepublish
+        - task: Bash@3
           displayName: Build files
-          workingDirectory: $(Build.SourcesDirectory)\Extension
+          inputs:
+            targetType: 'inline'
+            script: |
+              export SRC_DIR=$(echo $BUILD_SOURCESDIRECTORY | sed 's|\\|/|g')
+              cd "$SRC_DIR/Extension"
+              yarn run vsix-prepublish
+              if [ $? -ne 0 ]; then
+                echo "yarn run vsix-prepublish failed, sleeping for 30s before retrying..."
+                sleep 30
+                exit 1
+              fi
+          retryCountOnTaskFailure: 3
 
         - script: |
             cd $(Build.SourcesDirectory)\Extension
