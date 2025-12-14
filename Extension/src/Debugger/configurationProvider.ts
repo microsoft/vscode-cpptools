@@ -22,6 +22,7 @@ import { PlatformInformation } from '../platform';
 import { rsync, scp, ssh } from '../SSH/commands';
 import * as Telemetry from '../telemetry';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
+import { AttachItem, showQuickPick } from './attachQuickPick';
 import { ConfigMenu, ConfigMode, ConfigSource, CppDebugConfiguration, DebuggerEvent, DebuggerType, DebugType, IConfiguration, IConfigurationSnippet, isDebugLaunchStr, MIConfigurations, PipeTransportConfigurations, TaskStatus, WindowsConfigurations, WSLConfigurations } from './configurations';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
@@ -350,13 +351,24 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Pick process if process id is empty
         if (config.request === "attach" && !config.processId) {
             let processId: string | undefined;
-            if (config.pipeTransport || config.useExtendedRemote) {
-                const remoteAttachPicker: RemoteAttachPicker = new RemoteAttachPicker();
-                processId = await remoteAttachPicker.ShowAttachEntries(config);
+
+            // If program is specified, try to find matching process by name
+            if (config.program) {
+                processId = await this.findProcessByProgramName(config.program, config, token);
+                if (!processId) {
+                    void logger.getOutputChannelLogger().showErrorMessage(`No running process found matching "${config.program}".`);
+                    return undefined;
+                }
             } else {
-                const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
-                const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
-                processId = await attacher.ShowAttachEntries(token);
+                // Show process picker if no program specified
+                if (config.pipeTransport || config.useExtendedRemote) {
+                    const remoteAttachPicker: RemoteAttachPicker = new RemoteAttachPicker();
+                    processId = await remoteAttachPicker.ShowAttachEntries(config);
+                } else {
+                    const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
+                    const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
+                    processId = await attacher.ShowAttachEntries(token);
+                }
             }
 
             if (processId) {
@@ -1277,5 +1289,49 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
         }
 
         return Promise.resolve(new vscode.CompletionList(items, true));
+    }
+
+    private async findProcessByProgramName(
+        programPath: string,
+        config: CppDebugConfiguration,
+        token?: vscode.CancellationToken
+    ): Promise<string | undefined> {
+        const programBaseName: string = path.basename(programPath);
+        let processes: AttachItem[];
+
+        // Get process list using the same logic as interactive attach
+        if (config.pipeTransport || config.useExtendedRemote) {
+            // For remote attach, we need to use RemoteAttachPicker's methods
+            void logger.getOutputChannelLogger().showErrorMessage(
+                "Finding process by program name is not yet supported for remote attach. Please use processId instead."
+            );
+            return undefined;
+        } else {
+            const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
+            processes = await attachItemsProvider.getAttachItems(token);
+        }
+
+        // Find processes matching the program name
+        const matchingProcesses: AttachItem[] = processes.filter(p => {
+            const processName: string = p.label.toLowerCase();
+            const targetName: string = programBaseName.toLowerCase();
+            // Match if the process name exactly matches or starts with the target name
+            return processName === targetName || processName.startsWith(targetName);
+        });
+
+        if (matchingProcesses.length === 0) {
+            return undefined;
+        } else if (matchingProcesses.length === 1) {
+            void logger.getOutputChannelLogger().appendLine(
+                `Found process "${matchingProcesses[0].label}" with PID ${matchingProcesses[0].id}`
+            );
+            return matchingProcesses[0].id;
+        } else {
+            // Multiple matches - let user choose
+            void logger.getOutputChannelLogger().appendLine(
+                `Multiple processes found matching "${programBaseName}". Please select one:`
+            );
+            return showQuickPick(() => Promise.resolve(matchingProcesses));
+        }
     }
 }
