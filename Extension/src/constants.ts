@@ -15,4 +15,4 @@ export const isLinux = OperatingSystem === 'linux';
 export const verboseEnabled = false;
 
 // Model selector for Copilot features
-export const modelSelector = { vendor: 'copilot', family: 'gpt-4' };
+export const modelSelector = { vendor: 'copilot' };
