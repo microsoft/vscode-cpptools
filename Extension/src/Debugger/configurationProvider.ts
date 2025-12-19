@@ -1169,6 +1169,50 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
         return true;
     }
+
+    private async findProcessByProgramName(
+        programPath: string,
+        config: CppDebugConfiguration,
+        token?: vscode.CancellationToken
+    ): Promise<string | undefined> {
+        const programBaseName: string = path.basename(programPath);
+        let processes: AttachItem[];
+
+        // Get process list using the same logic as interactive attach
+        if (config.pipeTransport || config.useExtendedRemote) {
+            // For remote attach, we need to use RemoteAttachPicker's methods
+            void logger.getOutputChannelLogger().showErrorMessage(
+                "Finding process by program name is not yet supported for remote attach. Please use processId instead."
+            );
+            return undefined;
+        } else {
+            const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
+            processes = await attachItemsProvider.getAttachItems(token);
+        }
+
+        // Find processes matching the program name
+        const matchingProcesses: AttachItem[] = processes.filter(p => {
+            const processName: string = p.label.toLowerCase();
+            const targetName: string = programBaseName.toLowerCase();
+            // Match if the process name exactly matches or starts with the target name
+            return processName === targetName || processName.startsWith(targetName);
+        });
+
+        if (matchingProcesses.length === 0) {
+            return undefined;
+        } else if (matchingProcesses.length === 1) {
+            void logger.getOutputChannelLogger().appendLine(
+                `Found process "${matchingProcesses[0].label}" with PID ${matchingProcesses[0].id}`
+            );
+            return matchingProcesses[0].id;
+        } else {
+            // Multiple matches - let user choose
+            void logger.getOutputChannelLogger().appendLine(
+                `Multiple processes found matching "${programBaseName}". Please select one:`
+            );
+            return showQuickPick(() => Promise.resolve(matchingProcesses));
+        }
+    }
 }
 
 export interface IConfigurationAssetProvider {
@@ -1335,49 +1379,5 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
         }
 
         return Promise.resolve(new vscode.CompletionList(items, true));
-    }
-
-    private async findProcessByProgramName(
-        programPath: string,
-        config: CppDebugConfiguration,
-        token?: vscode.CancellationToken
-    ): Promise<string | undefined> {
-        const programBaseName: string = path.basename(programPath);
-        let processes: AttachItem[];
-
-        // Get process list using the same logic as interactive attach
-        if (config.pipeTransport || config.useExtendedRemote) {
-            // For remote attach, we need to use RemoteAttachPicker's methods
-            void logger.getOutputChannelLogger().showErrorMessage(
-                "Finding process by program name is not yet supported for remote attach. Please use processId instead."
-            );
-            return undefined;
-        } else {
-            const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
-            processes = await attachItemsProvider.getAttachItems(token);
-        }
-
-        // Find processes matching the program name
-        const matchingProcesses: AttachItem[] = processes.filter(p => {
-            const processName: string = p.label.toLowerCase();
-            const targetName: string = programBaseName.toLowerCase();
-            // Match if the process name exactly matches or starts with the target name
-            return processName === targetName || processName.startsWith(targetName);
-        });
-
-        if (matchingProcesses.length === 0) {
-            return undefined;
-        } else if (matchingProcesses.length === 1) {
-            void logger.getOutputChannelLogger().appendLine(
-                `Found process "${matchingProcesses[0].label}" with PID ${matchingProcesses[0].id}`
-            );
-            return matchingProcesses[0].id;
-        } else {
-            // Multiple matches - let user choose
-            void logger.getOutputChannelLogger().appendLine(
-                `Multiple processes found matching "${programBaseName}". Please select one:`
-            );
-            return showQuickPick(() => Promise.resolve(matchingProcesses));
-        }
     }
 }
