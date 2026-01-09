@@ -3745,5 +3745,7 @@
     "初期化子の結果は dllimport 変数をアドレス指定します",
     "'no_specializations' 属性を持つテンプレートを特殊化することはできません",
     "'static' はここでは非標準です",
-    "%nd は、明示的な列挙型ベースなしで以前に宣言されました"
+    "%nd は、明示的な列挙型ベースなしで以前に宣言されました",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]
