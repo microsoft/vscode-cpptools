@@ -3745,5 +3745,7 @@
     "başlatıcı sonucu bir dllimport değişkenini adresler",
     "'no_specializations' özniteliğine sahip şablon özelleştirilemez",
     "'static' burada standart dışıdır",
-    "%nd daha önce açık bir sabit liste tabanı olmadan tanımlanmıştı"
+    "%nd daha önce açık bir sabit liste tabanı olmadan tanımlanmıştı",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]

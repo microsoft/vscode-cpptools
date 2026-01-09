@@ -3745,5 +3745,7 @@
     "wynik inicjatora adresuje zmienną dllimport",
     "szablon z atrybutem „no_specializations” nie może być wyspecjalizowany",
     "„static” jest tutaj niestandardowy",
-    "funkcja %nd została poprzednio zadeklarowana bez jawnej bazy wyliczenia"
+    "funkcja %nd została poprzednio zadeklarowana bez jawnej bazy wyliczenia",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]

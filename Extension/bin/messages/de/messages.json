@@ -3745,5 +3745,7 @@
     "Initialisiererergebnis behebt eine dllimport-Variable",
     "Vorlage mit dem Attribut „no_specializations“ kann nicht spezialisiert werden",
     "„static“ entspricht hier nicht dem Standard",
-    "%nd wurde zuvor ohne explizite Enumerationsbasis deklariert"
+    "%nd wurde zuvor ohne explizite Enumerationsbasis deklariert",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]
