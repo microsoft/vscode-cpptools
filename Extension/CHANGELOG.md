@@ -10,8 +10,9 @@
 * Fix an IntelliSense squiggle on the wrong identifier when assigning to a constant member variable. [#14018](https://github.com/microsoft/vscode-cpptools/issues/14018)
 * Fix an IntelliSense error with `std::popcount`. [#14105](https://github.com/microsoft/vscode-cpptools/issues/14105)
 * Fix GitHub Copilot hover. [#14114](https://github.com/microsoft/vscode-cpptools/issues/14114)
-* Fix headers randomly using a header-only configuration from a configuration provider instead of using the source file's configuration. [#14126](https://github.com/microsoft/vscode-cpptools/issues/14126)
+* Fix headers sometimes using a header-only configuration from a configuration provider instead of the source file's configuration. [#14126](https://github.com/microsoft/vscode-cpptools/issues/14126)
 * Fix a reference in a `#define` not being found if it's directly after a `#include`. [#14130](https://github.com/microsoft/vscode-cpptools/issues/14130)
+* Fix a bug that could cause IntelliSense operations to fail when a document is closed during processing.
 * Fix a bug with internal buffer handling that could cause some IntelliSense operations to fail.
 
 ## Version 1.30.0: December 15, 2025
