@@ -3745,5 +3745,7 @@
     "初始設定式結果會處理 dllimport 變數",
     "具有 'no_specializations' 屬性的範本無法特殊化",
     "此處使用的 'static' 非標準",
-    "%nd 先前宣告時未明確指定的列舉基底"
+    "%nd 先前宣告時未明確指定的列舉基底",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]

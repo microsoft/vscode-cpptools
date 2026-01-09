@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "Die Taganalyse wird am Stamm abgebrochen.",
 	"unable_to_retrieve_to_reset_timestamps": "Datenbankdatensätze können nicht abgerufen werden, um Zeitstempel zurückzusetzen: Fehler = {0}",
 	"failed_to_reset_timestamps_for": "Fehler beim Zurücksetzen des Zeitstempels für \"{0}\": Fehler = {1}",
-	"no_suitable_complier": "Es wurde kein geeigneter Compiler gefunden. Legen Sie \"compilerPath\" in \"c_cpp_properties.json\" fest.",
+	"no_suitable_compiler": "Es wurde kein geeigneter Compiler gefunden. Legen Sie \"compilerPath\" in \"c_cpp_properties.json\" fest.",
 	"compiler_include_not_found": "Compilerincludepfad nicht gefunden: {0}",
 	"intellisense_not_responding": "Die IntelliSense-Engine reagiert nicht. Stattdessen wird der Tagparser verwendet.",
 	"tag_parser_will_be_used": "Der Tagparser wird für IntelliSense-Vorgänge in \"{0}\" verwendet.",

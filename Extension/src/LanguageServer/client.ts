@@ -1003,7 +1003,8 @@ export class DefaultClient implements Client {
             workspaceFolderBasename: this.Name,
             workspaceStorage: this.workspaceStoragePath,
             execPath: process.execPath,
-            pathSeparator: (os.platform() === 'win32') ? "\\" : "/"
+            pathSeparator: (os.platform() === 'win32') ? "\\" : "/",
+            userHome: os.homedir()
         };
     }
 
@@ -1796,7 +1797,7 @@ export class DefaultClient implements Client {
 
         if (Object.keys(changedSettings).length > 0) {
             if (this === defaultClient) {
-                if (changedSettings.commentContinuationPatterns !== undefined) {
+                if (changedSettings.commentContinuationPatterns2 !== undefined) {
                     updateLanguageConfigurations();
                 }
                 if (changedSettings.loggingLevel !== undefined) {

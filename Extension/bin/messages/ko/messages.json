@@ -3745,5 +3745,7 @@
     "이니셜라이저 결과가 dllimport 변수를 참조합니다.",
     "'no_specializations' 특성이 있는 템플릿은 특수화할 수 없습니다.",
     "여기서 'static'은 표준이 아닙니다.",
-    "%nd은(는) 이전에 명시적 열거형 기반 없이 선언되었습니다."
+    "%nd은(는) 이전에 명시적 열거형 기반 없이 선언되었습니다.",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]

@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "Anulando análise de marca na raiz",
 	"unable_to_retrieve_to_reset_timestamps": "Não é possível recuperar os registros do BD para redefinir os carimbos de data/hora: erro = {0}",
 	"failed_to_reset_timestamps_for": "Falha ao redefinir o carimbo de data/hora para {0}: erro = {1}",
-	"no_suitable_complier": "Nenhum compilador adequado encontrado. Defina \"compilerPath\" em c_cpp_properties.json.",
+	"no_suitable_compiler": "Nenhum compilador adequado encontrado. Defina \"compilerPath\" em c_cpp_properties.json.",
 	"compiler_include_not_found": "O compilador inclui o caminho não encontrado: {0}",
 	"intellisense_not_responding": "O mecanismo IntelliSense não está respondendo. Usando o Analisador de Marca em seu lugar.",
 	"tag_parser_will_be_used": "O Analisador de Marca será usado para operações do IntelliSense em: {0}",
