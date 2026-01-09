@@ -1,5 +1,19 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.30.1: January 11, 2026
+### Enhancement
+* Add IntelliSense support for C23/C++26 `#embed`. [#13705](https://github.com/microsoft/vscode-cpptools/issues/13705)
+
+### Bug Fixes
+* Fix an incorrect IntelliSense error on an overridden method. [#13729](https://github.com/microsoft/vscode-cpptools/issues/13729)
+* Fix an IntelliSense error with `std::countl_zero`. [#13876](https://github.com/microsoft/vscode-cpptools/issues/13876)
+* Fix an IntelliSense squiggle on the wrong identifier when assigning to a constant member variable. [#14018](https://github.com/microsoft/vscode-cpptools/issues/14018)
+* Fix an IntelliSense error with `std::popcount`. [#14105](https://github.com/microsoft/vscode-cpptools/issues/14105)
+* Fix GitHub Copilot hover. [#14114](https://github.com/microsoft/vscode-cpptools/issues/14114)
+* Fix headers randomly using a header-only configuration from a configuration provider instead of using the source file's configuration. [#14126](https://github.com/microsoft/vscode-cpptools/issues/14126)
+* Fix a reference in a `#define` not being found if it's directly after a `#include`. [#14130](https://github.com/microsoft/vscode-cpptools/issues/14130)
+* Fix a bug with internal buffer handling that could cause some IntelliSense operations to fail.
+
 ## Version 1.30.0: December 15, 2025
 ### Enhancements
 * Change `C` completion behavior to automatically trigger after the `struct/union/enum` keyword and to filter based on the keyword. [#13634](https://github.com/microsoft/vscode-cpptools/issues/13634)
