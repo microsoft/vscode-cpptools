@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.30.1: January 11, 2026
+## Version 1.30.1: January 12, 2026
 ### Enhancement
 * Add IntelliSense support for C23/C++26 `#embed`. [#13705](https://github.com/microsoft/vscode-cpptools/issues/13705)
 
