@@ -1551,7 +1551,6 @@ export function hasMsvcEnvironment(): boolean {
         'INCLUDE',
         'LIB',
         'LIBPATH',
-        'NETFXSDKDir',
         'UCRTVersion',
         'UniversalCRTSdkDir',
         'VCIDEInstallDir',

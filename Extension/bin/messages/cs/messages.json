@@ -3745,5 +3745,7 @@
     "výsledek inicializátoru odkazuje na proměnnou dllimport",
     "šablona s atributem no_specializations nemůže být specializovaná",
     "„static“ je zde nestandardní",
-    "%nd byl dříve deklarován bez explicitního základu výčtu"
+    "%nd byl dříve deklarován bez explicitního základu výčtu",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]

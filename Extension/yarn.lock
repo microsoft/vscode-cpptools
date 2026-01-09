@@ -3138,9 +3138,9 @@ jest-worker@^27.4.5:
     supports-color "^8.0.0"
 
 js-yaml@^4.1.0:
-  version "4.1.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/js-yaml/-/js-yaml-4.1.0.tgz#c1fb65f8f5017901cdd2c951864ba18458a10602"
-  integrity sha1-wftl+PUBeQHN0slRhkuhhFihBgI=
+  version "4.1.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/js-yaml/-/js-yaml-4.1.1.tgz#854c292467705b699476e1a2decc0c8a3458806b"
+  integrity sha1-hUwpJGdwW2mUduGi3swMijRYgGs=
   dependencies:
     argparse "^2.0.1"
 
