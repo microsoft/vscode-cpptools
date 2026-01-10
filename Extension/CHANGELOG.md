@@ -4,7 +4,7 @@
 ### Enhancements
 * Add IntelliSense support for C23/C++26 `#embed`. [#13705](https://github.com/microsoft/vscode-cpptools/issues/13705)
 * Add IntelliSense support for C++23 multidimensional subscript operators for gcc/clang modes (not msvc yet).
-* Add IntelliSense support for C++23 static operator[].
+* Add IntelliSense support for C++23 `static operator[]`.
 
 ### Bug Fixes
 * Fix an incorrect IntelliSense error on an overridden method. [#13729](https://github.com/microsoft/vscode-cpptools/issues/13729)
