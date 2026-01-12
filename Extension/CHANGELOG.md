@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.30.1: January 12, 2026
+## Version 1.30.1: January 13, 2026
 ### Enhancements
 * Add IntelliSense support for C23/C++26 `#embed`. [#13705](https://github.com/microsoft/vscode-cpptools/issues/13705)
 * Add IntelliSense support for C++23 multidimensional subscript operators for gcc/clang modes (not msvc yet).
