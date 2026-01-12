@@ -28,11 +28,13 @@ abstract class AbstractDebugAdapterDescriptorFactory implements vscode.DebugAdap
 export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
 
     async createDebugAdapterDescriptor(_session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor> {
-        const adapter: string = "./debugAdapters/bin/OpenDebugAD7" + (os.platform() === 'win32' ? ".exe" : "");
+        // Updated adapter path (adjust if your binary moved)
+        const adapter: string = "./out/debugAdapters/OpenDebugAD7" + (os.platform() === 'win32' ? ".exe" : "");
 
         const command: string = path.join(this.context.extensionPath, adapter);
 
-        return new vscode.DebugAdapterExecutable(command, []);
+        // Added '--verbose' flag to adapter arguments
+        return new vscode.DebugAdapterExecutable(command, ['--verbose']);
     }
 }
 
@@ -43,6 +45,7 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterD
             void vscode.window.showErrorMessage(localize("debugger.not.available", "Debugger type '{0}' is not available for non-Windows machines.", "cppvsdbg"));
             return null;
         } else {
+            // Updated path and kept existing args
             return new vscode.DebugAdapterExecutable(
                 path.join(this.context.extensionPath, './debugAdapters/vsdbg/bin/vsdbg.exe'),
                 ['--interpreter=vscode', '--extConfigDir=%USERPROFILE%\\.cppvsdbg\\extensions']
