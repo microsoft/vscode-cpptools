@@ -3745,5 +3745,7 @@
     "el resultado del inicializador se dirige a una variable dllimport",
     "La plantilla con el atributo \"no_specializations\" no se puede especializar",
     "\"static\" no es estándar aquí",
-    "%nd se declaró previamente sin una base explícita de enumeración"
+    "%nd se declaró previamente sin una base explícita de enumeración",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]
