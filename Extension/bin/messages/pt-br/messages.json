@@ -3745,5 +3745,7 @@
     "o resultado do inicializador trata de uma variável dllimport",
     "modelo com atributo \"no_specializations\" não pode ser especializado",
     "\"static\" não é padrão aqui",
-    "%nd foi declarado anteriormente sem uma base de enumeração explícita"
+    "%nd foi declarado anteriormente sem uma base de enumeração explícita",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]

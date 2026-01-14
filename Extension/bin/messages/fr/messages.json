@@ -3745,5 +3745,7 @@
     "Le résultat de l’initialiseur traite une variable dllimport",
     "le modèle avec l’attribut « no_specializations » ne peut pas être spécialisé",
     "« static » n’est pas standard ici",
-    "%nd a été déclaré précédemment sans base d’énumération explicite"
+    "%nd a été déclaré précédemment sans base d’énumération explicite",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]

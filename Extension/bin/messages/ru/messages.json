@@ -3745,5 +3745,7 @@
     "результат инициализатора указывает на переменную dllimport",
     "шаблон с атрибутом \"no_specializations\" не может иметь специализации",
     "\"static\" является здесь нестандартным",
-    "%nd ранее был объявлен без явной базы перечисления"
+    "%nd ранее был объявлен без явной базы перечисления",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]

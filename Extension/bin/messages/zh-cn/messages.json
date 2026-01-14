@@ -3745,5 +3745,7 @@
     "初始值设定项结果指向一个 dllimport 变量",
     "带有 \"no_specializations\" 属性的模板不能被专用化",
     "此处使用 \"static\" 不符合标准",
-    "之前声明 %nd 时未指定显式枚举基类型"
+    "之前声明 %nd 时未指定显式枚举基类型",
+    "missing \"typename\" is nonstandard here",
+    "abbreviated function template syntax is nonstandard for deduction guides"
 ]
