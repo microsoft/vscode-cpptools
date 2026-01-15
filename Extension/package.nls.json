@@ -478,7 +478,7 @@
     "c_cpp.configuration.autocomplete.markdownDescription": {
         "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (and similarly for `c` and `cuda-cpp` languages).",
         "comment": [
-            "{Locked=\"`disabled`\"} {Locked=\"`\\\"[cpp]\\\": \\{\\\"editor.wordBasedSuggestions\\\": <\"} {Locked=\">}`\"} {Locked=\"`c`\"} {Locked=\"`cuda-cpp`\"}"
+            "{Locked=\"`disabled`\"} {Locked=\"`\\\"[cpp]\\\": {\\\"editor.wordBasedSuggestions\\\": <\"} {Locked=\">}`\"} {Locked=\"`c`\"} {Locked=\"`cuda-cpp`\"}"
         ]
     },
     "c_cpp.configuration.autocomplete.default.description": "Uses the active IntelliSense engine.",
