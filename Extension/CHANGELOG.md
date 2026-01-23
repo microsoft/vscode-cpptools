@@ -2,7 +2,7 @@
 
 ## Version 1.30.2: January 26, 2026
 ### Enhancement
-* Add IntelliSense support for MSVC mode C++23 multidimensional subscript operators.
+* Add IntelliSense support for MSVC mode C++23 multidimensional subscript operators. [#13798](https://github.com/microsoft/vscode-cpptools/issues/13798)
 
 ### Bug Fixes
 * Fix the Locals/Watch window displaying `std::map<enum, struct>` incorrectly when using the `cppdbg` debugger. [#12102](https://github.com/microsoft/vscode-cpptools/issues/12102)
