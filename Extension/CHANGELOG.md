@@ -1,5 +1,32 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.30.2: January 26, 2026
+### Enhancement
+* Add IntelliSense support for MSVC mode C++23 multidimensional subscript operators. [#13798](https://github.com/microsoft/vscode-cpptools/issues/13798)
+
+### Bug Fixes
+* Fix the Locals/Watch window displaying `std::map<enum, struct>` incorrectly when using the `cppdbg` debugger. [#12102](https://github.com/microsoft/vscode-cpptools/issues/12102)
+* Fix a long `args` list in `launch.json` getting truncated when using the `cppdbg` debugger. [#14054](https://github.com/microsoft/vscode-cpptools/issues/14054)
+* Downgrade the version of SQLite used to see if that fixes the Windows ARM64 heap corruption that started with 1.30.1. [#14142](https://github.com/microsoft/vscode-cpptools/issues/14142)
+
+## Version 1.30.1: January 13, 2026
+### Enhancements
+* Add IntelliSense support for C23/C++26 `#embed`. [#13705](https://github.com/microsoft/vscode-cpptools/issues/13705)
+* Add IntelliSense support for C++23 multidimensional subscript operators for GCC/Clang modes (not MSVC yet).
+* Add IntelliSense support for C++23 `static operator[]`.
+
+### Bug Fixes
+* Fix an incorrect IntelliSense error on an overridden method. [#13729](https://github.com/microsoft/vscode-cpptools/issues/13729)
+* Fix an IntelliSense error with `std::countl_zero`. [#13876](https://github.com/microsoft/vscode-cpptools/issues/13876)
+* Fix an IntelliSense squiggle on the wrong identifier when assigning to a constant member variable. [#14018](https://github.com/microsoft/vscode-cpptools/issues/14018)
+* Fix IntelliSense with Clang mode C++23 deduced type construction with `auto`. [#14041](https://github.com/microsoft/vscode-cpptools/issues/14041)
+* Fix an IntelliSense error with `std::popcount`. [#14105](https://github.com/microsoft/vscode-cpptools/issues/14105)
+* Fix GitHub Copilot hover. [#14114](https://github.com/microsoft/vscode-cpptools/issues/14114)
+* Fix headers sometimes using a header-only configuration from a configuration provider instead of the source file's configuration. [#14126](https://github.com/microsoft/vscode-cpptools/issues/14126)
+* Fix a reference in a `#define` not being found if it's directly after a `#include`. [#14130](https://github.com/microsoft/vscode-cpptools/issues/14130)
+* Fix a bug that could cause IntelliSense operations to fail when a document is closed during processing.
+* Fix a bug with internal buffer handling that could cause some IntelliSense operations to fail.
+
 ## Version 1.30.0: December 15, 2025
 ### Enhancements
 * Change `C` completion behavior to automatically trigger after the `struct/union/enum` keyword and to filter based on the keyword. [#13634](https://github.com/microsoft/vscode-cpptools/issues/13634)
