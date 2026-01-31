@@ -932,12 +932,12 @@
         ]
     },
     "c_cpp.debuggers.program.attach.markdownDescription": {
-        "message": "Optional full path to program executable. When specified, the debugger will search for a running process matching this executable name and attach to it. If multiple processes match, a selection prompt will be shown. Use either `program` or `processId`, not both.",
+        "message": "Optional full path to the program executable. When specified, the debugger will search for a running process matching this executable path and attach to it. If multiple processes match, a selection prompt will be shown. Use either `program` or `processId`, not both.",
         "comment": [
             "{Locked=\"`program`\"} {Locked=\"`processId`\"}"
         ]
     },
-    "c_cpp.debuggers.symbolSearchPath.description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
+    "c_cpp.debuggers.symbolSearchPath.description": "Semicolon separated list of directories to use to search for symbol (that is, pdb or .so) files. Example: \"c:\\dir1;c:\\dir2\".",
     "c_cpp.debuggers.dumpPath.description": "Optional full path to a dump file for the specified program. Example: \"c:\\temp\\app.dmp\". Defaults to null.",
     "c_cpp.debuggers.enableDebugHeap.description": "If false, the process will be launched with debug heap disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
     "c_cpp.debuggers.symbolLoadInfo.description": "Explicit control of symbol loading.",
