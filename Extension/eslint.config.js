@@ -38,6 +38,7 @@ module.exports = [
       "@typescript-eslint/adjacent-overload-signatures": "error",
       "@typescript-eslint/array-type": "error",
       "@typescript-eslint/await-thenable": "error",
+      "@typescript-eslint/method-signature-style": ["error", "method"],
       "@typescript-eslint/naming-convention": [
         "error",
         {
@@ -45,27 +46,27 @@ module.exports = [
           format: ["PascalCase"]
         }
       ],
+      "@typescript-eslint/no-array-constructor": "error",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-extraneous-class": "off",
-      "@typescript-eslint/no-array-constructor": "error",
-      "@typescript-eslint/no-useless-constructor": "error",
+      "@typescript-eslint/no-extra-non-null-assertion": "error",
+      "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/no-for-in-array": "error",
       "@typescript-eslint/no-misused-new": "error",
       "@typescript-eslint/no-misused-promises": "error",
       "@typescript-eslint/no-namespace": "error",
       "@typescript-eslint/no-non-null-assertion": "error",
-      "@typescript-eslint/no-extra-non-null-assertion": "error",
       "@typescript-eslint/no-this-alias": "error",
+      "@typescript-eslint/no-unnecessary-boolean-literal-compare": "error",
+      "@typescript-eslint/no-unnecessary-qualifier": "error",
       "@typescript-eslint/no-unnecessary-type-arguments": "error",
+      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+      "@typescript-eslint/no-useless-constructor": "error",
       "@typescript-eslint/no-var-requires": "error",
       "@typescript-eslint/prefer-function-type": "error",
       "@typescript-eslint/prefer-namespace-keyword": "error",
       "@typescript-eslint/triple-slash-reference": "error",
       "@typescript-eslint/unified-signatures": "error",
-      "@typescript-eslint/no-floating-promises": "error",
-      "@typescript-eslint/method-signature-style": ["error", "method"],
-      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-      "@typescript-eslint/no-unnecessary-boolean-literal-compare": "off",
       
       // Core ESLint rules
       "camelcase": "off",

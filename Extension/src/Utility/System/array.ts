@@ -3,8 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/unified-signatures */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { fail } from 'assert';
 import { is } from '../System/guards';

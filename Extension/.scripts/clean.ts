@@ -18,25 +18,28 @@ export async function main() {
 }
 
 export async function all() {
-    await rimraf(...(await getModifiedIgnoredFiles()).filter(each => !each.includes('node_modules')));
+    await rimraf(...(await getModifiedIgnoredFiles()).filter((each): each is string => each !== undefined && !each.includes('node_modules')));
 }
 
 export async function reset() {
     verbose(`Resetting all .gitignored files in extension`);
-    await rimraf(...await getModifiedIgnoredFiles());
+    await rimraf(...(await getModifiedIgnoredFiles()).filter((each): each is string => each !== undefined));
 }
 
 async function details(files: string[]) {
     let all = await Promise.all(files.filter(each => each).map(async (each) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [filename, stats] = await filepath.stats(each);
+        if (!stats) {
+            return null;
+        }
         return {
             filename: stats.isDirectory() ? cyan(`${each}${sep}**`) : brightGreen(`${each}`),
             date: stats.mtime.toLocaleDateString().replace(/\b(\d)\//g, '0$1\/'),
             time: stats.mtime.toLocaleTimeString().replace(/^(\d)\:/g, '0$1:'),
             modified: stats.mtime
         };
-    }));
+    })).then(results => results.filter((each): each is NonNullable<typeof each> => each !== null));
     all = all.sort((a, b) => a.modified.getTime() - b.modified.getTime());
     // print a formatted table so the date and time are aligned
     const max = all.reduce((max, each) => Math.max(max, each.filename.length), 0);
@@ -56,7 +59,7 @@ export async function show(opt?: string) {
         case 'ignored':
         case 'untracked':
             console.log(cyan('\n\nUntracked+Ignored files:'));
-            return details(await getModifiedIgnoredFiles());
+            return details((await getModifiedIgnoredFiles()).filter((each): each is string => each !== undefined));
 
         default:
             return error(`Unknown option '${opt}'`);

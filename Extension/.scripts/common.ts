@@ -59,7 +59,7 @@ export async function getModifiedIgnoredFiles() {
 }
 
 export async function rimraf(...paths: string[]) {
-    const all = [];
+    const all: Promise<void>[] = [];
     for (const each of paths) {
         if (!each) {
             continue;
@@ -82,6 +82,9 @@ export async function mkdir(filePath: string) {
             return fullPath;
         }
         throw new Error(`Cannot create directory '${filePath}' because there is a file there.`);
+    }
+    if (!fullPath) {
+        throw new Error(`Cannot create directory '${filePath}' because the path is invalid.`);
     }
 
     await md(fullPath, { recursive: true });
@@ -259,7 +262,7 @@ export function position(text: string) {
     return gray(`${text}`);
 }
 
-export async function assertAnyFolder(oneOrMoreFolders: string | string[], errorMessage?: string): Promise<string> {
+export async function assertAnyFolder(oneOrMoreFolders: string | string[], errorMessage?: string): Promise<string | undefined> {
     oneOrMoreFolders = is.array(oneOrMoreFolders) ? oneOrMoreFolders : [oneOrMoreFolders];
     for (const each of oneOrMoreFolders) {
         const result = await filepath.isFolder(each, $root);
@@ -276,7 +279,7 @@ export async function assertAnyFolder(oneOrMoreFolders: string | string[], error
     }
 }
 
-export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMessage?: string): Promise<string> {
+export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMessage?: string): Promise<string | undefined> {
     oneOrMoreFiles = is.array(oneOrMoreFiles) ? oneOrMoreFiles : [oneOrMoreFiles];
     for (const each of oneOrMoreFiles) {
         const result = await filepath.isFile(each, $root);
