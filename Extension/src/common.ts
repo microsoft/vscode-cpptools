@@ -1474,9 +1474,7 @@ export function isVsCodeInsiders(): boolean {
 
 export function stripEscapeSequences(str: string): string {
     return str
-        // eslint-disable-next-line no-control-regex
         .replace(/\x1b\[\??[0-9]{0,3}(;[0-9]{1,3})?[a-zA-Z]/g, '')
-        // eslint-disable-next-line no-control-regex
         .replace(/\u0008/g, '')
         .replace(/\r/g, '');
 }

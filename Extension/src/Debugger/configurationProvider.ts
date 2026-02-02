@@ -245,7 +245,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
 
             // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
-            // eslint-disable-next-line no-prototype-builtins
             if (config.hasOwnProperty("externalConsole")) {
                 void logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
                 if (config.externalConsole && !config.console) {
@@ -710,7 +709,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, undefined);
                 if (sourceFileMapSource !== newSourceFileMapSource) {
                     message = "\t" + localize("replacing.sourcepath", "Replacing {0} '{1}' with '{2}'.", "sourcePath", sourceFileMapSource, newSourceFileMapSource);
-                    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                     delete config.sourceFileMap[sourceFileMapSource];
                     source = newSourceFileMapSource;
                 }
@@ -790,7 +788,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     private findDefaultConfig(configs: CppDebugConfiguration[]): CppDebugConfiguration[] {
-        // eslint-disable-next-line no-prototype-builtins
         return configs.filter((config: CppDebugConfiguration) => config.hasOwnProperty("isDefault") && config.isDefault);
     }
 

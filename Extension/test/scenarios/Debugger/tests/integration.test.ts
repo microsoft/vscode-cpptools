@@ -2,16 +2,16 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable @typescript-eslint/triple-slash-reference */
 /// <reference path="../../../../vscode.d.ts" />
 import * as assert from 'assert';
 import { suite } from 'mocha';
 import * as vscode from 'vscode';
 
-suite(`Debug Integration Test: `, function(): void {
+suite(`Debug Integration Test: `, function (): void {
 
-    suiteSetup(async function(): Promise<void> {
+    suiteSetup(async function (): Promise<void> {
         const extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools") || assert.fail("Extension not found");
         if (!extension.isActive) {
             await extension.activate();

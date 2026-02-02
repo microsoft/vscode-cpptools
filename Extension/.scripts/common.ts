@@ -54,6 +54,7 @@ export async function getModifiedIgnoredFiles() {
     }
 
     // return the full path of files that would be removed.
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     return Promise.all(stdio.filter("Would remove").map((s) => filepath.exists(s.replace(/^Would remove /, ''), $root)).filter(p => p));
 }
 

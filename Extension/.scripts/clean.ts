@@ -28,8 +28,7 @@ export async function reset() {
 
 async function details(files: string[]) {
     let all = await Promise.all(files.filter(each => each).map(async (each) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const [filename, stats ] = await filepath.stats(each);
+        const [filename, stats] = await filepath.stats(each);
         return {
             filename: stats.isDirectory() ? cyan(`${each}${sep}**`) : brightGreen(`${each}`),
             date: stats.mtime.toLocaleDateString().replace(/\b(\d)\//g, '0$1\/'),

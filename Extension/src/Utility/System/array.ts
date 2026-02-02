@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 
 /* eslint-disable @typescript-eslint/unified-signatures */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { fail } from 'assert';
 import { is } from '../System/guards';

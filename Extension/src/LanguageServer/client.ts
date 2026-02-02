@@ -1779,10 +1779,12 @@ export class DefaultClient implements Client {
         return { wasShutdown: initializeResult.shouldShutdown };
     }
 
-    public async sendDidChangeSettings(): Promise<void> {
+    public sendDidChangeSettings(): void {
         // Send settings json to native side
-        await this.ready;
-        await this.languageClient.sendNotification(DidChangeSettingsNotification, this.getAllSettings());
+        void (async () => {
+            await this.ready;
+            await this.languageClient.sendNotification(DidChangeSettingsNotification, this.getAllSettings());
+        })();
     }
 
     public async onDidChangeSettings(_event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> {
@@ -2074,7 +2076,7 @@ export class DefaultClient implements Client {
             if (!hasCompleted) {
                 hasCompleted = true;
                 if (currentProvider.version >= Version.v2) {
-                    await this.resumeParsing();
+                    this.resumeParsing();
                 }
             }
         }
@@ -2097,7 +2099,7 @@ export class DefaultClient implements Client {
             if (!hasCompleted) {
                 hasCompleted = true;
                 if (currentProvider.version >= Version.v2) {
-                    await this.resumeParsing();
+                    this.resumeParsing();
                 }
             }
         }
@@ -2109,7 +2111,7 @@ export class DefaultClient implements Client {
                 this.sendCustomBrowseConfiguration(null, undefined, Version.v0, true);
                 if (currentProvider.version >= Version.v2) {
                     console.warn(`Configuration Provider timed out in ${configProviderTimeout}ms.`);
-                    void this.resumeParsing().catch(logAndReturn.undefined);
+                    this.resumeParsing();
                 }
             }
         }, configProviderTimeout);
@@ -3112,16 +3114,18 @@ export class DefaultClient implements Client {
      */
     public activate(): void {
         this.model.activate();
-        void this.resumeParsing().catch(logAndReturn.undefined);
+        this.resumeParsing();
     }
 
-    public async selectionChanged(selection: Range): Promise<void> {
-        return this.languageClient.sendNotification(DidChangeTextEditorSelectionNotification, selection);
+    public selectionChanged(selection: Range): void {
+        void this.languageClient.sendNotification(DidChangeTextEditorSelectionNotification, selection);
     }
 
-    public async resetDatabase(): Promise<void> {
-        await this.ready;
-        return this.languageClient.sendNotification(ResetDatabaseNotification);
+    public resetDatabase(): void {
+        void (async () => {
+            await this.ready;
+            await this.languageClient.sendNotification(ResetDatabaseNotification);
+        })();
     }
 
     /**
@@ -3131,31 +3135,41 @@ export class DefaultClient implements Client {
         this.model.deactivate();
     }
 
-    public async pauseParsing(): Promise<void> {
-        await this.ready;
-        return this.languageClient.sendNotification(PauseParsingNotification);
+    public pauseParsing(): void {
+        void (async () => {
+            await this.ready;
+            await this.languageClient.sendNotification(PauseParsingNotification);
+        })();
     }
 
-    public async resumeParsing(): Promise<void> {
-        await this.ready;
-        return this.languageClient.sendNotification(ResumeParsingNotification);
+    public resumeParsing(): void {
+        void (async () => {
+            await this.ready;
+            await this.languageClient.sendNotification(ResumeParsingNotification);
+        })();
     }
 
-    public async PauseCodeAnalysis(): Promise<void> {
-        await this.ready;
-        this.model.isCodeAnalysisPaused.Value = true;
-        return this.languageClient.sendNotification(PauseCodeAnalysisNotification);
+    public PauseCodeAnalysis(): void {
+        void (async () => {
+            await this.ready;
+            this.model.isCodeAnalysisPaused.Value = true;
+            await this.languageClient.sendNotification(PauseCodeAnalysisNotification);
+        })();
     }
 
-    public async ResumeCodeAnalysis(): Promise<void> {
-        await this.ready;
-        this.model.isCodeAnalysisPaused.Value = false;
-        return this.languageClient.sendNotification(ResumeCodeAnalysisNotification);
+    public ResumeCodeAnalysis(): void {
+        void (async () => {
+            await this.ready;
+            this.model.isCodeAnalysisPaused.Value = false;
+            await this.languageClient.sendNotification(ResumeCodeAnalysisNotification);
+        })();
     }
 
-    public async CancelCodeAnalysis(): Promise<void> {
-        await this.ready;
-        return this.languageClient.sendNotification(CancelCodeAnalysisNotification);
+    public CancelCodeAnalysis(): void {
+        void (async () => {
+            await this.ready;
+            await this.languageClient.sendNotification(CancelCodeAnalysisNotification);
+        })();
     }
 
     private updateCodeAnalysisProcessed(processed: number): void {
@@ -3418,7 +3432,6 @@ export class DefaultClient implements Client {
         this.browseConfigurationLogging = "";
 
         // This while (true) is here just so we can break out early if the config is set on error
-        // eslint-disable-next-line no-constant-condition
         while (true) {
             // config is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
             if (timeoutOccured || !config || config instanceof Array) {
@@ -3563,24 +3576,32 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleConfigurationEditCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): Promise<void> {
-        await this.ready;
-        return this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument, viewColumn);
+    public handleConfigurationEditCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
+        void (async () => {
+            await this.ready;
+            await this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument, viewColumn);
+        })();
     }
 
-    public async handleConfigurationEditJSONCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): Promise<void> {
-        await this.ready;
-        return this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument, viewColumn);
+    public handleConfigurationEditJSONCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
+        void (async () => {
+            await this.ready;
+            await this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument, viewColumn);
+        })();
     }
 
-    public async handleConfigurationEditUICommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): Promise<void> {
-        await this.ready;
-        return this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument, viewColumn);
+    public handleConfigurationEditUICommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
+        void (async () => {
+            await this.ready;
+            await this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument, viewColumn);
+        })();
     }
 
-    public async handleAddToIncludePathCommand(path: string): Promise<void> {
-        await this.ready;
-        return this.configuration.addToIncludePathCommand(path);
+    public handleAddToIncludePathCommand(path: string): void {
+        void (async () => {
+            await this.ready;
+            this.configuration.addToIncludePathCommand(path);
+        })();
     }
 
     public async handleGoToDirectiveInGroup(next: boolean): Promise<void> {
@@ -4237,19 +4258,20 @@ export class DefaultClient implements Client {
         return languageClient ? languageClient.stop() : Promise.resolve();
     }
 
-    public async handleReferencesIcon(): Promise<void> {
-        await this.ready;
+    public handleReferencesIcon(): void {
+        void (async () => {
+            await this.ready;
 
-        workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
+            workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
 
-        // If the search is find all references, preview partial results.
-        // This will cause the language server to send partial results to display
-        // in the "Other References" view or channel. Doing a preview should not complete
-        // an in-progress request until it is finished or canceled.
-        if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
-            void this.languageClient.sendNotification(PreviewReferencesNotification);
-        }
-
+            // If the search is find all references, preview partial results.
+            // This will cause the language server to send partial results to display
+            // in the "Other References" view or channel. Doing a preview should not complete
+            // an in-progress request until it is finished or canceled.
+            if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
+                void this.languageClient.sendNotification(PreviewReferencesNotification);
+            }
+        })();
     }
 
     private serverCanceledReferences(): void {
@@ -4315,7 +4337,6 @@ function getLanguageServerFileName(): string {
     return path.resolve(util.getExtensionFilePath("bin"), extensionProcessName);
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 class NullClient implements Client {
     private booleanEvent = new vscode.EventEmitter<boolean>();
     private numberEvent = new vscode.EventEmitter<number>();
