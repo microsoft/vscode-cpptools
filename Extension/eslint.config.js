@@ -125,15 +125,6 @@ module.exports = [
       
       // JSDoc rules
       "jsdoc/no-types": "error",
-      
-      // Header rules - TODO: eslint-plugin-header may not be compatible with ESLint 9 flat config
-      // The old config had:
-      // "header/header": ["warn", "block", [
-      //   " --------------------------------------------------------------------------------------------",
-      //   " * Copyright (c) Microsoft Corporation. All Rights Reserved.",
-      //   " * See 'LICENSE' in the project root for license information.",
-      //   " * ------------------------------------------------------------------------------------------ "
-      // ]],
     },
   },
   {
