@@ -93,7 +93,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         let activeClient: Client;
         try {
             activeClient = ext.getActiveClient();
-        } catch (errJS) {
+        } catch {
             return emptyTasks; // Language service features may be disabled.
         }
 

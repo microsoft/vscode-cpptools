@@ -179,7 +179,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     await cppBuildTaskProvider.runBuildTask(config.preLaunchTask);
                     config.preLaunchTask = undefined;
                     Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "true" });
-                } catch (err) {
+                } catch {
                     Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "false" });
                 }
                 return config;
@@ -620,7 +620,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (response === applyButton || response === updateButton) {
             try {
                 await vscode.commands.executeCommand('C_Cpp.SetVsDeveloperEnvironment', 'buildAndDebug');
-            } catch (e: any) {
+            } catch {
                 // Ignore the error, the user will be prompted to apply the environment manually.
             }
         }

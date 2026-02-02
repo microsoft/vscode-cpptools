@@ -3,6 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/triple-slash-reference */
 /// <reference path="../../../../vscode.d.ts" />
 import * as assert from 'assert';

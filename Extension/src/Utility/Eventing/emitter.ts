@@ -3,6 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/unified-signatures */
 import { is } from '../System/guards';
 import { smash } from '../Text/identifiers';

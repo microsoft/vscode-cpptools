@@ -28,7 +28,7 @@ export function createSandbox(): <T>(code: string, context?: any) => T {
         } else {
             try {
                 runInContext(`${response} = ${code}`, sandbox);
-            } catch (e) {
+            } catch {
                 sandbox[response] = undefined;
             }
         }

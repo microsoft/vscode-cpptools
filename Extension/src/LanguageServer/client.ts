@@ -2228,13 +2228,13 @@ export class DefaultClient implements Client {
                 if (!await provider.canProvideConfiguration(docUri, tokenSource.token)) {
                     return [];
                 }
-            } catch (err) {
+            } catch {
                 console.warn("Caught exception from canProvideConfiguration");
             }
             let configs: util.Mutable<SourceFileConfigurationItem>[] = [];
             try {
                 configs = await provider.provideConfigurations([docUri], tokenSource.token);
-            } catch (err) {
+            } catch {
                 console.warn("Caught exception from provideConfigurations");
             }
 
@@ -4337,6 +4337,7 @@ function getLanguageServerFileName(): string {
     return path.resolve(util.getExtensionFilePath("bin"), extensionProcessName);
 }
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 class NullClient implements Client {
     private booleanEvent = new vscode.EventEmitter<boolean>();
     private numberEvent = new vscode.EventEmitter<number>();

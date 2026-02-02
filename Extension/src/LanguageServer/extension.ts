@@ -964,7 +964,7 @@ function reportMacCrashes(): void {
                         });
                     }, 5000);
                 });
-            } catch (e) {
+            } catch {
                 // The file watcher limit is hit (may not be possible on Mac, but just in case).
             }
         });
@@ -1023,7 +1023,7 @@ export function watchForCrashes(crashDirectory: string): void {
                         });
                     }, 5000);
                 });
-            } catch (e) {
+            } catch {
                 // The file watcher limit is hit (may not be possible on Mac, but just in case).
             }
         });

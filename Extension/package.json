@@ -6788,6 +6788,7 @@
         "chokidar": "^3.6.0",
         "comment-json": "^4.2.3",
         "escape-string-regexp": "^2.0.0",
+        "fast-glob": "^3.3.3",
         "glob": "^7.2.3",
         "minimatch": "^4.2.0",
         "mkdirp": "^3.0.1",
