@@ -271,12 +271,10 @@ export async function assertAnyFolder(oneOrMoreFolders: string | string[], error
             return result;
         }
     }
-    if (errorMessage) {
-        if (!$switches.includes('--quiet')) {
-            error(errorMessage);
-        }
-        process.exit(1);
+    if (errorMessage && !$switches.includes('--quiet')) {
+        error(errorMessage);
     }
+    process.exit(1);
 }
 
 export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMessage?: string): Promise<string | undefined> {
@@ -288,12 +286,10 @@ export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMess
             return result;
         }
     }
-    if (errorMessage) {
-        if (!$switches.includes('--quiet')) {
-            error(errorMessage);
-        }
-        process.exit(1);
+    if (errorMessage && !$switches.includes('--quiet')) {
+        error(errorMessage);
     }
+    process.exit(1);
 }
 
 const quiet = process.argv.includes('--quiet');

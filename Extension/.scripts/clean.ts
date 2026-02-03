@@ -27,9 +27,8 @@ export async function reset() {
 }
 
 async function details(files: string[]) {
-    let all = await Promise.all(files.filter(each => each).map(async (each) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const [filename, stats] = await filepath.stats(each);
+    const results = await Promise.all(files.filter(each => each).map(async (each) => {
+        const [, stats] = await filepath.stats(each);
         if (!stats) {
             return null;
         }
@@ -39,7 +38,8 @@ async function details(files: string[]) {
             time: stats.mtime.toLocaleTimeString().replace(/^(\d)\:/g, '0$1:'),
             modified: stats.mtime
         };
-    })).then(results => results.filter((each): each is NonNullable<typeof each> => each !== null));
+    }));
+    let all = results.filter((each): each is NonNullable<typeof each> => each !== null);
     all = all.sort((a, b) => a.modified.getTime() - b.modified.getTime());
     // print a formatted table so the date and time are aligned
     const max = all.reduce((max, each) => Math.max(max, each.filename.length), 0);
