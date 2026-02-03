@@ -352,8 +352,8 @@ export async function checkBinaries() {
 export async function checkProposals() {
     let failing = false;
 
-    await rm(`${$root}/vscode.proposed.chatParticipantAdditions.d.ts`);
     failing = await assertAnyFile('vscode.proposed.chatParticipantAdditions.d.ts') && (quiet || warn(`The VSCode import file '${$root}/vscode.proposed.chatParticipantAdditions.d.ts' should not be present.`)) || failing;
+    await rm(`${$root}/vscode.proposed.chatParticipantAdditions.d.ts`);
 
     if (!failing) {
         verbose('VSCode proposals appear to be in place.');
