@@ -271,8 +271,10 @@ export async function assertAnyFolder(oneOrMoreFolders: string | string[], error
             return result;
         }
     }
-    if (errorMessage && !$switches.includes('--quiet')) {
-        error(errorMessage);
+    if (errorMessage) {
+        if (!$switches.includes('--quiet')) {
+            error(errorMessage);
+        }
         process.exit(1);
     }
 }
@@ -286,8 +288,10 @@ export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMess
             return result;
         }
     }
-    if (errorMessage && !$switches.includes('--quiet')) {
-        error(errorMessage);
+    if (errorMessage) {
+        if (!$switches.includes('--quiet')) {
+            error(errorMessage);
+        }
         process.exit(1);
     }
 }
