@@ -262,7 +262,7 @@ export function position(text: string) {
     return gray(`${text}`);
 }
 
-export async function assertAnyFolder(oneOrMoreFolders: string | string[], errorMessage?: string): Promise<string | undefined> {
+export async function assertAnyFolder(oneOrMoreFolders: string | string[], errorMessage?: string): Promise<string> {
     oneOrMoreFolders = is.array(oneOrMoreFolders) ? oneOrMoreFolders : [oneOrMoreFolders];
     for (const each of oneOrMoreFolders) {
         const result = await filepath.isFolder(each, $root);
@@ -277,7 +277,7 @@ export async function assertAnyFolder(oneOrMoreFolders: string | string[], error
     process.exit(1);
 }
 
-export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMessage?: string): Promise<string | undefined> {
+export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMessage?: string): Promise<string> {
     oneOrMoreFiles = is.array(oneOrMoreFiles) ? oneOrMoreFiles : [oneOrMoreFiles];
     for (const each of oneOrMoreFiles) {
         const result = await filepath.isFile(each, $root);
