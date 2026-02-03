@@ -262,7 +262,7 @@ export function position(text: string) {
     return gray(`${text}`);
 }
 
-export async function assertAnyFolder(oneOrMoreFolders: string | string[], errorMessage?: string): Promise<string> {
+export async function assertAnyFolder(oneOrMoreFolders: string | string[], errorMessage?: string): Promise<string | undefined> {
     oneOrMoreFolders = is.array(oneOrMoreFolders) ? oneOrMoreFolders : [oneOrMoreFolders];
     for (const each of oneOrMoreFolders) {
         const result = await filepath.isFolder(each, $root);
@@ -273,13 +273,11 @@ export async function assertAnyFolder(oneOrMoreFolders: string | string[], error
     }
     if (errorMessage && !$switches.includes('--quiet')) {
         error(errorMessage);
-    } else {
-        error(`assertAnyFolders(${oneOrMoreFolders}) failed.`);
+        process.exit(1);
     }
-    process.exit(1);
 }
 
-export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMessage?: string): Promise<string> {
+export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMessage?: string): Promise<string | undefined> {
     oneOrMoreFiles = is.array(oneOrMoreFiles) ? oneOrMoreFiles : [oneOrMoreFiles];
     for (const each of oneOrMoreFiles) {
         const result = await filepath.isFile(each, $root);
@@ -290,10 +288,8 @@ export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMess
     }
     if (errorMessage && !$switches.includes('--quiet')) {
         error(errorMessage);
-    } else {
-        error(`assertAnyFiles(${oneOrMoreFiles}) failed.`);
+        process.exit(1);
     }
-    process.exit(1);
 }
 
 const quiet = process.argv.includes('--quiet');
@@ -352,8 +348,8 @@ export async function checkBinaries() {
 export async function checkProposals() {
     let failing = false;
 
-    failing = await assertAnyFile('vscode.proposed.chatParticipantAdditions.d.ts') && (quiet || warn(`The VSCode import file '${$root}/vscode.proposed.chatParticipantAdditions.d.ts' should not be present.`)) || failing;
     await rm(`${$root}/vscode.proposed.chatParticipantAdditions.d.ts`);
+    failing = await assertAnyFile('vscode.proposed.chatParticipantAdditions.d.ts') && (quiet || warn(`The VSCode import file '${$root}/vscode.proposed.chatParticipantAdditions.d.ts' should not be present.`)) || failing;
 
     if (!failing) {
         verbose('VSCode proposals appear to be in place.');
