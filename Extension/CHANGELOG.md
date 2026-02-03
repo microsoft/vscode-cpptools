@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.30.4: February 3, 2026
+### Bug Fix
+* Fix signing of MIEngine. [PR MIEngine#1544](https://github.com/microsoft/MIEngine/pull/1544)
+
 ## Version 1.30.3: February 2, 2026
 ### Enhancements
 * Add IntelliSense support for C++23 multidimensional subscript operators. [#11400](https://github.com/microsoft/vscode-cpptools/issues/11400), [#13798](https://github.com/microsoft/vscode-cpptools/issues/13798)
