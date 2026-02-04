@@ -816,25 +816,25 @@ export interface Client {
     didChangeActiveEditor(editor?: vscode.TextEditor, selection?: Range): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
     activate(): void;
-    selectionChanged(selection: Range): void;
-    resetDatabase(): void;
+    selectionChanged(selection: Range): Promise<void>;
+    resetDatabase(): Promise<void>;
     deactivate(): void;
     promptSelectIntelliSenseConfiguration(sender?: any): Promise<void>;
     rescanCompilers(sender?: any): Promise<void>;
-    pauseParsing(): void;
-    resumeParsing(): void;
-    PauseCodeAnalysis(): void;
-    ResumeCodeAnalysis(): void;
-    CancelCodeAnalysis(): void;
+    pauseParsing(): Promise<void>;
+    resumeParsing(): Promise<void>;
+    PauseCodeAnalysis(): Promise<void>;
+    ResumeCodeAnalysis(): Promise<void>;
+    CancelCodeAnalysis(): Promise<void>;
     handleConfigurationSelectCommand(config?: string): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
     handleShowActiveCodeAnalysisCommands(): Promise<void>;
     handleShowIdleCodeAnalysisCommands(): Promise<void>;
-    handleReferencesIcon(): void;
-    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void;
-    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void;
-    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
-    handleAddToIncludePathCommand(path: string): void;
+    handleReferencesIcon(): Promise<void>;
+    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): Promise<void>;
+    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): Promise<void>;
+    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): Promise<void>;
+    handleAddToIncludePathCommand(path: string): Promise<void>;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
     handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
@@ -849,7 +849,7 @@ export interface Client {
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
-    sendDidChangeSettings(): void;
+    sendDidChangeSettings(): Promise<void>;
     isInitialized(): boolean;
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
@@ -1779,12 +1779,10 @@ export class DefaultClient implements Client {
         return { wasShutdown: initializeResult.shouldShutdown };
     }
 
-    public sendDidChangeSettings(): void {
-        // Send settings json to native side
-        void (async () => {
-            await this.ready;
-            await this.languageClient.sendNotification(DidChangeSettingsNotification, this.getAllSettings());
-        })();
+    public async sendDidChangeSettings(): Promise<void> {
+        // Send settings json to native side.
+        await this.ready;
+        await this.languageClient.sendNotification(DidChangeSettingsNotification, this.getAllSettings());
     }
 
     public async onDidChangeSettings(_event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> {
@@ -2076,7 +2074,7 @@ export class DefaultClient implements Client {
             if (!hasCompleted) {
                 hasCompleted = true;
                 if (currentProvider.version >= Version.v2) {
-                    this.resumeParsing();
+                    await this.resumeParsing();
                 }
             }
         }
@@ -2099,7 +2097,7 @@ export class DefaultClient implements Client {
             if (!hasCompleted) {
                 hasCompleted = true;
                 if (currentProvider.version >= Version.v2) {
-                    this.resumeParsing();
+                    await this.resumeParsing();
                 }
             }
         }
@@ -2111,7 +2109,7 @@ export class DefaultClient implements Client {
                 this.sendCustomBrowseConfiguration(null, undefined, Version.v0, true);
                 if (currentProvider.version >= Version.v2) {
                     console.warn(`Configuration Provider timed out in ${configProviderTimeout}ms.`);
-                    this.resumeParsing();
+                    void this.resumeParsing().catch(logAndReturn.undefined);
                 }
             }
         }, configProviderTimeout);
@@ -3114,18 +3112,16 @@ export class DefaultClient implements Client {
      */
     public activate(): void {
         this.model.activate();
-        this.resumeParsing();
+        void this.resumeParsing().catch(logAndReturn.undefined);
     }
 
-    public selectionChanged(selection: Range): void {
-        void this.languageClient.sendNotification(DidChangeTextEditorSelectionNotification, selection);
+    public async selectionChanged(selection: Range): Promise<void> {
+        return this.languageClient.sendNotification(DidChangeTextEditorSelectionNotification, selection);
     }
 
-    public resetDatabase(): void {
-        void (async () => {
-            await this.ready;
-            await this.languageClient.sendNotification(ResetDatabaseNotification);
-        })();
+    public async resetDatabase(): Promise<void> {
+        await this.ready;
+        await this.languageClient.sendNotification(ResetDatabaseNotification);
     }
 
     /**
@@ -3135,41 +3131,31 @@ export class DefaultClient implements Client {
         this.model.deactivate();
     }
 
-    public pauseParsing(): void {
-        void (async () => {
-            await this.ready;
-            await this.languageClient.sendNotification(PauseParsingNotification);
-        })();
+    public async pauseParsing(): Promise<void> {
+        await this.ready;
+        await this.languageClient.sendNotification(PauseParsingNotification);
     }
 
-    public resumeParsing(): void {
-        void (async () => {
-            await this.ready;
-            await this.languageClient.sendNotification(ResumeParsingNotification);
-        })();
+    public async resumeParsing(): Promise<void> {
+        await this.ready;
+        await this.languageClient.sendNotification(ResumeParsingNotification);
     }
 
-    public PauseCodeAnalysis(): void {
-        void (async () => {
-            await this.ready;
-            this.model.isCodeAnalysisPaused.Value = true;
-            await this.languageClient.sendNotification(PauseCodeAnalysisNotification);
-        })();
+    public async PauseCodeAnalysis(): Promise<void> {
+        await this.ready;
+        this.model.isCodeAnalysisPaused.Value = true;
+        await this.languageClient.sendNotification(PauseCodeAnalysisNotification);
     }
 
-    public ResumeCodeAnalysis(): void {
-        void (async () => {
-            await this.ready;
-            this.model.isCodeAnalysisPaused.Value = false;
-            await this.languageClient.sendNotification(ResumeCodeAnalysisNotification);
-        })();
+    public async ResumeCodeAnalysis(): Promise<void> {
+        await this.ready;
+        this.model.isCodeAnalysisPaused.Value = false;
+        await this.languageClient.sendNotification(ResumeCodeAnalysisNotification);
     }
 
-    public CancelCodeAnalysis(): void {
-        void (async () => {
-            await this.ready;
-            await this.languageClient.sendNotification(CancelCodeAnalysisNotification);
-        })();
+    public async CancelCodeAnalysis(): Promise<void> {
+        await this.ready;
+        await this.languageClient.sendNotification(CancelCodeAnalysisNotification);
     }
 
     private updateCodeAnalysisProcessed(processed: number): void {
@@ -3576,32 +3562,24 @@ export class DefaultClient implements Client {
         }
     }
 
-    public handleConfigurationEditCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
-        void (async () => {
-            await this.ready;
-            await this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument, viewColumn);
-        })();
+    public async handleConfigurationEditCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): Promise<void> {
+        await this.ready;
+        await this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument, viewColumn);
     }
 
-    public handleConfigurationEditJSONCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
-        void (async () => {
-            await this.ready;
-            await this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument, viewColumn);
-        })();
+    public async handleConfigurationEditJSONCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): Promise<void> {
+        await this.ready;
+        await this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument, viewColumn);
     }
 
-    public handleConfigurationEditUICommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
-        void (async () => {
-            await this.ready;
-            await this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument, viewColumn);
-        })();
+    public async handleConfigurationEditUICommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): Promise<void> {
+        await this.ready;
+        await this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument, viewColumn);
     }
 
-    public handleAddToIncludePathCommand(path: string): void {
-        void (async () => {
-            await this.ready;
-            this.configuration.addToIncludePathCommand(path);
-        })();
+    public async handleAddToIncludePathCommand(path: string): Promise<void> {
+        await this.ready;
+        this.configuration.addToIncludePathCommand(path);
     }
 
     public async handleGoToDirectiveInGroup(next: boolean): Promise<void> {
@@ -4258,20 +4236,18 @@ export class DefaultClient implements Client {
         return languageClient ? languageClient.stop() : Promise.resolve();
     }
 
-    public handleReferencesIcon(): void {
-        void (async () => {
-            await this.ready;
+    public async handleReferencesIcon(): Promise<void> {
+        await this.ready;
 
-            workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
+        workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
 
-            // If the search is find all references, preview partial results.
-            // This will cause the language server to send partial results to display
-            // in the "Other References" view or channel. Doing a preview should not complete
-            // an in-progress request until it is finished or canceled.
-            if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
-                void this.languageClient.sendNotification(PreviewReferencesNotification);
-            }
-        })();
+        // If the search is find all references, preview partial results.
+        // This will cause the language server to send partial results to display
+        // in the "Other References" view or channel. Doing a preview should not complete
+        // an in-progress request until it is finished or canceled.
+        if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
+            void this.languageClient.sendNotification(PreviewReferencesNotification);
+        }
     }
 
     private serverCanceledReferences(): void {
@@ -4394,25 +4370,25 @@ class NullClient implements Client {
     didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
-    selectionChanged(selection: Range): void { }
-    resetDatabase(): void { }
+    selectionChanged(selection: Range): Promise<void> { return Promise.resolve(); }
+    resetDatabase(): Promise<void> { return Promise.resolve(); }
     promptSelectIntelliSenseConfiguration(sender?: any): Promise<void> { return Promise.resolve(); }
     rescanCompilers(sender?: any): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
-    pauseParsing(): void { }
-    resumeParsing(): void { }
-    PauseCodeAnalysis(): void { }
-    ResumeCodeAnalysis(): void { }
-    CancelCodeAnalysis(): void { }
+    pauseParsing(): Promise<void> { return Promise.resolve(); }
+    resumeParsing(): Promise<void> { return Promise.resolve(); }
+    PauseCodeAnalysis(): Promise<void> { return Promise.resolve(); }
+    ResumeCodeAnalysis(): Promise<void> { return Promise.resolve(); }
+    CancelCodeAnalysis(): Promise<void> { return Promise.resolve(); }
     handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleShowActiveCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleShowIdleCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
-    handleReferencesIcon(): void { }
-    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void { }
-    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void { }
-    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void { }
-    handleAddToIncludePathCommand(path: string): void { }
+    handleReferencesIcon(): Promise<void> { return Promise.resolve(); }
+    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): Promise<void> { return Promise.resolve(); }
+    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): Promise<void> { return Promise.resolve(); }
+    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): Promise<void> { return Promise.resolve(); }
+    handleAddToIncludePathCommand(path: string): Promise<void> { return Promise.resolve(); }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
     handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
@@ -4430,7 +4406,7 @@ class NullClient implements Client {
         this.stringEvent.dispose();
     }
     addFileAssociations(fileAssociations: string, languageId: string): void { }
-    sendDidChangeSettings(): void { }
+    sendDidChangeSettings(): Promise<void> { return Promise.resolve(); }
     isInitialized(): boolean { return true; }
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
