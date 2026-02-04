@@ -195,7 +195,7 @@ export async function activate(): Promise<void> {
 
     await registerCommands(true);
 
-    vscode.tasks.onDidStartTask(() => getActiveClient().PauseCodeAnalysis());
+    vscode.tasks.onDidStartTask(() => void getActiveClient().PauseCodeAnalysis().catch(logAndReturn.undefined));
 
     vscode.tasks.onDidEndTask(async event => {
         await getActiveClient().ResumeCodeAnalysis();

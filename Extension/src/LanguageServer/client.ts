@@ -1789,7 +1789,7 @@ export class DefaultClient implements Client {
         const defaultClient: Client = clients.getDefaultClient();
         if (this === defaultClient) {
             // Only send the updated settings information once, as it includes values for all folders.
-            void this.sendDidChangeSettings();
+            void this.sendDidChangeSettings().catch(logAndReturn.undefined);
         }
         const changedSettings: Record<string, string> = this.settingsTracker.getChangedSettings();
 

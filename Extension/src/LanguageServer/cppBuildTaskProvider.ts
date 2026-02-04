@@ -371,23 +371,25 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     constructor(private command: string | util.IQuotedString, private args: (string | util.IQuotedString)[], private options: cp.ExecOptions | undefined, private buildOptions: BuildOptions) {
     }
 
-    open(_initialDimensions: TerminalDimensions | undefined): void {
-        void (async () => {
-            if (this.buildOptions.taskUsesActiveFile && !util.isCppOrCFile(window.activeTextEditor?.document.uri)) {
-                this.writeEmitter.fire(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.') + this.endOfLine);
-                this.closeEmitter.fire(-1);
-                return;
-            }
+    async openAsync(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
+        if (this.buildOptions.taskUsesActiveFile && !util.isCppOrCFile(window.activeTextEditor?.document.uri)) {
+            this.writeEmitter.fire(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.') + this.endOfLine);
+            this.closeEmitter.fire(-1);
+            return;
+        }
 
-            // TODO: Remove when compiler query work goes in and we can determine the standard version from TypeScript
-            if (this.buildOptions.taskUsesActiveFile && window.activeTextEditor?.document.languageId === 'cpp' && this.buildOptions.insertStd) {
-                this.args.unshift('-std=gnu++14');
-            }
-            telemetry.logLanguageServerEvent("cppBuildTaskStarted");
-            // At this point we can start using the terminal.
-            this.writeEmitter.fire(localize("starting.build", "Starting build...") + this.endOfLine);
-            await this.doBuild();
-        })().catch(logAndReturn.undefined);
+        // TODO: Remove when compiler query work goes in and we can determine the standard version from TypeScript
+        if (this.buildOptions.taskUsesActiveFile && window.activeTextEditor?.document.languageId === 'cpp' && this.buildOptions.insertStd) {
+            this.args.unshift('-std=gnu++14');
+        }
+        telemetry.logLanguageServerEvent("cppBuildTaskStarted");
+        // At this point we can start using the terminal.
+        this.writeEmitter.fire(localize("starting.build", "Starting build...") + this.endOfLine);
+        await this.doBuild();
+    }
+
+    open(_initialDimensions: TerminalDimensions | undefined): void {
+        void this.openAsync(_initialDimensions).catch(logAndReturn.undefined);
     }
 
     close(): void {
