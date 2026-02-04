@@ -3121,7 +3121,7 @@ export class DefaultClient implements Client {
 
     public async resetDatabase(): Promise<void> {
         await this.ready;
-        await this.languageClient.sendNotification(ResetDatabaseNotification);
+        return this.languageClient.sendNotification(ResetDatabaseNotification);
     }
 
     /**
@@ -3133,29 +3133,29 @@ export class DefaultClient implements Client {
 
     public async pauseParsing(): Promise<void> {
         await this.ready;
-        await this.languageClient.sendNotification(PauseParsingNotification);
+        return this.languageClient.sendNotification(PauseParsingNotification);
     }
 
     public async resumeParsing(): Promise<void> {
         await this.ready;
-        await this.languageClient.sendNotification(ResumeParsingNotification);
+        return this.languageClient.sendNotification(ResumeParsingNotification);
     }
 
     public async PauseCodeAnalysis(): Promise<void> {
         await this.ready;
         this.model.isCodeAnalysisPaused.Value = true;
-        await this.languageClient.sendNotification(PauseCodeAnalysisNotification);
+        return this.languageClient.sendNotification(PauseCodeAnalysisNotification);
     }
 
     public async ResumeCodeAnalysis(): Promise<void> {
         await this.ready;
         this.model.isCodeAnalysisPaused.Value = false;
-        await this.languageClient.sendNotification(ResumeCodeAnalysisNotification);
+        return this.languageClient.sendNotification(ResumeCodeAnalysisNotification);
     }
 
     public async CancelCodeAnalysis(): Promise<void> {
         await this.ready;
-        await this.languageClient.sendNotification(CancelCodeAnalysisNotification);
+        return this.languageClient.sendNotification(CancelCodeAnalysisNotification);
     }
 
     private updateCodeAnalysisProcessed(processed: number): void {
@@ -3564,22 +3564,22 @@ export class DefaultClient implements Client {
 
     public async handleConfigurationEditCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): Promise<void> {
         await this.ready;
-        await this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument, viewColumn);
+        return this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument, viewColumn);
     }
 
     public async handleConfigurationEditJSONCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): Promise<void> {
         await this.ready;
-        await this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument, viewColumn);
+        return this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument, viewColumn);
     }
 
     public async handleConfigurationEditUICommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): Promise<void> {
         await this.ready;
-        await this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument, viewColumn);
+        return this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument, viewColumn);
     }
 
     public async handleAddToIncludePathCommand(path: string): Promise<void> {
         await this.ready;
-        this.configuration.addToIncludePathCommand(path);
+        return this.configuration.addToIncludePathCommand(path);
     }
 
     public async handleGoToDirectiveInGroup(next: boolean): Promise<void> {
