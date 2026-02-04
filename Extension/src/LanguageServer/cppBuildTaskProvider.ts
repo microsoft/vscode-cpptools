@@ -10,6 +10,7 @@ import { CustomExecution, Disposable, Event, EventEmitter, ProcessExecution, Pse
 import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
+import { logAndReturn } from "../Utility/Async/returns";
 import { Client } from './client';
 import * as configs from './configurations';
 import { getEffectiveEnvironment, isEnvironmentOverrideApplied } from "./devcmd";
@@ -386,7 +387,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             // At this point we can start using the terminal.
             this.writeEmitter.fire(localize("starting.build", "Starting build...") + this.endOfLine);
             await this.doBuild();
-        })();
+        })().catch(logAndReturn.undefined);
     }
 
     close(): void {
