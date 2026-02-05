@@ -36,7 +36,7 @@ export function createProtocolFilter(): Middleware {
                             const baseFileName: string = path.basename(document.fileName);
                             const mappingString: string = baseFileName + "@" + document.fileName;
                             client.addFileAssociations(mappingString, "cpp");
-                            await client.sendDidChangeSettings();
+                            void client.sendDidChangeSettings();
                             // The following will cause the file to be closed and reopened.
                             void vscode.languages.setTextDocumentLanguage(document, "cpp");
                             return;
