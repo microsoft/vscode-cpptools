@@ -453,26 +453,6 @@ ${copilotCompletionContext?.areSnippetsMissing ? "(missing code snippets)" : ""}
             resolver: this
         };
         type RegistrationResult = { message: string } | boolean;
-        const clientPromise: Promise<RegistrationResult> = getCopilotClientApi().then(async (api) => {
-            if (!api) {
-                throw new CopilotContextProviderException("getCopilotApi() returned null, Copilot client is missing or inactive.");
-            }
-            const disposable = await this.installContextProvider(api, contextProvider);
-            if (disposable) {
-                this.contextProviderDisposables = this.contextProviderDisposables ?? [];
-                this.contextProviderDisposables.push(disposable);
-                return true;
-            } else {
-                throw new CopilotContextProviderException("getContextProviderAPI() is not available in Copilot client.");
-            }
-        }).catch((e) => {
-            console.debug("Failed to register the Copilot Context Provider with Copilot client.");
-            let message = "Failed to register the Copilot Context Provider with Copilot client";
-            if (e instanceof CopilotContextProviderException) {
-                message += `: ${e.message} `;
-            }
-            return { message };
-        });
         const chatPromise: Promise<RegistrationResult> = getCopilotChatApi().then(async (api) => {
             if (!api) {
                 throw new CopilotContextProviderException("getCopilotChatApi() returned null, Copilot Chat is missing or inactive.");
@@ -493,24 +473,50 @@ ${copilotCompletionContext?.areSnippetsMissing ? "(missing code snippets)" : ""}
             }
             return { message };
         });
-        // The client usually doesn't block. So test it first.
-        clientPromise.then((clientResult) => {
+
+        chatPromise.then((chatResult) => {
             const properties: Record<string, string> = {};
-            if (isBoolean(clientResult) && clientResult) {
+            if (isBoolean(chatResult) && chatResult) {
                 properties["cppCodeSnippetsProviderRegistered"] = "true";
                 telemetry.logCopilotEvent(registerCopilotContextProvider, { ...properties });
                 return;
             }
-            return chatPromise.then((chatResult) => {
-                const properties: Record<string, string> = {};
-                if (isBoolean(chatResult) && chatResult) {
+
+            // Don't even start checking the github.copilot extension until the chat API is confirmed to be unavailable,
+            // as users can only follow this code path if they temporarily opted out of Copilot extension unification.
+            const clientPromise: Promise<RegistrationResult> = getCopilotClientApi().then(async (api) => {
+                if (!api) {
+                    if (vscode.extensions.getExtension('github.copilot') === undefined) {
+                        return { message: "getCopilotApi() returned null, Copilot extension is not installed." };
+                    }
+                    throw new CopilotContextProviderException("getCopilotApi() returned null, Copilot client is missing or inactive.");
+                }
+                const disposable = await this.installContextProvider(api, contextProvider);
+                if (disposable) {
+                    this.contextProviderDisposables = this.contextProviderDisposables ?? [];
+                    this.contextProviderDisposables.push(disposable);
+                    return true;
+                } else {
+                    throw new CopilotContextProviderException("getContextProviderAPI() is not available in Copilot client.");
+                }
+            }).catch((e) => {
+                console.debug("Failed to register the Copilot Context Provider with Copilot client.");
+                let message = "Failed to register the Copilot Context Provider with Copilot client";
+                if (e instanceof CopilotContextProviderException) {
+                    message += `: ${e.message} `;
+                }
+                return { message };
+            });
+
+            return clientPromise.then((clientResult) => {
+                if (isBoolean(clientResult) && clientResult) {
                     properties["cppCodeSnippetsProviderRegistered"] = "true";
                     telemetry.logCopilotEvent(registerCopilotContextProvider, { ...properties });
                     return;
-                } else if (!isBoolean(clientResult) && isString(clientResult.message)) {
-                    properties["error"] = clientResult.message;
                 } else if (!isBoolean(chatResult) && isString(chatResult.message)) {
                     properties["error"] = chatResult.message;
+                } else if (!isBoolean(clientResult) && isString(clientResult.message)) {
+                    properties["error"] = clientResult.message;
                 } else {
                     properties["error"] = "Failed to register the Copilot Context Provider for unknown reason.";
                 }
