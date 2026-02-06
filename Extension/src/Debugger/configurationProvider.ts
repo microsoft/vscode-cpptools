@@ -356,9 +356,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (config.request === "attach" && !config.processId) {
             let processId: string | undefined;
 
-            // If program is specified, try to find the matching process by name
-            if (config.program) {
-                processId = await this.findProcessByProgramName(config.program, config, token);
+            // If program is specified and not remote attach, try to find the matching process by name
+            if (config.program && !config.pipeTransport && !config.useExtendedRemote) {
+                processId = await this.findProcessByProgramName(config.program, token);
             }
 
             // Fall back to process picker if program wasn't specified or didn't match
@@ -1170,14 +1170,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
     private async findProcessByProgramName(
         programPath: string,
-        config: CppDebugConfiguration,
         token?: vscode.CancellationToken
     ): Promise<string | undefined> {
-        // Remote attach is not supported for program-based matching
-        if (config.pipeTransport || config.useExtendedRemote) {
-            return undefined;
-        }
-
         // Validate that the program path is valid
         if (!await util.checkExecutableWithoutExtensionExists(programPath)) {
             return undefined;
