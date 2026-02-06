@@ -2,7 +2,7 @@
 
 ## Version 1.30.5: February 9. 2026
 ### Bug Fix
-* Fix a potential deadlock after editing.
+* Fix a potential language server deadlock after editing code.
 
 ## Version 1.30.4: February 3, 2026
 ### Bug Fix
