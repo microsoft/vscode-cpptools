@@ -360,10 +360,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             if (config.program) {
                 processId = await this.findProcessByProgramName(config.program, config, token);
             }
-            
+
             // Fall back to process picker if program wasn't specified or didn't match
             if (!processId) {
-                // Show the process picker if no program is specified
                 if (config.pipeTransport || config.useExtendedRemote) {
                     const remoteAttachPicker: RemoteAttachPicker = new RemoteAttachPicker();
                     processId = await remoteAttachPicker.ShowAttachEntries(config);
@@ -1185,7 +1184,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         const programBaseName: string = path.basename(programPath);
-        
+
         // Get the process list using the same logic as interactive attach
         const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
         const processes: AttachItem[] = await attachItemsProvider.getAttachItems(token);
