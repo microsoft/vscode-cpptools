@@ -5265,7 +5265,7 @@ webpack-sources@^3.3.3:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/webpack-sources/-/webpack-sources-3.3.3.tgz#d4bf7f9909675d7a070ff14d0ef2a4f3c982c723"
   integrity sha1-1L9/mQlnXXoHD/FNDvKk88mCxyM=
 
-webpack@^5.104.1:
+webpack@^5.105.1:
   version "5.105.1"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/webpack/-/webpack-5.105.1.tgz#c05cb3621196c76fa3b3a9bea446d14616b83778"
   integrity sha1-wFyzYhGWx2+js6m+pEbRRha4N3g=

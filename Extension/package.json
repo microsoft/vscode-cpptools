@@ -6778,7 +6778,7 @@
         "ts-node": "^10.9.2",
         "typescript": "^5.4.5",
         "vscode-nls-dev": "^4.0.4",
-        "webpack": "^5.104.1",
+        "webpack": "^5.105.1",
         "webpack-cli": "^5.1.4",
         "xml2js": "^0.6.2"
     },
