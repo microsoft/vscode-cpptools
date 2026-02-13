@@ -4770,7 +4770,9 @@
                     "attach": {
                         "type": "object",
                         "default": {},
-                        "required": [],
+                        "required": [
+                            "program"
+                        ],
                         "properties": {
                             "targetArchitecture": {
                                 "type": "string",

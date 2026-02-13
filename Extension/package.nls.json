@@ -932,9 +932,9 @@
         ]
     },
     "c_cpp.debuggers.program.attach.markdownDescription": {
-        "message": "Optional full path to the program executable. When specified, the debugger will search for a running process matching this executable path and attach to it. If multiple processes match, a selection prompt will be shown. Use either `program` or `processId`, not both.",
+        "message": "Full path to the program executable. The debugger will search for a running process matching this executable path and attach to it. If multiple processes match, a selection prompt will be shown. This field is required to load debug symbols for the attached process.",
         "comment": [
-            "{Locked=\"`program`\"} {Locked=\"`processId`\"}"
+            "{Locked=\"`program`\"}"
         ]
     },
     "c_cpp.debuggers.symbolSearchPath.description": "Semicolon separated list of directories to use to search for symbol (that is, pdb or .so) files. Example: \"c:\\dir1;c:\\dir2\".",
