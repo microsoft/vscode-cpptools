@@ -185,7 +185,7 @@
 	"c_cpp.configuration.intelliSenseEngine.default.description": "透過單獨的 IntelliSense 處理序提供內容感知結果。",
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "提供不屬於內容意識的 `模糊` 結果。",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "關閉 C/C++ 語言服務功能。",
-	"c_cpp.configuration.autocomplete.markdownDescription": "控制自動完成提供者。若設為 `disabled` 且您想要以文字方式完成，您也必須設定 `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (且 `c` 及 `cuda-cpp` 語言也相同)。",
+	"c_cpp.configuration.autocomplete.markdownDescription": "控制自動完成提供者。若設為 `disabled` 且您想要以文字方式完成，您也必須設定 `\"[cpp]\": {\"editor.wordBasedSuggestions\": <值>}` (且 `c` 及 `cuda-cpp` 語言也相同)。",
 	"c_cpp.configuration.autocomplete.default.description": "使用作用中 IntelliSense 引擎。",
 	"c_cpp.configuration.autocomplete.disabled.description": "使用 Visual Studio Code 所提供的文字型完成。",
 	"c_cpp.configuration.errorSquiggles.description": "該設定會控制是否將 IntelliSense 引擎偵測到的可疑編譯錯誤回報給編輯器。其也會在找不到內容時，控制是否回報程式碼分析警告。標籤剖析器引擎已忽略此設定。",
