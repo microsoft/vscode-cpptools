@@ -4,7 +4,7 @@
 ### Enhancements
 * Add support for `program` in attach debug configurations. [#14046](https://github.com/microsoft/vscode-cpptools/issues/14046)
   * Thanks for the contribution. [@Subham-KRLX (Subham)](https://github.com/Subham-KRLX) [PR #14108](https://github.com/microsoft/vscode-cpptools/pull/14108)
-* Update SQLite to see if that fixes issues with the previous update. [#14142](https://github.com/microsoft/vscode-cpptools/issues/14142)
+* Update SQLite to the latest version.
 
 ### Bug Fixes
 * Fix an IntelliSense error with deducing `this` (explicit object member functions) with conversion operators. [#14140](https://github.com/microsoft/vscode-cpptools/issues/14140)
