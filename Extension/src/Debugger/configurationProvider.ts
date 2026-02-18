@@ -180,7 +180,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     await cppBuildTaskProvider.runBuildTask(config.preLaunchTask);
                     config.preLaunchTask = undefined;
                     Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "true" });
-                } catch (err) {
+                } catch {
                     Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "false" });
                 }
                 return config;
@@ -246,7 +246,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
 
             // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
-            // eslint-disable-next-line no-prototype-builtins
             if (config.hasOwnProperty("externalConsole")) {
                 void logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
                 if (config.externalConsole && !config.console) {
@@ -631,7 +630,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (response === applyButton || response === updateButton) {
             try {
                 await vscode.commands.executeCommand('C_Cpp.SetVsDeveloperEnvironment', 'buildAndDebug');
-            } catch (e: any) {
+            } catch {
                 // Ignore the error, the user will be prompted to apply the environment manually.
             }
         }
@@ -720,7 +719,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, undefined);
                 if (sourceFileMapSource !== newSourceFileMapSource) {
                     message = "\t" + localize("replacing.sourcepath", "Replacing {0} '{1}' with '{2}'.", "sourcePath", sourceFileMapSource, newSourceFileMapSource);
-                    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                     delete config.sourceFileMap[sourceFileMapSource];
                     source = newSourceFileMapSource;
                 }
@@ -800,7 +798,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     private findDefaultConfig(configs: CppDebugConfiguration[]): CppDebugConfiguration[] {
-        // eslint-disable-next-line no-prototype-builtins
         return configs.filter((config: CppDebugConfiguration) => config.hasOwnProperty("isDefault") && config.isDefault);
     }
 
