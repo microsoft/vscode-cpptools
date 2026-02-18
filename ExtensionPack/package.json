@@ -6,7 +6,7 @@
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
     "author": {
-      "name": "Microsoft Corporation"
+        "name": "Microsoft Corporation"
     },
     "license": "SEE LICENSE IN LICENSE.txt",
     "version": "1.4.0",
@@ -34,10 +34,11 @@
         "color-theme",
         "build",
         "cmake"
-      ],
+    ],
     "extensionPack": [
         "ms-vscode.cpptools",
         "ms-vscode.cpptools-themes",
+        "ms-vscode.cpp-devtools",
         "ms-vscode.cmake-tools"
     ]
 }
