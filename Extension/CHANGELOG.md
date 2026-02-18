@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.31.0: February 19, 2026
+### Enhancements
+* Add support for `program` in attach debug configurations. [#14046](https://github.com/microsoft/vscode-cpptools/issues/14046)
+  * Thanks for the contribution. [@Subham-KRLX (Subham)](https://github.com/Subham-KRLX) [PR #14108](https://github.com/microsoft/vscode-cpptools/pull/14108)
+* Update SQLite to the latest version.
+
+### Bug Fixes
+* Fix an IntelliSense error with deducing `this` (explicit object member functions) with conversion operators. [#14140](https://github.com/microsoft/vscode-cpptools/issues/14140)
+* Fix `embed-dir` compiler arguments not being handled for IntelliSense. [#14154](https://github.com/microsoft/vscode-cpptools/issues/14154)
+
 ## Version 1.30.5: February 9. 2026
 ### Bug Fix
 * Fix a potential language server deadlock after editing code.

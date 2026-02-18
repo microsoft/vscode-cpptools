@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.30.5-main",
+    "version": "1.31.0-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -4775,11 +4775,6 @@
                             "program"
                         ],
                         "properties": {
-                            "program": {
-                                "type": "string",
-                                "description": "%c_cpp.debuggers.program.description%",
-                                "default": "${workspaceRoot}/a.out"
-                            },
                             "targetArchitecture": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.targetArchitecture.description%",
@@ -4824,6 +4819,10 @@
                                 "type": "boolean",
                                 "description": "%c_cpp.debuggers.useExtendedRemote.description%",
                                 "default": false
+                            },
+                            "program": {
+                                "type": "string",
+                                "markdownDescription": "%c_cpp.debuggers.program.attach.markdownDescription%"
                             },
                             "processId": {
                                 "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
@@ -5790,14 +5789,16 @@
                     "attach": {
                         "type": "object",
                         "default": {},
-                        "required": [
-                            "processId"
-                        ],
+                        "required": [],
                         "properties": {
                             "symbolSearchPath": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.symbolSearchPath.description%",
                                 "default": ""
+                            },
+                            "program": {
+                                "type": "string",
+                                "markdownDescription": "%c_cpp.debuggers.program.attach.markdownDescription%"
                             },
                             "processId": {
                                 "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
