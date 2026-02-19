@@ -37,7 +37,7 @@ jobs:
         Write-Host "##vso[task.setvariable variable=AAD_TOKEN;issecret=true]$aadToken"
 
   - script: |
-      vsce publish --packagePath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}
+      npx @vscode/vsce@latest publish -i $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.vsix --manifestPath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.manifest --signaturePath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
     displayName: Publish to Marketplace
     env:
       VSCE_PAT: $(AAD_TOKEN)
