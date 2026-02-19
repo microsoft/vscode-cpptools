@@ -9,7 +9,7 @@
         "name": "Microsoft Corporation"
     },
     "license": "SEE LICENSE IN LICENSE.txt",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "engines": {
         "vscode": "^1.48.0"
     },
