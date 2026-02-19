@@ -6791,7 +6791,7 @@
         "escape-string-regexp": "^2.0.0",
         "fast-glob": "^3.3.3",
         "glob": "^7.2.3",
-        "minimatch": "^4.2.0",
+        "minimatch": "^10.2.1",
         "mkdirp": "^3.0.1",
         "node-fetch": "^2.7.0",
         "node-loader": "^2.0.0",
