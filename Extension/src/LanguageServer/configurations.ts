@@ -493,7 +493,7 @@ export class CppProperties {
                     });
                 }
             }
-        } catch (error) {
+        } catch {
             /*ignore*/
         } finally {
             this.vcpkgPathReady = true;
@@ -1196,7 +1196,7 @@ export class CppProperties {
                         }, 1000);
                     }));
                 });
-            } catch (e) {
+            } catch {
                 // The file watcher limit is hit.
                 // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
             }
@@ -1571,7 +1571,7 @@ export class CppProperties {
             if (dirty) {
                 try {
                     this.writeToJson();
-                } catch (err) {
+                } catch {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
                     void vscode.window.showWarningMessage(localize('update.properties.failed', 'Attempt to update "{0}" failed (do you have write access?)', this.propertiesFile.fsPath));
                     success = false;

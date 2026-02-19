@@ -195,10 +195,10 @@ export async function activate(): Promise<void> {
 
     await registerCommands(true);
 
-    vscode.tasks.onDidStartTask(() => getActiveClient().PauseCodeAnalysis());
+    vscode.tasks.onDidStartTask(() => void getActiveClient().PauseCodeAnalysis().catch(logAndReturn.undefined));
 
-    vscode.tasks.onDidEndTask(event => {
-        getActiveClient().ResumeCodeAnalysis();
+    vscode.tasks.onDidEndTask(async event => {
+        await getActiveClient().ResumeCodeAnalysis();
         if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
             || event.execution.task.name.startsWith(configPrefix)) {
             if (event.execution.task.scope !== vscode.TaskScope.Global && event.execution.task.scope !== vscode.TaskScope.Workspace) {
@@ -353,7 +353,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     if (!util.isCpp(event.textEditor.document)) {
         return;
     }
-    clients.ActiveClient.selectionChanged(makeLspRange(event.selections[0]));
+    void clients.ActiveClient.selectionChanged(makeLspRange(event.selections[0])).catch(logAndReturn.undefined);
 }
 
 async function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): Promise<void> {
@@ -507,7 +507,7 @@ async function selectClient(): Promise<Client> {
 
 async function onResetDatabase(): Promise<void> {
     await clients.ActiveClient.ready;
-    clients.ActiveClient.resetDatabase();
+    return clients.ActiveClient.resetDatabase();
 }
 
 async function onRescanCompilers(sender?: any): Promise<void> {
@@ -750,7 +750,7 @@ function onExpandSelection(r: Range) {
     }
 }
 
-function onAddToIncludePath(path: string): void {
+async function onAddToIncludePath(path: string): Promise<void> {
     if (isFolderOpen()) {
         // This only applies to the active client. It would not make sense to add the include path
         // suggestion to a different workspace.
@@ -777,23 +777,23 @@ function onToggleDimInactiveRegions(): void {
 }
 
 function onPauseParsing(): void {
-    clients.ActiveClient.pauseParsing();
+    void clients.ActiveClient.pauseParsing().catch(logAndReturn.undefined);
 }
 
 function onResumeParsing(): void {
-    clients.ActiveClient.resumeParsing();
+    void clients.ActiveClient.resumeParsing().catch(logAndReturn.undefined);
 }
 
 function onPauseCodeAnalysis(): void {
-    clients.ActiveClient.PauseCodeAnalysis();
+    void clients.ActiveClient.PauseCodeAnalysis().catch(logAndReturn.undefined);
 }
 
 function onResumeCodeAnalysis(): void {
-    clients.ActiveClient.ResumeCodeAnalysis();
+    void clients.ActiveClient.ResumeCodeAnalysis().catch(logAndReturn.undefined);
 }
 
 function onCancelCodeAnalysis(): void {
-    clients.ActiveClient.CancelCodeAnalysis();
+    void clients.ActiveClient.CancelCodeAnalysis().catch(logAndReturn.undefined);
 }
 
 function onShowActiveCodeAnalysisCommands(): Promise<void> {
@@ -805,7 +805,7 @@ function onShowIdleCodeAnalysisCommands(): Promise<void> {
 }
 
 function onShowReferencesProgress(): void {
-    clients.ActiveClient.handleReferencesIcon();
+    void clients.ActiveClient.handleReferencesIcon().catch(logAndReturn.undefined);
 }
 
 function onToggleRefGroupView(): void {
@@ -964,7 +964,7 @@ function reportMacCrashes(): void {
                         });
                     }, 5000);
                 });
-            } catch (e) {
+            } catch {
                 // The file watcher limit is hit (may not be possible on Mac, but just in case).
             }
         });
@@ -1023,7 +1023,7 @@ export function watchForCrashes(crashDirectory: string): void {
                         });
                     }, 5000);
                 });
-            } catch (e) {
+            } catch {
                 // The file watcher limit is hit (may not be possible on Mac, but just in case).
             }
         });

@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.30.2-main",
+    "version": "1.31.0-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -63,6 +63,7 @@
         "onFileSystem:cpptools-schema"
     ],
     "main": "./dist/src/main",
+    "type": "commonjs",
     "contributes": {
         "languages": [
             {
@@ -4774,11 +4775,6 @@
                             "program"
                         ],
                         "properties": {
-                            "program": {
-                                "type": "string",
-                                "description": "%c_cpp.debuggers.program.description%",
-                                "default": "${workspaceRoot}/a.out"
-                            },
                             "targetArchitecture": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.targetArchitecture.description%",
@@ -4823,6 +4819,10 @@
                                 "type": "boolean",
                                 "description": "%c_cpp.debuggers.useExtendedRemote.description%",
                                 "default": false
+                            },
+                            "program": {
+                                "type": "string",
+                                "markdownDescription": "%c_cpp.debuggers.program.attach.markdownDescription%"
                             },
                             "processId": {
                                 "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
@@ -5789,14 +5789,16 @@
                     "attach": {
                         "type": "object",
                         "default": {},
-                        "required": [
-                            "processId"
-                        ],
+                        "required": [],
                         "properties": {
                             "symbolSearchPath": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.symbolSearchPath.description%",
                                 "default": ""
+                            },
+                            "program": {
+                                "type": "string",
+                                "markdownDescription": "%c_cpp.debuggers.program.attach.markdownDescription%"
                             },
                             "processId": {
                                 "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
@@ -6718,7 +6720,7 @@
         "code": "yarn install && (yarn verify compiled --quiet || yarn build) && yarn verify binaries && ts-node -T .scripts/code.ts",
         "verify": "ts-node -T .scripts/verify.ts",
         "prep": "yarn prep:dts && yarn copy-walkthrough-media && yarn generate-native-strings && yarn translations-generate",
-        "lint": "yarn install && eslint -c .eslintrc.js --report-unused-disable-directives src test ui .scripts",
+        "lint": "yarn install && eslint --report-unused-disable-directives src test ui .scripts",
         "compile": "yarn install && (yarn verify prep --quiet || yarn prep) && yarn build",
         "watch": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build tsconfig.json --watch",
         "rebuild": "yarn install && yarn clean && yarn prep && yarn build",
@@ -6744,19 +6746,19 @@
         "@types/proxyquire": "^1.3.31",
         "@types/semver": "^7.5.8",
         "@types/shell-quote": "^1.7.5",
-        "@types/sinon": "^17.0.3",
+        "@types/sinon": "^21.0.0",
         "@types/tmp": "^0.2.6",
         "@types/which": "^2.0.2",
         "@types/yauzl": "^2.10.3",
-        "@typescript-eslint/eslint-plugin": "^6.1.0",
-        "@typescript-eslint/parser": "^6.1.0",
+        "@typescript-eslint/eslint-plugin": "^8.54.0",
+        "@typescript-eslint/parser": "^8.54.0",
         "@vscode/debugadapter": "^1.65.0",
         "@vscode/debugprotocol": "^1.65.0",
         "@vscode/dts": "^0.4.0",
         "@vscode/test-electron": "^2.3.10",
         "async-child-process": "^1.1.1",
         "await-notify": "^1.0.1",
-        "eslint": "^8.45.0",
+        "eslint": "^9.39.2",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-import": "^2.29.1",
         "eslint-plugin-jsdoc": "^48.2.8",
@@ -6772,12 +6774,12 @@
         "parse5": "^7.1.2",
         "parse5-traverse": "^1.0.3",
         "proxyquire": "^2.1.3",
-        "sinon": "^19.0.2",
+        "sinon": "^21.0.1",
         "ts-loader": "^9.5.1",
         "ts-node": "^10.9.2",
         "typescript": "^5.4.5",
         "vscode-nls-dev": "^4.0.4",
-        "webpack": "^5.94.0",
+        "webpack": "^5.105.1",
         "webpack-cli": "^5.1.4",
         "xml2js": "^0.6.2"
     },
@@ -6787,6 +6789,7 @@
         "chokidar": "^3.6.0",
         "comment-json": "^4.2.3",
         "escape-string-regexp": "^2.0.0",
+        "fast-glob": "^3.3.3",
         "glob": "^7.2.3",
         "minimatch": "^4.2.0",
         "mkdirp": "^3.0.1",

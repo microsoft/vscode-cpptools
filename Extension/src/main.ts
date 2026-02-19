@@ -131,7 +131,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
                     const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
                     void vscode.languages.setTextDocumentLanguage(doc, "jsonc");
                     util.setWorkspaceIsCpp();
-                } catch (err) {
+                } catch {
                     // The c_cpp_properties.json might not be openable (e.g. an executable).
                     // Catching the exception prevents our extension activation from failing.
                     // VS Code itself will report an error message.

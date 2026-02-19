@@ -23,6 +23,7 @@ import { PlatformInformation } from '../platform';
 import { rsync, scp, ssh } from '../SSH/commands';
 import * as Telemetry from '../telemetry';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
+import { AttachItem, showQuickPick } from './attachQuickPick';
 import { ConfigMenu, ConfigMode, ConfigSource, CppDebugConfiguration, DebuggerEvent, DebuggerType, DebugType, IConfiguration, IConfigurationSnippet, isDebugLaunchStr, MIConfigurations, PipeTransportConfigurations, TaskStatus, WindowsConfigurations, WSLConfigurations } from './configurations';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
@@ -179,7 +180,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     await cppBuildTaskProvider.runBuildTask(config.preLaunchTask);
                     config.preLaunchTask = undefined;
                     Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "true" });
-                } catch (err) {
+                } catch {
                     Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "false" });
                 }
                 return config;
@@ -245,7 +246,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
 
             // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
-            // eslint-disable-next-line no-prototype-builtins
             if (config.hasOwnProperty("externalConsole")) {
                 void logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
                 if (config.externalConsole && !config.console) {
@@ -354,13 +354,22 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Pick process if process id is empty
         if (config.request === "attach" && !config.processId) {
             let processId: string | undefined;
-            if (config.pipeTransport || config.useExtendedRemote) {
-                const remoteAttachPicker: RemoteAttachPicker = new RemoteAttachPicker();
-                processId = await remoteAttachPicker.ShowAttachEntries(config);
-            } else {
-                const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
-                const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
-                processId = await attacher.ShowAttachEntries(token);
+
+            // If program is specified and not remote attach, try to find the matching process by name
+            if (config.program && !config.pipeTransport && !config.useExtendedRemote) {
+                processId = await this.findProcessByProgramName(config.program, token);
+            }
+
+            // Fall back to process picker if program wasn't specified or didn't match
+            if (!processId) {
+                if (config.pipeTransport || config.useExtendedRemote) {
+                    const remoteAttachPicker: RemoteAttachPicker = new RemoteAttachPicker();
+                    processId = await remoteAttachPicker.ShowAttachEntries(config);
+                } else {
+                    const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
+                    const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
+                    processId = await attacher.ShowAttachEntries(token);
+                }
             }
 
             if (processId) {
@@ -621,7 +630,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (response === applyButton || response === updateButton) {
             try {
                 await vscode.commands.executeCommand('C_Cpp.SetVsDeveloperEnvironment', 'buildAndDebug');
-            } catch (e: any) {
+            } catch {
                 // Ignore the error, the user will be prompted to apply the environment manually.
             }
         }
@@ -710,7 +719,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, undefined);
                 if (sourceFileMapSource !== newSourceFileMapSource) {
                     message = "\t" + localize("replacing.sourcepath", "Replacing {0} '{1}' with '{2}'.", "sourcePath", sourceFileMapSource, newSourceFileMapSource);
-                    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                     delete config.sourceFileMap[sourceFileMapSource];
                     source = newSourceFileMapSource;
                 }
@@ -790,7 +798,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     private findDefaultConfig(configs: CppDebugConfiguration[]): CppDebugConfiguration[] {
-        // eslint-disable-next-line no-prototype-builtins
         return configs.filter((config: CppDebugConfiguration) => config.hasOwnProperty("isDefault") && config.isDefault);
     }
 
@@ -1156,6 +1163,44 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
         }
         return true;
+    }
+
+    private async findProcessByProgramName(
+        programPath: string,
+        token?: vscode.CancellationToken
+    ): Promise<string | undefined> {
+        // Validate that the program path is valid
+        if (!await util.checkExecutableWithoutExtensionExists(programPath)) {
+            return undefined;
+        }
+
+        const programBaseName: string = path.basename(programPath);
+
+        // Get the process list using the same logic as interactive attach
+        const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
+        const processes: AttachItem[] = await attachItemsProvider.getAttachItems(token);
+
+        // Prepare target name for matching (case-insensitive on Windows only)
+        let targetName: string = programBaseName;
+        if (isWindows) {
+            targetName = targetName.toLowerCase();
+            targetName = targetName.endsWith(".exe") ? targetName : (targetName + ".exe");
+        }
+
+        // Find processes matching the program name
+        const matchingProcesses: AttachItem[] = processes.filter(p => {
+            const processName: string = isWindows ? p.label.toLowerCase() : p.label;
+            return processName === targetName;
+        });
+
+        if (matchingProcesses.length === 0) {
+            return undefined;
+        } else if (matchingProcesses.length === 1) {
+            return matchingProcesses[0].id;
+        } else {
+            // Multiple matches - let the user choose
+            return showQuickPick(() => Promise.resolve(matchingProcesses));
+        }
     }
 }
 
