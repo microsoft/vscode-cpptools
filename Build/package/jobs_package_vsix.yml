@@ -59,6 +59,12 @@ jobs:
   - script: copy $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
     displayName: prepare manifest for signing
     workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+  - task: NuGetToolInstaller@1
+    displayName: Install NuGet
+  - task: NuGetAuthenticate@1
+    displayName: Authenticate NuGet
+  - script: nuget restore $(Build.SourcesDirectory)\Build\signing\SignVsix.proj -PackagesDirectory $(Build.SourcesDirectory)\Build\signing\packages
+    displayName: Restore MicroBuild Core
   - task: MSBuild@1
     displayName: Sign the vsix
     inputs:
