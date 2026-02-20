@@ -10,6 +10,7 @@ import { CustomExecution, Disposable, Event, EventEmitter, ProcessExecution, Pse
 import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
+import { logAndReturn } from "../Utility/Async/returns";
 import { Client } from './client';
 import * as configs from './configurations';
 import { getEffectiveEnvironment, isEnvironmentOverrideApplied } from "./devcmd";
@@ -93,7 +94,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         let activeClient: Client;
         try {
             activeClient = ext.getActiveClient();
-        } catch (errJS) {
+        } catch {
             return emptyTasks; // Language service features may be disabled.
         }
 
@@ -370,7 +371,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     constructor(private command: string | util.IQuotedString, private args: (string | util.IQuotedString)[], private options: cp.ExecOptions | undefined, private buildOptions: BuildOptions) {
     }
 
-    async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
+    async openAsync(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
         if (this.buildOptions.taskUsesActiveFile && !util.isCppOrCFile(window.activeTextEditor?.document.uri)) {
             this.writeEmitter.fire(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.') + this.endOfLine);
             this.closeEmitter.fire(-1);
@@ -385,6 +386,10 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         // At this point we can start using the terminal.
         this.writeEmitter.fire(localize("starting.build", "Starting build...") + this.endOfLine);
         await this.doBuild();
+    }
+
+    open(_initialDimensions: TerminalDimensions | undefined): void {
+        void this.openAsync(_initialDimensions).catch(logAndReturn.undefined);
     }
 
     close(): void {

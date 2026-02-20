@@ -95,7 +95,7 @@ export async function getRawJson(path: string | undefined): Promise<any> {
     let rawElement: any = {};
     try {
         rawElement = jsonc.parse(fileContents, undefined, true);
-    } catch (error) {
+    } catch {
         throw new Error(failedToParseJson);
     }
     return rawElement;
@@ -501,7 +501,7 @@ export async function fsStat(filePath: fs.PathLike): Promise<fs.Stats | undefine
     let stats: fs.Stats | undefined;
     try {
         stats = await fs.promises.stat(filePath);
-    } catch (e) {
+    } catch {
         // File doesn't exist
         return undefined;
     }
@@ -562,7 +562,7 @@ export function createDirIfNotExistsSync(filePath: string | undefined): void {
 export function checkFileExistsSync(filePath: string): boolean {
     try {
         return fs.statSync(filePath).isFile();
-    } catch (e) {
+    } catch {
         return false;
     }
 }
@@ -595,7 +595,7 @@ export function checkExecutableWithoutExtensionExistsSync(filePath: string): boo
 export function checkDirectoryExistsSync(dirPath: string): boolean {
     try {
         return fs.statSync(dirPath).isDirectory();
-    } catch (e) {
+    } catch {
         return false;
     }
 }
@@ -1446,7 +1446,7 @@ export function findPowerShell(): string | undefined {
                 if (fs.statSync(candidate).isFile()) {
                     return name;
                 }
-            } catch (e) {
+            } catch {
                 // ignore, try next candidate
             }
         }
@@ -1474,9 +1474,7 @@ export function isVsCodeInsiders(): boolean {
 
 export function stripEscapeSequences(str: string): string {
     return str
-        // eslint-disable-next-line no-control-regex
         .replace(/\x1b\[\??[0-9]{0,3}(;[0-9]{1,3})?[a-zA-Z]/g, '')
-        // eslint-disable-next-line no-control-regex
         .replace(/\u0008/g, '')
         .replace(/\r/g, '');
 }

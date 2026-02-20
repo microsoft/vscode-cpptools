@@ -44,5 +44,5 @@ extends:
 
       - template: /Build/package/jobs_package_vsix.yml@self
         parameters:
-          vsixName: cpptools-themes.vsix
+          vsixName: cpptools-themes
           srcDir: Themes

@@ -3,8 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable no-prototype-builtins */
-
 import { resolve } from 'path';
 import { $root, read, write } from './common';
 
