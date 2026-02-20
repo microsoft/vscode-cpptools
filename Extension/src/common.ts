@@ -171,7 +171,7 @@ export function isHeaderFile(uri: vscode.Uri): boolean {
 export function isCppFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
-    return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ii", ".ino"].some(ext => fileExtLower === ext);
+    return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ii", ".ino", ".sycl"].some(ext => fileExtLower === ext);
 }
 
 export function isCFile(uri: vscode.Uri): boolean {
