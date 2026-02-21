@@ -1286,11 +1286,23 @@ class OSXConfigurationProvider extends DefaultConfigurationProvider {
     private MIMode: string = 'lldb';
     private executable: string = "a.out";
     private pipeProgram: string = "/usr/bin/ssh";
+    private setupCommandsBlock: string = `"setupCommands": [
+    {
+        "description": "${localize("prevent.lldb.crash.concepts", "Prevent LLDB crash with C++20 concepts").replace(/"/g, '')}",
+        "text": "settings set target.expr-prefix '#ifndef __cpp_concepts\\n#define __cpp_concepts 0\\n#endif\\n'",
+        "ignoreFailures": true
+    },
+    {
+        "description": "${localize("disable.type.summary.stl", "Disable type summary for STL types to prevent crash").replace(/"/g, '')}",
+        "text": "type summary clear",
+        "ignoreFailures": true
+    }
+]`;
 
     constructor() {
         super();
         this.configurations = [
-            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram)
+            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock)
         ];
     }
 }

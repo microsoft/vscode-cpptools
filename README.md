@@ -57,6 +57,19 @@ File questions, issues, or feature requests for the extension.
 <br>
 
 **[Known issues](https://github.com/Microsoft/vscode-cpptools/issues)**
+## Debugging with LLDB (macOS/Linux)
+
+Some users may encounter a crash (exit code 139) when using LLDB with this extension on macOS or Linux platforms.
+
+> 🛠️ **Fix:** This issue has been investigated and addressed. See [Issue #13496](https://github.com/microsoft/vscode-cpptools/issues/13496) for full details.  
+> ✅ A fix is proposed in [Pull Request](https://github.com/microsoft/vscode-cpptools/compare/microsoft:vscode-cpptools:main...Subham-KRLX:vscode-cpptools:fix/llcdbg-crash?diff=unified&w).
+
+Make sure you are using:
+- A compatible LLDB version (`lldb --version`)
+- The latest version of the extension
+
+This helps prevent crashes during C++ debugging on Unix-based systems.
+
 <br>
 If someone has already filed an issue that encompasses your feedback, please leave a 👍 or 👎 reaction on the issue to upvote or downvote it to help us prioritize the issue.
 <br>
@@ -80,3 +93,4 @@ The software may collect information about you and your use of the software and 
 ## Trademarks
 
 This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow Microsoft’s Trademark & Brand Guidelines. Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party’s policies.
+
