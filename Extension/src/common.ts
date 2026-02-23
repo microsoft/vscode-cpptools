@@ -1850,3 +1850,7 @@ export function getVSCodeLanguageModel(): any | undefined {
     }
     return vscodelm;
 }
+
+export * from './Utility/msvcFlags';
+
+

@@ -3214,6 +3214,38 @@ export class DefaultClient implements Client {
             const compilerPathAndArgs: util.CompilerPathAndArgs =
                 util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, c.compilerPath, c.compilerArgs);
             modifiedConfig.compilerPath = compilerPathAndArgs.compilerPath;
+
+            // Handle external includes
+            const externalIncludePaths: string[] = [];
+            if (c.compilerArgs) {
+                const extracted = util.extractIncludePathsFromArgs(c.compilerArgs);
+                externalIncludePaths.push(...extracted.externalIncludePaths);
+
+                // Resolve external include variables
+                for (const varName of extracted.externalIncludeVars) {
+                    const resolved = this.AdditionalEnvironment ? this.AdditionalEnvironment[varName] : process.env[varName];
+                    if (util.isString(resolved)) {
+                        externalIncludePaths.push(...resolved.split(path.delimiter).filter(p => !!p));
+                    } else if (util.isArrayOfString(resolved)) {
+                        externalIncludePaths.push(...resolved);
+                    }
+                }
+            }
+
+            // Handle EXTERNAL_INCLUDE environment variable
+            const externalIncludeEnv = this.AdditionalEnvironment ? this.AdditionalEnvironment["EXTERNAL_INCLUDE"] : process.env["EXTERNAL_INCLUDE"];
+            if (util.isString(externalIncludeEnv)) {
+                externalIncludePaths.push(...externalIncludeEnv.split(path.delimiter).filter(p => !!p));
+            } else if (util.isArrayOfString(externalIncludeEnv)) {
+                externalIncludePaths.push(...externalIncludeEnv);
+            }
+
+            if (externalIncludePaths.length > 0) {
+                const currentIncludePath = modifiedConfig.includePath || [];
+                const uniqueNewIncludes = externalIncludePaths.filter(p => !currentIncludePath.includes(p));
+                modifiedConfig.includePath = currentIncludePath.concat(uniqueNewIncludes);
+            }
+
             if (settings.legacyCompilerArgsBehavior) {
                 modifiedConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
                 modifiedConfig.compilerArgs = undefined;
