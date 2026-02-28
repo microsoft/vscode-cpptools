@@ -92,36 +92,36 @@
     levn "^0.4.1"
 
 "@github/copilot-language-server-darwin-arm64@1.435.0":
-  version "1.433.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-darwin-arm64/-/copilot-language-server-darwin-arm64-1.433.0.tgz#69faf9bc1338d85a4cb455c1381b50bcc98f5ec1"
-  integrity sha1-afr5vBM42FpMtFXBOBtQvMmPXsE=
+  version "1.434.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-darwin-arm64/-/copilot-language-server-darwin-arm64-1.434.0.tgz#23eaa733096f19900d3cc1f76d602407e37290a7"
+  integrity sha1-I+qnMwlvGZANPMH3bWAkB+NykKc=
 
 "@github/copilot-language-server-darwin-x64@1.435.0":
-  version "1.433.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-darwin-x64/-/copilot-language-server-darwin-x64-1.433.0.tgz#ddac3f8d6aae11e509e52f3598c9323d9d973137"
-  integrity sha1-3aw/jWquEeUJ5S81mMkyPZ2XMTc=
+  version "1.434.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-darwin-x64/-/copilot-language-server-darwin-x64-1.434.0.tgz#3d2c6ababe98460e5653dab9cd6af76f096a1f40"
+  integrity sha1-PSxqur6YRg5WU9q5zWr3bwlqH0A=
 
 "@github/copilot-language-server-linux-arm64@1.435.0":
-  version "1.433.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-linux-arm64/-/copilot-language-server-linux-arm64-1.433.0.tgz#182d891c3a8f0dc9a56b2341189de2b57270c399"
-  integrity sha1-GC2JHDqPDcmlayNBGJ3itXJww5k=
+  version "1.434.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-linux-arm64/-/copilot-language-server-linux-arm64-1.434.0.tgz#c66943a7097a2fe4b14202d696b109807b3186ac"
+  integrity sha1-xmlDpwl6L+SxQgLWlrEJgHsxhqw=
 
 "@github/copilot-language-server-linux-x64@1.435.0":
-  version "1.433.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-linux-x64/-/copilot-language-server-linux-x64-1.433.0.tgz#a4fa191afddc234bac861dac866f9b4a3c6e3389"
-  integrity sha1-pPoZGv3cI0ushh2shm+bSjxuM4k=
+  version "1.434.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-linux-x64/-/copilot-language-server-linux-x64-1.434.0.tgz#05107eddeb18370c10b7b8c0322153c3d6f75a37"
+  integrity sha1-BRB+3esYNwwQt7jAMiFTw9b3Wjc=
 
 "@github/copilot-language-server-win32-arm64@1.435.0":
-  version "1.433.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-win32-arm64/-/copilot-language-server-win32-arm64-1.433.0.tgz#aa12e91bd569e3f7894ccbfb0215ef1fe047e2ad"
-  integrity sha1-qhLpG9Vp4/eJTMv7AhXvH+BH4q0=
+  version "1.434.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-win32-arm64/-/copilot-language-server-win32-arm64-1.434.0.tgz#43f960f41595e2375cdbf8fef2b344963ce05476"
+  integrity sha1-Q/lg9BWV4jdc2/j+8rNEljzgVHY=
 
 "@github/copilot-language-server-win32-x64@1.435.0":
-  version "1.433.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-win32-x64/-/copilot-language-server-win32-x64-1.433.0.tgz#b1b5bc37d53fff68051cb1ce9854aa130665e9ef"
-  integrity sha1-sbW8N9U//2gFHLHOmFSqEwZl6e8=
+  version "1.434.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-win32-x64/-/copilot-language-server-win32-x64-1.434.0.tgz#4af0fcdbc79f3c2fd8641f6d64b17aec23e87097"
+  integrity sha1-SvD828efPC/YZB9tZLF67CPocJc=
 
-"@github/copilot-language-server@^1.433.0":
+"@github/copilot-language-server@^1.435.0":
   version "1.435.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server/-/copilot-language-server-1.435.0.tgz#a98ceeb9dd0bfbf08f88dd6e30781c18122796f8"
   integrity sha1-qYzuud0L+/CPiN1uMHgcGBInlvg=
