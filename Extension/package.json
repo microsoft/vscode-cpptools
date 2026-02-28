@@ -6784,10 +6784,10 @@
         "xml2js": "^0.6.2"
     },
     "dependencies": {
-        "@github/copilot-language-server": "^1.316.0",
-        "@vscode/extension-telemetry": "^0.9.6",
+        "@github/copilot-language-server": "^1.433.0",
+        "@vscode/extension-telemetry": "^1.5.0",
         "chokidar": "^3.6.0",
-        "comment-json": "^4.2.3",
+        "comment-json": "^4.5.1",
         "escape-string-regexp": "^2.0.0",
         "fast-glob": "^3.3.3",
         "glob": "^7.2.3",
