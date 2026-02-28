@@ -231,7 +231,7 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@microsoft/1ds-core-js@4.3.11", "@microsoft/1ds-core-js@^4.3.10":
+"@microsoft/1ds-core-js@4.3.11", "@microsoft/1ds-core-js@^4.3.4":
   version "4.3.11"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@microsoft/1ds-core-js/-/1ds-core-js-4.3.11.tgz#523c600d25e004379c59404b0d75ee00043625cd"
   integrity sha1-UjxgDSXgBDecWUBLDXXuAAQ2Jc0=
@@ -242,7 +242,7 @@
     "@nevware21/ts-async" ">= 0.5.4 < 2.x"
     "@nevware21/ts-utils" ">= 0.11.8 < 2.x"
 
-"@microsoft/1ds-post-js@^4.3.10":
+"@microsoft/1ds-post-js@^4.3.4":
   version "4.3.11"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@microsoft/1ds-post-js/-/1ds-post-js-4.3.11.tgz#88ec08e4b4ab5969b00228254f5303d603bff09e"
   integrity sha1-iOwI5LSrWWmwAiglT1MD1gO/8J4=
@@ -292,7 +292,7 @@
   dependencies:
     "@nevware21/ts-utils" ">= 0.9.4 < 2.x"
 
-"@microsoft/applicationinsights-web-basic@^3.3.10":
+"@microsoft/applicationinsights-web-basic@^3.3.4":
   version "3.3.11"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@microsoft/applicationinsights-web-basic/-/applicationinsights-web-basic-3.3.11.tgz#353d159127c2b56b82dd5777f7a355626411f8ef"
   integrity sha1-NT0VkSfCtWuC3Vd396NVYmQR+O8=
@@ -750,14 +750,14 @@
     minimist "^1.2.8"
     prompts "^2.4.2"
 
-"@vscode/extension-telemetry@^1.5.0":
-  version "1.5.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@vscode/extension-telemetry/-/extension-telemetry-1.5.1.tgz#e336c404b1424939516b913e5f723a9df70e907b"
-  integrity sha1-4zbEBLFCSTlRa5E+X3I6nfcOkHs=
+"@vscode/extension-telemetry@^0.9.6":
+  version "0.9.9"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@vscode/extension-telemetry/-/extension-telemetry-0.9.9.tgz#58844e72ac7860eb0497898545c2c4f58096465e"
+  integrity sha1-WIROcqx4YOsEl4mFRcLE9YCWRl4=
   dependencies:
-    "@microsoft/1ds-core-js" "^4.3.10"
-    "@microsoft/1ds-post-js" "^4.3.10"
-    "@microsoft/applicationinsights-web-basic" "^3.3.10"
+    "@microsoft/1ds-core-js" "^4.3.4"
+    "@microsoft/1ds-post-js" "^4.3.4"
+    "@microsoft/applicationinsights-web-basic" "^3.3.4"
 
 "@vscode/test-electron@^2.3.10":
   version "2.5.2"
