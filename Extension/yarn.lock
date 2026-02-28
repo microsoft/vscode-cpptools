@@ -748,7 +748,7 @@
     minimist "^1.2.8"
     prompts "^2.4.2"
 
-"@vscode/extension-telemetry@^0.9.6":
+"@vscode/extension-telemetry@^0.9.9":
   version "0.9.9"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@vscode/extension-telemetry/-/extension-telemetry-0.9.9.tgz#58844e72ac7860eb0497898545c2c4f58096465e"
   integrity sha1-WIROcqx4YOsEl4mFRcLE9YCWRl4=
