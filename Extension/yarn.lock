@@ -91,49 +91,49 @@
     "@eslint/core" "^0.17.0"
     levn "^0.4.1"
 
-"@github/copilot-language-server-darwin-arm64@1.435.0":
+"@github/copilot-language-server-darwin-arm64@1.434.0":
   version "1.434.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-darwin-arm64/-/copilot-language-server-darwin-arm64-1.434.0.tgz#23eaa733096f19900d3cc1f76d602407e37290a7"
   integrity sha1-I+qnMwlvGZANPMH3bWAkB+NykKc=
 
-"@github/copilot-language-server-darwin-x64@1.435.0":
+"@github/copilot-language-server-darwin-x64@1.434.0":
   version "1.434.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-darwin-x64/-/copilot-language-server-darwin-x64-1.434.0.tgz#3d2c6ababe98460e5653dab9cd6af76f096a1f40"
   integrity sha1-PSxqur6YRg5WU9q5zWr3bwlqH0A=
 
-"@github/copilot-language-server-linux-arm64@1.435.0":
+"@github/copilot-language-server-linux-arm64@1.434.0":
   version "1.434.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-linux-arm64/-/copilot-language-server-linux-arm64-1.434.0.tgz#c66943a7097a2fe4b14202d696b109807b3186ac"
   integrity sha1-xmlDpwl6L+SxQgLWlrEJgHsxhqw=
 
-"@github/copilot-language-server-linux-x64@1.435.0":
+"@github/copilot-language-server-linux-x64@1.434.0":
   version "1.434.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-linux-x64/-/copilot-language-server-linux-x64-1.434.0.tgz#05107eddeb18370c10b7b8c0322153c3d6f75a37"
   integrity sha1-BRB+3esYNwwQt7jAMiFTw9b3Wjc=
 
-"@github/copilot-language-server-win32-arm64@1.435.0":
+"@github/copilot-language-server-win32-arm64@1.434.0":
   version "1.434.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-win32-arm64/-/copilot-language-server-win32-arm64-1.434.0.tgz#43f960f41595e2375cdbf8fef2b344963ce05476"
   integrity sha1-Q/lg9BWV4jdc2/j+8rNEljzgVHY=
 
-"@github/copilot-language-server-win32-x64@1.435.0":
+"@github/copilot-language-server-win32-x64@1.434.0":
   version "1.434.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server-win32-x64/-/copilot-language-server-win32-x64-1.434.0.tgz#4af0fcdbc79f3c2fd8641f6d64b17aec23e87097"
   integrity sha1-SvD828efPC/YZB9tZLF67CPocJc=
 
-"@github/copilot-language-server@^1.435.0":
-  version "1.435.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server/-/copilot-language-server-1.435.0.tgz#a98ceeb9dd0bfbf08f88dd6e30781c18122796f8"
-  integrity sha1-qYzuud0L+/CPiN1uMHgcGBInlvg=
+"@github/copilot-language-server@1.434.0":
+  version "1.434.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@github/copilot-language-server/-/copilot-language-server-1.434.0.tgz#be4ccd6569033c4da660a30281bdfda2099b7a55"
+  integrity sha1-vkzNZWkDPE2mYKMCgb39ogmbelU=
   dependencies:
     vscode-languageserver-protocol "^3.17.5"
   optionalDependencies:
-    "@github/copilot-language-server-darwin-arm64" "1.435.0"
-    "@github/copilot-language-server-darwin-x64" "1.435.0"
-    "@github/copilot-language-server-linux-arm64" "1.435.0"
-    "@github/copilot-language-server-linux-x64" "1.435.0"
-    "@github/copilot-language-server-win32-arm64" "1.435.0"
-    "@github/copilot-language-server-win32-x64" "1.435.0"
+    "@github/copilot-language-server-darwin-arm64" "1.434.0"
+    "@github/copilot-language-server-darwin-x64" "1.434.0"
+    "@github/copilot-language-server-linux-arm64" "1.434.0"
+    "@github/copilot-language-server-linux-x64" "1.434.0"
+    "@github/copilot-language-server-win32-arm64" "1.434.0"
+    "@github/copilot-language-server-win32-x64" "1.434.0"
 
 "@gulp-sourcemaps/identity-map@^2.0.1":
   version "2.0.1"
