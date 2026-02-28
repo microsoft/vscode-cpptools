@@ -543,11 +543,9 @@
   integrity sha1-7ihweulOEdK4J7y+UnC86n8+ce4=
 
 "@types/minimatch@*":
-  version "6.0.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@types/minimatch/-/minimatch-6.0.0.tgz#4d207b1cc941367bdcd195a3a781a7e4fc3b1e03"
-  integrity sha1-TSB7HMlBNnvc0ZWjp4Gn5Pw7HgM=
-  dependencies:
-    minimatch "*"
+  version "5.1.2"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@types/minimatch/-/minimatch-5.1.2.tgz#07508b45797cb81ec3f273011b054cd0755eddca"
+  integrity sha1-B1CLRXl8uB7D8nMBGwVM0HVe3co=
 
 "@types/minimatch@^3.0.3":
   version "3.0.5"
@@ -3501,7 +3499,7 @@ mimic-function@^5.0.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/mimic-function/-/mimic-function-5.0.1.tgz#acbe2b3349f99b9deaca7fb70e48b83e94e67076"
   integrity sha1-rL4rM0n5m53qyn+3Dki4PpTmcHY=
 
-minimatch@*, minimatch@^10.2.2:
+minimatch@^10.2.2:
   version "10.2.4"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/minimatch/-/minimatch-10.2.4.tgz#465b3accbd0218b8281f5301e27cedc697f96fde"
   integrity sha1-Rls6zL0CGLgoH1MB4nztxpf5b94=
