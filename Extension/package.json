@@ -6800,7 +6800,7 @@
         "node-vswhere": "^1.0.2",
         "plist": "^3.1.0",
         "posix-getopt": "^1.2.1",
-        "shell-quote": "^1.8.1",
+        "shell-quote": "1.8.2",
         "ssh-config": "^4.4.4",
         "tmp": "^0.2.5",
         "vscode-cpptools": "^7.1.1",
