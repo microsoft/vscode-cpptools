@@ -177,7 +177,7 @@ export class ClientCollection {
                 // read for new workspace folders. Send them up before creating new
                 // clients, so the native process is already aware of all workspace
                 // folders before receiving new CppProperties for new folders.
-                this.defaultClient.sendDidChangeSettings();
+                void this.defaultClient.sendDidChangeSettings();
                 e.added.forEach(folder => {
                     const path: string = util.asFolder(folder.uri);
                     const client: cpptools.Client | undefined = this.languageClients.get(path);

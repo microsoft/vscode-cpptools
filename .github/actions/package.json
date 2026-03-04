@@ -10,12 +10,12 @@
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@actions/core": "^1.9.1",
-    "@actions/github": "^6.0.0",
+    "@actions/core": "^2.0.3",
+    "@actions/github": "^8.0.1",
     "@octokit/rest": "^21.1.1",
     "@slack/web-api": "^6.9.1",
     "applicationinsights": "^2.5.1",
-    "axios": "^1.12.1",
+    "axios": "^1.13.5",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
