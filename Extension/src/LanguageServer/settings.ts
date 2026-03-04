@@ -301,7 +301,7 @@ export class CppSettings extends Settings {
                     if (!semver.valid(bundledVersion)) {
                         return path;
                     }
-                } catch (e) {
+                } catch {
                     // Unable to invoke our own clang-*.  Use the system installed clang-*.
                     return path;
                 }
@@ -314,7 +314,7 @@ export class CppSettings extends Settings {
                         path = "";
                         setCachedClangPath(path);
                     }
-                } catch (e) {
+                } catch {
                     path = "";
                     setCachedClangPath(path);
                 }
@@ -898,7 +898,7 @@ export class CppSettings extends Settings {
             try {
                 await vscode.workspace.applyEdit(edits);
                 document = await vscode.workspace.openTextDocument(uri);
-            } catch (e) {
+            } catch {
                 document = await vscode.workspace.openTextDocument();
             }
         } else {
