@@ -1,5 +1,16 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.31.1: March 9, 2026
+### Enhancements
+* Update clang-tidy and clang-format from 21.1.4 to 22.1.0.
+* Update support for the latest compiler versions.
+
+### Bug Fixes
+* Add IntelliSense support for `__builtin_is_implicit_lifetime`.
+* Fix three IntelliSense process crashes.
+* Fix a bug with `-embed-directory`.
+* Add some missing translations.
+
 ## Version 1.31.0: February 19, 2026
 ### Enhancements
 * Add support for `program` in attach debug configurations. [#14046](https://github.com/microsoft/vscode-cpptools/issues/14046)
