@@ -24,8 +24,6 @@ jobs:
           signWithProd: true
     featureFlags:
       autoBaseline: false
-    settings:
-      networkIsolationPolicy: Permissive,CFSClean
     outputs:
     - output: pipelineArtifact
       displayName: '${{ parameters.vsixName }}.vsix'
