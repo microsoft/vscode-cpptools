@@ -9,6 +9,7 @@
 * Add IntelliSense support for `__builtin_is_implicit_lifetime`.
 * Fix three IntelliSense process crashes.
 * Fix a bug with `-embed-directory`.
+* Add some missing translations.
 
 ## Version 1.31.0: February 19, 2026
 ### Enhancements
