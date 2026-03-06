@@ -31,6 +31,8 @@ extends:
         name: AzurePipelines-EO
         image: 1ESPT-Windows2022
         os: windows
+    settings:
+      networkIsolationPolicy: Permissive,CFSClean
 
     stages:
     - stage: package

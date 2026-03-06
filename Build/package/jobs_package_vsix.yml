@@ -38,9 +38,6 @@ jobs:
     inputs:
       version: 22.x
 
-  - script: npm install --global @vscode/vsce@3.1.1
-    displayName: install vsce@3.1.1
-
   - task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
     displayName: Use Yarn 1.x
 
@@ -49,11 +46,11 @@ jobs:
 
   - script: |
       cd $(Build.SourcesDirectory)\${{ parameters.srcDir }}
-      vsce package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix
+      npx @vscode/vsce@3.7.1 package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix
     displayName: Run VSCE to package vsix
 
 # sign the vsix
-  - script: vsce generate-manifest -i $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest
+  - script: npx @vscode/vsce@3.7.1 generate-manifest -i $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest
     displayName: generate manifest
     workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
   - script: copy $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
@@ -70,6 +67,3 @@ jobs:
     inputs:
       solution: $(Build.SourcesDirectory)\Build\signing\SignVsix.proj
       msbuildArguments: /p:SignType=${{ parameters.signType }}
-
-  - script: npm uninstall --global @vscode/vsce
-    displayName: uninstall vsce
