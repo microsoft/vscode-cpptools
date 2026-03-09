@@ -39,5 +39,5 @@ extends:
       jobs:
       - template: /Build/publish/jobs_publish_vsix.yml@self
         parameters:
-          vsixName: cpptools-themes.vsix
+          vsixName: cpptools-themes
 

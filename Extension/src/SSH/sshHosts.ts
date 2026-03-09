@@ -61,7 +61,7 @@ function extractHostNames(parsedConfig: Configuration): { [host: string]: string
         let resolvedConfig: ResolvedConfiguration | undefined;
         try {
             resolvedConfig = parsedConfig.compute(host);
-        } catch (e) {
+        } catch {
             getSshChannel().appendLine(localize("failed.to.find.user.info.for.SSH",
                 "Failed to find user info for SSH. This could be caused by VS Code being installed using 'snap'. Please reinstall VS Code using the 'deb' package if you are planning to use SSH features."));
         }
@@ -160,7 +160,7 @@ async function getIncludedConfigFile(
     let includedContents: string;
     try {
         includedContents = (await fs.readFile(includePath)).toString();
-    } catch (e) {
+    } catch {
         getSshChannel().appendLine(localize("failed.to.read.file", "Failed to read file {0}.", includePath));
         return;
     }
@@ -181,7 +181,7 @@ export async function writeSshConfiguration(configurationPath: string, configura
     try {
         await vscode.workspace.fs.createDirectory(vscode.Uri.file(path.dirname(configurationPath)));
         await fs.writeFile(configurationPath, configuration.toString());
-    } catch (e) {
+    } catch {
         getSshChannel().appendLine(localize("failed.to.write.file", "Failed to write to file {0}.", configurationPath));
     }
 }

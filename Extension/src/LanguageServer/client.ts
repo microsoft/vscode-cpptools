@@ -816,25 +816,25 @@ export interface Client {
     didChangeActiveEditor(editor?: vscode.TextEditor, selection?: Range): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
     activate(): void;
-    selectionChanged(selection: Range): void;
-    resetDatabase(): void;
+    selectionChanged(selection: Range): Promise<void>;
+    resetDatabase(): Promise<void>;
     deactivate(): void;
     promptSelectIntelliSenseConfiguration(sender?: any): Promise<void>;
     rescanCompilers(sender?: any): Promise<void>;
-    pauseParsing(): void;
-    resumeParsing(): void;
-    PauseCodeAnalysis(): void;
-    ResumeCodeAnalysis(): void;
-    CancelCodeAnalysis(): void;
+    pauseParsing(): Promise<void>;
+    resumeParsing(): Promise<void>;
+    PauseCodeAnalysis(): Promise<void>;
+    ResumeCodeAnalysis(): Promise<void>;
+    CancelCodeAnalysis(): Promise<void>;
     handleConfigurationSelectCommand(config?: string): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
     handleShowActiveCodeAnalysisCommands(): Promise<void>;
     handleShowIdleCodeAnalysisCommands(): Promise<void>;
-    handleReferencesIcon(): void;
-    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void;
-    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void;
-    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
-    handleAddToIncludePathCommand(path: string): void;
+    handleReferencesIcon(): Promise<void>;
+    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): Promise<void>;
+    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): Promise<void>;
+    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): Promise<void>;
+    handleAddToIncludePathCommand(path: string): Promise<void>;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
     handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
@@ -849,7 +849,7 @@ export interface Client {
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
-    sendDidChangeSettings(): void;
+    sendDidChangeSettings(): Promise<void>;
     isInitialized(): boolean;
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
@@ -1780,7 +1780,7 @@ export class DefaultClient implements Client {
     }
 
     public async sendDidChangeSettings(): Promise<void> {
-        // Send settings json to native side
+        // Send settings json to native side.
         await this.ready;
         await this.languageClient.sendNotification(DidChangeSettingsNotification, this.getAllSettings());
     }
@@ -1789,7 +1789,7 @@ export class DefaultClient implements Client {
         const defaultClient: Client = clients.getDefaultClient();
         if (this === defaultClient) {
             // Only send the updated settings information once, as it includes values for all folders.
-            void this.sendDidChangeSettings();
+            void this.sendDidChangeSettings().catch(logAndReturn.undefined);
         }
         const changedSettings: Record<string, string> = this.settingsTracker.getChangedSettings();
 
@@ -2226,13 +2226,13 @@ export class DefaultClient implements Client {
                 if (!await provider.canProvideConfiguration(docUri, tokenSource.token)) {
                     return [];
                 }
-            } catch (err) {
+            } catch {
                 console.warn("Caught exception from canProvideConfiguration");
             }
             let configs: util.Mutable<SourceFileConfigurationItem>[] = [];
             try {
                 configs = await provider.provideConfigurations([docUri], tokenSource.token);
-            } catch (err) {
+            } catch {
                 console.warn("Caught exception from provideConfigurations");
             }
 
@@ -3418,7 +3418,6 @@ export class DefaultClient implements Client {
         this.browseConfigurationLogging = "";
 
         // This while (true) is here just so we can break out early if the config is set on error
-        // eslint-disable-next-line no-constant-condition
         while (true) {
             // config is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
             if (timeoutOccured || !config || config instanceof Array) {
@@ -4249,7 +4248,6 @@ export class DefaultClient implements Client {
         if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
             void this.languageClient.sendNotification(PreviewReferencesNotification);
         }
-
     }
 
     private serverCanceledReferences(): void {
@@ -4372,25 +4370,25 @@ class NullClient implements Client {
     didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
-    selectionChanged(selection: Range): void { }
-    resetDatabase(): void { }
+    selectionChanged(selection: Range): Promise<void> { return Promise.resolve(); }
+    resetDatabase(): Promise<void> { return Promise.resolve(); }
     promptSelectIntelliSenseConfiguration(sender?: any): Promise<void> { return Promise.resolve(); }
     rescanCompilers(sender?: any): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
-    pauseParsing(): void { }
-    resumeParsing(): void { }
-    PauseCodeAnalysis(): void { }
-    ResumeCodeAnalysis(): void { }
-    CancelCodeAnalysis(): void { }
+    pauseParsing(): Promise<void> { return Promise.resolve(); }
+    resumeParsing(): Promise<void> { return Promise.resolve(); }
+    PauseCodeAnalysis(): Promise<void> { return Promise.resolve(); }
+    ResumeCodeAnalysis(): Promise<void> { return Promise.resolve(); }
+    CancelCodeAnalysis(): Promise<void> { return Promise.resolve(); }
     handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleShowActiveCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleShowIdleCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
-    handleReferencesIcon(): void { }
-    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void { }
-    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void { }
-    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void { }
-    handleAddToIncludePathCommand(path: string): void { }
+    handleReferencesIcon(): Promise<void> { return Promise.resolve(); }
+    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): Promise<void> { return Promise.resolve(); }
+    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): Promise<void> { return Promise.resolve(); }
+    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): Promise<void> { return Promise.resolve(); }
+    handleAddToIncludePathCommand(path: string): Promise<void> { return Promise.resolve(); }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
     handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
@@ -4408,7 +4406,7 @@ class NullClient implements Client {
         this.stringEvent.dispose();
     }
     addFileAssociations(fileAssociations: string, languageId: string): void { }
-    sendDidChangeSettings(): void { }
+    sendDidChangeSettings(): Promise<void> { return Promise.resolve(); }
     isInitialized(): boolean { return true; }
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
