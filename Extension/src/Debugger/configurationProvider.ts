@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as jsonc from 'comment-json';
-import * as fs from 'fs';
 import * as glob from 'glob';
 import * as os from 'os';
 import * as path from 'path';
@@ -22,8 +21,8 @@ import * as logger from '../logger';
 import { PlatformInformation } from '../platform';
 import { rsync, scp, ssh } from '../SSH/commands';
 import * as Telemetry from '../telemetry';
-import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { AttachItem, showQuickPick } from './attachQuickPick';
+import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { ConfigMenu, ConfigMode, ConfigSource, CppDebugConfiguration, DebuggerEvent, DebuggerType, DebugType, IConfiguration, IConfigurationSnippet, isDebugLaunchStr, MIConfigurations, PipeTransportConfigurations, TaskStatus, WindowsConfigurations, WSLConfigurations } from './configurations';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
@@ -303,7 +302,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         // Validate LLDB-MI
         if (os.platform() === 'darwin' && // Check for macOS
-            fs.existsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
+            util.checkFileExistsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
             (!macOSMIMode || macOSMIMode === 'lldb') &&
             !macOSMIDebuggerPath // User did not provide custom lldb-mi
         ) {
@@ -657,7 +656,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         ];
 
         for (const searchPath of searchPaths) {
-            if (fs.existsSync(path.join(searchPath, LLDBFramework))) {
+            if (util.checkDirectoryExistsSync(path.join(searchPath, LLDBFramework))) {
                 // Found a framework that 'lldb-mi' can use.
                 return searchPath;
             }
