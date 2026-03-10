@@ -44,9 +44,6 @@ jobs:
   - script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
     displayName: Delete .npmrc if it exists
 
-  - script: mkdir $(Build.ArtifactStagingDirectory)\Extension
-    displayName: Create Extension Staging Directory
-
   - task: Bash@3
     displayName: Build files
     inputs:
