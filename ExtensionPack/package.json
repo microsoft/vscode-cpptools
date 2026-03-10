@@ -40,5 +40,8 @@
         "ms-vscode.cpptools-themes",
         "ms-vscode.cpp-devtools",
         "ms-vscode.cmake-tools"
-    ]
+    ],
+    "devDependencies": {
+        "@vscode/vsce": "3.7.1"
+    }
 }

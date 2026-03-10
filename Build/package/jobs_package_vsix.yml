@@ -41,6 +41,27 @@ jobs:
   - task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
     displayName: Use Yarn 1.x
 
+  - script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
+    displayName: Delete .npmrc if it exists
+
+  - script: mkdir $(Build.ArtifactStagingDirectory)\Extension
+    displayName: Create Extension Staging Directory
+
+  - task: Bash@3
+    displayName: Build files
+    inputs:
+      targetType: 'inline'
+      script: |
+        export SRC_DIR=$(echo $BUILD_SOURCESDIRECTORY | sed 's|\\|/|g')
+        cd "$SRC_DIR/${{ parameters.srcDir }}"
+        yarn install
+        if [ $? -ne 0 ]; then
+          echo "yarn install failed, sleeping for 30s before retrying..."
+          sleep 30
+          exit 1
+        fi
+    retryCountOnTaskFailure: 3
+
   - script: mkdir $(Build.ArtifactStagingDirectory)\vsix
     displayName: Create Staging Directory
 
