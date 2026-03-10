@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as plist from 'plist';
 import * as nls from 'vscode-nls';
+import * as util from './common';
 import { LinuxDistribution } from './linuxDistribution';
 import * as logger from './logger';
 import { SessionState, SupportedWindowsVersions } from './sessionState';
@@ -68,7 +69,7 @@ export class PlatformInformation {
         let productDarwinVersion: string = "";
         let errorMessage: string = "";
 
-        if (fs.existsSync(DARWIN_SYSTEM_VERSION_PLIST)) {
+        if (util.checkFileExistsSync(DARWIN_SYSTEM_VERSION_PLIST)) {
             const systemVersionPListBuffer: Buffer = fs.readFileSync(DARWIN_SYSTEM_VERSION_PLIST);
             const systemVersionData: any = plist.parse(systemVersionPListBuffer.toString());
             if (systemVersionData) {

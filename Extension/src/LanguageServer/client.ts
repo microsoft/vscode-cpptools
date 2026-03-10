@@ -1285,7 +1285,7 @@ export class DefaultClient implements Client {
         }
 
         this.rootFolder = workspaceFolder;
-        this.rootRealPath = this.RootPath ? fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath : "";
+        this.rootRealPath = this.RootPath ? util.checkDirectoryExistsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath : "";
 
         this.workspaceStoragePath = util.extensionContext?.storageUri?.fsPath ?? "";
         if (this.workspaceStoragePath.length > 0) {
@@ -1612,7 +1612,7 @@ export class DefaultClient implements Client {
         this.currentCaseSensitiveFileSupport = new PersistentWorkspaceState<boolean>("CPP.currentCaseSensitiveFileSupport", false);
         let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
-        const exeExists: boolean = fs.existsSync(serverModule);
+        const exeExists: boolean = util.checkFileExistsSync(serverModule);
         if (!exeExists) {
             telemetry.logLanguageServerEvent("missingLanguageServerBinary");
             throw String('Missing binary at ' + serverModule);

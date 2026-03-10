@@ -61,5 +61,8 @@
         "path": "./themes/cpptools_light_vs.json"
       }
     ]
+  },
+  "devDependencies": {
+      "@vscode/vsce": "3.7.1"
   }
 }
