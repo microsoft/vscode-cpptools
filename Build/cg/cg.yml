@@ -60,6 +60,8 @@ extends:
         enabled: true
     featureFlags:
       autoBaseline: false
+    settings:
+      networkIsolationPolicy: Permissive,CFSClean,CFSClean2
 
     stages:
     - stage: build
@@ -90,11 +92,6 @@ extends:
         - script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
           displayName: Delete .npmrc if it exists
 
-        - task: Npm@0
-          displayName: Install vsce
-          inputs:
-            arguments: --global @vscode/vsce
-
         - script: mkdir $(Build.ArtifactStagingDirectory)\Extension
           displayName: Create Extension Staging Directory
 
@@ -115,12 +112,6 @@ extends:
 
         - script: |
             cd $(Build.SourcesDirectory)\Extension
-            vsce package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
+            npx @vscode/vsce@3.7.1 package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
           name: ProcessRunner_12
           displayName: Run VSCE to package vsix
-
-        - task: Npm@0
-          displayName: Uninstall vsce
-          inputs:
-            command: uninstall
-            arguments: --global @vscode/vsce

@@ -29,8 +29,7 @@ jobs/**
 cgmanifest.json
 
 # ignore development files
-.eslintignore
-.eslintrc.js
+eslint.config.js
 .gitattributes
 .gitignore
 gulpfile.js
