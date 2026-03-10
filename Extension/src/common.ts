@@ -146,10 +146,10 @@ export function getVcpkgRoot(): string {
     if (!vcpkgRoot && vcpkgRoot !== "") {
         vcpkgRoot = "";
         // Check for vcpkg instance.
-        if (fs.existsSync(getVcpkgPathDescriptorFile())) {
+        if (checkFileExistsSync(getVcpkgPathDescriptorFile())) {
             let vcpkgRootTemp: string = fs.readFileSync(getVcpkgPathDescriptorFile()).toString();
             vcpkgRootTemp = vcpkgRootTemp.trim();
-            if (fs.existsSync(vcpkgRootTemp)) {
+            if (checkDirectoryExistsSync(vcpkgRootTemp)) {
                 vcpkgRoot = path.join(vcpkgRootTemp, "/installed").replace(/\\/g, "/");
             }
         }

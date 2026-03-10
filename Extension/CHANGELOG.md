@@ -1,11 +1,13 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.31.1: March 9, 2026
+## Version 1.31.1: March 10, 2026
 ### Enhancements
 * Update clang-tidy and clang-format from 21.1.4 to 22.1.0.
 * Update support for the latest compiler versions.
 
 ### Bug Fixes
+* Fix workspace symbol search with `scope::variable` not working after symbols are deleted and then added back. [#14200](https://github.com/microsoft/vscode-cpptools/issues/14200)
+* Fix bugs where a path was checked for existence but not whether it was a file or a folder. [#14257](https://github.com/microsoft/vscode-cpptools/issues/14257)
 * Add IntelliSense support for `__builtin_is_implicit_lifetime`.
 * Fix three IntelliSense process crashes.
 * Fix a bug with `-embed-directory`.
