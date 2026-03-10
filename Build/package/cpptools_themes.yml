@@ -32,7 +32,7 @@ extends:
         image: 1ESPT-Windows2022
         os: windows
     settings:
-      networkIsolationPolicy: Permissive,CFSClean
+      networkIsolationPolicy: Permissive,CFSClean,CFSClean2
 
     stages:
     - stage: package
