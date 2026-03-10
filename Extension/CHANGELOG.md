@@ -7,6 +7,7 @@
 
 ### Bug Fixes
 * Fix workspace symbol search with `scope::variable` not working after symbols are deleted and then added back. [#14200](https://github.com/microsoft/vscode-cpptools/issues/14200)
+* Fix bugs where a path was checked for existence but not whether it was a file or a folder. [#14257](https://github.com/microsoft/vscode-cpptools/issues/14257)
 * Add IntelliSense support for `__builtin_is_implicit_lifetime`.
 * Fix three IntelliSense process crashes.
 * Fix a bug with `-embed-directory`.
