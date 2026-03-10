@@ -42,6 +42,6 @@
         "ms-vscode.cmake-tools"
     ],
     "devDependencies": {
-        "@vscode/vsce": "3.7.1"
+        "@vscode/vsce": "^3.7.1"
     }
 }
