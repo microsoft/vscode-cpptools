@@ -6881,6 +6881,6 @@
     "resolutions": {
         "postcss": "^8.4.31",
         "gulp-typescript/**/glob-parent": "^5.1.2",
-        "serialize-javascript": "^7.0.3"
+        "serialize-javascript": "^7.0.4"
     }
 }
