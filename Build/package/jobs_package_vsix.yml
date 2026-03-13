@@ -38,22 +38,37 @@ jobs:
     inputs:
       version: 22.x
 
-  - script: npm install --global @vscode/vsce@3.1.1
-    displayName: install vsce@3.1.1
-
   - task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
     displayName: Use Yarn 1.x
+
+  - script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
+    displayName: Delete .npmrc if it exists
+
+  - task: Bash@3
+    displayName: Build files
+    inputs:
+      targetType: 'inline'
+      script: |
+        export SRC_DIR=$(echo $BUILD_SOURCESDIRECTORY | sed 's|\\|/|g')
+        cd "$SRC_DIR/${{ parameters.srcDir }}"
+        yarn install
+        if [ $? -ne 0 ]; then
+          echo "yarn install failed, sleeping for 30s before retrying..."
+          sleep 30
+          exit 1
+        fi
+    retryCountOnTaskFailure: 3
 
   - script: mkdir $(Build.ArtifactStagingDirectory)\vsix
     displayName: Create Staging Directory
 
   - script: |
       cd $(Build.SourcesDirectory)\${{ parameters.srcDir }}
-      vsce package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix
+      npx @vscode/vsce@3.7.1 package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix
     displayName: Run VSCE to package vsix
 
 # sign the vsix
-  - script: vsce generate-manifest -i $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest
+  - script: npx @vscode/vsce@3.7.1 generate-manifest -i $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest
     displayName: generate manifest
     workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
   - script: copy $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
@@ -70,6 +85,3 @@ jobs:
     inputs:
       solution: $(Build.SourcesDirectory)\Build\signing\SignVsix.proj
       msbuildArguments: /p:SignType=${{ parameters.signType }}
-
-  - script: npm uninstall --global @vscode/vsce
-    displayName: uninstall vsce

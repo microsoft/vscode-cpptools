@@ -5,7 +5,6 @@
 'use strict';
 
 import { execSync } from 'child_process';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -13,6 +12,7 @@ import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
+import * as util from '../common';
 import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isObject, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
 import { isWindows } from '../constants';
 import * as telemetry from '../telemetry';
@@ -925,7 +925,7 @@ export class CppSettings extends Settings {
         let foundEditorConfigWithVcFormatSettings: boolean = false;
         const findConfigFile: (parentPath: string) => boolean = (parentPath: string) => {
             const editorConfigPath: string = path.join(parentPath, ".editorconfig");
-            if (fs.existsSync(editorConfigPath)) {
+            if (util.checkFileExistsSync(editorConfigPath)) {
                 const editorConfigSettings: any = getEditorConfigSettings(document.uri.fsPath);
                 const keys: string[] = Object.keys(editorConfigSettings);
                 for (let i: number = 0; i < keys.length; ++i) {
@@ -954,11 +954,11 @@ export class CppSettings extends Settings {
                 }
             }
             const clangFormatPath1: string = path.join(parentPath, ".clang-format");
-            if (fs.existsSync(clangFormatPath1)) {
+            if (util.checkFileExistsSync(clangFormatPath1)) {
                 return true;
             }
             const clangFormatPath2: string = path.join(parentPath, "_clang-format");
-            return fs.existsSync(clangFormatPath2);
+            return util.checkFileExistsSync(clangFormatPath2);
         };
         // Scan parent paths to see which we find first, ".clang-format" or ".editorconfig"
         const fsPath: string = document.uri.fsPath;
