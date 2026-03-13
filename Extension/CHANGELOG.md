@@ -5,7 +5,6 @@
 * Fix an incorrect warning message with `c_cpp_properties.json` squiggles. [PR #14265](https://github.com/microsoft/vscode-cpptools/pull/14265)
 * Fix cpptools getting stuck if DevTools sends a workspace symbol request when the database is empty. [#14268](https://github.com/microsoft/vscode-cpptools/issues/14268)
 * Update clang-tidy and clang-format from 22.1.0 to 22.1.1 (bug fixes).
-* Various other internal changes.
 
 ## Version 1.31.1: March 10, 2026
 ### Enhancements
