@@ -311,6 +311,7 @@ export interface GetDocumentSymbolRequestParams {
 
 export interface WorkspaceSymbolParams extends WorkspaceFolderParams {
     query: string;
+    experimentEnabled?: boolean;
 }
 
 export enum SymbolScope {
