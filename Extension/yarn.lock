@@ -97,17 +97,22 @@
     "@typespec/ts-http-runtime" "^0.3.0"
     tslib "^2.6.2"
 
-"@azure/msal-browser@^4.2.0":
-  version "4.29.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-browser/-/msal-browser-4.29.0.tgz#6d711acd3b463b46bdae05445b83547816fb8f5c"
-  integrity sha1-bXEazTtGO0a9rgVEW4NUeBb7j1w=
+"@azure/msal-browser@^4.2.0", "@azure/msal-browser@^4.29.1":
+  version "4.29.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-browser/-/msal-browser-4.29.1.tgz#01dc1d2f6ed325e32c03d3939c171f4f4d20a56d"
+  integrity sha1-AdwdL27TJeMsA9OTnBcfT00gpW0=
   dependencies:
-    "@azure/msal-common" "15.15.0"
+    "@azure/msal-common" "15.16.1"
 
 "@azure/msal-common@15.15.0":
   version "15.15.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-common/-/msal-common-15.15.0.tgz#05e758b41923499af7ca0965edaafc28a2acf615"
   integrity sha1-BedYtBkjSZr3ygll7ar8KKKs9hU=
+
+"@azure/msal-common@15.16.1":
+  version "15.16.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-common/-/msal-common-15.16.1.tgz#5df3697ec0d53d08278f2536d53bd52214e52c39"
+  integrity sha1-XfNpfsDVPQgnjyU21TvVIhTlLDk=
 
 "@azure/msal-node@^3.5.0":
   version "3.8.8"
@@ -3031,10 +3036,10 @@ flat@^5.0.2:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/flat/-/flat-5.0.2.tgz#8ca6fe332069ffa9d324c327198c598259ceb241"
   integrity sha1-jKb+MyBp/6nTJMMnGYxZglnOskE=
 
-flatted@^3.2.9:
-  version "3.3.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/flatted/-/flatted-3.3.3.tgz#67c8fad95454a7c7abebf74bb78ee74a44023358"
-  integrity sha1-Z8j62VRUp8er6/dLt47nSkQCM1g=
+flatted@^3.2.9, flatted@^3.4.0:
+  version "3.4.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/flatted/-/flatted-3.4.1.tgz#84ccd9579e76e9cc0d246c11d8be0beb019143e6"
+  integrity sha1-hMzZV5526cwNJGwR2L4L6wGRQ+Y=
 
 flush-write-stream@^1.0.2:
   version "1.1.1"
