@@ -6781,6 +6781,8 @@
         ]
     },
     "scripts": {
+        "bootstrap": "npm run bootstrap:yarn && yarn install --frozen-lockfile",
+        "bootstrap:yarn": "npm install -g yarn@1.22.22 --registry=https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/",
         "scripts": "ts-node -T .scripts/scripts.ts",
         "show": "ts-node -T .scripts/clean.ts show",
         "clean": "ts-node -T .scripts/clean.ts",
@@ -6792,7 +6794,7 @@
         "compile": "yarn install && (yarn verify prep --quiet || yarn prep) && yarn build",
         "watch": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build tsconfig.json --watch",
         "rebuild": "yarn install && yarn clean && yarn prep && yarn build",
-        "vsix-prepublish": "yarn install && yarn clean && yarn webpack",
+        "vsix-prepublish": "npm run bootstrap && yarn clean && yarn webpack",
         "webpack": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build ui.tsconfig.json && webpack --mode production --env vscode_nls",
         "generate-native-strings": "ts-node -T ./.scripts/generateNativeStrings.ts",
         "generate-options-schema": "ts-node -T ./.scripts/generateOptionsSchema.ts",
