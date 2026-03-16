@@ -61,7 +61,7 @@ extends:
     featureFlags:
       autoBaseline: false
     settings:
-      networkIsolationPolicy: Permissive,CFSClean,CFSClean2
+      networkIsolationPolicy: Permissive
 
     stages:
     - stage: build
