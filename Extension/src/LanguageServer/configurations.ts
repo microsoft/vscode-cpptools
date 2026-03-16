@@ -254,7 +254,7 @@ export class CppProperties {
         // to the language server until the default include paths and frameworks have been sent.
 
         const configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
-        if (this.rootUri !== null && fs.existsSync(configFilePath)) {
+        if (this.rootUri !== null && util.checkFileExistsSync(configFilePath)) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
         } else {
             this.propertiesFile = null;
@@ -481,9 +481,9 @@ export class CppProperties {
                     list.forEach((entry) => {
                         if (entry !== "vcpkg") {
                             const pathToCheck: string = path.join(vcpkgRoot, entry);
-                            if (fs.existsSync(pathToCheck)) {
+                            if (util.checkDirectoryExistsSync(pathToCheck)) {
                                 let p: string = path.join(pathToCheck, "include");
-                                if (fs.existsSync(p)) {
+                                if (util.checkDirectoryExistsSync(p)) {
                                     p = p.replace(/\\/g, "/");
                                     p = p.replace(vcpkgRoot, "${vcpkgRoot}");
                                     this.vcpkgIncludes.push(p);
@@ -1171,7 +1171,7 @@ export class CppProperties {
             this.configurationJson.configurations.forEach(c => {
                 c.compileCommands?.forEach((path: string) => {
                     const compileCommandsFile: string = this.resolvePath(path);
-                    if (fs.existsSync(compileCommandsFile)) {
+                    if (util.checkFileExistsSync(compileCommandsFile)) {
                         filePaths.add(compileCommandsFile);
                     }
                 });
