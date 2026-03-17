@@ -52,7 +52,7 @@ The `launch.json` entries now specify a `preLaunchTask` that will build the exte
 the `yarn watch` command, and will wait until the build is ready. The watch command will continue to watch from 
 that point.
 
-If the extension is already built, the the watch will be very quick.
+If the extension is already built, the watch will be very quick.
 
 ### From Inside VS Code
 There are two tasks that can be run from inside VS Code to build the extension.

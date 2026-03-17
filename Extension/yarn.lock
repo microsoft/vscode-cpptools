@@ -97,17 +97,22 @@
     "@typespec/ts-http-runtime" "^0.3.0"
     tslib "^2.6.2"
 
-"@azure/msal-browser@^4.2.0":
-  version "4.29.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-browser/-/msal-browser-4.29.0.tgz#6d711acd3b463b46bdae05445b83547816fb8f5c"
-  integrity sha1-bXEazTtGO0a9rgVEW4NUeBb7j1w=
+"@azure/msal-browser@^4.2.0", "@azure/msal-browser@^4.29.1":
+  version "4.29.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-browser/-/msal-browser-4.29.1.tgz#01dc1d2f6ed325e32c03d3939c171f4f4d20a56d"
+  integrity sha1-AdwdL27TJeMsA9OTnBcfT00gpW0=
   dependencies:
-    "@azure/msal-common" "15.15.0"
+    "@azure/msal-common" "15.16.1"
 
 "@azure/msal-common@15.15.0":
   version "15.15.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-common/-/msal-common-15.15.0.tgz#05e758b41923499af7ca0965edaafc28a2acf615"
   integrity sha1-BedYtBkjSZr3ygll7ar8KKKs9hU=
+
+"@azure/msal-common@15.16.1":
+  version "15.16.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-common/-/msal-common-15.16.1.tgz#5df3697ec0d53d08278f2536d53bd52214e52c39"
+  integrity sha1-XfNpfsDVPQgnjyU21TvVIhTlLDk=
 
 "@azure/msal-node@^3.5.0":
   version "3.8.8"
@@ -3031,10 +3036,10 @@ flat@^5.0.2:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/flat/-/flat-5.0.2.tgz#8ca6fe332069ffa9d324c327198c598259ceb241"
   integrity sha1-jKb+MyBp/6nTJMMnGYxZglnOskE=
 
-flatted@^3.2.9:
-  version "3.3.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/flatted/-/flatted-3.3.3.tgz#67c8fad95454a7c7abebf74bb78ee74a44023358"
-  integrity sha1-Z8j62VRUp8er6/dLt47nSkQCM1g=
+flatted@^3.2.9, flatted@^3.4.1:
+  version "3.4.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/flatted/-/flatted-3.4.1.tgz#84ccd9579e76e9cc0d246c11d8be0beb019143e6"
+  integrity sha1-hMzZV5526cwNJGwR2L4L6wGRQ+Y=
 
 flush-write-stream@^1.0.2:
   version "1.1.1"
@@ -5125,13 +5130,6 @@ queue-microtask@^1.2.2:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha1-SSkii7xyTfrEPg77BYyve2z7YkM=
 
-randombytes@^2.1.0:
-  version "2.1.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/randombytes/-/randombytes-2.1.0.tgz#df6f84372f0270dc65cdf6291349ab7a473d4f2a"
-  integrity sha1-32+ENy8CcNxlzfYpE0mrekc9Tyo=
-  dependencies:
-    safe-buffer "^5.1.0"
-
 rc-config-loader@^4.1.3:
   version "4.1.4"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/rc-config-loader/-/rc-config-loader-4.1.4.tgz#6cc79042ac193ebed9f082fcba7b823d9dc143cc"
@@ -5450,12 +5448,10 @@ semver@^7.3.4, semver@^7.3.5, semver@^7.3.7, semver@^7.5.2, semver@^7.5.4, semve
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/semver/-/semver-7.7.4.tgz#28464e36060e991fa7a11d0279d2d3f3b57a7e8a"
   integrity sha1-KEZONgYOmR+noR0CedLT87V6foo=
 
-serialize-javascript@^6.0.2:
-  version "6.0.2"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/serialize-javascript/-/serialize-javascript-6.0.2.tgz#defa1e055c83bf6d59ea805d8da862254eb6a6c2"
-  integrity sha1-3voeBVyDv21Z6oBdjahiJU62psI=
-  dependencies:
-    randombytes "^2.1.0"
+serialize-javascript@^6.0.2, serialize-javascript@^7.0.4:
+  version "7.0.4"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/serialize-javascript/-/serialize-javascript-7.0.4.tgz#c517735bd5b7631dd1fc191ee19cbb713ff8e05c"
+  integrity sha1-xRdzW9W3Yx3R/Bke4Zy7cT/44Fw=
 
 set-function-length@^1.2.2:
   version "1.2.2"
@@ -6284,9 +6280,9 @@ undici-types@~7.18.0:
   integrity sha1-KTV6iee3ykrvO/D9P9DNc4hCKek=
 
 undici@^7.19.0:
-  version "7.22.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/undici/-/undici-7.22.0.tgz#7a82590a5908e504a47d85c60b0f89ca14240e60"
-  integrity sha1-eoJZClkI5QSkfYXGCw+JyhQkDmA=
+  version "7.24.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/undici/-/undici-7.24.0.tgz#c7349cdede0db44226b5930783b11207831a5eaf"
+  integrity sha1-xzSc3t4NtEImtZMHg7ESB4MaXq8=
 
 unicorn-magic@^0.1.0:
   version "0.1.0"
