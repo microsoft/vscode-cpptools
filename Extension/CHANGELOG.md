@@ -1,5 +1,11 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.31.2: March 17, 2026
+### Bug Fixes
+* Fix an incorrect warning message with `c_cpp_properties.json` squiggles. [PR #14265](https://github.com/microsoft/vscode-cpptools/pull/14265)
+* Fix cpptools getting stuck if C/C++ DevTools sends a workspace symbol request when the database is empty. [#14268](https://github.com/microsoft/vscode-cpptools/issues/14268)
+* Update clang-tidy and clang-format from 22.1.0 to 22.1.1 (bug fixes).
+
 ## Version 1.31.1: March 10, 2026
 ### Enhancements
 * Update clang-tidy and clang-format from 21.1.4 to 22.1.0.

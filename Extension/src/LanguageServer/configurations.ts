@@ -1672,10 +1672,10 @@ export class CppProperties {
         if (!isCl && compilerPathAndArgs.compilerPath) {
             const compilerPathMayNeedQuotes: boolean = !resolvedCompilerPath.startsWith('"') && resolvedCompilerPath.includes(" ") && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0;
             let pathExists: boolean = true;
-            const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && util.checkFileExistsSync(path + ".exe");
+            const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
 
             resolvedCompilerPath = compilerPathAndArgs.compilerPath;
-            if (!util.checkFileExistsSync(resolvedCompilerPath)) {
+            if (!fs.existsSync(resolvedCompilerPath)) {
                 if (existsWithExeAdded(resolvedCompilerPath)) {
                     resolvedCompilerPath += ".exe";
                 } else {
@@ -1686,7 +1686,7 @@ export class CppProperties {
                     } else if (rootUri) {
                         // Test if it was a relative path.
                         const absolutePath: string = rootUri.fsPath + path.sep + resolvedCompilerPath;
-                        if (!util.checkFileExistsSync(absolutePath)) {
+                        if (!fs.existsSync(absolutePath)) {
                             if (existsWithExeAdded(absolutePath)) {
                                 resolvedCompilerPath = absolutePath + ".exe";
                             } else {
