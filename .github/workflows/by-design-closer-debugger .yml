@@ -18,7 +18,7 @@ jobs:
       issues: write
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install Actions
         run: cd ./.github/actions && npm install --production && cd ../..
       - name: Stale Closer
