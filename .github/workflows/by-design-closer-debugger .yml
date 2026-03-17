@@ -8,6 +8,9 @@ on:
        description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
        default: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   main:
     runs-on: ubuntu-latest
