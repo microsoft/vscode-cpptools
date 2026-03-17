@@ -16,7 +16,7 @@
 * Fix three IntelliSense process crashes.
 * Fix some missing translations.
 
-## Version 1.30.5: February 9. 2026
+## Version 1.30.5: February 9, 2026
 ### Bug Fix
 * Fix a potential language server deadlock after editing code.
 
