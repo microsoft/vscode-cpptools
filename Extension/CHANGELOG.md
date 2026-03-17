@@ -1,33 +1,20 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.31.2: March 17, 2026
-### Bug Fixes
-* Fix an incorrect warning message with `c_cpp_properties.json` squiggles. [PR #14265](https://github.com/microsoft/vscode-cpptools/pull/14265)
-* Fix cpptools getting stuck if C/C++ DevTools sends a workspace symbol request when the database is empty. [#14268](https://github.com/microsoft/vscode-cpptools/issues/14268)
-* Update clang-tidy and clang-format from 22.1.0 to 22.1.1 (bug fixes).
-
-## Version 1.31.1: March 10, 2026
-### Enhancements
-* Update clang-tidy and clang-format from 21.1.4 to 22.1.0.
-* Update support for the latest compiler versions.
-
-### Bug Fixes
-* Fix workspace symbol search with `scope::variable` not working after symbols are deleted and then added back. [#14200](https://github.com/microsoft/vscode-cpptools/issues/14200)
-* Fix bugs where a path was checked for existence but not whether it was a file or a folder. [#14257](https://github.com/microsoft/vscode-cpptools/issues/14257)
-* Add IntelliSense support for `__builtin_is_implicit_lifetime`.
-* Fix three IntelliSense process crashes.
-* Fix a bug with `-embed-directory`.
-* Add some missing translations.
-
-## Version 1.31.0: February 19, 2026
-### Enhancements
+## Version 1.31.3: March 23, 2026
 * Add support for `program` in attach debug configurations. [#14046](https://github.com/microsoft/vscode-cpptools/issues/14046)
   * Thanks for the contribution. [@Subham-KRLX (Subham)](https://github.com/Subham-KRLX) [PR #14108](https://github.com/microsoft/vscode-cpptools/pull/14108)
+* Update clang-tidy and clang-format from 21.1.4 to 22.1.1.
+* Update support for the latest compiler versions.
 * Update SQLite to the latest version.
 
 ### Bug Fixes
 * Fix an IntelliSense error with deducing `this` (explicit object member functions) with conversion operators. [#14140](https://github.com/microsoft/vscode-cpptools/issues/14140)
 * Fix `embed-dir` compiler arguments not being handled for IntelliSense. [#14154](https://github.com/microsoft/vscode-cpptools/issues/14154)
+* Fix workspace symbol search with `scope::variable` not working after symbols are deleted and then added back. [#14200](https://github.com/microsoft/vscode-cpptools/issues/14200)
+* Fix bugs where a path was checked for existence but not whether it was a file or a folder. [#14257](https://github.com/microsoft/vscode-cpptools/issues/14257)
+* Add IntelliSense support for `__builtin_is_implicit_lifetime`.
+* Fix three IntelliSense process crashes.
+* Fix some missing translations.
 
 ## Version 1.30.5: February 9. 2026
 ### Bug Fix
