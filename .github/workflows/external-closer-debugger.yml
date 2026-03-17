@@ -18,7 +18,7 @@ jobs:
       issues: write
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install Actions
         run: cd ./.github/actions && npm install --production && cd ../..
       - name: Stale Closer
@@ -29,3 +29,4 @@ jobs:
           ignoreLabels: Language Service,internal
           closeDays: 0
           closeComment: "This issue has been closed because it is external or not applicable to the extension."
+

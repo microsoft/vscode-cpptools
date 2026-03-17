@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ inputs.runner-env }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Use Node.js 24
         uses: actions/setup-node@v4
@@ -82,3 +82,4 @@ jobs:
       #   with:
       #     run: yarn test --scenario=MultirootDeadlockTest
       #     working-directory: Extension
+

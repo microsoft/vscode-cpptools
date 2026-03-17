@@ -18,7 +18,7 @@ jobs:
       issues: write
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install Actions
         run: cd ./.github/actions && npm install --production && cd ../..
       - name: Run Locker
@@ -28,3 +28,4 @@ jobs:
           daysSinceClose: 45
           daysSinceUpdate: 3
           ignoreLabels: more votes needed,debugger,internal
+
