@@ -8,6 +8,9 @@ on:
        description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
        default: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -15,7 +18,7 @@ jobs:
       issues: write
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
       - name: Install Actions
         run: cd ./.github/actions && npm install --production && cd ../..
       - name: Run Reopener
@@ -31,3 +34,4 @@ jobs:
           milestoneName: Triage
           setMilestoneId: 28
           removeLabels: more votes needed
+
