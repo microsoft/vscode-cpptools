@@ -43,5 +43,5 @@ inputs:
   readonly:
     description: If true, changes are not applied.
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'index.js'
