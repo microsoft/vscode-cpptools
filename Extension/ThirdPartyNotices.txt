@@ -1765,6 +1765,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 core-util-is 1.0.3 - MIT
 https://github.com/isaacs/core-util-is#readme
 
+Copyright Node.js contributors
 Copyright Joyent, Inc. and other Node contributors
 
 Copyright Node.js contributors. All rights reserved.
@@ -2598,6 +2599,7 @@ merge2 1.4.1 - MIT
 https://github.com/teambition/merge2
 
 Copyright (c) 2014-2020 Teambition
+(c) Teambition (https://www.teambition.com)
 
 The MIT License (MIT)
 
