@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.32.0: March 25, 2026
+### Bug Fix
+* Set `C_Cpp.copilotHover` to `disabled` by default due to several reported VS Code (Copilot) bugs. [#14168](https://github.com/microsoft/vscode-cpptools/issues/14168), [#14211](https://github.com/microsoft/vscode-cpptools/issues/14211), [#14241](https://github.com/microsoft/vscode-cpptools/issues/14241)
+
 ## Version 1.31.3: March 24, 2026
 ### Enhancements
 * Add support for `program` in attach debug configurations. [#14046](https://github.com/microsoft/vscode-cpptools/issues/14046)
