@@ -4974,14 +4974,14 @@ picocolors@^1.1.1:
   integrity sha1-PTIa8+q5ObCDyPkpodEs2oHCa2s=
 
 picomatch@^2.0.4, picomatch@^2.2.1, picomatch@^2.3.1:
-  version "2.3.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
-  integrity sha1-O6ODNzNkbZ0+SZWUbBNlpn+wekI=
+  version "2.3.2"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/picomatch/-/picomatch-2.3.2.tgz#5a942915e26b372dc0f0e6753149a16e6b1c5601"
+  integrity sha1-WpQpFeJrNy3A8OZ1MUmhbmscVgE=
 
 picomatch@^4.0.3:
-  version "4.0.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/picomatch/-/picomatch-4.0.3.tgz#796c76136d1eead715db1e7bad785dedd695a042"
-  integrity sha1-eWx2E20e6tcV2x57rXhd7daVoEI=
+  version "4.0.4"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/picomatch/-/picomatch-4.0.4.tgz#fd6f5e00a143086e074dffe4c924b8fb293b0589"
+  integrity sha1-/W9eAKFDCG4HTf/kySS4+yk7BYk=
 
 pkg-dir@^4.2.0:
   version "4.2.0"
