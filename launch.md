@@ -1,1 +1,3 @@
-The documentation for debug configuration has moved to https://code.visualstudio.com/docs/cpp/launch-json-reference.
+# Debug Configuration
+
+The documentation for debug configuration has moved to <https://code.visualstudio.com/docs/cpp/launch-json-reference>.
