@@ -1746,6 +1746,21 @@ export class DefaultClient implements Client {
             // TODO: should I set the output channel? Does this sort output between servers?
         };
 
+        // Reset all UI state to default, in case this is a restart after a crash.
+        this.model.isIndexingWorkspace.Value = false;
+        this.model.isParsingWorkspace.Value = false;
+        this.model.isParsingWorkspacePaused.Value = false;
+        this.model.isParsingFiles.Value = false;
+        this.model.isUpdatingIntelliSense.Value = false;
+        this.model.isRunningCodeAnalysis.Value = false;
+        this.model.isCodeAnalysisPaused.Value = false;
+        this.model.codeAnalysisProcessed.Value = 0;
+        this.model.codeAnalysisTotal.Value = 0;
+        this.model.parsingWorkspaceStatus.Value = "";
+
+        // Refresh initializing state in UI.
+        this.model.isInitializingWorkspace.Value = true;
+
         // Create the language client
         languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
         languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
