@@ -17,7 +17,7 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
-import { isWindows, modelSelector } from '../constants';
+import { isWindows } from '../constants';
 import { instrument } from '../instrumentation';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
@@ -1471,8 +1471,12 @@ async function onCopilotHover(): Promise<void> {
 
     let chatResponse: vscode.LanguageModelChatResponse | undefined;
     try {
-        // Select the chat model.
-        const [model] = await vscodelm.selectChatModels(modelSelector);
+        // Select the chat model (refresh from cache).
+        const model = await copilotHoverProvider.refreshCachedChatModel();
+        if (!model) {
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, "Copilot model not available.");
+            return;
+        }
 
         chatResponse = await model.sendRequest(
             messages,

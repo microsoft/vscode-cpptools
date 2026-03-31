@@ -466,7 +466,6 @@ ${copilotCompletionContext?.areSnippetsMissing ? "(missing code snippets)" : ""}
                 throw new CopilotContextProviderException("getContextProviderAPI() is not available in Copilot Chat.");
             }
         }).catch((e) => {
-            console.debug("Failed to register the Copilot Context Provider with Copilot Chat.");
             let message = "Failed to register the Copilot Context Provider with Copilot Chat";
             if (e instanceof CopilotContextProviderException) {
                 message += `: ${e.message} `;
@@ -500,7 +499,6 @@ ${copilotCompletionContext?.areSnippetsMissing ? "(missing code snippets)" : ""}
                     throw new CopilotContextProviderException("getContextProviderAPI() is not available in Copilot client.");
                 }
             }).catch((e) => {
-                console.debug("Failed to register the Copilot Context Provider with Copilot client.");
                 let message = "Failed to register the Copilot Context Provider with Copilot client";
                 if (e instanceof CopilotContextProviderException) {
                     message += `: ${e.message} `;

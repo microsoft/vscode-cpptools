@@ -35,15 +35,20 @@
 ### Required Tools 
 
 * [Node.js](https://nodejs.org/en/download/) v16.*
-* Yarn - use `npm install -g yarn` to install
+* npm (comes with Node.js)
 
 ### Setting up the repository
 
 `git clone https://github.com/microsoft/vscode-cpptools.git`
 
-`yarn install`
+`cd vscode-cpptools/Extension`
 
-It's also good practice to run `yarn install` after merging from upstream or switching branches. 
+`npm run bootstrap`
+
+`npm run bootstrap` installs Yarn `1.22.22` globally from the internal npm feed and then runs `yarn install --frozen-lockfile`.
+On some systems, global npm install may require elevated permissions.
+
+It's also good practice to run `npm run bootstrap` after merging from upstream or switching branches. 
 
 ## Building the Extension
 
@@ -336,4 +341,4 @@ This will use webpack to build the extension. This is only necessary when packag
 
 Installs the VS Code `*.d.ts` files and then runs `yarn prep`
 
-You should run `yarn install` after merging from upstream or switching branches. 
+You should run `npm run bootstrap` after merging from upstream or switching branches. 
