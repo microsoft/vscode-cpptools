@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.31.4: March 31, 2026
+### Bug Fix
+* Debugging cpptools and cpptools-srv processes on macOS (to get call stacks) is now blocked when SIP is enabled (due to a potential security issue).
+
 ## Version 1.31.3: March 24, 2026
 ### Enhancements
 * Add support for `program` in attach debug configurations. [#14046](https://github.com/microsoft/vscode-cpptools/issues/14046)
