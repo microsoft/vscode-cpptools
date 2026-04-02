@@ -97,17 +97,22 @@
     "@typespec/ts-http-runtime" "^0.3.0"
     tslib "^2.6.2"
 
-"@azure/msal-browser@^4.2.0":
-  version "4.29.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-browser/-/msal-browser-4.29.0.tgz#6d711acd3b463b46bdae05445b83547816fb8f5c"
-  integrity sha1-bXEazTtGO0a9rgVEW4NUeBb7j1w=
+"@azure/msal-browser@^4.2.0", "@azure/msal-browser@^4.29.1":
+  version "4.29.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-browser/-/msal-browser-4.29.1.tgz#01dc1d2f6ed325e32c03d3939c171f4f4d20a56d"
+  integrity sha1-AdwdL27TJeMsA9OTnBcfT00gpW0=
   dependencies:
-    "@azure/msal-common" "15.15.0"
+    "@azure/msal-common" "15.16.1"
 
 "@azure/msal-common@15.15.0":
   version "15.15.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-common/-/msal-common-15.15.0.tgz#05e758b41923499af7ca0965edaafc28a2acf615"
   integrity sha1-BedYtBkjSZr3ygll7ar8KKKs9hU=
+
+"@azure/msal-common@15.16.1":
+  version "15.16.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-common/-/msal-common-15.16.1.tgz#5df3697ec0d53d08278f2536d53bd52214e52c39"
+  integrity sha1-XfNpfsDVPQgnjyU21TvVIhTlLDk=
 
 "@azure/msal-node@^3.5.0":
   version "3.8.8"
@@ -1742,24 +1747,24 @@ boundary@^2.0.0:
   integrity sha1-FpyLHw1Ezywlk4lnoyjzfgpOXvw=
 
 brace-expansion@^1.1.7:
-  version "1.1.12"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-1.1.12.tgz#ab9b454466e5a8cc3a187beaad580412a9c5b843"
-  integrity sha1-q5tFRGblqMw6GHvqrVgEEqnFuEM=
+  version "1.1.13"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-1.1.13.tgz#d37875c01dc9eff988dd49d112a57cb67b54efe6"
+  integrity sha1-03h1wB3J7/mI3UnREqV8tntU7+Y=
   dependencies:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
 
 brace-expansion@^2.0.1:
-  version "2.0.2"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-2.0.2.tgz#54fc53237a613d854c7bd37463aad17df87214e7"
-  integrity sha1-VPxTI3phPYVMe9N0Y6rRffhyFOc=
+  version "2.0.3"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-2.0.3.tgz#0493338bdd58e319b1039c67cf7ee439892c01d9"
+  integrity sha1-BJMzi91Y4xmxA5xnz37kOYksAdk=
   dependencies:
     balanced-match "^1.0.0"
 
 brace-expansion@^5.0.2:
-  version "5.0.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-5.0.3.tgz#6a9c6c268f85b53959ec527aeafe0f7300258eef"
-  integrity sha1-apxsJo+FtTlZ7FJ66v4PcwAlju8=
+  version "5.0.5"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-5.0.5.tgz#dcc3a37116b79f3e1b46db994ced5d570e930fdb"
+  integrity sha1-3MOjcRa3nz4bRtuZTO1dVw6TD9s=
   dependencies:
     balanced-match "^4.0.2"
 
@@ -3031,10 +3036,10 @@ flat@^5.0.2:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/flat/-/flat-5.0.2.tgz#8ca6fe332069ffa9d324c327198c598259ceb241"
   integrity sha1-jKb+MyBp/6nTJMMnGYxZglnOskE=
 
-flatted@^3.2.9:
-  version "3.3.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/flatted/-/flatted-3.3.3.tgz#67c8fad95454a7c7abebf74bb78ee74a44023358"
-  integrity sha1-Z8j62VRUp8er6/dLt47nSkQCM1g=
+flatted@^3.2.9, flatted@^3.4.1:
+  version "3.4.2"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/flatted/-/flatted-3.4.2.tgz#f5c23c107f0f37de8dbdf24f13722b3b98d52726"
+  integrity sha1-9cI8EH8PN96NvfJPE3IrO5jVJyY=
 
 flush-write-stream@^1.0.2:
   version "1.1.1"
@@ -4969,14 +4974,14 @@ picocolors@^1.1.1:
   integrity sha1-PTIa8+q5ObCDyPkpodEs2oHCa2s=
 
 picomatch@^2.0.4, picomatch@^2.2.1, picomatch@^2.3.1:
-  version "2.3.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
-  integrity sha1-O6ODNzNkbZ0+SZWUbBNlpn+wekI=
+  version "2.3.2"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/picomatch/-/picomatch-2.3.2.tgz#5a942915e26b372dc0f0e6753149a16e6b1c5601"
+  integrity sha1-WpQpFeJrNy3A8OZ1MUmhbmscVgE=
 
 picomatch@^4.0.3:
-  version "4.0.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/picomatch/-/picomatch-4.0.3.tgz#796c76136d1eead715db1e7bad785dedd695a042"
-  integrity sha1-eWx2E20e6tcV2x57rXhd7daVoEI=
+  version "4.0.4"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/picomatch/-/picomatch-4.0.4.tgz#fd6f5e00a143086e074dffe4c924b8fb293b0589"
+  integrity sha1-/W9eAKFDCG4HTf/kySS4+yk7BYk=
 
 pkg-dir@^4.2.0:
   version "4.2.0"
@@ -5443,10 +5448,10 @@ semver@^7.3.4, semver@^7.3.5, semver@^7.3.7, semver@^7.5.2, semver@^7.5.4, semve
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/semver/-/semver-7.7.4.tgz#28464e36060e991fa7a11d0279d2d3f3b57a7e8a"
   integrity sha1-KEZONgYOmR+noR0CedLT87V6foo=
 
-serialize-javascript@^6.0.2, serialize-javascript@^7.0.4:
-  version "7.0.4"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/serialize-javascript/-/serialize-javascript-7.0.4.tgz#c517735bd5b7631dd1fc191ee19cbb713ff8e05c"
-  integrity sha1-xRdzW9W3Yx3R/Bke4Zy7cT/44Fw=
+serialize-javascript@^6.0.2, serialize-javascript@^7.0.5:
+  version "7.0.5"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/serialize-javascript/-/serialize-javascript-7.0.5.tgz#c798cc0552ffbb08981914a42a8756e339d0d5b1"
+  integrity sha1-x5jMBVL/uwiYGRSkKodW4znQ1bE=
 
 set-function-length@^1.2.2:
   version "1.2.2"
@@ -6275,9 +6280,9 @@ undici-types@~7.18.0:
   integrity sha1-KTV6iee3ykrvO/D9P9DNc4hCKek=
 
 undici@^7.19.0:
-  version "7.22.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/undici/-/undici-7.22.0.tgz#7a82590a5908e504a47d85c60b0f89ca14240e60"
-  integrity sha1-eoJZClkI5QSkfYXGCw+JyhQkDmA=
+  version "7.24.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/undici/-/undici-7.24.0.tgz#c7349cdede0db44226b5930783b11207831a5eaf"
+  integrity sha1-xzSc3t4NtEImtZMHg7ESB4MaXq8=
 
 unicorn-magic@^0.1.0:
   version "0.1.0"

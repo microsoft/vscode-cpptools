@@ -14,17 +14,20 @@ on:
       yarn-args:
         type: string
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ${{ inputs.runner-env }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Install Dependencies
         run: yarn install ${{ inputs.yarn-args }}
@@ -79,3 +82,4 @@ jobs:
       #   with:
       #     run: yarn test --scenario=MultirootDeadlockTest
       #     working-directory: Extension
+
