@@ -117,7 +117,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         if (platform === 'win32') {
             cp.spawn('cmd.exe', ['/c', 'start', 'cmd.exe', '/K', cmdLine], { cwd, env, detached: true, stdio: 'ignore' }).unref();
         } else if (platform === 'darwin') {
-            cp.spawn('osascript', ['-e', `tell application "Terminal" to do script "${cmdLine.replace(/"/g, '\\"')}"`], { cwd, env, detached: true, stdio: 'ignore' }).unref();
+            cp.spawn('osascript', ['-e', `tell application "Terminal" to do script "${this.escapeQuotes(cmdLine)}"`], { cwd, env, detached: true, stdio: 'ignore' }).unref();
         } else if (platform === 'linux' && sessionIsWsl()) {
             cp.spawn('/mnt/c/Windows/System32/cmd.exe', ['/c', 'start', 'bash', '-c', `${cmdLine};read -p 'Press enter to continue...'`], { env, detached: true, stdio: 'ignore' }).unref();
         } else { // platform === 'linux'
@@ -186,8 +186,12 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         });
     }
 
+    private escapeQuotes(arg: string): string {
+        return arg.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    }
+
     private quoteArg(arg: string): string {
-        return /\s/.test(arg) ? `"${arg.replace(/"/g, '\\"')}"` : arg;
+        return /\s/.test(arg) ? `"${this.escapeQuotes(arg)}"` : arg;
     }
 
     private sendResponse(request: { command: string; seq: number; }, body: object): void {
