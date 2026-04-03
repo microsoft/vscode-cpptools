@@ -41,7 +41,13 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         const vscodelm = getVSCodeLanguageModel();
         if (vscodelm) {
             try {
-                const [model] = await vscodelm.selectChatModels(modelSelector);
+                // First look for GPT-5-mini which should be available to all
+                // users and have a 0x multiplier on paid plans.
+                let [model] = await vscodelm.selectChatModels({ ...modelSelector, id: 'gpt-5-mini' });
+                if (!model) {
+                    // If GPT-5-mini is not available, fall back to the first available model
+                    [model] = await vscodelm.selectChatModels(modelSelector);
+                }
                 if (!model) {
                     telemetry.logLanguageServerEvent('CopilotHoverNoModelSelected', { remoteName: vscode.env.remoteName || 'local' });
                 } else {
