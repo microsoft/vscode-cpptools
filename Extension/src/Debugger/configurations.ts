@@ -97,7 +97,7 @@ function createLaunchString(name: string, type: string, executable: string): str
 "stopAtEntry": false,
 "cwd": "$\{fileDirname\}",
 "environment": [],
-${ type === "cppdbg" ? `"externalConsole": false` : `"console": "externalTerminal"` }
+${ type === "cppdbg" ? `"externalConsole": false` : `"console": "integratedTerminal"` }
 `;
 }
 

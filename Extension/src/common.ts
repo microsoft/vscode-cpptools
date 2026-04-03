@@ -1850,3 +1850,14 @@ export function getVSCodeLanguageModel(): any | undefined {
     }
     return vscodelm;
 }
+
+export function sessionIsWsl(): boolean {
+    if (process.env.WSL_DISTRO_NAME) {
+        return true;
+    }
+    try {
+        return fs.readFileSync('/proc/version', 'utf8').toLowerCase().includes('microsoft');
+    } catch {
+        return false;
+    }
+}

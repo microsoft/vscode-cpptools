@@ -7,6 +7,7 @@ import * as cp from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { sessionIsWsl } from '../common';
 
 /**
  * A minimal inline Debug Adapter that runs the target program directly without a debug adapter
@@ -56,13 +57,14 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             cwd?: string;
             environment?: { name: string; value: string; }[];
             console?: string;
+            externalConsole?: boolean;
         };
 
         const program: string = config.program ?? '';
         const args: string[] = config.args ?? [];
         const cwd: string | undefined = config.cwd;
         const environment: { name: string; value: string; }[] = config.environment ?? [];
-        const consoleMode: string = config.console ?? 'integratedTerminal';
+        const consoleMode: string = config.console ?? (config.externalConsole ? 'externalTerminal' : 'integratedTerminal');
 
         // Merge the launch config's environment variables on top of the inherited process environment.
         const env: NodeJS.ProcessEnv = { ...process.env };
@@ -112,8 +114,10 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             cp.spawn('cmd.exe', ['/c', 'start', 'cmd.exe', '/K', cmdLine], { cwd, env, detached: true, stdio: 'ignore' }).unref();
         } else if (platform === 'darwin') {
             cp.spawn('osascript', ['-e', `tell application "Terminal" to do script "${cmdLine.replace(/"/g, '\\"')}"`], { cwd, env, detached: true, stdio: 'ignore' }).unref();
-        } else {
-            cp.spawn('x-terminal-emulator', ['-e', cmdLine], { cwd, env, detached: true, stdio: 'ignore' }).unref();
+        } else if (platform === 'linux' && sessionIsWsl()) {
+            cp.spawn('/mnt/c/Windows/System32/cmd.exe', ['/c', 'start', 'bash', '-c', `${cmdLine};read -p 'Press enter to continue...'`], { env, detached: true, stdio: 'ignore' }).unref();
+        } else { // platform === 'linux'
+            cp.spawn('bash', ['-c', `${cmdLine};read -p 'Press enter to continue...'`], { cwd, env, detached: true, stdio: 'ignore' }).unref();
         }
         this.sendEvent('terminated');
     }
