@@ -183,7 +183,6 @@ function createTracker(debugType: string, sessionName: string, timeoutMs: number
 }
 
 suite('Run Without Debugging Integration Test', function (): void {
-
     suiteSetup(async function (): Promise<void> {
         const extension: vscode.Extension<any> = vscode.extensions.getExtension('ms-vscode.cpptools') || assert.fail('Extension not found');
         if (!extension.isActive) {
@@ -224,7 +223,8 @@ suite('Run Without Debugging Integration Test', function (): void {
                     program: executablePath,
                     args: [],
                     cwd: workspacePath,
-                    console: 'internalConsole'
+                    externalConsole: debugType === 'cppdbg' ? false : undefined,
+                    console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
                 },
                 { noDebug: true });
 
@@ -278,7 +278,8 @@ suite('Run Without Debugging Integration Test', function (): void {
                     program: executablePath,
                     args: [],
                     cwd: workspacePath,
-                    console: 'internalConsole'
+                    externalConsole: debugType === 'cppdbg' ? false : undefined,
+                    console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
                 },
                 { noDebug: false });
 
