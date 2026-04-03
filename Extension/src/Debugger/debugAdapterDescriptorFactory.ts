@@ -7,11 +7,12 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from "vscode";
 import * as nls from 'vscode-nls';
+import { RunWithoutDebuggingAdapter } from './runWithoutDebuggingAdapter';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-// Registers DebugAdapterDescriptorFactory for `cppdbg` and `cppvsdbg`. If it is not ready, it will prompt a wait for the download dialog.
+// Registers DebugAdapterDescriptorFactory for `cppdbg` and `cppvsdbg`.
 // NOTE: This file is not automatically tested.
 
 abstract class AbstractDebugAdapterDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
@@ -27,7 +28,11 @@ abstract class AbstractDebugAdapterDescriptorFactory implements vscode.DebugAdap
 
 export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
 
-    async createDebugAdapterDescriptor(_session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor> {
+    async createDebugAdapterDescriptor(session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor> {
+        if (session.configuration.noDebug) {
+            return new vscode.DebugAdapterInlineImplementation(new RunWithoutDebuggingAdapter());
+        }
+
         const adapter: string = "./debugAdapters/bin/OpenDebugAD7" + (os.platform() === 'win32' ? ".exe" : "");
 
         const command: string = path.join(this.context.extensionPath, adapter);
@@ -38,7 +43,11 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
 
 export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
 
-    async createDebugAdapterDescriptor(_session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor | null> {
+    async createDebugAdapterDescriptor(session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor | null> {
+        if (session.configuration.noDebug) {
+            return new vscode.DebugAdapterInlineImplementation(new RunWithoutDebuggingAdapter());
+        }
+
         if (os.platform() !== 'win32') {
             void vscode.window.showErrorMessage(localize("debugger.not.available", "Debugger type '{0}' is not available for non-Windows machines.", "cppvsdbg"));
             return null;
