@@ -20,10 +20,13 @@ const localize = nls.loadMessageBundle();
 export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     private readonly sendMessageEmitter = new vscode.EventEmitter<vscode.DebugProtocolMessage>();
     public readonly onDidSendMessage: vscode.Event<vscode.DebugProtocolMessage> = this.sendMessageEmitter.event;
+    private readonly terminalListeners: vscode.Disposable[] = [];
 
     private seq: number = 1;
     private childProcess?: cp.ChildProcess;
     private terminal?: vscode.Terminal;
+    private terminalExecution?: vscode.TerminalShellExecution;
+    private hasTerminated: boolean = false;
 
     public handleMessage(message: vscode.DebugProtocolMessage): void {
         const msg = message as { type: string; command: string; seq: number; arguments?: any; };
@@ -79,7 +82,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         this.sendResponse(request, {});
 
         if (consoleMode === 'integratedTerminal') {
-            this.launchIntegratedTerminal(program, args, cwd, env);
+            await this.launchIntegratedTerminal(program, args, cwd, env);
         } else if (consoleMode === 'externalTerminal') {
             this.launchExternalTerminal(program, args, cwd, env);
         } else {
@@ -91,8 +94,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
      * Launch the program in a VS Code integrated terminal.
      * The terminal will remain open after the program exits and be reused for the next session, if applicable.
      */
-    private launchIntegratedTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv) {
-        const shellArgs: string[] = [program, ...args].map(a => this.quoteArg(a));
+    private async launchIntegratedTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv): Promise<void> {
         const terminalName = path.normalize(program);
         const existingTerminal = vscode.window.terminals.find(t => t.name === terminalName);
         this.terminal = existingTerminal ?? vscode.window.createTerminal({
@@ -101,10 +103,21 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             env: env as Record<string, string>
         });
         this.terminal.show(true);
-        this.terminal.sendText(shellArgs.join(' '));
 
-        // The terminal manages its own lifecycle; notify VS Code the "debug" session is done.
-        this.sendEvent('terminated');
+        const shellIntegration: vscode.TerminalShellIntegration | undefined =
+            this.terminal.shellIntegration ?? await this.waitForShellIntegration(this.terminal, 3000);
+
+        // Not all terminals support shell integration. If it's not available, we'll just send the command as text though we won't be able to monitor its execution.
+        if (shellIntegration) {
+            this.monitorIntegratedTerminal(this.terminal);
+            this.terminalExecution = shellIntegration.executeCommand(program, args);
+        } else {
+            const shellArgs: string[] = [program, ...args].map(a => this.quoteArg(a));
+            this.terminal.sendText(shellArgs.join(' '));
+
+            // The terminal manages its own lifecycle; notify VS Code the "debug" session is done.
+            this.sendEvent('terminated');
+        }
     }
 
     /**
@@ -194,6 +207,65 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         return /\s/.test(arg) ? `"${this.escapeQuotes(arg)}"` : arg;
     }
 
+    private waitForShellIntegration(terminal: vscode.Terminal, timeoutMs: number): Promise<vscode.TerminalShellIntegration | undefined> {
+        return new Promise(resolve => {
+            let resolved: boolean = false;
+            const done = (shellIntegration: vscode.TerminalShellIntegration | undefined): void => {
+                if (resolved) {
+                    return;
+                }
+
+                resolved = true;
+                clearTimeout(timeout);
+                shellIntegrationChanged.dispose();
+                terminalClosed.dispose();
+                resolve(shellIntegration);
+            };
+
+            const timeout = setTimeout(() => done(undefined), timeoutMs);
+            const shellIntegrationChanged = vscode.window.onDidChangeTerminalShellIntegration(event => {
+                if (event.terminal === terminal) {
+                    done(event.shellIntegration);
+                }
+            });
+            const terminalClosed = vscode.window.onDidCloseTerminal(closedTerminal => {
+                if (closedTerminal === terminal) {
+                    done(undefined);
+                }
+            });
+        });
+    }
+
+    private monitorIntegratedTerminal(terminal: vscode.Terminal): void {
+        this.disposeTerminalListeners();
+        this.terminalListeners.push(
+            vscode.window.onDidEndTerminalShellExecution(event => {
+                if (event.terminal !== terminal || event.execution !== this.terminalExecution || this.hasTerminated) {
+                    return;
+                }
+
+                if (event.exitCode !== undefined) {
+                    this.sendEvent('exited', { exitCode: event.exitCode });
+                }
+
+                this.sendEvent('terminated');
+            }),
+            vscode.window.onDidCloseTerminal(closedTerminal => {
+                if (closedTerminal !== terminal || this.hasTerminated) {
+                    return;
+                }
+
+                this.sendEvent('terminated');
+            })
+        );
+    }
+
+    private disposeTerminalListeners(): void {
+        while (this.terminalListeners.length > 0) {
+            this.terminalListeners.pop()?.dispose();
+        }
+    }
+
     private sendResponse(request: { command: string; seq: number; }, body: object): void {
         this.sendMessageEmitter.fire({
             type: 'response',
@@ -206,6 +278,15 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     }
 
     private sendEvent(event: string, body?: object): void {
+        if (event === 'terminated') {
+            if (this.hasTerminated) {
+                return;
+            }
+
+            this.hasTerminated = true;
+            this.disposeTerminalListeners();
+        }
+
         this.sendMessageEmitter.fire({
             type: 'event',
             seq: this.seq++,
@@ -216,6 +297,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
 
     public dispose(): void {
         this.terminateProcess();
+        this.disposeTerminalListeners();
         this.sendMessageEmitter.dispose();
     }
 
