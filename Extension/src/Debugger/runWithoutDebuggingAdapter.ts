@@ -7,7 +7,11 @@ import * as cp from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
 import { sessionIsWsl } from '../common';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize = nls.loadMessageBundle();
 
 /**
  * A minimal inline Debug Adapter that runs the target program directly without a debug adapter
@@ -117,9 +121,46 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         } else if (platform === 'linux' && sessionIsWsl()) {
             cp.spawn('/mnt/c/Windows/System32/cmd.exe', ['/c', 'start', 'bash', '-c', `${cmdLine};read -p 'Press enter to continue...'`], { env, detached: true, stdio: 'ignore' }).unref();
         } else { // platform === 'linux'
-            cp.spawn('bash', ['-c', `${cmdLine};read -p 'Press enter to continue...'`], { cwd, env, detached: true, stdio: 'ignore' }).unref();
+            this.launchLinuxExternalTerminal(cmdLine, cwd, env);
         }
         this.sendEvent('terminated');
+    }
+
+    /**
+     * On Linux, find and launch an available terminal emulator to run the command.
+     */
+    private launchLinuxExternalTerminal(cmdLine: string, cwd: string | undefined, env: NodeJS.ProcessEnv): void {
+        const bashCmd = `${cmdLine}; echo; read -p 'Press enter to continue...'`;
+        const bashArgs = ['bash', '-c', bashCmd];
+
+        // Terminal emulators in order of preference, with the correct flag style for each.
+        const candidates: { cmd: string; buildArgs: () => string[] }[] = [
+            { cmd: 'x-terminal-emulator', buildArgs: () => ['-e', ...bashArgs] },
+            { cmd: 'gnome-terminal', buildArgs: () => ['-e', ...bashArgs] },
+            { cmd: 'konsole', buildArgs: () => ['-e', ...bashArgs] },
+            { cmd: 'xterm', buildArgs: () => ['-e', ...bashArgs] }
+        ];
+
+        // Honor the $TERMINAL environment variable if set.
+        const terminalEnv = process.env['TERMINAL'];
+        if (terminalEnv) {
+            candidates.unshift({ cmd: terminalEnv, buildArgs: () => ['-e', ...bashArgs] });
+        }
+
+        for (const candidate of candidates) {
+            try {
+                const result = cp.spawnSync('which', [candidate.cmd], { stdio: 'pipe' });
+                if (result.status === 0) {
+                    cp.spawn(candidate.cmd, candidate.buildArgs(), { cwd, env, detached: true, stdio: 'ignore' }).unref();
+                    return;
+                }
+            } catch {
+                continue;
+            }
+        }
+
+        const message = localize('no.terminal.emulator', 'No terminal emulator found. Please set the $TERMINAL environment variable to your terminal emulator of choice, or install one of the following: x-terminal-emulator, gnome-terminal, konsole, xterm.');
+        vscode.window.showErrorMessage(message);
     }
 
     /**
