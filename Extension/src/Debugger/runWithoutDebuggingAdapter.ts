@@ -134,7 +134,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         const bashArgs = ['bash', '-c', bashCmd];
 
         // Terminal emulators in order of preference, with the correct flag style for each.
-        const candidates: { cmd: string; buildArgs: () => string[] }[] = [
+        const candidates: { cmd: string; buildArgs(): string[] }[] = [
             { cmd: 'x-terminal-emulator', buildArgs: () => ['-e', ...bashArgs] },
             { cmd: 'gnome-terminal', buildArgs: () => ['-e', ...bashArgs] },
             { cmd: 'konsole', buildArgs: () => ['-e', ...bashArgs] },
