@@ -147,7 +147,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": folder ? ConfigSource.workspaceFolder : ConfigSource.singleFile, "configMode": ConfigMode.noLaunchConfig, "cancelled": "true", "succeeded": "true" });
                 return undefined; // aborts debugging silently
             } else {
-                const noDebug = config.noDebug ?? false; // preserve the noDebug value from the config if it exists.
+                const noDebug = config.noDebug ?? false; // Preserve the noDebug value from the config if it exists.
                 // Currently, we expect only one debug config to be selected.
                 console.assert(configs.length === 1, "More than one debug config is selected.");
                 config = configs[0];
