@@ -8,7 +8,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { sessionIsWsl } from '../common';
+import { buildShellCommandLine, sessionIsWsl } from '../common';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize = nls.loadMessageBundle();
@@ -112,8 +112,8 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             this.monitorIntegratedTerminal(this.terminal);
             this.terminalExecution = shellIntegration.executeCommand(program, args);
         } else {
-            const shellArgs: string[] = [program, ...args].map(a => this.quoteArg(a));
-            this.terminal.sendText(shellArgs.join(' '));
+            const cmdLine: string = buildShellCommandLine('', program, args);
+            this.terminal.sendText(cmdLine);
 
             // The terminal manages its own lifecycle; notify VS Code the "debug" session is done.
             this.sendEvent('terminated');
@@ -124,8 +124,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
      * Launch the program in an external terminal. We do not keep track of this terminal or the spawned process.
      */
     private launchExternalTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv): void {
-        const quotedArgs: string[] = [program, ...args].map(a => this.quoteArg(a));
-        const cmdLine: string = quotedArgs.join(' ');
+        const cmdLine: string = buildShellCommandLine('', program, args);
         const platform: string = os.platform();
         if (platform === 'win32') {
             cp.spawn('cmd.exe', ['/c', 'start', 'cmd.exe', '/K', cmdLine], { cwd, env, detached: true, stdio: 'ignore' }).unref();
@@ -201,10 +200,6 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
 
     private escapeQuotes(arg: string): string {
         return arg.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    }
-
-    private quoteArg(arg: string): string {
-        return /\s/.test(arg) ? `"${this.escapeQuotes(arg)}"` : arg;
     }
 
     private waitForShellIntegration(terminal: vscode.Terminal, timeoutMs: number): Promise<vscode.TerminalShellIntegration | undefined> {
