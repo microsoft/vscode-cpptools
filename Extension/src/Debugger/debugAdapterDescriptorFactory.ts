@@ -7,6 +7,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from "vscode";
 import * as nls from 'vscode-nls';
+import { getOutputChannel } from '../logger';
 import { RunWithoutDebuggingAdapter } from './runWithoutDebuggingAdapter';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -27,10 +28,13 @@ abstract class AbstractDebugAdapterDescriptorFactory implements vscode.DebugAdap
 }
 
 export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
-
     async createDebugAdapterDescriptor(session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor> {
         if (session.configuration.noDebug) {
-            return new vscode.DebugAdapterInlineImplementation(new RunWithoutDebuggingAdapter());
+            if (noDebugSupported(session.configuration)) {
+                return new vscode.DebugAdapterInlineImplementation(new RunWithoutDebuggingAdapter());
+            }
+            // If the configuration is not supported, gracefully fall back to a regular debug session and log a message to the user.
+            logReasonForNoDebugNotSupported(session.configuration);
         }
 
         const adapter: string = "./debugAdapters/bin/OpenDebugAD7" + (os.platform() === 'win32' ? ".exe" : "");
@@ -42,10 +46,13 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
 }
 
 export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
-
     async createDebugAdapterDescriptor(session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor | null> {
         if (session.configuration.noDebug) {
-            return new vscode.DebugAdapterInlineImplementation(new RunWithoutDebuggingAdapter());
+            if (noDebugSupported(session.configuration)) {
+                return new vscode.DebugAdapterInlineImplementation(new RunWithoutDebuggingAdapter());
+            }
+            // If the configuration is not supported, gracefully fall back to a regular debug session and log a message to the user.
+            logReasonForNoDebugNotSupported(session.configuration);
         }
 
         if (os.platform() !== 'win32') {
@@ -58,4 +65,29 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterD
             );
         }
     }
+}
+
+function noDebugSupported(configuration: vscode.DebugConfiguration): boolean {
+    // Don't attempt to start a noDebug session if the configuration has any of these properties, which require a debug adapter to function.
+    return configuration.request === 'launch' && !configuration.pipeTransport && !configuration.debugServerPath && !configuration.miDebuggerServerAddress && !configuration.coreDumpPath;
+}
+
+function logReasonForNoDebugNotSupported(configuration: vscode.DebugConfiguration): void {
+    const outputChannel = getOutputChannel();
+    if (configuration.request !== 'launch') {
+        outputChannel.appendLine(localize("debugger.noDebug.requestType.not.supported", "Run Without Debugging is only supported for launch configurations."));
+    }
+    if (configuration.pipeTransport) {
+        outputChannel.appendLine(localize("debugger.noDebug.pipeTransport.not.supported", "Run Without Debugging is not supported for configurations with 'pipeTransport' set."));
+    }
+    if (configuration.debugServerPath) {
+        outputChannel.appendLine(localize("debugger.noDebug.debugServerPath.not.supported", "Run Without Debugging is not supported for configurations with 'debugServerPath' set."));
+    }
+    if (configuration.miDebuggerServerAddress) {
+        outputChannel.appendLine(localize("debugger.noDebug.miDebuggerServerAddress.not.supported", "Run Without Debugging is not supported for configurations with 'miDebuggerServerAddress' set."));
+    }
+    if (configuration.coreDumpPath) {
+        outputChannel.appendLine(localize("debugger.noDebug.coreDumpPath.not.supported", "Run Without Debugging is not supported for configurations with 'coreDumpPath' set."));
+    }
+    outputChannel.show(true);
 }
