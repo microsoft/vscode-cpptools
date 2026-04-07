@@ -106,7 +106,7 @@ function createSessionTerminatedPromise(sessionName: string): Promise<void> {
     });
 }
 
-function createTracker(debugType: string, sessionName: string, timeoutMs: number, timeoutMessage: string): TrackerController {
+function createTracker(debugType: string, sessionName: string, programName: string, timeoutMs: number, timeoutMessage: string): TrackerController {
     const state: TrackerState = {
         setBreakpointsRequestReceived: false,
         stoppedEventReceived: false,
@@ -148,6 +148,34 @@ function createTracker(debugType: string, sessionName: string, timeoutMs: number
                                 timeoutHandle = undefined;
                             }
                             resolve('stopped');
+                        }
+
+                        // integratedTerminal scenarios may not send an 'exited' event if the terminal does not support shell integration.
+                        // We have to close the terminal with the exit code to get the result.
+                        if (message.event === 'terminated' && !state.exitedEventReceived) {
+                            state.exitedEventReceived = true;
+                            const disp = vscode.window.onDidCloseTerminal((terminal) => {
+                                if (terminal.name === programName) {
+                                    state.exitedEventReceived = true;
+                                    state.actualExitCode = terminal.exitStatus?.code;
+                                    if (!state.stoppedEventReceived) {
+                                        state.exitedBeforeStop = true;
+                                    }
+                                    if (timeoutHandle) {
+                                        clearTimeout(timeoutHandle);
+                                        timeoutHandle = undefined;
+                                    }
+                                    disp.dispose();
+                                    resolve('exited');
+                                }
+                            });
+
+                            vscode.window.terminals.forEach((terminal) => {
+                                if (terminal.name === programName) {
+                                    const exitCommand = isWindows ? 'exit /b %ErrorLevel%' : 'exit $?';
+                                    terminal.sendText(exitCommand);
+                                }
+                            });
                         }
 
                         if (message.event === 'exited') {
@@ -210,7 +238,7 @@ suite('Run Without Debugging Integration Test', function (): void {
         await compileProgram(workspacePath, sourceFile, executablePath);
 
         const breakpoint = await createBreakpointAtReturnStatement(sourceUri);
-        const tracker = createTracker(debugType, sessionName, 30000, 'Timed out waiting for debugger event.');
+        const tracker = createTracker(debugType, sessionName, executablePath, 30000, 'Timed out waiting for debugger event.');
         const debugSessionTerminated = createSessionTerminatedPromise(sessionName);
 
         try {
@@ -259,7 +287,7 @@ suite('Run Without Debugging Integration Test', function (): void {
         const breakpoint = await createBreakpointAtReturnStatement(sourceUri);
 
         let launchedSession: vscode.DebugSession | undefined;
-        const tracker = createTracker(debugType, sessionName, 45000, 'Timed out waiting for debugger event in normal debug mode.');
+        const tracker = createTracker(debugType, sessionName, executablePath, 45000, 'Timed out waiting for debugger event in normal debug mode.');
 
         const startedSubscription = vscode.debug.onDidStartDebugSession((session) => {
             if (session.name === sessionName) {
