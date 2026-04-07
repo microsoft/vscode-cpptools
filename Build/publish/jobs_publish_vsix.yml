@@ -31,8 +31,14 @@ jobs:
         $aadToken = az account get-access-token --query accessToken --resource $(AzureGuid) -o tsv
         Write-Host "##vso[task.setvariable variable=AAD_TOKEN;issecret=true]$aadToken"
 
-  - script: npm install --no-save --ignore-scripts=false --include=optional @vscode/vsce@3.7.1
+  - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.7.1
     displayName: Install vsce
+
+  - script: npm rebuild @vscode/vsce-sign --ignore-scripts=false
+    displayName: Rebuild vsce-sign binary
+
+  - script: if not exist node_modules\@vscode\vsce-sign\bin\vsce-sign.exe (echo Missing vsce-sign.exe && exit 1)
+    displayName: Verify vsce-sign binary exists
 
   - script: npx vsce publish --skip-duplicate -i $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.vsix --manifestPath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.manifest --signaturePath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
     displayName: Publish to Marketplace
