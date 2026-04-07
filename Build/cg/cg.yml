@@ -107,8 +107,18 @@ extends:
               fi
           retryCountOnTaskFailure: 3
 
-        - script: |
-            cd $(Build.SourcesDirectory)\Extension
-            npx @vscode/vsce@3.7.1 package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
-          name: ProcessRunner_12
+        - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.7.1
+          displayName: Install vsce
+          workingDirectory: $(Build.SourcesDirectory)\Extension
+
+        - script: npm rebuild @vscode/vsce-sign --ignore-scripts=false
+          displayName: Rebuild vsce-sign binary
+          workingDirectory: $(Build.SourcesDirectory)\Extension
+
+        - script: if not exist node_modules\@vscode\vsce-sign\bin\vsce-sign.exe (echo Missing vsce-sign.exe && exit 1)
+          displayName: Verify vsce-sign binary exists
+          workingDirectory: $(Build.SourcesDirectory)\Extension
+
+        - script: npx vsce package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
           displayName: Run VSCE to package vsix
+          workingDirectory: $(Build.SourcesDirectory)\Extension
