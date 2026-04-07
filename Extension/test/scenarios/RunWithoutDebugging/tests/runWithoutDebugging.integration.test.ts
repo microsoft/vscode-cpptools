@@ -252,6 +252,7 @@ suite('Run Without Debugging Integration Test', function (): void {
         const executablePath = path.join(workspacePath, executableName);
         const sessionName = 'Debug Launch Breakpoint Stop';
         const debugType = isWindows ? 'cppvsdbg' : 'cppdbg';
+        const miMode = isMacOS ? 'lldb' : 'gdb';
 
         await compileProgram(workspacePath, sourceFile, executablePath);
 
@@ -278,6 +279,7 @@ suite('Run Without Debugging Integration Test', function (): void {
                     program: executablePath,
                     args: [],
                     cwd: workspacePath,
+                    MIMode: debugType === 'cppdbg' ? miMode : undefined,
                     externalConsole: debugType === 'cppdbg' ? false : undefined,
                     console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
                 },
