@@ -107,7 +107,7 @@ extends:
               fi
           retryCountOnTaskFailure: 3
 
-        - script: npm install --no-save --ignore-scripts=false @vscode/vsce@3.7.1
+        - script: npm install --no-save --ignore-scripts=false --include=optional @vscode/vsce@3.7.1
           displayName: Install vsce
           workingDirectory: $(Build.SourcesDirectory)\Extension
 
