@@ -107,9 +107,10 @@ extends:
               fi
           retryCountOnTaskFailure: 3
 
-        - script: |
-            cd $(Build.SourcesDirectory)\Extension
-            npm install --ignore-scripts=false @vscode/vsce@3.7.1
-            npx @vscode/vsce@3.7.1 package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
-          name: ProcessRunner_12
+        - script: npm install --ignore-scripts=false @vscode/vsce@3.7.1
+          displayName: Install vsce
+          workingDirectory: $(Build.SourcesDirectory)\Extension
+
+        - script: npx @vscode/vsce@3.7.1 package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
           displayName: Run VSCE to package vsix
+          workingDirectory: $(Build.SourcesDirectory)\Extension

@@ -31,9 +31,10 @@ jobs:
         $aadToken = az account get-access-token --query accessToken --resource $(AzureGuid) -o tsv
         Write-Host "##vso[task.setvariable variable=AAD_TOKEN;issecret=true]$aadToken"
 
-  - script: |
-      npm install --ignore-scripts=false @vscode/vsce@3.7.1
-      npx @vscode/vsce@3.7.1 publish --skip-duplicate -i $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.vsix --manifestPath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.manifest --signaturePath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
+  - script: npm install --ignore-scripts=false @vscode/vsce@3.7.1
+    displayName: Install vsce
+
+  - script: npx @vscode/vsce@3.7.1 publish --skip-duplicate -i $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.vsix --manifestPath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.manifest --signaturePath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
     displayName: Publish to Marketplace
     env:
       VSCE_PAT: $(AAD_TOKEN)
