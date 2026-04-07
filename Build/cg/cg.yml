@@ -109,6 +109,7 @@ extends:
 
         - script: |
             cd $(Build.SourcesDirectory)\Extension
-            npx --ignore-scripts=false @vscode/vsce@3.7.1 package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
+            npm install --ignore-scripts=false @vscode/vsce@3.7.1
+            npx @vscode/vsce@3.7.1 package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
           name: ProcessRunner_12
           displayName: Run VSCE to package vsix

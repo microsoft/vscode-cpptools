@@ -61,11 +61,14 @@ jobs:
 
   - script: |
       cd $(Build.SourcesDirectory)\${{ parameters.srcDir }}
-      npx --ignore-scripts=false @vscode/vsce@3.7.1 package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix
+      npm install --ignore-scripts=false @vscode/vsce@3.7.1
+      npx @vscode/vsce@3.7.1 package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix
     displayName: Run VSCE to package vsix
 
 # sign the vsix
-  - script: npx --ignore-scripts=false @vscode/vsce@3.7.1 generate-manifest -i $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest
+  - script: |
+      npm install --ignore-scripts=false @vscode/vsce@3.7.1
+      npx @vscode/vsce@3.7.1 generate-manifest -i $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest
     displayName: generate manifest
     workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
   - script: copy $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
