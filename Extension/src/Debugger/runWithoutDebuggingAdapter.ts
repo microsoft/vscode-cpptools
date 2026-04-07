@@ -81,12 +81,10 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
 
         this.sendResponse(request, {});
 
-        if (consoleMode === 'integratedTerminal') {
+        if (consoleMode === 'integratedTerminal' || consoleMode === 'internalConsole') {
             await this.launchIntegratedTerminal(program, args, cwd, env);
         } else if (consoleMode === 'externalTerminal') {
             this.launchExternalTerminal(program, args, cwd, env);
-        } else {
-            this.launchInternalConsole(program, args, cwd, env);
         }
     }
 
@@ -173,29 +171,6 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
 
         const message = localize('no.terminal.emulator', 'No terminal emulator found. Please set the $TERMINAL environment variable to your terminal emulator of choice, or install one of the following: x-terminal-emulator, gnome-terminal, konsole, xterm.');
         vscode.window.showErrorMessage(message);
-    }
-
-    /**
-     * Spawn the process and forward stdout/stderr as DAP output events.
-     */
-    private launchInternalConsole(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv) {
-        this.childProcess = cp.spawn(program, args, { cwd, env });
-
-        this.childProcess.stdout?.on('data', (data: Buffer) => {
-            this.sendEvent('output', { category: 'stdout', output: data.toString() });
-        });
-        this.childProcess.stderr?.on('data', (data: Buffer) => {
-            this.sendEvent('output', { category: 'stderr', output: data.toString() });
-        });
-        this.childProcess.on('error', (err: Error) => {
-            this.sendEvent('output', { category: 'stderr', output: `${err.message}\n` });
-            this.sendEvent('exited', { exitCode: 1 });
-            this.sendEvent('terminated');
-        });
-        this.childProcess.on('exit', (code: number | null) => {
-            this.sendEvent('exited', { exitCode: code ?? 0 });
-            this.sendEvent('terminated');
-        });
     }
 
     private escapeQuotes(arg: string): string {
