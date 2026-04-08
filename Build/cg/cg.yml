@@ -107,12 +107,8 @@ extends:
               fi
           retryCountOnTaskFailure: 3
 
-        - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.7.1
-          displayName: Install vsce
-          workingDirectory: $(Build.SourcesDirectory)\Extension
-
-        - script: npm rebuild @vscode/vsce-sign --ignore-scripts=false
-          displayName: Rebuild vsce-sign binary
+        - script: yarn install --frozen-lockfile
+          displayName: Install dependencies with yarn
           workingDirectory: $(Build.SourcesDirectory)\Extension
 
         - script: if not exist node_modules\@vscode\vsce-sign\bin\vsce-sign.exe (echo Missing vsce-sign.exe && exit 1)
