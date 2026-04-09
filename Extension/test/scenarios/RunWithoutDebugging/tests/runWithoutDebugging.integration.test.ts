@@ -24,7 +24,6 @@ interface TrackerState {
     stoppedEventReceived: boolean;
     exitedEventReceived: boolean;
     exitedBeforeStop: boolean;
-    actualExitCode?: number;
 }
 
 interface TrackerController {
@@ -59,7 +58,8 @@ async function setWindowsBuildEnvironment(): Promise<void> {
     }, 1000);
     await promise;
     clearInterval(timer);
-    assert.strictEqual(util.hasMsvcEnvironment(), true, 'MSVC environment not set correctly.');
+    const missingVars = util.getMissingMsvcEnvironmentVariables();
+    assert.strictEqual(missingVars.length, 0, `MSVC environment missing: ${missingVars.join(', ')}`);
 }
 
 async function compileProgram(workspacePath: string, sourcePath: string, outputPath: string): Promise<void> {
@@ -86,11 +86,11 @@ async function compileProgram(workspacePath: string, sourcePath: string, outputP
     assert.fail(`Unsupported test platform: ${process.platform}`);
 }
 
-async function createBreakpointAtReturnStatement(sourceUri: vscode.Uri): Promise<vscode.SourceBreakpoint> {
+async function createBreakpointAtResultWriteStatement(sourceUri: vscode.Uri): Promise<vscode.SourceBreakpoint> {
     const document = await vscode.workspace.openTextDocument(sourceUri);
-    const returnLine = document.getText().split(/\r?\n/).findIndex((line) => line.includes('return 37;'));
-    assert.notStrictEqual(returnLine, -1, 'Unable to find expected return statement for breakpoint placement.');
-    const breakpoint = new vscode.SourceBreakpoint(new vscode.Location(sourceUri, new vscode.Position(returnLine, 0)), true);
+    const resultWriteLine = document.getText().split(/\r?\n/).findIndex((line) => line.includes('resultFile << 37;'));
+    assert.notStrictEqual(resultWriteLine, -1, 'Unable to find expected result-write statement for breakpoint placement.');
+    const breakpoint = new vscode.SourceBreakpoint(new vscode.Location(sourceUri, new vscode.Position(resultWriteLine, 0)), true);
     vscode.debug.addBreakpoints([breakpoint]);
     return breakpoint;
 }
@@ -106,7 +106,7 @@ function createSessionTerminatedPromise(sessionName: string): Promise<void> {
     });
 }
 
-function createTracker(debugType: string, sessionName: string, programName: string, timeoutMs: number, timeoutMessage: string): TrackerController {
+function createTracker(debugType: string, sessionName: string, timeoutMs: number, timeoutMessage: string): TrackerController {
     const state: TrackerState = {
         setBreakpointsRequestReceived: false,
         stoppedEventReceived: false,
@@ -150,37 +150,8 @@ function createTracker(debugType: string, sessionName: string, programName: stri
                             resolve('stopped');
                         }
 
-                        // integratedTerminal scenarios may not send an 'exited' event if the terminal does not support shell integration.
-                        // We have to close the terminal with the exit code to get the result.
-                        if (message.event === 'terminated' && !state.exitedEventReceived) {
+                        if ((message.event === 'terminated' || message.event === 'exited') && !state.exitedEventReceived) {
                             state.exitedEventReceived = true;
-                            const disp = vscode.window.onDidCloseTerminal((terminal) => {
-                                if (terminal.name === programName) {
-                                    state.exitedEventReceived = true;
-                                    state.actualExitCode = terminal.exitStatus?.code;
-                                    if (!state.stoppedEventReceived) {
-                                        state.exitedBeforeStop = true;
-                                    }
-                                    if (timeoutHandle) {
-                                        clearTimeout(timeoutHandle);
-                                        timeoutHandle = undefined;
-                                    }
-                                    disp.dispose();
-                                    resolve('exited');
-                                }
-                            });
-
-                            vscode.window.terminals.forEach((terminal) => {
-                                if (terminal.name === programName) {
-                                    const exitCommand = isWindows ? 'exit /b %ErrorLevel%' : 'exit $?';
-                                    terminal.sendText(exitCommand);
-                                }
-                            });
-                        }
-
-                        if (message.event === 'exited') {
-                            state.exitedEventReceived = true;
-                            state.actualExitCode = message.body?.exitCode;
                             if (!state.stoppedEventReceived) {
                                 state.exitedBeforeStop = true;
                             }
@@ -210,6 +181,32 @@ function createTracker(debugType: string, sessionName: string, programName: stri
     };
 }
 
+async function waitForResultFileValue(filePath: string, timeoutMs: number): Promise<number> {
+    const deadline = Date.now() + timeoutMs;
+    let lastContents = '';
+
+    while (Date.now() < deadline) {
+        try {
+            lastContents = await util.readFileText(filePath, 'utf8');
+            const trimmedContents = lastContents.trim();
+            if (trimmedContents.length > 0) {
+                const value = Number.parseInt(trimmedContents, 10);
+                if (!Number.isNaN(value)) {
+                    return value;
+                }
+            }
+        } catch (error) {
+            if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+                throw error;
+            }
+        }
+
+        await new Promise<void>(resolve => setTimeout(resolve, 100));
+    }
+
+    assert.fail(`Timed out waiting for numeric result in ${filePath}. Last contents: ${lastContents}`);
+}
+
 suite('Run Without Debugging Integration Test', function (): void {
     suiteSetup(async function (): Promise<void> {
         const extension: vscode.Extension<any> = vscode.extensions.getExtension('ms-vscode.cpptools') || assert.fail('Extension not found');
@@ -224,21 +221,23 @@ suite('Run Without Debugging Integration Test', function (): void {
         }
     });
 
-    test('Run Without Debugging should not break on breakpoints and emit expected exit code', async () => {
-        const expectedExitCode = 37;
+    test('Run Without Debugging should not break on breakpoints and write the expected result file', async () => {
+        const expectedResultValue = 37;
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0] ?? assert.fail('No workspace folder available');
         const workspacePath = workspaceFolder.uri.fsPath;
-        const sourceFile = path.join(workspacePath, 'exitCode.cpp');
+        const sourceFile = path.join(workspacePath, 'debugTest.cpp');
         const sourceUri = vscode.Uri.file(sourceFile);
-        const executableName = isWindows ? 'exitCodeProgram.exe' : 'exitCodeProgram';
+        const resultFilePath = path.join(workspacePath, 'runWithoutDebuggingResult.txt');
+        const executableName = isWindows ? 'debugTestProgram.exe' : 'debugTestProgram';
         const executablePath = path.join(workspacePath, executableName);
-        const sessionName = 'Run Without Debugging Exit Code';
+        const sessionName = 'Run Without Debugging Result File';
         const debugType = isWindows ? 'cppvsdbg' : 'cppdbg';
 
+        await util.deleteFile(resultFilePath);
         await compileProgram(workspacePath, sourceFile, executablePath);
 
-        const breakpoint = await createBreakpointAtReturnStatement(sourceUri);
-        const tracker = createTracker(debugType, sessionName, executablePath, 30000, 'Timed out waiting for debugger event.');
+        const breakpoint = await createBreakpointAtResultWriteStatement(sourceUri);
+        const tracker = createTracker(debugType, sessionName, 30000, 'Timed out waiting for debugger event.');
         const debugSessionTerminated = createSessionTerminatedPromise(sessionName);
 
         try {
@@ -260,23 +259,26 @@ suite('Run Without Debugging Integration Test', function (): void {
 
             const lastEvent = await tracker.lastEvent;
             await debugSessionTerminated;
+            const actualResultValue = await waitForResultFileValue(resultFilePath, 10000);
 
             assert.strictEqual(lastEvent, 'exited', 'No-debug launch should exit rather than stop on a breakpoint.');
             assert.strictEqual(tracker.state.setBreakpointsRequestReceived, false, 'a "no debug" session should not send setBreakpoints requests.');
             assert.strictEqual(tracker.state.stoppedEventReceived, false, 'a "no debug" session should not emit stopped events.');
-            assert.strictEqual(tracker.state.actualExitCode, expectedExitCode, 'Unexpected exit code from run without debugging launch.');
+            assert.strictEqual(actualResultValue, expectedResultValue, 'Unexpected result value from run without debugging launch.');
         } finally {
             tracker.dispose();
             vscode.debug.removeBreakpoints([breakpoint]);
+            await util.deleteFile(resultFilePath);
         }
     });
 
     test('Debug launch should bind and stop at the breakpoint', async () => {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0] ?? assert.fail('No workspace folder available');
         const workspacePath = workspaceFolder.uri.fsPath;
-        const sourceFile = path.join(workspacePath, 'exitCode.cpp');
+        const sourceFile = path.join(workspacePath, 'debugTest.cpp');
         const sourceUri = vscode.Uri.file(sourceFile);
-        const executableName = isWindows ? 'exitCodeProgram.exe' : 'exitCodeProgram';
+        const resultFilePath = path.join(workspacePath, 'runWithoutDebuggingResult.txt');
+        const executableName = isWindows ? 'debugTestProgram.exe' : 'debugTestProgram';
         const executablePath = path.join(workspacePath, executableName);
         const sessionName = 'Debug Launch Breakpoint Stop';
         const debugType = isWindows ? 'cppvsdbg' : 'cppdbg';
@@ -284,10 +286,10 @@ suite('Run Without Debugging Integration Test', function (): void {
 
         await compileProgram(workspacePath, sourceFile, executablePath);
 
-        const breakpoint = await createBreakpointAtReturnStatement(sourceUri);
+        const breakpoint = await createBreakpointAtResultWriteStatement(sourceUri);
 
         let launchedSession: vscode.DebugSession | undefined;
-        const tracker = createTracker(debugType, sessionName, executablePath, 45000, 'Timed out waiting for debugger event in normal debug mode.');
+        const tracker = createTracker(debugType, sessionName, 45000, 'Timed out waiting for debugger event in normal debug mode.');
 
         const startedSubscription = vscode.debug.onDidStartDebugSession((session) => {
             if (session.name === sessionName) {
@@ -331,6 +333,7 @@ suite('Run Without Debugging Integration Test', function (): void {
             startedSubscription.dispose();
             tracker.dispose();
             vscode.debug.removeBreakpoints([breakpoint]);
+            await util.deleteFile(resultFilePath);
         }
     });
 });

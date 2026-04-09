@@ -1568,6 +1568,34 @@ export function hasMsvcEnvironment(): boolean {
     );
 }
 
+export function getMissingMsvcEnvironmentVariables(): string[] {
+    const msvcEnvVars: string[] = [
+        'DevEnvDir',
+        'Framework40Version',
+        'FrameworkDir',
+        'FrameworkVersion',
+        'INCLUDE',
+        'LIB',
+        'LIBPATH',
+        'UCRTVersion',
+        'UniversalCRTSdkDir',
+        'VCIDEInstallDir',
+        'VCINSTALLDIR',
+        'VCToolsRedistDir',
+        'VisualStudioVersion',
+        'VSINSTALLDIR',
+        'WindowsLibPath',
+        'WindowsSdkBinPath',
+        'WindowsSdkDir',
+        'WindowsSDKLibVersion',
+        'WindowsSDKVersion'
+    ];
+    return msvcEnvVars.filter(envVarName =>
+        (process.env[envVarName] === undefined || process.env[envVarName] === '') &&
+        extensionContext?.environmentVariableCollection?.get(envVarName) === undefined
+    );
+}
+
 function isIntegral(str: string): boolean {
     const regex = /^-?\d+$/;
     return regex.test(str);
