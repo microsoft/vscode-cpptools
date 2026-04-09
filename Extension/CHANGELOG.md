@@ -1,8 +1,14 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.31.3: March 23, 2026
+## Version 1.31.4: March 31, 2026
+### Bug Fix
+* Debugging cpptools and cpptools-srv processes on macOS (to get call stacks) is now blocked when SIP is enabled (due to a potential security issue).
+
+## Version 1.31.3: March 24, 2026
+### Enhancements
 * Add support for `program` in attach debug configurations. [#14046](https://github.com/microsoft/vscode-cpptools/issues/14046)
   * Thanks for the contribution. [@Subham-KRLX (Subham)](https://github.com/Subham-KRLX) [PR #14108](https://github.com/microsoft/vscode-cpptools/pull/14108)
+* Remove unnecessary `console.debug` logging. [#14294](https://github.com/microsoft/vscode-cpptools/issues/14294)
 * Update clang-tidy and clang-format from 21.1.4 to 22.1.1.
 * Update support for the latest compiler versions.
 * Update SQLite to the latest version.
@@ -12,6 +18,9 @@
 * Fix `embed-dir` compiler arguments not being handled for IntelliSense. [#14154](https://github.com/microsoft/vscode-cpptools/issues/14154)
 * Fix workspace symbol search with `scope::variable` not working after symbols are deleted and then added back. [#14200](https://github.com/microsoft/vscode-cpptools/issues/14200)
 * Fix bugs where a path was checked for existence but not whether it was a file or a folder. [#14257](https://github.com/microsoft/vscode-cpptools/issues/14257)
+* Fix the Call Hierarchy Callers Of progress UI not showing. [#14287](https://github.com/microsoft/vscode-cpptools/issues/14287)
+* Fix an IntelliSense crash when using GCC 16 `span` and `string`. [#14309](https://github.com/microsoft/vscode-cpptools/issues/14309)
+* Fix `_CONTROL_FLOW_GUARD` not being defined when `/guard:cf` is used in MSVC mode. [#14310](https://github.com/microsoft/vscode-cpptools/issues/14310)
 * Add IntelliSense support for `__builtin_is_implicit_lifetime`.
 * Fix three IntelliSense process crashes.
 * Fix some missing translations.

@@ -26,8 +26,49 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
     private cancelledDocument: vscode.TextDocument | undefined;
     private cancelledPosition: vscode.Position | undefined;
     private content: string | undefined;
+    private chatModel: vscode.LanguageModelChat | undefined;
+    // Flag to avoid querying the LanguageModelChat repeatedly if no model is found
+    private checkedChatModel: boolean = false;
     constructor(client: DefaultClient) {
         this.client = client;
+    }
+
+    public async getCachedChatModel(): Promise<vscode.LanguageModelChat | undefined> {
+        if (this.checkedChatModel) {
+            return this.chatModel;
+        }
+
+        const vscodelm = getVSCodeLanguageModel();
+        if (vscodelm) {
+            try {
+                // First look for GPT-5-mini which should be available to all
+                // users and have a 0x multiplier on paid plans.
+                let [model] = await vscodelm.selectChatModels({ ...modelSelector, id: 'gpt-5-mini' });
+                if (!model) {
+                    // If GPT-5-mini is not available, fall back to the first available model
+                    [model] = await vscodelm.selectChatModels(modelSelector);
+                }
+                if (!model) {
+                    telemetry.logLanguageServerEvent('CopilotHoverNoModelSelected', { remoteName: vscode.env.remoteName || 'local' });
+                } else {
+                    this.chatModel = model;
+                }
+            } catch (e: any) {
+                const exceptionType = e?.name || e?.constructor?.name || typeof e;
+                telemetry.logLanguageServerEvent('CopilotHoverSelectModelFailed', {
+                    remoteName: vscode.env.remoteName || 'local',
+                    exceptionType: String(exceptionType)
+                });
+            }
+        }
+        this.checkedChatModel = true;
+        return this.chatModel;
+    }
+
+    public async refreshCachedChatModel(): Promise<vscode.LanguageModelChat | undefined> {
+        this.chatModel = undefined;
+        this.checkedChatModel = false;
+        return this.getCachedChatModel();
     }
 
     public async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | undefined> {
@@ -43,12 +84,9 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         }
 
         // Ensure the user has access to Copilot.
-        const vscodelm = getVSCodeLanguageModel();
-        if (vscodelm) {
-            const [model] = await vscodelm.selectChatModels(modelSelector);
-            if (!model) {
-                return undefined;
-            }
+        const model = await this.getCachedChatModel();
+        if (!model) {
+            return undefined;
         }
 
         const newHover = this.isNewHover(document, position);

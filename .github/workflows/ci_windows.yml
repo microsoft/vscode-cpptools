@@ -6,9 +6,12 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   job:
     uses: ./.github/workflows/job-compile-and-test.yml
     with:
-      runner-env: windows-2022
+      runner-env: windows-2025
       platform: windows
