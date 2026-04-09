@@ -1549,7 +1549,6 @@ export function hasMsvcEnvironment(): boolean {
         'INCLUDE',
         'LIB',
         'LIBPATH',
-        'UCRTVersion',
         'UniversalCRTSdkDir',
         'VCIDEInstallDir',
         'VCINSTALLDIR',
