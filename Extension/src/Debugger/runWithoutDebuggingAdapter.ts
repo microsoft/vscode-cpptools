@@ -108,6 +108,10 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         // Not all terminals support shell integration. If it's not available, we'll just send the command as text though we won't be able to monitor its execution.
         if (shellIntegration) {
             this.monitorIntegratedTerminal(this.terminal);
+            if (program.includes(' ')) {
+                // VS Code does not automatically quote the program path if it has spaces.
+                program = `"${program}"`;
+            }
             this.terminalExecution = shellIntegration.executeCommand(program, args);
         } else {
             const cmdLine: string = buildShellCommandLine('', program, args);
