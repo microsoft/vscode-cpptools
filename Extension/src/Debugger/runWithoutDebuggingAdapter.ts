@@ -108,13 +108,32 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         // Not all terminals support shell integration. If it's not available, we'll just send the command as text though we won't be able to monitor its execution.
         if (shellIntegration) {
             this.monitorIntegratedTerminal(this.terminal);
-            if (program.includes(' ')) {
+            let executable: string = program;
+            let executableArgs: string[] = args;
+            if (!program.match(/["']/) && program.match(/\s/)) {
                 // VS Code does not automatically quote the program path if it has spaces.
-                program = `"${program}"`;
+                const shellPath: string | undefined = 'shellPath' in this.terminal.creationOptions
+                    ? this.terminal.creationOptions.shellPath?.toLowerCase()
+                    : undefined;
+                const terminalShell: string | undefined = this.terminal.state.shell?.toLowerCase();
+                const defaultTerminalProfile: string | undefined = os.platform() === 'win32'
+                    ? vscode.workspace.getConfiguration('terminal.integrated').get<string>('defaultProfile.windows')?.toLowerCase()
+                    : undefined;
+                const isPowerShell: boolean | undefined =
+                    shellPath?.endsWith('pwsh.exe') || shellPath?.endsWith('powershell.exe') || shellPath?.endsWith('pwsh') ||
+                    terminalShell?.includes('powershell') || terminalShell?.includes('pwsh') ||
+                    defaultTerminalProfile?.includes('powershell') || defaultTerminalProfile?.includes('pwsh');
+
+                if (isPowerShell) {
+                    executable = '&';
+                    executableArgs = [program, ...args];
+                } else {
+                    executable = `"${program}"`;
+                }
             }
-            this.terminalExecution = shellIntegration.executeCommand(program, args);
+            this.terminalExecution = shellIntegration.executeCommand(executable, executableArgs);
         } else {
-            const cmdLine: string = buildShellCommandLine('', program, args);
+            const cmdLine: string = buildShellCommandLine('', program, args, true);
             this.terminal.sendText(cmdLine);
 
             // The terminal manages its own lifecycle; notify VS Code the "debug" session is done.
@@ -126,10 +145,10 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
      * Launch the program in an external terminal. We do not keep track of this terminal or the spawned process.
      */
     private launchExternalTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv): void {
-        const cmdLine: string = buildShellCommandLine('', program, args);
+        const cmdLine: string = buildShellCommandLine('', program, args, true);
         const platform: string = os.platform();
         if (platform === 'win32') {
-            cp.spawn('cmd.exe', ['/c', 'start', 'cmd.exe', '/K', cmdLine], { cwd, env, detached: true, stdio: 'ignore' }).unref();
+            cp.spawn('cmd.exe', ['/c', 'start', 'cmd.exe', '/K', `"${cmdLine}"`], { cwd, env, windowsVerbatimArguments: true, detached: true, stdio: 'ignore' }).unref();
         } else if (platform === 'darwin') {
             cp.spawn('osascript', ['-e', `tell application "Terminal" to do script "${this.escapeQuotes(cmdLine)}"`], { cwd, env, detached: true, stdio: 'ignore' }).unref();
         } else if (platform === 'linux' && sessionIsWsl()) {

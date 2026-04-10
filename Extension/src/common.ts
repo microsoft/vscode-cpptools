@@ -1695,7 +1695,7 @@ export interface IQuotedString {
 
 export type CommandString = string | IQuotedString;
 
-export function buildShellCommandLine(originalCommand: CommandString, command: CommandString, args: CommandString[]): string {
+export function buildShellCommandLine(originalCommand: CommandString, command: CommandString, args: CommandString[], singleCommandOnly: boolean = false): string {
 
     let shellQuoteOptions: IShellQuotingOptions;
     const isWindows: boolean = os.platform() === 'win32';
@@ -1809,7 +1809,7 @@ export function buildShellCommandLine(originalCommand: CommandString, command: C
 
     let commandLine = result.join(' ');
     // There are special rules quoted command line in cmd.exe
-    if (isWindows) {
+    if (isWindows && !singleCommandOnly) {
         commandLine = `chcp 65001>nul && ${commandLine}`;
         if (commandQuoted && argQuoted) {
             commandLine = '"' + commandLine + '"';

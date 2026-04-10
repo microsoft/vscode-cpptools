@@ -5,19 +5,12 @@
 /* eslint-disable @typescript-eslint/triple-slash-reference */
 /// <reference path="../../../../vscode.d.ts" />
 import * as assert from 'assert';
-import * as cp from 'child_process';
 import { suite } from 'mocha';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as util from '../../../../src/common';
-import { isLinux, isMacOS, isWindows } from '../../../../src/constants';
-import { getEffectiveEnvironment } from '../../../../src/LanguageServer/devcmd';
-
-interface ProcessResult {
-    code: number | null;
-    stdout: string;
-    stderr: string;
-}
+import { isMacOS, isWindows } from '../../../../src/constants';
+import { compileProgram } from './compileProgram';
 
 interface TrackerState {
     setBreakpointsRequestReceived: boolean;
@@ -30,60 +23,6 @@ interface TrackerController {
     state: TrackerState;
     lastEvent: Promise<'stopped' | 'exited'>;
     dispose(): void;
-}
-
-function runProcess(command: string, args: string[], cwd: string, env?: NodeJS.ProcessEnv): Promise<ProcessResult> {
-    return new Promise((resolve, reject) => {
-        const child = cp.spawn(command, args, { cwd, env });
-        let stdout = '';
-        let stderr = '';
-
-        child.stdout.on('data', (data: Buffer) => {
-            stdout += data.toString();
-        });
-
-        child.stderr.on('data', (data: Buffer) => {
-            stderr += data.toString();
-        });
-
-        child.on('error', reject);
-        child.on('close', (code) => resolve({ code, stdout, stderr }));
-    });
-}
-
-async function setWindowsBuildEnvironment(): Promise<void> {
-    const promise = vscode.commands.executeCommand('C_Cpp.SetVsDeveloperEnvironment', 'test');
-    const timer = setInterval(() => {
-        void vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
-    }, 1000);
-    await promise;
-    clearInterval(timer);
-    const missingVars = util.getMissingMsvcEnvironmentVariables();
-    assert.strictEqual(missingVars.length, 0, `MSVC environment missing: ${missingVars.join(', ')}`);
-}
-
-async function compileProgram(workspacePath: string, sourcePath: string, outputPath: string): Promise<void> {
-    if (isWindows) {
-        await setWindowsBuildEnvironment();
-        const env = getEffectiveEnvironment();
-        const result = await runProcess('cl.exe', ['/nologo', '/EHsc', '/Zi', '/std:c++17', `/Fe:${outputPath}`, sourcePath], workspacePath, env);
-        assert.strictEqual(result.code, 0, `MSVC compilation failed. stdout: ${result.stdout}\nstderr: ${result.stderr}`);
-        return;
-    }
-
-    if (isMacOS) {
-        const result = await runProcess('clang++', ['-std=c++17', '-g', sourcePath, '-o', outputPath], workspacePath);
-        assert.strictEqual(result.code, 0, `clang++ compilation failed. stdout: ${result.stdout}\nstderr: ${result.stderr}`);
-        return;
-    }
-
-    if (isLinux) {
-        const result = await runProcess('g++', ['-std=c++17', '-g', sourcePath, '-o', outputPath], workspacePath);
-        assert.strictEqual(result.code, 0, `g++ compilation failed. stdout: ${result.stdout}\nstderr: ${result.stderr}`);
-        return;
-    }
-
-    assert.fail(`Unsupported test platform: ${process.platform}`);
 }
 
 async function createBreakpointAtResultWriteStatement(sourceUri: vscode.Uri): Promise<vscode.SourceBreakpoint> {
@@ -207,12 +146,25 @@ async function waitForResultFileValue(filePath: string, timeoutMs: number): Prom
     assert.fail(`Timed out waiting for numeric result in ${filePath}. Last contents: ${lastContents}`);
 }
 
-suite('Run Without Debugging Integration Test', function (): void {
+suite('Run Without Debugging Test', function (): void {
+    const expectedResultValue = 37;
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0] ?? assert.fail('No workspace folder available');
+    const workspacePath = workspaceFolder.uri.fsPath;
+    const sourceFile = path.join(workspacePath, 'debugTest.cpp');
+    const sourceUri = vscode.Uri.file(sourceFile);
+    const resultFilePath = path.join(workspacePath, 'runWithoutDebuggingResult.txt');
+    const executableName = isWindows ? 'debugTestProgram.exe' : 'debugTestProgram';
+    const executablePath = path.join(workspacePath, executableName);
+    const sessionName = 'Run Without Debugging Result File';
+    const debugType = isWindows ? 'cppvsdbg' : 'cppdbg';
+    const miMode = isMacOS ? 'lldb' : 'gdb';
+
     suiteSetup(async function (): Promise<void> {
         const extension: vscode.Extension<any> = vscode.extensions.getExtension('ms-vscode.cpptools') || assert.fail('Extension not found');
         if (!extension.isActive) {
             await extension.activate();
         }
+        await compileProgram(workspacePath, sourceFile, executablePath);
     });
 
     suiteTeardown(async function (): Promise<void> {
@@ -221,21 +173,11 @@ suite('Run Without Debugging Integration Test', function (): void {
         }
     });
 
-    test('Run Without Debugging should not break on breakpoints and write the expected result file', async () => {
-        const expectedResultValue = 37;
-        const workspaceFolder = vscode.workspace.workspaceFolders?.[0] ?? assert.fail('No workspace folder available');
-        const workspacePath = workspaceFolder.uri.fsPath;
-        const sourceFile = path.join(workspacePath, 'debugTest.cpp');
-        const sourceUri = vscode.Uri.file(sourceFile);
-        const resultFilePath = path.join(workspacePath, 'runWithoutDebuggingResult.txt');
-        const executableName = isWindows ? 'debugTestProgram.exe' : 'debugTestProgram';
-        const executablePath = path.join(workspacePath, executableName);
-        const sessionName = 'Run Without Debugging Result File';
-        const debugType = isWindows ? 'cppvsdbg' : 'cppdbg';
-
+    setup(async function (): Promise<void> {
         await util.deleteFile(resultFilePath);
-        await compileProgram(workspacePath, sourceFile, executablePath);
+    });
 
+    test('Run Without Debugging should not break on breakpoints and write the expected result file', async () => {
         const breakpoint = await createBreakpointAtResultWriteStatement(sourceUri);
         const tracker = createTracker(debugType, sessionName, 30000, 'Timed out waiting for debugger event.');
         const debugSessionTerminated = createSessionTerminatedPromise(sessionName);
@@ -273,31 +215,16 @@ suite('Run Without Debugging Integration Test', function (): void {
     });
 
     test('Debug launch should bind and stop at the breakpoint', async () => {
-        const workspaceFolder = vscode.workspace.workspaceFolders?.[0] ?? assert.fail('No workspace folder available');
-        const workspacePath = workspaceFolder.uri.fsPath;
-        const sourceFile = path.join(workspacePath, 'debugTest.cpp');
-        const sourceUri = vscode.Uri.file(sourceFile);
-        const resultFilePath = path.join(workspacePath, 'runWithoutDebuggingResult.txt');
-        const executableName = isWindows ? 'debugTestProgram.exe' : 'debugTestProgram';
-        const executablePath = path.join(workspacePath, executableName);
-        const sessionName = 'Debug Launch Breakpoint Stop';
-        const debugType = isWindows ? 'cppvsdbg' : 'cppdbg';
-        const miMode = isMacOS ? 'lldb' : 'gdb';
-
-        await compileProgram(workspacePath, sourceFile, executablePath);
-
         const breakpoint = await createBreakpointAtResultWriteStatement(sourceUri);
+        const tracker = createTracker(debugType, sessionName, 30000, 'Timed out waiting for debugger event in normal debug mode.');
+        const debugSessionTerminated = createSessionTerminatedPromise(sessionName);
 
         let launchedSession: vscode.DebugSession | undefined;
-        const tracker = createTracker(debugType, sessionName, 45000, 'Timed out waiting for debugger event in normal debug mode.');
-
         const startedSubscription = vscode.debug.onDidStartDebugSession((session) => {
             if (session.name === sessionName) {
                 launchedSession = session;
             }
         });
-
-        const debugSessionTerminated = createSessionTerminatedPromise(sessionName);
 
         try {
             const started = await vscode.debug.startDebugging(
@@ -336,4 +263,5 @@ suite('Run Without Debugging Integration Test', function (): void {
             await util.deleteFile(resultFilePath);
         }
     });
+
 });
