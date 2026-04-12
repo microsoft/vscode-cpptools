@@ -1060,6 +1060,88 @@
                         "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.order.markdownDescription%",
                         "scope": "resource"
                     },
+                    "C_Cpp.configurations": {
+                        "type": "array",
+                        "description": "A list of configurations that will be used instead of c_cpp_properties.json when present in workspace settings.",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "name"
+                            ],
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "Configuration identifier."
+                                },
+                                "compilerPath": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ],
+                                    "description": "Full path of the compiler being used."
+                                },
+                                "compilerArgs": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "Compiler arguments."
+                                },
+                                "includePath": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "A list of paths for the IntelliSense engine to use while searching for included headers."
+                                },
+                                "defines": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "A list of preprocessor definitions."
+                                },
+                                "cStandard": {
+                                    "type": "string",
+                                    "description": "Version of the C language standard to use for IntelliSense."
+                                },
+                                "cppStandard": {
+                                    "type": "string",
+                                    "description": "Version of the C++ language standard to use for IntelliSense."
+                                },
+                                "intelliSenseMode": {
+                                    "type": "string",
+                                    "description": "The IntelliSense mode to use."
+                                },
+                                "configurationProvider": {
+                                    "type": "string",
+                                    "description": "The id of a VS Code extension that can provide IntelliSense configuration information."
+                                },
+                                "compileCommands": {
+                                    "type": "string",
+                                    "description": "Full path to a compile_commands.json file."
+                                },
+                                "browse": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "limitSymbolsToIncludedHeaders": {
+                                            "type": "boolean"
+                                        },
+                                        "databaseFilename": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "scope": "resource"
+                    },
                     "C_Cpp.configurationWarnings": {
                         "type": "string",
                         "enum": [

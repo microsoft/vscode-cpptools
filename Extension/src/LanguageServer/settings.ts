@@ -448,6 +448,7 @@ export class CppSettings extends Settings {
     public get defaultCStandard(): string | undefined { return this.getAsStringOrUndefined("default.cStandard"); }
     public get defaultCppStandard(): string | undefined { return this.getAsStringOrUndefined("default.cppStandard"); }
     public get defaultConfigurationProvider(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.configurationProvider")); }
+    public get configurations(): any[] | undefined { return this.Section.get<any[]>("configurations"); }
     public get defaultMergeConfigurations(): boolean { return this.getAsBoolean("default.mergeConfigurations"); }
     public get defaultBrowsePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.browse.path"); }
     public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.browse.databaseFilename")); }

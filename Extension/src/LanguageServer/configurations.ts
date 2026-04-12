@@ -363,8 +363,8 @@ export class CppProperties {
     public onDidChangeSettings(): void {
         // Default settings may have changed in a way that affects the configuration.
         // Just send another message since the language server will sort out whether anything important changed or not.
-        if (!this.propertiesFile) {
-            this.resetToDefaultSettings(true);
+        const settings: CppSettings = new CppSettings(this.rootUri);
+        if (!this.propertiesFile || (settings.configurations && settings.configurations.length > 0)) {
             this.handleConfigurationChange();
         } else if (!this.configurationIncomplete) {
             this.handleConfigurationChange();
@@ -1370,7 +1370,8 @@ export class CppProperties {
     }
 
     public handleConfigurationChange(): void {
-        if (this.propertiesFile === undefined) {
+        const settings: CppSettings = new CppSettings(this.rootUri);
+        if (this.propertiesFile === undefined && (!settings.configurations || settings.configurations.length === 0)) {
             return; // Occurs when propertiesFile hasn't been checked yet.
         }
         this.configFileWatcherFallbackTime = new Date();
@@ -1452,24 +1453,46 @@ export class CppProperties {
     }
 
     private parsePropertiesFile(): boolean {
-        if (!this.propertiesFile) {
-            this.configurationJson = undefined;
-            return false;
-        }
+        const settings: CppSettings = new CppSettings(this.rootUri);
+        const settingsConfigs: any[] | undefined = settings.configurations;
+
         let success: boolean = true;
         const firstParse = this.configurationJson === undefined;
-        try {
-            const readResults: string = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
-            if (readResults === "") {
-                return false; // Repros randomly when the file is initially created. The parse will get called again after the file is written.
-            }
 
-            // Try to use the same configuration as before the change.
-            // TODO?: Handle when jsonc.parse() throws an exception due to invalid JSON contents.
-            const newJson: ConfigurationJson = jsonc.parse(readResults, undefined, true) as any;
-            if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
+        let newJson: ConfigurationJson | undefined;
+        if (settingsConfigs && settingsConfigs.length > 0) {
+            newJson = {
+                configurations: settingsConfigs as Configuration[],
+                version: configVersion
+            };
+        } else {
+            if (!this.propertiesFile) {
+                this.configurationJson = undefined;
+                return false;
+            }
+            try {
+                const readResults: string = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
+                if (readResults === "") {
+                    return false; // Repros randomly when the file is initially created. The parse will get called again after the file is written.
+                }
+
+                // Try to use the same configuration as before the change.
+                // TODO?: Handle when jsonc.parse() throws an exception due to invalid JSON contents.
+                newJson = jsonc.parse(readResults, undefined, true) as any;
+            } catch (err) {
+                this.configurationJson = undefined;
+                success = false;
+            }
+        }
+
+        if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
+            if (settingsConfigs && settingsConfigs.length > 0) {
+                 // If we tried to parse from settings and it was invalid, we should probably log an error.
+            } else if (this.propertiesFile) {
                 throw { message: localize("invalid.configuration.file", "Invalid configuration file. There must be at least one configuration present in the array.") };
             }
+            return false;
+        }
             if (!this.configurationIncomplete && this.configurationJson && this.configurationJson.configurations &&
                 this.CurrentConfigurationIndex >= 0 && this.CurrentConfigurationIndex < this.configurationJson.configurations.length) {
                 for (let i: number = 0; i < newJson.configurations.length; i++) {
