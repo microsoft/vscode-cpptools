@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "Прерывание анализа тегов в корне",
 	"unable_to_retrieve_to_reset_timestamps": "Не удалось получить записи базы данных для сброса меток времени: ошибка — {0}",
 	"failed_to_reset_timestamps_for": "Не удалось сбросить метку времени для {0}: ошибка — {1}",
-	"no_suitable_complier": "Подходящий компилятор не найден. Укажите \"compilerPath\" в c_cpp_properties.json.",
+	"no_suitable_compiler": "Подходящий компилятор не найден. Укажите \"compilerPath\" в c_cpp_properties.json.",
 	"compiler_include_not_found": "Путь включения компилятора не найден: {0}",
 	"intellisense_not_responding": "Подсистема IntelliSense не отвечает. Используйте вместо этого анализатор тегов.",
 	"tag_parser_will_be_used": "Анализатор тегов будет использоваться для операций IntelliSense в: {0}",

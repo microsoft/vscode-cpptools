@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "Parsování značek v kořenu se přerušuje.",
 	"unable_to_retrieve_to_reset_timestamps": "Nepovedlo se načíst záznamy databáze pro resetování časových razítek: chyba = {0}",
 	"failed_to_reset_timestamps_for": "Nepovedlo se resetovat časové razítko pro {0}: chyba = {1}",
-	"no_suitable_complier": "Nenašel se žádný vhodný kompilátor. Nastavte prosím compilerPath v souboru c_cpp_properties.json.",
+	"no_suitable_compiler": "Nenašel se žádný vhodný kompilátor. Nastavte prosím compilerPath v souboru c_cpp_properties.json.",
 	"compiler_include_not_found": "Nenašla se cesta kompilátoru pro vložené soubory: {0}",
 	"intellisense_not_responding": "Modul IntelliSense neodpovídá. Používá se místo něj analyzátor značek.",
 	"tag_parser_will_be_used": "Analyzátor značek se bude používat pro operace IntelliSense v: {0}",

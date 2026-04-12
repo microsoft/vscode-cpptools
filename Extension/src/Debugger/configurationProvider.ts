@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as jsonc from 'comment-json';
-import * as fs from 'fs';
 import * as glob from 'glob';
 import * as os from 'os';
 import * as path from 'path';
@@ -15,12 +14,14 @@ import * as util from '../common';
 import { isWindows } from '../constants';
 import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
 import { CppBuildTask, CppBuildTaskDefinition, cppBuildTaskProvider } from '../LanguageServer/cppBuildTaskProvider';
+import { canFindCl } from '../LanguageServer/devcmd';
 import { configPrefix } from '../LanguageServer/extension';
 import { CppSettings, OtherSettings } from '../LanguageServer/settings';
 import * as logger from '../logger';
 import { PlatformInformation } from '../platform';
 import { rsync, scp, ssh } from '../SSH/commands';
 import * as Telemetry from '../telemetry';
+import { AttachItem, showQuickPick } from './attachQuickPick';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { ConfigMenu, ConfigMode, ConfigSource, CppDebugConfiguration, DebuggerEvent, DebuggerType, DebugType, IConfiguration, IConfigurationSnippet, isDebugLaunchStr, MIConfigurations, PipeTransportConfigurations, TaskStatus, WindowsConfigurations, WSLConfigurations } from './configurations';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
@@ -87,6 +88,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         const defaultConfig: CppDebugConfiguration[] = this.findDefaultConfig(configs);
         // If there was only one config defined for the default task, choose that config, otherwise ask the user to choose.
         if (defaultConfig.length === 1) {
+            if (this.isClConfiguration(defaultConfig[0].name) && await this.showErrorIfClNotAvailable(defaultConfig[0].label)) {
+                return []; // Cannot continue with build/debug.
+            }
             return defaultConfig;
         }
 
@@ -120,8 +124,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return []; // User canceled it.
         }
 
-        if (this.isClConfiguration(selection.label)) {
-            this.showErrorIfClNotAvailable(selection.label);
+        if (this.isClConfiguration(selection.label) && await this.showErrorIfClNotAvailable(selection.label)) {
+            return []; // Cannot continue with build/debug.
         }
 
         return [selection.configuration];
@@ -175,7 +179,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     await cppBuildTaskProvider.runBuildTask(config.preLaunchTask);
                     config.preLaunchTask = undefined;
                     Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "true" });
-                } catch (err) {
+                } catch {
                     Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "false" });
                 }
                 return config;
@@ -241,7 +245,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
 
             // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
-            // eslint-disable-next-line no-prototype-builtins
             if (config.hasOwnProperty("externalConsole")) {
                 void logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
                 if (config.externalConsole && !config.console) {
@@ -299,7 +302,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         // Validate LLDB-MI
         if (os.platform() === 'darwin' && // Check for macOS
-            fs.existsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
+            util.checkFileExistsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
             (!macOSMIMode || macOSMIMode === 'lldb') &&
             !macOSMIDebuggerPath // User did not provide custom lldb-mi
         ) {
@@ -350,13 +353,22 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Pick process if process id is empty
         if (config.request === "attach" && !config.processId) {
             let processId: string | undefined;
-            if (config.pipeTransport || config.useExtendedRemote) {
-                const remoteAttachPicker: RemoteAttachPicker = new RemoteAttachPicker();
-                processId = await remoteAttachPicker.ShowAttachEntries(config);
-            } else {
-                const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
-                const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
-                processId = await attacher.ShowAttachEntries(token);
+
+            // If program is specified and not remote attach, try to find the matching process by name
+            if (config.program && !config.pipeTransport && !config.useExtendedRemote) {
+                processId = await this.findProcessByProgramName(config.program, token);
+            }
+
+            // Fall back to process picker if program wasn't specified or didn't match
+            if (!processId) {
+                if (config.pipeTransport || config.useExtendedRemote) {
+                    const remoteAttachPicker: RemoteAttachPicker = new RemoteAttachPicker();
+                    processId = await remoteAttachPicker.ShowAttachEntries(config);
+                } else {
+                    const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
+                    const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
+                    processId = await attacher.ShowAttachEntries(token);
+                }
             }
 
             if (processId) {
@@ -578,19 +590,61 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         return `${localize("build.and.debug.active.file", 'build and debug active file')}`;
     }
 
-    private isClConfiguration(configurationLabel: string): boolean {
-        return configurationLabel.startsWith("C/C++: cl.exe");
+    private isClConfiguration(configurationLabel?: string): boolean {
+        return !!configurationLabel?.startsWith("C/C++: cl.exe");
     }
 
-    private showErrorIfClNotAvailable(_configurationLabel: string): boolean {
-        if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
-            void vscode.window.showErrorMessage(localize({
+    /**
+     * @returns `true` if the VS developer environment is not available and an error was shown to the user,
+     * `false` if the VS developer environment is available or the user chose to apply it.
+     */
+    private async showErrorIfClNotAvailable(_configurationLabel: string): Promise<boolean> {
+        const hasEnvironment = util.hasMsvcEnvironment();
+        if (hasEnvironment) {
+            if (await canFindCl()) {
+                return false; // No error to show
+            }
+            // The user has an environment but cl.exe cannot be found. Prompt the user to update the environment.
+        }
+
+        const applyButton = localize("apply.dev.env", "Apply Developer Environment");
+        const applyMessage = localize(
+            {
                 key: "cl.exe.not.available",
-                comment: ["{0} is a command option in a menu. {1} is the product name \"Developer Command Prompt for VS\"."]
-            }, "{0} is only usable when VS Code is run from the {1}.", `cl.exe ${this.buildAndDebugActiveFileStr()}`, "Developer Command Prompt for VS"));
+                comment: ["{0} is a command option in a menu."]
+            },
+            "{0} requires the Visual Studio developer environment.", `cl.exe ${this.buildAndDebugActiveFileStr()}`);
+        const updateButton = localize("update.dev.env", "Update Developer Environment");
+        const updateMessage = localize(
+            {
+                key: "update.dev.env",
+                comment: ["{0} is a command option in a menu."]
+            },
+            "{0} requires the Visual Studio developer environment to be updated.", `cl.exe ${this.buildAndDebugActiveFileStr()}`);
+        const cancel = localize("cancel", "Cancel");
+        const response = await vscode.window.showErrorMessage(
+            hasEnvironment ? updateMessage : applyMessage,
+            hasEnvironment ? updateButton : applyButton,
+            cancel);
+        if (response === applyButton || response === updateButton) {
+            try {
+                await vscode.commands.executeCommand('C_Cpp.SetVsDeveloperEnvironment', 'buildAndDebug');
+            } catch {
+                // Ignore the error, the user will be prompted to apply the environment manually.
+            }
+        }
+        if (response === cancel || response === undefined) {
+            // A message was already shown, so exit early noting that the environment is not available. We don't need to show another error message.
             return true;
         }
-        return false;
+
+        if (util.hasMsvcEnvironment() && await canFindCl()) {
+            return false;
+        }
+        const notAppliedMessage = localize("dev.env.not.applied", "The source code could not be built because the Visual Studio developer environment was not applied.");
+        const notFoundMessage = localize("dev.env.not.found", "The source code could not be built because the Visual C++ compiler could not be found.");
+        void vscode.window.showErrorMessage(hasEnvironment ? notFoundMessage : notAppliedMessage);
+        return true;
     }
 
     private getLLDBFrameworkPath(): string | undefined {
@@ -602,7 +656,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         ];
 
         for (const searchPath of searchPaths) {
-            if (fs.existsSync(path.join(searchPath, LLDBFramework))) {
+            if (util.checkDirectoryExistsSync(path.join(searchPath, LLDBFramework))) {
                 // Found a framework that 'lldb-mi' can use.
                 return searchPath;
             }
@@ -664,7 +718,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, undefined);
                 if (sourceFileMapSource !== newSourceFileMapSource) {
                     message = "\t" + localize("replacing.sourcepath", "Replacing {0} '{1}' with '{2}'.", "sourcePath", sourceFileMapSource, newSourceFileMapSource);
-                    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                     delete config.sourceFileMap[sourceFileMapSource];
                     source = newSourceFileMapSource;
                 }
@@ -744,7 +797,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     private findDefaultConfig(configs: CppDebugConfiguration[]): CppDebugConfiguration[] {
-        // eslint-disable-next-line no-prototype-builtins
         return configs.filter((config: CppDebugConfiguration) => config.hasOwnProperty("isDefault") && config.isDefault);
     }
 
@@ -967,7 +1019,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 placeHolder: items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration")
             });
         }
-        if (selection && this.isClConfiguration(selection.configuration.name) && this.showErrorIfClNotAvailable(selection.configuration.name)) {
+        if (selection && this.isClConfiguration(selection.configuration.name) && await this.showErrorIfClNotAvailable(selection.configuration.name)) {
             return;
         }
         return selection?.configuration;
@@ -1110,6 +1162,44 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
         }
         return true;
+    }
+
+    private async findProcessByProgramName(
+        programPath: string,
+        token?: vscode.CancellationToken
+    ): Promise<string | undefined> {
+        // Validate that the program path is valid
+        if (!await util.checkExecutableWithoutExtensionExists(programPath)) {
+            return undefined;
+        }
+
+        const programBaseName: string = path.basename(programPath);
+
+        // Get the process list using the same logic as interactive attach
+        const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
+        const processes: AttachItem[] = await attachItemsProvider.getAttachItems(token);
+
+        // Prepare target name for matching (case-insensitive on Windows only)
+        let targetName: string = programBaseName;
+        if (isWindows) {
+            targetName = targetName.toLowerCase();
+            targetName = targetName.endsWith(".exe") ? targetName : (targetName + ".exe");
+        }
+
+        // Find processes matching the program name
+        const matchingProcesses: AttachItem[] = processes.filter(p => {
+            const processName: string = isWindows ? p.label.toLowerCase() : p.label;
+            return processName === targetName;
+        });
+
+        if (matchingProcesses.length === 0) {
+            return undefined;
+        } else if (matchingProcesses.length === 1) {
+            return matchingProcesses[0].id;
+        } else {
+            // Multiple matches - let the user choose
+            return showQuickPick(() => Promise.resolve(matchingProcesses));
+        }
     }
 }
 

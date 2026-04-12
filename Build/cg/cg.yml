@@ -4,6 +4,7 @@ trigger:
     include:
     - main
     - release
+    - insiders
 
 schedules:
 - cron: 30 5 * * 0
@@ -30,13 +31,15 @@ extends:
   parameters:
     pool:
       name: AzurePipelines-EO
-      image: AzurePipelinesWindows2022compliantGPT
+      image: 1ESPT-Windows2025
       os: windows
     sdl:
       sourceAnalysisPool:
         name: AzurePipelines-EO
-        image: AzurePipelinesWindows2022compliantGPT
+        image: 1ESPT-Windows2025
         os: windows
+      binskim:
+        preReleaseVersion: '4.3.1'
       tsa:
         enabled: true
         config:
@@ -57,6 +60,8 @@ extends:
         enabled: true
     featureFlags:
       autoBaseline: false
+    settings:
+      networkIsolationPolicy: Permissive,CFSClean,CFSClean2,CFSClean3
 
     stages:
     - stage: build
@@ -76,9 +81,6 @@ extends:
         steps:
         - checkout: self
 
-        - task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
-          displayName: Use Yarn 1.x
-
         - task: UseNode@1
           displayName: Use Node 22.x
           inputs:
@@ -87,26 +89,32 @@ extends:
         - script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
           displayName: Delete .npmrc if it exists
 
-        - task: Npm@0
-          displayName: Install vsce
-          inputs:
-            arguments: --global @vscode/vsce
-
         - script: mkdir $(Build.ArtifactStagingDirectory)\Extension
           displayName: Create Extension Staging Directory
 
-        - script: yarn run vsix-prepublish
+        - task: Bash@3
           displayName: Build files
+          inputs:
+            targetType: 'inline'
+            script: |
+              export SRC_DIR=$(echo $BUILD_SOURCESDIRECTORY | sed 's|\\|/|g')
+              cd "$SRC_DIR/Extension"
+              npm run vsix-prepublish
+              if [ $? -ne 0 ]; then
+                echo "npm run vsix-prepublish failed, sleeping for 30s before retrying..."
+                sleep 30
+                exit 1
+              fi
+          retryCountOnTaskFailure: 3
+
+        - script: yarn install --frozen-lockfile
+          displayName: Install dependencies with yarn
           workingDirectory: $(Build.SourcesDirectory)\Extension
 
-        - script: |
-            cd $(Build.SourcesDirectory)\Extension
-            vsce package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
-          name: ProcessRunner_12
-          displayName: Run VSCE to package vsix
+        - script: if not exist node_modules\@vscode\vsce-sign\bin\vsce-sign.exe (echo Missing vsce-sign.exe && exit 1)
+          displayName: Verify vsce-sign binary exists
+          workingDirectory: $(Build.SourcesDirectory)\Extension
 
-        - task: Npm@0
-          displayName: Uninstall vsce
-          inputs:
-            command: uninstall
-            arguments: --global @vscode/vsce
+        - script: npx vsce package --yarn -o $(Build.ArtifactStagingDirectory)\Extension\cpptools.vsix
+          displayName: Run VSCE to package vsix
+          workingDirectory: $(Build.SourcesDirectory)\Extension

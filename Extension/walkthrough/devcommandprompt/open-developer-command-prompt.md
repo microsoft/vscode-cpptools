@@ -1,7 +1,18 @@
-<h1 data-loc-id="walkthrough.windows.title.open.dev.command.prompt">Relaunch using the <span>Developer Command Prompt for VS</span></h1>
-<p data-loc-id="walkthrough.windows.background.dev.command.prompt"> You are using a Windows machine with the MSVC compiler, so you need to start VS Code from the <span>Developer Command Prompt for VS</span> for all environment variables to be set correctly. To relaunch using the <span>Developer Command Prompt for VS</span>:</p>
+<h1 data-loc-id="walkthrough.windows.title.apply.dev.env">Apply the Visual Studio developer environment</h1>
+<p data-loc-id="walkthrough.windows.dev.env.required">The Visual Studio C++ compiler requires several environment variables to be set in order to successfully compile your code. If you are using a Windows machine with the Visual Studio C++ compiler, there are two ways you can ensure the environment is applied.</p>
+<p data-loc-id="walkthrough.windows.do.one"> You only need to do one of the following:</p>
+<ul>
+<li><p data-loc-id="walkthrough.windows.run.dev.command">Run the <code data-loc-id="walkthrough.windows.set.dev.environment">C/C++: Set Visual Studio Developer Environment</code> command</p>
+</li>
+<li><p data-loc-id="walkthrough.windows.start.from.dev.command">Start VS Code from the <span>Developer Command Prompt for VS</span></p>
+</li>
+</ul>
+<h3 data-loc-id="walkthrough.windows.relaunch.command.prompt">To relaunch VS Code using the <span>Developer Command Prompt for VS</span></h3>
 <ol>
-<li><p data-loc-id="walkthrough.open.command.prompt">Open the <span>Developer Command Prompt for VS</span> by typing "<span>developer</span>" in the Windows Start menu. Select the <span>Developer Command Prompt for VS</span>, which will automatically navigate to your current open folder.</p>
+<li><p data-loc-id="walkthrough.close.vscode">Close the current instance of VS Code.</p>
 </li>
-<li><p data-loc-id="walkthrough.windows.press.f5">Type "<span>code</span>" into the command prompt and hit enter. This should relaunch VS Code and take you back to this walkthrough. </p>
+<li><p data-loc-id="walkthrough.open.command.prompt">Open the <span>Developer Command Prompt for VS</span> by typing <code>developer</code> in the Windows Start menu then select the <span>Developer Command Prompt for VS</span>.</p>
 </li>
+<li><p data-loc-id="walkthrough.windows.press.f5">Type <code>code</code> into the command prompt and hit enter. This should relaunch VS Code in the same workspace and take you back to this walkthrough.</p>
+</li>
+</ol>

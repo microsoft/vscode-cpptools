@@ -46,7 +46,7 @@
 	"aborting_tag_parse_at_root": "ルートでのタグ解析を中止しています",
 	"unable_to_retrieve_to_reset_timestamps": "タイムスタンプをリセットするための DB レコードを取得できません。エラー = {0}",
 	"failed_to_reset_timestamps_for": "{0} のタイムスタンプをリセットできませんでした: エラー = {1}",
-	"no_suitable_complier": "適切なコンパイラが見つかりませんでした。c_cpp_properties.json の \"compilerPath\" を設定してください。",
+	"no_suitable_compiler": "適切なコンパイラが見つかりませんでした。c_cpp_properties.json の \"compilerPath\" を設定してください。",
 	"compiler_include_not_found": "コンパイラのインクルード パスが見つかりませんでした: {0}",
 	"intellisense_not_responding": "IntelliSense エンジンが応答していません。代わりにタグ パーサーを使用します。",
 	"tag_parser_will_be_used": "タグ パーサーは {0} で IntelliSense 操作に使用されます",

@@ -44,7 +44,7 @@
     "aborting_tag_parse_at_root": "Aborting tag parse at root",
     "unable_to_retrieve_to_reset_timestamps": "Unable to retrieve DB records to reset timestamps: error = {0}",
     "failed_to_reset_timestamps_for": "Failed to reset timestamp for {0}: error = {1}",
-    "no_suitable_complier": "No suitable compiler found. Please set the \"compilerPath\" in c_cpp_properties.json.",
+    "no_suitable_compiler": "No suitable compiler found. Please set the \"compilerPath\" in c_cpp_properties.json.",
     "compiler_include_not_found": "Compiler include path not found: {0}",
     "intellisense_not_responding": "IntelliSense engine is not responding. Using the Tag Parser instead.",
     "tag_parser_will_be_used": "Tag Parser will be used for IntelliSense operations in: {0}",

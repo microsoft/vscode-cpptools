@@ -5,16 +5,28 @@ parameters:
 - name: srcDir
   type: string
   default: ''
+- name: signType
+  type: string
+  default: 'real'
 
 jobs:
 - job: package
-  displayName: Build ${{ parameters.vsixName }}
+  displayName: Build ${{ parameters.vsixName }}.vsix
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 1
   templateContext:
+    mb: # Enable the MicroBuild Signing toolset
+      signing:
+        enabled: true
+        signType: ${{ parameters.signType }}
+        zipSources: false
+        ${{ if eq(parameters.signType, 'real') }}:
+          signWithProd: true
+    featureFlags:
+      autoBaseline: false
     outputs:
     - output: pipelineArtifact
-      displayName: '${{ parameters.vsixName }}'
+      displayName: '${{ parameters.vsixName }}.vsix'
       targetPath: $(Build.ArtifactStagingDirectory)\vsix
       artifactName: vsix
 
@@ -26,24 +38,58 @@ jobs:
     inputs:
       version: 22.x
 
-  - task: Npm@0
-    displayName: Install vsce
-    inputs:
-      arguments: --global @vscode/vsce
+  - script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
+    displayName: Delete .npmrc if it exists
 
-  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
-    displayName: Use Yarn 1.x
+  - task: Bash@3
+    displayName: Build files
+    inputs:
+      targetType: 'inline'
+      script: |
+        export SRC_DIR=$(echo $BUILD_SOURCESDIRECTORY | sed 's|\\|/|g')
+        cd "$SRC_DIR/${{ parameters.srcDir }}"
+        npm install
+        if [ $? -ne 0 ]; then
+          echo "npm install failed, sleeping for 30s before retrying..."
+          sleep 30
+          exit 1
+        fi
+    retryCountOnTaskFailure: 3
 
   - script: mkdir $(Build.ArtifactStagingDirectory)\vsix
     displayName: Create Staging Directory
 
-  - script: |
-      cd $(Build.SourcesDirectory)\${{ parameters.srcDir }}
-      vsce package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}
-    displayName: Run VSCE to package vsix
+  - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.7.1
+    displayName: Install vsce
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
 
-  - task: Npm@0
-    displayName: Uninstall vsce
+  - script: npm rebuild @vscode/vsce-sign --ignore-scripts=false
+    displayName: Rebuild vsce-sign binary
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+
+  - script: if not exist node_modules\@vscode\vsce-sign\bin\vsce-sign.exe (echo Missing vsce-sign.exe && exit 1)
+    displayName: Verify vsce-sign binary exists
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+
+  - script: npx vsce package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix
+    displayName: Run VSCE to package vsix
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+
+# sign the vsix
+  - script: npx vsce generate-manifest -i $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest
+    displayName: generate manifest
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+  - script: copy $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
+    displayName: prepare manifest for signing
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+  - task: NuGetToolInstaller@1
+    displayName: Install NuGet
+  - task: NuGetAuthenticate@1
+    displayName: Authenticate NuGet
+  - script: nuget restore $(Build.SourcesDirectory)\Build\signing\SignVsix.proj -PackagesDirectory $(Build.SourcesDirectory)\Build\signing\packages -ConfigFile $(Build.SourcesDirectory)\Build\signing\NuGet.config
+    displayName: Restore MicroBuild Core
+  - task: MSBuild@1
+    displayName: Sign the vsix
     inputs:
-      command: uninstall
-      arguments: --global @vscode/vsce
+      solution: $(Build.SourcesDirectory)\Build\signing\SignVsix.proj
+      msbuildArguments: /p:SignType=${{ parameters.signType }}

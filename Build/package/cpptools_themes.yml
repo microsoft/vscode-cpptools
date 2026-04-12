@@ -24,13 +24,15 @@ extends:
   parameters:
     pool:
       name: AzurePipelines-EO
-      image: AzurePipelinesWindows2022compliantGPT
+      image: 1ESPT-Windows2025
       os: windows
     sdl:
       sourceAnalysisPool:
         name: AzurePipelines-EO
-        image: AzurePipelinesWindows2022compliantGPT
+        image: 1ESPT-Windows2025
         os: windows
+    settings:
+      networkIsolationPolicy: Permissive,CFSClean,CFSClean2,CFSClean3
 
     stages:
     - stage: package
@@ -44,5 +46,5 @@ extends:
 
       - template: /Build/package/jobs_package_vsix.yml@self
         parameters:
-          vsixName: cpptools-themes.vsix
+          vsixName: cpptools-themes
           srcDir: Themes
