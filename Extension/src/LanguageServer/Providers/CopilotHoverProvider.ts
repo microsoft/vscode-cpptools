@@ -43,7 +43,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         if (vscodelm) {
             try {
                 let model: vscode.LanguageModelChat | undefined;
-                if (this.chatModelId == undefined) {
+                if (this.chatModelId === undefined) {
                     // First look for GPT-4o which should be available to all
                     // users and have a 0x multiplier on paid plans.
                     // GPT-4o is faster than the x0 GPT-5-mini (which seems too slow for hover, e.g. 10+ seconds).
