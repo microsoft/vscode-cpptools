@@ -1703,6 +1703,12 @@
                         "description": "%c_cpp.configuration.doxygen.generateOnType.description%",
                         "scope": "resource"
                     },
+                    "C_Cpp.doxygen.generateOnCodeAction": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "%c_cpp.configuration.doxygen.generateOnCodeAction.description%",
+                        "scope": "resource"
+                    },
                     "C_Cpp.doxygen.generatedStyle": {
                         "type": "string",
                         "enum": [
