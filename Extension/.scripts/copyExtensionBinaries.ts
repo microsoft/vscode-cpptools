@@ -80,7 +80,9 @@ async function findLatestInstalledExtension(providedPath?: string): Promise<stri
 
     const searchRoots: string[] = [
         join(homedir(), '.vscode', 'extensions'),
-        join(homedir(), '.vscode-insiders', 'extensions')
+        join(homedir(), '.vscode-insiders', 'extensions'),
+        join(homedir(), '.vscode-server', 'extensions'),
+        join(homedir(), '.vscode-server-insiders', 'extensions')
     ];
 
     const installed: InstalledExtension[] = (await Promise.all(searchRoots.map(each => getInstalledExtensions(each)))).flat();
