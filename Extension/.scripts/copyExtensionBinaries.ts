@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { $args, $root, green, heading, note } from './common';
 
 const extensionPrefix = 'ms-vscode.cpptools-';
-const foldersToCopy = ['bin', 'debugAdapters'] as const;
+const foldersToCopy = ['bin', 'debugAdapters', 'LLVM'] as const;
 
 type InstalledExtension = {
     path: string;
