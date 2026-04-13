@@ -58,6 +58,10 @@ function disposeTerminals(programs: string[]): void {
     }
 }
 
+/**
+ * Sets or clears the setting for the default Windows terminal profile.
+ * @param profile The terminal profile to set as the default, or undefined to clear the setting.
+ */
 async function setWindowsDefaultTerminalProfile(profile?: WindowsTerminalProfile): Promise<void> {
     if (!isWindows) {
         return;
@@ -136,11 +140,11 @@ suite('Run Without Debugging Terminal and Arguments Test', function (this: Mocha
         }
     });
 
-    const consoleCases: { label: string; consoleMode: ConsoleMode; windowsProfiles?: WindowsTerminalProfile[] }[] = [
+    const consoleCases: { label: string; consoleMode: ConsoleMode; windowsProfiles?: (WindowsTerminalProfile | undefined)[] }[] = [
         {
             label: 'integrated terminal',
             consoleMode: 'integratedTerminal',
-            windowsProfiles: ['Command Prompt', 'PowerShell']
+            windowsProfiles: [undefined, 'Command Prompt', 'PowerShell']
         },
         {
             label: 'external terminal',
@@ -164,11 +168,9 @@ suite('Run Without Debugging Terminal and Arguments Test', function (this: Mocha
             const profiles: (WindowsTerminalProfile | undefined)[] = isWindows && consoleCase.consoleMode === 'integratedTerminal' ? consoleCase.windowsProfiles ?? [undefined] : [undefined];
 
             for (const profile of profiles) {
-                const profileSuffix = profile ? ` with ${profile} as the default terminal` : '';
+                const profileSuffix = profile ? ` with ${profile} as the default terminal` : consoleCase.consoleMode === 'integratedTerminal' ? ' with default terminal' : '';
                 test(`No-debug launch via ${consoleCase.label} handles ${programCase.label}${profileSuffix}`, async () => {
-                    if (profile) {
-                        await setWindowsDefaultTerminalProfile(profile);
-                    }
+                    await setWindowsDefaultTerminalProfile(profile);
 
                     disposeTerminals(executablePaths);
                     const sessionName = `Run Without Debugging Args (${consoleCase.consoleMode}, ${path.basename(programCase.programPath)}${profile ? `, ${profile}` : ''})`;

@@ -9,6 +9,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { buildShellCommandLine, sessionIsWsl } from '../common';
+import { isWindows } from '../constants';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize = nls.loadMessageBundle();
@@ -116,7 +117,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
                     ? this.terminal.creationOptions.shellPath?.toLowerCase()
                     : undefined;
                 const terminalShell: string | undefined = this.terminal.state.shell?.toLowerCase();
-                const defaultTerminalProfile: string | undefined = os.platform() === 'win32'
+                const defaultTerminalProfile: string | undefined = isWindows
                     ? vscode.workspace.getConfiguration('terminal.integrated').get<string>('defaultProfile.windows')?.toLowerCase()
                     : undefined;
                 const isPowerShell: boolean | undefined =
@@ -124,7 +125,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
                     terminalShell?.includes('powershell') || terminalShell?.includes('pwsh') ||
                     defaultTerminalProfile?.includes('powershell') || defaultTerminalProfile?.includes('pwsh');
 
-                if (isPowerShell) {
+                if (isPowerShell || (isWindows && isPowerShell === undefined)) { // PowerShell is the default on Windows if we can't determine the shell.
                     executable = '&';
                     executableArgs = [program, ...args];
                 } else {
