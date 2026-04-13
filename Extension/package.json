@@ -6805,6 +6805,7 @@
         "generate-native-strings": "ts-node -T ./.scripts/generateNativeStrings.ts",
         "generate-options-schema": "ts-node -T ./.scripts/generateOptionsSchema.ts",
         "copy-walkthrough-media": "ts-node -T ./.scripts/copyWalkthruMedia.ts",
+        "copy-extension-binaries": "ts-node -T ./.scripts/copyExtensionBinaries.ts",
         "translations-export": "yarn install && yarn prep && yarn generate-native-strings && gulp translations-export",
         "translations-generate": "gulp translations-generate",
         "translations-import": "gulp translations-import",
