@@ -41,11 +41,12 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         const vscodelm = getVSCodeLanguageModel();
         if (vscodelm) {
             try {
-                // First look for GPT-5-mini which should be available to all
+                // First look for GPT-4o which should be available to all
                 // users and have a 0x multiplier on paid plans.
-                let [model] = await vscodelm.selectChatModels({ ...modelSelector, id: 'gpt-5-mini' });
+                // GTP-4o is faster than GPT-5-mini (which seems too slow for hover, e.g. 10+ seconds).
+                let [model] = await vscodelm.selectChatModels({ ...modelSelector, id: 'gpt-4o' });
                 if (!model) {
-                    // If GPT-5-mini is not available, fall back to the first available model
+                    // If GPT-4o is not available, fall back to the first available model.
                     [model] = await vscodelm.selectChatModels(modelSelector);
                 }
                 if (!model) {
