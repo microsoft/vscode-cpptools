@@ -1567,6 +1567,34 @@ export function hasMsvcEnvironment(): boolean {
     );
 }
 
+export function getMissingMsvcEnvironmentVariables(): string[] {
+    const msvcEnvVars: string[] = [
+        'DevEnvDir',
+        'Framework40Version',
+        'FrameworkDir',
+        'FrameworkVersion',
+        'INCLUDE',
+        'LIB',
+        'LIBPATH',
+        'UCRTVersion',
+        'UniversalCRTSdkDir',
+        'VCIDEInstallDir',
+        'VCINSTALLDIR',
+        'VCToolsRedistDir',
+        'VisualStudioVersion',
+        'VSINSTALLDIR',
+        'WindowsLibPath',
+        'WindowsSdkBinPath',
+        'WindowsSdkDir',
+        'WindowsSDKLibVersion',
+        'WindowsSDKVersion'
+    ];
+    return msvcEnvVars.filter(envVarName =>
+        (process.env[envVarName] === undefined || process.env[envVarName] === '') &&
+        extensionContext?.environmentVariableCollection?.get(envVarName) === undefined
+    );
+}
+
 function isIntegral(str: string): boolean {
     const regex = /^-?\d+$/;
     return regex.test(str);
@@ -1667,7 +1695,7 @@ export interface IQuotedString {
 
 export type CommandString = string | IQuotedString;
 
-export function buildShellCommandLine(originalCommand: CommandString, command: CommandString, args: CommandString[]): string {
+export function buildShellCommandLine(originalCommand: CommandString, command: CommandString, args: CommandString[], singleCommandOnly: boolean = false): string {
 
     let shellQuoteOptions: IShellQuotingOptions;
     const isWindows: boolean = os.platform() === 'win32';
@@ -1781,7 +1809,7 @@ export function buildShellCommandLine(originalCommand: CommandString, command: C
 
     let commandLine = result.join(' ');
     // There are special rules quoted command line in cmd.exe
-    if (isWindows) {
+    if (isWindows && !singleCommandOnly) {
         commandLine = `chcp 65001>nul && ${commandLine}`;
         if (commandQuoted && argQuoted) {
             commandLine = '"' + commandLine + '"';
@@ -1848,4 +1876,15 @@ export function getVSCodeLanguageModel(): any | undefined {
         return undefined;
     }
     return vscodelm;
+}
+
+export function sessionIsWsl(): boolean {
+    if (process.env.WSL_DISTRO_NAME) {
+        return true;
+    }
+    try {
+        return fs.readFileSync('/proc/version', 'utf8').toLowerCase().includes('microsoft');
+    } catch {
+        return false;
+    }
 }
