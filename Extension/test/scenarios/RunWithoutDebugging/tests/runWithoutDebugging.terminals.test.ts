@@ -108,6 +108,7 @@ suite('Run Without Debugging Terminal and Arguments Test', function (this: Mocha
         'two words',
         path.join(workspacePath, 'input folder', 'three words.txt')
     ];
+    const skipExternalConsole = process.env.SCENARIO_ARGS?.includes('skipExternalConsole');
 
     suiteSetup(async function (): Promise<void> {
         const extension: vscode.Extension<any> = vscode.extensions.getExtension('ms-vscode.cpptools') || assert.fail('Extension not found');
@@ -170,6 +171,10 @@ suite('Run Without Debugging Terminal and Arguments Test', function (this: Mocha
             for (const profile of profiles) {
                 const profileSuffix = profile ? ` with ${profile} as the default terminal` : consoleCase.consoleMode === 'integratedTerminal' ? ' with default terminal' : '';
                 test(`No-debug launch via ${consoleCase.label} handles ${programCase.label}${profileSuffix}`, async () => {
+                    if (skipExternalConsole && consoleCase.consoleMode === 'externalTerminal') {
+                        console.log(`\tSkipping external terminal test for ${programCase.label}`);
+                        return;
+                    }
                     await setWindowsDefaultTerminalProfile(profile);
 
                     disposeTerminals(executablePaths);
