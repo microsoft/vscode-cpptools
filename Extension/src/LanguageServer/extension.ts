@@ -23,6 +23,9 @@ import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
 import { CopilotHoverProvider } from './Providers/CopilotHoverProvider';
+import { sendCallHierarchyCallsFromRequest, sendCallHierarchyCallsToRequest, sendPrepareCallHierarchyRequest } from './Providers/callHierarchyProvider';
+import { sendFindAllReferencesRequest } from './Providers/findAllReferencesProvider';
+import { sendGoToDefinitionRequest } from './Providers/goToDefinitionProvider';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
@@ -397,6 +400,11 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowActiveCodeAnalysisCommands', enabled ? onShowActiveCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowIdleCodeAnalysisCommands', enabled ? onShowIdleCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', enabled ? onShowReferencesProgress : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.FindAllReferences', enabled ? onFindAllReferences : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToDefinition', enabled ? onGoToDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PrepareCallHierarchy', enabled ? onPrepareCallHierarchy : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CallHierarchyCallsTo', enabled ? onCallHierarchyCallsTo : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CallHierarchyCallsFrom', enabled ? onCallHierarchyCallsFrom : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', enabled ? onTakeSurvey : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', enabled ? onLogDiagnostics : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', enabled ? onRescanWorkspace : onDisabledCommand));
@@ -806,6 +814,77 @@ function onShowIdleCodeAnalysisCommands(): Promise<void> {
 
 function onShowReferencesProgress(): void {
     void clients.ActiveClient.handleReferencesIcon().catch(logAndReturn.undefined);
+}
+
+async function onFindAllReferences(uri: vscode.Uri, position: vscode.Position, token?: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+    if (!uri || !position) {
+        throw new Error("C_Cpp.FindAllReferences requires both a uri and position.");
+    }
+
+    const client: Client = clients.getClientFor(uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    await client.ready;
+    const result = await sendFindAllReferencesRequest(client, uri, position, token ?? CancellationToken.None);
+    return result?.locations;
+}
+
+async function onGoToDefinition(uri: vscode.Uri, position: vscode.Position, token?: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+    if (!uri || !position) {
+        throw new Error("C_Cpp.GoToDefinition requires both a uri and position.");
+    }
+
+    const client: Client = clients.getClientFor(uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    await client.ready;
+    return sendGoToDefinitionRequest(client, uri, position, token ?? CancellationToken.None);
+}
+
+async function onPrepareCallHierarchy(uri: vscode.Uri, position: vscode.Position, token?: vscode.CancellationToken): Promise<vscode.CallHierarchyItem[] | undefined> {
+    if (!uri || !position) {
+        throw new Error("C_Cpp.PrepareCallHierarchy requires both a uri and position.");
+    }
+
+    const client: Client = clients.getClientFor(uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    await client.ready;
+    return sendPrepareCallHierarchyRequest(client, uri, position, token ?? CancellationToken.None);
+}
+
+async function onCallHierarchyCallsTo(item: vscode.CallHierarchyItem, token?: vscode.CancellationToken): Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
+    if (!item) {
+        throw new Error("C_Cpp.CallHierarchyCallsTo requires an item.");
+    }
+
+    const client: Client = clients.getClientFor(item.uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    await client.ready;
+    return sendCallHierarchyCallsToRequest(client, item, token ?? CancellationToken.None);
+}
+
+async function onCallHierarchyCallsFrom(item: vscode.CallHierarchyItem, token?: vscode.CancellationToken): Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {
+    if (!item) {
+        throw new Error("C_Cpp.CallHierarchyCallsFrom requires an item.");
+    }
+
+    const client: Client = clients.getClientFor(item.uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    await client.ready;
+    return sendCallHierarchyCallsFromRequest(client, item, token ?? CancellationToken.None);
 }
 
 function onToggleRefGroupView(): void {
