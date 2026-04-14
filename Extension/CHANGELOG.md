@@ -1,8 +1,32 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.31.3: March 23, 2026
+## Version 1.32.0: April 14, 2026
+### New Feature
+* Add support for run without debugging. [#1201](https://github.com/microsoft/vscode-cpptools/issues/1201)
+
+### Enhancements
+* Add a `C_Cpp.doxygen.generateOnCodeAction` setting to allow disabling of Doxygen generation code actions. [#14341](https://github.com/microsoft/vscode-cpptools/issues/14341)
+* Improve wildcard matching with the debugger natvis. [MIEngine#1162](https://github.com/microsoft/MIEngine/issues/1162)
+* Add support for `HideRawView` with the debugger natvis. [MIEngine#1458](https://github.com/microsoft/MIEngine/issues/1458)
+
+### Bug Fixes
+* Fix high CPU usage caused by repeated calls to `selectChatModels`. [#14168](https://github.com/microsoft/vscode-cpptools/issues/14168), [#14211](https://github.com/microsoft/vscode-cpptools/issues/14211), [#14241](https://github.com/microsoft/vscode-cpptools/issues/14241)
+* Fix the MSVC developer environment not working if `UCRTVersion` isn't found, and update the walkthrough instructions for installing MSVC. [#14352](https://github.com/microsoft/vscode-cpptools/issues/14352)
+* Fix Copilot hover taking too many premium requests. [#14372](https://github.com/microsoft/vscode-cpptools/issues/14372)
+* Fix null pointers being expandable for variables in the debugger. [MIEngine#698](https://github.com/microsoft/MIEngine/issues/698)
+* Fix recursive `{this}` evaluation with the debugger natvis. [MIEngine#1391](https://github.com/microsoft/MIEngine/issues/1391)
+* Update clang-tidy and clang-format from 22.1.1 to 22.1.3 (bug fixes).
+* Fix a bug with semantic colorization of operators.
+
+## Version 1.31.4: March 31, 2026
+### Bug Fix
+* Debugging cpptools and cpptools-srv processes on macOS (to get call stacks) is now blocked when SIP is enabled (due to a potential security issue).
+
+## Version 1.31.3: March 24, 2026
+### Enhancements
 * Add support for `program` in attach debug configurations. [#14046](https://github.com/microsoft/vscode-cpptools/issues/14046)
   * Thanks for the contribution. [@Subham-KRLX (Subham)](https://github.com/Subham-KRLX) [PR #14108](https://github.com/microsoft/vscode-cpptools/pull/14108)
+* Remove unnecessary `console.debug` logging. [#14294](https://github.com/microsoft/vscode-cpptools/issues/14294)
 * Update clang-tidy and clang-format from 21.1.4 to 22.1.1.
 * Update support for the latest compiler versions.
 * Update SQLite to the latest version.
@@ -12,6 +36,9 @@
 * Fix `embed-dir` compiler arguments not being handled for IntelliSense. [#14154](https://github.com/microsoft/vscode-cpptools/issues/14154)
 * Fix workspace symbol search with `scope::variable` not working after symbols are deleted and then added back. [#14200](https://github.com/microsoft/vscode-cpptools/issues/14200)
 * Fix bugs where a path was checked for existence but not whether it was a file or a folder. [#14257](https://github.com/microsoft/vscode-cpptools/issues/14257)
+* Fix the Call Hierarchy Callers Of progress UI not showing. [#14287](https://github.com/microsoft/vscode-cpptools/issues/14287)
+* Fix an IntelliSense crash when using GCC 16 `span` and `string`. [#14309](https://github.com/microsoft/vscode-cpptools/issues/14309)
+* Fix `_CONTROL_FLOW_GUARD` not being defined when `/guard:cf` is used in MSVC mode. [#14310](https://github.com/microsoft/vscode-cpptools/issues/14310)
 * Add IntelliSense support for `__builtin_is_implicit_lifetime`.
 * Fix three IntelliSense process crashes.
 * Fix some missing translations.
