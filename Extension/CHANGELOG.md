@@ -1,5 +1,19 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.32.0: April 14, 2026
+### New Feature
+* Add support for run without debugging. [#1201](https://github.com/microsoft/vscode-cpptools/issues/1201)
+
+### Enhancement
+* Add a `C_Cpp.doxygen.generateOnCodeAction` setting to allow disabling of Doxygen generation code actions. [#14341](https://github.com/microsoft/vscode-cpptools/issues/14341)
+
+### Bug Fixes
+* Fix high CPU usage caused by repeated calls to `selectChatModels`. [#14168](https://github.com/microsoft/vscode-cpptools/issues/14168), [#14211](https://github.com/microsoft/vscode-cpptools/issues/14211), [#14241](https://github.com/microsoft/vscode-cpptools/issues/14241)
+* Fix the MSVC developer environment not working if `UCRTVersion` isn't found, and update the walkthrough instructions for installing MSVC. [#14352](https://github.com/microsoft/vscode-cpptools/issues/14352)
+* Fix Copilot hover taking too many premium requests. [#14372](https://github.com/microsoft/vscode-cpptools/issues/14372)
+* Update clang-tidy and clang-format from 22.1.1 to 22.1.3 (bug fixes).
+* Fix a bug with semantic colorization of operators.
+
 ## Version 1.31.4: March 31, 2026
 ### Bug Fix
 * Debugging cpptools and cpptools-srv processes on macOS (to get call stacks) is now blocked when SIP is enabled (due to a potential security issue).
