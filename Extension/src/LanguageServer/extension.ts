@@ -478,11 +478,7 @@ async function onSwitchHeaderSource(): Promise<void> {
         rootUri = vscode.Uri.file(path.dirname(fileName)); // When switching without a folder open.
     }
 
-    await vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        title: localize('switch.header.source', 'Switching Header/Source...'),
-        cancellable: true
-    }, async (_progress, token) => {
+    const switchHeaderSource: (token: vscode.CancellationToken) => Promise<void> = async (token: vscode.CancellationToken) => {
         try {
             let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootUri, fileName, token);
             if (token.isCancellationRequested || !targetFileName) {
@@ -506,7 +502,42 @@ async function onSwitchHeaderSource(): Promise<void> {
             }
             throw e;
         }
-    });
+    };
+
+    const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+    try {
+        const switchHeaderSourcePromise: Promise<void> = switchHeaderSource(tokenSource.token);
+        const showProgress: boolean = await new Promise<boolean>((resolve, reject) => {
+            const timer: NodeJS.Timeout = global.setTimeout(() => resolve(true), 2000);
+            void switchHeaderSourcePromise.then(() => {
+                clearTimeout(timer);
+                resolve(false);
+            }, (e) => {
+                clearTimeout(timer);
+                reject(e);
+            });
+        });
+
+        if (!showProgress) {
+            await switchHeaderSourcePromise;
+            return;
+        }
+
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: localize('switch.header.source', 'Switching Header/Source...'),
+            cancellable: true
+        }, async (_progress, token) => {
+            const cancellationListener: vscode.Disposable = token.onCancellationRequested(() => tokenSource.cancel());
+            try {
+                await switchHeaderSourcePromise;
+            } finally {
+                cancellationListener.dispose();
+            }
+        });
+    } finally {
+        tokenSource.dispose();
+    }
 }
 
 /**
