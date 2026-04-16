@@ -481,7 +481,7 @@ async function onSwitchHeaderSource(): Promise<void> {
     const switchHeaderSource: (token: vscode.CancellationToken) => Promise<void> = async (token: vscode.CancellationToken) => {
         try {
             let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootUri, fileName, token);
-            if (token.isCancellationRequested || !targetFileName) {
+            if (!targetFileName) {
                 return;
             }
             // If the targetFileName has a path that is a symlink target of a workspace folder,

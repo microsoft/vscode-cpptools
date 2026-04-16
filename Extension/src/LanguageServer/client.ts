@@ -3024,14 +3024,22 @@ export class DefaultClient implements Client {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootUri.toString()
         };
-        const request: Promise<string> = this.enqueue(async () => {
+        return this.enqueue(async () => {
             if (token.isCancellationRequested) {
                 throw new vscode.CancellationError();
             }
-            return DefaultClient.withLspCancellationHandling(
-                () => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params, token), token);
+
+            // Don't use withLspCancellationHandling() or withCancellation() here. If the switch target is already known,
+            // the caller should still be able to use it even if the progress notification was just cancelled.
+            try {
+                return await this.languageClient.sendRequest(SwitchHeaderSourceRequest, params, token);
+            } catch (e: any) {
+                if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                    throw new vscode.CancellationError();
+                }
+                throw e;
+            }
         });
-        return withCancellation(request, token);
     }
 
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
