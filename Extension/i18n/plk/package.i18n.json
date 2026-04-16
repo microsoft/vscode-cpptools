@@ -210,6 +210,7 @@
 	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "Znak używany jako separator ścieżek dla wygenerowanych ścieżek użytkowników.",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "W przypadku wartości `true` etykietki narzędzi najechania kursorem oraz automatycznego uzupełniania będą wyświetlać tylko określone etykiety komentarzy ze strukturą. W przeciwnym razie wyświetlane będą wszystkie komentarze.",
 	"c_cpp.configuration.doxygen.generateOnType.description": "Określa, czy komentarz Doxygen ma być wstawiany automatycznie po wpisaniu wybranego stylu komentarza.",
+	"c_cpp.configuration.doxygen.generateOnCodeAction.description": "Określa, czy akcja kodu w celu wygenerowania komentarza Doxygen jest włączona.",
 	"c_cpp.configuration.doxygen.generatedStyle.description": "Ciąg znaków używany jako wiersz początkowy komentarza Doxygen.",
 	"c_cpp.configuration.doxygen.sectionTags.description": "Wybierz tagi sekcji Doxygen, które mają być wyświetlane po zatrzymaniu wskaźnika myszy w obszarze etykietki narzędzia po włączeniu ustawienia „Uprość komentarze strukturalne”. ",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "Wzorzec, który rozpoczyna wielowierszowy lub jednowierszowy blok komentarza. Wartość domyślna wzorca kontynuacji to ` * ` w przypadku wielowierszowych bloków komentarzy lub ten ciąg w przypadku jednowierszowych bloków komentarza.",

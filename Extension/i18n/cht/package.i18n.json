@@ -210,6 +210,7 @@
 	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "作為所產生使用者路徑之路徑分隔符的字元。",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "若為 `true`，暫留與自動完成的工具提示只會顯示特定結構化註解標籤，否則將會顯示所有註解。",
 	"c_cpp.configuration.doxygen.generateOnType.description": "控制是否在輸入選擇的註解樣式後自動插入 Doxygen 註解。",
+	"c_cpp.configuration.doxygen.generateOnCodeAction.description": "控制是否啟用產生 Doxygen 註解的程式碼動作。",
 	"c_cpp.configuration.doxygen.generatedStyle.description": "作為 Doxygen 註解起始行的字元字串。",
 	"c_cpp.configuration.doxygen.sectionTags.description": "選取啟用 [簡化結構化註解] 設定時，要在於工具提示區域暫留時顯示的 [Doxygen] 區段標籤。 ",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "開始多行或單行註解區塊的模式。對於多行註解區塊，接續模式預設為 ` * `，或此字串表示單行註解區塊。",
