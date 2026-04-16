@@ -210,6 +210,7 @@
 	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "O caractere usado como separador de caminho para caminhos de usuário gerados.",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "Se for `true`, as dicas de passar o mouse e autocompletar exibirão apenas alguns rótulos de comentários estruturados. Caso contrário, todos os comentários serão exibidos.",
 	"c_cpp.configuration.doxygen.generateOnType.description": "Controle se o comentário Doxygen deve ser inserido automaticamente depois de digitar o estilo de comentário escolhido.",
+	"c_cpp.configuration.doxygen.generateOnCodeAction.description": "Controla se a ação de código para gerar um comentário do Doxygen está habilitada.",
 	"c_cpp.configuration.doxygen.generatedStyle.description": "A cadeia de caracteres usada como a linha inicial do comentário Doxygen.",
 	"c_cpp.configuration.doxygen.sectionTags.description": "Selecione as tags de seção do Doxygen que você quer exibir ao focalizar na área de dica de ferramenta quando a configuração `Simplificar Comentários Estruturados` estiver habilitada. ",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "O padrão que inicia um bloco de comentário de várias linhas ou de uma linha. O padrão de continuação é `*` para blocos de comentários de várias linhas ou esta cadeia de caracteres para blocos de comentários de uma única linha.",

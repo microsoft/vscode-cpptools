@@ -6,7 +6,7 @@
 {
 	"walkthrough.windows.install.compiler": "Installer un compilateur C++ sur Windows",
 	"walkthrough.windows.text1": "Si vous effectuez un développement C++ pour Windows, nous vous recommandons d’installer le compilateur Microsoft Visual C++ (MSVC).",
-	"walkthrough.windows.text2": "Pour installer MSVC, ouvrez le terminal VS Code (CTRL + `) et collez-le dans la commande suivante :\n",
+	"walkthrough.windows.text2": "Pour installer MSVC, ouvrez le terminal VS Code (CTRL + `) et collez-le dans la commande suivante :",
 	"walkthrough.windows.note1": "Remarque",
 	"walkthrough.windows.note1.text": "Vous pouvez utiliser l’ensemble d’outils C++ à partir de Visual Studio Build Tools avec Visual Studio Code pour compiler, générer et vérifier n’importe quelle base de code C++, tant que vous disposez également d’une licence Visual Studio valide (Community, Pro ou Enterprise) que vous utilisez activement pour développer cette base de code C++.",
 	"walkthrough.windows.verify.compiler": "Vérification de l’installation du compilateur",
