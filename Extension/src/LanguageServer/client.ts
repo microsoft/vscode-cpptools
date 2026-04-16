@@ -811,7 +811,7 @@ export interface Client {
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined>;
     takeOwnership(document: vscode.TextDocument): void;
     sendDidOpen(document: vscode.TextDocument): Promise<void>;
-    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string>;
+    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string>;
     updateActiveDocumentTextOptions(): void;
     didChangeActiveEditor(editor?: vscode.TextEditor, selection?: Range): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
@@ -3019,12 +3019,14 @@ export class DefaultClient implements Client {
     /**
      * requests to the language server
      */
-    public async requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Promise<string> {
+    public async requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Promise<string> {
         const params: SwitchHeaderSourceParams = {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootUri.toString()
         };
-        return this.enqueue(async () => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
+        await withCancellation(this.ready, token);
+        return DefaultClient.withLspCancellationHandling(
+            () => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params, token), token);
     }
 
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
@@ -4366,7 +4368,7 @@ class NullClient implements Client {
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): void { }
     sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
-    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string> { return Promise.resolve(""); }
+    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string> { return Promise.resolve(""); }
     updateActiveDocumentTextOptions(): void { }
     didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
