@@ -3025,10 +3025,6 @@ export class DefaultClient implements Client {
             workspaceFolderUri: rootUri.toString()
         };
         return this.enqueue(async () => {
-            if (token.isCancellationRequested) {
-                throw new vscode.CancellationError();
-            }
-
             // Don't use withLspCancellationHandling() or withCancellation() here. If the switch target is already known,
             // the caller should still be able to use it even if the progress notification was just cancelled.
             try {
