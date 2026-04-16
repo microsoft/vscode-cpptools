@@ -275,6 +275,7 @@ export async function activate(): Promise<void> {
     }
 
     await registerRelatedFilesProvider();
+    await vscode.commands.executeCommand('setContext', 'cpptools.languageServerActivated', true);
 }
 
 export function updateLanguageConfigurations(): void {
