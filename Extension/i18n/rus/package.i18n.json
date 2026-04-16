@@ -210,6 +210,7 @@
 	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "Символ, используемый в качестве разделителя путей для созданных путей пользователей.",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "Если выбрано значение `true`, в подсказках при наведении указателя и автозавершении будут отображаться только определенные метки со структурированными комментариями. В противном случае отображаются все комментарии.",
 	"c_cpp.configuration.doxygen.generateOnType.description": "Определяет, следует ли автоматически вставлять комментарий Doxygen после ввода выбранного стиля комментария.",
+	"c_cpp.configuration.doxygen.generateOnCodeAction.description": "Управляет включением действия кода для создания комментария Doxygen.",
 	"c_cpp.configuration.doxygen.generatedStyle.description": "Строка символов, используемая в качестве начальной строки комментария Doxygen.",
 	"c_cpp.configuration.doxygen.sectionTags.description": "Выберите теги раздела Doxygen, которые должны отображаться при наведении курсора на область подсказок, если включен параметр \"Упростить структурированные комментарии\".",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "Шаблон, который начинается с многострочного или однострочного примечания. Шаблон продолжения по умолчанию имеет значение ` * ` для многострочных примечаний или соответствует этой строке для однострочных примечаний.",

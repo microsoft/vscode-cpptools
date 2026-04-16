@@ -6,7 +6,7 @@
 {
 	"walkthrough.windows.install.compiler": "在 Windows 上安装 C++ 编译器",
 	"walkthrough.windows.text1": "如果要对 Windows 进行 C++ 开发，建议安装 Microsoft Visual C++ (MSVC)编译器。",
-	"walkthrough.windows.text2": "若要安装 MSVC，请打开 VS Code 终端(CTRL + `)并在以下命令中粘贴:\n",
+	"walkthrough.windows.text2": "若要安装 MSVC，请打开 VS Code 终端(CTRL + `)并在以下命令中粘贴:",
 	"walkthrough.windows.note1": "注意",
 	"walkthrough.windows.note1.text": "可以使用 Visual Studio 生成工具中的 C++ 工具集以及 Visual Studio Code 以编译、生成并验证任何 C++ 代码库，前提是同时具有有效的 Visual Studio 许可证(社区版、专业版或企业版)，且正积极将其用于开发该 C++ 代码库。",
 	"walkthrough.windows.verify.compiler": "验证编译器安装",
