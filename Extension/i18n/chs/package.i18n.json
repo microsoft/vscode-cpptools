@@ -210,6 +210,7 @@
 	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "用作生成的用户路径的路径分隔符的字符。",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "如果为 `true`，则悬停和自动完成的工具提示将仅显示结构化注释的某些标签。否则，将显示所有注释。",
 	"c_cpp.configuration.doxygen.generateOnType.description": "控制在键入所选注释样式后是否自动插入 Doxygen 注释。",
+	"c_cpp.configuration.doxygen.generateOnCodeAction.description": "控制是否启用生成 Doxygen 注释的代码操作。",
 	"c_cpp.configuration.doxygen.generatedStyle.description": "用作 Doxygen 注释起始行的字符串。",
 	"c_cpp.configuration.doxygen.sectionTags.description": "启用“简化结构化注释”设置后，选择希望在工具提示区域中悬停时显示的 Doxygen 节标记。 ",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "开始多行或单行注释块的模式。多行注释块的延续模式默认为 ` * `，或单行注释块默认为此字符串。",
