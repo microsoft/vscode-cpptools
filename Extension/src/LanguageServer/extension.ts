@@ -483,22 +483,29 @@ async function onSwitchHeaderSource(): Promise<void> {
         title: localize('switch.header.source', 'Switching Header/Source...'),
         cancellable: true
     }, async (_progress, token) => {
-        let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootUri, fileName, token);
-        if (token.isCancellationRequested) {
-            return;
-        }
-        // If the targetFileName has a path that is a symlink target of a workspace folder,
-        // then replace the RootRealPath with the RootPath (the symlink path).
-        let targetFileNameReplaced: boolean = false;
-        clients.forEach(client => {
-            if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
-                && targetFileName.startsWith(client.RootRealPath)) {
-                targetFileName = client.RootPath + targetFileName.substring(client.RootRealPath.length);
-                targetFileNameReplaced = true;
+        try {
+            let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootUri, fileName, token);
+            if (token.isCancellationRequested || !targetFileName) {
+                return;
             }
-        });
-        const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
-        await vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
+            // If the targetFileName has a path that is a symlink target of a workspace folder,
+            // then replace the RootRealPath with the RootPath (the symlink path).
+            let targetFileNameReplaced: boolean = false;
+            clients.forEach(client => {
+                if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
+                    && targetFileName.startsWith(client.RootRealPath)) {
+                    targetFileName = client.RootPath + targetFileName.substring(client.RootRealPath.length);
+                    targetFileNameReplaced = true;
+                }
+            });
+            const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
+            await vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
+        } catch (e) {
+            if (e instanceof vscode.CancellationError) {
+                return;
+            }
+            throw e;
+        }
     });
 }
 

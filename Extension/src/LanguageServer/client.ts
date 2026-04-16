@@ -3024,9 +3024,14 @@ export class DefaultClient implements Client {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootUri.toString()
         };
-        await withCancellation(this.ready, token);
-        return DefaultClient.withLspCancellationHandling(
-            () => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params, token), token);
+        const request: Promise<string> = this.enqueue(async () => {
+            if (token.isCancellationRequested) {
+                throw new vscode.CancellationError();
+            }
+            return DefaultClient.withLspCancellationHandling(
+                () => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params, token), token);
+        });
+        return withCancellation(request, token);
     }
 
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
