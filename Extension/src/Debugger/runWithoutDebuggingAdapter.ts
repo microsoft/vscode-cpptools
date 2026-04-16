@@ -193,7 +193,8 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             }
         }
 
-        const message = localize('no.terminal.emulator', 'No terminal emulator found. Please set the $TERMINAL environment variable to your terminal emulator of choice, or install one of the following: x-terminal-emulator, gnome-terminal, konsole, xterm.');
+        const message = localize({ key: 'no.terminal.emulator', comment: ["{Locked=\"$TERMINAL\"} {Locked=\"x-terminal-emulator\"} {Locked=\"gnome-terminal\"} {Locked=\"konsole\"} {Locked=\"xterm\"}"] },
+            "No terminal emulator found. Please set the $TERMINAL environment variable to your terminal emulator of choice, or install one of the following: x-terminal-emulator, gnome-terminal, konsole, xterm.");
         vscode.window.showErrorMessage(message);
     }
 
