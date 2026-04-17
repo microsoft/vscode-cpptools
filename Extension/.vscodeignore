@@ -35,7 +35,6 @@ eslint.config.js
 gulpfile.js
 localized_string_ids.h
 readme.developer.md
-Reinstalling the Extension.md
 test.tsconfig.json
 translations_auto_pr.js
 tsconfig.json
