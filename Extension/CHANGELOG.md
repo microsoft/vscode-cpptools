@@ -1,9 +1,15 @@
 # C/C++ for Visual Studio Code Changelog
 
 ## Version 1.31.5: April 20, 2026
+### Enhancements
+* Improve wildcard matching with the debugger natvis. [MIEngine#1162](https://github.com/microsoft/MIEngine/issues/1162)
+* Add support for `HideRawView` with the debugger natvis. [MIEngine#1458](https://github.com/microsoft/MIEngine/issues/1458)
+
 ### Bug Fixes
 * Fix `Reinstalling the Extension.md` not being found. [#14389](https://github.com/microsoft/vscode-cpptools/issues/14389)
 * Fix the `C/C++ DevTools` extension language service tools not working after the `C/C++` extension updates via `Restart Extensions`. [#14392](https://github.com/microsoft/vscode-cpptools/issues/14392)
+* Fix null pointers being expandable for variables in the debugger. [MIEngine#698](https://github.com/microsoft/MIEngine/issues/698)
+* Fix recursive `{this}` evaluation with the debugger natvis. [MIEngine#1391](https://github.com/microsoft/MIEngine/issues/1391)
 
 ## Version 1.31.4: March 31, 2026
 ### Bug Fix
