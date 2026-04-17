@@ -45,11 +45,8 @@ jobs:
         run: yarn test
         working-directory: Extension
 
-      - name: Install latest cpptools
-        run: code --install-extension ms-vscode.cpptools --pre-release
-
       - name: Acquire Native Binaries
-        run: yarn run copy-extension-binaries
+        run: yarn install-and-copy-binaries-for-test
         working-directory: Extension
 
       - name: Run languageServer integration tests
