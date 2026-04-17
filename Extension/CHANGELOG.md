@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Versio 1.31.5: April 20, 2026
+## Version 1.31.5: April 20, 2026
 ### Bug Fixes
 * Fix `Reinstalling the Extension.md` not being found. [#14389](https://github.com/microsoft/vscode-cpptools/issues/14389)
 * Fix the `C/C++ DevTools` extension language service tools not working after the `C/C++` extension updates via `Restart Extensions`. [#14392](https://github.com/microsoft/vscode-cpptools/issues/14392)
