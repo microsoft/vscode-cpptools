@@ -210,6 +210,7 @@
 	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "Das Zeichen, das als Pfadtrennzeichen für generierte Benutzerpfade verwendet wird.",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "Wenn `true` festgelegt ist, zeigen die QuickInfos für Draufzeigen und AutoVervollständigen nur bestimmte Bezeichnungen strukturierter Kommentare an. Andernfalls werden alle Kommentare angezeigt.",
 	"c_cpp.configuration.doxygen.generateOnType.description": "Steuert, ob der Doxygenkommentar nach Eingabe des ausgewählten Kommentarstils automatisch eingefügt wird.",
+	"c_cpp.configuration.doxygen.generateOnCodeAction.description": "Steuert, ob die Codeaktion zum Generieren eines Doxygen-Kommentars aktiviert ist.",
 	"c_cpp.configuration.doxygen.generatedStyle.description": "Die Zeichenfolge von Zeichen, die als Startzeile des Doxygen-Kommentars verwendet wird.",
 	"c_cpp.configuration.doxygen.sectionTags.description": "Wählen Sie die Doxygen-Abschnittstags aus, die beim Daraufzeigen im QuickInfo-Bereich angezeigt werden sollen, wenn die Einstellung \"Strukturierte Kommentare vereinfachen\" aktiviert ist. ",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "Muster, mit dem ein mehrzeiliger oder einzeiliger Kommentarblock beginnt. Das Fortsetzungsmuster wird standardmäßig auf ` * ` für mehrzeilige Kommentarblöcke oder auf diese Zeichenfolge für einzeilige Kommentarblöcke festgelegt.",

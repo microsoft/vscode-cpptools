@@ -126,6 +126,7 @@ export interface WorkspaceFolderSettingsParams {
     vcFormatSpaceAroundTernaryOperator: string;
     vcFormatWrapPreserveBlocks: string;
     doxygenGenerateOnType: boolean;
+    doxygenGenerateOnCodeAction: boolean;
     doxygenGeneratedStyle: string;
     doxygenSectionTags: string[];
     filesExclude: Excludes;
@@ -383,6 +384,7 @@ export class CppSettings extends Settings {
     public get simplifyStructuredComments(): boolean { return this.getAsBoolean("simplifyStructuredComments"); }
     public get doxygenGeneratedCommentStyle(): string { return this.getAsString("doxygen.generatedStyle"); }
     public get doxygenGenerateOnType(): boolean { return this.getAsBoolean("doxygen.generateOnType"); }
+    public get doxygenGenerateOnCodeAction(): boolean { return this.getAsBoolean("doxygen.generateOnCodeAction"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] {
         const value: any = super.Section.get<any>("commentContinuationPatterns");
         if (this.isArrayOfCommentContinuationPatterns(value)) {

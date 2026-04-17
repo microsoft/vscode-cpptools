@@ -210,6 +210,7 @@
 	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "생성된 사용자 경로의 경로 구분 기호로 사용되는 문자입니다.",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "`true`인 경우 가리키기 및 자동 완성 도구 설명에 구조적 주석의 특정 레이블만 표시됩니다. 그렇지 않으면 모든 주석이 표시됩니다.",
 	"c_cpp.configuration.doxygen.generateOnType.description": "선택한 주석 스타일을 입력한 후 Doxygen 주석을 자동으로 삽입할지 여부를 제어합니다.",
+	"c_cpp.configuration.doxygen.generateOnCodeAction.description": "Doxygen 주석을 생성하는 코드 작업을 사용할지 여부를 제어합니다.",
 	"c_cpp.configuration.doxygen.generatedStyle.description": "Doxygen 주석의 시작 줄로 사용되는 문자 문자열입니다.",
 	"c_cpp.configuration.doxygen.sectionTags.description": "'구조적 설명 단순화' 설정이 활성화된 경우 도구 설명 영역에서 마우스를 가져가면 표시할 Doxygen 섹션 태그를 선택합니다. ",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "여러 줄 또는 한 줄 주석 블록을 시작하는 패턴입니다. 기본적으로 여러 줄 주석 블록의 계속 패턴은 ` * `로 설정되고, 한 줄 주석 블록의 경우 이 문자열로 설정됩니다.",

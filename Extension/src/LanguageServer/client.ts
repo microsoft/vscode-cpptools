@@ -1537,6 +1537,7 @@ export class DefaultClient implements Client {
             vcFormatSpaceAroundTernaryOperator: settings.vcFormatSpaceAroundTernaryOperator,
             vcFormatWrapPreserveBlocks: settings.vcFormatWrapPreserveBlocks,
             doxygenGenerateOnType: settings.doxygenGenerateOnType,
+            doxygenGenerateOnCodeAction: settings.doxygenGenerateOnCodeAction,
             doxygenGeneratedStyle: settings.doxygenGeneratedCommentStyle,
             doxygenSectionTags: settings.doxygenSectionTags,
             filesExclude: otherSettings.filesExclude,

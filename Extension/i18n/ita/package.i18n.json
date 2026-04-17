@@ -210,6 +210,7 @@
 	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "Carattere utilizzato come separatore di percorso per i percorsi utente generati.",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "Se è `true`, le descrizioni comando al passaggio del mouse e del completamento automatico visualizzeranno solo alcune etichette di commenti strutturati. In caso contrario, vengono visualizzati tutti i commenti.",
 	"c_cpp.configuration.doxygen.generateOnType.description": "Controlla se inserire automaticamente il commento Doxygen dopo aver digitato lo stile di commento scelto.",
+	"c_cpp.configuration.doxygen.generateOnCodeAction.description": "Controllare se l'azione codice per generare un commento Doxygen è abilitata.",
 	"c_cpp.configuration.doxygen.generatedStyle.description": "Stringa di caratteri utilizzata come riga iniziale del commento Doxygen.",
 	"c_cpp.configuration.doxygen.sectionTags.description": "Seleziona i tag di sezione Doxygen da visualizzare al passaggio del mouse nell'area della descrizione comando quando è abilitata l'impostazione 'Semplifica commenti strutturati'. ",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "Criterio con cui inizia un blocco di commento su più righe o su una sola riga. Il criterio di continuazione è impostato su `* ` per i blocchi di commento su più righe o su questa stringa per i blocchi di commento su una sola riga.",
