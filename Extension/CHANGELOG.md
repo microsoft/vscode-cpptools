@@ -1,5 +1,13 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.32.1: April 20, 2026
+### Bug Fixes
+* Fix an IntelliSense crash when three special case comments were used in a template. [#14360](https://github.com/microsoft/vscode-cpptools/issues/14360)
+* Fix `Reinstalling the Extension.md` not being found. [#14389](https://github.com/microsoft/vscode-cpptools/issues/14389)
+* Fix the `C/C++ DevTools` extension language service tools not working after the `C/C++` extension updates via `Restart Extensions`. [#14392](https://github.com/microsoft/vscode-cpptools/issues/14392)
+* Fix clang-tidy error `Error: no checks enabled.` if checks are not set in another way. [#14391](https://github.com/microsoft/vscode-cpptools/issues/14391)
+* Update localized strings.
+
 ## Version 1.32.0: April 14, 2026
 ### New Feature
 * Add support for run without debugging. [#1201](https://github.com/microsoft/vscode-cpptools/issues/1201)
