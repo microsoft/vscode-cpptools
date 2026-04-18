@@ -210,6 +210,7 @@
 	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "生成されたユーザー パスのパス区切り記号として使用される文字です。",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "`true` の場合、ホバーおよびオートコンプリートのヒントに、構造化されたコメントの特定のラベルのみが表示されます。それ以外の場合は、すべてのコメントが表示されます。",
 	"c_cpp.configuration.doxygen.generateOnType.description": "選択したコメント スタイルを入力した後に、Doxygen コメントを自動的に挿入するかどうかを制御します。",
+	"c_cpp.configuration.doxygen.generateOnCodeAction.description": "Doxygen コメントを生成するコード アクションを有効にするかどうかを制御します。",
 	"c_cpp.configuration.doxygen.generatedStyle.description": "Doxygen コメントの開始行として使用される文字列です。",
 	"c_cpp.configuration.doxygen.sectionTags.description": "[構造化コメントの簡略化] 設定が有効になっているときにヒント領域をポイントしたときに表示する Doxygen セクション タグを選択します。 ",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "複数行または単一行のコメント ブロックの先頭に置くパターン。継続のパターンの既定値は、複数行コメント ブロックの場合は ` * `、単一行コメント ブロックの場合はこの文字列です。",

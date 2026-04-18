@@ -210,6 +210,7 @@
 	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "Znak použitý jako oddělovač cesty pro generované uživatelské cesty",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "Když se tato možnost nastaví na `true`, popisky ovládacích prvků po najetí myší a automatické dokončování budou zobrazovat jen určité popisky strukturovaných komentářů. Jinak se budou zobrazovat všechny komentáře.",
 	"c_cpp.configuration.doxygen.generateOnType.description": "Určuje, jestli se má po zadání zvoleného stylu komentáře automaticky vložit komentář Doxygen.",
+	"c_cpp.configuration.doxygen.generateOnCodeAction.description": "Určuje, zda je povolena akce kódu pro generování komentáře Doxygen.",
 	"c_cpp.configuration.doxygen.generatedStyle.description": "Řetězec znaků použitý jako počáteční řádek komentáře Doxygen.",
 	"c_cpp.configuration.doxygen.sectionTags.description": "Vyberte značky oddílu Doxygen, které chcete zobrazit při najetí myší v oblasti popisu, pokud je povolené nastavení Zjednodušit strukturované komentáře. ",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "Vzor, který zahájí víceřádkový nebo jednořádkový blok komentáře. Výchozí vzor pro pokračování je pro víceřádkové bloky komentářů ` * `, nebo tento řetězec pro jednořádkové bloky.",

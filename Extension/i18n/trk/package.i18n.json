@@ -210,6 +210,7 @@
 	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "Oluşturulan kullanıcı yolları için yol ayırıcı olarak kullanılan karakter.",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "`true` ise, üzerine gelme ve otomatik tamamlama araç ipuçları, yapılandırılmış açıklamaların yalnızca belirli etiketlerini görüntüler. Aksi halde tüm açıklamalar görüntülenir.",
 	"c_cpp.configuration.doxygen.generateOnType.description": "Seçilen açıklama stilini girdikten sonra Doxygen açıklamasının otomatik olarak eklenip eklenmeyeceğini kontrol eder.",
+	"c_cpp.configuration.doxygen.generateOnCodeAction.description": "Doxygen açıklaması oluşturma kod eyleminin etkin olup olmadığını denetler.",
 	"c_cpp.configuration.doxygen.generatedStyle.description": "Doxygen açıklamasının başlangıç satırı olarak kullanılan karakter dizesi.",
 	"c_cpp.configuration.doxygen.sectionTags.description": "\"Yapılandırılmış Yorumları Basitleştir\" ayarı etkinleştirildiğinde araç ipucu alanında fareyle üzerine gelindiğinde görünmesini istediğiniz Doxygen bölümü etiketlerini seçin. ",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "Çok satırlı veya tek satırlı açıklama bloğu başlatan desen. Devam deseni, çok satırlı açıklama blokları için varsayılan olarak ` * ` değerini veya tek satırlı açıklama blokları için bu dize değerini alır.",
