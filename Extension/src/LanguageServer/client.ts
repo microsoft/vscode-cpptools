@@ -805,6 +805,7 @@ export interface Client {
     setCurrentConfigName(configurationName: string): Thenable<void>;
     getCurrentConfigName(): Thenable<string | undefined>;
     getCurrentConfigCustomVariable(variableName: string): Thenable<string>;
+    waitForIdle(timeout?: number): Promise<boolean>;
     getVcpkgInstalled(): Thenable<boolean>;
     getVcpkgEnabled(): Thenable<boolean>;
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined>;
@@ -919,6 +920,7 @@ export class DefaultClient implements Client {
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseButton: boolean = false;
+    private pendingIdleCalls: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout }[] = [];
 
     /** A queue of asynchronous tasks that need to be processed befofe ready is considered active. */
     private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>] | [ManualPromise<unknown>]>();
@@ -1006,6 +1008,56 @@ export class DefaultClient implements Client {
             pathSeparator: (os.platform() === 'win32') ? "\\" : "/",
             userHome: os.homedir()
         };
+    }
+
+    private isIdle(): boolean {
+        return !this.model.isInitializingWorkspace.Value
+            && !this.model.isIndexingWorkspace.Value
+            && !this.model.isParsingWorkspace.Value
+            && !this.model.isParsingFiles.Value
+            && !this.model.isUpdatingIntelliSense.Value;
+    }
+
+    private resolvePendingIdleCallsIfReady(): void {
+        if (!this.pendingIdleCalls.length || !this.isIdle()) {
+            return;
+        }
+
+        const pendingCalls: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout }[] = this.pendingIdleCalls;
+        this.pendingIdleCalls = [];
+        pendingCalls.forEach(pendingCall => {
+            if (pendingCall.timer) {
+                clearTimeout(pendingCall.timer);
+            }
+            pendingCall.promise.resolve(true);
+        });
+    }
+
+    public async waitForIdle(timeout?: number): Promise<boolean> {
+        if (this.isIdle()) {
+            return true;
+        }
+
+        if (timeout !== undefined && timeout <= 0) {
+            return false;
+        }
+
+        const pendingCall: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout } = {
+            promise: new ManualPromise<boolean>()
+        };
+
+        if (timeout !== undefined) {
+            pendingCall.timer = global.setTimeout(() => {
+                const index: number = this.pendingIdleCalls.indexOf(pendingCall);
+                if (index !== -1) {
+                    this.pendingIdleCalls.splice(index, 1);
+                }
+                pendingCall.promise.resolve(false);
+            }, timeout);
+        }
+
+        this.pendingIdleCalls.push(pendingCall);
+        return pendingCall.promise;
     }
 
     private getName(workspaceFolder?: vscode.WorkspaceFolder): string {
@@ -2892,6 +2944,8 @@ export class DefaultClient implements Client {
         } else if (message.includes("/")) {
             this.lastInvokedLspMessage = message;
         }
+
+        this.resolvePendingIdleCallsIfReady();
     }
 
     private updateTagParseStatus(tagParseStatus: TagParseStatus): void {
@@ -4207,6 +4261,13 @@ export class DefaultClient implements Client {
     }
 
     public dispose(): void {
+        this.pendingIdleCalls.forEach(pendingCall => {
+            if (pendingCall.timer) {
+                clearTimeout(pendingCall.timer);
+            }
+            pendingCall.promise.resolve(false);
+        });
+        this.pendingIdleCalls = [];
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];
         if (this.documentFormattingProviderDisposable) {
@@ -4359,6 +4420,7 @@ class NullClient implements Client {
     setCurrentConfigName(configurationName: string): Thenable<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getCurrentConfigCustomVariable(variableName: string): Thenable<string> { return Promise.resolve(""); }
+    waitForIdle(timeout?: number): Promise<boolean> { return Promise.resolve(true); }
     getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> { return Promise.resolve(undefined); }

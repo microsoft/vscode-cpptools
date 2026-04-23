@@ -422,6 +422,7 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', enabled ? onGetActiveConfigName : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', enabled ? onGetActiveConfigCustomVariable : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', enabled ? onSetActiveConfigName : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.waitForIdle', enabled ? onWaitForIdle : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
@@ -904,6 +905,13 @@ function onLogDiagnostics(): Promise<void> {
 
 function onRescanWorkspace(): Promise<void> {
     return clients.ActiveClient.rescanFolder();
+}
+
+async function onWaitForIdle(timeout?: number): Promise<boolean> {
+    const pending: Promise<boolean>[] = [];
+    clients.forEach(client => pending.push(client.waitForIdle(timeout)));
+    const results: boolean[] = await Promise.all(pending);
+    return results.every(result => result);
 }
 
 function onShowRefCommand(arg?: TreeNode): void {
