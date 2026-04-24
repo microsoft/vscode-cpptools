@@ -430,6 +430,7 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', enabled ? onGetActiveConfigName : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', enabled ? onGetActiveConfigCustomVariable : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', enabled ? onSetActiveConfigName : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.waitForIdle', enabled ? onWaitForIdle : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
@@ -975,6 +976,10 @@ function onGetActiveConfigName(): Thenable<string | undefined> {
 
 function onGetActiveConfigCustomVariable(variableName: string): Thenable<string> {
     return clients.ActiveClient.getCurrentConfigCustomVariable(variableName);
+}
+
+async function onWaitForIdle(timeout?: number): Promise<boolean> {
+    return clients.getDefaultClient().waitForIdle(timeout);
 }
 
 function onLogDiagnostics(): Promise<void> {
