@@ -805,7 +805,7 @@ export interface Client {
     setCurrentConfigName(configurationName: string): Thenable<void>;
     getCurrentConfigName(): Thenable<string | undefined>;
     getCurrentConfigCustomVariable(variableName: string): Thenable<string>;
-    waitForIdle(timeout?: number): Promise<boolean>;
+    waitForTagParsing(timeout: number, token: vscode.CancellationToken): Promise<boolean>;
     getVcpkgInstalled(): Thenable<boolean>;
     getVcpkgEnabled(): Thenable<boolean>;
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined>;
@@ -920,7 +920,7 @@ export class DefaultClient implements Client {
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseButton: boolean = false;
-    private pendingIdleCalls: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout }[] = [];
+    private pendingTagParsingCalls: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout; cancellationListener?: vscode.Disposable }[] = [];
 
     /** A queue of asynchronous tasks that need to be processed befofe ready is considered active. */
     private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>] | [ManualPromise<unknown>]>();
@@ -1010,53 +1010,61 @@ export class DefaultClient implements Client {
         };
     }
 
-    private isIdle(): boolean {
-        return !this.model.isInitializingWorkspace.Value
-            && !this.model.isIndexingWorkspace.Value
-            && !this.model.isParsingWorkspace.Value
-            && !this.model.isParsingFiles.Value
-            && !this.model.isUpdatingIntelliSense.Value;
-    }
-
-    private resolvePendingIdleCallsIfReady(): void {
-        if (!this.pendingIdleCalls.length || !this.isIdle()) {
+    // If there are any pending calls that were waiting for tag parsing to complete, we can resolve them since it's finished. If there are no pending calls, this does nothing.
+    private resolvePendingTagParsingCallsIfReady(): void {
+        if (!this.pendingTagParsingCalls.length || this.IsTagParsing) {
             return;
         }
 
-        const pendingCalls: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout }[] = this.pendingIdleCalls;
-        this.pendingIdleCalls = [];
+        const pendingCalls: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout; cancellationListener?: vscode.Disposable }[] = this.pendingTagParsingCalls;
+        this.pendingTagParsingCalls = [];
         pendingCalls.forEach(pendingCall => {
             if (pendingCall.timer) {
                 clearTimeout(pendingCall.timer);
             }
+            pendingCall.cancellationListener?.dispose();
             pendingCall.promise.resolve(true);
         });
     }
 
-    public async waitForIdle(timeout?: number): Promise<boolean> {
-        if (this.isIdle()) {
+    public async waitForTagParsing(timeout: number, token: vscode.CancellationToken): Promise<boolean> {
+        // On initialization, the client has UI bools all set to false which could cause an early return. We want to ensure it's ready first.
+        await this.ready;
+
+        if (!this.IsTagParsing) {
             return true;
         }
 
-        if (timeout !== undefined && timeout <= 0) {
-            return false;
+        if (token.isCancellationRequested) {
+            throw new vscode.CancellationError();
         }
 
-        const pendingCall: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout } = {
+        const pendingCall: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout; cancellationListener?: vscode.Disposable } = {
             promise: new ManualPromise<boolean>()
         };
 
-        if (timeout !== undefined) {
-            pendingCall.timer = global.setTimeout(() => {
-                const index: number = this.pendingIdleCalls.indexOf(pendingCall);
-                if (index !== -1) {
-                    this.pendingIdleCalls.splice(index, 1);
-                }
-                pendingCall.promise.resolve(false);
-            }, timeout);
-        }
+        pendingCall.timer = global.setTimeout(() => {
+            const index: number = this.pendingTagParsingCalls.indexOf(pendingCall);
+            if (index !== -1) {
+                this.pendingTagParsingCalls.splice(index, 1);
+            }
+            pendingCall.cancellationListener?.dispose();
+            pendingCall.promise.resolve(false);
+        }, timeout);
 
-        this.pendingIdleCalls.push(pendingCall);
+        pendingCall.cancellationListener = token.onCancellationRequested(() => {
+            const index: number = this.pendingTagParsingCalls.indexOf(pendingCall);
+            if (index !== -1) {
+                this.pendingTagParsingCalls.splice(index, 1);
+            }
+            if (pendingCall.timer) {
+                clearTimeout(pendingCall.timer);
+            }
+            pendingCall.cancellationListener?.dispose();
+            pendingCall.promise.reject(new vscode.CancellationError());
+        });
+
+        this.pendingTagParsingCalls.push(pendingCall);
         return pendingCall.promise;
     }
 
@@ -2946,7 +2954,7 @@ export class DefaultClient implements Client {
             this.lastInvokedLspMessage = message;
         }
 
-        this.resolvePendingIdleCallsIfReady();
+        this.resolvePendingTagParsingCallsIfReady();
     }
 
     private updateTagParseStatus(tagParseStatus: TagParseStatus): void {
@@ -4262,13 +4270,14 @@ export class DefaultClient implements Client {
     }
 
     public dispose(): void {
-        this.pendingIdleCalls.forEach(pendingCall => {
+        this.pendingTagParsingCalls.forEach(pendingCall => {
             if (pendingCall.timer) {
                 clearTimeout(pendingCall.timer);
             }
+            pendingCall.cancellationListener?.dispose();
             pendingCall.promise.resolve(false);
         });
-        this.pendingIdleCalls = [];
+        this.pendingTagParsingCalls = [];
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];
         if (this.documentFormattingProviderDisposable) {
@@ -4421,7 +4430,7 @@ class NullClient implements Client {
     setCurrentConfigName(configurationName: string): Thenable<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getCurrentConfigCustomVariable(variableName: string): Thenable<string> { return Promise.resolve(""); }
-    waitForIdle(timeout?: number): Promise<boolean> { return Promise.resolve(true); }
+    waitForTagParsing(timeout: number, token: vscode.CancellationToken): Promise<boolean> { return token.isCancellationRequested ? Promise.reject(new vscode.CancellationError()) : Promise.resolve(true); }
     getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> { return Promise.resolve(undefined); }
