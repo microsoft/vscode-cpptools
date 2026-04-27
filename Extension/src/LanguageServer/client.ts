@@ -104,6 +104,12 @@ interface ConfigStateReceived {
     timeout: boolean;
 }
 
+interface PendingTagParsingCall {
+    promise: ManualPromise<boolean>;
+    timer: NodeJS.Timeout;
+    cancellationListener: vscode.Disposable;
+}
+
 let workspaceHash: string = "";
 
 let workspaceDisposables: vscode.Disposable[] = [];
@@ -920,7 +926,7 @@ export class DefaultClient implements Client {
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseButton: boolean = false;
-    private pendingTagParsingCalls: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout; cancellationListener?: vscode.Disposable }[] = [];
+    private pendingTagParsingCalls: PendingTagParsingCall[] = [];
 
     /** A queue of asynchronous tasks that need to be processed befofe ready is considered active. */
     private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>] | [ManualPromise<unknown>]>();
@@ -1016,13 +1022,13 @@ export class DefaultClient implements Client {
             return;
         }
 
-        const pendingCalls: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout; cancellationListener?: vscode.Disposable }[] = this.pendingTagParsingCalls;
+        const pendingCalls: PendingTagParsingCall[] = this.pendingTagParsingCalls;
         this.pendingTagParsingCalls = [];
         pendingCalls.forEach(pendingCall => {
             if (pendingCall.timer) {
                 clearTimeout(pendingCall.timer);
             }
-            pendingCall.cancellationListener?.dispose();
+            pendingCall.cancellationListener.dispose();
             pendingCall.promise.resolve(true);
         });
     }
@@ -1039,16 +1045,14 @@ export class DefaultClient implements Client {
             throw new vscode.CancellationError();
         }
 
-        const pendingCall: { promise: ManualPromise<boolean>; timer?: NodeJS.Timeout; cancellationListener?: vscode.Disposable } = {
-            promise: new ManualPromise<boolean>()
-        };
+        const pendingCall = { promise: new ManualPromise<boolean>() } as PendingTagParsingCall;
 
         pendingCall.timer = global.setTimeout(() => {
             const index: number = this.pendingTagParsingCalls.indexOf(pendingCall);
             if (index !== -1) {
                 this.pendingTagParsingCalls.splice(index, 1);
             }
-            pendingCall.cancellationListener?.dispose();
+            pendingCall.cancellationListener.dispose();
             pendingCall.promise.resolve(false);
         }, timeout);
 
@@ -1060,7 +1064,7 @@ export class DefaultClient implements Client {
             if (pendingCall.timer) {
                 clearTimeout(pendingCall.timer);
             }
-            pendingCall.cancellationListener?.dispose();
+            pendingCall.cancellationListener.dispose();
             pendingCall.promise.reject(new vscode.CancellationError());
         });
 
@@ -4274,7 +4278,7 @@ export class DefaultClient implements Client {
             if (pendingCall.timer) {
                 clearTimeout(pendingCall.timer);
             }
-            pendingCall.cancellationListener?.dispose();
+            pendingCall.cancellationListener.dispose();
             pendingCall.promise.resolve(false);
         });
         this.pendingTagParsingCalls = [];
@@ -4430,7 +4434,7 @@ class NullClient implements Client {
     setCurrentConfigName(configurationName: string): Thenable<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getCurrentConfigCustomVariable(variableName: string): Thenable<string> { return Promise.resolve(""); }
-    waitForTagParsing(timeout: number, token: vscode.CancellationToken): Promise<boolean> { return token.isCancellationRequested ? Promise.reject(new vscode.CancellationError()) : Promise.resolve(true); }
+    waitForTagParsing(timeout: number, token: vscode.CancellationToken): Promise<boolean> { return Promise.resolve(true); }
     getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> { return Promise.resolve(undefined); }
