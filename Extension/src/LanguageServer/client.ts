@@ -1045,28 +1045,28 @@ export class DefaultClient implements Client {
             throw new vscode.CancellationError();
         }
 
-        const pendingCall = { promise: new ManualPromise<boolean>() } as PendingTagParsingCall;
+        const pendingCall: PendingTagParsingCall = {
+            promise: new ManualPromise<boolean>(),
 
-        pendingCall.timer = global.setTimeout(() => {
-            const index: number = this.pendingTagParsingCalls.indexOf(pendingCall);
-            if (index !== -1) {
-                this.pendingTagParsingCalls.splice(index, 1);
-            }
-            pendingCall.cancellationListener.dispose();
-            pendingCall.promise.resolve(false);
-        }, timeout);
+            timer: global.setTimeout(() => {
+                const index: number = this.pendingTagParsingCalls.indexOf(pendingCall);
+                if (index !== -1) {
+                    this.pendingTagParsingCalls.splice(index, 1);
+                }
+                pendingCall.cancellationListener.dispose();
+                pendingCall.promise.resolve(false);
+            }, timeout),
 
-        pendingCall.cancellationListener = token.onCancellationRequested(() => {
-            const index: number = this.pendingTagParsingCalls.indexOf(pendingCall);
-            if (index !== -1) {
-                this.pendingTagParsingCalls.splice(index, 1);
-            }
-            if (pendingCall.timer) {
+            cancellationListener: token.onCancellationRequested(() => {
+                const index: number = this.pendingTagParsingCalls.indexOf(pendingCall);
+                if (index !== -1) {
+                    this.pendingTagParsingCalls.splice(index, 1);
+                }
                 clearTimeout(pendingCall.timer);
-            }
-            pendingCall.cancellationListener.dispose();
-            pendingCall.promise.reject(new vscode.CancellationError());
-        });
+                pendingCall.cancellationListener.dispose();
+                pendingCall.promise.reject(new vscode.CancellationError());
+            })
+        };
 
         this.pendingTagParsingCalls.push(pendingCall);
         return pendingCall.promise;
