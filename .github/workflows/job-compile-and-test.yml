@@ -45,53 +45,46 @@ jobs:
         run: yarn test
         working-directory: Extension
 
-      # These tests don't require the binary.
-      # On Linux, it is failing (before the tests actually run) with: Test run terminated with signal SIGSEGV.
-      # But it works on Linux during the E2E test.
-      - name: Run SingleRootProject tests
-        if: ${{ inputs.platform != 'linux' }}
-        run: yarn test --scenario=SingleRootProject --skipCheckBinaries
+      - name: Acquire Native Binaries
+        run: yarn install-and-copy-binaries-for-test
         working-directory: Extension
 
-      # NOTE : We can't run the test that require the native binary files
-      #        yet -- there will be an update soon that allows the tester to 
-      #        acquire them on-the-fly
-      # - name: Run languageServer integration tests
-      #   if: ${{ inputs.platform == 'windows' }}
-      #   run: yarn test --scenario=SingleRootProject
-      #   working-directory: Extension
+      - name: Run languageServer integration tests (Windows)
+        if: ${{ inputs.platform == 'windows' }}
+        run: yarn test --scenario=SingleRootProject
+        working-directory: Extension
 
-      # - name: Run E2E IntelliSense features tests
-      #   if: ${{ inputs.platform == 'windows' }}
-      #   run: yarn test --scenario=MultirootDeadlockTest
-      #   working-directory: Extension
+      - name: Run E2E IntelliSense features tests (Windows)
+        if: ${{ inputs.platform == 'windows' }}
+        run: yarn test --scenario=MultirootDeadlockTest
+        working-directory: Extension
 
-      # - name: Run E2E IntelliSense features tests
-      #   if: ${{ inputs.platform == 'windows' }}
-      #   run: yarn test --scenario=RunWithoutDebugging
-      #   working-directory: Extension
+      - name: Run RunWithoutDebugging tests (Windows)
+        if: ${{ inputs.platform == 'windows' }}
+        run: yarn test --scenario=RunWithoutDebugging
+        working-directory: Extension
 
       # NOTE: For mac/linux run the tests with xvfb-action for UI support.
       # Another way to start xvfb https://github.com/microsoft/vscode-test/blob/master/sample/azure-pipelines.yml
 
-      # - name: Run languageServer integration tests (xvfb)
-      #   if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
-      #   uses: coactions/setup-xvfb@v1
-      #   with:
-      #     run: yarn test --scenario=SingleRootProject
-      #     working-directory: Extension
+      - name: Run languageServer integration tests (linux/macOS)
+        if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: yarn test --scenario=SingleRootProject
+          working-directory: Extension
 
-      # - name: Run E2E IntelliSense features tests (xvfb)
-      #   if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
-      #   uses: coactions/setup-xvfb@v1
-      #   with:
-      #     run: yarn test --scenario=MultirootDeadlockTest
-      #     working-directory: Extension
+      - name: Run E2E IntelliSense features tests (linux/macOS)
+        if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: yarn test --scenario=MultirootDeadlockTest
+          working-directory: Extension
 
-      # - name: Run E2E IntelliSense features tests (xvfb)
-      #   if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
-      #   uses: coactions/setup-xvfb@v1
-      #   with:
-      #     run: yarn test --scenario=RunWithoutDebugging
-      #     working-directory: Extension
+      - name: Run RunWithoutDebugging tests (linux/macOS)
+        if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: yarn test --scenario=RunWithoutDebugging --scenario-arg=skipExternalConsole
+          working-directory: Extension
 
