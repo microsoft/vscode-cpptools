@@ -98,6 +98,10 @@
                     "value": "${workspaceFolder}/test/scenarios/MultirootDeadlockTest/assets/test.code-workspace"
                 },
                 {
+                    "label": "RunWithoutDebugging   ",
+                    "value": "${workspaceFolder}/test/scenarios/RunWithoutDebugging/assets/"
+                },
+                {
                     "label": "SimpleCppProject   ",
                     "value": "${workspaceFolder}/test/scenarios/SimpleCppProject/assets/simpleCppProject.code-workspace"
                 },

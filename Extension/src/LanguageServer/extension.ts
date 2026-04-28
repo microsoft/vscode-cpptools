@@ -17,12 +17,15 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
-import { isWindows, modelSelector } from '../constants';
+import { isWindows } from '../constants';
 import { instrument } from '../instrumentation';
 import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
 import { CopilotHoverProvider } from './Providers/CopilotHoverProvider';
+import { sendCallHierarchyCallsFromRequest, sendCallHierarchyCallsToRequest, sendPrepareCallHierarchyRequest } from './Providers/callHierarchyProvider';
+import { sendFindAllReferencesRequest } from './Providers/findAllReferencesProvider';
+import { sendGoToDefinitionRequest } from './Providers/goToDefinitionProvider';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
@@ -398,6 +401,11 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowActiveCodeAnalysisCommands', enabled ? onShowActiveCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowIdleCodeAnalysisCommands', enabled ? onShowIdleCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', enabled ? onShowReferencesProgress : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.FindAllReferences', enabled ? onFindAllReferences : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToDefinition', enabled ? onGoToDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PrepareCallHierarchy', enabled ? onPrepareCallHierarchy : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CallHierarchyCallsTo', enabled ? onCallHierarchyCallsTo : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CallHierarchyCallsFrom', enabled ? onCallHierarchyCallsFrom : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', enabled ? onTakeSurvey : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', enabled ? onLogDiagnostics : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', enabled ? onRescanWorkspace : onDisabledCommand));
@@ -422,6 +430,7 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', enabled ? onGetActiveConfigName : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', enabled ? onGetActiveConfigCustomVariable : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', enabled ? onSetActiveConfigName : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('cpptools.waitForTagParsing', enabled ? onWaitForTagParsing : () => true));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
@@ -809,6 +818,77 @@ function onShowReferencesProgress(): void {
     void clients.ActiveClient.handleReferencesIcon().catch(logAndReturn.undefined);
 }
 
+async function onFindAllReferences(uri: vscode.Uri, position: vscode.Position, token?: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+    if (!uri || !position) {
+        throw new Error("C_Cpp.FindAllReferences requires both a uri and position.");
+    }
+
+    const client: Client = clients.getClientFor(uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    await client.ready;
+    const result = await sendFindAllReferencesRequest(client, uri, position, token ?? CancellationToken.None);
+    return result?.locations;
+}
+
+async function onGoToDefinition(uri: vscode.Uri, position: vscode.Position, token?: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+    if (!uri || !position) {
+        throw new Error("C_Cpp.GoToDefinition requires both a uri and position.");
+    }
+
+    const client: Client = clients.getClientFor(uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    await client.ready;
+    return sendGoToDefinitionRequest(client, uri, position, token ?? CancellationToken.None);
+}
+
+async function onPrepareCallHierarchy(uri: vscode.Uri, position: vscode.Position, token?: vscode.CancellationToken): Promise<vscode.CallHierarchyItem[] | undefined> {
+    if (!uri || !position) {
+        throw new Error("C_Cpp.PrepareCallHierarchy requires both a uri and position.");
+    }
+
+    const client: Client = clients.getClientFor(uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    await client.ready;
+    return sendPrepareCallHierarchyRequest(client, uri, position, token ?? CancellationToken.None);
+}
+
+async function onCallHierarchyCallsTo(item: vscode.CallHierarchyItem, token?: vscode.CancellationToken): Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
+    if (!item) {
+        throw new Error("C_Cpp.CallHierarchyCallsTo requires an item.");
+    }
+
+    const client: Client = clients.getClientFor(item.uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    await client.ready;
+    return sendCallHierarchyCallsToRequest(client, item, token ?? CancellationToken.None);
+}
+
+async function onCallHierarchyCallsFrom(item: vscode.CallHierarchyItem, token?: vscode.CancellationToken): Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {
+    if (!item) {
+        throw new Error("C_Cpp.CallHierarchyCallsFrom requires an item.");
+    }
+
+    const client: Client = clients.getClientFor(item.uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    await client.ready;
+    return sendCallHierarchyCallsFromRequest(client, item, token ?? CancellationToken.None);
+}
+
 function onToggleRefGroupView(): void {
     // Set context to switch icons
     const client: Client = getActiveClient();
@@ -896,6 +976,10 @@ function onGetActiveConfigName(): Thenable<string | undefined> {
 
 function onGetActiveConfigCustomVariable(variableName: string): Thenable<string> {
     return clients.ActiveClient.getCurrentConfigCustomVariable(variableName);
+}
+
+async function onWaitForTagParsing(timeout: number, token: vscode.CancellationToken): Promise<boolean> {
+    return clients.getDefaultClient().waitForTagParsing(timeout, token);
 }
 
 function onLogDiagnostics(): Promise<void> {
@@ -1472,8 +1556,12 @@ async function onCopilotHover(): Promise<void> {
 
     let chatResponse: vscode.LanguageModelChatResponse | undefined;
     try {
-        // Select the chat model.
-        const [model] = await vscodelm.selectChatModels(modelSelector);
+        // Select the chat model (refresh from cache).
+        const model = await copilotHoverProvider.refreshCachedChatModel();
+        if (!model) {
+            await reportCopilotFailure(copilotHoverProvider, hoverDocument, hoverPosition, "Copilot model not available.");
+            return;
+        }
 
         chatResponse = await model.sendRequest(
             messages,
