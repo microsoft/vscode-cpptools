@@ -1310,9 +1310,9 @@
   integrity sha1-Ml20I5XNSf5sFAV/mpAOQn34gQ4=
 
 "@xmldom/xmldom@^0.8.8":
-  version "0.8.11"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@xmldom/xmldom/-/xmldom-0.8.11.tgz#b79de2d67389734c57c52595f7a7305e30c2d608"
-  integrity sha1-t53i1nOJc0xXxSWV96cwXjDC1gg=
+  version "0.8.13"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@xmldom/xmldom/-/xmldom-0.8.13.tgz#00d1dd940b218dff2e49309d410d8bb212159225"
+  integrity sha1-ANHdlAshjf8uSTCdQQ2LshIVkiU=
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
@@ -4271,9 +4271,9 @@ lodash.truncate@^4.4.2:
   integrity sha1-WjUNoLERO4N+z//VgSy+WNbq4ZM=
 
 lodash@^4.17.23:
-  version "4.17.23"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/lodash/-/lodash-4.17.23.tgz#f113b0378386103be4f6893388c73d0bde7f2c5a"
-  integrity sha1-8ROwN4OGEDvk9okziMc9C95/LFo=
+  version "4.18.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
+  integrity sha1-/ytmwfYybVlRPeJAe/iBQ5gSdxw=
 
 log-symbols@^4.1.0:
   version "4.1.0"
