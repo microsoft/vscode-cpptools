@@ -85,7 +85,7 @@
 	"c_cpp.configuration.codeAnalysis.clangTidy.headerFilter.markdownDescription": "符合輸出診斷來源之標頭名稱的 POSIX 擴充規則運算式 (ERE)。來自每個編譯單位之主要檔案的診斷將一律顯示。支援 `${workspaceFolder}` 變數 (如果沒有 `.clang-tidy` 檔案，則作為預設後援值)。若此選項並非 `null` (空白)，則會覆寫 `.clang-tidy` 檔案中的 `HeaderFilterRegex` 選項 (如果有的話)。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription": "要傳遞給 `clang-tidy` 的其他命令列引數。這些命令列引數會比對等的 `C_Cpp.codeAnalysis.clangTidy.*` 設定優先考慮。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.useBuildPath.markdownDescription": "如果設定了 `true` 和 `compileCommands`，則 `-p=<build-path>` 引數會傳遞至 `clang-tidy`，而非在 `--` 之後傳遞組建引數。若未設定環境變數以找到系統包含的環境變數，可能無法運作。",
-	"c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription": "已啟用的 `clang-tidy` 檢查清單。值會附加到 `.clang-tidy` 檔案中的 `Checks` 或 `#C_Cpp.codeAnalysis.clangTidy.config#` (如果有的話)。除非明確地停用，否則一律使用預設檢查 `clang-analyzer-*`。",
+	"c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription": "已啟用的 `clang-tidy` 檢查清單。值會附加到 `.clang-tidy` 檔案中的 `Checks` 或 `#C_Cpp.codeAnalysis.clangTidy.config#` (如果有的話)。除非明確地停用，否則一律使用預設檢查 `clang-analyzer-core.*`。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.checks.disabled.markdownDescription": "已停用的 `clang-tidy` 檢查清單。值會附加到 `.clang-tidy` 檔案中的 `Checks` 或 `#C_Cpp.codeAnalysis.clangTidy.config#` (如果有的話)。",
 	"c_cpp.configuration.formatting.description": "選擇格式設定引擎。",
 	"c_cpp.configuration.formatting.clangFormat.markdownDescription": "將使用 `clang-format` 來格式化程式碼。",
