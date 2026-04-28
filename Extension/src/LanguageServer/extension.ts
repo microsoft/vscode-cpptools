@@ -479,19 +479,66 @@ async function onSwitchHeaderSource(): Promise<void> {
         rootUri = vscode.Uri.file(path.dirname(fileName)); // When switching without a folder open.
     }
 
-    let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootUri, fileName);
-    // If the targetFileName has a path that is a symlink target of a workspace folder,
-    // then replace the RootRealPath with the RootPath (the symlink path).
-    let targetFileNameReplaced: boolean = false;
-    clients.forEach(client => {
-        if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
-            && targetFileName.startsWith(client.RootRealPath)) {
-            targetFileName = client.RootPath + targetFileName.substring(client.RootRealPath.length);
-            targetFileNameReplaced = true;
+    const switchHeaderSource: (token: vscode.CancellationToken) => Promise<void> = async (token: vscode.CancellationToken) => {
+        try {
+            let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootUri, fileName, token);
+            if (!targetFileName) {
+                return;
+            }
+            // If the targetFileName has a path that is a symlink target of a workspace folder,
+            // then replace the RootRealPath with the RootPath (the symlink path).
+            let targetFileNameReplaced: boolean = false;
+            clients.forEach(client => {
+                if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
+                    && targetFileName.startsWith(client.RootRealPath)) {
+                    targetFileName = client.RootPath + targetFileName.substring(client.RootRealPath.length);
+                    targetFileNameReplaced = true;
+                }
+            });
+            const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
+            await vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
+        } catch (e) {
+            if (e instanceof vscode.CancellationError) {
+                return;
+            }
+            throw e;
         }
-    });
-    const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
-    void vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
+    };
+
+    const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+    try {
+        const switchHeaderSourcePromise: Promise<void> = switchHeaderSource(tokenSource.token);
+        const showProgress: boolean = await new Promise<boolean>((resolve, reject) => {
+            const timer: NodeJS.Timeout = global.setTimeout(() => resolve(true), 2000);
+            void switchHeaderSourcePromise.then(() => {
+                clearTimeout(timer);
+                resolve(false);
+            }, (e) => {
+                clearTimeout(timer);
+                reject(e);
+            });
+        });
+
+        if (!showProgress) {
+            await switchHeaderSourcePromise;
+            return;
+        }
+
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: localize('switch.header.source', 'Switching Header/Source...'),
+            cancellable: true
+        }, async (_progress, token) => {
+            const cancellationListener: vscode.Disposable = token.onCancellationRequested(() => tokenSource.cancel());
+            try {
+                await switchHeaderSourcePromise;
+            } finally {
+                cancellationListener.dispose();
+            }
+        });
+    } finally {
+        tokenSource.dispose();
+    }
 }
 
 /**
