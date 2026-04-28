@@ -211,7 +211,7 @@
         ]
     },
     "c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription": {
-        "message": "List of enabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any. The default check `clang-analyzer-*` is always used unless it is explicitly disabled.",
+        "message": "List of enabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any. The default check `clang-analyzer-core.*` is always used unless it is explicitly disabled.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
