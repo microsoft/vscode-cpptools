@@ -85,7 +85,7 @@
 	"c_cpp.configuration.codeAnalysis.clangTidy.headerFilter.markdownDescription": "진단을 출력할 헤더의 이름과 일치하는 POSIX 확장 정규식(ERE)입니다. 각 번역 단위의 기본 파일에서 진단이 항상 표시됩니다. `${workspaceFolder}` 변수가 지원됩니다(`.clang-tidy` 파일이 없는 경우 기본 폴백 값으로 사용됨). 이 옵션이 `null`(비어 있음)이 아닌 경우 `.clang-tidy` 파일의 `HeaderFilterRegex` 옵션(있는 경우)을 재정의합니다.",
 	"c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription": "`clang-tidy`에 전달할 추가 명령줄 인수입니다. 이는 동등한 `C_Cpp.codeAnalysis.clangTidy.*` 설정보다 우선합니다.",
 	"c_cpp.configuration.codeAnalysis.clangTidy.useBuildPath.markdownDescription": "`true` 및 `compileCommands`가 설정되면 `--` 뒤에 빌드 인수가 전달되는 대신 `-p=<build-path>` 인수가 `clang-tidy`에 전달됩니다. 시스템 포함을 찾을 수 있도록 환경 변수가 설정되지 않은 경우 작동하지 않을 수 있습니다.",
-	"c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription": "사용하도록 설정된 `clang-tidy` 검사 목록입니다. 값은 `.clang-tidy` 파일의 `Checks` 또는 `#C_Cpp.codeAnalysis.clangTidy.config#`(있는 경우)에 추가됩니다. 기본 검사 `clang-analyzer-*`는 명시적으로 비활성화되지 않는 한 항상 사용됩니다.",
+	"c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription": "사용하도록 설정된 `clang-tidy` 검사 목록입니다. 값은 `.clang-tidy` 파일의 `Checks` 또는 `#C_Cpp.codeAnalysis.clangTidy.config#`(있는 경우)에 추가됩니다. 기본 검사 `clang-analyzer-core.*`는 명시적으로 비활성화되지 않는 한 항상 사용됩니다.",
 	"c_cpp.configuration.codeAnalysis.clangTidy.checks.disabled.markdownDescription": "비활성화된 `clang-tidy` 검사 목록입니다. 값은 `.clang-tidy` 파일의 `Checks` 또는 `#C_Cpp.codeAnalysis.clangTidy.config#`(있는 경우)에 추가됩니다.",
 	"c_cpp.configuration.formatting.description": "서식 지정 엔진을 구성합니다.",
 	"c_cpp.configuration.formatting.clangFormat.markdownDescription": "코드 서식을 지정하는 데 `clang-format`이 사용됩니다.",
