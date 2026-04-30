@@ -485,5 +485,163 @@
     "license_terms": {
         "text": "The C/C++ extension may be used only with Microsoft Visual Studio, Visual Studio for Mac, Visual Studio Code, Azure DevOps, Team Foundation Server, and successor Microsoft products and services to develop and test your applications.",
         "hint": "{Locked=\"C/C++\"} {Locked=\"Visual Studio\"} {Locked=\"Mac\"} {Locked=\"Visual Studio Code\"} {Locked=\"Azure DevOps\"} {Locked=\"Team Foundation Server\"}"
+    },
+    "help_title": {
+        "text": "Microsoft C++ Language Server",
+        "hint": "{Locked=\"Microsoft\"} {Locked=\"C++\"}"
+    },
+    "help_usage": {
+        "text": "Usage: {0} [options]",
+        "hint": "{0} is the executable name. {Locked=\"{0}\"}"
+    },
+    "help_options_header": "Options:",
+    "help_help": "Show this help message and exit.",
+    "help_version": "Show version information and exit.",
+    "help_accept_eula": {
+        "text": "Permanently accept the End User License Agreement (EULA).",
+        "hint": "{Locked=\"EULA\"}"
+    },
+    "help_stderr": {
+        "text": "Do not redirect stderr to /dev/null (useful for debugging).",
+        "hint": "{Locked=\"stderr\"} {Locked=\"/dev/null\"}"
+    },
+    "help_login": {
+        "text": "Initiate interactive login (GitHub Copilot subscription required).",
+        "hint": "{Locked=\"GitHub Copilot\"}"
+    },
+    "help_force_login": "Force the login process, even if already authenticated.",
+    "help_allow_plaintext": "Allow storing credentials in plaintext if a secure keychain is unavailable.",
+    "help_log_dir": "Specify the directory for log files (default: system temp directory).",
+    "help_log_level": "Set the logging verbosity from 0 (Errors only) to 9 (Verbose).",
+    "help_lsp_config": {
+        "text": "Specify the parameter as an absolute path, or relative to the workspace root or its .github folder.",
+        "hint": "{Locked=\".github\"}"
+    },
+    "help_disable_telemetry": "Disable sending telemetry data.",
+    "auth_device_flow_prompt": {
+        "text": "To authenticate with GitHub, please copy the code {0} and then visit {1}. Waiting for authorization...",
+        "hint": "{0} is the user code to enter. {1} is the verification URL to visit. {Locked=\"GitHub\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
+    },
+    "auth_timed_out": "Timed out waiting for authorization.",
+    "auth_success": {
+        "text": "Successfully authenticated with GitHub.",
+        "hint": "{Locked=\"GitHub\"}"
+    },
+    "auth_save_failed": {
+        "text": "GitHub authentication succeeded but tokens could not be saved.",
+        "hint": "{Locked=\"GitHub\"}"
+    },
+    "auth_keyring_error": {
+        "text": "Keyring error: {0}",
+        "hint": "{Locked=\"{0}\"}"
+    },
+    "auth_keyring_locked": {
+        "text": "The keyring collection is locked. Unlock it or restart gnome-keyring-daemon.",
+        "hint": "{Locked=\"gnome-keyring-daemon\"}"
+    },
+    "auth_keyring_unavailable": {
+        "text": "No keyring service is available. Install and start gnome-keyring: sudo apt install gnome-keyring",
+        "hint": "{Locked=\"gnome-keyring\"} {Locked=\"sudo apt install gnome-keyring\"}"
+    },
+    "auth_try_plaintext": {
+        "text": "Or allow plaintext storage by passing --login --allow-plaintext-secret-storage.",
+        "hint": "{Locked=\"--login\"} {Locked=\"--allow-plaintext-secret-storage\"}"
+    },
+    "auth_expired": "The device code has expired. Please try again.",
+    "auth_denied": "Authorization was denied by the user.",
+    "auth_unexpected_error": {
+        "text": "Unexpected error during polling: {0}",
+        "hint": "{Locked=\"{0}\"}"
+    },
+    "auth_login_failed": {
+        "text": "GitHub login failed. Try running with --login from the command line to log in.",
+        "hint": "{Locked=\"GitHub\"} {Locked=\"--login\"}"
+    },
+    "auth_eula_required": {
+        "text": "EULA must be accepted to proceed. Run with --accept-eula.",
+        "hint": "{Locked=\"EULA\"} {Locked=\"--accept-eula\"}"
+    },
+    "auth_already_authenticated": {
+        "text": "Already authenticated with GitHub. Use --force-login to re-authenticate.",
+        "hint": "{Locked=\"GitHub\"} {Locked=\"--force-login\"}"
+    },
+    "config_unsupported_version": "Initialization failed: Unsupported config version. Only version 1 is supported.",
+    "config_file_not_found": {
+        "text": "Initialization failed: Config file '{0}' not found.",
+        "hint": "{Locked=\"{0}\"}"
+    },
+    "config_parse_failed": {
+        "text": "Initialization failed: Unable to parse config file '{0}'. Verify the JSON format. Error: {1}",
+        "hint": "{Locked=\"JSON\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
+    },
+    "config_repo_path_invalid": {
+        "text": "Initialization failed: 'repositoryPath' is not configured or invalid.",
+        "hint": "{Locked=\"repositoryPath\"}"
+    },
+    "config_missing_source": {
+        "text": "Initialization failed: 'compileCommands' or 'cppProperties' must be configured.",
+        "hint": "{Locked=\"compileCommands\"} {Locked=\"cppProperties\"}"
+    },
+    "config_dual_source": {
+        "text": "Initialization failed: 'compileCommands' and 'cppProperties' cannot both be configured.",
+        "hint": "{Locked=\"compileCommands\"} {Locked=\"cppProperties\"}"
+    },
+    "config_compile_commands_not_found": {
+        "text": "Initialization failed: 'compileCommands' path not found: '{0}'.",
+        "hint": "{Locked=\"compileCommands\"} {Locked=\"{0}\"}"
+    },
+    "config_cpp_properties_not_found": {
+        "text": "Initialization failed: 'cppProperties' path not found: '{0}'.",
+        "hint": "{Locked=\"cppProperties\"} {Locked=\"{0}\"}"
+    },
+    "config_cpp_properties_parse_failed": {
+        "text": "Initialization failed: Unable to parse file specified by 'cppProperties': '{0}'. Verify the JSON format. Error: {1}",
+        "hint": "{Locked=\"JSON\"} {Locked=\"cppProperties\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
+    },
+    "config_cpp_properties_schema_invalid": {
+        "text": "Initialization failed: Unable to read configuration from 'cppProperties' file: '{0}'. Verify the schema.",
+        "hint": "{Locked=\"cppProperties\"} {Locked=\"{0}\"}"
+    },
+    "config_no_configurations": {
+        "text": "Initialization failed: '{0}' does not contain a valid 'configurations' array.",
+        "hint": "{Locked=\"configurations\"} {Locked=\"{0}\"}"
+    },
+    "config_configuration_not_found": {
+        "text": "Initialization failed: Configuration '{0}' was not found in 'cppProperties' file: '{1}'.",
+        "hint": "{Locked=\"cppProperties\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
+    },
+    "config_paths_cache_missing": "Initialization failed: LSP config paths cache is missing.",
+    "curl_not_found": {
+        "text": "libcurl not found ({0}). libcurl is required for authentication and telemetry.",
+        "hint": "{Locked=\"libcurl\"} {Locked=\"{0}\"}"
+    },
+    "curl_install_macos": {
+        "text": "libcurl should be available on macOS by default. If missing, install via: brew install curl",
+        "hint": "{Locked=\"libcurl\"} {Locked=\"macOS\"} {Locked=\"brew install curl\"}"
+    },
+    "curl_install_linux": {
+        "text": "Install libcurl: sudo apt install libcurl4 (Debian/Ubuntu) or sudo dnf install libcurl (Fedora/RHEL).",
+        "hint": "{Locked=\"libcurl\"} {Locked=\"sudo apt install libcurl4\"} {Locked=\"sudo dnf install libcurl\"} {Locked=\"Debian\"} {Locked=\"Ubuntu\"} {Locked=\"Fedora\"} {Locked=\"RHEL\"}"
+    },
+    "curl_symbols_missing": {
+        "text": "libcurl loaded but required symbols are missing. This may indicate a very old or incompatible libcurl version. The language server cannot operate without a compatible libcurl.",
+        "hint": "{Locked=\"libcurl\"}"
+    },
+    "keytar_not_found": {
+        "text": "libsecret-1.so.0 not found ({0}). libsecret is required for secure credential storage. Install libsecret: sudo apt install libsecret-1-0 (Debian/Ubuntu) or sudo dnf install libsecret (Fedora/RHEL).",
+        "hint": "{Locked=\"libsecret-1.so.0\"} {Locked=\"libsecret\"} {Locked=\"sudo apt install libsecret-1-0\"} {Locked=\"sudo dnf install libsecret\"} {Locked=\"Debian\"} {Locked=\"Ubuntu\"} {Locked=\"Fedora\"} {Locked=\"RHEL\"} {Locked=\"{0}\"}"
+    },
+    "keytar_symbols_missing": {
+        "text": "libsecret loaded but required symbols are missing. The language server cannot operate without a compatible libsecret.",
+        "hint": "{Locked=\"libsecret\"}"
+    },
+    "telemetry_disable_failed": "Failed to disable telemetry.",
+    "lsp_method_not_found": {
+        "text": "Method not found: {0}",
+        "hint": "{0} is the LSP method name. {Locked=\"{0}\"}"
+    },
+    "intellisense_same_canonical_path": {
+        "text": "Unable to process IntelliSense for a file with the same canonicalized path as an existing file. URI: {0}, canonicalized path: {1}",
+        "hint": "{Locked=\"IntelliSense\"} {Locked=\"URI\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
     }
 }
