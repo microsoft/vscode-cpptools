@@ -122,7 +122,7 @@ Repo: ${context.repo.owner}/${context.repo.repo}
 <!-- Context:
 ${JSON.stringify(context, null, 2)
 				.replace(/<!--/gu, '<@--')
-				.replace(/-->/gu, '--@>')
+				.replace(/--!?\s*>/gu, '--@>')
 				.replace(/\/|\\/gu, 'slash-')}
 -->
 `);
