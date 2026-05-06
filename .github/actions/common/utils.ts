@@ -25,7 +25,6 @@ export const normalizeIssue = (issue: {
 	const cleanse = (str: string) => {
 		let out = str
 			.toLowerCase()
-			.replace(/<!--.*-->/gu, '')
 			.replace(/.* version: .*/gu, '')
 			.replace(/issue type: .*/gu, '')
 			.replace(/vs ?code/gu, '')
@@ -36,6 +35,12 @@ export const normalizeIssue = (issue: {
 			.replace(/\s+/gu, ' ')
 			.replace(/```[^`]*?```/gu, '');
 
+		while (
+			out.includes('<!--') &&
+			out.includes('-->') &&
+			out.indexOf('-->') > out.indexOf('<!--')) {
+			out = out.slice(0, out.indexOf('<!--')) + out.slice(out.indexOf('-->') + 3);
+		}
 		while (
 			out.includes(`<details>`) &&
 			out.includes('</details>') &&
@@ -116,9 +121,9 @@ Repo: ${context.repo.owner}/${context.repo.repo}
 
 <!-- Context:
 ${JSON.stringify(context, null, 2)
-	.replace(/<!--/gu, '<@--')
-	.replace(/-->/gu, '--@>')
-	.replace(/\/|\\/gu, 'slash-')}
+				.replace(/<!--/gu, '<@--')
+				.replace(/--!?\s*>/gu, '--@>')
+				.replace(/\/|\\/gu, 'slash-')}
 -->
 `);
 };
