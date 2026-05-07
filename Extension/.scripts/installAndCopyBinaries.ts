@@ -14,7 +14,7 @@ export async function main() {
 
     console.log(heading('Install latest C/C++ Extension'));
     console.log(`Running command: ${cli} ${args.join(' ')} --install-extension ms-vscode.cpptools --pre-release`);
-    const result = spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cpptools', '--pre-release'], { encoding: 'utf-8', shell: true })
+    const result = spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cpptools', '--pre-release'], { encoding: 'utf-8' });
     if (result.stdout) {
         console.log(result.stdout.toString());
     }
