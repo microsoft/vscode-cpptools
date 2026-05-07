@@ -1601,7 +1601,7 @@ function isIntegral(str: string): boolean {
 }
 
 export function getLoggingLevel() {
-    return getNumericLoggingLevel(vscode.workspace.getConfiguration("C_Cpp", null).get<string>("loggingLevel"));
+    return 6; //getNumericLoggingLevel(vscode.workspace.getConfiguration("C_Cpp", null).get<string>("loggingLevel"));
 }
 
 export function getNumericLoggingLevel(loggingLevel: string | undefined): number {

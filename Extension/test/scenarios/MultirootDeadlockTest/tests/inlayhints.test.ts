@@ -43,7 +43,6 @@ suite("[Inlay hints test]", function (): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function (): Promise<void> {
-        vscode.workspace.getConfiguration('C_Cpp').update('loggingLevel', 'Debug', vscode.ConfigurationTarget.Global);
         await testHelpers.activateCppExtension();
 
         const cpptools = await apit.getCppToolsTestApi(api.Version.latest) ?? assert.fail("Could not get cpptools test api");
