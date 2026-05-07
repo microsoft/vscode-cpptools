@@ -13,7 +13,7 @@ export async function main() {
     const vscode = await install();
 
     console.log(heading('Install latest C/C++ Extension'));
-    const result = await runVSCodeCommand([...vscode?.args ?? [], '--install-extension', 'ms-vscode.cpptools', '--pre-release'], options);
+    const result = await runVSCodeCommand([...vscode?.args ?? [], '--install-extension', 'ms-vscode.cpptools@1.31.4', '--pre-release'], options);
     if (result.stdout) {
         console.log(result.stdout.toString());
     }
