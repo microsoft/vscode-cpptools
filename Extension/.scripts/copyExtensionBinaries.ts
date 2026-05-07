@@ -6,6 +6,7 @@
 import { cp, readdir, rm, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { verbose } from '../src/Utility/Text/streams';
 import { $args, $root, green, heading, note } from './common';
 
 const extensionPrefix = 'ms-vscode.cpptools-';
@@ -110,7 +111,7 @@ async function findLatestInstalledExtension(providedPath?: string): Promise<stri
         // find a folder called 'extensions' recursively under the provided path and add it to the front of the search roots
         const extensionsFolderPath = await findExtensionsFolder(providedPath);
         if (extensionsFolderPath) {
-            console.log(`Found extensions folder under provided path: ${extensionsFolderPath}`);
+            verbose(`Found extensions folder under provided path: ${extensionsFolderPath}`);
             searchRoots.unshift(extensionsFolderPath);
         }
     }
