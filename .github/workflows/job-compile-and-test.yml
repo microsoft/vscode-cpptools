@@ -11,6 +11,9 @@ on:
         # Expects 'mac', 'linux', or 'windows'
         required: true
         type: string
+      checkout-ref:
+        required: false
+        type: string
       yarn-args:
         type: string
 
@@ -23,6 +26,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.checkout-ref }}
 
       - name: Use Node.js 24
         uses: actions/setup-node@v4
