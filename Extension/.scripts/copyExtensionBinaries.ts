@@ -79,7 +79,12 @@ async function findExtensionsFolder(root: string): Promise<string | undefined> {
         for (const entry of entries) {
             if (entry.isDirectory()) {
                 if (entry.name === 'extensions') {
-                    return join(root, entry.name);
+                    const extensionEntries = await readdir(join(root, entry.name), { withFileTypes: true });
+                    for (const extensionEntry of extensionEntries) {
+                        if (extensionEntry.isDirectory() && extensionEntry.name.startsWith(extensionPrefix)) {
+                            return join(root, entry.name);
+                        }
+                    }
                 }
                 const result = await findExtensionsFolder(join(root, entry.name));
                 if (result) {
