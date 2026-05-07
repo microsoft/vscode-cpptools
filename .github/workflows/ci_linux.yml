@@ -21,4 +21,4 @@ jobs:
     with:
       runner-env: ubuntu-24.04
       platform: linux
-      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.target-ref || github.ref_name }}
+      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.target-ref || github.ref }}
