@@ -6,7 +6,7 @@
 {
 	"walkthrough.windows.install.compiler": "Windows'a C++ derleyicisi yükleme",
 	"walkthrough.windows.text1": "Windows için C++ geliştirme yapıyorsanız Microsoft Visual C++ (MSVC) derleyicisini yüklemenizi öneririz.",
-	"walkthrough.windows.text2": "MSVC'yi yüklemek için VS Code terminalini (CTRL + `) açın ve aşağıdaki komutu yapıştırın:\n",
+	"walkthrough.windows.text2": "MSVC'yi yüklemek için VS Code terminalini (CTRL + `) açın ve aşağıdaki komutu yapıştırın:",
 	"walkthrough.windows.note1": "Not",
 	"walkthrough.windows.note1.text": "Herhangi bir C++ kod temelini derlemek, oluşturmak ve doğrulamak için Visual Studio Code ile birlikte Visual Studio Derleme Araçları’nda bulunan C++ araç takımını kullanabilirsiniz. Bunun yanı sıra, bu C++ kod temelini geliştirmek için etkin olarak kullandığınız geçerli bir Visual Studio lisansına (Community, Pro veya Enterprise) sahip olursunuz.",
 	"walkthrough.windows.verify.compiler": "Derleyici yüklemesi doğrulanıyor",

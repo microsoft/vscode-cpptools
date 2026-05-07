@@ -59,13 +59,24 @@ jobs:
   - script: mkdir $(Build.ArtifactStagingDirectory)\vsix
     displayName: Create Staging Directory
 
-  - script: |
-      cd $(Build.SourcesDirectory)\${{ parameters.srcDir }}
-      npx @vscode/vsce@3.7.1 package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix
+  - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.7.1
+    displayName: Install vsce
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+
+  - script: npm rebuild @vscode/vsce-sign --ignore-scripts=false
+    displayName: Rebuild vsce-sign binary
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+
+  - script: if not exist node_modules\@vscode\vsce-sign\bin\vsce-sign.exe (echo Missing vsce-sign.exe && exit 1)
+    displayName: Verify vsce-sign binary exists
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+
+  - script: npx vsce package -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix
     displayName: Run VSCE to package vsix
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
 
 # sign the vsix
-  - script: npx @vscode/vsce@3.7.1 generate-manifest -i $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest
+  - script: npx vsce generate-manifest -i $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -o $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest
     displayName: generate manifest
     workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
   - script: copy $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s

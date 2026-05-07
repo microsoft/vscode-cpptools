@@ -6,7 +6,7 @@
 {
 	"walkthrough.windows.install.compiler": "Zainstaluj kompilator języka C++ w systemie Windows",
 	"walkthrough.windows.text1": "W przypadku programowania w języku C++ dla systemu Windows zalecamy zainstalowanie kompilatora Microsoft Visual C++ (MSVC).",
-	"walkthrough.windows.text2": "Aby zainstalować program MSVC, otwórz terminal VS Code (CTRL + `) i wklej następujące polecenie:\n",
+	"walkthrough.windows.text2": "Aby zainstalować program MSVC, otwórz terminal VS Code (CTRL + `) i wklej następujące polecenie:",
 	"walkthrough.windows.note1": "Notatka",
 	"walkthrough.windows.note1.text": "Zestawu narzędzi języka C++ z narzędzi Visual Studio Build Tools wraz z programem Visual Studio Code można używać do kompilowania, tworzenia i weryfikowania dowolnej bazy kodu języka C++, o ile masz również ważną licencję programu Visual Studio (Community, Pro lub Enterprise), której aktywnie używasz do opracowywania tej bazy kodu języka C++.",
 	"walkthrough.windows.verify.compiler": "Weryfikowanie instalacji kompilatora",

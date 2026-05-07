@@ -6,7 +6,7 @@
 {
 	"walkthrough.windows.install.compiler": "Windows で C++ コンパイラをインストールする",
 	"walkthrough.windows.text1": "Windows 向けの C++ 開発を行っている場合は、Microsoft Visual C++ (MSVC) コンパイラをインストールすることをお勧めします。",
-	"walkthrough.windows.text2": "MSVC をインストールするには、VS Code ターミナル (CTRL + `) を開き、次のコマンドで貼り付けます:\n",
+	"walkthrough.windows.text2": "MSVC をインストールするには、VS Code ターミナルを開き (CTRL + `)、次のコマンドを貼り付けます:",
 	"walkthrough.windows.note1": "メモ",
 	"walkthrough.windows.note1.text": "有効な Visual Studio ライセンス (Community、Pro、Enterprise のいずれか) があり、その C++ コードベースの開発に積極的に使用している場合は、Visual Studio Build Tools の C++ ツールセットを Visual Studio Code と合わせて使用して、C++ コードベースのコンパイル、ビルド、および検証を行うことができます。",
 	"walkthrough.windows.verify.compiler": "コンパイラのインストールの確認中",

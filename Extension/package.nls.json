@@ -211,7 +211,7 @@
         ]
     },
     "c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription": {
-        "message": "List of enabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any. The default check `clang-analyzer-*` is always used unless it is explicitly disabled.",
+        "message": "List of enabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any. The default check `clang-analyzer-core.*` is always used unless it is explicitly disabled.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -580,6 +580,7 @@
         ]
     },
     "c_cpp.configuration.doxygen.generateOnType.description": "Controls whether to automatically insert the Doxygen comment after typing the chosen comment style.",
+    "c_cpp.configuration.doxygen.generateOnCodeAction.description": "Controls whether the code action to generate a Doxygen comment is enabled.",
     "c_cpp.configuration.doxygen.generatedStyle.description": "The string of characters used as the starting line of the Doxygen comment.",
     "c_cpp.configuration.doxygen.sectionTags.description": "Select the Doxygen section tags that you would like to appear on hover in the tooltip area when the 'Simplify Structured Comments' setting is enabled. ",
     "c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": {
