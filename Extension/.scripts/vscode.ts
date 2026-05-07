@@ -17,7 +17,7 @@ export const settings = resolve(userDir, "User", 'settings.json');
 
 export const options = {
     cachePath: `${isolated}/cache`,
-    launchArgs: ['--no-sandbox', '--disable-updates', '--skip-welcome', '--skip-release-notes', `--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`, '--disable-workspace-trust']
+    launchArgs: ['--no-sandbox', '--disable-updates', '--skip-welcome', '--skip-release-notes', '--disable-extensions', `--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`, '--disable-workspace-trust']
 };
 
 export async function install() {
