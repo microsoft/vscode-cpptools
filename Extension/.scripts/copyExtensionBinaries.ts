@@ -85,10 +85,11 @@ async function findExtensionsFolder(root: string): Promise<string | undefined> {
                             return join(root, entry.name);
                         }
                     }
-                }
-                const result = await findExtensionsFolder(join(root, entry.name));
-                if (result) {
-                    return result;
+                } else {
+                    const result = await findExtensionsFolder(join(root, entry.name));
+                    if (result) {
+                        return result;
+                    }
                 }
             }
         }
@@ -109,6 +110,7 @@ async function findLatestInstalledExtension(providedPath?: string): Promise<stri
         // find a folder called 'extensions' recursively under the provided path and add it to the front of the search roots
         const extensionsFolderPath = await findExtensionsFolder(providedPath);
         if (extensionsFolderPath) {
+            console.log(`Found extensions folder under provided path: ${extensionsFolderPath}`);
             searchRoots.unshift(extensionsFolderPath);
         }
     }

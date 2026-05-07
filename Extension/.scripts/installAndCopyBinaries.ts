@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { spawnSync } from 'child_process';
-import { verbose } from '../src/Utility/Text/streams';
 import { heading } from './common';
 import * as copy from './copyExtensionBinaries';
 import { install, isolated } from "./vscode";
@@ -14,8 +13,8 @@ export async function main() {
     const { cli, args } = await install();
 
     console.log(heading('Install latest C/C++ Extension'));
-    verbose(`Running command: ${cli} ${args.join(' ')} --install-extension ms-vscode.cpptools --pre-release`);
-    const result = spawnSync(cli, ['--install-extension', 'ms-vscode.cpptools', '--pre-release'], { encoding: 'utf-8', shell: true })
+    console.log(`Running command: ${cli} ${args.join(' ')} --install-extension ms-vscode.cpptools --pre-release`);
+    const result = spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cpptools', '--pre-release'], { encoding: 'utf-8', shell: true })
     if (result.stdout) {
         console.log(result.stdout.toString());
     }

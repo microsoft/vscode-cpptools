@@ -32,6 +32,7 @@ export async function install() {
         const [cli, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath).filter(each => !each.startsWith('--extensions-dir=') && !each.startsWith('--user-data-dir='));
 
         args.push(`--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`);
+        console.log(`extensionsDir: ${extensionsDir}`);
 
         // install the appropriate extensions
         // spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cpptools'], { encoding: 'utf-8', stdio: 'ignore' });
