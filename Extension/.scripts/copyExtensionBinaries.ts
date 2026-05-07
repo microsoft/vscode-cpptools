@@ -73,6 +73,26 @@ async function getInstalledExtensions(root: string): Promise<InstalledExtension[
     }
 }
 
+async function findExtensionsFolder(root: string): Promise<string | undefined> {
+    try {
+        const entries = await readdir(root, { withFileTypes: true });
+        for (const entry of entries) {
+            if (entry.isDirectory()) {
+                if (entry.name === 'extensions') {
+                    return join(root, entry.name);
+                }
+                const result = await findExtensionsFolder(join(root, entry.name));
+                if (result) {
+                    return result;
+                }
+            }
+        }
+    } catch {
+        // Ignore errors (permission denied, etc.)
+    }
+    return undefined;
+}
+
 async function findLatestInstalledExtension(providedPath?: string): Promise<string> {
     const searchRoots: string[] = [
         join(homedir(), '.vscode', 'extensions'),
@@ -81,7 +101,11 @@ async function findLatestInstalledExtension(providedPath?: string): Promise<stri
         join(homedir(), '.vscode-server-insiders', 'extensions')
     ];
     if (providedPath) {
-        searchRoots.unshift(join(providedPath, 'extensions'));
+        // find a folder called 'extensions' recursively under the provided path and add it to the front of the search roots
+        const extensionsFolderPath = await findExtensionsFolder(providedPath);
+        if (extensionsFolderPath) {
+            searchRoots.unshift(extensionsFolderPath);
+        }
     }
 
     const installed: InstalledExtension[] = (await Promise.all(searchRoots.map(each => getInstalledExtensions(each)))).flat();

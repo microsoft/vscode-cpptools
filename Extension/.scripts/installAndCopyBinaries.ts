@@ -17,7 +17,13 @@ export async function main() {
     verbose(`Running command: ${cli} ${args.join(' ')} --install-extension ms-vscode.cpptools --pre-release`);
     const result = spawnSync(cli, ['--install-extension', 'ms-vscode.cpptools', '--pre-release'], { encoding: 'utf-8', shell: true })
     if (result.stdout) {
-        verbose(result.stdout.toString());
+        console.log(result.stdout.toString());
+    }
+    if (result.stderr) {
+        console.error(result.stderr.toString());
+    }
+    if (result.error) {
+        console.error(result.error);
     }
 
     await copy.main(isolated);
