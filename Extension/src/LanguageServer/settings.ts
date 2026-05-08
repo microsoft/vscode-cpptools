@@ -375,7 +375,7 @@ export class CppSettings extends Settings {
     public get inactiveRegionBackgroundColor(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("inactiveRegionBackgroundColor")); }
     public get autocomplete(): string { return this.getAsString("autocomplete"); }
     public get autocompleteAddParentheses(): boolean { return this.getAsBoolean("autocompleteAddParentheses"); }
-    public get loggingLevel(): string { return "Debug"; }
+    public get loggingLevel(): string { return this.getAsString("loggingLevel"); }
     public get autoAddFileAssociations(): boolean { return this.getAsBoolean("autoAddFileAssociations"); }
     public get workspaceParsingPriority(): string { return this.getAsString("workspaceParsingPriority"); }
     public get workspaceSymbols(): string { return this.getAsString("workspaceSymbols"); }

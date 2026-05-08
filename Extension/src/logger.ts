@@ -138,7 +138,6 @@ export function getOutputChannelLogger(): Logger {
 }
 
 export function log(output: string): void {
-    console.log(output);
     getOutputChannel().appendLine(`${output}`);
 }
 
