@@ -6888,7 +6888,7 @@
         "which": "^2.0.2"
     },
     "resolutions": {
-        "postcss": "^8.4.31",
+        "postcss": "^8.5.14",
         "gulp-typescript/**/glob-parent": "^5.1.2",
         "serialize-javascript": "^7.0.5",
         "@azure/msal-browser": "^4.29.1",
