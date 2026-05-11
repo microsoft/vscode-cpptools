@@ -71,11 +71,15 @@ export class PlatformInformation {
 
         if (util.checkFileExistsSync(DARWIN_SYSTEM_VERSION_PLIST)) {
             const systemVersionPListBuffer: Buffer = fs.readFileSync(DARWIN_SYSTEM_VERSION_PLIST);
-            const systemVersionData: any = plist.parse(systemVersionPListBuffer.toString());
-            if (systemVersionData) {
-                productDarwinVersion = systemVersionData.ProductVersion;
-            } else {
-                errorMessage = localize("missing.plist.productversion", "Could not get ProduceVersion from SystemVersion.plist");
+            try {
+                const systemVersionData: any = plist.parse(systemVersionPListBuffer.toString());
+                if (systemVersionData) {
+                    productDarwinVersion = systemVersionData.ProductVersion;
+                } else {
+                    errorMessage = localize("missing.plist.productversion", "Could not get ProduceVersion from SystemVersion.plist");
+                }
+            } catch (error) {
+                errorMessage = localize("plist.parse.error", "Failed to parse SystemVersion.plist: {0}", (error as Error).message);
             }
         } else {
             errorMessage = localize("missing.darwin.systemversion.file", "Failed to find SystemVersion.plist in {0}.", DARWIN_SYSTEM_VERSION_PLIST);
