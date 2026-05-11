@@ -1686,7 +1686,7 @@ bare-events@^2.7.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/bare-events/-/bare-events-2.8.2.tgz#7b3e10bd8e1fc80daf38bb516921678f566ab89f"
   integrity sha1-ez4QvY4fyA2vOLtRaSFnj1ZquJ8=
 
-base64-js@^1.3.1:
+base64-js@^1.3.1, base64-js@^1.5.1:
   version "1.5.1"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha1-GxtEAWClv3rUC2UPCVljSBkDkwo=
@@ -4990,12 +4990,13 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-plist@^5.0.0:
-  version "5.0.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/plist/-/plist-5.0.0.tgz#a0a0db9d31667d43e11a4b8e3795af4d76bc0804"
-  integrity sha1-oKDbnTFmfUPhGkuON5WvTXa8CAQ=
+plist@^3.1.1:
+  version "3.1.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/plist/-/plist-3.1.1.tgz#fa6099e1e3cf6ea180258ebe6378ea3878c2c841"
+  integrity sha1-+mCZ4ePPbqGAJY6+Y3jqOHjCyEE=
   dependencies:
     "@xmldom/xmldom" "^0.9.10"
+    base64-js "^1.5.1"
     xmlbuilder "^15.1.1"
 
 plugin-error@^1.0.1:
