@@ -1255,7 +1255,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
 
     const lines: string[] = data.split("\n");
     let addressData: string;
-    const isCppToolsSrv2: boolean = crashFile.startsWith("cpptools-srv2");
+    const isCppToolsSrv2: boolean = crashFile.startsWith("cpptools-srv2-");
     const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
     const telemetryHeader: string = (isCppToolsSrv2 ? "cpptools-srv2.txt" : isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
