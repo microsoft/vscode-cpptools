@@ -1195,7 +1195,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     data = data.replace(/0x1........ \+ 0/g, "");
 
     // Get rid of the process names on each line and just add it to the start.
-    const processNames: string[] = ["cpptools-srv", "cpptools-wordexp", "cpptools",
+    const processNames: string[] = ["cpptools-srv2", "cpptools-srv", "cpptools-wordexp", "cpptools",
         // Since only crash logs that start with "cpptools" are reported, the cases below would only occur
         // if the crash were to happen before the new process had fully started and renamed itself.
         "clang-tidy", "clang-format", "clang", "gcc"];
@@ -1255,8 +1255,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
 
     const lines: string[] = data.split("\n");
     let addressData: string;
+    const isCppToolsSrv2: boolean = crashFile.startsWith("cpptools-srv2");
     const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
-    const telemetryHeader: string = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
+    const telemetryHeader: string = (isCppToolsSrv2 ? "cpptools-srv2.txt" : isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
     const startStr: string = isMac ? " _" : "<";
@@ -1405,7 +1406,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         prevCppCrashCallStackData = crashCallStack;
 
         if (lines.length >= 6 && util.getLoggingLevel() >= 1) {
-            getCrashCallStacksChannel().appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}${crashLog.length > 0 ? "\n\n" + crashLog : ""}`);
+            getCrashCallStacksChannel().appendLine(`\n${isCppToolsSrv2 ? "cpptools-srv2" : isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}${crashLog.length > 0 ? "\n\n" + crashLog : ""}`);
         }
     }
 
