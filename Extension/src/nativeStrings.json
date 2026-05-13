@@ -687,5 +687,7 @@
     "status_indexing_files": "Indexing files",
     "status_indexing_files_with_n_of_m": "Indexing files ({0} of {1})",
     "status_indexing_files_with_n_of_m_and_text": "Indexing files ({0} of {1}): {2}",
-    "status_indexing_files_with_text": "Indexing files {0}"
+    "status_indexing_files_with_text": "Indexing files {0}",
+    "help_allow_missing_lsp_config": "Allow the server to start even if the specified --lsp-config file does not exist.",
+    "initialize_failed_during_engine_setup": "Initialization failed during engine setup." 
 }
