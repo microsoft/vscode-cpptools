@@ -223,7 +223,6 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     public async prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.CallHierarchyItem | undefined> {
         await this.client.ready;
 
-        workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
         workspaceReferences.clearViews();
 
         const range: vscode.Range | undefined = document.getWordRangeAtPosition(position);
@@ -262,7 +261,6 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken): Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
         await this.client.ready;
-        workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
         const CallHierarchyCallsToEvent: string = "CallHierarchyCallsTo";
         if (item === undefined) {

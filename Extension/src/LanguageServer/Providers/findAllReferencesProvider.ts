@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import { Position, RequestType, ResponseError } from 'vscode-languageclient';
 import { DefaultClient, workspaceReferences } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
-import { CancellationSender, ReferenceInfo, ReferenceType, ReferencesParams, ReferencesResult } from '../references';
+import { ReferenceInfo, ReferenceType, ReferencesParams, ReferencesResult } from '../references';
 
 const FindAllReferencesRequest: RequestType<ReferencesParams, ReferencesResult, void> =
     new RequestType<ReferencesParams, ReferencesResult, void>('cpptools/findAllReferences');
@@ -64,7 +64,6 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
 
     public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
         await this.client.ready;
-        workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
         // Listen to a cancellation for this request. When this request is cancelled,
         // use a local cancellation source to explicitly cancel a token.

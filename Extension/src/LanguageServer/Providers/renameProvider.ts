@@ -8,7 +8,7 @@ import * as nls from 'vscode-nls';
 import * as util from '../../common';
 import { DefaultClient, workspaceReferences } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
-import { CancellationSender, ReferenceType, ReferencesParams, ReferencesResult, getReferenceItemIconPath, getReferenceTagString } from '../references';
+import { ReferenceType, ReferencesParams, ReferencesResult, getReferenceItemIconPath, getReferenceTagString } from '../references';
 import { CppSettings } from '../settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -26,7 +26,6 @@ export class RenameProvider implements vscode.RenameProvider {
 
     public async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, _token: vscode.CancellationToken): Promise<vscode.WorkspaceEdit | undefined> {
         await this.client.ready;
-        workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
         const settings: CppSettings = new CppSettings();
         if (settings.renameRequiresIdentifier && !util.isValidIdentifier(newName)) {
