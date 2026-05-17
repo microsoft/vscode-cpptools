@@ -196,8 +196,10 @@ export class ReferencesManager {
     private findAllRefsView?: FindAllRefsView;
     private viewsInitialized: boolean = false;
 
-    public renamePending: boolean = false;
+    private nextRenameRequestId: number = 0;
+    private pendingRenameRequests: Set<number> = new Set<number>();
     private referenceRequestCanceled = new vscode.EventEmitter<CancellationSender>();
+    private renameRequestCanceled = new vscode.EventEmitter<CancellationSender>();
 
     private referencesCurrentProgress?: ReportReferencesProgressNotification;
     private referencesPrevProgressIncrement: number = 0;
@@ -225,7 +227,7 @@ export class ReferencesManager {
 
     constructor(client: DefaultClient) {
         this.client = client;
-        this.disposables.push(vscode.Disposable.from(this.referenceRequestCanceled));
+        this.disposables.push(vscode.Disposable.from(this.referenceRequestCanceled, this.renameRequestCanceled));
     }
 
     initializeViews(): void {
@@ -239,9 +241,35 @@ export class ReferencesManager {
         return this.referenceRequestCanceled.event;
     }
 
+    public get onRenameCancellationRequested(): vscode.Event<CancellationSender> {
+        return this.renameRequestCanceled.event;
+    }
+
+    public get renamePending(): boolean {
+        return this.pendingRenameRequests.size !== 0;
+    }
+
     public cancelCurrentReferenceRequest(sender: CancellationSender): void {
         // Notify the current listener to cancel its request.
         this.referenceRequestCanceled.fire(sender);
+    }
+
+    public createRenameRequest(): number {
+        const requestId: number = ++this.nextRenameRequestId;
+        this.pendingRenameRequests.add(requestId);
+        return requestId;
+    }
+
+    public cancelPendingRenameRequests(sender: CancellationSender): void {
+        if (this.pendingRenameRequests.size === 0) {
+            return;
+        }
+        this.pendingRenameRequests.clear();
+        this.renameRequestCanceled.fire(sender);
+    }
+
+    public finishRenameRequest(requestId: number): void {
+        this.pendingRenameRequests.delete(requestId);
     }
 
     public dispose(): void {
@@ -450,12 +478,7 @@ export class ReferencesManager {
         this.referencesProgressBarStartTime = 0;
     }
 
-    public startRename(): void {
-        this.renamePending = true;
-    }
-
     public resetReferences(): void {
-        this.renamePending = false;
         this.initializeViews();
         this.client.setReferencesCommandMode(ReferencesCommandMode.None);
     }
