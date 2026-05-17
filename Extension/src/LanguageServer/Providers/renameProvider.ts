@@ -24,64 +24,76 @@ export class RenameProvider implements vscode.RenameProvider {
         this.client = client;
     }
 
-    public async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, _token: vscode.CancellationToken): Promise<vscode.WorkspaceEdit | undefined> {
-        await this.client.ready;
-
+    public provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, _token: vscode.CancellationToken): Promise<vscode.WorkspaceEdit | undefined> {
         const settings: CppSettings = new CppSettings();
         if (settings.renameRequiresIdentifier && !util.isValidIdentifier(newName)) {
             void vscode.window.showErrorMessage(localize("invalid.identifier.for.rename", "Invalid identifier provided for the Rename Symbol operation."));
-            return undefined;
+            return Promise.resolve(undefined);
         }
 
-        // Listen to a cancellation for this request. When this request is cancelled,
-        // use a local cancellation source to explicitly cancel a token.
-        // Don't listen to the token from the provider, as it will cancel when the cursor is moved to a different position.
-        const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-        const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(_sender => { cancelSource.cancel(); });
+        const renameRequestId: number = workspaceReferences.createRenameRequest();
 
-        // Send the request to the language server.
-        workspaceReferences.startRename();
-        const workspaceEditResult: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-        const params: ReferencesParams = {
-            newName: newName,
-            position: Position.create(position.line, position.character),
-            textDocument: { uri: document.uri.toString() }
-        };
-        let response: ReferencesResult;
-        try {
-            response = await this.client.languageClient.sendRequest(RenameRequest, params, cancelSource.token);
-        } catch (e: any) {
-            if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+        return this.client.enqueue(async () => {
+            if (!workspaceReferences.hasPendingRenameRequest(renameRequestId)) {
                 throw new vscode.CancellationError();
             }
-            throw e;
-        }
-        finally {
-            // Reset anything that can be cleared before processing the result.
-            workspaceReferences.resetProgressBar();
-            workspaceReferences.resetReferences();
-            requestCanceledListener.dispose();
-        }
 
-        // Process the result.
-        if (cancelSource.token.isCancellationRequested || response.isCanceled) {
-            throw new vscode.CancellationError();
-        } else if (response.referenceInfos.length === 0) {
-            void vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
-        } else {
-            for (const reference of response.referenceInfos) {
-                const uri: vscode.Uri = vscode.Uri.file(reference.file);
-                const range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character,
-                    reference.position.line, reference.position.character + response.text.length);
-                const metadata: vscode.WorkspaceEditEntryMetadata = {
-                    needsConfirmation: reference.type !== ReferenceType.Confirmed,
-                    label: getReferenceTagString(reference.type, false, true),
-                    iconPath: getReferenceItemIconPath(reference.type, false)
-                };
-                workspaceEditResult.replace(uri, range, newName, metadata);
+            // Listen to a cancellation for this request. When this request is cancelled,
+            // use a local cancellation source to explicitly cancel a token.
+            // Don't listen to the token from the provider, as it will cancel when the cursor is moved to a different position.
+            const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+            const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(_sender => { cancelSource.cancel(); });
+            const renameCanceledListener: vscode.Disposable = workspaceReferences.onRenameCancellationRequested((sender) => {
+                if (sender === CancellationSender.User) {
+                    cancelSource.cancel();
+                }
+            });
+
+            // Send the request to the language server.
+            const workspaceEditResult: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+            const params: ReferencesParams = {
+                newName: newName,
+                position: Position.create(position.line, position.character),
+                textDocument: { uri: document.uri.toString() }
+            };
+            let response: ReferencesResult;
+            try {
+                response = await this.client.languageClient.sendRequest(RenameRequest, params, cancelSource.token);
+            } catch (e: any) {
+                if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                    throw new vscode.CancellationError();
+                }
+                throw e;
             }
-        }
+            finally {
+                // Reset anything that can be cleared before processing the result.
+                workspaceReferences.finishRenameRequest(renameRequestId);
+                workspaceReferences.resetProgressBar();
+                workspaceReferences.resetReferences();
+                requestCanceledListener.dispose();
+                renameCanceledListener.dispose();
+            }
 
-        return workspaceEditResult;
+            // Process the result.
+            if (cancelSource.token.isCancellationRequested || response.isCanceled) {
+                throw new vscode.CancellationError();
+            } else if (response.referenceInfos.length === 0) {
+                void vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
+            } else {
+                for (const reference of response.referenceInfos) {
+                    const uri: vscode.Uri = vscode.Uri.file(reference.file);
+                    const range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character,
+                        reference.position.line, reference.position.character + response.text.length);
+                    const metadata: vscode.WorkspaceEditEntryMetadata = {
+                        needsConfirmation: reference.type !== ReferenceType.Confirmed,
+                        label: getReferenceTagString(reference.type, false, true),
+                        iconPath: getReferenceItemIconPath(reference.type, false)
+                    };
+                    workspaceEditResult.replace(uri, range, newName, metadata);
+                }
+            }
+
+            return workspaceEditResult;
+        });
     }
 }

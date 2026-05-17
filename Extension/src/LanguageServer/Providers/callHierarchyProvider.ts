@@ -220,91 +220,99 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         this.client = client;
     }
 
-    public async prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.CallHierarchyItem | undefined> {
-        await this.client.ready;
+    public prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.CallHierarchyItem | undefined> {
+        return this.client.enqueue(async () => {
+            if (token.isCancellationRequested) {
+                throw new vscode.CancellationError();
+            }
 
-        workspaceReferences.clearViews();
+            workspaceReferences.clearViews();
 
-        const range: vscode.Range | undefined = document.getWordRangeAtPosition(position);
-        if (range === undefined) {
-            return undefined;
-        }
+            const range: vscode.Range | undefined = document.getWordRangeAtPosition(position);
+            if (range === undefined) {
+                return undefined;
+            }
 
-        // Listen to a cancellation for this request. When this request is cancelled,
-        // use a local cancellation source to explicitly cancel a token.
-        const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-        const cancellationTokenListener: vscode.Disposable = token.onCancellationRequested(() => {
-            cancelSource.cancel();
+            // Listen to a cancellation for this request. When this request is cancelled,
+            // use a local cancellation source to explicitly cancel a token.
+            const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+            const cancellationTokenListener: vscode.Disposable = token.onCancellationRequested(() => {
+                cancelSource.cancel();
+            });
+            const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(_sender => {
+                cancelSource.cancel();
+            });
+
+            let result: vscode.CallHierarchyItem[] | undefined;
+            try {
+                result = await sendPrepareCallHierarchyRequest(this.client, document.uri, position, cancelSource.token);
+            } finally {
+                cancellationTokenListener.dispose();
+                requestCanceledListener.dispose();
+            }
+
+            if (cancelSource.token.isCancellationRequested) {
+                throw new vscode.CancellationError();
+            }
+            if (!result || result.length === 0) {
+                return undefined;
+            }
+
+            this.isEntryRootNodeTelemetry = true;
+            return result[0];
         });
-        const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(_sender => {
-            cancelSource.cancel();
-        });
-
-        let result: vscode.CallHierarchyItem[] | undefined;
-        try {
-            result = await sendPrepareCallHierarchyRequest(this.client, document.uri, position, cancelSource.token);
-        } finally {
-            cancellationTokenListener.dispose();
-            requestCanceledListener.dispose();
-        }
-
-        if (cancelSource.token.isCancellationRequested) {
-            throw new vscode.CancellationError();
-        }
-        if (!result || result.length === 0) {
-            return undefined;
-        }
-
-        this.isEntryRootNodeTelemetry = true;
-        return result[0];
     }
 
-    public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken): Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
-        await this.client.ready;
+    public provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken): Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
+        return this.client.enqueue(async () => {
+            if (token.isCancellationRequested) {
+                throw new vscode.CancellationError();
+            }
 
-        const CallHierarchyCallsToEvent: string = "CallHierarchyCallsTo";
-        if (item === undefined) {
-            this.logTelemetry(CallHierarchyCallsToEvent, CallHierarchyRequestStatus.Failed);
-            return undefined;
-        }
+            const CallHierarchyCallsToEvent: string = "CallHierarchyCallsTo";
+            if (item === undefined) {
+                this.logTelemetry(CallHierarchyCallsToEvent, CallHierarchyRequestStatus.Failed);
+                return undefined;
+            }
 
-        // Listen to a cancellation for this request. When this request is cancelled,
-        // use a local cancellation source to explicitly cancel a token.
-        let requestCanceled: CancellationSender | undefined;
-        const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-        const cancellationTokenListener: vscode.Disposable = token.onCancellationRequested(() => {
-            requestCanceled = CancellationSender.ProviderToken;
-            cancelSource.cancel();
+            // Listen to a cancellation for this request. When this request is cancelled,
+            // use a local cancellation source to explicitly cancel a token.
+            let requestCanceled: CancellationSender | undefined;
+            const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+            const cancellationTokenListener: vscode.Disposable = token.onCancellationRequested(() => {
+                requestCanceled = CancellationSender.ProviderToken;
+                cancelSource.cancel();
+            });
+            const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(sender => {
+                requestCanceled = sender;
+                cancelSource.cancel();
+            });
+
+            // Send the request to the language server.
+            let result: vscode.CallHierarchyIncomingCall[] | undefined;
+            let progressBarDuration: number | undefined;
+            try {
+                result = await sendCallHierarchyCallsToRequest(this.client, item, cancelSource.token);
+            } finally {
+                // Reset anything that can be cleared before processing the result.
+                progressBarDuration = workspaceReferences.getCallHierarchyProgressBarDuration();
+                workspaceReferences.resetProgressBar();
+                workspaceReferences.resetReferences();
+                cancellationTokenListener.dispose();
+                requestCanceledListener.dispose();
+            }
+
+            // Process the result.
+            if (cancelSource.token.isCancellationRequested || result === undefined || requestCanceled !== undefined) {
+                const requestStatus: CallHierarchyRequestStatus = requestCanceled === CancellationSender.User ?
+                    CallHierarchyRequestStatus.CanceledByUser : CallHierarchyRequestStatus.Canceled;
+                this.logTelemetry(CallHierarchyCallsToEvent, requestStatus, progressBarDuration);
+                throw new vscode.CancellationError();
+            }
+
+            this.logTelemetry(CallHierarchyCallsToEvent, CallHierarchyRequestStatus.Succeeded, progressBarDuration);
+            return result.length !== 0 ? result : undefined;
         });
-        const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(sender => {
-            requestCanceled = sender;
-            cancelSource.cancel();
-        });
-
-        // Send the request to the language server.
-        let result: vscode.CallHierarchyIncomingCall[] | undefined;
-        let progressBarDuration: number | undefined;
-        try {
-            result = await sendCallHierarchyCallsToRequest(this.client, item, cancelSource.token);
-        } finally {
-            // Reset anything that can be cleared before processing the result.
-            progressBarDuration = workspaceReferences.getCallHierarchyProgressBarDuration();
-            workspaceReferences.resetProgressBar();
-            workspaceReferences.resetReferences();
-            cancellationTokenListener.dispose();
-            requestCanceledListener.dispose();
-        }
-
-        // Process the result.
-        if (cancelSource.token.isCancellationRequested || result === undefined || requestCanceled !== undefined) {
-            const requestStatus: CallHierarchyRequestStatus = requestCanceled === CancellationSender.User ?
-                CallHierarchyRequestStatus.CanceledByUser : CallHierarchyRequestStatus.Canceled;
-            this.logTelemetry(CallHierarchyCallsToEvent, requestStatus, progressBarDuration);
-            throw new vscode.CancellationError();
-        }
-
-        this.logTelemetry(CallHierarchyCallsToEvent, CallHierarchyRequestStatus.Succeeded, progressBarDuration);
-        return result.length !== 0 ? result : undefined;
     }
 
     public async provideCallHierarchyOutgoingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken): Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {

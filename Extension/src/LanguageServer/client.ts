@@ -2015,10 +2015,10 @@ export class DefaultClient implements Client {
 
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
         if (util.isCpp(textDocumentChangeEvent.document)) {
-            // If any file has changed, we need to abort the current rename operation
+            // If any file has changed, abort any pending rename operations.
             if (workspaceReferences !== undefined // Occurs when a document changes before cpptools starts.
                 && workspaceReferences.renamePending) {
-                workspaceReferences.cancelCurrentReferenceRequest(refs.CancellationSender.User);
+                workspaceReferences.cancelPendingRenameRequests(refs.CancellationSender.User);
             }
 
             const oldVersion: number | undefined = openFileVersions.get(textDocumentChangeEvent.document.uri.toString());
