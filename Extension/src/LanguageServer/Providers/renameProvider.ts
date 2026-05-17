@@ -31,13 +31,7 @@ export class RenameProvider implements vscode.RenameProvider {
             return Promise.resolve(undefined);
         }
 
-        const renameRequestId: number = workspaceReferences.createRenameRequest();
-
         return this.client.enqueue(async () => {
-            if (!workspaceReferences.hasPendingRenameRequest(renameRequestId)) {
-                throw new vscode.CancellationError();
-            }
-
             // Listen to a cancellation for this request. When this request is cancelled,
             // use a local cancellation source to explicitly cancel a token.
             // Don't listen to the token from the provider, as it will cancel when the cursor is moved to a different position.
@@ -48,6 +42,7 @@ export class RenameProvider implements vscode.RenameProvider {
                     cancelSource.cancel();
                 }
             });
+            const renameRequestId: number = workspaceReferences.createRenameRequest();
 
             // Send the request to the language server.
             const workspaceEditResult: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();

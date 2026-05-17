@@ -260,10 +260,6 @@ export class ReferencesManager {
         return requestId;
     }
 
-    public hasPendingRenameRequest(requestId: number): boolean {
-        return this.pendingRenameRequests.has(requestId);
-    }
-
     public cancelPendingRenameRequests(sender: CancellationSender): void {
         if (this.pendingRenameRequests.size === 0) {
             return;
