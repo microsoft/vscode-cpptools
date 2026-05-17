@@ -8,7 +8,7 @@ import * as nls from 'vscode-nls';
 import * as util from '../../common';
 import { DefaultClient, workspaceReferences } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
-import { ReferenceType, ReferencesParams, ReferencesResult, getReferenceItemIconPath, getReferenceTagString } from '../references';
+import { CancellationSender, ReferenceType, ReferencesParams, ReferencesResult, getReferenceItemIconPath, getReferenceTagString } from '../references';
 import { CppSettings } from '../settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
