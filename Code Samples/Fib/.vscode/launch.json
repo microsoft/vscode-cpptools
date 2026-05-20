@@ -3,7 +3,6 @@
     "configurations": [
         {
             "name": "(gdb) Launch",
-            "preLaunchTask": "build",
             "type": "cppdbg",
             "request": "launch",
             "args": [],
