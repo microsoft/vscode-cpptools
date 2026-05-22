@@ -4362,6 +4362,24 @@
                                 "default": "throw",
                                 "description": "%c_cpp.debuggers.unknownBreakpointHandling.description%"
                             },
+                            "debuginfod": {
+                                "description": "%c_cpp.debuggers.debuginfod.description%",
+                                "default": {},
+                                "type": "object",
+                                "properties": {
+                                    "enabled": {
+                                        "type": "boolean",
+                                        "description": "%c_cpp.debuggers.debuginfod.enabled.description%",
+                                        "default": true
+                                    },
+                                    "timeout": {
+                                        "type": "integer",
+                                        "description": "%c_cpp.debuggers.debuginfod.timeout.description%",
+                                        "minimum": 0,
+                                        "default": 30
+                                    }
+                                }
+                            },
                             "variables": {
                                 "type": "object",
                                 "description": "%c_cpp.debuggers.variables.description%",
@@ -4961,6 +4979,24 @@
                                         }
                                     }
                                 ]
+                            },
+                            "debuginfod": {
+                                "description": "%c_cpp.debuggers.debuginfod.description%",
+                                "default": {},
+                                "type": "object",
+                                "properties": {
+                                    "enabled": {
+                                        "type": "boolean",
+                                        "description": "%c_cpp.debuggers.debuginfod.enabled.description%",
+                                        "default": true
+                                    },
+                                    "timeout": {
+                                        "type": "integer",
+                                        "description": "%c_cpp.debuggers.debuginfod.timeout.description%",
+                                        "minimum": 0,
+                                        "default": 30
+                                    }
+                                }
                             },
                             "logging": {
                                 "description": "%c_cpp.debuggers.logging.description%",
