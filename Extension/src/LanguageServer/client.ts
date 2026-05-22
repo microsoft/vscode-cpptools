@@ -2940,6 +2940,7 @@ export class DefaultClient implements Client {
                 this.model.isInitializingWorkspace.Value = false;
                 this.model.isIndexingWorkspace.Value = false;
                 this.model.isParsingWorkspace.Value = false;
+                this.model.isParsingFiles.Value = false;
             } else if (message.endsWith("files")) {
                 this.model.isParsingFiles.Value = true;
             } else if (message.endsWith("IntelliSense")) {
