@@ -2936,6 +2936,10 @@ export class DefaultClient implements Client {
                 this.model.isIndexingWorkspace.Value = true;
                 this.model.isInitializingWorkspace.Value = false;
                 this.model.isParsingWorkspace.Value = false;
+            } else if (message.endsWith("Failed")) {
+                this.model.isInitializingWorkspace.Value = false;
+                this.model.isIndexingWorkspace.Value = false;
+                this.model.isParsingWorkspace.Value = false;
             } else if (message.endsWith("files")) {
                 this.model.isParsingFiles.Value = true;
             } else if (message.endsWith("IntelliSense")) {
