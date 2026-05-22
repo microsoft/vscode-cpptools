@@ -189,7 +189,6 @@
     },
     "expands_to": "Expands to:",
     "attention_label": "Attention:",
-    "important_label": "Important:",
     "author_label": "Author:",
     "authors_label": "Authors:",
     "bug_label": "Bug:",
@@ -201,14 +200,6 @@
         "text": "Exceptions:",
         "hint": "This label is for describing the exceptions thrown by a function. Usage example: Exception: std::out_of_range parameter is out of range."
     },
-    "throw_label": {
-        "text": "Throw:",
-        "hint": "This label is for describing the exceptions thrown by a function. Usage example: Throw: std::out_of_range parameter is out of range."
-    },
-    "throws_label": {
-        "text": "Throws:",
-        "hint": "This label is for describing the exceptions thrown by a function. Usage example: Throws: std::out_of_range parameter is out of range."
-    },
     "invariant_label": "Invariant:",
     "file_label": "File:",
     "note_label": "Note:",
@@ -218,10 +209,6 @@
     "remark_label": "Remark:",
     "remarks_label": "Remarks:",
     "result_label": "Result:",
-    "return_label": {
-        "text": "Return:",
-        "hint": "This label is for the return value description for a function. Usage example: 'Return: Area of a shape.'"
-    },
     "returns_label": {
         "text": "Returns:",
         "hint": "This label is for the return value description for a function. Usage example: 'Returns: Area of a shape.'"
@@ -701,5 +688,6 @@
     "status_indexing_files_with_n_of_m_and_text": "Indexing files ({0} of {1}): {2}",
     "status_indexing_files_with_text": "Indexing files {0}",
     "help_allow_missing_lsp_config": "Allow the server to start even if the specified --lsp-config file does not exist.",
-    "initialize_failed_during_engine_setup": "Initialization failed during engine setup."
+    "initialize_failed_during_engine_setup": "Initialization failed during engine setup.",
+    "important_label": "Important:"
 }
