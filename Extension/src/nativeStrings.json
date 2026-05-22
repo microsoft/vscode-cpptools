@@ -209,6 +209,7 @@
     "remark_label": "Remark:",
     "remarks_label": "Remarks:",
     "result_label": "Result:",
+    "return_label": "Return:",
     "returns_label": {
         "text": "Returns:",
         "hint": "This label is for the return value description for a function. Usage example: 'Returns: Area of a shape.'"
