@@ -1725,6 +1725,7 @@
                         "type": "array",
                         "default": [
                             "attention",
+                            "important",
                             "tparam",
                             "param",
                             "result",
@@ -1747,6 +1748,7 @@
                                 "deprecated",
                                 "details",
                                 "exception",
+                                "important",
                                 "invariant",
                                 "note",
                                 "param",
