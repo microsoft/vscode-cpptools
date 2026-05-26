@@ -415,5 +415,6 @@
 	"status_indexing_files_with_n_of_m_and_text": "Indexando os arquivos ({0} de {1}): {2}",
 	"status_indexing_files_with_text": "Indexando os arquivos {0}",
 	"help_allow_missing_lsp_config": "Permita que o servidor seja iniciado mesmo que o arquivo --lsp-config especificado não exista.",
-	"initialize_failed_during_engine_setup": "Falha na inicialização durante a instalação do mecanismo."
+	"initialize_failed_during_engine_setup": "Falha na inicialização durante a instalação do mecanismo.",
+	"important_label": "Importante:"
 }

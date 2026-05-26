@@ -415,5 +415,6 @@
 	"status_indexing_files_with_n_of_m_and_text": "ファイルのインデックスを作成しています ({0}/{1}): {2}",
 	"status_indexing_files_with_text": "ファイルのインデックスを作成しています: {0}",
 	"help_allow_missing_lsp_config": "指定された --lsp-config ファイルが存在しない場合でも、サーバーの起動を許可します。",
-	"initialize_failed_during_engine_setup": "エンジンのセットアップ中に初期化に失敗しました。"
+	"initialize_failed_during_engine_setup": "エンジンのセットアップ中に初期化に失敗しました。",
+	"important_label": "重要:"
 }

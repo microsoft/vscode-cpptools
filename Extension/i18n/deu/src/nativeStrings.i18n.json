@@ -415,5 +415,6 @@
 	"status_indexing_files_with_n_of_m_and_text": "Indizieren von Dateien ({0} von {1}): {2}",
 	"status_indexing_files_with_text": "Indizieren von Dateien {0}",
 	"help_allow_missing_lsp_config": "Zulassen, dass der Server gestartet wird, auch wenn die angegebene --lsp-config-Datei nicht vorhanden ist.",
-	"initialize_failed_during_engine_setup": "Fehler bei der Initialisierung während der Engine-Einrichtung."
+	"initialize_failed_during_engine_setup": "Fehler bei der Initialisierung während der Engine-Einrichtung.",
+	"important_label": "Wichtig:"
 }
