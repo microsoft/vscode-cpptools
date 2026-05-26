@@ -415,5 +415,6 @@
 	"status_indexing_files_with_n_of_m_and_text": "Индексирование файлов ({0} из {1}): {2}",
 	"status_indexing_files_with_text": "Индексирование файлов {0}",
 	"help_allow_missing_lsp_config": "Разрешить запуск сервера, даже если указанный файл --lsp-config не существует.",
-	"initialize_failed_during_engine_setup": "Сбой инициализации при настройке подсистемы."
+	"initialize_failed_during_engine_setup": "Сбой инициализации при настройке подсистемы.",
+	"important_label": "Важно!"
 }

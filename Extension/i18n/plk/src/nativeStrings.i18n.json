@@ -415,5 +415,6 @@
 	"status_indexing_files_with_n_of_m_and_text": "Indeksowanie plików ({0} z {1}): {2}",
 	"status_indexing_files_with_text": "Indeksowanie plików {0}",
 	"help_allow_missing_lsp_config": "Zezwól na uruchomienie serwera, nawet jeśli podany plik --lsp-config nie istnieje.",
-	"initialize_failed_during_engine_setup": "Inicjowanie nie powiodło się podczas instalacji aparatu."
+	"initialize_failed_during_engine_setup": "Inicjowanie nie powiodło się podczas instalacji aparatu.",
+	"important_label": "Ważne:"
 }
