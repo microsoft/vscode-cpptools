@@ -88,7 +88,6 @@ export interface Configuration {
     browse?: Browse;
     recursiveIncludes?: RecursiveIncludes;
     customConfigurationVariables?: { [key: string]: string };
-    recursiveIncludesReduceIsExplicit?: boolean;
     recursiveIncludesPriorityIsExplicit?: boolean;
     recursiveIncludesOrderIsExplicit?: boolean;
 }
@@ -978,8 +977,6 @@ export class CppProperties {
             if (!configuration.recursiveIncludes) {
                 configuration.recursiveIncludes = {};
             }
-            configuration.recursiveIncludes.reduce = this.updateConfigurationString(configuration.recursiveIncludes.reduce, settings.defaultRecursiveIncludesReduce);
-            configuration.recursiveIncludesReduceIsExplicit = configuration.recursiveIncludesReduceIsExplicit || settings.defaultRecursiveIncludesReduce !== "";
             configuration.recursiveIncludes.priority = this.updateConfigurationString(configuration.recursiveIncludes.priority, settings.defaultRecursiveIncludesPriority);
             configuration.recursiveIncludesPriorityIsExplicit = configuration.recursiveIncludesPriorityIsExplicit || settings.defaultRecursiveIncludesPriority !== "";
             configuration.recursiveIncludes.order = this.updateConfigurationString(configuration.recursiveIncludes.order, settings.defaultRecursiveIncludesOrder);
@@ -1560,7 +1557,6 @@ export class CppProperties {
                     || (this.configurationJson.configurations[i].cStandardIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].cppStandardIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].intelliSenseModeIsExplicit !== undefined)
-                    || (this.configurationJson.configurations[i].recursiveIncludesReduceIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].recursiveIncludesPriorityIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].recursiveIncludesOrderIsExplicit !== undefined)) {
                     dirty = true;
@@ -1583,7 +1579,6 @@ export class CppProperties {
                 e.cStandardIsExplicit = e.cStandard !== undefined;
                 e.cppStandardIsExplicit = e.cppStandard !== undefined;
                 e.intelliSenseModeIsExplicit = e.intelliSenseMode !== undefined;
-                e.recursiveIncludesReduceIsExplicit = e.recursiveIncludes?.reduce !== undefined;
                 e.recursiveIncludesPriorityIsExplicit = e.recursiveIncludes?.priority !== undefined;
                 e.recursiveIncludesOrderIsExplicit = e.recursiveIncludes?.order !== undefined;
             });
@@ -2408,7 +2403,6 @@ export class CppProperties {
         const savedCStandardIsExplicit: boolean[] = [];
         const savedCppStandardIsExplicit: boolean[] = [];
         const savedIntelliSenseModeIsExplicit: boolean[] = [];
-        const savedRecursiveIncludesReduceIsExplicit: boolean[] = [];
         const savedRecursiveIncludesPriorityIsExplicit: boolean[] = [];
         const savedRecursiveIncludesOrderIsExplicit: boolean[] = [];
 
@@ -2429,10 +2423,6 @@ export class CppProperties {
                 savedIntelliSenseModeIsExplicit.push(!!e.intelliSenseModeIsExplicit);
                 if (e.intelliSenseModeIsExplicit !== undefined) {
                     delete e.intelliSenseModeIsExplicit;
-                }
-                savedRecursiveIncludesReduceIsExplicit.push(!!e.recursiveIncludesReduceIsExplicit);
-                if (e.recursiveIncludesReduceIsExplicit !== undefined) {
-                    delete e.recursiveIncludesReduceIsExplicit;
                 }
                 savedRecursiveIncludesPriorityIsExplicit.push(!!e.recursiveIncludesPriorityIsExplicit);
                 if (e.recursiveIncludesPriorityIsExplicit !== undefined) {
@@ -2456,7 +2446,6 @@ export class CppProperties {
                 this.configurationJson.configurations[i].cStandardIsExplicit = savedCStandardIsExplicit[i];
                 this.configurationJson.configurations[i].cppStandardIsExplicit = savedCppStandardIsExplicit[i];
                 this.configurationJson.configurations[i].intelliSenseModeIsExplicit = savedIntelliSenseModeIsExplicit[i];
-                this.configurationJson.configurations[i].recursiveIncludesReduceIsExplicit = savedRecursiveIncludesReduceIsExplicit[i];
                 this.configurationJson.configurations[i].recursiveIncludesPriorityIsExplicit = savedRecursiveIncludesPriorityIsExplicit[i];
                 this.configurationJson.configurations[i].recursiveIncludesOrderIsExplicit = savedRecursiveIncludesOrderIsExplicit[i];
             }

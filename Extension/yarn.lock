@@ -460,9 +460,9 @@
     "@nevware21/ts-utils" ">= 0.12.2 < 2.x"
 
 "@nevware21/ts-utils@>= 0.10.4 < 2.x", "@nevware21/ts-utils@>= 0.11.8 < 2.x", "@nevware21/ts-utils@>= 0.12.2 < 2.x", "@nevware21/ts-utils@>= 0.9.4 < 2.x":
-  version "0.13.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@nevware21/ts-utils/-/ts-utils-0.13.0.tgz#0b1699597f736d162221c1922172924b38cef54c"
-  integrity sha1-CxaZWX9zbRYiIcGSIXKSSzjO9Uw=
+  version "0.14.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@nevware21/ts-utils/-/ts-utils-0.14.0.tgz#9e6074ce28f0b1bab7bfdacd1a7760b2ba73688d"
+  integrity sha1-nmB0zijwsbq3v9rNGndgsrpzaI0=
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -1310,9 +1310,9 @@
   integrity sha1-Ml20I5XNSf5sFAV/mpAOQn34gQ4=
 
 "@xmldom/xmldom@^0.8.8":
-  version "0.8.12"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@xmldom/xmldom/-/xmldom-0.8.12.tgz#cf488a5435fa06c7374ad1449c69cea0f823624b"
-  integrity sha1-z0iKVDX6Bsc3StFEnGnOoPgjYks=
+  version "0.8.13"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@xmldom/xmldom/-/xmldom-0.8.13.tgz#00d1dd940b218dff2e49309d410d8bb212159225"
+  integrity sha1-ANHdlAshjf8uSTCdQQ2LshIVkiU=
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
@@ -2931,9 +2931,9 @@ fast-levenshtein@^3.0.0:
     fastest-levenshtein "^1.0.7"
 
 fast-uri@^3.0.1:
-  version "3.1.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/fast-uri/-/fast-uri-3.1.0.tgz#66eecff6c764c0df9b762e62ca7edcfb53b4edfa"
-  integrity sha1-Zu7P9sdkwN+bdi5iyn7c+1O07fo=
+  version "3.1.2"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/fast-uri/-/fast-uri-3.1.2.tgz#8af3d4fc9d3e71b11572cc2673b514a7d1a8c8ec"
+  integrity sha1-ivPU/J0+cbEVcswmc7UUp9GoyOw=
 
 fastest-levenshtein@^1.0.12, fastest-levenshtein@^1.0.7:
   version "1.0.16"
@@ -5029,10 +5029,10 @@ possible-typed-array-names@^1.0.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/possible-typed-array-names/-/possible-typed-array-names-1.1.0.tgz#93e3582bc0e5426586d9d07b79ee40fc841de4ae"
   integrity sha1-k+NYK8DlQmWG2dB7ee5A/IQd5K4=
 
-postcss@^7.0.16, postcss@^8.4.31:
-  version "8.5.6"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/postcss/-/postcss-8.5.6.tgz#2825006615a619b4f62a9e7426cc120b349a8f3c"
-  integrity sha1-KCUAZhWmGbT2Kp50JswSCzSajzw=
+postcss@^7.0.16, postcss@^8.5.14:
+  version "8.5.14"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/postcss/-/postcss-8.5.14.tgz#a66c2d7808fadf69ebb5b84a03f8bafd76c4919c"
+  integrity sha1-pmwteAj632nrtbhKA/i6/XbEkZw=
   dependencies:
     nanoid "^3.3.11"
     picocolors "^1.1.1"
