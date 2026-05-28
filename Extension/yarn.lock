@@ -5119,9 +5119,9 @@ punycode@^2.1.0:
   integrity sha1-AnQi4vrsCyXhVJw+G9gwm5EztuU=
 
 qs@^6.9.1:
-  version "6.15.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/qs/-/qs-6.15.0.tgz#db8fd5d1b1d2d6b5b33adaf87429805f1909e7b3"
-  integrity sha1-24/V0bHS1rWzOtr4dCmAXxkJ57M=
+  version "6.15.2"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/qs/-/qs-6.15.2.tgz#fd55426d710403ddccc45e0f9eab16db7727ece9"
+  integrity sha1-/VVCbXEEA93MxF4PnqsW23cn7Ok=
   dependencies:
     side-channel "^1.1.0"
 
