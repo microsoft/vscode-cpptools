@@ -19,7 +19,7 @@ export async function watch() {
         verbose(`Watching ${source} folder for changes.`);
         console.log('Press Ctrl+C to exit.');
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for await (const event of watchFiles(source, {recursive: true })) {
+        for await (const event of watchFiles(source, { recursive: true })) {
             await main();
         }
     }

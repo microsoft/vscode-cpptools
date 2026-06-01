@@ -426,7 +426,7 @@
 
         <div style="height: 30px; display: block"></div>
 
-        <span data-loc-id="check.the.schema">Learn more about the C/C++ properties by going to <a data-loc-id="cpp.properties.schema.reference" href="https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference" title="Properties Schema Reference" data-loc-id-title="view.schema.reference">C/C++ Properties Schema Reference</a>.</span><br>
+        <span data-loc-id="check.the.schema">Learn more about the C/C++ properties by going to <a data-loc-id="cpp.properties.schema.reference" href="https://code.visualstudio.com/docs/cpp/customize-cpp-settings" title="Properties Schema Reference" data-loc-id-title="view.schema.reference">C/C++ Properties Schema Reference</a>.</span><br>
     </div>
 
   </div> <!-- sidebar end -->
@@ -600,6 +600,7 @@
         <div class="section-text" data-loc-id="cpp.standard.description">The version of the C++ language standard to use for IntelliSense. Note: GNU standards are only used to query the set compiler to get GNU defines, and IntelliSense will emulate the equivalent C++ standard version.</div>
         <div>
             <select name="inputValue" id="cppStandard" class="select-default">
+                <option value="c++26">c++26</option>
                 <option value="c++23">c++23</option>
                 <option value="c++20">c++20</option>
                 <option value="c++17">c++17</option>
@@ -607,6 +608,7 @@
                 <option value="c++11">c++11</option>
                 <option value="c++03">c++03</option>
                 <option value="c++98">c++98</option>
+                <option value="gnu++26">gnu++26</option>
                 <option value="gnu++23">gnu++23</option>
                 <option value="gnu++20">gnu++20</option>
                 <option value="gnu++17">gnu++17</option>
@@ -685,7 +687,7 @@
             <div class="section-title" data-loc-id="merge.configurations">Merge configurations</div>
             <div>
                 <input type="checkbox" id="mergeConfigurations" style="vertical-align: middle; transform: scale(1.5)">
-                    <span data-loc-id="merge.configurations.description">When <code>true</code> (or checked), merge include paths, defines, and forced includes with those from a configuration provider.</span>
+                    <span data-loc-id="merge.configurations.description">When <code>true</code> (or checked), merge <code>includePath</code>, <code>defines</code>, <code>forcedInclude</code>, and <code>browse.path</code> with those received from the configuration provider.</span>
                 </input>
             </div>
         </div>
@@ -723,7 +725,7 @@
         </div>
 
         <div class="section">
-            <div class="section-title" data-loc-id="recursiveIncludes.reduce">Recursive includes: priority</div>
+            <div class="section-title" data-loc-id="recursiveIncludes.reduce">Recursive includes: reduce</div>
             <div class="section-text">
                 <span data-loc-id="recursiveIncludes.reduce.description">Set to <code>always</code> to reduce the number of recursive include paths provided to IntelliSense to only those paths currently referenced by #include statements. This requires first parsing files to determine which files are included. Set to <code>never</code> to provide all recursive include paths to IntelliSense. Reducing the number of recursive include paths may improve IntelliSense performance when a very large number of recursive include paths are involved. Not reducing the number of recursive include paths can improve IntelliSense performance by avoiding the need to parse files to determine which include paths to provide.</span>
             </div>
@@ -752,7 +754,7 @@
         </div>
 
         <div class="section">
-            <div class="section-title" data-loc-id="recursiveIncludes.order">Recursive includes: priority</div>
+            <div class="section-title" data-loc-id="recursiveIncludes.order">Recursive includes: order</div>
             <div class="section-text">
                 <span data-loc-id="recursiveIncludes.order.description">The order in which subdirectories under recursive include paths are searched.</span>
                 </div>

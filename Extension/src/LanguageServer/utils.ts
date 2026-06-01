@@ -118,3 +118,23 @@ export async function checkDuration<T>(fn: () => Promise<T>): Promise<{ result: 
     const result = await fn();
     return { result, duration: performance.now() - start };
 }
+
+/**
+ * A class that delays the execution of a callback until a specified timeout period has elapsed.
+ */
+export class Deferral {
+    private timer?: NodeJS.Timeout;
+
+    constructor(callback: () => void, timeout: number) {
+        this.timer = setTimeout(() => {
+            this.timer = undefined;
+            callback();
+        }, timeout);
+    }
+    public cancel() {
+        if (this.timer) {
+            clearTimeout(this.timer);
+            this.timer = undefined;
+        }
+    }
+}

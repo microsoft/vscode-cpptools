@@ -95,7 +95,7 @@ export async function getRawJson(path: string | undefined): Promise<any> {
     let rawElement: any = {};
     try {
         rawElement = jsonc.parse(fileContents, undefined, true);
-    } catch (error) {
+    } catch {
         throw new Error(failedToParseJson);
     }
     return rawElement;
@@ -146,10 +146,10 @@ export function getVcpkgRoot(): string {
     if (!vcpkgRoot && vcpkgRoot !== "") {
         vcpkgRoot = "";
         // Check for vcpkg instance.
-        if (fs.existsSync(getVcpkgPathDescriptorFile())) {
+        if (checkFileExistsSync(getVcpkgPathDescriptorFile())) {
             let vcpkgRootTemp: string = fs.readFileSync(getVcpkgPathDescriptorFile()).toString();
             vcpkgRootTemp = vcpkgRootTemp.trim();
-            if (fs.existsSync(vcpkgRootTemp)) {
+            if (checkDirectoryExistsSync(vcpkgRootTemp)) {
                 vcpkgRoot = path.join(vcpkgRootTemp, "/installed").replace(/\\/g, "/");
             }
         }
@@ -165,19 +165,19 @@ export function getVcpkgRoot(): string {
 export function isHeaderFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
-    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
+    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".inl", ".ipp", ".tcc", ".txx", ".tpp", ".tlh", ".tli", ""].some(ext => fileExtLower === ext);
 }
 
 export function isCppFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
-    return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
+    return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ii", ".ino"].some(ext => fileExtLower === ext);
 }
 
 export function isCFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
-    return (fileExt === ".C") || fileExtLower === ".c";
+    return fileExt === ".c" || fileExtLower === ".i";
 }
 
 export function isCppOrCFile(uri: vscode.Uri | undefined): boolean {
@@ -247,19 +247,22 @@ export function displayExtensionNotReadyPrompt(): void {
 // Users start with a progress of 0 and it increases as they get further along in using the tool.
 // This eliminates noise/problems due to re-installs, terminated installs that don't send errors,
 // errors followed by workarounds that lead to success, etc.
-const progressInstallSuccess: number = 100;
+const progressDebuggerStarted: number = 50;
+const progressDebuggerSuccess: number = 100;
 const progressExecutableStarted: number = 150;
+const progressCopilotSuccess: number = 180;
 const progressExecutableSuccess: number = 200;
 const progressParseRootSuccess: number = 300;
+const progressLanguageServiceDisabled: number = 400;
 const progressIntelliSenseNoSquiggles: number = 1000;
 // Might add more IntelliSense progress measurements later.
-// IntelliSense progress is separate from the install progress, because parse root can occur afterwards.
+// IntelliSense progress is separate from the activation progress, because parse root can occur afterwards.
 
-const installProgressStr: string = "CPP." + packageJson.version + ".Progress";
+const activationProgressStr: string = "CPP." + packageJson.version + ".Progress";
 const intelliSenseProgressStr: string = "CPP." + packageJson.version + ".IntelliSenseProgress";
 
 export function getProgress(): number {
-    return extensionContext ? extensionContext.globalState.get<number>(installProgressStr, -1) : -1;
+    return extensionContext ? extensionContext.globalState.get<number>(activationProgressStr, -1) : -1;
 }
 
 export function getIntelliSenseProgress(): number {
@@ -268,15 +271,18 @@ export function getIntelliSenseProgress(): number {
 
 export function setProgress(progress: number): void {
     if (extensionContext && getProgress() < progress) {
-        void extensionContext.globalState.update(installProgressStr, progress);
+        void extensionContext.globalState.update(activationProgressStr, progress);
         const telemetryProperties: Record<string, string> = {};
         let progressName: string | undefined;
         switch (progress) {
-            case 0: progressName = "install started"; break;
-            case progressInstallSuccess: progressName = "install succeeded"; break;
+            case 0: progressName = "activation started"; break;
+            case progressDebuggerStarted: progressName = "debugger started"; break;
+            case progressDebuggerSuccess: progressName = "debugger succeeded"; break;
             case progressExecutableStarted: progressName = "executable started"; break;
+            case progressCopilotSuccess: progressName = "copilot succeeded"; break;
             case progressExecutableSuccess: progressName = "executable succeeded"; break;
             case progressParseRootSuccess: progressName = "parse root succeeded"; break;
+            case progressLanguageServiceDisabled: progressName = "language service disabled"; break;
         }
         if (progressName) {
             telemetryProperties.progress = progressName;
@@ -300,10 +306,13 @@ export function setIntelliSenseProgress(progress: number): void {
     }
 }
 
-export function getProgressInstallSuccess(): number { return progressInstallSuccess; } // Download/install was successful (i.e. not blocked by component acquisition).
+export function getProgressDebuggerStarted(): number { return progressDebuggerStarted; } // Debugger initialization was started.
+export function getProgressDebuggerSuccess(): number { return progressDebuggerSuccess; } // Debugger was successfully initialized.
 export function getProgressExecutableStarted(): number { return progressExecutableStarted; } // The extension was activated and starting the executable was attempted.
+export function getProgressCopilotSuccess(): number { return progressCopilotSuccess; } // Copilot activation was successful.
 export function getProgressExecutableSuccess(): number { return progressExecutableSuccess; } // Starting the exe was successful (i.e. not blocked by 32-bit or glibc < 2.18 on Linux)
 export function getProgressParseRootSuccess(): number { return progressParseRootSuccess; } // Parse root was successful (i.e. not blocked by processing taking too long).
+export function getProgressLanguageServiceDisabled(): number { return progressLanguageServiceDisabled; } // The user disabled the language service.
 export function getProgressIntelliSenseNoSquiggles(): number { return progressIntelliSenseNoSquiggles; } // IntelliSense was successful and the user got no squiggles.
 
 export function isUri(input: any): input is vscode.Uri {
@@ -492,7 +501,7 @@ export async function fsStat(filePath: fs.PathLike): Promise<fs.Stats | undefine
     let stats: fs.Stats | undefined;
     try {
         stats = await fs.promises.stat(filePath);
-    } catch (e) {
+    } catch {
         // File doesn't exist
         return undefined;
     }
@@ -553,7 +562,7 @@ export function createDirIfNotExistsSync(filePath: string | undefined): void {
 export function checkFileExistsSync(filePath: string): boolean {
     try {
         return fs.statSync(filePath).isFile();
-    } catch (e) {
+    } catch {
         return false;
     }
 }
@@ -586,7 +595,7 @@ export function checkExecutableWithoutExtensionExistsSync(filePath: string): boo
 export function checkDirectoryExistsSync(dirPath: string): boolean {
     try {
         return fs.statSync(dirPath).isDirectory();
-    } catch (e) {
+    } catch {
         return false;
     }
 }
@@ -1068,7 +1077,10 @@ function extractArgs(argsString: string): string[] {
         return result;
     } else {
         try {
-            const wordexpResult: any = child_process.execFileSync(getExtensionFilePath("bin/cpptools-wordexp"), [argsString], { shell: false });
+            const executablePath: string = getExtensionFilePath("bin/cpptools-wordexp");
+            const executableDir: string = path.dirname(executablePath);
+            process.chdir(executableDir);
+            const wordexpResult: any = child_process.execFileSync(executablePath, [argsString], { shell: false });
             if (wordexpResult === undefined) {
                 return [];
             }
@@ -1089,74 +1101,66 @@ export function isCl(compilerPath: string): boolean {
 
 /** CompilerPathAndArgs retains original casing of text input for compiler path and args */
 export interface CompilerPathAndArgs {
-    compilerPath?: string | null;
+    compilerPath?: string;
     compilerName: string;
     compilerArgs?: string[];
     compilerArgsFromCommandLineInPath: string[];
     allCompilerArgs: string[];
+    error?: string;
+    telemetry?: { [key: string]: number };
 }
 
-export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string | null, compilerArgs?: string[]): CompilerPathAndArgs {
-    let compilerPath: string | undefined | null = inputCompilerPath;
+/**
+ * Parse the compiler path input into a compiler path and compiler args. If there are no args in the input string, this function will have
+ * verified that the compiler exists. (e.g. `compilerArgsFromCommandLineInPath` will be empty)
+ *
+ * @param useLegacyBehavior - If true, use the legacy behavior of separating the compilerPath from the args.
+ * @param inputCompilerPath - The compiler path input from the user.
+ * @param compilerArgs - The compiler args input from the user.
+ * @param cwd - The directory used to resolve relative paths.
+ */
+export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string, compilerArgs?: string[], cwd?: string): CompilerPathAndArgs {
+    let compilerPath: string | undefined = inputCompilerPath;
     let compilerName: string = "";
     let compilerArgsFromCommandLineInPath: string[] = [];
+    const trimLegacyQuotes = (compilerPath?: string): string | undefined => {
+        if (compilerPath && useLegacyBehavior) {
+            // Try to trim quotes from compiler path.
+            const tempCompilerPath: string[] = extractArgs(compilerPath);
+            if (tempCompilerPath.length > 0) {
+                return tempCompilerPath[0];
+            }
+        }
+        return compilerPath;
+    };
     if (compilerPath) {
         compilerPath = compilerPath.trim();
         if (isCl(compilerPath) || checkExecutableWithoutExtensionExistsSync(compilerPath)) {
             // If the path ends with cl, or if a file is found at that path, accept it without further validation.
             compilerName = path.basename(compilerPath);
+        } else if (cwd && checkExecutableWithoutExtensionExistsSync(path.join(cwd, compilerPath))) {
+            // If the path is relative and a file is found at that path, accept it without further validation.
+            compilerPath = path.join(cwd, compilerPath);
+            compilerName = path.basename(compilerPath);
         } else if (compilerPath.startsWith("\"") || (os.platform() !== 'win32' && compilerPath.startsWith("'"))) {
             // If the string starts with a quote, treat it as a command line.
             // Otherwise, a path with a leading quote would not be valid.
-            if (useLegacyBehavior) {
-                compilerArgsFromCommandLineInPath = legacyExtractArgs(compilerPath);
-                if (compilerArgsFromCommandLineInPath.length > 0) {
-                    compilerPath = compilerArgsFromCommandLineInPath.shift();
-                    if (compilerPath) {
-                        // Try to trim quotes from compiler path.
-                        const tempCompilerPath: string[] | undefined = extractArgs(compilerPath);
-                        if (tempCompilerPath && compilerPath.length > 0) {
-                            compilerPath = tempCompilerPath[0];
-                        }
-                        compilerName = path.basename(compilerPath);
-                    }
-                }
-            } else {
-                compilerArgsFromCommandLineInPath = extractArgs(compilerPath);
-                if (compilerArgsFromCommandLineInPath.length > 0) {
-                    compilerPath = compilerArgsFromCommandLineInPath.shift();
-                    if (compilerPath) {
-                        compilerName = path.basename(compilerPath);
-                    }
-                }
+            compilerArgsFromCommandLineInPath = useLegacyBehavior ? legacyExtractArgs(compilerPath) : extractArgs(compilerPath);
+            if (compilerArgsFromCommandLineInPath.length > 0) {
+                compilerPath = trimLegacyQuotes(compilerArgsFromCommandLineInPath.shift());
+                compilerName = path.basename(compilerPath ?? '');
             }
         } else {
-            const spaceStart: number = compilerPath.lastIndexOf(" ");
-            if (spaceStart !== -1) {
-                // There is no leading quote, but a space suggests it might be a command line.
-                // Try processing it as a command line, and validate that by checking for the executable.
+            if (compilerPath.includes(' ')) {
+                // There is no leading quote, but there is a space so we'll treat it as a command line.
                 const potentialArgs: string[] = useLegacyBehavior ? legacyExtractArgs(compilerPath) : extractArgs(compilerPath);
-                let potentialCompilerPath: string | undefined = potentialArgs.shift();
-                if (useLegacyBehavior) {
-                    if (potentialCompilerPath) {
-                        const tempCompilerPath: string[] | undefined = extractArgs(potentialCompilerPath);
-                        if (tempCompilerPath && compilerPath.length > 0) {
-                            potentialCompilerPath = tempCompilerPath[0];
-                        }
-                    }
-                }
-                if (potentialCompilerPath) {
-                    if (isCl(potentialCompilerPath) || checkExecutableWithoutExtensionExistsSync(potentialCompilerPath)) {
-                        compilerArgsFromCommandLineInPath = potentialArgs;
-                        compilerPath = potentialCompilerPath;
-                        compilerName = path.basename(compilerPath);
-                    }
-                }
+                compilerPath = trimLegacyQuotes(potentialArgs.shift());
+                compilerArgsFromCommandLineInPath = potentialArgs;
             }
+            compilerName = path.basename(compilerPath ?? '');
         }
     }
-    let allCompilerArgs: string[] = !compilerArgs ? [] : compilerArgs;
-    allCompilerArgs = allCompilerArgs.concat(compilerArgsFromCommandLineInPath);
+    const allCompilerArgs: string[] = (compilerArgs ?? []).concat(compilerArgsFromCommandLineInPath);
     return { compilerPath, compilerName, compilerArgs, compilerArgsFromCommandLineInPath, allCompilerArgs };
 }
 
@@ -1442,7 +1446,7 @@ export function findPowerShell(): string | undefined {
                 if (fs.statSync(candidate).isFile()) {
                     return name;
                 }
-            } catch (e) {
+            } catch {
                 // ignore, try next candidate
             }
         }
@@ -1470,9 +1474,7 @@ export function isVsCodeInsiders(): boolean {
 
 export function stripEscapeSequences(str: string): string {
     return str
-        // eslint-disable-next-line no-control-regex
         .replace(/\x1b\[\??[0-9]{0,3}(;[0-9]{1,3})?[a-zA-Z]/g, '')
-        // eslint-disable-next-line no-control-regex
         .replace(/\u0008/g, '')
         .replace(/\r/g, '');
 }
@@ -1520,9 +1522,9 @@ export interface ISshLocalForwardInfo {
     remoteSocket?: string;
 }
 
-export function whichAsync(name: string): Promise<string | undefined> {
+export function whichAsync(name: string, path?: string): Promise<string | undefined> {
     return new Promise<string | undefined>(resolve => {
-        which(name, (err, resolved) => {
+        which(name, path ? { path } : {}, (err, resolved) => {
             if (err) {
                 resolve(undefined);
             } else {
@@ -1547,7 +1549,33 @@ export function hasMsvcEnvironment(): boolean {
         'INCLUDE',
         'LIB',
         'LIBPATH',
-        'NETFXSDKDir',
+        'UniversalCRTSdkDir',
+        'VCIDEInstallDir',
+        'VCINSTALLDIR',
+        'VCToolsRedistDir',
+        'VisualStudioVersion',
+        'VSINSTALLDIR',
+        'WindowsLibPath',
+        'WindowsSdkBinPath',
+        'WindowsSdkDir',
+        'WindowsSDKLibVersion',
+        'WindowsSDKVersion'
+    ];
+    return msvcEnvVars.every(envVarName =>
+        (process.env[envVarName] !== undefined && process.env[envVarName] !== '') ||
+        extensionContext?.environmentVariableCollection?.get(envVarName) !== undefined
+    );
+}
+
+export function getMissingMsvcEnvironmentVariables(): string[] {
+    const msvcEnvVars: string[] = [
+        'DevEnvDir',
+        'Framework40Version',
+        'FrameworkDir',
+        'FrameworkVersion',
+        'INCLUDE',
+        'LIB',
+        'LIBPATH',
         'UCRTVersion',
         'UniversalCRTSdkDir',
         'VCIDEInstallDir',
@@ -1561,7 +1589,10 @@ export function hasMsvcEnvironment(): boolean {
         'WindowsSDKLibVersion',
         'WindowsSDKVersion'
     ];
-    return msvcEnvVars.every((envVarName) => process.env[envVarName] !== undefined && process.env[envVarName] !== '');
+    return msvcEnvVars.filter(envVarName =>
+        (process.env[envVarName] === undefined || process.env[envVarName] === '') &&
+        extensionContext?.environmentVariableCollection?.get(envVarName) === undefined
+    );
 }
 
 function isIntegral(str: string): boolean {
@@ -1664,7 +1695,7 @@ export interface IQuotedString {
 
 export type CommandString = string | IQuotedString;
 
-export function buildShellCommandLine(originalCommand: CommandString, command: CommandString, args: CommandString[]): string {
+export function buildShellCommandLine(originalCommand: CommandString, command: CommandString, args: CommandString[], singleCommandOnly: boolean = false): string {
 
     let shellQuoteOptions: IShellQuotingOptions;
     const isWindows: boolean = os.platform() === 'win32';
@@ -1778,7 +1809,7 @@ export function buildShellCommandLine(originalCommand: CommandString, command: C
 
     let commandLine = result.join(' ');
     // There are special rules quoted command line in cmd.exe
-    if (isWindows) {
+    if (isWindows && !singleCommandOnly) {
         commandLine = `chcp 65001>nul && ${commandLine}`;
         if (commandQuoted && argQuoted) {
             commandLine = '"' + commandLine + '"';
@@ -1814,4 +1845,46 @@ export function findExePathInArgs(args: CommandString[]): string | undefined {
 
 export function getVsCodeVersion(): number[] {
     return vscode.version.split('.').map(num => parseInt(num, undefined));
+}
+
+export function equals(array1: string[] | undefined, array2: string[] | undefined): boolean {
+    if (array1 === undefined && array2 === undefined) {
+        return true;
+    }
+    if (array1 === undefined || array2 === undefined) {
+        return false;
+    }
+    if (array1.length !== array2.length) {
+        return false;
+    }
+    for (let i: number = 0; i < array1.length; ++i) {
+        if (array1[i] !== array2[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function getVSCodeLanguageModel(): any | undefined {
+    // Check if the user has access to vscode language model.
+    const vscodelm = (vscode as any).lm;
+    if (!vscodelm) {
+        return undefined;
+    }
+    // Check that vscodelm has a method called 'selectChatModels'
+    if (!vscodelm.selectChatModels || typeof vscodelm.selectChatModels !== 'function') {
+        return undefined;
+    }
+    return vscodelm;
+}
+
+export function sessionIsWsl(): boolean {
+    if (process.env.WSL_DISTRO_NAME) {
+        return true;
+    }
+    try {
+        return fs.readFileSync('/proc/version', 'utf8').toLowerCase().includes('microsoft');
+    } catch {
+        return false;
+    }
 }

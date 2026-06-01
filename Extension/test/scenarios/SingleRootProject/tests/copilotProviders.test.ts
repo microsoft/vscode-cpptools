@@ -24,7 +24,7 @@ describe('copilotProviders Tests', () => {
     let getClientsStub: sinon.SinonStub;
     let activeClientStub: sinon.SinonStubbedInstance<DefaultClient>;
     let vscodeGetExtensionsStub: sinon.SinonStub;
-    let callbackPromise: Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }> | undefined;
+    let callbackPromise: Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] } | undefined> | undefined;
     let vscodeExtension: vscode.Extension<unknown>;
     let telemetryStub: sinon.SinonStub;
 
@@ -52,7 +52,7 @@ describe('copilotProviders Tests', () => {
                     uri: vscode.Uri,
                     context: { flags: Record<string, unknown> },
                     cancellationToken: vscode.CancellationToken
-                ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>
+                ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] } | undefined>
             ): vscode.Disposable & { [Symbol.dispose](): void } {
                 return {
                     dispose: () => { },
@@ -88,13 +88,13 @@ describe('copilotProviders Tests', () => {
     });
 
     const arrange = ({ vscodeExtension, getIncludeFiles, projectContext, rootUri, flags }:
-    { vscodeExtension?: vscode.Extension<unknown>; getIncludeFiles?: GetIncludesResult; projectContext?: ProjectContext; rootUri?: vscode.Uri; flags?: Record<string, unknown> } =
-    { vscodeExtension: undefined, getIncludeFiles: undefined, projectContext: undefined, rootUri: undefined, flags: {} }
+        { vscodeExtension?: vscode.Extension<unknown>; getIncludeFiles?: GetIncludesResult; projectContext?: ProjectContext; rootUri?: vscode.Uri; flags?: Record<string, unknown> } =
+        { vscodeExtension: undefined, getIncludeFiles: undefined, projectContext: undefined, rootUri: undefined, flags: {} }
     ) => {
         activeClientStub.getIncludes.resolves(getIncludeFiles);
         sinon.stub(lmTool, 'getProjectContext').resolves(projectContext);
         sinon.stub(activeClientStub, 'RootUri').get(() => rootUri);
-        mockCopilotApi.registerRelatedFilesProvider.callsFake((_providerId: { extensionId: string; languageId: string }, callback: (uri: vscode.Uri, context: { flags: Record<string, unknown> }, cancellationToken: vscode.CancellationToken) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>) => {
+        mockCopilotApi.registerRelatedFilesProvider.callsFake((_providerId: { extensionId: string; languageId: string }, callback: (uri: vscode.Uri, context: { flags: Record<string, unknown> }, cancellationToken: vscode.CancellationToken) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] } | undefined>) => {
             if (_providerId.languageId === 'cpp') {
                 const tokenSource = new vscode.CancellationTokenSource();
                 try {

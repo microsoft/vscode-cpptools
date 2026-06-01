@@ -35,15 +35,20 @@
 ### Required Tools 
 
 * [Node.js](https://nodejs.org/en/download/) v16.*
-* Yarn - use `npm install -g yarn` to install
+* npm (comes with Node.js)
 
 ### Setting up the repository
 
 `git clone https://github.com/microsoft/vscode-cpptools.git`
 
-`yarn install`
+`cd vscode-cpptools/Extension`
 
-It's also good practice to run `yarn install` after merging from upstream or switching branches. 
+`npm run bootstrap`
+
+`npm run bootstrap` installs Yarn `1.22.22` globally from the internal npm feed and then runs `yarn install --frozen-lockfile`.
+On some systems, global npm install may require elevated permissions.
+
+It's also good practice to run `npm run bootstrap` after merging from upstream or switching branches. 
 
 ## Building the Extension
 
@@ -52,7 +57,7 @@ The `launch.json` entries now specify a `preLaunchTask` that will build the exte
 the `yarn watch` command, and will wait until the build is ready. The watch command will continue to watch from 
 that point.
 
-If the extension is already built, the the watch will be very quick.
+If the extension is already built, the watch will be very quick.
 
 ### From Inside VS Code
 There are two tasks that can be run from inside VS Code to build the extension.
@@ -336,4 +341,4 @@ This will use webpack to build the extension. This is only necessary when packag
 
 Installs the VS Code `*.d.ts` files and then runs `yarn prep`
 
-You should run `yarn install` after merging from upstream or switching branches. 
+You should run `npm run bootstrap` after merging from upstream or switching branches. 

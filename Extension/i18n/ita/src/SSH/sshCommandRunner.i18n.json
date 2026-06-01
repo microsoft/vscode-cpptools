@@ -15,6 +15,6 @@
 	"ssh.terminal.command.canceled": "Il comando del terminale \"{0}\" è stato annullato.",
 	"ssh.terminal.command.done": "Comando terminale \"{0}\" completato.",
 	"ssh.continuing.command.canceled": "L'attività '{0}' è stata annullata, ma è possibile che il comando sottostante non venga terminato. Controllare manualmente.",
-	"ssh.process.failed": "Elaborazione \"{0}\" non riuscita: {1}",
+	"ssh.process.failed": "Elaborazione di \"{0}\" non riuscita: {1}",
 	"ssh.wrote.data.to.terminal": "\"{0}\" ha scritto i dati nel terminale: \"{1}\"."
 }

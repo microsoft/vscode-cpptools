@@ -3,7 +3,6 @@
 const fs = require("fs-extra");
 const cp = require("child_process");
 const path = require('path');
-const parseGitConfig = require('parse-git-config');
 
 const branchName = 'localization';
 const mergeTo = 'main';
@@ -105,8 +104,8 @@ cp.execSync('git fetch');
 
 // Remove old localization branch, if any
 if (hasBranch("localization")) {
-	console.log(`Remove old localization branch, if any (git branch -D localization)`);
-	cp.execSync('git branch -D localization');
+    console.log(`Remove old localization branch, if any (git branch -D localization)`);
+    cp.execSync('git branch -D localization');
 }
 
 // Check out local branch
@@ -128,13 +127,17 @@ if (!hasAnyChanges()) {
 // Save existing user name and email, in case already set.
 var existingUserName;
 var existingUserEmail;
-var gitConfigPath = path.resolve(process.cwd(), '../.git/config');
-var config = parseGitConfig.sync({ path: gitConfigPath });
 
-if (typeof config === 'object' && config.hasOwnProperty('user')) {
-    existingUserName = config.user.name;
-    existingUserEmail = config.user.email;
+try {
+    existingUserName = cp.execSync('git config --local user.name', { encoding: 'utf8', cwd: process.cwd() }).trim() || undefined
+} catch {
 }
+
+try {
+    existingUserEmail = cp.execSync('git config --local user.email', { encoding: 'utf8', cwd: process.cwd() }).trim() || undefined
+} catch {
+}
+
 if (existingUserName === undefined) {
     console.log(`Existing user name: undefined`);
 } else {

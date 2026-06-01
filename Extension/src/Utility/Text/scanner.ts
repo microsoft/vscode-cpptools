@@ -117,11 +117,9 @@ export enum Kind {
     Comma,
     QuestionDot,
     LessThan,
-    // eslint-disable-next-line @typescript-eslint/prefer-literal-enum-member
     OpenAngle = LessThan,
     LessThanSlash,
     GreaterThan,
-    // eslint-disable-next-line @typescript-eslint/prefer-literal-enum-member
     CloseAngle = GreaterThan,
     LessThanEquals,
     GreaterThanEquals,

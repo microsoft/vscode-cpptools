@@ -38,6 +38,7 @@ const knownValues: { [Property in keyof ChatContextResult]?: { [id: string]: str
         'c++17': 'C++17',
         'c++20': 'C++20',
         'c++23': 'C++23',
+        'c++26': 'C++26',
         'c89': "C89",
         'c99': "C99",
         'c11': "C11",

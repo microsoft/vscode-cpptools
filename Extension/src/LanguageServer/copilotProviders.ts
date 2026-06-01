@@ -24,20 +24,23 @@ export interface CopilotTrait {
     promptTextOverride?: string;
 }
 
-export interface CopilotApi {
+export interface CopilotContextProviderAPI {
+    getContextProviderAPI(version: string): Promise<ContextProviderApiV1 | undefined>;
+}
+
+export interface CopilotApi extends CopilotContextProviderAPI {
     registerRelatedFilesProvider(
         providerId: { extensionId: string; languageId: string },
         callback: (
             uri: vscode.Uri,
             context: { flags: Record<string, unknown> },
             cancellationToken: vscode.CancellationToken
-        ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] }>
+        ) => Promise<{ entries: vscode.Uri[]; traits?: CopilotTrait[] } | undefined>
     ): Disposable;
-    getContextProviderAPI(version: string): Promise<ContextProviderApiV1 | undefined>;
 }
 
 export async function registerRelatedFilesProvider(): Promise<void> {
-    const api = await getCopilotApi();
+    const api = await getCopilotClientApi();
     if (util.extensionContext && api) {
         try {
             for (const languageId of ['c', 'cpp', 'cuda-cpp']) {
@@ -91,15 +94,18 @@ export async function registerRelatedFilesProvider(): Promise<void> {
                             return { entries: await includesPromise, traits: await traitsPromise };
                         }
                         catch (exception) {
-                            try {
-                                const err: Error = exception as Error;
-                                logger.getOutputChannelLogger().appendLine(localize("copilot.relatedfilesprovider.error", "Error while retrieving result. Reason: {0}", err.message));
+                            // Avoid logging the error message if it is a cancellation error.
+                            if (exception instanceof vscode.CancellationError) {
+                                telemetryProperties["error"] = "cancellation";
+                                telemetryProperties["cancellation"] = "true";
+                                throw exception; // Rethrow the cancellation error to be handled by the caller.
+                            } else if (exception instanceof Error) {
+                                telemetryProperties["error"] = "true";
+                                logger.getOutputChannelLogger().appendLine(localize("copilot.relatedfilesprovider.error", "Error while retrieving result. Reason: {0}", exception.message));
                             }
-                            catch {
-                                // Intentionally swallow any exception.
-                            }
-                            telemetryProperties["error"] = "true";
-                            throw exception; // Throw the exception for auto-retry.
+
+                            // In case of error retrieving the include files, we signal the caller of absence of the results by returning undefined.
+                            return undefined;
                         } finally {
                             telemetryMetrics['duration'] = performance.now() - start;
                             telemetry.logCopilotEvent('RelatedFilesProvider', telemetryProperties, telemetryMetrics);
@@ -126,7 +132,7 @@ async function getIncludes(uri: vscode.Uri, maxDepth: number): Promise<GetInclud
     return includes;
 }
 
-export async function getCopilotApi(): Promise<CopilotApi | undefined> {
+export async function getCopilotClientApi(): Promise<CopilotApi | undefined> {
     const copilotExtension = vscode.extensions.getExtension<CopilotApi>('github.copilot');
     if (!copilotExtension) {
         return undefined;
@@ -141,4 +147,32 @@ export async function getCopilotApi(): Promise<CopilotApi | undefined> {
     } else {
         return copilotExtension.exports;
     }
+}
+
+export async function getCopilotChatApi(): Promise<CopilotContextProviderAPI | undefined> {
+    type CopilotChatApi = { getAPI?(version: number): CopilotContextProviderAPI | undefined };
+    const copilotExtension = vscode.extensions.getExtension<CopilotChatApi>('github.copilot-chat');
+    if (!copilotExtension) {
+        return undefined;
+    }
+
+    let exports: CopilotChatApi | undefined;
+    if (!copilotExtension.isActive) {
+        try {
+            exports = await copilotExtension.activate();
+        } catch {
+            return undefined;
+        }
+    } else {
+        exports = copilotExtension.exports;
+    }
+    if (!exports || typeof exports.getAPI !== 'function') {
+        return undefined;
+    }
+    const result = exports.getAPI(1);
+    return result;
+}
+
+interface Disposable {
+    dispose(): void;
 }

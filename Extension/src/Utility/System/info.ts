@@ -75,7 +75,6 @@ interface FunctionInfo {
 
     /** a bound callable function for the member (saves us from having to do it later anyway) */
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
     fn: Function;
 }
 
@@ -140,7 +139,7 @@ export function members(obj: any): Members {
                     result.fields.set(memberName, type);
                 }
             }
-        // eslint-disable-next-line no-cond-assign
+            // eslint-disable-next-line no-cond-assign
         } while (instance = Object.getPrototypeOf(instance));
     }
     return result;

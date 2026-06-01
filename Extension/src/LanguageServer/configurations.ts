@@ -24,6 +24,7 @@ import { PersistentFolderState } from './persistentState';
 import { CppSettings, OtherSettings } from './settings';
 import { SettingsPanel } from './settingsPanel';
 import { ConfigurationType, getUI } from './ui';
+import { Deferral } from './utils';
 import escapeStringRegExp = require('escape-string-regexp');
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -63,7 +64,7 @@ export interface ConfigurationJson {
 export interface Configuration {
     name: string;
     compilerPathInCppPropertiesJson?: string | null;
-    compilerPath?: string | null;
+    compilerPath?: string; // Can be set to null based on the schema, but it will be fixed in parsePropertiesFile.
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
     compilerArgsLegacy?: string[];
@@ -83,10 +84,12 @@ export interface Configuration {
     forcedInclude?: string[];
     configurationProviderInCppPropertiesJson?: string;
     configurationProvider?: string;
-    mergeConfigurations?: boolean | string;
+    mergeConfigurations?: boolean;
     browse?: Browse;
     recursiveIncludes?: RecursiveIncludes;
     customConfigurationVariables?: { [key: string]: string };
+    recursiveIncludesPriorityIsExplicit?: boolean;
+    recursiveIncludesOrderIsExplicit?: boolean;
 }
 
 export interface ConfigurationErrors {
@@ -149,7 +152,6 @@ export class CppProperties {
     private defaultCStandard: string | null = null;
     private defaultCppStandard: string | null = null;
     private defaultWindowsSdkVersion: string | null = null;
-    private isCppPropertiesJsonVisible: boolean = false;
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private nodeAddonIncludes: string[] = [];
@@ -201,6 +203,41 @@ export class CppProperties {
         return new CppSettings(this.rootUri).defaultConfigurationProvider;
     }
 
+    public get CurrentMergeConfigurations(): boolean {
+        if (this.CurrentConfiguration?.mergeConfigurations) {
+            return this.CurrentConfiguration.mergeConfigurations;
+        }
+        return new CppSettings(this.rootUri).defaultMergeConfigurations;
+    }
+
+    public get CurrentIncludePath(): string[] | undefined {
+        if (this.CurrentConfiguration?.includePath) {
+            return this.CurrentConfiguration.includePath;
+        }
+        return new CppSettings(this.rootUri).defaultIncludePath;
+    }
+
+    public get CurrentDefines(): string[] | undefined {
+        if (this.CurrentConfiguration?.defines) {
+            return this.CurrentConfiguration.defines;
+        }
+        return new CppSettings(this.rootUri).defaultDefines;
+    }
+
+    public get CurrentForcedInclude(): string[] | undefined {
+        if (this.CurrentConfiguration?.forcedInclude) {
+            return this.CurrentConfiguration.forcedInclude;
+        }
+        return new CppSettings(this.rootUri).defaultForcedInclude;
+    }
+
+    public get CurrentBrowsePath(): string[] | undefined {
+        if (this.CurrentConfiguration?.browse?.path) {
+            return this.CurrentConfiguration.browse.path;
+        }
+        return new CppSettings(this.rootUri).defaultBrowsePath;
+    }
+
     public get ConfigurationNames(): string[] | undefined {
         const result: string[] = [];
         if (this.configurationJson) {
@@ -212,12 +249,11 @@ export class CppProperties {
     }
 
     public setupConfigurations(): void {
-
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
 
         const configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
-        if (this.rootUri !== null && fs.existsSync(configFilePath)) {
+        if (this.rootUri !== null && util.checkFileExistsSync(configFilePath)) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
         } else {
             this.propertiesFile = null;
@@ -242,21 +278,21 @@ export class CppProperties {
         });
 
         vscode.workspace.onDidChangeTextDocument((e) => {
-            if (e.document.uri.fsPath === settingsPath && this.isCppPropertiesJsonVisible) {
-                void this.handleSquiggles().catch(logAndReturn.undefined);
+            if (e.document.uri.fsPath === settingsPath) {
+                this.handleSquiggles(e.document);
             }
         });
 
-        vscode.window.onDidChangeVisibleTextEditors((editors) => {
-            const wasVisible: boolean = this.isCppPropertiesJsonVisible;
-            editors.forEach(editor => {
-                if (editor.document.uri.fsPath === settingsPath) {
-                    this.isCppPropertiesJsonVisible = true;
-                    if (!wasVisible) {
-                        void this.handleSquiggles().catch(logAndReturn.undefined);
-                    }
-                }
-            });
+        vscode.workspace.onDidOpenTextDocument(document => {
+            if (document.uri.fsPath === settingsPath) {
+                this.handleSquiggles();
+            }
+        });
+
+        vscode.workspace.onDidCloseTextDocument(document => {
+            if (document.uri.fsPath === settingsPath) {
+                this.diagnosticCollection.clear();
+            }
         });
 
         vscode.workspace.onDidSaveTextDocument((doc: vscode.TextDocument) => {
@@ -293,6 +329,7 @@ export class CppProperties {
             }
         });
     }
+
     public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
         this.defaultCompilerPath = compilerDefaults.trustedCompilerFound ? compilerDefaults.compilerPath : null;
         this.knownCompilers = compilerDefaults.knownCompilers;
@@ -315,7 +352,7 @@ export class CppProperties {
 
     private onSelectionChanged(): void {
         this.selectionChanged.fire(this.CurrentConfigurationIndex);
-        void this.handleSquiggles().catch(logAndReturn.undefined);
+        this.handleSquiggles();
     }
 
     private onCompileCommandsChanged(path: string): void {
@@ -443,9 +480,9 @@ export class CppProperties {
                     list.forEach((entry) => {
                         if (entry !== "vcpkg") {
                             const pathToCheck: string = path.join(vcpkgRoot, entry);
-                            if (fs.existsSync(pathToCheck)) {
+                            if (util.checkDirectoryExistsSync(pathToCheck)) {
                                 let p: string = path.join(pathToCheck, "include");
-                                if (fs.existsSync(p)) {
+                                if (util.checkDirectoryExistsSync(p)) {
                                     p = p.replace(/\\/g, "/");
                                     p = p.replace(vcpkgRoot, "${vcpkgRoot}");
                                     this.vcpkgIncludes.push(p);
@@ -455,9 +492,10 @@ export class CppProperties {
                     });
                 }
             }
-        } catch (error) { /*ignore*/ } finally {
+        } catch {
+            /*ignore*/
+        } finally {
             this.vcpkgPathReady = true;
-            this.handleConfigurationChange();
         }
     }
 
@@ -757,7 +795,7 @@ export class CppProperties {
         return result;
     }
 
-    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true, glob: boolean = false): string[] {
+    private async resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true, glob: boolean = false): Promise<string[]> {
         const resolvedVariables: string[] = [];
         if (paths === undefined) {
             return resolvedVariables;
@@ -808,7 +846,7 @@ export class CppProperties {
             if (isGlobPattern) {
                 // fastGlob silently strips non-found paths. Limit that behavior to dynamic paths only.
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
-                    fastGlob.sync(normalized, { onlyDirectories: true, cwd, suppressErrors: true, deep: 15 }) : [res];
+                    await fastGlob.async(normalized, { onlyDirectories: true, cwd, suppressErrors: true, deep: 15 }) : [res];
                 resolvedGlob.push(...matches.map(s => s + suffix));
                 if (resolvedGlob.length === 0) {
                     resolvedGlob.push(normalized);
@@ -843,14 +881,14 @@ export class CppProperties {
         return property;
     }
 
-    private updateConfigurationPathsArray(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true): string[] | undefined {
+    private updateConfigurationPathsArray(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true): Promise<string[] | undefined> {
         if (paths) {
             return this.resolveAndSplit(paths, defaultValue, env, assumeRelative, true);
         }
-        if (!paths && defaultValue) {
+        if (defaultValue) {
             return this.resolveAndSplit(defaultValue, [], env, assumeRelative, true);
         }
-        return paths;
+        return Promise.resolve(undefined);
     }
 
     private updateConfigurationBoolean(property: boolean | string | undefined | null, defaultValue: boolean | undefined | null): boolean | undefined {
@@ -895,7 +933,7 @@ export class CppProperties {
         return this.configProviderAutoSelected;
     }
 
-    private updateServerOnFolderSettingsChange(): void {
+    private async updateServerOnFolderSettingsChange(): Promise<void> {
         this.configProviderAutoSelected = false;
         if (!this.configurationJson) {
             return;
@@ -908,7 +946,7 @@ export class CppProperties {
             configuration.compilerPathInCppPropertiesJson = configuration.compilerPath;
             configuration.compileCommandsInCppPropertiesJson = configuration.compileCommands;
             configuration.configurationProviderInCppPropertiesJson = configuration.configurationProvider;
-            configuration.includePath = this.updateConfigurationPathsArray(configuration.includePath, settings.defaultIncludePath, env);
+            configuration.includePath = await this.updateConfigurationPathsArray(configuration.includePath, settings.defaultIncludePath, env);
             // in case includePath is reset below
             const origIncludePath: string[] | undefined = configuration.includePath;
             if (userSettings.addNodeAddonIncludePaths) {
@@ -926,7 +964,7 @@ export class CppProperties {
 
             configuration.macFrameworkPath = this.updateConfigurationStringArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
-            configuration.forcedInclude = this.updateConfigurationPathsArray(configuration.forcedInclude, settings.defaultForcedInclude, env, false);
+            configuration.forcedInclude = await this.updateConfigurationPathsArray(configuration.forcedInclude, settings.defaultForcedInclude, env, false);
             configuration.compileCommands = this.updateConfigurationStringArray(configuration.compileCommands, settings.defaultCompileCommands, env);
             configuration.compilerArgs = this.updateConfigurationStringArray(configuration.compilerArgs, settings.defaultCompilerArgs, env);
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
@@ -939,9 +977,10 @@ export class CppProperties {
             if (!configuration.recursiveIncludes) {
                 configuration.recursiveIncludes = {};
             }
-            configuration.recursiveIncludes.reduce = this.updateConfigurationString(configuration.recursiveIncludes.reduce, settings.defaultRecursiveIncludesReduce);
             configuration.recursiveIncludes.priority = this.updateConfigurationString(configuration.recursiveIncludes.priority, settings.defaultRecursiveIncludesPriority);
+            configuration.recursiveIncludesPriorityIsExplicit = configuration.recursiveIncludesPriorityIsExplicit || settings.defaultRecursiveIncludesPriority !== "";
             configuration.recursiveIncludes.order = this.updateConfigurationString(configuration.recursiveIncludes.order, settings.defaultRecursiveIncludesOrder);
+            configuration.recursiveIncludesOrderIsExplicit = configuration.recursiveIncludesOrderIsExplicit || settings.defaultRecursiveIncludesOrder !== "";
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
@@ -976,14 +1015,13 @@ export class CppProperties {
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
                 if (configuration.compilerPath === "${default}") {
-                    configuration.compilerPath = settings.defaultCompilerPath;
-                }
-                if (configuration.compilerPath === null) {
+                    configuration.compilerPath = settings.defaultCompilerPath ?? undefined;
                     configuration.compilerPathIsExplicit = true;
-                } else if (configuration.compilerPath !== undefined) {
+                }
+                if (configuration.compilerPath) {
                     configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
                     configuration.compilerPathIsExplicit = true;
-                } else {
+                } else if (configuration.compilerPathIsExplicit === undefined) {
                     configuration.compilerPathIsExplicit = false;
                 }
             }
@@ -1002,7 +1040,7 @@ export class CppProperties {
                 // Otherwise, if the browse path is not set, let the native process populate it
                 // with include paths, including any parsed from compilerArgs.
             } else {
-                configuration.browse.path = this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
+                configuration.browse.path = await this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
             }
 
             configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders);
@@ -1130,7 +1168,7 @@ export class CppProperties {
             this.configurationJson.configurations.forEach(c => {
                 c.compileCommands?.forEach((path: string) => {
                     const compileCommandsFile: string = this.resolvePath(path);
-                    if (fs.existsSync(compileCommandsFile)) {
+                    if (util.checkFileExistsSync(compileCommandsFile)) {
                         filePaths.add(compileCommandsFile);
                     }
                 });
@@ -1155,7 +1193,7 @@ export class CppProperties {
                         }, 1000);
                     }));
                 });
-            } catch (e) {
+            } catch {
                 // The file watcher limit is hit.
                 // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
             }
@@ -1221,7 +1259,7 @@ export class CppProperties {
                         this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
                         this.settingsPanel.createOrShow(configNames,
                             this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex),
+                            await this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex),
                             viewColumn);
                     }
                 }
@@ -1252,7 +1290,7 @@ export class CppProperties {
                         }
                         this.settingsPanel.updateConfigUI(configNames,
                             this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                            await this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
                     } else {
                         // Parse failed, open json file
                         void vscode.workspace.openTextDocument(this.propertiesFile).then(undefined, logAndReturn.undefined);
@@ -1281,13 +1319,13 @@ export class CppProperties {
         return trimmedPaths;
     }
 
-    private saveConfigurationUI(): void {
+    private async saveConfigurationUI(): Promise<void> {
         this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
         if (this.settingsPanel && this.configurationJson) {
             const config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
             this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex] = config;
             this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex].includePath = this.trimPathWhitespace(this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex].includePath);
-            this.settingsPanel.updateErrors(this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+            this.settingsPanel.updateErrors(await this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
             this.writeToJson();
         }
         // Any time parsePropertiesFile is called, configurationJson gets
@@ -1295,12 +1333,12 @@ export class CppProperties {
         this.handleConfigurationChange();
     }
 
-    private onConfigSelectionChanged(): void {
+    private async onConfigSelectionChanged(): Promise<void> {
         const configNames: string[] | undefined = this.ConfigurationNames;
         if (configNames && this.settingsPanel && this.configurationJson) {
             this.settingsPanel.updateConfigUI(configNames,
                 this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                await this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
         }
     }
 
@@ -1353,7 +1391,9 @@ export class CppProperties {
         }
 
         void this.applyDefaultIncludePathsAndFrameworks().catch(logAndReturn.undefined);
-        this.updateServerOnFolderSettingsChange();
+        void this.timeOperation(() => this.updateServerOnFolderSettingsChange()).then(result => {
+            getOutputChannelLogger().appendLineAtLevel(5, localize('resolve.configuration.processed', "Processed c_cpp_properties.json in {0}s", result.duration));
+        }).catch(logAndReturn.undefined);
     }
 
     private async ensurePropertiesFile(): Promise<void> {
@@ -1414,6 +1454,7 @@ export class CppProperties {
             return false;
         }
         let success: boolean = true;
+        const firstParse = this.configurationJson === undefined;
         try {
             const readResults: string = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
             if (readResults === "") {
@@ -1438,10 +1479,17 @@ export class CppProperties {
                 }
             }
 
-            // Configuration.compileCommands is allowed to be defined as a string in the schema, but we send an array to the language server.
-            // For having a predictable behavior, we convert it here to an array of strings.
+            // Special sanitization of the newly parsed configuration file happens here:
             for (let i: number = 0; i < newJson.configurations.length; i++) {
+                // Configuration.compileCommands is allowed to be defined as a string in the schema, but we send an array to the language server.
+                // For having a predictable behavior, we convert it here to an array of strings.
                 newJson.configurations[i].compileCommands = this.forceCompileCommandsAsArray(<any>newJson.configurations[i].compileCommands);
+
+                // `compilerPath` is allowed to be set to null in the schema so that empty string is not the default value (which has another meaning).
+                // If we detect this, we treat it as undefined.
+                if (newJson.configurations[i].compilerPath === null) {
+                    delete newJson.configurations[i].compilerPath;
+                }
             }
 
             this.configurationJson = newJson;
@@ -1508,7 +1556,9 @@ export class CppProperties {
                 if ((this.configurationJson.configurations[i].compilerPathIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].cStandardIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].cppStandardIsExplicit !== undefined)
-                    || (this.configurationJson.configurations[i].intelliSenseModeIsExplicit !== undefined)) {
+                    || (this.configurationJson.configurations[i].intelliSenseModeIsExplicit !== undefined)
+                    || (this.configurationJson.configurations[i].recursiveIncludesPriorityIsExplicit !== undefined)
+                    || (this.configurationJson.configurations[i].recursiveIncludesOrderIsExplicit !== undefined)) {
                     dirty = true;
                     break;
                 }
@@ -1517,7 +1567,7 @@ export class CppProperties {
             if (dirty) {
                 try {
                     this.writeToJson();
-                } catch (err) {
+                } catch {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
                     void vscode.window.showWarningMessage(localize('update.properties.failed', 'Attempt to update "{0}" failed (do you have write access?)', this.propertiesFile.fsPath));
                     success = false;
@@ -1529,8 +1579,18 @@ export class CppProperties {
                 e.cStandardIsExplicit = e.cStandard !== undefined;
                 e.cppStandardIsExplicit = e.cppStandard !== undefined;
                 e.intelliSenseModeIsExplicit = e.intelliSenseMode !== undefined;
+                e.recursiveIncludesPriorityIsExplicit = e.recursiveIncludes?.priority !== undefined;
+                e.recursiveIncludesOrderIsExplicit = e.recursiveIncludes?.order !== undefined;
             });
 
+            if (firstParse) {
+                // Check documents that are already open since no event will fire for them.
+                const fsPath = this.propertiesFile.fsPath;
+                const document = vscode.workspace.textDocuments.find(doc => doc.uri.fsPath === fsPath);
+                if (document) {
+                    this.handleSquiggles(document);
+                }
+            }
         } catch (errJS) {
             const err: Error = errJS as Error;
             const failedToParse: string = localize("failed.to.parse.properties", 'Failed to parse "{0}"', this.propertiesFile.fsPath);
@@ -1584,7 +1644,96 @@ export class CppProperties {
         return result;
     }
 
-    private getErrorsForConfigUI(configIndex: number): ConfigurationErrors {
+    /**
+     * Get the compilerPath and args from a compilerPath string that has already passed through
+     * `this.resolvePath`. If there are errors processing the path, those will also be returned.
+     *
+     * @param resolvedCompilerPath a compilerPath string that has already been resolved.
+     * @param rootUri the workspace folder URI, if any.
+     */
+    public static validateCompilerPath(resolvedCompilerPath: string, rootUri?: vscode.Uri): util.CompilerPathAndArgs {
+        if (!resolvedCompilerPath) {
+            return { compilerName: '', allCompilerArgs: [], compilerArgsFromCommandLineInPath: [] };
+        }
+        resolvedCompilerPath = resolvedCompilerPath.trim();
+
+        const settings = new CppSettings(rootUri);
+        const compilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath, undefined, rootUri?.fsPath);
+        const compilerLowerCase: string = compilerPathAndArgs.compilerName.toLowerCase();
+        const isCl: boolean = compilerLowerCase === "cl" || compilerLowerCase === "cl.exe";
+        const telemetry: { [key: string]: number } = {};
+
+        // Don't error cl.exe paths because it could be for an older preview build.
+        if (!isCl && compilerPathAndArgs.compilerPath) {
+            const compilerPathMayNeedQuotes: boolean = !resolvedCompilerPath.startsWith('"') && resolvedCompilerPath.includes(" ") && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0;
+            let pathExists: boolean = true;
+            const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
+
+            resolvedCompilerPath = compilerPathAndArgs.compilerPath;
+            if (!fs.existsSync(resolvedCompilerPath)) {
+                if (existsWithExeAdded(resolvedCompilerPath)) {
+                    resolvedCompilerPath += ".exe";
+                } else {
+                    const pathLocation = which.sync(resolvedCompilerPath, { nothrow: true });
+                    if (pathLocation) {
+                        resolvedCompilerPath = pathLocation;
+                        compilerPathAndArgs.compilerPath = pathLocation;
+                    } else if (rootUri) {
+                        // Test if it was a relative path.
+                        const absolutePath: string = rootUri.fsPath + path.sep + resolvedCompilerPath;
+                        if (!fs.existsSync(absolutePath)) {
+                            if (existsWithExeAdded(absolutePath)) {
+                                resolvedCompilerPath = absolutePath + ".exe";
+                            } else {
+                                pathExists = false;
+                            }
+                        } else {
+                            resolvedCompilerPath = absolutePath;
+                        }
+                    }
+                }
+            }
+
+            const compilerPathErrors: string[] = [];
+            if (compilerPathMayNeedQuotes && !pathExists) {
+                compilerPathErrors.push(localize({ key: "path.with.spaces", comment: ["{Locked=\"{0}\"} The {0} is a double quote character \", and should be located next to the translation for \"double quotes\"."] },
+                    "Compiler path with spaces could not be found. If this was intended to include compiler arguments, surround the compiler path with double quotes ({0}).", '"'));
+                telemetry.CompilerPathMissingQuotes = 1;
+            }
+
+            if (!pathExists) {
+                const message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
+                compilerPathErrors.push(message);
+                telemetry.PathNonExistent = 1;
+            } else if (!util.checkExecutableWithoutExtensionExistsSync(resolvedCompilerPath)) {
+                const message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
+                compilerPathErrors.push(message);
+                telemetry.PathNotAFile = 1;
+            }
+
+            if (compilerPathErrors.length > 0) {
+                compilerPathAndArgs.error = compilerPathErrors.join('\n');
+            }
+        }
+        compilerPathAndArgs.telemetry = telemetry;
+        return compilerPathAndArgs;
+    }
+
+    /**
+     * Time an operation and return the result plus the length of the operation.
+     *
+     * @param operation The async operation to perform.
+     * @returns The result of the operation and the time it took to complete in seconds.
+     */
+    private async timeOperation<T>(operation: () => Promise<T | undefined>): Promise<{ result: T | undefined; duration: number }> {
+        const start = process.hrtime();
+        const result = await operation();
+        const diff = process.hrtime(start);
+        const duration = diff[0] + diff[1] / 1e9; // diff[0] is in seconds, diff[1] is in nanoseconds
+        return { result, duration };
+    }
+
+    private async getErrorsForConfigUI(configIndex: number): Promise<ConfigurationErrors> {
         const errors: ConfigurationErrors = {};
         if (!this.configurationJson) {
             return errors;
@@ -1596,87 +1745,27 @@ export class CppProperties {
         errors.name = this.isConfigNameUnique(config.name);
         let resolvedCompilerPath: string | undefined | null;
         // Validate compilerPath
-        if (config.compilerPath) {
-            resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true });
+        if (!resolvedCompilerPath) {
+            resolvedCompilerPath = this.resolvePath(config.compilerPath, false, false);
         }
-
-        if (resolvedCompilerPath === undefined) {
-            resolvedCompilerPath = this.resolvePath(config.compilerPath);
-        }
-        const settings: CppSettings = new CppSettings(this.rootUri);
-        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
-        if (resolvedCompilerPath
-            // Don't error cl.exe paths because it could be for an older preview build.
-            && compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe"
-            && compilerPathAndArgs.compilerName.toLowerCase() !== "cl") {
-            resolvedCompilerPath = resolvedCompilerPath.trim();
-
-            // Error when the compiler's path has spaces without quotes but args are used.
-            // Except, exclude cl.exe paths because it could be for an older preview build.
-            const compilerPathNeedsQuotes: boolean =
-                (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0) &&
-                !resolvedCompilerPath.startsWith('"') &&
-                compilerPathAndArgs.compilerPath !== undefined &&
-                compilerPathAndArgs.compilerPath !== null &&
-                compilerPathAndArgs.compilerPath.includes(" ");
-
-            const compilerPathErrors: string[] = [];
-            if (compilerPathNeedsQuotes) {
-                compilerPathErrors.push(localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.'));
-            }
-
-            // Get compiler path without arguments before checking if it exists
-            resolvedCompilerPath = compilerPathAndArgs.compilerPath ?? undefined;
-            if (resolvedCompilerPath) {
-                let pathExists: boolean = true;
-                const existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
-                if (!fs.existsSync(resolvedCompilerPath)) {
-                    if (existsWithExeAdded(resolvedCompilerPath)) {
-                        resolvedCompilerPath += ".exe";
-                    } else if (!this.rootUri) {
-                        pathExists = false;
-                    } else {
-                        // Check again for a relative path.
-                        const relativePath: string = this.rootUri.fsPath + path.sep + resolvedCompilerPath;
-                        if (!fs.existsSync(relativePath)) {
-                            if (existsWithExeAdded(resolvedCompilerPath)) {
-                                resolvedCompilerPath += ".exe";
-                            } else {
-                                pathExists = false;
-                            }
-                        } else {
-                            resolvedCompilerPath = relativePath;
-                        }
-                    }
-                }
-
-                if (!pathExists) {
-                    const message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
-                    compilerPathErrors.push(message);
-                } else if (compilerPathAndArgs.compilerPath === "") {
-                    const message: string = localize("cannot.resolve.compiler.path", "Invalid input, cannot resolve compiler path");
-                    compilerPathErrors.push(message);
-                } else if (!util.checkExecutableWithoutExtensionExistsSync(resolvedCompilerPath)) {
-                    const message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
-                    compilerPathErrors.push(message);
-                }
-
-                if (compilerPathErrors.length > 0) {
-                    errors.compilerPath = compilerPathErrors.join('\n');
-                }
-            }
-        }
+        const compilerPathAndArgs: util.CompilerPathAndArgs = CppProperties.validateCompilerPath(resolvedCompilerPath, this.rootUri);
+        errors.compilerPath = compilerPathAndArgs.error;
 
         // Validate paths (directories)
-        errors.includePath = this.validatePath(config.includePath, { globPaths: true });
-        errors.macFrameworkPath = this.validatePath(config.macFrameworkPath);
-        errors.browsePath = this.validatePath(config.browse ? config.browse.path : undefined);
+        try {
+            const { result, duration } = await this.timeOperation(() => this.validatePath(config.includePath, { globPaths: true }));
+            errors.includePath = result ?? duration >= 10 ? localize('resolve.includePath.took.too.long', "The include path validation took {0}s to evaluate", duration) : undefined;
+        } catch (e) {
+            errors.includePath = localize('resolve.includePath.failed', "Failed to resolve include path. Error: {0}", (e as Error).message);
+        }
+        errors.macFrameworkPath = await this.validatePath(config.macFrameworkPath);
+        errors.browsePath = await this.validatePath(config.browse ? config.browse.path : undefined);
 
         // Validate files
-        errors.forcedInclude = this.validatePath(config.forcedInclude, { isDirectory: false, assumeRelative: false });
-        errors.compileCommands = this.validatePath(config.compileCommands, { isDirectory: false });
-        errors.dotConfig = this.validatePath(config.dotConfig, { isDirectory: false });
-        errors.databaseFilename = this.validatePath(config.browse ? config.browse.databaseFilename : undefined, { isDirectory: false });
+        errors.forcedInclude = await this.validatePath(config.forcedInclude, { isDirectory: false, assumeRelative: false });
+        errors.compileCommands = await this.validatePath(config.compileCommands, { isDirectory: false });
+        errors.dotConfig = await this.validatePath(config.dotConfig, { isDirectory: false });
+        errors.databaseFilename = await this.validatePath(config.browse ? config.browse.databaseFilename : undefined, { isDirectory: false });
 
         // Validate intelliSenseMode
         if (isWindows) {
@@ -1689,7 +1778,7 @@ export class CppProperties {
         return errors;
     }
 
-    private validatePath(input: string | string[] | undefined, { isDirectory = true, assumeRelative = true, globPaths = false } = {}): string | undefined {
+    private async validatePath(input: string | string[] | undefined, { isDirectory = true, assumeRelative = true, globPaths = false } = {}): Promise<string | undefined> {
         if (!input) {
             return undefined;
         }
@@ -1705,10 +1794,11 @@ export class CppProperties {
         }
 
         // Resolve and split any environment variables
-        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, assumeRelative, globPaths);
+        paths = await this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, assumeRelative, globPaths);
 
         for (const p of paths) {
             let pathExists: boolean = true;
+            let quotedPath: boolean = false;
             let resolvedPath: string = this.resolvePath(p);
             if (!resolvedPath) {
                 continue;
@@ -1716,7 +1806,10 @@ export class CppProperties {
 
             // Check if resolved path exists
             if (!fs.existsSync(resolvedPath)) {
-                if (assumeRelative && !path.isAbsolute(resolvedPath)) {
+                if (resolvedPath.match(/".*"/) !== null) {
+                    pathExists = false;
+                    quotedPath = true;
+                } else if (assumeRelative && !path.isAbsolute(resolvedPath)) {
                     continue;
                 } else if (!this.rootUri) {
                     pathExists = false;
@@ -1732,7 +1825,10 @@ export class CppProperties {
             }
 
             if (!pathExists) {
-                const message: string = localize('cannot.find', "Cannot find: {0}", resolvedPath);
+                let message: string = localize('cannot.find', "Cannot find: {0}", resolvedPath);
+                if (quotedPath) {
+                    message += '. ' + localize('wrapped.with.quotes', 'Do not add extra quotes around paths.');
+                }
                 errors.push(message);
                 continue;
             }
@@ -1764,7 +1860,24 @@ export class CppProperties {
         return errorMsg;
     }
 
-    private async handleSquiggles(): Promise<void> {
+    private lastConfigurationVersion: number = 0;
+    private handleSquigglesDeferral: Deferral | undefined;
+
+    private handleSquiggles(doc?: vscode.TextDocument): void {
+        // When we open the doc or the active config changes, we don't pass the doc in since we always want to process squiggles.
+        if (doc?.version !== this.lastConfigurationVersion) {
+            this.lastConfigurationVersion = doc?.version ?? 0;
+
+            // Debounce the squiggles requests.
+            this.handleSquigglesDeferral?.cancel();
+            this.handleSquigglesDeferral = new Deferral(() => void this.handleSquigglesImpl().catch(logAndReturn.undefined), 1000);
+        }
+    }
+
+    /**
+     * Not to be called directly. Use the `handleSquiggles` method instead which will debounce the calls.
+     */
+    private async handleSquigglesImpl(): Promise<void> {
         if (!this.propertiesFile) {
             return;
         }
@@ -1776,7 +1889,7 @@ export class CppProperties {
         if (!this.configurationJson) {
             return;
         }
-        if ((this.configurationJson.enableConfigurationSquiggles !== undefined && !this.configurationJson.enableConfigurationSquiggles) ||
+        if ((this.configurationJson.enableConfigurationSquiggles === false) ||
             (this.configurationJson.enableConfigurationSquiggles === undefined && !settings.defaultEnableConfigurationSquiggles)) {
             this.diagnosticCollection.clear();
             return;
@@ -1879,9 +1992,9 @@ export class CppProperties {
             curText = curText.substring(0, nextNameStart2);
         }
         if (this.prevSquiggleMetrics.get(currentConfiguration.name) === undefined) {
-            this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0, MultiplePathsShouldBeSeparated: 0 });
+            this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, SlowPathResolution: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0, MultiplePathsShouldBeSeparated: 0 });
         }
-        const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0, MultiplePathsShouldBeSeparated: 0 };
+        const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, SlowPathResolution: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0, MultiplePathsShouldBeSeparated: 0 };
         const isWindows: boolean = os.platform() === 'win32';
 
         // TODO: Add other squiggles.
@@ -1909,7 +2022,6 @@ export class CppProperties {
 
         // Check for path-related squiggles.
         const paths: string[] = [];
-        let compilerPath: string | undefined;
         for (const pathArray of [currentConfiguration.browse ? currentConfiguration.browse.path : undefined, currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
             if (pathArray) {
                 for (const curPath of pathArray) {
@@ -1931,13 +2043,6 @@ export class CppProperties {
             paths.push(`${file}`);
         });
 
-        if (currentConfiguration.compilerPath) {
-            // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace and the possibility of compiler args.
-            compilerPath = currentConfiguration.compilerPath;
-        }
-
-        compilerPath = this.resolvePath(compilerPath).trim();
-
         // Get the start/end for properties that are file-only.
         const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
         const forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
@@ -1954,45 +2059,19 @@ export class CppProperties {
         const processedPaths: Set<string> = new Set<string>();
 
         // Validate compiler paths
-        let compilerPathNeedsQuotes: boolean = false;
-        let compilerMessage: string | undefined;
-        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, compilerPath);
-        const compilerLowerCase: string = compilerPathAndArgs.compilerName.toLowerCase();
-        const isClCompiler: boolean = compilerLowerCase === "cl" || compilerLowerCase === "cl.exe";
-        // Don't squiggle for invalid cl and cl.exe paths.
-        if (compilerPathAndArgs.compilerPath && !isClCompiler) {
-            // Squiggle when the compiler's path has spaces without quotes but args are used.
-            compilerPathNeedsQuotes = (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0)
-                && !compilerPath.startsWith('"')
-                && compilerPathAndArgs.compilerPath.includes(" ");
-            compilerPath = compilerPathAndArgs.compilerPath;
-            // Don't squiggle if compiler path is resolving with environment path.
-            if (compilerPathNeedsQuotes || (compilerPath && !which.sync(compilerPath, { nothrow: true }))) {
-                if (compilerPathNeedsQuotes) {
-                    compilerMessage = localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.');
-                    newSquiggleMetrics.CompilerPathMissingQuotes++;
-                } else if (!util.checkExecutableWithoutExtensionExistsSync(compilerPath)) {
-                    compilerMessage = localize("path.is.not.a.file", "Path is not a file: {0}", compilerPath);
-                    newSquiggleMetrics.PathNotAFile++;
-                }
-            }
-        }
-        let compilerPathExists: boolean = true;
-        if (this.rootUri && !isClCompiler) {
-            const checkPathExists: any = util.checkPathExistsSync(compilerPath, this.rootUri.fsPath + path.sep, isWindows, true);
-            compilerPathExists = checkPathExists.pathExists;
-            compilerPath = checkPathExists.path;
-        }
-        if (!compilerPathExists) {
-            compilerMessage = localize('cannot.find', "Cannot find: {0}", compilerPath);
-            newSquiggleMetrics.PathNonExistent++;
-        }
-        if (compilerMessage) {
+        const resolvedCompilerPath = this.resolvePath(currentConfiguration.compilerPath, false, false);
+        const compilerPathAndArgs: util.CompilerPathAndArgs = CppProperties.validateCompilerPath(resolvedCompilerPath, this.rootUri);
+        if (compilerPathAndArgs.error) {
             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                new vscode.Range(document.positionAt(curTextStartOffset + compilerPathValueStart),
-                    document.positionAt(curTextStartOffset + compilerPathEnd)),
-                compilerMessage, vscode.DiagnosticSeverity.Warning);
+                new vscode.Range(document.positionAt(curTextStartOffset + compilerPathValueStart), document.positionAt(curTextStartOffset + compilerPathEnd)),
+                compilerPathAndArgs.error,
+                vscode.DiagnosticSeverity.Warning);
             diagnostics.push(diagnostic);
+        }
+        if (compilerPathAndArgs.telemetry) {
+            for (const o of Object.keys(compilerPathAndArgs.telemetry)) {
+                newSquiggleMetrics[o] = compilerPathAndArgs.telemetry[o];
+            }
         }
 
         // validate .config path
@@ -2049,8 +2128,33 @@ export class CppProperties {
             // and extend that pattern to the next quote before and next quote after it.
             const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
             const configMatches: string[] | null = curText.match(pattern);
+            let expandedPaths: string[];
 
-            const expandedPaths: string[] = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, true);
+            try {
+                const { result, duration } = await this.timeOperation(() => this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, true));
+                expandedPaths = result ?? [];
+                if (duration > 10 && configMatches) {
+                    newSquiggleMetrics.SlowPathResolution++;
+                    const curOffset = curText.indexOf(configMatches[0]);
+                    const endOffset = curOffset + curPath.length;
+                    const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset), document.positionAt(curTextStartOffset + endOffset)),
+                        localize('resolve.path.took.too.long', "Path took {0}s to evaluate", duration),
+                        vscode.DiagnosticSeverity.Warning);
+                    diagnostics.push(diagnostic);
+                }
+            } catch (e) {
+                expandedPaths = [];
+                if (configMatches) {
+                    const curOffset = curText.indexOf(configMatches[0]);
+                    const endOffset = curOffset + curPath.length;
+                    const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset), document.positionAt(curTextStartOffset + endOffset)),
+                        localize('resolve.path.failed', "Failed to resolve path {0}. Error: {1}", curPath, (e as Error).message),
+                        vscode.DiagnosticSeverity.Warning);
+                    diagnostics.push(diagnostic);
+                }
+            }
             const incorrectExpandedPaths: string[] = [];
 
             if (expandedPaths.length <= 0) {
@@ -2120,6 +2224,9 @@ export class CppProperties {
                             badPath = `"${expandedPaths[0]}"`;
                         }
                         message = localize('cannot.find', "Cannot find: {0}", badPath);
+                        if (incorrectExpandedPaths.some(p => p.match(/".*"/) !== null)) {
+                            message += '.\n' + localize('wrapped.with.quotes', 'Do not add extra quotes around paths.');
+                        }
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
                         // Check for file versus path mismatches.
@@ -2296,6 +2403,8 @@ export class CppProperties {
         const savedCStandardIsExplicit: boolean[] = [];
         const savedCppStandardIsExplicit: boolean[] = [];
         const savedIntelliSenseModeIsExplicit: boolean[] = [];
+        const savedRecursiveIncludesPriorityIsExplicit: boolean[] = [];
+        const savedRecursiveIncludesOrderIsExplicit: boolean[] = [];
 
         if (this.configurationJson) {
             this.configurationJson.configurations.forEach(e => {
@@ -2315,6 +2424,14 @@ export class CppProperties {
                 if (e.intelliSenseModeIsExplicit !== undefined) {
                     delete e.intelliSenseModeIsExplicit;
                 }
+                savedRecursiveIncludesPriorityIsExplicit.push(!!e.recursiveIncludesPriorityIsExplicit);
+                if (e.recursiveIncludesPriorityIsExplicit !== undefined) {
+                    delete e.recursiveIncludesPriorityIsExplicit;
+                }
+                savedRecursiveIncludesOrderIsExplicit.push(!!e.recursiveIncludesOrderIsExplicit);
+                if (e.recursiveIncludesOrderIsExplicit !== undefined) {
+                    delete e.recursiveIncludesOrderIsExplicit;
+                }
             });
         }
 
@@ -2329,6 +2446,8 @@ export class CppProperties {
                 this.configurationJson.configurations[i].cStandardIsExplicit = savedCStandardIsExplicit[i];
                 this.configurationJson.configurations[i].cppStandardIsExplicit = savedCppStandardIsExplicit[i];
                 this.configurationJson.configurations[i].intelliSenseModeIsExplicit = savedIntelliSenseModeIsExplicit[i];
+                this.configurationJson.configurations[i].recursiveIncludesPriorityIsExplicit = savedRecursiveIncludesPriorityIsExplicit[i];
+                this.configurationJson.configurations[i].recursiveIncludesOrderIsExplicit = savedRecursiveIncludesOrderIsExplicit[i];
             }
         }
     }

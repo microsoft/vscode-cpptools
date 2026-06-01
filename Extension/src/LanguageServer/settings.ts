@@ -5,7 +5,6 @@
 'use strict';
 
 import { execSync } from 'child_process';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -13,6 +12,7 @@ import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
+import * as util from '../common';
 import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isObject, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
 import { isWindows } from '../constants';
 import * as telemetry from '../telemetry';
@@ -126,6 +126,7 @@ export interface WorkspaceFolderSettingsParams {
     vcFormatSpaceAroundTernaryOperator: string;
     vcFormatWrapPreserveBlocks: string;
     doxygenGenerateOnType: boolean;
+    doxygenGenerateOnCodeAction: boolean;
     doxygenGeneratedStyle: string;
     doxygenSectionTags: string[];
     filesExclude: Excludes;
@@ -164,6 +165,7 @@ export interface SettingsParams {
     codeAnalysisUpdateDelay: number;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
     copilotHover: string;
+    windowsErrorReportingMode: string;
 }
 
 function getTarget(): vscode.ConfigurationTarget {
@@ -300,7 +302,7 @@ export class CppSettings extends Settings {
                     if (!semver.valid(bundledVersion)) {
                         return path;
                     }
-                } catch (e) {
+                } catch {
                     // Unable to invoke our own clang-*.  Use the system installed clang-*.
                     return path;
                 }
@@ -313,7 +315,7 @@ export class CppSettings extends Settings {
                         path = "";
                         setCachedClangPath(path);
                     }
-                } catch (e) {
+                } catch {
                     path = "";
                     setCachedClangPath(path);
                 }
@@ -382,9 +384,17 @@ export class CppSettings extends Settings {
     public get simplifyStructuredComments(): boolean { return this.getAsBoolean("simplifyStructuredComments"); }
     public get doxygenGeneratedCommentStyle(): string { return this.getAsString("doxygen.generatedStyle"); }
     public get doxygenGenerateOnType(): boolean { return this.getAsBoolean("doxygen.generateOnType"); }
+    public get doxygenGenerateOnCodeAction(): boolean { return this.getAsBoolean("doxygen.generateOnCodeAction"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] {
         const value: any = super.Section.get<any>("commentContinuationPatterns");
         if (this.isArrayOfCommentContinuationPatterns(value)) {
+            // Needs to be sorted with longer patterns first so it takes precedence and
+            // doesn't apply the shorter pattern if it's a prefix (e.g. // matching ///).
+            value.sort((a: string | CommentPattern, b: string | CommentPattern) => {
+                const aStr: string = isString(a) ? a : a.begin;
+                const bStr: string = isString(b) ? b : b.begin;
+                return bStr.length - aStr.length;
+            });
             return value;
         }
         const setting = getRawSetting("C_Cpp.commentContinuationPatterns", true);
@@ -440,13 +450,12 @@ export class CppSettings extends Settings {
     public get defaultCStandard(): string | undefined { return this.getAsStringOrUndefined("default.cStandard"); }
     public get defaultCppStandard(): string | undefined { return this.getAsStringOrUndefined("default.cppStandard"); }
     public get defaultConfigurationProvider(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.configurationProvider")); }
-    public get defaultMergeConfigurations(): boolean | undefined { return this.getAsBooleanOrUndefined("default.mergeConfigurations"); }
+    public get defaultMergeConfigurations(): boolean { return this.getAsBoolean("default.mergeConfigurations"); }
     public get defaultBrowsePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.browse.path"); }
     public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.browse.databaseFilename")); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
-    public get defaultRecursiveIncludesReduce(): string { return this.getAsString("default.recursiveIncludes.reduce"); }
-    public get defaultRecursiveIncludesPriority(): string { return this.getAsString("default.recursiveIncludes.priority"); }
-    public get defaultRecursiveIncludesOrder(): string { return this.getAsString("default.recursiveIncludes.order"); }
+    public get defaultRecursiveIncludesPriority(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.priority"); }
+    public get defaultRecursiveIncludesOrder(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.order"); }
     public get defaultSystemIncludePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean { return this.getAsBoolean("default.enableConfigurationSquiggles"); }
     public get defaultCustomConfigurationVariables(): Associations | undefined { return this.getAsAssociations("default.customConfigurationVariables", true) ?? undefined; }
@@ -478,8 +487,9 @@ export class CppSettings extends Settings {
         }
         return this.getAsString("copilotHover");
     }
-    public get cppCodeSnippetsFeatureNames(): string | undefined {
-        const value = super.Section.get<any>("cppCodeSnippetsFeatureNames");
+    public get windowsErrorReportingMode(): string { return this.getAsString("windowsErrorReportingMode"); }
+    public get cppContextProviderParams(): string | undefined {
+        const value = super.Section.get<any>("copilotContextProviderParams");
         if (isString(value)) {
             return value;
         }
@@ -549,6 +559,7 @@ export class CppSettings extends Settings {
             && this.intelliSenseEngine.toLowerCase() === "default" && vscode.workspace.getConfiguration("workbench").get<any>("colorTheme") !== "Default High Contrast";
     }
     public get sshTargetsView(): string { return this.getAsString("sshTargetsView"); }
+    public get persistVSDeveloperEnvironment(): boolean { return this.getAsBoolean("persistVsDeveloperEnvironment"); }
 
     // Returns the value of a setting as a string with proper type validation and checks for valid enum values while returning an undefined value if necessary.
     private getAsStringOrUndefined(settingName: string): string | undefined {
@@ -563,21 +574,6 @@ export class CppSettings extends Settings {
                 return value;
             }
         } else if (isString(value)) {
-            return value;
-        }
-
-        return undefined;
-    }
-
-    // Returns the value of a setting as a boolean with proper type validation and checks for valid enum values while returning an undefined value if necessary.
-    private getAsBooleanOrUndefined(settingName: string): boolean | undefined {
-        const value: any = super.Section.get<any>(settingName);
-        const setting = getRawSetting("C_Cpp." + settingName, true);
-        if (setting.default !== undefined) {
-            console.error(`Default value for ${settingName} is expected to be undefined.`);
-        }
-
-        if (isBoolean(value)) {
             return value;
         }
 
@@ -903,7 +899,7 @@ export class CppSettings extends Settings {
             try {
                 await vscode.workspace.applyEdit(edits);
                 document = await vscode.workspace.openTextDocument(uri);
-            } catch (e) {
+            } catch {
                 document = await vscode.workspace.openTextDocument();
             }
         } else {
@@ -930,7 +926,7 @@ export class CppSettings extends Settings {
         let foundEditorConfigWithVcFormatSettings: boolean = false;
         const findConfigFile: (parentPath: string) => boolean = (parentPath: string) => {
             const editorConfigPath: string = path.join(parentPath, ".editorconfig");
-            if (fs.existsSync(editorConfigPath)) {
+            if (util.checkFileExistsSync(editorConfigPath)) {
                 const editorConfigSettings: any = getEditorConfigSettings(document.uri.fsPath);
                 const keys: string[] = Object.keys(editorConfigSettings);
                 for (let i: number = 0; i < keys.length; ++i) {
@@ -959,11 +955,11 @@ export class CppSettings extends Settings {
                 }
             }
             const clangFormatPath1: string = path.join(parentPath, ".clang-format");
-            if (fs.existsSync(clangFormatPath1)) {
+            if (util.checkFileExistsSync(clangFormatPath1)) {
                 return true;
             }
             const clangFormatPath2: string = path.join(parentPath, "_clang-format");
-            return fs.existsSync(clangFormatPath2);
+            return util.checkFileExistsSync(clangFormatPath2);
         };
         // Scan parent paths to see which we find first, ".clang-format" or ".editorconfig"
         const fsPath: string = document.uri.fsPath;
@@ -1098,4 +1094,18 @@ export class OtherSettings {
     };
     public get searchExclude(): Excludes { return this.getAsExcludes("search", "exclude", this.defaultSearchExcludes, this.resource); }
     public get workbenchSettingsEditor(): string { return this.getAsString("workbench.settings", "editor", this.resource, "ui"); }
+}
+
+export function hasFileAssociation(fileName: string): boolean {
+    const otherSettings: OtherSettings = new OtherSettings();
+    const associations: Associations = otherSettings.filesAssociations;
+    if (associations[fileName]) {
+        return true;
+    }
+    for (const pattern in associations) {
+        if (pattern.startsWith('*.') && fileName.endsWith(pattern.slice(1))) {
+            return true;
+        }
+    }
+    return false;
 }

@@ -20,7 +20,7 @@ export async function logMachineIdMappings(): Promise<void> {
     // The first MAC address is the one Visual Studio uses
     const primary = await getMachineId(macAddresses.shift());
     if (primary) {
-        logLanguageServerEvent('machineIdMap', {primary});
+        logLanguageServerEvent('machineIdMap', { primary });
     }
 
     // VS Code uses os.networkInterfaces() which has different sorting and availability,
@@ -30,7 +30,7 @@ export async function logMachineIdMappings(): Promise<void> {
     for (const macAddress of macAddresses) {
         const additional = await getMachineId(macAddress);
         if (additional) {
-            logLanguageServerEvent('machineIdMap', {additional});
+            logLanguageServerEvent('machineIdMap', { additional });
         }
     }
 }
@@ -43,7 +43,7 @@ async function getMacAddresses(): Promise<string[]> {
         const output = await execChildProcess('getmac');
         const regex = /(?:[a-z0-9]{2}[:\-]){5}[a-z0-9]{2}/gmi;
         return output.match(regex) ?? [];
-    } catch (err) {
+    } catch {
         return [];
     }
 }
@@ -62,7 +62,7 @@ async function getMachineId(macAddress?: string): Promise<string | undefined> {
         const crypto = await import('crypto');
         const normalized = macAddress.toUpperCase().replace(/:/g, '-');
         return crypto.createHash('sha256').update(normalized, 'utf8').digest('hex');
-    } catch (err) {
+    } catch {
         return undefined;
     }
 }

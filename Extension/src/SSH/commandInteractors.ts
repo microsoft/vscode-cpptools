@@ -182,7 +182,7 @@ export function getExitCode(output: string, marker: string): number | undefined 
         try {
             const num: number = parseInt(match[1]);
             return Number.isNaN(num) ? undefined : num;
-        } catch (err) {
+        } catch {
             return undefined;
         }
     }

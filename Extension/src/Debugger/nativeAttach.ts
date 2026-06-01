@@ -184,7 +184,7 @@ function spawnChildProcess(command: string, token?: vscode.CancellationToken): P
 
                 try {
                     process.kill();
-                } catch (e) {
+                } catch {
                     // Failed to kill process.
                 }
                 reject(new Error(localize("timeout.processList.spawn", '"{0}" timed out after {1} seconds.', command, seconds)));
@@ -198,7 +198,7 @@ function spawnChildProcess(command: string, token?: vscode.CancellationToken): P
 
                 try {
                     process.kill();
-                } catch (e) {
+                } catch {
                     // Failed to kill process.
                 }
                 reject(new Error(localize("cancel.processList.spawn", '"{0}" canceled.', command)));

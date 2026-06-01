@@ -8,6 +8,9 @@ on:
        description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
        default: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -15,7 +18,7 @@ jobs:
       issues: write
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
       - name: Install Actions
         run: cd ./.github/actions && npm install --production && cd ../..
       - name: Stale Closer
@@ -26,3 +29,4 @@ jobs:
           ignoreLabels: Language Service,internal
           closeDays: 180
           closeComment: "This issue has been closed as lower priority. We're sorry if this issue still impacts you but unfortunately we're not able to address this. We will accept a pull request from the community if it's applicable for this issue."
+

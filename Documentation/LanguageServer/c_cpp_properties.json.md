@@ -1,1 +1,1 @@
-The documentation for c_cpp_properties.json has moved to https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference.
+The documentation for c_cpp_properties.json has moved to https://code.visualstudio.com/docs/cpp/customize-cpp-settings.

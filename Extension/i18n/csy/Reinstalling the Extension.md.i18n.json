@@ -6,7 +6,7 @@
 {
 	"incompatible.extension.heading": "Nekompatibilní nebo neodpovídající binární soubory rozšíření C/C++",
 	"incompat.extension.text1": "Rozšíření C/C++ obsahuje nativní binární soubory.",
-	"incompat.extension.text2": "Při instalaci přes rozhraní tržiště ve VS Code by měly být zahrnuty správné nativní binární soubory.  Pokud byly zjištěny nekompatibilní binární soubory a rozšíření C/C++ bylo nainstalováno prostřednictvím uživatelského rozhraní tržiště ve VS Code, {0}.",
+	"incompat.extension.text2": "Při instalaci přes rozhraní marketplace ve VS Code by měly být zahrnuty správné nativní binární soubory.  Pokud byly zjištěny nekompatibilní binární soubory a rozšíření C/C++ bylo nainstalováno prostřednictvím uživatelského rozhraní tržiště ve VS Code, {0}.",
 	"bug.report.link.title": "nahlaste prosím problém",
 	"reinstalling.extension.heading": "Přeinstaluje se rozšíření C/C++.",
 	"reinstall.extension.text1": "Při přeinstalování ekvivalentní verze rozšíření může VS Code znovu použít stávající adresář rozšíření. Aby k tomu při přeinstalování rozšíření C/C++ nedošlo, může být nutné stávající adresář rozšíření nejprve odstranit.",
@@ -16,6 +16,6 @@
 	"reinstall.extension.text5": "Ve Windows:",
 	"reinstall.extension.text6": "V Linuxu:",
 	"reinstall.extension.text7": "Pak ji znovu nainstalujte přes uživatelské rozhraní Marketplace ve VS Code.",
-	"reinstall.extension.text8": "Pokud VS Code nenasadí správnou verzi rozšíření, můžete správný soubor VSIX pro váš systém {0} a nainstalovat pomocí možnosti Instalovat z VSIX.... v uživatelském rozhraní Marketplace ve VS Code.",
+	"reinstall.extension.text8": "Pokud VS Code nenasadí správnou verzi rozšíření, můžete správný soubor VSIX pro váš systém {0} a nainstalovat pomocí možnosti 'Instalovat z VSIX...' v uživatelském rozhraní v nabídce '...'  Marketplace ve VS Code.",
 	"download.vsix.link.title": "staženo z webu VS Code Marketplace"
 }

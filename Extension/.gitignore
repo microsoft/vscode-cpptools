@@ -10,6 +10,7 @@ server
 debugAdapters
 LLVM
 bin/cpptools*
+bin/libc.so
 bin/*.dll
 bin/.vs
 bin/LICENSE.txt

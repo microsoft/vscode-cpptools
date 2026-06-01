@@ -1,6 +1,0 @@
-{
-  "defaults": [
-    "-D__building_module(x)=0"
-  ],
-  "defaults_op": "merge"
-}

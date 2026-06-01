@@ -8,6 +8,9 @@ on:
        description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
        default: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -15,7 +18,7 @@ jobs:
       issues: write
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
       - name: Install Actions
         run: cd ./.github/actions && npm install --production && cd ../..
       - name: Stale Closer
@@ -28,3 +31,4 @@ jobs:
           closeComment: "This issue has been closed because it is a duplicate of another issue we are tracking."
           pingDays: 80
           pingComment: "Hey @${assignee}, this issue might need further attention.\n\n@${author}, you can help us out by closing this issue if it is no longer relevant."
+

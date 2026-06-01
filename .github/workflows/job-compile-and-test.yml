@@ -11,20 +11,28 @@ on:
         # Expects 'mac', 'linux', or 'windows'
         required: true
         type: string
+      checkout-ref:
+        required: false
+        type: string
       yarn-args:
         type: string
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
     runs-on: ${{ inputs.runner-env }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.checkout-ref }}
 
-      - name: Use Node.js 20
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install Dependencies
         run: yarn install ${{ inputs.yarn-args }}
@@ -63,6 +71,11 @@ jobs:
       #   run: yarn test --scenario=MultirootDeadlockTest
       #   working-directory: Extension
 
+      # - name: Run E2E IntelliSense features tests
+      #   if: ${{ inputs.platform == 'windows' }}
+      #   run: yarn test --scenario=RunWithoutDebugging
+      #   working-directory: Extension
+
       # NOTE: For mac/linux run the tests with xvfb-action for UI support.
       # Another way to start xvfb https://github.com/microsoft/vscode-test/blob/master/sample/azure-pipelines.yml
 
@@ -79,3 +92,11 @@ jobs:
       #   with:
       #     run: yarn test --scenario=MultirootDeadlockTest
       #     working-directory: Extension
+
+      # - name: Run E2E IntelliSense features tests (xvfb)
+      #   if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
+      #   uses: coactions/setup-xvfb@v1
+      #   with:
+      #     run: yarn test --scenario=RunWithoutDebugging
+      #     working-directory: Extension
+

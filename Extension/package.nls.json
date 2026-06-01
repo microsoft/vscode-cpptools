@@ -37,6 +37,8 @@
     "c_cpp.command.RemoveAllCodeAnalysisProblems.title": "Clear All Code Analysis Problems",
     "c_cpp.command.BuildAndDebugFile.title": "Debug C/C++ File",
     "c_cpp.command.BuildAndRunFile.title": "Run C/C++ File",
+    "c_cpp.command.SetVsDeveloperEnvironment.title": "Set Visual Studio Developer Environment",
+    "c_cpp.command.ClearVsDeveloperEnvironment.title": "Clear Visual Studio Developer Environment",
     "c_cpp.command.AddDebugConfiguration.title": "Add Debug Configuration",
     "c_cpp.command.GenerateDoxygenComment.title": "Generate Doxygen Comment",
     "c_cpp.command.addSshTarget.title": "Add SSH target",
@@ -209,7 +211,7 @@
         ]
     },
     "c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription": {
-        "message": "List of enabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any. The default check `clang-analyzer-*` is always used unless it is explicitly disabled.",
+        "message": "List of enabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any. The default check `clang-analyzer-core.*` is always used unless it is explicitly disabled.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -300,7 +302,7 @@
     },
     "c_cpp.configuration.vcFormat.indent.gotoLabels.description": "The position of goto labels.",
     "c_cpp.configuration.vcFormat.indent.gotoLabels.oneLeft.markdownDescription": {
-        "message": "Position goto labels to the left of the current code indentation, by the amount specified in the `#editor.tabSize#` setting.",
+        "message": "Position goto labels to the left of the current code indentation by the amount specified in the `#editor.tabSize#` setting.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -319,7 +321,7 @@
     },
     "c_cpp.configuration.vcFormat.indent.preprocessor.description": "The position of preprocessor directives.",
     "c_cpp.configuration.vcFormat.indent.preprocessor.oneLeft.markdownDescription": {
-        "message": "Preprocessor directives are positioned to the left of the current code indentation, by the amount specified in the `#editor.tabSize#` setting.",
+        "message": "Preprocessor directives are positioned to the left of the current code indentation by the amount specified in the `#editor.tabSize#` setting.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -476,7 +478,7 @@
     "c_cpp.configuration.autocomplete.markdownDescription": {
         "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (and similarly for `c` and `cuda-cpp` languages).",
         "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered -- except for text \"value\", which is a placeholder that should be translated."
+            "{Locked=\"`disabled`\"} {Locked=\"`\\\"[cpp]\\\": {\\\"editor.wordBasedSuggestions\\\": <\"} {Locked=\">}`\"} {Locked=\"`c`\"} {Locked=\"`cuda-cpp`\"}"
         ]
     },
     "c_cpp.configuration.autocomplete.default.description": "Uses the active IntelliSense engine.",
@@ -578,6 +580,7 @@
         ]
     },
     "c_cpp.configuration.doxygen.generateOnType.description": "Controls whether to automatically insert the Doxygen comment after typing the chosen comment style.",
+    "c_cpp.configuration.doxygen.generateOnCodeAction.description": "Controls whether the code action to generate a Doxygen comment is enabled.",
     "c_cpp.configuration.doxygen.generatedStyle.description": "The string of characters used as the starting line of the Doxygen comment.",
     "c_cpp.configuration.doxygen.sectionTags.description": "Select the Doxygen section tags that you would like to appear on hover in the tooltip area when the 'Simplify Structured Comments' setting is enabled. ",
     "c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": {
@@ -785,9 +788,15 @@
         ]
     },
     "c_cpp.configuration.copilotHover.markdownDescription": {
-        "message": "If `disabled`, no Copilot information will appear in Hover.",
+        "message": "If `disabled`, no 'Generate Copilot summary' option will appear on hover.",
         "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+            "{Locked=\"`disabled`\"} {Locked=\"Copilot\"}"
+        ]
+    },
+    "c_cpp.configuration.windowsErrorReportingMode.markdownDescription": {
+        "message": "If `disabled`, Windows Error Reporting will be disabled. If `default`, Windows Error Reporting will be enabled, but it becomes disabled after the first crash in the current session. Changing the setting doesn't affect currently running IntelliSense processes.",
+        "comment": [
+            "{Locked=\"`disabled`\"} {Locked=\"`default`\"} {Locked=\"`IntelliSense`\"}"
         ]
     },
     "c_cpp.configuration.renameRequiresIdentifier.markdownDescription": {
@@ -843,6 +852,7 @@
         ]
     },
     "c_cpp.configuration.debugShortcut.description": "Show the \"Run and Debug\" play button and \"Add Debug Configuration\" gear in the editor title bar for C++ files.",
+    "c_cpp.configuration.persistVsDeveloperEnvironment.description": "Remember the last used Visual Studio developer environment for the current workspace. This setting is only applicable for Windows.",
     "c_cpp.debuggers.pipeTransport.description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
     "c_cpp.debuggers.pipeTransport.default.pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'.",
     "c_cpp.debuggers.pipeTransport.default.debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb.",
@@ -866,8 +876,6 @@
     "c_cpp.debuggers.ignoreFailures.description": "If true, failures from the command should be ignored. Default value is false.",
     "c_cpp.debuggers.program.description": "Full path to program executable.",
     "c_cpp.debuggers.args.description": "Command line arguments passed to the program.",
-    "c_cpp.debuggers.cppdbg.type.description": "The type of the engine. Must be \"cppdbg\".",
-    "c_cpp.debuggers.cppvsdbg.type.description": "The type of the engine. Must be \"cppvsdbg\".",
     "c_cpp.debuggers.targetArchitecture.description": "The architecture of the debuggee. This will automatically be detected unless this parameter is set. Allowed values are x86, arm, arm64, mips, x64, amd64, x86_64.",
     "c_cpp.debuggers.cwd.description": "The working directory of the target.",
     "c_cpp.debuggers.setupCommands.description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
@@ -878,7 +886,12 @@
     "c_cpp.debuggers.cppdbg.svdPath.description": "The full path to an embedded device's SVD file.",
     "c_cpp.debuggers.cppvsdbg.visualizerFile.description": ".natvis file to be used when debugging this process.",
     "c_cpp.debuggers.showDisplayString.description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
-    "c_cpp.debuggers.environment.description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"config\", \"value\": \"Debug\" } ], not [ { \"config\": \"Debug\" } ].",
+    "c_cpp.debuggers.environment.description": {
+        "message": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"config\", \"value\": \"Debug\" } ], not [ { \"config\": \"Debug\" } ].",
+        "comment": [
+            "{Locked=\"[ { \\\"name\\\": \\\"\"} {Locked=\"\\\", \\\"value\\\": \\\"\"} {Locked=\"\\\" } ]\"} {Locked=\"[ { \\\"\"} {Locked=\"\\\": \\\"\"} {Locked=\"\\\" } ]\"}"
+        ]
+    },
     "c_cpp.debuggers.envFile.description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE.",
     "c_cpp.debuggers.additionalSOLibSearchPath.description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
     "c_cpp.debuggers.MIMode.description": "Indicates the console debugger that the MIDebugEngine will connect to. Allowed values are \"gdb\" \"lldb\".",
@@ -886,8 +899,13 @@
     "c_cpp.debuggers.miDebuggerArgs.description": "Additional arguments for the MI debugger (such as gdb).",
     "c_cpp.debuggers.miDebuggerServerAddress.description": "Network address of the MI Debugger Server to connect to (example: localhost:1234).",
     "c_cpp.debuggers.useExtendedRemote.description": "Connect to the MI Debugger Server with target extended-remote mode.",
-    "c_cpp.debuggers.stopAtEntry.description": "Optional parameter. If true, the debugger should stop at the entrypoint of the target. If processId is passed, has no effect.",
-    "c_cpp.debuggers.debugServerPath.description": "Optional full path to the debug server to launch. Defaults to null. It is used in conjunction with either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\".",
+    "c_cpp.debuggers.stopAtEntry.markdownDescription": {
+        "message": "Optional parameter. If `true`, the debugger should stop at the entry point of the target. If `processId` is passed, this has no effect.",
+        "comment": [
+            "{Locked=\"`true`\"} {Locked=\"`processId`\"}"
+        ]
+    },
+    "c_cpp.debuggers.debugServerPath.description": "Optional full path to the debug server to launch. Defaults to null. It is used in conjunction with either \"miDebuggerServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\".",
     "c_cpp.debuggers.debugServerArgs.description": "Optional debug server args. Defaults to null.",
     "c_cpp.debuggers.serverStarted.description": "Optional server-started pattern to look for in the debug server output. Defaults to null.",
     "c_cpp.debuggers.filterStdout.description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
@@ -902,9 +920,25 @@
     "c_cpp.debuggers.cppvsdbg.console.externalTerminal.description": "Console applications will be launched in an external terminal window. The window will be reused in relaunch scenarios and will not automatically disappear when the application exits.",
     "c_cpp.debuggers.cppvsdbg.console.newExternalWindow.description": "Console applications will be launched in their own external console window which will end when the application stops. Non-console applications will run without a terminal, and stdout/stderr will be ignored.",
     "c_cpp.debuggers.avoidWindowsConsoleRedirection.description": "If true, disables debuggee console redirection that is required for Integrated Terminal support.",
-    "c_cpp.debuggers.sourceFileMap.description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'.",
-    "c_cpp.debuggers.processId.anyOf.description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
-    "c_cpp.debuggers.symbolSearchPath.description": "Semicolon separated list of directories to use to search for symbol (that is, pdb) files. Example: \"c:\\dir1;c:\\dir2\".",
+    "c_cpp.debuggers.sourceFileMap.markdownDescription": {
+        "message": "Optional source file mappings passed to the debug engine. Example: `{ \"<original source path>\": \"<current source path>\" }`.",
+        "comment": [
+            "{Locked=\"`{ \\\"<\"} {Locked=\">\\\": \\\"<\"} {Locked=\">\\\" }`\"}"
+        ]
+    },
+    "c_cpp.debuggers.processId.anyOf.markdownDescription": {
+        "message": "Optional process ID to attach the debugger to. Use `${command:pickProcess}` to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+        "comment": [
+            "{Locked=\"`${command:pickProcess}`\"}"
+        ]
+    },
+    "c_cpp.debuggers.program.attach.markdownDescription": {
+        "message": "Full path to the program executable. The debugger will search for a running process matching this executable path and attach to it. If multiple processes match, a selection prompt will be shown. This field is required to load debug symbols for the attached process.",
+        "comment": [
+            "{Locked=\"`program`\"}"
+        ]
+    },
+    "c_cpp.debuggers.symbolSearchPath.description": "Semicolon separated list of directories to use to search for symbol (that is, pdb or .so) files. Example: \"c:\\dir1;c:\\dir2\".",
     "c_cpp.debuggers.dumpPath.description": "Optional full path to a dump file for the specified program. Example: \"c:\\temp\\app.dmp\". Defaults to null.",
     "c_cpp.debuggers.enableDebugHeap.description": "If false, the process will be launched with debug heap disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
     "c_cpp.debuggers.symbolLoadInfo.description": "Explicit control of symbol loading.",
@@ -934,12 +968,27 @@
     "c_cpp.debuggers.deploySteps.copyFile.files.description": "Files to be copied. Supports path pattern.",
     "c_cpp.debuggers.deploySteps.copyFile.targetDir.description": "Target directory.",
     "c_cpp.debuggers.deploySteps.copyFile.recursive.description": "If true, copies folders recursively.",
-    "c_cpp.debuggers.deploySteps.copyFile.scpPath.description": "Optional full path to SCP. Assumes SCP is on PATH if not specified",
-    "c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description": "Optional full path to rsync. Assumes rsync is on PATH if not specified",
+    "c_cpp.debuggers.deploySteps.copyFile.scpPath.description": {
+        "message": "Optional full path to SCP. Assumes SCP is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"SCP\"} {Locked=\"PATH\"}"
+        ]
+    },
+    "c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description": {
+        "message": "Optional full path to rsync. Assumes rsync is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"rsync\"} {Locked=\"PATH\"}"
+        ]
+    },
     "c_cpp.debuggers.deploySteps.debug": "If true, skip when starting without debugging. If false, skip when starting debugging. If undefined, never skip.",
     "c_cpp.debuggers.deploySteps.ssh.description": "SSH command step.",
     "c_cpp.debuggers.deploySteps.ssh.command.description": "Command to be executed via SSH. The command after '-c' in SSH command.",
-    "c_cpp.debuggers.deploySteps.ssh.sshPath.description": "Optional full path to SSH. Assumes SSH is on PATH if not specified",
+    "c_cpp.debuggers.deploySteps.ssh.sshPath.description": {
+        "message": "Optional full path to SSH. Assumes SSH is on PATH if not specified.",
+        "comment": [
+            "{Locked=\"SSH\"} {Locked=\"PATH\"}"
+        ]
+    },
     "c_cpp.debuggers.deploySteps.continueOn.description": "An optional finish pattern in output. When this pattern is seen in the output, continue the deploy procedures regardless of whether this step returns.",
     "c_cpp.debuggers.deploySteps.shell.description": "Shell command step.",
     "c_cpp.debuggers.deploySteps.shell.command.description": "Shell command to be executed.",
@@ -962,6 +1011,9 @@
     "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations.",
     "c_cpp.debuggers.symbolOptions.description": "Options to control how symbols (.pdb files) are found and loaded.",
     "c_cpp.debuggers.unknownBreakpointHandling.description": "Controls how breakpoints set externally (usually via raw GDB commands) are handled when hit.\nAllowed values are \"throw\", which acts as if an exception was thrown by the application, and \"stop\", which only pauses the debug session. The default value is \"throw\".",
+    "c_cpp.debuggers.debuginfod.description": "Controls GDB's debuginfod behavior for downloading debug symbols from debuginfod servers.",
+    "c_cpp.debuggers.debuginfod.enabled.description": "If true (default), GDB's debuginfod support is enabled. Set to false to prevent GDB from contacting debuginfod servers.",
+    "c_cpp.debuggers.debuginfod.timeout.description": "The timeout in seconds for debuginfod server requests. Default is 30. Set to 0 to use GDB/libdebuginfod defaults (no override).",
     "c_cpp.debuggers.VSSymbolOptions.description": "Provides configuration for locating and loading symbols to the debug adapter.",
     "c_cpp.debuggers.VSSymbolOptions.searchPaths.description": "Array of symbol server URLs (example: http\u200b://MyExampleSymbolServer) or directories (example: /build/symbols) to search for .pdb files. These directories will be searched in addition to the default locations -- next to the module and the path where the pdb was originally dropped to.",
     "c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description": "If 'true' the Microsoft Symbol server (https\u200b://msdl.microsoft.com\u200b/download/symbols) is added to the symbols search path. If unspecified, this option defaults to 'false'.",
@@ -998,27 +1050,37 @@
     "c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
     "c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
     "c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages.",
-    "c_cpp.walkthrough.title": "Get Started with C++ Development",
+    "c_cpp.walkthrough.title": "Get started with C++ development",
     "c_cpp.walkthrough.description": "Dive into VS Code's rich C++ development experience.",
-    "c_cpp.walkthrough.set.up.title": "Set up your C++ Environment",
+    "c_cpp.walkthrough.set.up.title": "Set up your C++ environment",
     "c_cpp.walkthrough.activating.description": "Activating the C++ extension to determine whether your C++ Environment has been set up.\nActivating Extension...",
     "c_cpp.walkthrough.no.compilers.windows.description": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%22walkthrough%22)",
-    "c_cpp.walkthrough.no.compilers.description": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Either select “Install a C++ Compiler” to have a compiler installed for you or follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Install a C++ Compiler](command:C_Cpp.InstallCompiler?%22walkthrough%22)\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%22walkthrough%22)",
+    "c_cpp.walkthrough.no.compilers.description": {
+        "message": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Either select “Install a C++ Compiler” to have a compiler installed for you or follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Install a C++ Compiler](command:C_Cpp.InstallCompiler?%22walkthrough%22)\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%22walkthrough%22)",
+        "comment": [
+            "{Locked=\"C++\"} {Locked=\"\n[\"} {Locked=\"](command:C_Cpp.InstallCompiler?%22walkthrough%22)\n[\"} {Locked=\"](command:C_Cpp.RescanCompilers?%22walkthrough%22)\"}"
+        ]
+    },
     "c_cpp.walkthrough.compilers.found.description": "The C++ extension works with a C++ compiler. Select one from those already on your machine by clicking the button below.\n[Select my Default Compiler](command:C_Cpp.SelectIntelliSenseConfiguration?%22walkthrough%22)",
     "c_cpp.walkthrough.compilers.found.altText": "Image showing the select a default compiler quickpick and the list of compilers found on the users machine, one of which is selected.",
     "c_cpp.walkthrough.create.cpp.file.title": "Create a C++ file",
-    "c_cpp.walkthrough.create.cpp.file.description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D) a C++ file. Be sure to save it with the \".cpp\" extension, such as \"helloworld.cpp\". \n[Create a C++ File](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)",
+    "c_cpp.walkthrough.create.cpp.file.description": {
+        "message": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D) a C++ file. Be sure to save it with the \".cpp\" extension, such as \"helloworld.cpp\". \n[Create a C++ File](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)",
+        "comment": [
+            "{Locked=\"](command:toSide:workbench.action.files.openFile)\"} {Locked=\"](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)\"} {Locked=\"C++\"} {Locked=\".cpp\"} {Locked=\"\n[\"} {Locked=\"](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)\"}"
+        ]
+    },
     "c_cpp.walkthrough.create.cpp.file.altText": "Open a C++ file or a folder with a C++ project.",
     "c_cpp.walkthrough.command.prompt.title": {
-        "message": "Launch from the Developer Command Prompt for VS",
+        "message": "Apply the Visual Studio developer environment",
         "comment": [
-            "Don't translate the product name \"Developer Command Prompt for VS\"."
+            "{Locked=\"Visual Studio\"}"
         ]
     },
     "c_cpp.walkthrough.command.prompt.description": {
-        "message": "When using the Microsoft Visual Studio C++ compiler, the C++ extension requires you to launch VS Code from the Developer Command Prompt for VS. Follow the instructions on the right to relaunch.\n[Reload Window](command:workbench.action.reloadWindow)",
+        "message": "When using the Microsoft Visual Studio C++ compiler, the Visual Studio developer environment must be present.\n\nFollow the instructions on the right to relaunch or click the button below.\n[Set Developer Environment](command:C_Cpp.SetVsDeveloperEnvironment?%22walkthrough%22)",
         "comment": [
-            "Don't translate the product name \"Developer Command Prompt for VS\"."
+            "{Locked=\"Visual Studio\"} {Locked=\"C++\"} {Locked=\"\n\n\"} {Locked=\"\n[\"} {Locked=\"](command:C_Cpp.SetVsDeveloperEnvironment?%22walkthrough%22)\"}"
         ]
     },
     "c_cpp.walkthrough.run.debug.title": "Run and debug your C++ file",

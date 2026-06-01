@@ -72,6 +72,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
             this.isClosed = isClosed;
             this.eol = eol;
             this.lineCount = lineCount;
+            this.encoding = '';
         }
         fileName: string;
         isUntitled: boolean;
@@ -79,6 +80,7 @@ describe('CppConfigurationLanguageModelTool Tests', () => {
         version: number;
         isDirty: boolean;
         isClosed: boolean;
+        encoding: string;
         save(): Thenable<boolean> {
             throw new Error('Method not implemented.');
         }

@@ -72,12 +72,20 @@ export class CopilotCompletionContextTelemetry {
         this.addMetric('computeContextElapsedMs', duration);
     }
 
-    public addResponseMetadata(areCodeSnippetsMissing: boolean, snippetCount?: number, codeSnippetsCount?: number, traitsCount?: number, caretOffset?: number,
+    public addGetClientForElapsed(duration: number): void {
+        this.addMetric('getClientForElapsedMs', duration);
+    }
+
+    public addSpeculativeRequestMetadata(proposedEditsCount: number): void {
+        this.addProperty('request.isSpeculativeRequest', 'true');
+        this.addMetric('request.proposedEditsCount', proposedEditsCount);
+    }
+
+    public addResponseMetadata(areSnippetsMissing: boolean, codeSnippetsCount?: number, traitsCount?: number, caretOffset?: number,
         featureFlag?: CopilotCompletionContextFeatures): void {
-        this.addProperty('response.areCodeSnippetsMissing', areCodeSnippetsMissing.toString());
+        this.addProperty('response.areCodeSnippetsMissing', areSnippetsMissing.toString());
         // Args can be undefined, in which case the value is set to a
         // special value (e.g. -1) to indicate data is not set.
-        this.addMetric('response.snippetsCount', snippetCount ?? -1);
         this.addMetric('response.caretOffset', caretOffset ?? -1);
         this.addProperty('response.featureFlag', featureFlag?.toString() ?? '<not-set>');
         this.addMetric('response.codeSnippetsCount', codeSnippetsCount ?? -1);
@@ -85,16 +93,19 @@ export class CopilotCompletionContextTelemetry {
     }
 
     public addRequestMetadata(uri: string, caretOffset: number, completionId: string,
-        languageId: string, { featureFlag, timeBudgetFactor, maxCaretDistance }: {
-            featureFlag?: CopilotCompletionContextFeatures;
-            timeBudgetFactor?: number; maxCaretDistance?: number;
+        languageId: string, { featureFlag, timeBudgetMs, maxCaretDistance, maxSnippetCount, maxSnippetLength, doAggregateSnippets }: {
+            featureFlag?: CopilotCompletionContextFeatures; timeBudgetMs?: number; maxCaretDistance?: number;
+            maxSnippetCount?: number; maxSnippetLength?: number; doAggregateSnippets?: boolean;
         } = {}): void {
         this.addProperty('request.completionId', completionId);
         this.addProperty('request.languageId', languageId);
         this.addMetric('request.caretOffset', caretOffset);
         this.addProperty('request.featureFlag', featureFlag?.toString() ?? '<not-set>');
-        if (timeBudgetFactor !== undefined) { this.addMetric('request.timeBudgetFactor', timeBudgetFactor); }
+        if (timeBudgetMs !== undefined) { this.addMetric('request.timeBudgetMs', timeBudgetMs); }
         if (maxCaretDistance !== undefined) { this.addMetric('request.maxCaretDistance', maxCaretDistance); }
+        if (maxSnippetCount !== undefined) { this.addMetric('request.maxSnippetCount', maxSnippetCount); }
+        if (maxSnippetLength !== undefined) { this.addMetric('request.maxSnippetLength', maxSnippetLength); }
+        if (doAggregateSnippets !== undefined) { this.addProperty('request.doAggregateSnippets', doAggregateSnippets.toString()); }
     }
 
     public addCppStandardVersionMetadata(standardVersion: string, elapsedMs: number): void {

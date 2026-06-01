@@ -1,0 +1,10 @@
+{
+    "name": "cpptools-yarn-bootstrap",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Install Yarn from internal npm feed for repository bootstrap.",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "devDependencies": {
+        "yarn": "1.22.22"
+    }
+}

@@ -19,8 +19,8 @@
                         "markdownDescription": "Full path of the compiler being used, e.g. `/usr/bin/gcc`, to enable more accurate IntelliSense.",
                         "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": [
-                            "string",
-                            "null"
+                            "null",
+                            "string"
                         ]
                     },
                     "compilerArgs": {
@@ -59,6 +59,7 @@
                             "c++17",
                             "c++20",
                             "c++23",
+                            "c++26",
                             "gnu++98",
                             "gnu++03",
                             "gnu++11",
@@ -66,6 +67,7 @@
                             "gnu++17",
                             "gnu++20",
                             "gnu++23",
+                            "gnu++26",
                             "${default}"
                         ]
                     },
@@ -178,12 +180,9 @@
                         "type": "string"
                     },
                     "mergeConfigurations": {
-                        "markdownDescription": "Set to `true` to merge include paths, defines, and forced includes with those from a configuration provider.",
-                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
-                        "type": [
-                            "boolean",
-                            "string"
-                        ]
+                        "markdownDescription": "Set to `true` to merge `includePath`, `defines`, `forcedInclude`, and `browse.path` with those received from the configuration provider.",
+                        "descriptionHint": "{Locked=\"`true`\"} {Locked=\"`includePath`\"} {Locked=\"`defines`\"} {Locked=\"`forcedInclude`\"} {Locked=\"`browse.path`\"}",
+                        "type": "boolean"
                     },
                     "browse": {
                         "type": "object",
@@ -214,17 +213,6 @@
                     "recursiveIncludes": {
                         "type": "object",
                         "properties": {
-                            "reduce": {
-                                "markdownDescription": "Set to `always` to always reduce the number of recursive include paths provided to IntelliSense to only those paths currently referenced by #include statements. This requires first parsing files to determine which headers are included. Set to `never` to provide all recursive include paths to IntelliSense. Reducing the number of recursive include paths may improve IntelliSense performance when a very large number of recursive include paths are involved. Not reducing the number of recursive include paths can improve IntelliSense performance by avoiding the need to parse files to determine which include paths to provide. The `default` value is currently to reduce the number of recursive include paths provided to IntelliSense.",
-                                "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
-                                "type": "string",
-                                "enum": [
-                                    "always",
-                                    "never",
-                                    "default",
-                                    "${default}"
-                                ]
-                            },
                             "priority": {
                                 "markdownDescription": "The priority of recursive include paths. If set to `beforeSystemIncludes`, the recursive include paths will be searched before system include paths. If set to `afterSystemIncludes`, the recursive include paths will be searched after system include paths. `beforeSystemIncludes` would more closely reflect the search order of a compiler, while `afterSystemIncludes` may result in improved performance.",
                                 "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
