@@ -155,7 +155,7 @@ function publishRefactorDiagnostics(params: PublishRefactorDiagnosticsParams): v
         const message: string = getLocalizedString(d.localizeStringParams);
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
         diagnostic.code = d.code;
-        diagnostic.source = CppSourceStr + " Refactor";
+        diagnostic.source = CppSourceStr + ": Refactor";
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {

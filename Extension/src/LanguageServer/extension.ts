@@ -45,7 +45,7 @@ import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './uti
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const CppSourceStr: string = "C/C++";
-export const CppIntelliSenseSourceStr: string = CppSourceStr + " IntelliSense";
+export const CppIntelliSenseSourceStr: string = CppSourceStr + ": IntelliSense";
 export const configPrefix: string = "C/C++: ";
 
 let prevMacCrashFile: string;
