@@ -404,7 +404,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
         } else {
             diagnostic.code = d.code;
         }
-        diagnostic.source = CppSourceStr;
+        diagnostic.source = CppSourceStr + " clang-tidy";
         codeActionDiagnosticInfo.push(codeAction);
         if (relatedCodeActions.length > 0) {
             codeActionDiagnosticInfo.push(...relatedCodeActions);

@@ -59,7 +59,7 @@ import { CopilotCompletionContextFeatures, CopilotCompletionContextProvider } fr
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from './customProviders';
 import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
-import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, isWritingCrashCallStack, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
+import { CppIntelliSenseSourceStr, CppSourceStr, clients, configPrefix, initializeIntervalTimer, isWritingCrashCallStack, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
 import { RequestCancelled, ServerCancelled, createProtocolFilter } from './protocolFilter';
@@ -155,7 +155,7 @@ function publishRefactorDiagnostics(params: PublishRefactorDiagnosticsParams): v
         const message: string = getLocalizedString(d.localizeStringParams);
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
         diagnostic.code = d.code;
-        diagnostic.source = CppSourceStr;
+        diagnostic.source = CppSourceStr + " Refactor";
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
@@ -2696,7 +2696,7 @@ export class DefaultClient implements Client {
             const message: string = getLocalizedString(d.localizeStringParams);
             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
             diagnostic.code = d.code;
-            diagnostic.source = CppSourceStr;
+            diagnostic.source = CppIntelliSenseSourceStr;
             if (d.relatedInformation) {
                 diagnostic.relatedInformation = [];
                 for (const info of d.relatedInformation) {

@@ -45,6 +45,7 @@ import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './uti
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const CppSourceStr: string = "C/C++";
+export const CppIntelliSenseSourceStr: string = CppSourceStr + " IntelliSense";
 export const configPrefix: string = "C/C++: ";
 
 let prevMacCrashFile: string;
@@ -132,7 +133,7 @@ function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
     if (diagnostic.code === null || diagnostic.code === undefined || !diagnostic.source) {
         return false;
     }
-    return diagnostic.code === missingIncludeCode && diagnostic.source === 'C/C++';
+    return diagnostic.code === missingIncludeCode && diagnostic.source === CppIntelliSenseSourceStr;
 }
 
 function sendActivationTelemetry(): void {
