@@ -59,7 +59,7 @@ jobs:
   - script: mkdir $(Build.ArtifactStagingDirectory)\vsix
     displayName: Create Staging Directory
 
-  - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.7.1
+  - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.9.1
     displayName: Install vsce
     workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
 
