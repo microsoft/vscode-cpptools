@@ -6471,45 +6471,27 @@ vscode-cpptools@^7.1.1:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-cpptools/-/vscode-cpptools-7.1.1.tgz#adde3b6d627ddae5397224daa3e41952b219126b"
   integrity sha1-rd47bWJ92uU5ciTao+QZUrIZEms=
 
-vscode-jsonrpc@8.1.0:
-  version "8.1.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-jsonrpc/-/vscode-jsonrpc-8.1.0.tgz#cb9989c65e219e18533cc38e767611272d274c94"
-  integrity sha1-y5mJxl4hnhhTPMOOdnYRJy0nTJQ=
-
 vscode-jsonrpc@8.2.0:
   version "8.2.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-jsonrpc/-/vscode-jsonrpc-8.2.0.tgz#f43dfa35fb51e763d17cd94dcca0c9458f35abf9"
   integrity sha1-9D36NftR52PRfNlNzKDJRY81q/k=
 
-vscode-languageclient@^8.1.0:
-  version "8.1.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-languageclient/-/vscode-languageclient-8.1.0.tgz#3e67d5d841481ac66ddbdaa55b4118742f6a9f3f"
-  integrity sha1-PmfV2EFIGsZt29qlW0EYdC9qnz8=
+vscode-languageclient@^9.0.1:
+  version "9.0.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-languageclient/-/vscode-languageclient-9.0.1.tgz#cdfe20267726c8d4db839dc1e9d1816e1296e854"
+  integrity sha1-zf4gJncmyNTbg53B6dGBbhKW6FQ=
   dependencies:
     minimatch "^5.1.0"
     semver "^7.3.7"
-    vscode-languageserver-protocol "3.17.3"
+    vscode-languageserver-protocol "3.17.5"
 
-vscode-languageserver-protocol@3.17.3:
-  version "3.17.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-languageserver-protocol/-/vscode-languageserver-protocol-3.17.3.tgz#6d0d54da093f0c0ee3060b81612cce0f11060d57"
-  integrity sha1-bQ1U2gk/DA7jBguBYSzODxEGDVc=
-  dependencies:
-    vscode-jsonrpc "8.1.0"
-    vscode-languageserver-types "3.17.3"
-
-vscode-languageserver-protocol@^3.17.5:
+vscode-languageserver-protocol@3.17.5, vscode-languageserver-protocol@^3.17.5:
   version "3.17.5"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-languageserver-protocol/-/vscode-languageserver-protocol-3.17.5.tgz#864a8b8f390835572f4e13bd9f8313d0e3ac4bea"
   integrity sha1-hkqLjzkINVcvThO9n4MT0OOsS+o=
   dependencies:
     vscode-jsonrpc "8.2.0"
     vscode-languageserver-types "3.17.5"
-
-vscode-languageserver-types@3.17.3:
-  version "3.17.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-languageserver-types/-/vscode-languageserver-types-3.17.3.tgz#72d05e47b73be93acb84d6e311b5786390f13f64"
-  integrity sha1-ctBeR7c76TrLhNbjEbV4Y5DxP2Q=
 
 vscode-languageserver-types@3.17.5:
   version "3.17.5"
