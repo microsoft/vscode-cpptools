@@ -246,7 +246,7 @@
         "enabled": {
           "type": "boolean",
           "description": "%c_cpp.debuggers.debuginfod.enabled.description%",
-          "default": true
+          "default": false
         },
         "timeout": {
           "type": "integer",
