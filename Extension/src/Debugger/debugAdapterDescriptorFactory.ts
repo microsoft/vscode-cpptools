@@ -38,6 +38,7 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
                 }
                 // If the configuration is not supported, gracefully fall back to a regular debug session and log a message to the user.
                 logReasonForNoDebugNotSupported(session.configuration);
+                logFallbackMessage();
                 properties.noDebugSkipped = true.toString();
             }
 
@@ -62,6 +63,7 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterD
                 }
                 // If the configuration is not supported, gracefully fall back to a regular debug session and log a message to the user.
                 logReasonForNoDebugNotSupported(session.configuration);
+                logFallbackMessage();
                 properties.noDebugSkipped = true.toString();
             }
 
@@ -102,5 +104,10 @@ function logReasonForNoDebugNotSupported(configuration: vscode.DebugConfiguratio
     if (configuration.coreDumpPath) {
         outputChannel.appendLine(localize("debugger.noDebug.coreDumpPath.not.supported", "Run Without Debugging is not supported for configurations with 'coreDumpPath' set."));
     }
+}
+
+function logFallbackMessage(): void {
+    const outputChannel = getOutputChannel();
+    outputChannel.appendLine(localize("debugger.fallback.message", "Falling back to a regular debug session."));
     outputChannel.show(true);
 }
