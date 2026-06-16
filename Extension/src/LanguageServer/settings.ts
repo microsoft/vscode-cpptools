@@ -454,7 +454,6 @@ export class CppSettings extends Settings {
     public get defaultBrowsePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.browse.path"); }
     public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.browse.databaseFilename")); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
-    public get defaultRecursiveIncludesReduce(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.reduce"); }
     public get defaultRecursiveIncludesPriority(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.priority"); }
     public get defaultRecursiveIncludesOrder(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.order"); }
     public get defaultSystemIncludePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.systemIncludePath"); }

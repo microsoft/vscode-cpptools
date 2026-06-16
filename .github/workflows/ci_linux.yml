@@ -5,6 +5,12 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      target-ref:
+        description: Branch, tag, or SHA to test
+        required: true
+        default: main
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -15,3 +21,4 @@ jobs:
     with:
       runner-env: ubuntu-24.04
       platform: linux
+      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.target-ref || github.ref }}
