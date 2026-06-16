@@ -1664,7 +1664,7 @@
     "#include_next, birincil kaynak dosyada kullanılamıyor",
     "şablon üye tanımında %no1 belirtilemiyor -- onun yerine %no2 varsayıldı",
     "yerel işlev bildiriminde, %sq özniteliği yoksayılıyor",
-    "%sq öğesi ile %n içerisinde birleştirme işlemi, geçerli bir simge oluşturmuyor",
+    "%sq öğesi ile %n içerisinde birleştirme işlemi, geçerli bir belirteç oluşturmuyor",
     "%no belirsiz (%n2 varsayıldı)",
     "statik bir üye işlev üzerinde tür niteleyicisine izin verilmiyor",
     "bir tür niteleyicisine, bir oluşturucu veya yıkıcı üzerinde izin verilmiyor",
