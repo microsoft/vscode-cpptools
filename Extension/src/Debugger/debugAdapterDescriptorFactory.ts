@@ -90,7 +90,7 @@ function logReasonForNoDebugNotSupported(configuration: vscode.DebugConfiguratio
         return;
     }
 
-    const disallowedProperties = [];
+    const disallowedProperties: string[] = [];
     const outputChannel = getOutputChannel();
     outputChannel.show(true);
 

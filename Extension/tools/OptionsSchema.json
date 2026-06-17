@@ -849,6 +849,7 @@
           "$ref": "#/definitions/DeploySteps"
         },
         "ignoreRunWithoutDebuggingWarnings": {
+          "type": "boolean",
           "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
           "default": false
         }
@@ -1124,6 +1125,7 @@
           }
         },
         "ignoreRunWithoutDebuggingWarnings": {
+          "type": "boolean",
           "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
           "default": false
         }
