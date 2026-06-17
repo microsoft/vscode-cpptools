@@ -1026,6 +1026,7 @@
     "c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description": "Array of modules that the debugger should NOT load symbols for. Wildcards (example: MyCompany.*.dll) are supported.\n\nThis property is ignored unless 'mode' is set to 'loadAllButExcluded'.",
     "c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description": "Array of modules that the debugger should load symbols for. Wildcards (example: MyCompany.*.dll) are supported.\n\nThis property is ignored unless 'mode' is set to 'loadOnlyIncluded'.",
     "c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description": "If true, for any module NOT in the 'includedModules' array, the debugger will still check next to the module itself and the launching executable, but it will not check paths on the symbol search list. This option defaults to 'true'.\n\nThis property is ignored unless 'mode' is set to 'loadOnlyIncluded'.",
+    "c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description": "If true, no warning will be logged when run without debugging fails to launch the program in the terminal.",
     "c_cpp.semanticTokenTypes.referenceType.description": "Style for C++/CLI reference types.",
     "c_cpp.semanticTokenTypes.cliProperty.description": "Style for C++/CLI properties.",
     "c_cpp.semanticTokenTypes.genericType.description": "Style for C++/CLI generic types.",

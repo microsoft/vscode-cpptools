@@ -4859,6 +4859,10 @@
                                     ]
                                 },
                                 "default": []
+                            },
+                            "ignoreRunWithoutDebuggingWarnings": {
+                                "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
+                                "default": false
                             }
                         }
                     },
@@ -5895,6 +5899,10 @@
                                         }
                                     }
                                 }
+                            },
+                            "ignoreRunWithoutDebuggingWarnings": {
+                                "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
+                                "default": false
                             }
                         }
                     },

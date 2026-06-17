@@ -38,7 +38,6 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
                 }
                 // If the configuration is not supported, gracefully fall back to a regular debug session and log a message to the user.
                 logReasonForNoDebugNotSupported(session.configuration);
-                logFallbackMessage();
                 properties.noDebugSkipped = true.toString();
             }
 
@@ -63,7 +62,6 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterD
                 }
                 // If the configuration is not supported, gracefully fall back to a regular debug session and log a message to the user.
                 logReasonForNoDebugNotSupported(session.configuration);
-                logFallbackMessage();
                 properties.noDebugSkipped = true.toString();
             }
 
@@ -88,26 +86,32 @@ function noDebugSupported(configuration: vscode.DebugConfiguration): boolean {
 }
 
 function logReasonForNoDebugNotSupported(configuration: vscode.DebugConfiguration): void {
+    if (configuration.ignoreRunWithoutDebuggingWarnings === true) {
+        return;
+    }
+
+    const disallowedProperties = [];
     const outputChannel = getOutputChannel();
+    outputChannel.show(true);
+
     if (configuration.request !== 'launch') {
         outputChannel.appendLine(localize("debugger.noDebug.requestType.not.supported", "Run Without Debugging is only supported for launch configurations."));
+        return;
     }
     if (configuration.pipeTransport) {
-        outputChannel.appendLine(localize("debugger.noDebug.pipeTransport.not.supported", "Run Without Debugging is not supported for configurations with 'pipeTransport' set."));
+        disallowedProperties.push('pipeTransport');
     }
     if (configuration.debugServerPath) {
-        outputChannel.appendLine(localize("debugger.noDebug.debugServerPath.not.supported", "Run Without Debugging is not supported for configurations with 'debugServerPath' set."));
+        disallowedProperties.push('debugServerPath');
     }
     if (configuration.miDebuggerServerAddress) {
-        outputChannel.appendLine(localize("debugger.noDebug.miDebuggerServerAddress.not.supported", "Run Without Debugging is not supported for configurations with 'miDebuggerServerAddress' set."));
+        disallowedProperties.push('miDebuggerServerAddress');
     }
     if (configuration.coreDumpPath) {
-        outputChannel.appendLine(localize("debugger.noDebug.coreDumpPath.not.supported", "Run Without Debugging is not supported for configurations with 'coreDumpPath' set."));
+        disallowedProperties.push('coreDumpPath');
     }
+    outputChannel.appendLine(localize("debugger.unsupported.properties", "Launch configurations with the following properties cannot be run directly in the terminal: {0}", disallowedProperties.join(', ')));
+    outputChannel.appendLine(localize("debugger.fallback.message", "Program output will appear in the Debug Console instead."));
+    outputChannel.appendLine(localize("debugger.fallback.message2", "To suppress this warning, set the 'ignoreRunWithoutDebuggingWarnings' property to true in your launch configuration."));
 }
 
-function logFallbackMessage(): void {
-    const outputChannel = getOutputChannel();
-    outputChannel.appendLine(localize("debugger.fallback.message", "Falling back to a regular debug session."));
-    outputChannel.show(true);
-}

@@ -847,6 +847,10 @@
         },
         "deploySteps": {
           "$ref": "#/definitions/DeploySteps"
+        },
+        "ignoreRunWithoutDebuggingWarnings": {
+          "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
+          "default": false
         }
       }
     },
@@ -1118,6 +1122,10 @@
             "searchPaths": [],
             "searchMicrosoftSymbolServer": false
           }
+        },
+        "ignoreRunWithoutDebuggingWarnings": {
+          "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
+          "default": false
         }
       }
     },
