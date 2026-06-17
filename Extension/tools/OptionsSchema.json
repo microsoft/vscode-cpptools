@@ -192,7 +192,6 @@
     },
     "SourceFileMapEntry": {
       "type": "object",
-      "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%",
       "default": {
         "<source-path>": {
           "editorPath": "",
