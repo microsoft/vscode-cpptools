@@ -557,9 +557,17 @@
         "text": "GitHub login failed. Try running with --login from the command line to log in.",
         "hint": "{Locked=\"GitHub\"} {Locked=\"--login\"}"
     },
+    "auth_login_failed_plugin": {
+        "text": "GitHub login failed. Run npx @microsoft/cpp-language-server --login",
+        "hint": "{Locked=\"GitHub\"} {Locked=\"npx @microsoft/cpp-language-server --login\"}"
+    },
     "auth_eula_required": {
         "text": "EULA must be accepted to proceed. Run with --accept-eula.",
         "hint": "{Locked=\"EULA\"} {Locked=\"--accept-eula\"}"
+    },
+    "auth_eula_required_plugin": {
+        "text": "EULA must be accepted to proceed. Run npx @microsoft/cpp-language-server --accept-eula",
+        "hint": "{Locked=\"EULA\"} {Locked=\"npx @microsoft/cpp-language-server --accept-eula\"}"
     },
     "auth_already_authenticated": {
         "text": "Already authenticated with GitHub. Use --force-login to re-authenticate.",
