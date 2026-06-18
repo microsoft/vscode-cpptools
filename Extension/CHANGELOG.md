@@ -6,7 +6,7 @@
 
 ### Enhancements
 * Add the `debuginfod` launch option to the `cppdbg` debugger schema. [#14460](https://github.com/microsoft/vscode-cpptools/issues/14460), [PR #14471](https://github.com/microsoft/vscode-cpptools/pull/14471), [PR #14506](https://github.com/microsoft/vscode-cpptools/pull/14506), [MIEngine#1562](https://github.com/microsoft/MIEngine/issues/1562)
-* Add the `ignoreRunWithoutDebuggingWarnings` property to enable 'Run without debugging' warnings to be suppressed. [#14515](https://github.com/microsoft/vscode-cpptools/issues/14515)
+* Add the `ignoreRunWithoutDebuggingWarnings` property to allow 'Run without debugging' warnings to be suppressed. [#14515](https://github.com/microsoft/vscode-cpptools/issues/14515)
 * Various localization updates.
 
 ### Bug Fixes
