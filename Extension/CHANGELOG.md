@@ -1,5 +1,21 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.33.0: June 22, 2026
+### New Feature
+* Unification of tag parsing with the VS implementation. In particular, it's now done using multiple parallel cpptools-srv2 processes. [PR #14426](https://github.com/microsoft/vscode-cpptools/pull/14426)
+
+### Enhancements
+* Add `debuginfod` launch option to `cppdbg` debugger schema. [#14460](https://github.com/microsoft/vscode-cpptools/issues/14460), [PR #14471](https://github.com/microsoft/vscode-cpptools/pull/14471), [PR #14506](https://github.com/microsoft/vscode-cpptools/pull/14506), [MIEngine#1562](https://github.com/microsoft/MIEngine/issues/1562)
+* Add the `ignoreRunWithoutDebuggingWarnings` property to enable 'Run without debugging' warnings to be suppressed. [#14515](https://github.com/microsoft/vscode-cpptools/issues/14515)
+* Various localization updates.
+
+### Bug Fixes
+* Add `important` to `C_Cpp.doxygen.sectionTags`. [PR #14473](https://github.com/microsoft/vscode-cpptools/pull/14473)
+* Update the minimum supported VS Code version to 1.77. [PR #14502](https://github.com/microsoft/vscode-cpptools/pull/14502)
+* Fixes to the debugger `launch.json` schema. [PR #14523](https://github.com/microsoft/vscode-cpptools/pull/14523)
+* Fix the `refactoring.includeHeader` setting not honoring `always`.
+* Various other fixes found internally.
+
 ## Version 1.32.2: April 28, 2026
 ### New Feature
 * Add support for "Run without debugging". [#1201](https://github.com/microsoft/vscode-cpptools/issues/1201)
