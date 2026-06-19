@@ -1,0 +1,118 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "VS Code task definitions",
+    "description": "A json schema for VS Code task definitions contributed by the C/C++ extension",
+    "type": "object",
+    "definitions": {
+        "TaskStringWithQuoting": {
+            "type": "object",
+            "required": [
+                "value",
+                "quoting"
+            ],
+            "properties": {
+                "value": {
+                    "type": "string",
+                    "description": "%c_cpp.taskDefinitions.args.value.description%"
+                },
+                "quoting": {
+                    "type": "string",
+                    "enum": [
+                        "escape",
+                        "strong",
+                        "weak"
+                    ],
+                    "enumDescriptions": [
+                        "%c_cpp.taskDefinitions.args.quoting.escape.description%",
+                        "%c_cpp.taskDefinitions.args.quoting.strong.description%",
+                        "%c_cpp.taskDefinitions.args.quoting.weak.description%"
+                    ],
+                    "default": "strong",
+                    "description": "%c_cpp.taskDefinitions.args.quoting.description%"
+                }
+            }
+        },
+        "TaskStringOrQuotedString": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "$ref": "#/definitions/TaskStringWithQuoting"
+                }
+            ]
+        },
+        "CppBuildTaskOptions": {
+            "type": "object",
+            "description": "%c_cpp.taskDefinitions.options.description%",
+            "properties": {
+                "cwd": {
+                    "type": "string",
+                    "description": "%c_cpp.taskDefinitions.options.cwd.description%"
+                }
+            }
+        },
+        "CppBuildTaskPlatformOverride": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "$ref": "#/definitions/TaskStringOrQuotedString"
+                },
+                "args": {
+                    "type": "array",
+                    "description": "%c_cpp.taskDefinitions.args.description%",
+                    "items": {
+                        "$ref": "#/definitions/TaskStringOrQuotedString"
+                    }
+                },
+                "options": {
+                    "$ref": "#/definitions/CppBuildTaskOptions"
+                }
+            }
+        },
+        "CppBuildTaskDefinition": {
+            "type": "cppbuild",
+            "required": [
+                "command",
+                "label"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "description": "%c_cpp.taskDefinitions.name.description%"
+                },
+                "command": {
+                    "$ref": "#/definitions/TaskStringOrQuotedString"
+                },
+                "args": {
+                    "type": "array",
+                    "description": "%c_cpp.taskDefinitions.args.description%",
+                    "items": {
+                        "$ref": "#/definitions/TaskStringOrQuotedString"
+                    }
+                },
+                "options": {
+                    "$ref": "#/definitions/CppBuildTaskOptions"
+                },
+                "detail": {
+                    "type": "string",
+                    "description": "%c_cpp.taskDefinitions.detail.description%"
+                },
+                "windows": {
+                    "$ref": "#/definitions/CppBuildTaskPlatformOverride"
+                },
+                "linux": {
+                    "$ref": "#/definitions/CppBuildTaskPlatformOverride"
+                },
+                "osx": {
+                    "$ref": "#/definitions/CppBuildTaskPlatformOverride"
+                }
+            }
+        },
+        "TaskDefinitions": [
+            {
+                "$ref": "#/definitions/CppBuildTaskDefinition"
+            }
+        ]
+    }
+}
