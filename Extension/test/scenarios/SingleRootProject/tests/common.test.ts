@@ -199,16 +199,21 @@ suite("resolveVariables", () => {
             .shouldLookupSymbol("Root");
     });
 
-    test("${env:UNDEFINED_ENV_VAR} expands to empty", () => {
-        resolveVariablesWithInput("${env:UNDEFINED_ENV_VAR}")
+    test("${env:X} expands to empty when unset", () => {
+        const processKey: string = `cpptoolstests_unset_${Date.now()}`;
+        delete process.env[processKey];
+        resolveVariablesWithInput("${env:" + processKey + "}")
             .withEnvironment({})
             .shouldResolveTo("");
     });
 
-    test("${UNDEFINED_ENV_VAR} left unexpanded", () => {
-        resolveVariablesWithInput("${UNDEFINED_ENV_VAR}")
+    test("${X} left unexpanded when unset", () => {
+        const processKey: string = `cpptoolstests_unset_${Date.now()}`;
+        delete process.env[processKey];
+        const token: string = "${" + processKey + "}";
+        resolveVariablesWithInput(token)
             .withEnvironment({})
-            .shouldResolveTo("${UNDEFINED_ENV_VAR}");
+            .shouldResolveTo(token);
     });
 
     test("escapeForSquiggles:", () => {
