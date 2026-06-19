@@ -199,6 +199,18 @@ suite("resolveVariables", () => {
             .shouldLookupSymbol("Root");
     });
 
+    test("${env:UNDEFINED_ENV_VAR} expands to empty", () => {
+        resolveVariablesWithInput("${env:UNDEFINED_ENV_VAR}")
+            .withEnvironment({})
+            .shouldResolveTo("");
+    });
+
+    test("${UNDEFINED_ENV_VAR} left unexpanded", () => {
+        resolveVariablesWithInput("${UNDEFINED_ENV_VAR}")
+            .withEnvironment({})
+            .shouldResolveTo("${UNDEFINED_ENV_VAR}");
+    });
+
     test("escapeForSquiggles:", () => {
         const testEscapeForSquigglesScenario: any = (input: string, expectedOutput: string) => {
             const result: string = escapeForSquiggles(input);
