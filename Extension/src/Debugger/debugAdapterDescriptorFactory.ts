@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as vscode from "vscode";
 import * as nls from 'vscode-nls';
 import { getOutputChannel } from '../logger';
+import { logDebuggerEvent } from '../telemetry';
 import { RunWithoutDebuggingAdapter } from './runWithoutDebuggingAdapter';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -29,40 +30,52 @@ abstract class AbstractDebugAdapterDescriptorFactory implements vscode.DebugAdap
 
 export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
     async createDebugAdapterDescriptor(session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor> {
-        if (session.configuration.noDebug) {
-            if (noDebugSupported(session.configuration)) {
-                return new vscode.DebugAdapterInlineImplementation(new RunWithoutDebuggingAdapter());
+        const properties: { [key: string]: string } = { type: 'cppdbg', noDebug: Boolean(session.configuration.noDebug).toString() };
+        try {
+            if (session.configuration.noDebug) {
+                if (noDebugSupported(session.configuration)) {
+                    return new vscode.DebugAdapterInlineImplementation(new RunWithoutDebuggingAdapter());
+                }
+                // If the configuration is not supported, gracefully fall back to a regular debug session and log a message to the user.
+                logReasonForNoDebugNotSupported(session.configuration);
+                properties.noDebugSkipped = true.toString();
             }
-            // If the configuration is not supported, gracefully fall back to a regular debug session and log a message to the user.
-            logReasonForNoDebugNotSupported(session.configuration);
+
+            const adapter: string = "./debugAdapters/bin/OpenDebugAD7" + (os.platform() === 'win32' ? ".exe" : "");
+
+            const command: string = path.join(this.context.extensionPath, adapter);
+
+            return new vscode.DebugAdapterExecutable(command, []);
+        } finally {
+            logDebuggerEvent('createDebugAdapter', properties);
         }
-
-        const adapter: string = "./debugAdapters/bin/OpenDebugAD7" + (os.platform() === 'win32' ? ".exe" : "");
-
-        const command: string = path.join(this.context.extensionPath, adapter);
-
-        return new vscode.DebugAdapterExecutable(command, []);
     }
 }
 
 export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
     async createDebugAdapterDescriptor(session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor | null> {
-        if (session.configuration.noDebug) {
-            if (noDebugSupported(session.configuration)) {
-                return new vscode.DebugAdapterInlineImplementation(new RunWithoutDebuggingAdapter());
+        const properties: { [key: string]: string } = { type: 'cppvsdbg', noDebug: Boolean(session.configuration.noDebug).toString() };
+        try {
+            if (session.configuration.noDebug) {
+                if (noDebugSupported(session.configuration)) {
+                    return new vscode.DebugAdapterInlineImplementation(new RunWithoutDebuggingAdapter());
+                }
+                // If the configuration is not supported, gracefully fall back to a regular debug session and log a message to the user.
+                logReasonForNoDebugNotSupported(session.configuration);
+                properties.noDebugSkipped = true.toString();
             }
-            // If the configuration is not supported, gracefully fall back to a regular debug session and log a message to the user.
-            logReasonForNoDebugNotSupported(session.configuration);
-        }
 
-        if (os.platform() !== 'win32') {
-            void vscode.window.showErrorMessage(localize("debugger.not.available", "Debugger type '{0}' is not available for non-Windows machines.", "cppvsdbg"));
-            return null;
-        } else {
-            return new vscode.DebugAdapterExecutable(
-                path.join(this.context.extensionPath, './debugAdapters/vsdbg/bin/vsdbg.exe'),
-                ['--interpreter=vscode', '--extConfigDir=%USERPROFILE%\\.cppvsdbg\\extensions']
-            );
+            if (os.platform() !== 'win32') {
+                void vscode.window.showErrorMessage(localize("debugger.not.available", "Debugger type '{0}' is not available for non-Windows machines.", "cppvsdbg"));
+                return null;
+            } else {
+                return new vscode.DebugAdapterExecutable(
+                    path.join(this.context.extensionPath, './debugAdapters/vsdbg/bin/vsdbg.exe'),
+                    ['--interpreter=vscode', '--extConfigDir=%USERPROFILE%\\.cppvsdbg\\extensions']
+                );
+            }
+        } finally {
+            logDebuggerEvent('createDebugAdapter', properties);
         }
     }
 }
@@ -73,21 +86,32 @@ function noDebugSupported(configuration: vscode.DebugConfiguration): boolean {
 }
 
 function logReasonForNoDebugNotSupported(configuration: vscode.DebugConfiguration): void {
+    if (configuration.ignoreRunWithoutDebuggingWarnings === true) {
+        return;
+    }
+
+    const disallowedProperties: string[] = [];
     const outputChannel = getOutputChannel();
+    outputChannel.show(true);
+
     if (configuration.request !== 'launch') {
         outputChannel.appendLine(localize("debugger.noDebug.requestType.not.supported", "Run Without Debugging is only supported for launch configurations."));
+        return;
     }
     if (configuration.pipeTransport) {
-        outputChannel.appendLine(localize("debugger.noDebug.pipeTransport.not.supported", "Run Without Debugging is not supported for configurations with 'pipeTransport' set."));
+        disallowedProperties.push('pipeTransport');
     }
     if (configuration.debugServerPath) {
-        outputChannel.appendLine(localize("debugger.noDebug.debugServerPath.not.supported", "Run Without Debugging is not supported for configurations with 'debugServerPath' set."));
+        disallowedProperties.push('debugServerPath');
     }
     if (configuration.miDebuggerServerAddress) {
-        outputChannel.appendLine(localize("debugger.noDebug.miDebuggerServerAddress.not.supported", "Run Without Debugging is not supported for configurations with 'miDebuggerServerAddress' set."));
+        disallowedProperties.push('miDebuggerServerAddress');
     }
     if (configuration.coreDumpPath) {
-        outputChannel.appendLine(localize("debugger.noDebug.coreDumpPath.not.supported", "Run Without Debugging is not supported for configurations with 'coreDumpPath' set."));
+        disallowedProperties.push('coreDumpPath');
     }
-    outputChannel.show(true);
+    outputChannel.appendLine(localize("debugger.unsupported.properties", "Launch configurations with the following properties cannot be run directly in the terminal: {0}", disallowedProperties.join(', ')));
+    outputChannel.appendLine(localize("debugger.fallback.message", "Program output will appear in the Debug Console instead."));
+    outputChannel.appendLine(localize("debugger.fallback.message2", "To suppress this warning, set the 'ignoreRunWithoutDebuggingWarnings' property to true in your launch configuration."));
 }
+

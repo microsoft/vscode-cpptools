@@ -104,6 +104,12 @@ interface ConfigStateReceived {
     timeout: boolean;
 }
 
+interface PendingTagParsingCall {
+    promise: ManualPromise<boolean>;
+    timer: NodeJS.Timeout;
+    cancellationListener: vscode.Disposable;
+}
+
 let workspaceHash: string = "";
 
 let workspaceDisposables: vscode.Disposable[] = [];
@@ -619,12 +625,12 @@ const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefin
 const ExtractToFunctionRequest: RequestType<ExtractToFunctionParams, WorkspaceEditResult, void> = new RequestType<ExtractToFunctionParams, WorkspaceEditResult, void>('cpptools/extractToFunction');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
-const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
 const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
 const CppContextRequest: RequestType<TextDocumentIdentifier, ChatContextResult, void> = new RequestType<TextDocumentIdentifier, ChatContextResult, void>('cpptools/getChatContext');
 const CopilotCompletionContextRequest: RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void> = new RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void>('cpptools/getCompletionContext');
 
 // Notifications to the server
+const ChangeCppPropertiesNotification: NotificationType<CppPropertiesParams> = new NotificationType<CppPropertiesParams>('cpptools/didChangeCppProperties');
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileCreated');
 const FileChangedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileChanged');
@@ -805,13 +811,14 @@ export interface Client {
     setCurrentConfigName(configurationName: string): Thenable<void>;
     getCurrentConfigName(): Thenable<string | undefined>;
     getCurrentConfigCustomVariable(variableName: string): Thenable<string>;
+    waitForTagParsing(timeout: number, token: vscode.CancellationToken): Promise<boolean>;
     getVcpkgInstalled(): Thenable<boolean>;
     getVcpkgEnabled(): Thenable<boolean>;
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined>;
     takeOwnership(document: vscode.TextDocument): void;
     sendDidOpen(document: vscode.TextDocument): Promise<void>;
-    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string>;
+    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string>;
     updateActiveDocumentTextOptions(): void;
     didChangeActiveEditor(editor?: vscode.TextEditor, selection?: Range): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
@@ -919,6 +926,7 @@ export class DefaultClient implements Client {
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseButton: boolean = false;
+    private pendingTagParsingCalls: PendingTagParsingCall[] = [];
 
     /** A queue of asynchronous tasks that need to be processed befofe ready is considered active. */
     private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>] | [ManualPromise<unknown>]>();
@@ -1006,6 +1014,62 @@ export class DefaultClient implements Client {
             pathSeparator: (os.platform() === 'win32') ? "\\" : "/",
             userHome: os.homedir()
         };
+    }
+
+    // If there are any pending calls that were waiting for tag parsing to complete, we can resolve them since it's finished. If there are no pending calls, this does nothing.
+    private resolvePendingTagParsingCallsIfReady(): void {
+        if (!this.pendingTagParsingCalls.length || this.IsTagParsing) {
+            return;
+        }
+
+        const pendingCalls: PendingTagParsingCall[] = this.pendingTagParsingCalls;
+        this.pendingTagParsingCalls = [];
+        pendingCalls.forEach(pendingCall => {
+            if (pendingCall.timer) {
+                clearTimeout(pendingCall.timer);
+            }
+            pendingCall.cancellationListener.dispose();
+            pendingCall.promise.resolve(true);
+        });
+    }
+
+    public async waitForTagParsing(timeout: number, token: vscode.CancellationToken): Promise<boolean> {
+        // On initialization, the client has UI bools all set to false which could cause an early return. We want to ensure it's ready first.
+        await this.ready;
+
+        if (!this.IsTagParsing) {
+            return true;
+        }
+
+        if (token.isCancellationRequested) {
+            throw new vscode.CancellationError();
+        }
+
+        const pendingCall: PendingTagParsingCall = {
+            promise: new ManualPromise<boolean>(),
+
+            timer: global.setTimeout(() => {
+                const index: number = this.pendingTagParsingCalls.indexOf(pendingCall);
+                if (index !== -1) {
+                    this.pendingTagParsingCalls.splice(index, 1);
+                }
+                pendingCall.cancellationListener.dispose();
+                pendingCall.promise.resolve(false);
+            }, timeout),
+
+            cancellationListener: token.onCancellationRequested(() => {
+                const index: number = this.pendingTagParsingCalls.indexOf(pendingCall);
+                if (index !== -1) {
+                    this.pendingTagParsingCalls.splice(index, 1);
+                }
+                clearTimeout(pendingCall.timer);
+                pendingCall.cancellationListener.dispose();
+                pendingCall.promise.reject(new vscode.CancellationError());
+            })
+        };
+
+        this.pendingTagParsingCalls.push(pendingCall);
+        return pendingCall.promise;
     }
 
     private getName(workspaceFolder?: vscode.WorkspaceFolder): string {
@@ -1746,6 +1810,21 @@ export class DefaultClient implements Client {
 
             // TODO: should I set the output channel? Does this sort output between servers?
         };
+
+        // Reset all UI state to default, in case this is a restart after a crash.
+        this.model.isIndexingWorkspace.Value = false;
+        this.model.isParsingWorkspace.Value = false;
+        this.model.isParsingWorkspacePaused.Value = false;
+        this.model.isParsingFiles.Value = false;
+        this.model.isUpdatingIntelliSense.Value = false;
+        this.model.isRunningCodeAnalysis.Value = false;
+        this.model.isCodeAnalysisPaused.Value = false;
+        this.model.codeAnalysisProcessed.Value = 0;
+        this.model.codeAnalysisTotal.Value = 0;
+        this.model.parsingWorkspaceStatus.Value = "";
+
+        // Refresh initializing state in UI.
+        this.model.isInitializingWorkspace.Value = true;
 
         // Create the language client
         languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
@@ -2857,6 +2936,11 @@ export class DefaultClient implements Client {
                 this.model.isIndexingWorkspace.Value = true;
                 this.model.isInitializingWorkspace.Value = false;
                 this.model.isParsingWorkspace.Value = false;
+            } else if (message.endsWith("Failed")) {
+                this.model.isInitializingWorkspace.Value = false;
+                this.model.isIndexingWorkspace.Value = false;
+                this.model.isParsingWorkspace.Value = false;
+                this.model.isParsingFiles.Value = false;
             } else if (message.endsWith("files")) {
                 this.model.isParsingFiles.Value = true;
             } else if (message.endsWith("IntelliSense")) {
@@ -2893,6 +2977,8 @@ export class DefaultClient implements Client {
         } else if (message.includes("/")) {
             this.lastInvokedLspMessage = message;
         }
+
+        this.resolvePendingTagParsingCallsIfReady();
     }
 
     private updateTagParseStatus(tagParseStatus: TagParseStatus): void {
@@ -3019,12 +3105,23 @@ export class DefaultClient implements Client {
     /**
      * requests to the language server
      */
-    public async requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Promise<string> {
+    public async requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Promise<string> {
         const params: SwitchHeaderSourceParams = {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootUri.toString()
         };
-        return this.enqueue(async () => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
+        return this.enqueue(async () => {
+            // Don't use withLspCancellationHandling() or withCancellation() here. If the switch target is already known,
+            // the caller should still be able to use it even if the progress notification was just cancelled.
+            try {
+                return await this.languageClient.sendRequest(SwitchHeaderSourceRequest, params, token);
+            } catch (e: any) {
+                if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                    throw new vscode.CancellationError();
+                }
+                throw e;
+            }
+        });
     }
 
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
@@ -3225,7 +3322,7 @@ export class DefaultClient implements Client {
             params.configurations.push(modifiedConfig);
         });
 
-        await this.languageClient.sendRequest(ChangeCppPropertiesRequest, params);
+        await this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
         if (!!this.lastCustomBrowseConfigurationProviderId && !!this.lastCustomBrowseConfiguration && !!this.lastCustomBrowseConfigurationProviderVersion) {
             if (!this.doneInitialCustomBrowseConfigurationCheck) {
                 // Send the last custom browse configuration we received from this provider.
@@ -4208,6 +4305,14 @@ export class DefaultClient implements Client {
     }
 
     public dispose(): void {
+        this.pendingTagParsingCalls.forEach(pendingCall => {
+            if (pendingCall.timer) {
+                clearTimeout(pendingCall.timer);
+            }
+            pendingCall.cancellationListener.dispose();
+            pendingCall.promise.resolve(false);
+        });
+        this.pendingTagParsingCalls = [];
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];
         if (this.documentFormattingProviderDisposable) {
@@ -4360,13 +4465,14 @@ class NullClient implements Client {
     setCurrentConfigName(configurationName: string): Thenable<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getCurrentConfigCustomVariable(variableName: string): Thenable<string> { return Promise.resolve(""); }
+    waitForTagParsing(timeout: number, token: vscode.CancellationToken): Promise<boolean> { return Promise.resolve(true); }
     getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> { return Promise.resolve(undefined); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): void { }
     sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
-    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string> { return Promise.resolve(""); }
+    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string> { return Promise.resolve(""); }
     updateActiveDocumentTextOptions(): void { }
     didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }

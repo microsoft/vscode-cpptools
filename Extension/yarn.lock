@@ -460,9 +460,9 @@
     "@nevware21/ts-utils" ">= 0.12.2 < 2.x"
 
 "@nevware21/ts-utils@>= 0.10.4 < 2.x", "@nevware21/ts-utils@>= 0.11.8 < 2.x", "@nevware21/ts-utils@>= 0.12.2 < 2.x", "@nevware21/ts-utils@>= 0.9.4 < 2.x":
-  version "0.13.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@nevware21/ts-utils/-/ts-utils-0.13.0.tgz#0b1699597f736d162221c1922172924b38cef54c"
-  integrity sha1-CxaZWX9zbRYiIcGSIXKSSzjO9Uw=
+  version "0.14.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@nevware21/ts-utils/-/ts-utils-0.14.0.tgz#9e6074ce28f0b1bab7bfdacd1a7760b2ba73688d"
+  integrity sha1-nmB0zijwsbq3v9rNGndgsrpzaI0=
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -1136,10 +1136,10 @@
     "@vscode/vsce-sign-win32-arm64" "2.0.6"
     "@vscode/vsce-sign-win32-x64" "2.0.6"
 
-"@vscode/vsce@^3.7.1":
-  version "3.7.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@vscode/vsce/-/vsce-3.7.1.tgz#55a88ae40e9618fea251e373bc6b23c128915654"
-  integrity sha1-VaiK5A6WGP6iUeNzvGsjwSiRVlQ=
+"@vscode/vsce@^3.9.1":
+  version "3.9.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@vscode/vsce/-/vsce-3.9.1.tgz#cf273fe0895a14fe8a5e7fd88630bb5a5876ad6a"
+  integrity sha1-zyc/4IlaFP6KXn/YhjC7Wlh2rWo=
   dependencies:
     "@azure/identity" "^4.1.0"
     "@secretlint/node" "^10.1.2"
@@ -1168,7 +1168,7 @@
     typed-rest-client "^1.8.4"
     url-join "^4.0.1"
     xml2js "^0.5.0"
-    yauzl "^2.3.1"
+    yauzl "^3.2.1"
     yazl "^2.2.2"
   optionalDependencies:
     keytar "^7.7.0"
@@ -1310,9 +1310,9 @@
   integrity sha1-Ml20I5XNSf5sFAV/mpAOQn34gQ4=
 
 "@xmldom/xmldom@^0.8.8":
-  version "0.8.12"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@xmldom/xmldom/-/xmldom-0.8.12.tgz#cf488a5435fa06c7374ad1449c69cea0f823624b"
-  integrity sha1-z0iKVDX6Bsc3StFEnGnOoPgjYks=
+  version "0.8.13"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@xmldom/xmldom/-/xmldom-0.8.13.tgz#00d1dd940b218dff2e49309d410d8bb212159225"
+  integrity sha1-ANHdlAshjf8uSTCdQQ2LshIVkiU=
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
@@ -1747,24 +1747,24 @@ boundary@^2.0.0:
   integrity sha1-FpyLHw1Ezywlk4lnoyjzfgpOXvw=
 
 brace-expansion@^1.1.7:
-  version "1.1.13"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-1.1.13.tgz#d37875c01dc9eff988dd49d112a57cb67b54efe6"
-  integrity sha1-03h1wB3J7/mI3UnREqV8tntU7+Y=
+  version "1.1.15"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-1.1.15.tgz#a6d90d54067236e5f42570a3b7378d594d9b7738"
+  integrity sha1-ptkNVAZyNuX0JXCjtzeNWU2bdzg=
   dependencies:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
 
 brace-expansion@^2.0.1:
-  version "2.0.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-2.0.3.tgz#0493338bdd58e319b1039c67cf7ee439892c01d9"
-  integrity sha1-BJMzi91Y4xmxA5xnz37kOYksAdk=
+  version "2.1.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-2.1.1.tgz#c68b1c4111c76aae3a6fba55d496cee10c39dad8"
+  integrity sha1-xoscQRHHaq46b7pV1JbO4Qw52tg=
   dependencies:
     balanced-match "^1.0.0"
 
 brace-expansion@^5.0.2:
-  version "5.0.5"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-5.0.5.tgz#dcc3a37116b79f3e1b46db994ced5d570e930fdb"
-  integrity sha1-3MOjcRa3nz4bRtuZTO1dVw6TD9s=
+  version "5.0.6"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-5.0.6.tgz#ec68fe0a641a29d8711579caf641d05bae1f2285"
+  integrity sha1-7Gj+CmQaKdhxFXnK9kHQW64fIoU=
   dependencies:
     balanced-match "^4.0.2"
 
@@ -2931,9 +2931,9 @@ fast-levenshtein@^3.0.0:
     fastest-levenshtein "^1.0.7"
 
 fast-uri@^3.0.1:
-  version "3.1.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/fast-uri/-/fast-uri-3.1.0.tgz#66eecff6c764c0df9b762e62ca7edcfb53b4edfa"
-  integrity sha1-Zu7P9sdkwN+bdi5iyn7c+1O07fo=
+  version "3.1.2"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/fast-uri/-/fast-uri-3.1.2.tgz#8af3d4fc9d3e71b11572cc2673b514a7d1a8c8ec"
+  integrity sha1-ivPU/J0+cbEVcswmc7UUp9GoyOw=
 
 fastest-levenshtein@^1.0.12, fastest-levenshtein@^1.0.7:
   version "1.0.16"
@@ -2946,13 +2946,6 @@ fastq@^1.13.0, fastq@^1.6.0:
   integrity sha1-ynUKENySW8ixiDn9ID4+9LPO1nU=
   dependencies:
     reusify "^1.0.4"
-
-fd-slicer@~1.1.0:
-  version "1.1.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/fd-slicer/-/fd-slicer-1.1.0.tgz#25c7c89cb1f9077f8891bbe61d8f390eae256f1e"
-  integrity sha1-JcfInLH5B3+IkbvmHY85Dq4lbx4=
-  dependencies:
-    pend "~1.2.0"
 
 fdir@^6.5.0:
   version "6.5.0"
@@ -3077,15 +3070,15 @@ foreground-child@^3.3.1:
     signal-exit "^4.0.1"
 
 form-data@^4.0.0, form-data@^4.0.4:
-  version "4.0.5"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/form-data/-/form-data-4.0.5.tgz#b49e48858045ff4cbf6b03e1805cebcad3679053"
-  integrity sha1-tJ5IhYBF/0y/awPhgFzrytNnkFM=
+  version "4.0.6"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/form-data/-/form-data-4.0.6.tgz#28e864e1b786dbebb68db1f452f9635278665827"
+  integrity sha1-KOhk4beG2+u2jbH0UvljUnhmWCc=
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
     es-set-tostringtag "^2.1.0"
-    hasown "^2.0.2"
-    mime-types "^2.1.12"
+    hasown "^2.0.4"
+    mime-types "^2.1.35"
 
 from@^0.1.7:
   version "0.1.7"
@@ -3492,6 +3485,13 @@ hasown@^2.0.2:
   version "2.0.2"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/hasown/-/hasown-2.0.2.tgz#003eaf91be7adc372e84ec59dc37252cedb80003"
   integrity sha1-AD6vkb563DcuhOxZ3DclLO24AAM=
+  dependencies:
+    function-bind "^1.1.2"
+
+hasown@^2.0.4:
+  version "2.0.4"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/hasown/-/hasown-2.0.4.tgz#8c62d8cb90beb2aad5d0a5b67581ad9854c3f003"
+  integrity sha1-jGLYy5C+sqrV0KW2dYGtmFTD8AM=
   dependencies:
     function-bind "^1.1.2"
 
@@ -4003,9 +4003,9 @@ js-tokens@^4.0.0:
   integrity sha1-GSA/tZmR35jjoocFDUZHzerzJJk=
 
 js-yaml@^4.1.0, js-yaml@^4.1.1:
-  version "4.1.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/js-yaml/-/js-yaml-4.1.1.tgz#854c292467705b699476e1a2decc0c8a3458806b"
-  integrity sha1-hUwpJGdwW2mUduGi3swMijRYgGs=
+  version "4.2.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/js-yaml/-/js-yaml-4.2.0.tgz#2bd9e85682dd91bd469afb809d816043b3d49524"
+  integrity sha1-K9noVoLdkb1GmvuAnYFgQ7PUlSQ=
   dependencies:
     argparse "^2.0.1"
 
@@ -4190,10 +4190,10 @@ liftoff@^5.0.1:
     rechoir "^0.8.0"
     resolve "^1.20.0"
 
-linkify-it@^5.0.0:
-  version "5.0.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/linkify-it/-/linkify-it-5.0.0.tgz#9ef238bfa6dc70bd8e7f9572b52d369af569b421"
-  integrity sha1-nvI4v6bccL2Of5VytS02mvVptCE=
+linkify-it@^5.0.1:
+  version "5.0.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/linkify-it/-/linkify-it-5.0.1.tgz#10c4cecbb5c6828eabf81d3c801adc4a542dfb55"
+  integrity sha1-EMTOy7XGgo6r+B08gBrcSlQt+1U=
   dependencies:
     uc.micro "^2.0.0"
 
@@ -4331,13 +4331,13 @@ map-stream@0.0.7:
   integrity sha1-ih8HiW2CsQkmvTdEokIACfiJdKg=
 
 markdown-it@^14.1.0:
-  version "14.1.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/markdown-it/-/markdown-it-14.1.1.tgz#856f90b66fc39ae70affd25c1b18b581d7deee1f"
-  integrity sha1-hW+Qtm/DmucK/9JcGxi1gdfe7h8=
+  version "14.2.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/markdown-it/-/markdown-it-14.2.0.tgz#06d48d9035e77d5b1c85adb315482fc8240289ef"
+  integrity sha1-BtSNkDXnfVscha2zFUgvyCQCie8=
   dependencies:
     argparse "^2.0.1"
     entities "^4.4.0"
-    linkify-it "^5.0.0"
+    linkify-it "^5.0.1"
     mdurl "^2.0.0"
     punycode.js "^2.3.1"
     uc.micro "^2.1.0"
@@ -4394,7 +4394,7 @@ mime-db@1.52.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/mime-db/-/mime-db-1.52.0.tgz#bbabcdc02859f4987301c856e3387ce5ec43bf70"
   integrity sha1-u6vNwChZ9JhzAchW4zh85exDv3A=
 
-mime-types@^2.1.12, mime-types@^2.1.27:
+mime-types@^2.1.27, mime-types@^2.1.35:
   version "2.1.35"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/mime-types/-/mime-types-2.1.35.tgz#381a871b62a734450660ae3deee44813f70d959a"
   integrity sha1-OBqHG2KnNEUGYK497uRIE/cNlZo=
@@ -5029,10 +5029,10 @@ possible-typed-array-names@^1.0.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/possible-typed-array-names/-/possible-typed-array-names-1.1.0.tgz#93e3582bc0e5426586d9d07b79ee40fc841de4ae"
   integrity sha1-k+NYK8DlQmWG2dB7ee5A/IQd5K4=
 
-postcss@^7.0.16, postcss@^8.4.31:
-  version "8.5.6"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/postcss/-/postcss-8.5.6.tgz#2825006615a619b4f62a9e7426cc120b349a8f3c"
-  integrity sha1-KCUAZhWmGbT2Kp50JswSCzSajzw=
+postcss@^7.0.16, postcss@^8.5.14:
+  version "8.5.14"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/postcss/-/postcss-8.5.14.tgz#a66c2d7808fadf69ebb5b84a03f8bafd76c4919c"
+  integrity sha1-pmwteAj632nrtbhKA/i6/XbEkZw=
   dependencies:
     nanoid "^3.3.11"
     picocolors "^1.1.1"
@@ -5119,9 +5119,9 @@ punycode@^2.1.0:
   integrity sha1-AnQi4vrsCyXhVJw+G9gwm5EztuU=
 
 qs@^6.9.1:
-  version "6.15.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/qs/-/qs-6.15.0.tgz#db8fd5d1b1d2d6b5b33adaf87429805f1909e7b3"
-  integrity sha1-24/V0bHS1rWzOtr4dCmAXxkJ57M=
+  version "6.15.2"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/qs/-/qs-6.15.2.tgz#fd55426d710403ddccc45e0f9eab16db7727ece9"
+  integrity sha1-/VVCbXEEA93MxF4PnqsW23cn7Ok=
   dependencies:
     side-channel "^1.1.0"
 
@@ -5508,10 +5508,10 @@ shebang-regex@^3.0.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha1-rhbxZE2HPsrYQ7AwexQzYtTEIXI=
 
-shell-quote@1.8.2:
-  version "1.8.2"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/shell-quote/-/shell-quote-1.8.2.tgz#d2d83e057959d53ec261311e9e9b8f51dcb2934a"
-  integrity sha1-0tg+BXlZ1T7CYTEenpuPUdyyk0o=
+shell-quote@1.8.4:
+  version "1.8.4"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/shell-quote/-/shell-quote-1.8.4.tgz#2edd9a4dcefc96649e2e2cb12f637b1f1d92a190"
+  integrity sha1-Lt2aTc78lmSeLiyxL2N7Hx2SoZA=
 
 side-channel-list@^1.0.0:
   version "1.0.0"
@@ -6037,10 +6037,10 @@ tinyglobby@^0.2.15:
     fdir "^6.5.0"
     picomatch "^4.0.3"
 
-tmp@^0.2.3, tmp@^0.2.5:
-  version "0.2.5"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/tmp/-/tmp-0.2.5.tgz#b06bcd23f0f3c8357b426891726d16015abfd8f8"
-  integrity sha1-sGvNI/DzyDV7QmiRcm0WAVq/2Pg=
+tmp@^0.2.3, tmp@^0.2.5, tmp@^0.2.7:
+  version "0.2.7"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/tmp/-/tmp-0.2.7.tgz#26f4db11d1601ce8012dcb8a798ece1c06a99059"
+  integrity sha1-JvTbEdFgHOgBLcuKeY7OHAapkFk=
 
 to-absolute-glob@^2.0.0, to-absolute-glob@^2.0.2:
   version "2.0.2"
@@ -6279,10 +6279,10 @@ undici-types@~7.18.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/undici-types/-/undici-types-7.18.2.tgz#29357a89e7b7ca4aef3bf0fd3fd0cd73884229e9"
   integrity sha1-KTV6iee3ykrvO/D9P9DNc4hCKek=
 
-undici@^7.19.0:
-  version "7.24.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/undici/-/undici-7.24.0.tgz#c7349cdede0db44226b5930783b11207831a5eaf"
-  integrity sha1-xzSc3t4NtEImtZMHg7ESB4MaXq8=
+undici@^7.19.0, undici@^7.28.0:
+  version "7.28.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/undici/-/undici-7.28.0.tgz#97d64564198b285bc281f0e8e29597e3d11fe7ec"
+  integrity sha1-l9ZFZBmLKFvCgfDo4pWX49Ef5+w=
 
 unicorn-magic@^0.1.0:
   version "0.1.0"
@@ -6337,10 +6337,10 @@ util-deprecate@^1.0.1, util-deprecate@~1.0.1:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
 
-uuid@^8.3.0:
-  version "8.3.2"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
-  integrity sha1-gNW1ztJxu5r2xEXyGhoExgbO++I=
+uuid@^11.1.1, uuid@^8.3.0:
+  version "11.1.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/uuid/-/uuid-11.1.1.tgz#f6d81d2e1c65d00762e5e29b16c5d2d995e208ad"
+  integrity sha1-9tgdLhxl0Adi5eKbFsXS2ZXiCK0=
 
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"
@@ -6478,45 +6478,27 @@ vscode-cpptools@^7.1.1:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-cpptools/-/vscode-cpptools-7.1.1.tgz#adde3b6d627ddae5397224daa3e41952b219126b"
   integrity sha1-rd47bWJ92uU5ciTao+QZUrIZEms=
 
-vscode-jsonrpc@8.1.0:
-  version "8.1.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-jsonrpc/-/vscode-jsonrpc-8.1.0.tgz#cb9989c65e219e18533cc38e767611272d274c94"
-  integrity sha1-y5mJxl4hnhhTPMOOdnYRJy0nTJQ=
-
 vscode-jsonrpc@8.2.0:
   version "8.2.0"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-jsonrpc/-/vscode-jsonrpc-8.2.0.tgz#f43dfa35fb51e763d17cd94dcca0c9458f35abf9"
   integrity sha1-9D36NftR52PRfNlNzKDJRY81q/k=
 
-vscode-languageclient@^8.1.0:
-  version "8.1.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-languageclient/-/vscode-languageclient-8.1.0.tgz#3e67d5d841481ac66ddbdaa55b4118742f6a9f3f"
-  integrity sha1-PmfV2EFIGsZt29qlW0EYdC9qnz8=
+vscode-languageclient@^9.0.1:
+  version "9.0.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-languageclient/-/vscode-languageclient-9.0.1.tgz#cdfe20267726c8d4db839dc1e9d1816e1296e854"
+  integrity sha1-zf4gJncmyNTbg53B6dGBbhKW6FQ=
   dependencies:
     minimatch "^5.1.0"
     semver "^7.3.7"
-    vscode-languageserver-protocol "3.17.3"
+    vscode-languageserver-protocol "3.17.5"
 
-vscode-languageserver-protocol@3.17.3:
-  version "3.17.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-languageserver-protocol/-/vscode-languageserver-protocol-3.17.3.tgz#6d0d54da093f0c0ee3060b81612cce0f11060d57"
-  integrity sha1-bQ1U2gk/DA7jBguBYSzODxEGDVc=
-  dependencies:
-    vscode-jsonrpc "8.1.0"
-    vscode-languageserver-types "3.17.3"
-
-vscode-languageserver-protocol@^3.17.5:
+vscode-languageserver-protocol@3.17.5, vscode-languageserver-protocol@^3.17.5:
   version "3.17.5"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-languageserver-protocol/-/vscode-languageserver-protocol-3.17.5.tgz#864a8b8f390835572f4e13bd9f8313d0e3ac4bea"
   integrity sha1-hkqLjzkINVcvThO9n4MT0OOsS+o=
   dependencies:
     vscode-jsonrpc "8.2.0"
     vscode-languageserver-types "3.17.5"
-
-vscode-languageserver-types@3.17.3:
-  version "3.17.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/vscode-languageserver-types/-/vscode-languageserver-types-3.17.3.tgz#72d05e47b73be93acb84d6e311b5786390f13f64"
-  integrity sha1-ctBeR7c76TrLhNbjEbV4Y5DxP2Q=
 
 vscode-languageserver-types@3.17.5:
   version "3.17.5"
@@ -6840,13 +6822,13 @@ yargs@^17.3.0:
     y18n "^5.0.5"
     yargs-parser "^21.1.1"
 
-yauzl@^2.3.1:
-  version "2.10.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/yauzl/-/yauzl-2.10.0.tgz#c7eb17c93e112cb1086fa6d8e51fb0667b79a5f9"
-  integrity sha1-x+sXyT4RLLEIb6bY5R+wZnt5pfk=
+yauzl@^3.2.1:
+  version "3.3.1"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/yauzl/-/yauzl-3.3.1.tgz#b0de68ae3a862715e130849679a4236f54dba45f"
+  integrity sha1-sN5orjqGJxXhMISWeaQjb1TbpF8=
   dependencies:
     buffer-crc32 "~0.2.3"
-    fd-slicer "~1.1.0"
+    pend "~1.2.0"
 
 yazl@^2.2.2:
   version "2.5.1"

@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.32.1-main",
+    "version": "1.33.0-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -11,7 +11,7 @@
     },
     "license": "SEE LICENSE IN LICENSE.txt",
     "engines": {
-        "vscode": "^1.67.0"
+        "vscode": "^1.77.0"
     },
     "bugs": {
         "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -1725,6 +1725,7 @@
                         "type": "array",
                         "default": [
                             "attention",
+                            "important",
                             "tparam",
                             "param",
                             "result",
@@ -1747,6 +1748,7 @@
                                 "deprecated",
                                 "details",
                                 "exception",
+                                "important",
                                 "invariant",
                                 "note",
                                 "param",
@@ -4362,6 +4364,24 @@
                                 "default": "throw",
                                 "description": "%c_cpp.debuggers.unknownBreakpointHandling.description%"
                             },
+                            "debuginfod": {
+                                "description": "%c_cpp.debuggers.debuginfod.description%",
+                                "default": {},
+                                "type": "object",
+                                "properties": {
+                                    "enabled": {
+                                        "type": "boolean",
+                                        "description": "%c_cpp.debuggers.debuginfod.enabled.description%",
+                                        "default": false
+                                    },
+                                    "timeout": {
+                                        "type": "integer",
+                                        "description": "%c_cpp.debuggers.debuginfod.timeout.description%",
+                                        "minimum": 0,
+                                        "default": 30
+                                    }
+                                }
+                            },
                             "variables": {
                                 "type": "object",
                                 "description": "%c_cpp.debuggers.variables.description%",
@@ -4839,6 +4859,11 @@
                                     ]
                                 },
                                 "default": []
+                            },
+                            "ignoreRunWithoutDebuggingWarnings": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
+                                "default": false
                             }
                         }
                     },
@@ -4961,6 +4986,24 @@
                                         }
                                     }
                                 ]
+                            },
+                            "debuginfod": {
+                                "description": "%c_cpp.debuggers.debuginfod.description%",
+                                "default": {},
+                                "type": "object",
+                                "properties": {
+                                    "enabled": {
+                                        "type": "boolean",
+                                        "description": "%c_cpp.debuggers.debuginfod.enabled.description%",
+                                        "default": false
+                                    },
+                                    "timeout": {
+                                        "type": "integer",
+                                        "description": "%c_cpp.debuggers.debuginfod.timeout.description%",
+                                        "minimum": 0,
+                                        "default": 30
+                                    }
+                                }
                             },
                             "logging": {
                                 "description": "%c_cpp.debuggers.logging.description%",
@@ -5857,6 +5900,11 @@
                                         }
                                     }
                                 }
+                            },
+                            "ignoreRunWithoutDebuggingWarnings": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
+                                "default": false
                             }
                         }
                     },
@@ -6833,7 +6881,7 @@
         "@vscode/debugprotocol": "^1.65.0",
         "@vscode/dts": "^0.4.0",
         "@vscode/test-electron": "^2.3.10",
-        "@vscode/vsce": "^3.7.1",
+        "@vscode/vsce": "^3.9.1",
         "async-child-process": "^1.1.1",
         "await-notify": "^1.0.1",
         "eslint": "^9.39.2",
@@ -6878,20 +6926,22 @@
         "node-vswhere": "^1.0.2",
         "plist": "^3.1.0",
         "posix-getopt": "^1.2.1",
-        "shell-quote": "1.8.2",
+        "shell-quote": "1.8.4",
         "ssh-config": "^4.4.4",
-        "tmp": "^0.2.5",
+        "tmp": "^0.2.7",
         "vscode-cpptools": "^7.1.1",
-        "vscode-languageclient": "^8.1.0",
+        "vscode-languageclient": "^9.0.1",
         "vscode-nls": "^5.2.0",
         "vscode-tas-client": "^0.1.84",
         "which": "^2.0.2"
     },
     "resolutions": {
-        "postcss": "^8.4.31",
+        "postcss": "^8.5.14",
         "gulp-typescript/**/glob-parent": "^5.1.2",
         "serialize-javascript": "^7.0.5",
         "@azure/msal-browser": "^4.29.1",
-        "flatted": "^3.4.1"
+        "flatted": "^3.4.1",
+        "uuid": "^11.1.1",
+        "undici": "^7.28.0"
     }
 }

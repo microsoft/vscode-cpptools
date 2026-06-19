@@ -1,30 +1,49 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.32.1: April 20, 2026
-### Bug Fixes
-* Fix an IntelliSense crash when three special-case comments are used in a template. [#14360](https://github.com/microsoft/vscode-cpptools/issues/14360)
-* Fix `Reinstalling the Extension.md` not being found. [#14389](https://github.com/microsoft/vscode-cpptools/issues/14389)
-* Fix the `C/C++ DevTools` extension language service tools not working after the `C/C++` extension updates via `Restart Extensions`. [#14392](https://github.com/microsoft/vscode-cpptools/issues/14392)
-* Fix the clang-tidy error `Error: no checks enabled.` when checks are not otherwise set. [#14391](https://github.com/microsoft/vscode-cpptools/issues/14391)
-* Update localized strings.
-
-## Version 1.32.0: April 14, 2026
+## Version 1.33.0: June 22, 2026
 ### New Feature
-* Add support for run without debugging. [#1201](https://github.com/microsoft/vscode-cpptools/issues/1201)
+* Unification of tag parsing with the VS implementation. In particular, it's now done using multiple parallel `cpptools-srv2` processes. [PR #14426](https://github.com/microsoft/vscode-cpptools/pull/14426)
+
+### Enhancements
+* Add the `debuginfod` launch option to the `cppdbg` debugger schema. [#14458](https://github.com/microsoft/vscode-cpptools/issues/14458), [#14460](https://github.com/microsoft/vscode-cpptools/issues/14460), [PR #14471](https://github.com/microsoft/vscode-cpptools/pull/14471), [PR #14506](https://github.com/microsoft/vscode-cpptools/pull/14506), [MIEngine#1562](https://github.com/microsoft/MIEngine/issues/1562)
+* Add the `ignoreRunWithoutDebuggingWarnings` property to allow 'Run without debugging' warnings to be suppressed. [#14515](https://github.com/microsoft/vscode-cpptools/issues/14515)
+* Various localization updates.
+
+### Bug Fixes
+* Fix an incorrect `invalid type conversion` IntelliSense error. [#11294](https://github.com/microsoft/vscode-cpptools/issues/11294)
+* Fix include completion (with recursive includes) still suggesting headers from a deleted folder. [#12636](https://github.com/microsoft/vscode-cpptools/issues/12636)
+* Add `important` to `C_Cpp.doxygen.sectionTags`. [PR #14473](https://github.com/microsoft/vscode-cpptools/pull/14473)
+* Update the minimum supported VS Code version to 1.77. [PR #14502](https://github.com/microsoft/vscode-cpptools/pull/14502)
+* Fix issues with the debugger `launch.json` schema. [PR #14523](https://github.com/microsoft/vscode-cpptools/pull/14523)
+* Fix `${env:VAR}` and `${env.VAR}` not expanding to an empty string when the environment variable is unset, to match VS Code's behavior. [PR #14535](https://github.com/microsoft/vscode-cpptools/pull/14535)
+  * Thanks for the contribution. [@notable-equivalent](https://github.com/notable-equivalent)
+* Fix the `C_Cpp.refactoring.includeHeader` setting not honoring `always`.
+* Various other fixes found internally.
+
+## Version 1.32.2: April 28, 2026
+### New Feature
+* Add support for "Run without debugging". [#1201](https://github.com/microsoft/vscode-cpptools/issues/1201)
 
 ### Enhancements
 * Add a `C_Cpp.doxygen.generateOnCodeAction` setting to allow disabling of Doxygen generation code actions. [#14341](https://github.com/microsoft/vscode-cpptools/issues/14341)
+* Add a `cpptools.waitForTagParsing` command (for use by the `C/C++ DevTools` extension). [PR #14407](https://github.com/microsoft/vscode-cpptools/pull/14407/changes)
 * Improve wildcard matching with the debugger natvis. [MIEngine#1162](https://github.com/microsoft/MIEngine/issues/1162)
 * Add support for `HideRawView` with the debugger natvis. [MIEngine#1458](https://github.com/microsoft/MIEngine/issues/1458)
 
 ### Bug Fixes
 * Fix high CPU usage caused by repeated calls to `selectChatModels`. [#14168](https://github.com/microsoft/vscode-cpptools/issues/14168), [#14211](https://github.com/microsoft/vscode-cpptools/issues/14211), [#14241](https://github.com/microsoft/vscode-cpptools/issues/14241)
 * Fix the MSVC developer environment not working if `UCRTVersion` isn't found, and update the walkthrough instructions for installing MSVC. [#14352](https://github.com/microsoft/vscode-cpptools/issues/14352)
+* Fix an IntelliSense crash when three special-case comments are used in a template. [#14360](https://github.com/microsoft/vscode-cpptools/issues/14360)
 * Fix Copilot hover taking too many premium requests. [#14372](https://github.com/microsoft/vscode-cpptools/issues/14372)
 * Fix null pointers being expandable for variables in the debugger. [MIEngine#698](https://github.com/microsoft/MIEngine/issues/698)
 * Fix recursive `{this}` evaluation with the debugger natvis. [MIEngine#1391](https://github.com/microsoft/MIEngine/issues/1391)
 * Update clang-tidy and clang-format from 22.1.1 to 22.1.3 (bug fixes).
 * Fix a bug with semantic colorization of operators.
+
+## Version 1.31.5: April 20, 2026
+### Bug Fixes
+* Fix `Reinstalling the Extension.md` not being found. [#14389](https://github.com/microsoft/vscode-cpptools/issues/14389)
+* Fix the `C/C++ DevTools` extension language service tools not working after the `C/C++` extension updates via `Restart Extensions`. [#14392](https://github.com/microsoft/vscode-cpptools/issues/14392)
 
 ## Version 1.31.4: March 31, 2026
 ### Bug Fix

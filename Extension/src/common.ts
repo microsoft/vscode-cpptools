@@ -399,14 +399,12 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     const cycleCache = new Set<string>();
     while (!cycleCache.has(ret)) {
         cycleCache.add(ret);
-        ret = ret.replace(regexp(), (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
-            // Historically, if the variable didn't have anything before the "." or ":"
-            // it was assumed to be an environment variable
-            if (!varType) {
-                varType = "env";
-            }
+        ret = ret.replace(regexp(), (match: string, ignored1: string | undefined, varType: string | undefined, ignored2: string | undefined, name: string) => {
             let newValue: string | undefined;
             switch (varType) {
+                // Historically, if the variable didn't have anything before the "." or ":"
+                // it was assumed to be an environment variable
+                case undefined:
                 case "env": {
                     if (additionalEnvironment) {
                         const v: string | string[] | undefined = additionalEnvironment[name];
@@ -424,6 +422,12 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                     }
                     if (newValue === undefined) {
                         newValue = process.env[name];
+                    }
+
+                    // If the environment variable is not set, we return an empty string. Only do
+                    // this for ${env:X} variables, not ${X} variables.
+                    if (newValue === undefined && varType !== undefined) {
+                        newValue = "";
                     }
                     break;
                 }

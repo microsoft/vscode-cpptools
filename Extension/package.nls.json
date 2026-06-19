@@ -211,7 +211,7 @@
         ]
     },
     "c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription": {
-        "message": "List of enabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any. The default check `clang-analyzer-*` is always used unless it is explicitly disabled.",
+        "message": "List of enabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any. The default check `clang-analyzer-core.*` is always used unless it is explicitly disabled.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -1011,6 +1011,14 @@
     "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations.",
     "c_cpp.debuggers.symbolOptions.description": "Options to control how symbols (.pdb files) are found and loaded.",
     "c_cpp.debuggers.unknownBreakpointHandling.description": "Controls how breakpoints set externally (usually via raw GDB commands) are handled when hit.\nAllowed values are \"throw\", which acts as if an exception was thrown by the application, and \"stop\", which only pauses the debug session. The default value is \"throw\".",
+    "c_cpp.debuggers.debuginfod.description": "Controls GDB's debuginfod behavior for downloading debug symbols from debuginfod servers.",
+    "c_cpp.debuggers.debuginfod.enabled.description": {
+        "message": "If false (default), GDB will not contact debuginfod servers. Set to true to enable debuginfod support.",
+        "comment": [
+            "{Locked=\"false\"} {Locked=\"GDB\"} {Locked=\"true\"} {Locked=\"debuginfod\"}"
+        ]
+    },
+    "c_cpp.debuggers.debuginfod.timeout.description": "The timeout in seconds for debuginfod server requests. Default is 30. Set to 0 to use GDB/libdebuginfod defaults (no override).",
     "c_cpp.debuggers.VSSymbolOptions.description": "Provides configuration for locating and loading symbols to the debug adapter.",
     "c_cpp.debuggers.VSSymbolOptions.searchPaths.description": "Array of symbol server URLs (example: http\u200b://MyExampleSymbolServer) or directories (example: /build/symbols) to search for .pdb files. These directories will be searched in addition to the default locations -- next to the module and the path where the pdb was originally dropped to.",
     "c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description": "If 'true' the Microsoft Symbol server (https\u200b://msdl.microsoft.com\u200b/download/symbols) is added to the symbols search path. If unspecified, this option defaults to 'false'.",
@@ -1023,6 +1031,12 @@
     "c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description": "Array of modules that the debugger should NOT load symbols for. Wildcards (example: MyCompany.*.dll) are supported.\n\nThis property is ignored unless 'mode' is set to 'loadAllButExcluded'.",
     "c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description": "Array of modules that the debugger should load symbols for. Wildcards (example: MyCompany.*.dll) are supported.\n\nThis property is ignored unless 'mode' is set to 'loadOnlyIncluded'.",
     "c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description": "If true, for any module NOT in the 'includedModules' array, the debugger will still check next to the module itself and the launching executable, but it will not check paths on the symbol search list. This option defaults to 'true'.\n\nThis property is ignored unless 'mode' is set to 'loadOnlyIncluded'.",
+    "c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description": {
+        "message": "If true, no warning will be logged when run without debugging fails to launch the program in the terminal.",
+        "comment": [
+            "{Locked=\"true\"}"
+        ]
+    },
     "c_cpp.semanticTokenTypes.referenceType.description": "Style for C++/CLI reference types.",
     "c_cpp.semanticTokenTypes.cliProperty.description": "Style for C++/CLI properties.",
     "c_cpp.semanticTokenTypes.genericType.description": "Style for C++/CLI generic types.",
