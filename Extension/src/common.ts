@@ -399,7 +399,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     const cycleCache = new Set<string>();
     while (!cycleCache.has(ret)) {
         cycleCache.add(ret);
-        ret = ret.replace(regexp(), (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
+        ret = ret.replace(regexp(), (match: string, ignored1: string | undefined, varType: string | undefined, ignored2: string | undefined, name: string) => {
             let newValue: string | undefined;
             switch (varType) {
                 // Historically, if the variable didn't have anything before the "." or ":"
