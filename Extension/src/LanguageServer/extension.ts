@@ -944,7 +944,7 @@ function onToggleRefGroupView(): void {
 
 function onTakeSurvey(): void {
     telemetry.logLanguageServerEvent("onTakeSurvey");
-    const uri: vscode.Uri = vscode.Uri.parse(`https://www.research.net/r/VBVV6C6?o=${os.platform()}&m=${vscode.env.machineId}`);
+    const uri: vscode.Uri = vscode.Uri.parse(`https://aka.ms/vcvscodesurvey`);
     void vscode.commands.executeCommand('vscode.open', uri);
 }
 
