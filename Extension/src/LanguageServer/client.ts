@@ -13,6 +13,7 @@ import { CodeActionProvider } from './Providers/codeActionProvider';
 import { DocumentFormattingEditProvider } from './Providers/documentFormattingEditProvider';
 import { DocumentRangeFormattingEditProvider } from './Providers/documentRangeFormattingEditProvider';
 import { DocumentSymbolProvider } from './Providers/documentSymbolProvider';
+import { EvaluatableExpressionProvider } from './Providers/evaluatableExpressionProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
 import { FoldingRangeProvider } from './Providers/foldingRangeProvider';
 import { CppInlayHint, InlayHintsProvider } from './Providers/inlayHintProvider';
@@ -1431,6 +1432,7 @@ export class DefaultClient implements Client {
 
                 this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, instrument(this.copilotHoverProvider)));
                 this.disposables.push(vscode.languages.registerHoverProvider(util.documentSelector, instrument(this.hoverProvider)));
+                this.disposables.push(vscode.languages.registerEvaluatableExpressionProvider(util.documentSelector, instrument(new EvaluatableExpressionProvider())));
                 this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, instrument(this.inlayHintsProvider)));
                 this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, instrument(new RenameProvider(this))));
                 this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, instrument(new FindAllReferencesProvider(this))));
