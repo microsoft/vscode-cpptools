@@ -415,5 +415,6 @@
 	"status_indexing_files_with_n_of_m_and_text": "파일을 인덱싱하는 중({0}/{1}개): {2}",
 	"status_indexing_files_with_text": "파일을 인덱싱하는 중 {0}",
 	"help_allow_missing_lsp_config": "지정된 --lsp-config 파일이 없어도 서버를 시작할 수 있도록 허용합니다.",
-	"initialize_failed_during_engine_setup": "엔진을 설정하는 동안 초기화하지 못했습니다."
+	"initialize_failed_during_engine_setup": "엔진을 설정하는 동안 초기화하지 못했습니다.",
+	"important_label": "중요:"
 }

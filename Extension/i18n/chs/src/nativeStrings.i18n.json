@@ -415,5 +415,6 @@
 	"status_indexing_files_with_n_of_m_and_text": "正在为文件编制索引({0}/{1}): {2}",
 	"status_indexing_files_with_text": "正在为文件编制索引 {0}",
 	"help_allow_missing_lsp_config": "即使指定的 --lsp-config 文件不存在，也允许服务器启动。",
-	"initialize_failed_during_engine_setup": "引擎设置期间初始化失败。"
+	"initialize_failed_during_engine_setup": "引擎设置期间初始化失败。",
+	"important_label": "重要说明:"
 }

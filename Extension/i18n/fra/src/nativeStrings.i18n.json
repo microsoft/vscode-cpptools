@@ -415,5 +415,6 @@
 	"status_indexing_files_with_n_of_m_and_text": "Indexation des fichiers ({0} sur {1}) : {2}",
 	"status_indexing_files_with_text": "Indexation des fichiers {0}",
 	"help_allow_missing_lsp_config": "Autorisez le serveur à démarrer même si le fichier --lsp-config spécifié n’existe pas.",
-	"initialize_failed_during_engine_setup": "Échec de l’initialisation lors de la configuration du moteur."
+	"initialize_failed_during_engine_setup": "Échec de l’initialisation lors de la configuration du moteur.",
+	"important_label": "Important :"
 }

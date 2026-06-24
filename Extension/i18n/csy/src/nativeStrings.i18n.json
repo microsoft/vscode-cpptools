@@ -415,5 +415,6 @@
 	"status_indexing_files_with_n_of_m_and_text": "Probíhá indexování souborů ({0} z(e) {1}): {2}",
 	"status_indexing_files_with_text": "Probíhá indexování souborů {0}",
 	"help_allow_missing_lsp_config": "Povolit spuštění serveru i v případě, že zadaný soubor --lsp-config neexistuje.",
-	"initialize_failed_during_engine_setup": "Inicializace se během instalace modulu nezdařila."
+	"initialize_failed_during_engine_setup": "Inicializace se během instalace modulu nezdařila.",
+	"important_label": "Důležité:"
 }

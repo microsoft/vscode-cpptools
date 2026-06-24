@@ -415,5 +415,6 @@
 	"status_indexing_files_with_n_of_m_and_text": "Dosyaların dizini oluşturuluyor ({0} / {1}): {2}",
 	"status_indexing_files_with_text": "Dosyaların dizini oluşturuluyor {0}",
 	"help_allow_missing_lsp_config": "Belirtilen --lsp-config dosyası mevcut olmasa bile sunucunun başlamasına izin verin.",
-	"initialize_failed_during_engine_setup": "Altyapı kurulumu sırasında başlatma başarısız oldu."
+	"initialize_failed_during_engine_setup": "Altyapı kurulumu sırasında başlatma başarısız oldu.",
+	"important_label": "Önemli:"
 }
