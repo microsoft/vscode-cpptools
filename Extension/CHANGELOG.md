@@ -1,5 +1,11 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.33.1: June 24, 2026
+### Bug Fixes
+* Fix some crash regressions.
+* Fix IntelliSense incorrectly resolving `#include` files through a symbolic link after the target directory was deleted from disk.
+* Fix "tag parsing finished" status randomly getting reported too soon after a 'Reset IntelliSense Database' command.
+
 ## Version 1.33.0: June 22, 2026
 ### New Feature
 * Unification of tag parsing with the VS implementation. In particular, it's now done using multiple parallel `cpptools-srv2` processes. [PR #14426](https://github.com/microsoft/vscode-cpptools/pull/14426)
