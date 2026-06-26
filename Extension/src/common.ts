@@ -19,7 +19,7 @@ import { isWindows } from './constants';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
-import which = require("which");
+import which = require('which');
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
