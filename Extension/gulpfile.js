@@ -232,7 +232,9 @@ gulp.task("translations-export", async () => {
     }
 
     const xlf = getL10nXlf(l10nContents);
-    const exportDir = path.join(__dirname, "..", `${translationProjectName}-localization-export`);
+    // Match the layout the loc handoff/upload path expects (and that translations-import reads back):
+    // ../vscode-extensions-localization-export/<project>/<extension>.xlf
+    const exportDir = path.join(__dirname, "..", `${translationProjectName}-localization-export`, translationProjectName);
     fs.mkdirSync(exportDir, { recursive: true });
     fs.writeFileSync(path.join(exportDir, `${translationExtensionName}.xlf`), xlf);
 });
