@@ -4,12 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import { getReferenceItemIconPath, getReferenceTagString, ReferenceType } from './references';
 import { NodeType, ReferencesModel, TreeNode } from './referencesModel';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     private referencesModel: ReferencesModel | undefined;
@@ -64,7 +60,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
 
                 if (element.node === NodeType.fileWithPendingRef) {
                     resultFile.command = {
-                        title: localize("goto.reference", "Go to reference"),
+                        title: vscode.l10n.t("Go to reference"),
                         command: 'C_Cpp.ShowReferenceItem',
                         arguments: [element]
                     };
@@ -88,7 +84,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                 resultRef.tooltip = `[${tag}]\n${element.referenceText}`;
 
                 resultRef.command = {
-                    title: localize("goto.reference", "Go to reference"),
+                    title: vscode.l10n.t("Go to reference"),
                     command: 'C_Cpp.ShowReferenceItem',
                     arguments: [element]
                 };

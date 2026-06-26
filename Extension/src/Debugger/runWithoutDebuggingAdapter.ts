@@ -7,12 +7,8 @@ import * as cp from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import { buildShellCommandLine, sessionIsWsl } from '../common';
 import { isWindows } from '../constants';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize = nls.loadMessageBundle();
 
 /**
  * A minimal inline Debug Adapter that runs the target program directly without a debug adapter
@@ -193,8 +189,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             }
         }
 
-        const message = localize({ key: 'no.terminal.emulator', comment: ['{Locked="$TERMINAL"} {Locked="x-terminal-emulator"} {Locked="gnome-terminal"} {Locked="konsole"} {Locked="xterm"}'] },
-            'No terminal emulator found. Please set the $TERMINAL environment variable to your terminal emulator of choice, or install one of the following: x-terminal-emulator, gnome-terminal, konsole, xterm.');
+        const message = vscode.l10n.t({ message: 'No terminal emulator found. Please set the $TERMINAL environment variable to your terminal emulator of choice, or install one of the following: x-terminal-emulator, gnome-terminal, konsole, xterm.', comment: ['{Locked="$TERMINAL"} {Locked="x-terminal-emulator"} {Locked="gnome-terminal"} {Locked="konsole"} {Locked="xterm"}'] });
         vscode.window.showErrorMessage(message);
     }
 

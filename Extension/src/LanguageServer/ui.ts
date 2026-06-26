@@ -5,16 +5,12 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { Client } from './client';
 import { CustomConfigurationProviderCollection, getCustomConfigProviders, isSameProviderExtensionId } from './customProviders';
 import { ReferencesCommandMode, referencesCommandModeToString } from './references';
 import { CppSettings } from './settings';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let ui: LanguageStatusUI;
 
@@ -48,21 +44,21 @@ export class LanguageStatusUI {
 
     // IntelliSense language status
     private intelliSenseStatusItem: vscode.LanguageStatusItem;
-    private readonly updatingIntelliSenseText: string = localize("updating.intellisense.text", "IntelliSense: Updating");
-    private readonly idleIntelliSenseText: string = localize("idle.intellisense.text", "IntelliSense: Ready");
+    private readonly updatingIntelliSenseText: string = vscode.l10n.t("IntelliSense: Updating");
+    private readonly idleIntelliSenseText: string = vscode.l10n.t("IntelliSense: Ready");
     // Tag parse language status
     private tagParseStatusItem: vscode.LanguageStatusItem;
     private isParsingWorkspace: boolean = false;
     private isParsingWorkspacePaused: boolean = false;
     private isParsingFiles: boolean = false;
     private readonly dataBaseIcon: string = "$(database)";
-    private readonly workspaceParsingInitializing: string = localize("initializing.tagparser.text", "Initializing Workspace");
-    private readonly workspaceParsingIndexing: string = localize("indexing.tagparser.text", "Indexing Workspace");
-    private readonly workspaceParsingRunningText: string = localize("running.tagparser.text", "Parsing Workspace");
-    private readonly workspaceParsingPausedText: string = localize("paused.tagparser.text", "Parsing Workspace: Paused");
-    private readonly workspaceParsingDoneText: string = localize("complete.tagparser.text", "Parsing Complete");
-    private readonly workspaceRescanText: string = localize("rescan.tagparse.text", "Rescan Workspace");
-    private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.open.files.tooltip", "Parsing Open Files");
+    private readonly workspaceParsingInitializing: string = vscode.l10n.t("Initializing Workspace");
+    private readonly workspaceParsingIndexing: string = vscode.l10n.t("Indexing Workspace");
+    private readonly workspaceParsingRunningText: string = vscode.l10n.t("Parsing Workspace");
+    private readonly workspaceParsingPausedText: string = vscode.l10n.t("Parsing Workspace: Paused");
+    private readonly workspaceParsingDoneText: string = vscode.l10n.t("Parsing Complete");
+    private readonly workspaceRescanText: string = vscode.l10n.t("Rescan Workspace");
+    private readonly parsingFilesTooltip: string = vscode.l10n.t("Parsing Open Files");
 
     // Code analysis language status
     private codeAnalysisStatusItem: vscode.LanguageStatusItem;
@@ -71,13 +67,13 @@ export class LanguageStatusUI {
     private codeAnalysisProcessed: number = 0;
     private codeAnalysisTotal: number = 0;
     private codeAnalysProgress: string = "";
-    private readonly codeAnalysisRunningText: string = localize("running.analysis.text", "Code Analysis: Running");
-    private readonly codeAnalysisPausedText: string = localize("paused.analysis.text", "Code Analysis: Paused");
-    private readonly codeAnalysisModePrefix: string = localize("mode.analysis.prefix", "Code Analysis Mode: ");
+    private readonly codeAnalysisRunningText: string = vscode.l10n.t("Code Analysis: Running");
+    private readonly codeAnalysisPausedText: string = vscode.l10n.t("Code Analysis: Paused");
+    private readonly codeAnalysisModePrefix: string = vscode.l10n.t("Code Analysis Mode: ");
 
     // References status bar
     private referencesStatusBarItem: vscode.StatusBarItem;
-    private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
+    private readonly referencesPreviewTooltip: string = ` (${vscode.l10n.t("click to preview results")})`;
 
     // Configuration status bar
     private configurationStatusBarItem: vscode.StatusBarItem;
@@ -86,7 +82,7 @@ export class LanguageStatusUI {
     private configureIntelliSenseStatusBarItem: vscode.StatusBarItem;
     private showConfigureIntelliSenseButton: boolean = false;
     private configureIntelliSenseTimeout?: NodeJS.Timeout;
-    private readonly configureIntelliSenseText: string = localize("c.cpp.configureIntelliSenseStatus.text", "Configure IntelliSense");
+    private readonly configureIntelliSenseText: string = vscode.l10n.t("Configure IntelliSense");
 
     constructor() {
         this.intelliSenseStatusItem = this.createIntelliSenseStatusItem();
@@ -110,7 +106,7 @@ export class LanguageStatusUI {
     //#region IntelliSense language status
     private createIntelliSenseStatusItem(): vscode.LanguageStatusItem {
         const item: vscode.LanguageStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.High}.intellisense`, util.documentSelector);
-        item.name = localize("cpptools.status.intellisense", "C/C++ IntelliSense Status");
+        item.name = vscode.l10n.t("C/C++ IntelliSense Status");
         item.text = this.idleIntelliSenseText;
         return item;
     }
@@ -127,8 +123,8 @@ export class LanguageStatusUI {
         }
         this.intelliSenseStatusItem.command = {
             command: "C_Cpp.RestartIntelliSenseForFile",
-            title: localize("rescan.intellisense.text", "Rescan"),
-            tooltip: localize("rescan.intellisense.tooltip", "Rescan IntelliSense"),
+            title: vscode.l10n.t("Rescan"),
+            tooltip: vscode.l10n.t("Rescan IntelliSense"),
             arguments: commandArguments
         };
     }
@@ -137,8 +133,8 @@ export class LanguageStatusUI {
     //#region Tag parse language status
     private createTagParseStatusItem(): vscode.LanguageStatusItem {
         const item: vscode.LanguageStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.tagparser`, util.documentSelector);
-        item.name = localize("cpptools.status.tagparser", "C/C++ Tag Parser Status");
-        item.detail = localize("cpptools.detail.tagparser", "Initializing...");
+        item.name = vscode.l10n.t("C/C++ Tag Parser Status");
+        item.detail = vscode.l10n.t("Initializing...");
         item.text = this.dataBaseIcon;
         item.command = {
             command: "C_Cpp.RescanWorkspace",
@@ -218,12 +214,12 @@ export class LanguageStatusUI {
                 // Pausing/resuming is only applicable to parsing workspace.
                 this.tagParseStatusItem.command = this.isParsingWorkspacePaused ? {
                     command: "C_Cpp.ResumeParsing",
-                    title: localize("tagparser.resume.text", "Resume"),
+                    title: vscode.l10n.t("Resume"),
                     arguments: commandArguments,
                     tooltip: this.tagParseStatusItem.command?.tooltip ?? undefined
                 } : {
                     command: "C_Cpp.PauseParsing",
-                    title: localize("tagparser.pause.text", "Pause"),
+                    title: vscode.l10n.t("Pause"),
                     arguments: commandArguments,
                     tooltip: this.tagParseStatusItem.command?.tooltip ?? undefined
                 };
@@ -251,11 +247,11 @@ export class LanguageStatusUI {
     //#region Code analysis language status
     private createCodeAnalysisStatusItem(): vscode.LanguageStatusItem {
         const item: vscode.LanguageStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Low}.codeanalysis`, util.documentSelector);
-        item.name = localize("cpptools.status.codeanalysis", "C/C++ Code Analysis Status");
+        item.name = vscode.l10n.t("C/C++ Code Analysis Status");
         item.text = this.codeAnalysisModePrefix + this.codeAnalysisCurrentMode();
         item.command = {
             command: "C_Cpp.ShowIdleCodeAnalysisCommands",
-            title: localize("c.cpp.codeanalysis.statusbar.runNow", "Run Now"),
+            title: vscode.l10n.t("Run Now"),
             arguments: commandArguments
         };
         return item;
@@ -280,8 +276,8 @@ export class LanguageStatusUI {
     private codeAnalysisCurrentMode(): string {
         const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
         const state: string = (settings.codeAnalysisRunAutomatically && settings.clangTidyEnabled)
-            ? localize("mode.codeanalysis.status.automatic", "Automatic")
-            : localize("mode.codeanalysis.status.manual", "Manual");
+            ? vscode.l10n.t("Automatic")
+            : vscode.l10n.t("Manual");
         return state;
     }
 
@@ -296,20 +292,19 @@ export class LanguageStatusUI {
         this.refreshCodeAnalysisText(val);
         this.codeAnalysisStatusItem.command = val ? {
             command: "C_Cpp.ShowActiveCodeAnalysisCommands",
-            title: localize("c.cpp.codeanalysis.statusbar.showCodeAnalysisOptions", "Options"),
+            title: vscode.l10n.t("Options"),
             // Make sure not to overwrite current progress
-            tooltip: this.codeAnalysisStatusItem.command?.tooltip ?? localize("startup.codeanalysis.status", "Starting..."),
+            tooltip: this.codeAnalysisStatusItem.command?.tooltip ?? vscode.l10n.t("Starting..."),
             arguments: commandArguments
         } : {
             command: "C_Cpp.ShowIdleCodeAnalysisCommands",
-            title: localize("c.cpp.codeanalysis.statusbar.showRunNowOptions", "Run Now"),
+            title: vscode.l10n.t("Run Now"),
             arguments: commandArguments
         };
     }
 
     private updateCodeAnalysisTooltip(): void {
-        this.codeAnalysProgress = localize("running.analysis.processed.tooltip", "Running: {0} / {1} ({2}%)",
-            this.codeAnalysisProcessed, Math.max(this.codeAnalysisTotal, 1), Math.floor(100 * this.codeAnalysisProcessed / Math.max(this.codeAnalysisTotal, 1)));
+        this.codeAnalysProgress = vscode.l10n.t("Running: {0} / {1} ({2}%)", this.codeAnalysisProcessed, Math.max(this.codeAnalysisTotal, 1), Math.floor(100 * this.codeAnalysisProcessed / Math.max(this.codeAnalysisTotal, 1)));
 
         if (this.codeAnalysisStatusItem.command) {
             this.codeAnalysisStatusItem.command.tooltip = this.codeAnalysProgress;
@@ -339,29 +334,29 @@ export class LanguageStatusUI {
 
     public async showActiveCodeAnalysisCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.code.analysis.command", "Select a code analysis command...");
+        options.placeHolder = vscode.l10n.t("Select a code analysis command...");
 
         const items: IndexableQuickPickItem[] = [];
-        items.push({ label: localize("cancel.analysis", "Cancel"), description: "", index: 0 });
+        items.push({ label: vscode.l10n.t("Cancel"), description: "", index: 0 });
 
         if (this.isCodeAnalysisPaused) {
-            items.push({ label: localize("resume.analysis", "Resume"), description: "", index: 2 });
+            items.push({ label: vscode.l10n.t("Resume"), description: "", index: 2 });
         } else {
-            items.push({ label: localize("pause.analysis", "Pause"), description: "", index: 1 });
+            items.push({ label: vscode.l10n.t("Pause"), description: "", index: 1 });
         }
-        items.push({ label: localize("another.analysis", "Start Another..."), description: "", index: 3 });
+        items.push({ label: vscode.l10n.t("Start Another..."), description: "", index: 3 });
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return selection ? selection.index : -1;
     }
 
     public async showIdleCodeAnalysisCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.command", "Select a command...");
+        options.placeHolder = vscode.l10n.t("Select a command...");
 
         const items: IndexableQuickPickItem[] = [];
-        items.push({ label: localize("active.analysis", "Run Code Analysis on Active File"), description: "", index: 0 });
-        items.push({ label: localize("all.analysis", "Run Code Analysis on All Files"), description: "", index: 1 });
-        items.push({ label: localize("open.analysis", "Run Code Analysis on Open Files"), description: "", index: 2 });
+        items.push({ label: vscode.l10n.t("Run Code Analysis on Active File"), description: "", index: 0 });
+        items.push({ label: vscode.l10n.t("Run Code Analysis on All Files"), description: "", index: 1 });
+        items.push({ label: vscode.l10n.t("Run Code Analysis on Open Files"), description: "", index: 2 });
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return selection ? selection.index : -1;
     }
@@ -370,7 +365,7 @@ export class LanguageStatusUI {
     //#region References status
     private createReferencesStatusBarItem(): vscode.StatusBarItem {
         const item: vscode.StatusBarItem = vscode.window.createStatusBarItem(`c.cpp.references.statusbar`, vscode.StatusBarAlignment.Right, 901);
-        item.name = localize("c.cpp.references.statusbar", "C/C++ References Status");
+        item.name = vscode.l10n.t("C/C++ References Status");
         item.tooltip = "";
         item.command = {
             command: "C_Cpp.ShowReferencesProgress",
@@ -409,7 +404,7 @@ export class LanguageStatusUI {
 
     //#region Configuration status bar
     private createConfigurationStatusBarItem(): vscode.StatusBarItem {
-        const configTooltip: string = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
+        const configTooltip: string = vscode.l10n.t("C/C++ Configuration");
         const item: vscode.StatusBarItem = vscode.window.createStatusBarItem("c.cpp.configuration.tooltip", vscode.StatusBarAlignment.Right, 0);
         item.name = configTooltip;
         item.tooltip = configTooltip;
@@ -436,7 +431,7 @@ export class LanguageStatusUI {
 
     //#region Configure IntelliSense status bar
     private createConfigureIntelliSenseStatusBarItem(): vscode.StatusBarItem {
-        const cppConfigureIntelliSenseText: string = localize("c.cpp.configureIntelliSenseStatus.cppText", "C/C++ Configure IntelliSense");
+        const cppConfigureIntelliSenseText: string = vscode.l10n.t("C/C++ Configure IntelliSense");
         const item: vscode.StatusBarItem = vscode.window.createStatusBarItem(`c.cpp.configureIntelliSenseStatus.statusbar`, vscode.StatusBarAlignment.Right, 0);
         item.name = cppConfigureIntelliSenseText;
         item.tooltip = cppConfigureIntelliSenseText;
@@ -522,14 +517,14 @@ export class LanguageStatusUI {
 
     public async showConfigurations(configurationNames: string[]): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.a.configuration", "Select a Configuration...");
+        options.placeHolder = vscode.l10n.t("Select a Configuration...");
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < configurationNames.length; i++) {
             items.push({ label: configurationNames[i], description: "", index: i });
         }
-        items.push({ label: localize("edit.configuration.ui", "Edit Configurations (UI)"), description: "", index: configurationNames.length });
-        items.push({ label: localize("edit.configuration.json", "Edit Configurations (JSON)"), description: "", index: configurationNames.length + 1 });
+        items.push({ label: vscode.l10n.t("Edit Configurations (UI)"), description: "", index: configurationNames.length });
+        items.push({ label: vscode.l10n.t("Edit Configurations (JSON)"), description: "", index: configurationNames.length + 1 });
 
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return selection ? selection.index : -1;
@@ -537,18 +532,18 @@ export class LanguageStatusUI {
 
     public async showConfigurationProviders(currentProvider?: string): Promise<string | undefined> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.configuration.provider", "Select a Configuration Provider...");
+        options.placeHolder = vscode.l10n.t("Select a Configuration Provider...");
         const providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
 
         const items: KeyedQuickPickItem[] = [];
         providers.forEach(provider => {
             let label: string = provider.name;
             if (isSameProviderExtensionId(currentProvider, provider.extensionId)) {
-                label += ` (${localize("active", "active")})`;
+                label += ` (${vscode.l10n.t("active")})`;
             }
             items.push({ label: label, description: "", key: provider.extensionId });
         });
-        items.push({ label: `(${localize("none", "none")})`, description: localize("disable.configuration.provider", "Disable the active configuration provider, if applicable."), key: "" });
+        items.push({ label: `(${vscode.l10n.t("none")})`, description: vscode.l10n.t("Disable the active configuration provider, if applicable."), key: "" });
 
         const selection: KeyedQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return selection ? selection.key : undefined;
@@ -556,7 +551,7 @@ export class LanguageStatusUI {
 
     public async showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.workspace", "Select a workspace folder...");
+        options.placeHolder = vscode.l10n.t("Select a workspace folder...");
 
         const items: KeyedQuickPickItem[] = [];
         workspaceNames.forEach(name => items.push({ label: name.name, description: "", key: name.key }));

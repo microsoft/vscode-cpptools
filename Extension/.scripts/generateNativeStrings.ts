@@ -47,23 +47,22 @@ export async function main() {
             }
             typeScriptSwitchContent += `        case ${stringIndex}:\n`;
             if (numArgs !== 0) {
+                const stringArgsList: string[] = [];
+                for (let i = 0; i < numArgs; i++) {
+                    stringArgsList.push(`stringArgs[${i}]`);
+                }
                 typeScriptSwitchContent += `            if (stringArgs) {\n`;
                 if (hintValue) {
-                    typeScriptSwitchContent += `                message = localize({ key: ${JSON.stringify(property)}, comment: [${JSON.stringify(hintValue)}] }, ${JSON.stringify(stringValue)}`;
+                    typeScriptSwitchContent += `                message = vscode.l10n.t({ message: ${JSON.stringify(stringValue)}, args: [${stringArgsList.join(", ")}], comment: [${JSON.stringify(hintValue)}] });\n                break;\n            }\n`;
                 } else {
-                    typeScriptSwitchContent += `                message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringValue)}`;
+                    typeScriptSwitchContent += `                message = vscode.l10n.t(${JSON.stringify(stringValue)}, ${stringArgsList.join(", ")});\n                break;\n            }\n`;
                 }
-                for (let i = 0; i < numArgs; i++) {
-                    typeScriptSwitchContent += `, stringArgs[${i}]`;
-                }
-                typeScriptSwitchContent += `);\n                break;\n            }\n`;
             }
             if (hintValue) {
-                typeScriptSwitchContent += `            message = localize({ key: ${JSON.stringify(property)}, comment: [${JSON.stringify(hintValue)}] }, ${JSON.stringify(stringValue)}`;
+                typeScriptSwitchContent += `            message = vscode.l10n.t({ message: ${JSON.stringify(stringValue)}, comment: [${JSON.stringify(hintValue)}] });\n            break;\n`;
             } else {
-                typeScriptSwitchContent += `            message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringValue)}`;
+                typeScriptSwitchContent += `            message = vscode.l10n.t(${JSON.stringify(stringValue)});\n            break;\n`;
             }
-            typeScriptSwitchContent += `);\n            break;\n`;
         }
         ++stringIndex;
     }
@@ -81,10 +80,7 @@ export async function main() {
 
 'use strict';
 
-import * as nls from 'vscode-nls';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+import * as vscode from 'vscode';
 
 export const localizedStringCount: number = ${stringIndex};
 

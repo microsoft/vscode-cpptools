@@ -5,13 +5,9 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import { isString } from '../common';
 import { getOutputChannel } from '../logger';
 import { CppSettings } from './settings';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface CommentPattern {
     begin: string;
@@ -274,7 +270,7 @@ export function getLanguageConfigFromPatterns(languageId: string, patterns?: (st
         }
     });
     if (duplicates) {
-        getOutputChannel().appendLine(localize("duplicate.multiline.patterns", "Duplicate multiline comment patterns detected."));
+        getOutputChannel().appendLine(vscode.l10n.t("Duplicate multiline comment patterns detected."));
     }
     return { onEnterRules: beginRules.concat(continueRules).concat(endRules).filter(e => e) }; // Remove any 'undefined' entries
 }

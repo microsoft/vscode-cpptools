@@ -3,14 +3,11 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+import * as vscode from 'vscode';
 import { constants } from 'fs';
 import { TreeItem } from "vscode";
-import * as nls from 'vscode-nls';
 import { extensionContext, ISshConfigHostInfo, pathAccessible } from "../../common";
 import { LabelLeafNode } from "./common";
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export const workspaceState_activeSshTarget: string = 'workspaceState_activeSshTarget';
 
@@ -36,7 +33,7 @@ export class TargetLeafNode extends LabelLeafNode {
         const item: TreeItem = await super.getTreeItem();
         const removable: boolean = await isWritable(this.sshConfigHostInfo.file);
         if (_activeTarget === this.name) {
-            item.description = localize('ssh.target.active.description', '[Active]');
+            item.description = vscode.l10n.t('[Active]');
             if (removable) {
                 item.contextValue = 'CppSshTargetsView.targetLeafRemovable';
             }

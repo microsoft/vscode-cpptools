@@ -5,15 +5,11 @@
 'use strict';
 import * as vscode from 'vscode';
 import { LanguageClient, NotificationType, Range } from 'vscode-languageclient/node';
-import * as nls from 'vscode-nls';
 import { Location, WorkspaceEdit } from './commonTypes';
 import { CppSourceStr } from './extension';
 import { LocalizeStringParams, getLocalizedString } from './localization';
 import { CppSettings } from './settings';
 import { makeVscodeLocation, makeVscodeRange, makeVscodeTextEdits, rangeEquals } from './utils';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let diagnosticsCollectionCodeAnalysis: vscode.DiagnosticCollection;
 
@@ -118,7 +114,7 @@ export const codeAnalysisCodeToFixes: Map<string, CodeActionCodeInfo> = new Map<
 export const codeAnalysisAllFixes: CodeActionAllInfo = {
     version: 0,
     fixAllCodeAction: {
-        title: localize("fix.all.code.analysis.problems", "Fix all code analysis problems"),
+        title: vscode.l10n.t("Fix all code analysis problems"),
         command: {
             title: 'FixAllCodeAnalysisProblems',
             command: 'C_Cpp.FixAllCodeAnalysisProblems',
@@ -127,7 +123,7 @@ export const codeAnalysisAllFixes: CodeActionAllInfo = {
         kind: vscode.CodeActionKind.QuickFix
     },
     removeAllCodeAction: {
-        title: localize("clear.all.code.analysis.problems", "Clear all code analysis problems"),
+        title: vscode.l10n.t("Clear all code analysis problems"),
         command: { title: "RemoveAllCodeAnalysisProblems", command: "C_Cpp.RemoveAllCodeAnalysisProblems" },
         kind: vscode.CodeActionKind.QuickFix
     }
@@ -175,7 +171,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
             }
             ++numFixTypes;
             codeToFixes[1].fixAllTypeCodeAction = {
-                title: localize("fix.all.type.problems", "Fix all {0} problems", codeToFixes[0]),
+                title: vscode.l10n.t("Fix all {0} problems", codeToFixes[0]),
                 command: {
                     title: 'FixAllTypeCodeAnalysisProblems',
                     command: 'C_Cpp.FixAllTypeCodeAnalysisProblems',
@@ -187,7 +183,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
 
         if (new CppSettings().clangTidyCodeActionShowDisable) {
             codeToFixes[1].disableAllTypeCodeAction = {
-                title: localize("disable.all.type.problems", "Disable all {0} problems", codeToFixes[0]),
+                title: vscode.l10n.t("Disable all {0} problems", codeToFixes[0]),
                 command: {
                     title: 'DisableAllTypeCodeAnalysisProblems',
                     command: 'C_Cpp.DisableAllTypeCodeAnalysisProblems',
@@ -201,7 +197,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
 
         if (new CppSettings().clangTidyCodeActionShowClear !== "None") {
             codeToFixes[1].removeAllTypeCodeAction = {
-                title: localize("clear.all.type.problems", "Clear all {0} problems", codeToFixes[0]),
+                title: vscode.l10n.t("Clear all {0} problems", codeToFixes[0]),
                 command: {
                     title: 'RemoveAllTypeCodeAnalysisProblems',
                     command: 'C_Cpp.RemoveCodeAnalysisProblems',
@@ -265,7 +261,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
             range: makeVscodeRange(identifier.range),
             code: identifier.code,
             removeCodeAction: {
-                title: localize("clear.this.problem", "Clear this {0} problem", d.code),
+                title: vscode.l10n.t("Clear this {0} problem", d.code),
                 command: {
                     title: 'RemoveCodeAnalysisProblems',
                     command: 'C_Cpp.RemoveCodeAnalysisProblems',
@@ -281,7 +277,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                 codeActionWorkspaceEdit.workspaceEdit.set(vscode.Uri.parse(workspaceEdit.file, true), makeVscodeTextEdits(workspaceEdit.edits));
             }
             const fixThisCodeAction: vscode.CodeAction = {
-                title: localize("fix.this.problem", "Fix this {0} problem", d.code),
+                title: vscode.l10n.t("Fix this {0} problem", d.code),
                 command: {
                     title: 'FixThisCodeAnalysisProblem',
                     command: 'C_Cpp.FixThisCodeAnalysisProblem',
@@ -316,7 +312,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                     uri: info.location.uri, identifiers: [relatedIdentifier]
                 };
                 const relatedCodeAction: vscode.CodeAction = {
-                    title: localize("fix.this.problem", "Fix this {0} problem", d.code),
+                    title: vscode.l10n.t("Fix this {0} problem", d.code),
                     command: {
                         title: 'FixThisCodeAnalysisProblem',
                         command: 'C_Cpp.FixThisCodeAnalysisProblem',
@@ -385,7 +381,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                 if (new CppSettings().clangTidyCodeActionShowDocumentation) {
                     if (codeActionCodeInfo.docCodeAction === undefined) {
                         codeActionCodeInfo.docCodeAction = {
-                            title: localize("show.documentation.for", "Show documentation for {0}", primaryCode),
+                            title: vscode.l10n.t("Show documentation for {0}", primaryCode),
                             command: {
                                 title: 'ShowDocumentation',
                                 command: 'C_Cpp.ShowCodeAnalysisDocumentation',

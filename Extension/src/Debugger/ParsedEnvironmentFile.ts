@@ -3,11 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as nls from 'vscode-nls';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface Environment {
     name: string;
@@ -72,7 +69,7 @@ export class ParsedEnvironmentFile {
         // show error message if single lines cannot get parsed
         let warning: string | undefined;
         if (parseErrors.length !== 0) {
-            warning = localize("ignoring.lines.in.envfile", "Ignoring non-parsable lines in {0} {1}: ", "envFile", envFile);
+            warning = vscode.l10n.t("Ignoring non-parsable lines in {0} {1}: ", "envFile", envFile);
             parseErrors.forEach(function (value, idx, array): void {
                 warning += "\"" + value + "\"" + ((idx !== array.length - 1) ? ", " : ".");
             });

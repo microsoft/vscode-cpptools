@@ -24,9 +24,10 @@ install.lock
 # ignore vscode test
 .vscode-test/
 
-# ignore generated localization file
-**/nls.*.json
+# ignore generated localization files
 **/*.nls.*.json
+l10n/bundle.l10n.json
+l10n/bundle.l10n.*.json
 
 # ignore generate native header
 localized_string_ids.h

@@ -21,18 +21,21 @@
 
 ## String Localization
 
-* [vscode-nls](https://github.com/microsoft/vscode-nls) is used to localize strings in TypeScript code.  To use [vscode-nls](https://github.com/microsoft/vscode-nls), the source file must contain:
+* VS Code's built-in [l10n](https://code.visualstudio.com/api/references/vscode-api#l10n) support is used to localize strings in TypeScript code. The English string itself is the key, so no separate setup or import is required beyond `vscode`:
 ```typescript
-import * as nls from 'vscode-nls';
+import * as vscode from 'vscode';
+```
+* For each user-facing string, wrap the string in a call to `vscode.l10n.t`:
+```typescript
+const readmeMessage: string = vscode.l10n.t("Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
+```
+* The first parameter is the string to localize, and it must be a string literal. Tokens such as {0} and {1} are supported in the localizable string, with replacement values passed as additional parameters (these may be strings, numbers, or booleans).
+* When a translator needs a hint about how to translate a string, use the object form, which takes a required `comment` and an optional `args` array:
+```typescript
+const message: string = vscode.l10n.t({ message: "Add '{0}'", args: [code], comment: ["{0} is C++ code to add, such as '#include <string>'"] });
+```
+* At build time, [@vscode/l10n-dev](https://github.com/microsoft/vscode-l10n) scans the source for these calls and produces `./l10n/bundle.l10n.json` (and per-language `./l10n/bundle.l10n.<language>.json` files). The `"l10n": "./l10n"` field in [**package.json**](Extension/package.json) tells VS Code where to load them. VS Code loads the bundle for the active display language, so the strings are not read synchronously at extension startup.
 
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-```
-* For each user-facing string, wrap the string in a call to localize:
-```typescript
-const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
-```
-* The first parameter to localize should be a unique key for that string, not used by any other call to localize() in the file unless representing the same string.  The second parameter is the string to localize.  Both of these parameters must be string literals.  Tokens such as {0} and {1} are supported in the localizable string, with replacement values passed as additional parameters to localize().
 
 ## Contributor License Agreement
 

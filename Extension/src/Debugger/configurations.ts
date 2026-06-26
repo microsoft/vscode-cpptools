@@ -5,11 +5,7 @@
 
 import * as os from 'os';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import { configPrefix } from '../LanguageServer/extension';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export function isDebugLaunchStr(str: string): boolean {
     return str.startsWith("(gdb) ") || str.startsWith("(lldb) ") || str.startsWith("(Windows) ");
@@ -92,7 +88,7 @@ function createLaunchString(name: string, type: string, executable: string): str
     return `"name": "${name}",
 "type": "${type}",
 "request": "launch",
-"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/"/g, '')}",
+"program": "${vscode.l10n.t("enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/"/g, '')}",
 "args": [],
 "stopAtEntry": false,
 "cwd": "$\{fileDirname\}",
@@ -106,7 +102,7 @@ function createAttachString(name: string, type: string, executable: string): str
 "name": "${name}",
 "type": "${type}",
 "request": "attach",{0}
-`, [type === "cppdbg" ? `${os.EOL}"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/"/g, '')}",` : ""]);
+`, [type === "cppdbg" ? `${os.EOL}"program": "${vscode.l10n.t("enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/"/g, '')}",` : ""]);
 }
 
 function createRemoteAttachString(name: string, type: string, executable: string): string {
@@ -114,7 +110,7 @@ function createRemoteAttachString(name: string, type: string, executable: string
 "name": "${name}",
 "type": "${type}",
 "request": "attach",
-"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/"/g, '')}",
+"program": "${vscode.l10n.t("enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/"/g, '')}",
 "processId": "$\{command:pickRemoteProcess\}"
 `;
 }
@@ -158,7 +154,7 @@ abstract class Configuration implements IConfiguration {
 export class MIConfigurations extends Configuration {
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        const name: string = `(${this.MIMode}) ${localize("launch.string", "Launch").replace(/"/g, '')}`;
+        const name: string = `(${this.MIMode}) ${vscode.l10n.t("Launch").replace(/"/g, '')}`;
 
         const body: string = formatString(`{
 \t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
@@ -168,7 +164,7 @@ export class MIConfigurations extends Configuration {
 
         return {
             "label": configPrefix + name,
-            "description": localize("launch.with", "Launch with {0}.", this.MIMode).replace(/"/g, ''),
+            "description": vscode.l10n.t("Launch with {0}.", this.MIMode).replace(/"/g, ''),
             "bodyText": body.trim(),
             "isInitialConfiguration": true,
             "debuggerType": DebuggerType.cppdbg
@@ -176,7 +172,7 @@ export class MIConfigurations extends Configuration {
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        const name: string = `(${this.MIMode}) ${localize("attach.string", "Attach").replace(/"/g, '')}`;
+        const name: string = `(${this.MIMode}) ${vscode.l10n.t("Attach").replace(/"/g, '')}`;
 
         const body: string = formatString(`{
 \t${indentJsonString(createAttachString(name, this.miDebugger, this.executable))}
@@ -186,7 +182,7 @@ export class MIConfigurations extends Configuration {
 
         return {
             "label": configPrefix + name,
-            "description": localize("attach.with", "Attach with {0}.", this.MIMode).replace(/"/g, ''),
+            "description": vscode.l10n.t("Attach with {0}.", this.MIMode).replace(/"/g, ''),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
         };
@@ -197,7 +193,7 @@ export class MIConfigurations extends Configuration {
 export class PipeTransportConfigurations extends Configuration {
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        const name: string = `(${this.MIMode}) ${localize("pipe.launch", "Pipe Launch").replace(/"/g, '')}`;
+        const name: string = `(${this.MIMode}) ${vscode.l10n.t("Pipe Launch").replace(/"/g, '')}`;
 
         const body: string = formatString(`
 {
@@ -208,7 +204,7 @@ export class PipeTransportConfigurations extends Configuration {
 
         return {
             "label": configPrefix + name,
-            "description": localize("pipe.launch.with", "Pipe Launch with {0}.", this.MIMode).replace(/"/g, ''),
+            "description": vscode.l10n.t("Pipe Launch with {0}.", this.MIMode).replace(/"/g, ''),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
         };
@@ -216,7 +212,7 @@ export class PipeTransportConfigurations extends Configuration {
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        const name: string = `(${this.MIMode}) ${localize("pipe.attach", "Pipe Attach").replace(/"/g, '')}`;
+        const name: string = `(${this.MIMode}) ${vscode.l10n.t("Pipe Attach").replace(/"/g, '')}`;
 
         const body: string = formatString(`
 {
@@ -226,7 +222,7 @@ export class PipeTransportConfigurations extends Configuration {
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
         return {
             "label": configPrefix + name,
-            "description": localize("pipe.attach.with", "Pipe Attach with {0}.", this.MIMode).replace(/"/g, ''),
+            "description": vscode.l10n.t("Pipe Attach with {0}.", this.MIMode).replace(/"/g, ''),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
         };
@@ -237,7 +233,7 @@ export class PipeTransportConfigurations extends Configuration {
 export class WindowsConfigurations extends Configuration {
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        const name: string = `(Windows) ${localize("launch.string", "Launch").replace(/"/g, '')}`;
+        const name: string = `(Windows) ${vscode.l10n.t("Launch").replace(/"/g, '')}`;
 
         const body: string = `
 {
@@ -246,7 +242,7 @@ export class WindowsConfigurations extends Configuration {
 
         return {
             "label": configPrefix + name,
-            "description": localize("launch.with.vs.debugger", "Launch with the Visual Studio C/C++ debugger.").replace(/"/g, ''),
+            "description": vscode.l10n.t("Launch with the Visual Studio C/C++ debugger.").replace(/"/g, ''),
             "bodyText": body.trim(),
             "isInitialConfiguration": true,
             "debuggerType": DebuggerType.cppvsdbg
@@ -255,7 +251,7 @@ export class WindowsConfigurations extends Configuration {
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        const name: string = `(Windows) ${localize("attach.string", "Attach").replace(/"/g, '')}`;
+        const name: string = `(Windows) ${vscode.l10n.t("Attach").replace(/"/g, '')}`;
 
         const body: string = `
 {
@@ -264,7 +260,7 @@ export class WindowsConfigurations extends Configuration {
 
         return {
             "label": configPrefix + name,
-            "description": localize("attach.with.vs.debugger", "Attach to a process with the Visual Studio C/C++ debugger.").replace(/"/g, ''),
+            "description": vscode.l10n.t("Attach to a process with the Visual Studio C/C++ debugger.").replace(/"/g, ''),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppvsdbg
         };
@@ -277,7 +273,7 @@ export class WSLConfigurations extends Configuration {
     public bashPipeProgram = process.arch === 'ia32' ? "${env:windir}\\\\sysnative\\\\bash.exe" : "${env:windir}\\\\system32\\\\bash.exe";
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        const name: string = `(${this.MIMode}) ${localize("bash.on.windows.launch", "Bash on Windows Launch").replace(/"/g, '')}`;
+        const name: string = `(${this.MIMode}) ${vscode.l10n.t("Bash on Windows Launch").replace(/"/g, '')}`;
 
         const body: string = formatString(`
 {
@@ -287,14 +283,14 @@ export class WSLConfigurations extends Configuration {
 
         return {
             "label": configPrefix + name,
-            "description": localize("launch.bash.windows", "Launch in Bash on Windows using {0}.", this.MIMode).replace(/"/g, ''),
+            "description": vscode.l10n.t("Launch in Bash on Windows using {0}.", this.MIMode).replace(/"/g, ''),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
         };
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        const name: string = `(${this.MIMode}) ${localize("bash.on.windows.attach", "Bash on Windows Attach").replace(/"/g, '')}`;
+        const name: string = `(${this.MIMode}) ${vscode.l10n.t("Bash on Windows Attach").replace(/"/g, '')}`;
 
         const body: string = formatString(`
 {
@@ -304,7 +300,7 @@ export class WSLConfigurations extends Configuration {
 
         return {
             "label": configPrefix + name,
-            "description": localize("remote.attach.bash.windows", "Attach to a remote process running in Bash on Windows using {0}.", this.MIMode).replace(/"/g, ''),
+            "description": vscode.l10n.t("Attach to a remote process running in Bash on Windows using {0}.", this.MIMode).replace(/"/g, ''),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
         };

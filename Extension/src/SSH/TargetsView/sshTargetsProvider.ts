@@ -4,14 +4,10 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import { extensionContext, ISshConfigHostInfo } from '../../common';
 import { getSshConfigHostInfos } from '../sshHosts';
 import { addSshTargetCmd, BaseNode, LabelLeafNode, refreshCppSshTargetsViewCmd } from './common';
 import { filesWritable, setActiveSshTarget, TargetLeafNode, workspaceState_activeSshTarget, _activeTarget } from './targetNodes';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let _targets: Map<string, ISshConfigHostInfo> = new Map<string, ISshConfigHostInfo>();
 
@@ -29,7 +25,7 @@ export class SshTargetsProvider implements vscode.TreeDataProvider<BaseNode>, vs
 
         const children: BaseNode[] = await this.getTargets();
         if (children.length === 0) {
-            return [new LabelLeafNode(localize('no.ssh.targets', 'No SSH targets'))];
+            return [new LabelLeafNode(vscode.l10n.t('No SSH targets'))];
         }
 
         return children;
@@ -94,7 +90,7 @@ export async function getActiveSshTarget(selectWhenNotSet: boolean = true): Prom
     if (!_activeTarget && selectWhenNotSet) {
         const name: string | undefined = await selectSshTarget();
         if (!name) {
-            throw Error(localize('active.ssh.target.selection.cancelled', 'Active SSH target selection cancelled.'));
+            throw Error(vscode.l10n.t('Active SSH target selection cancelled.'));
         }
         await setActiveSshTarget(name);
         await vscode.commands.executeCommand(refreshCppSshTargetsViewCmd);
@@ -102,13 +98,13 @@ export async function getActiveSshTarget(selectWhenNotSet: boolean = true): Prom
     return _activeTarget;
 }
 
-const addNewSshTarget: string = localize('add.new.ssh.target', '{0} Add New SSH Target...', '$(plus)');
+const addNewSshTarget: string = vscode.l10n.t('{0} Add New SSH Target...', '$(plus)');
 
 export async function selectSshTarget(): Promise<string | undefined> {
     const items: string[] = Array.from(_targets.keys());
     // Special item for adding SSH target
     items.push(addNewSshTarget);
-    const selection: string | undefined = await vscode.window.showQuickPick(items, { title: localize('select.ssh.target', 'Select an SSH target') });
+    const selection: string | undefined = await vscode.window.showQuickPick(items, { title: vscode.l10n.t('Select an SSH target') });
     if (!selection) {
         return undefined;
     }

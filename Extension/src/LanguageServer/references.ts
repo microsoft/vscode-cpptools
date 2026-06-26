@@ -6,7 +6,6 @@
 import { setInterval } from 'timers';
 import * as vscode from 'vscode';
 import { Position, TextDocumentIdentifier } from 'vscode-languageclient';
-import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as logger from '../logger';
 import * as telemetry from '../telemetry';
@@ -14,9 +13,6 @@ import { DefaultClient } from './client';
 import { PersistentState } from './persistentState';
 import { FindAllRefsView } from './referencesView';
 import { CppSettings } from './settings';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export enum ReferenceType {
     Confirmed,
@@ -101,13 +97,13 @@ export enum CancellationSender {
 export function referencesCommandModeToString(referencesCommandMode: ReferencesCommandMode): string {
     switch (referencesCommandMode) {
         case ReferencesCommandMode.Find:
-            return localize("find.all.references", "Find All References");
+            return vscode.l10n.t("Find All References");
         case ReferencesCommandMode.Peek:
-            return localize("peek.references", "Peek References");
+            return vscode.l10n.t("Peek References");
         case ReferencesCommandMode.Rename:
-            return localize("rename", "Rename");
+            return vscode.l10n.t("Rename");
         case ReferencesCommandMode.CallHierarchy:
-            return localize("call.hierarchy", "Call Hierarchy");
+            return vscode.l10n.t("Call Hierarchy");
         default:
             return "";
     }
@@ -116,31 +112,31 @@ export function referencesCommandModeToString(referencesCommandMode: ReferencesC
 export function convertReferenceTypeToString(referenceType: ReferenceType, upperCase?: boolean): string {
     if (upperCase) {
         switch (referenceType) {
-            case ReferenceType.Confirmed: return localize("confirmed.reference.upper", "CONFIRMED REFERENCE");
-            case ReferenceType.ConfirmationInProgress: return localize("confirmation.in.progress.upper", "CONFIRMATION IN PROGRESS");
-            case ReferenceType.Comment: return localize("comment.reference.upper", "COMMENT REFERENCE");
-            case ReferenceType.String: return localize("string.reference.upper", "STRING REFERENCE");
-            case ReferenceType.Inactive: return localize("inactive.reference.upper", "INACTIVE REFERENCE");
-            case ReferenceType.CannotConfirm: return localize("cannot.confirm.reference.upper", "CANNOT CONFIRM REFERENCE");
-            case ReferenceType.NotAReference: return localize("not.a.reference.upper", "NOT A REFERENCE");
+            case ReferenceType.Confirmed: return vscode.l10n.t("CONFIRMED REFERENCE");
+            case ReferenceType.ConfirmationInProgress: return vscode.l10n.t("CONFIRMATION IN PROGRESS");
+            case ReferenceType.Comment: return vscode.l10n.t("COMMENT REFERENCE");
+            case ReferenceType.String: return vscode.l10n.t("STRING REFERENCE");
+            case ReferenceType.Inactive: return vscode.l10n.t("INACTIVE REFERENCE");
+            case ReferenceType.CannotConfirm: return vscode.l10n.t("CANNOT CONFIRM REFERENCE");
+            case ReferenceType.NotAReference: return vscode.l10n.t("NOT A REFERENCE");
         }
     } else {
         switch (referenceType) {
-            case ReferenceType.Confirmed: return localize("confirmed.reference", "Confirmed reference");
-            case ReferenceType.ConfirmationInProgress: return localize("confirmation.in.progress", "Confirmation in progress");
-            case ReferenceType.Comment: return localize("comment.reference", "Comment reference");
-            case ReferenceType.String: return localize("string.reference", "String reference");
-            case ReferenceType.Inactive: return localize("inactive.reference", "Inactive reference");
-            case ReferenceType.CannotConfirm: return localize("cannot.confirm.reference", "Cannot confirm reference");
-            case ReferenceType.NotAReference: return localize("not.a.reference", "Not a reference");
+            case ReferenceType.Confirmed: return vscode.l10n.t("Confirmed reference");
+            case ReferenceType.ConfirmationInProgress: return vscode.l10n.t("Confirmation in progress");
+            case ReferenceType.Comment: return vscode.l10n.t("Comment reference");
+            case ReferenceType.String: return vscode.l10n.t("String reference");
+            case ReferenceType.Inactive: return vscode.l10n.t("Inactive reference");
+            case ReferenceType.CannotConfirm: return vscode.l10n.t("Cannot confirm reference");
+            case ReferenceType.NotAReference: return vscode.l10n.t("Not a reference");
         }
     }
 }
 
 function getReferenceCanceledString(upperCase?: boolean): string {
     return upperCase ?
-        localize("confirmation.canceled.upper", "CONFIRMATION CANCELED") :
-        localize("confirmation.canceled", "Confirmation canceled");
+        vscode.l10n.t("CONFIRMATION CANCELED") :
+        vscode.l10n.t("Confirmation canceled");
 }
 
 export function getReferenceTagString(referenceType: ReferenceType, referenceCanceled: boolean, upperCase?: boolean): string {
@@ -271,16 +267,16 @@ export class ReferencesManager {
     }
 
     private reportProgress(progress: vscode.Progress<{ message?: string; increment?: number }>, forceUpdate: boolean, mode: ReferencesCommandMode): void {
-        const helpMessage: string = (mode !== ReferencesCommandMode.Find) ? "" : ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
+        const helpMessage: string = (mode !== ReferencesCommandMode.Find) ? "" : ` ${vscode.l10n.t("To preview results, click the search icon in the status bar.")}`;
         if (this.referencesCurrentProgress) {
             switch (this.referencesCurrentProgress.referencesProgress) {
                 case ReferencesProgress.Started:
                 case ReferencesProgress.StartedRename:
                 case ReferencesProgress.StartedCallHierarchy:
-                    progress.report({ message: localize("started", "Started."), increment: 0 });
+                    progress.report({ message: vscode.l10n.t("Started."), increment: 0 });
                     break;
                 case ReferencesProgress.ProcessingSource:
-                    progress.report({ message: localize("processing.source", "Processing source."), increment: 0 });
+                    progress.report({ message: vscode.l10n.t("Processing source."), increment: 0 });
                     break;
                 case ReferencesProgress.ProcessingTargets:
                     let numWaitingToLex: number = 0;
@@ -323,12 +319,12 @@ export class ReferencesManager {
                     const numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
                     if (numLexing >= (numParsing + numConfirmingReferences) && numFinishedConfirming === 0) {
                         if (numTotalToLex === 0) {
-                            currentMessage = localize("searching.files", "Searching files."); // TODO: Prevent this from happening.
+                            currentMessage = vscode.l10n.t("Searching files."); // TODO: Prevent this from happening.
                         } else {
-                            currentMessage = localize("files.searched", "{0}/{1} files searched.{2}", numFinishedLexing, numTotalToLex, helpMessage);
+                            currentMessage = vscode.l10n.t("{0}/{1} files searched.{2}", numFinishedLexing, numTotalToLex, helpMessage);
                         }
                     } else {
-                        currentMessage = localize("files.confirmed", "{0}/{1} files confirmed.{2}", numFinishedConfirming, numTotalToParse, helpMessage);
+                        currentMessage = vscode.l10n.t("{0}/{1} files confirmed.{2}", numFinishedConfirming, numTotalToParse, helpMessage);
                     }
                     const currentLexProgress: number = numFinishedLexing / numTotalToLex;
                     const confirmingWeight: number = 0.5; // Count confirming as 50% of parsing time (even though it's a lot less) so that the progress bar change is more noticeable.
@@ -465,14 +461,13 @@ export class ReferencesManager {
         this.clearViews();
 
         if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek && !this.referencesChannel) {
-            this.referencesChannel = vscode.window.createOutputChannel(localize("c.cpp.peek.references", "C/C++ Peek References"));
+            this.referencesChannel = vscode.window.createOutputChannel(vscode.l10n.t("C/C++ Peek References"));
             this.disposables.push(this.referencesChannel);
         }
 
         if (this.referencesStartedWhileTagParsing) {
             const showLog: boolean = util.getNumericLoggingLevel(new CppSettings().loggingLevel) >= 3;
-            const msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
-                referencesCommandModeToString(this.client.ReferencesCommandMode));
+            const msg: string = vscode.l10n.t("[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.", referencesCommandModeToString(this.client.ReferencesCommandMode));
             if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
                 if (this.referencesChannel) {
                     this.referencesChannel.appendLine(msg);

@@ -58,17 +58,8 @@ const config = {
     }
 }
 
-module.exports = (env) => {
-    if (env.vscode_nls) {
-        // rewrite nls call when being asked for
-        // @ts-ignore
-        config.module.rules.unshift({
-            loader: 'vscode-nls-dev/lib/webpack-loader',
-            options: {
-                base: `${__dirname}/src`
-            }
-        })
-    }
-
+module.exports = () => {
+    // Localization is handled by VS Code's built-in l10n support (the "l10n" field in
+    // package.json and vscode.l10n.t() call sites), so no nls rewriting loader is needed.
     return config
 };

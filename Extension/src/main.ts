@@ -14,7 +14,6 @@ import * as Telemetry from './telemetry';
 
 import * as semver from 'semver';
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
-import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import { CppBuildTaskProvider, cppBuildTaskProvider } from './LanguageServer/cppBuildTaskProvider';
 import { getLocaleId, getLocalizedHtmlPath } from './LanguageServer/localization';
@@ -26,9 +25,6 @@ import { logMachineIdMappings } from './id';
 import { instrument, sendInstrumentation } from './instrumentation';
 import { disposeOutputChannels, log } from './logger';
 import { PlatformInformation } from './platform';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
@@ -100,7 +96,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     if (isOldMacOs) {
         languageServiceDisabled = true;
-        void vscode.window.showErrorMessage(localize("macos.version.deprecated", "Versions of the C/C++ extension more recent than {0} require at least macOS version {1}.", "1.9.8", "10.12"));
+        void vscode.window.showErrorMessage(vscode.l10n.t("Versions of the C/C++ extension more recent than {0} require at least macOS version {1}.", "1.9.8", "10.12"));
     } else {
         if (settings.intelliSenseEngine === "disabled") {
             languageServiceDisabled = true;
@@ -162,7 +158,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         await LanguageServer.registerCommands(false);
         // The check here for isIntelliSenseEngineDisabled avoids logging
         // the message on old Macs that we've already displayed a warning for.
-        log(localize("intellisense.disabled", "intelliSenseEngine is disabled"));
+        log(vscode.l10n.t("intelliSenseEngine is disabled"));
         util.setProgress(util.getProgressLanguageServiceDisabled());
     }
 
@@ -310,15 +306,15 @@ async function checkVsixCompatibility(): Promise<void> {
                     console.log("Unrecognized TargetPlatform in .vsixmanifest");
                     break;
             }
-            const moreInfoButton: string = localize("more.info.button", "More Info");
-            const ignoreButton: string = localize("ignore.button", "Ignore");
+            const moreInfoButton: string = vscode.l10n.t("More Info");
+            const ignoreButton: string = vscode.l10n.t("Ignore");
             let promise: Thenable<string | undefined> | undefined;
             if (!isPlatformCompatible) {
-                promise = vscode.window.showErrorMessage(localize("vsix.platform.incompatible", "The C/C++ extension installed does not match your system.", vsixTargetPlatform), moreInfoButton);
+                promise = vscode.window.showErrorMessage(vscode.l10n.t("The C/C++ extension installed does not match your system.", vsixTargetPlatform), moreInfoButton);
             } else if (!isPlatformMatching) {
                 if (!ignoreMismatchedCompatibleVsix.Value) {
                     resetIgnoreMismatchedCompatibleVsix = false;
-                    promise = vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The C/C++ extension installed is compatible with but does not match your system.", vsixTargetPlatform), moreInfoButton, ignoreButton);
+                    promise = vscode.window.showWarningMessage(vscode.l10n.t("The C/C++ extension installed is compatible with but does not match your system.", vsixTargetPlatform), moreInfoButton, ignoreButton);
                 }
             }
 

@@ -305,7 +305,7 @@ export async function checkPrep() {
     failing = !await assertAnyFolder('dist/walkthrough') && (quiet || warn(`The walkthrough files are not in place.`)) || failing;
     failing = !await assertAnyFolder('dist/html') && (quiet || warn(`The html files are not in place.`)) || failing;
     failing = !await assertAnyFolder('dist/schema') && (quiet || warn(`The schema files are not in place.`)) || failing;
-    failing = !await assertAnyFile('dist/nls.metadata.json') && (quiet || warn(`The extension translation file '${$root}/dist/nls.metadata.json is missing.`)) || failing;
+    failing = !await assertAnyFile('l10n/bundle.l10n.json') && (quiet || warn(`The extension localization bundle '${$root}/l10n/bundle.l10n.json is missing.`)) || failing;
     failing = await checkDTS() || failing;
 
     if (!failing) {

@@ -6,14 +6,10 @@
 
 import * as os from 'os';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import { getLoggingLevel } from './common';
 import { sendInstrumentation } from './instrumentation';
 import { CppSourceStr } from './LanguageServer/extension';
 import { getLocalizedString, LocalizeStringParams } from './LanguageServer/localization';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 // This is used for testing purposes
 let Subscriber: (message: string) => void;
@@ -102,24 +98,22 @@ export function getOutputChannel(): vscode.OutputChannel {
 
 export function getDiagnosticsChannel(): vscode.OutputChannel {
     if (!diagnosticsChannel) {
-        diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
+        diagnosticsChannel = vscode.window.createOutputChannel(vscode.l10n.t("C/C++ Diagnostics"));
     }
     return diagnosticsChannel;
 }
 
 export function getCrashCallStacksChannel(): vscode.OutputChannel {
     if (!crashCallStacksChannel) {
-        crashCallStacksChannel = vscode.window.createOutputChannel(localize("c.cpp.crash.call.stacks.title", "C/C++ Crash Call Stacks"));
-        crashCallStacksChannel.appendLine(localize({ key: "c.cpp.crash.call.stacks.description", comment: ["{0} is a URL."] },
-            "A C/C++ extension process has crashed. The crashing process name, date/time, signal, and call stack are below -- it would be helpful to include that in a bug report at {0}.",
-            "https://github.com/Microsoft/vscode-cpptools/issues"));
+        crashCallStacksChannel = vscode.window.createOutputChannel(vscode.l10n.t("C/C++ Crash Call Stacks"));
+        crashCallStacksChannel.appendLine(vscode.l10n.t({ message: "A C/C++ extension process has crashed. The crashing process name, date/time, signal, and call stack are below -- it would be helpful to include that in a bug report at {0}.", args: ["https://github.com/Microsoft/vscode-cpptools/issues"], comment: ["{0} is a URL."] }));
     }
     return crashCallStacksChannel;
 }
 
 export function getSshChannel(): vscode.OutputChannel {
     if (!sshChannel) {
-        sshChannel = vscode.window.createOutputChannel(localize("c.cpp.ssh.channel", "{0}: SSH", "Cpptools"));
+        sshChannel = vscode.window.createOutputChannel(vscode.l10n.t("{0}: SSH", "Cpptools"));
     }
     return sshChannel;
 }
@@ -149,7 +143,7 @@ export interface DebugProtocolParams {
 
 export function logDebugProtocol(output: DebugProtocolParams): void {
     if (!debugChannel) {
-        debugChannel = vscode.window.createOutputChannel(`${localize("c.cpp.debug.protocol", "C/C++ Debug Protocol")}`);
+        debugChannel = vscode.window.createOutputChannel(`${vscode.l10n.t("C/C++ Debug Protocol")}`);
     }
     debugChannel.appendLine("");
     debugChannel.appendLine("************************************************************************************************************************");
@@ -164,7 +158,7 @@ export function showWarning(params: ShowWarningParams): void {
     const message: string = getLocalizedString(params.localizeStringParams);
     let showChannel: boolean = false;
     if (!warningChannel) {
-        warningChannel = vscode.window.createOutputChannel(`${localize("c.cpp.warnings", "C/C++ Configuration Warnings")}`);
+        warningChannel = vscode.window.createOutputChannel(`${vscode.l10n.t("C/C++ Configuration Warnings")}`);
         showChannel = true;
     }
     // Append before showing the channel, to avoid a delay.

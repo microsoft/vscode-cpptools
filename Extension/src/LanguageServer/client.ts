@@ -30,7 +30,6 @@ import { SourceFileConfiguration, SourceFileConfigurationItem, Version, Workspac
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
 import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, ResponseError, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
-import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
 import { ManualPromise } from '../Utility/Async/manualPromise';
 import { ManualSignal } from '../Utility/Async/manualSignal';
@@ -73,8 +72,6 @@ import minimatch = require("minimatch");
 function deepCopy(obj: any) {
     return JSON.parse(JSON.stringify(obj));
 }
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let ui: LanguageStatusUI;
 let timeStamp: number = 0;
@@ -1098,10 +1095,10 @@ export class DefaultClient implements Client {
         paths = paths.map(p => p.replace(/[\\/]/g, preferredPathSeparator));
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = compilersOnly || !vscode.workspace.workspaceFolders || !this.RootFolder ?
-            localize("select.compiler", "Select a compiler to configure for IntelliSense") :
+            vscode.l10n.t("Select a compiler to configure for IntelliSense") :
             vscode.workspace.workspaceFolders.length > 1 ?
-                localize("configure.intelliSense.forFolder", "How would you like to configure IntelliSense for the '{0}' folder?", this.RootFolder.name) :
-                localize("configure.intelliSense.thisFolder", "How would you like to configure IntelliSense for this folder?");
+                vscode.l10n.t("How would you like to configure IntelliSense for the '{0}' folder?", this.RootFolder.name) :
+                vscode.l10n.t("How would you like to configure IntelliSense for this folder?");
 
         const items: IndexableQuickPickItem[] = [];
         let isCompilerSection: boolean = false;
@@ -1111,16 +1108,16 @@ export class DefaultClient implements Client {
 
             if (isCompiler) {
                 const path: string | undefined = paths[i].replace(compilerName, "");
-                const description: string = localize("found.string", "Found at {0}", path);
-                const label: string = localize("use.compiler", "Use {0}", compilerName);
+                const description: string = vscode.l10n.t("Found at {0}", path);
+                const label: string = vscode.l10n.t("Use {0}", compilerName);
                 items.push({ label: label, description: description, index: i });
             } else if (paths[i] === DefaultClient.configurationProvidersLabel) {
-                items.push({ label: localize("configuration.providers", "configuration providers"), index: i, kind: vscode.QuickPickItemKind.Separator });
+                items.push({ label: vscode.l10n.t("configuration providers"), index: i, kind: vscode.QuickPickItemKind.Separator });
             } else if (paths[i] === DefaultClient.compileCommandsLabel) {
                 items.push({ label: paths[i], index: i, kind: vscode.QuickPickItemKind.Separator });
             } else if (paths[i] === DefaultClient.compilersLabel) {
                 isCompilerSection = true;
-                items.push({ label: localize("compilers", "compilers"), index: i, kind: vscode.QuickPickItemKind.Separator });
+                items.push({ label: vscode.l10n.t("compilers"), index: i, kind: vscode.QuickPickItemKind.Separator });
             } else {
                 items.push({ label: paths[i], index: i });
             }
@@ -1131,8 +1128,8 @@ export class DefaultClient implements Client {
     }
 
     public async showPrompt(sender?: any): Promise<void> {
-        const buttonMessage: string = localize("selectIntelliSenseConfiguration.string", "Select IntelliSense Configuration...");
-        const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), buttonMessage);
+        const buttonMessage: string = vscode.l10n.t("Select IntelliSense Configuration...");
+        const value: string | undefined = await vscode.window.showInformationMessage(vscode.l10n.t("You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), buttonMessage);
         if (value === buttonMessage) {
             return this.handleIntelliSenseConfigurationQuickPick(sender);
         }
@@ -1145,7 +1142,7 @@ export class DefaultClient implements Client {
         if (configProviders && configProviders.length > 0) {
             paths.push(DefaultClient.configurationProvidersLabel);
             for (const provider of configProviders) {
-                paths.push(localize("use.provider", "Use {0}", provider.name));
+                paths.push(vscode.l10n.t("Use {0}", provider.name));
             }
         }
         const configProvidersIndex: number = paths.length;
@@ -1153,7 +1150,7 @@ export class DefaultClient implements Client {
         if (!showCompilersOnly && this.compileCommandsPaths.length > 0) {
             paths.push(DefaultClient.compileCommandsLabel);
             for (const compileCommandsPath of this.compileCommandsPaths) {
-                paths.push(localize("use.compileCommands", "Use {0}", compileCommandsPath));
+                paths.push(vscode.l10n.t("Use {0}", compileCommandsPath));
             }
         }
         const compileCommandsIndex: number = paths.length;
@@ -1178,16 +1175,16 @@ export class DefaultClient implements Client {
         }
         const compilersIndex: number = paths.length;
         const compilerCount: number = compilersIndex === compileCommandsIndex ? 0 : compilersIndex - compileCommandsIndex - 1;
-        paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine..."));
+        paths.push(vscode.l10n.t("Select another compiler on my machine..."));
         let installShown = true;
         if (isWindows && util.getSenderType(sender) !== 'walkthrough') {
-            paths.push(localize("installCompiler.string", "Help me install a compiler"));
+            paths.push(vscode.l10n.t("Help me install a compiler"));
         } else if (!isWindows) {
-            paths.push(localize("installCompiler.string.nix", "Install a compiler"));
+            paths.push(vscode.l10n.t("Install a compiler"));
         } else {
             installShown = false;
         }
-        paths.push(localize("noConfig.string", "Do not configure with a compiler (not recommended)"));
+        paths.push(vscode.l10n.t("Do not configure with a compiler (not recommended)"));
         let preferredPathSeparator: string = settings.preferredPathSeparator;
         if (preferredPathSeparator === "Forward Slash") {
             preferredPathSeparator = "/";
@@ -1387,11 +1384,11 @@ export class DefaultClient implements Client {
                 failureMessageShown = true;
                 let additionalInfo: string;
                 if (err.code === "EPERM") {
-                    additionalInfo = localize('check.permissions', "EPERM: Check permissions for '{0}'", getLanguageServerFileName());
+                    additionalInfo = vscode.l10n.t("EPERM: Check permissions for '{0}'", getLanguageServerFileName());
                 } else {
                     additionalInfo = String(err);
                 }
-                void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", additionalInfo));
+                void vscode.window.showErrorMessage(vscode.l10n.t("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", additionalInfo));
             }
         }
 
@@ -1495,7 +1492,7 @@ export class DefaultClient implements Client {
             this.isSupported = false; // Running on an OS we don't support yet.
             if (!failureMessageShown) {
                 failureMessageShown = true;
-                void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", String(err)));
+                void vscode.window.showErrorMessage(vscode.l10n.t("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", String(err)));
             }
         }
 
@@ -1794,8 +1791,8 @@ export class DefaultClient implements Client {
                         );
                     }, 1000);
 
-                    const message: string = restart ? localize('server.crashed.restart', 'The language server crashed. Restarting...')
-                        : localize('server.crashed2', 'The language server crashed 5 times in the last 3 minutes. It will not be restarted.');
+                    const message: string = restart ? vscode.l10n.t('The language server crashed. Restarting...')
+                        : vscode.l10n.t('The language server crashed 5 times in the last 3 minutes. It will not be restarted.');
 
                     // We manually restart the language server so tell the LanguageClient not to do it automatically for us.
                     return { action: CloseAction.DoNotRestart, message };
@@ -1884,7 +1881,7 @@ export class DefaultClient implements Client {
                     const oldLoggingLevelLogged: boolean = this.loggingLevel > 1;
                     this.loggingLevel = util.getNumericLoggingLevel(changedSettings.loggingLevel);
                     if (oldLoggingLevelLogged || this.loggingLevel > 1) {
-                        getOutputChannelLogger().appendLine(localize({ key: "loggingLevel.changed", comment: ["{0} is the setting name 'loggingLevel', {1} is a string value such as 'Debug'"] }, "{0} has changed to: {1}", "loggingLevel", changedSettings.loggingLevel));
+                        getOutputChannelLogger().appendLine(vscode.l10n.t({ message: "{0} has changed to: {1}", args: ["loggingLevel", changedSettings.loggingLevel], comment: ["{0} is the setting name 'loggingLevel', {1} is a string value such as 'Debug'"] }));
                     }
                 }
                 const settings: CppSettings = new CppSettings();
@@ -2368,15 +2365,13 @@ export class DefaultClient implements Client {
             result = "timeout";
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.isConfigurationWarningsEnabled && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
-                const dismiss: string = localize("dismiss.button", "Dismiss");
-                const disable: string = localize("disable.warnings.button", "Disable Warnings");
+                const dismiss: string = vscode.l10n.t("Dismiss");
+                const disable: string = vscode.l10n.t("Disable Warnings");
                 const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
                 if (!configName) {
                     return "noConfigName";
                 }
-                let message: string = localize("unable.to.provide.configuration",
-                    "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
-                    provider.name, docUri.fsPath, configName);
+                let message: string = vscode.l10n.t("{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.", provider.name, docUri.fsPath, configName);
                 if (err) {
                     message += ` (${err})`;
                 }
@@ -2423,7 +2418,7 @@ export class DefaultClient implements Client {
         const configurationIndex: number = configurations.findIndex((config) => config.name === configurationName);
 
         if (configurationIndex === -1) {
-            throw new Error(localize("config.not.found", "The requested configuration name is not found: {0}", configurationName));
+            throw new Error(vscode.l10n.t("The requested configuration name is not found: {0}", configurationName));
         }
         this.configuration.select(configurationIndex);
     }
@@ -2545,7 +2540,7 @@ export class DefaultClient implements Client {
      * Use `await <client>.ready` when you need to ensure that the client is initialized, and still run in order.
      */
     enqueue<T>(task: () => Promise<T>) {
-        ok(this.isSupported, localize("unsupported.client", "Unsupported client"));
+        ok(this.isSupported, vscode.l10n.t("Unsupported client"));
 
         // create a placeholder promise that is resolved when the task is complete.
         const result = new ManualPromise<unknown>();
@@ -2620,7 +2615,7 @@ export class DefaultClient implements Client {
                 if (cancelToken) {
                     cancelToken.cancel();
                 }
-                reject(localize("timed.out", "Timed out in {0}ms.", ms));
+                reject(vscode.l10n.t("Timed out in {0}ms.", ms));
             }, ms);
         });
 
@@ -2892,13 +2887,9 @@ export class DefaultClient implements Client {
             if (filesDiscovered > 250000 || parsableFiles > 100000) {
                 // According to telemetry, less than 3% of workspaces have this many files so it seems like a reasonable threshold.
 
-                const message = localize(
-                    "parsing.stats.large.project",
-                    'Enumerated {0} files with {1} C/C++ source files detected. You may want to consider excluding some files for better performance.',
-                    filesDiscovered,
-                    parsableFiles);
-                const learnMore = localize('learn.more', 'Learn More');
-                const dontShowAgain = localize('dont.show.again', 'Don\'t Show Again');
+                const message = vscode.l10n.t('Enumerated {0} files with {1} C/C++ source files detected. You may want to consider excluding some files for better performance.', filesDiscovered, parsableFiles);
+                const learnMore = vscode.l10n.t('Learn More');
+                const dontShowAgain = vscode.l10n.t('Don\'t Show Again');
 
                 // We only want to show this once per session.
                 this.excessiveFilesWarningShown = true;
@@ -2949,7 +2940,7 @@ export class DefaultClient implements Client {
                 const status: IntelliSenseStatus = { status: Status.IntelliSenseCompiling };
                 testHook.updateStatus(status);
             } else if (message.endsWith("IntelliSense done")) {
-                getOutputChannelLogger().appendLineAtLevel(6, localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", (Date.now() - timeStamp) / 1000));
+                getOutputChannelLogger().appendLineAtLevel(6, vscode.l10n.t("Update IntelliSense time (sec): {0}", (Date.now() - timeStamp) / 1000));
                 this.model.isUpdatingIntelliSense.Value = false;
                 const status: IntelliSenseStatus = { status: Status.IntelliSenseReady };
                 testHook.updateStatus(status);
@@ -3432,7 +3423,7 @@ export class DefaultClient implements Client {
         }
 
         const out: Logger = getOutputChannelLogger();
-        out.appendLineAtLevel(6, localize("configurations.received", "Custom configurations received:"));
+        out.appendLineAtLevel(6, vscode.l10n.t("Custom configurations received:"));
         const sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
             if (this.isSourceFileConfigurationItem(item, providerVersion)) {
@@ -3548,7 +3539,7 @@ export class DefaultClient implements Client {
                 return;
             }
 
-            getOutputChannelLogger().appendLineAtLevel(6, localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
+            getOutputChannelLogger().appendLineAtLevel(6, vscode.l10n.t("Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
 
             // Separate compiler path and args before sending to language client
             if (util.isString(sanitized.compilerPath)) {
@@ -3946,7 +3937,7 @@ export class DefaultClient implements Client {
                 await vscode.env.clipboard.writeText(result.clipboardText);
                 copiedToClipboard = true;
             }
-            void vscode.window.showInformationMessage(result.errorText + (copiedToClipboard ? localize("fallback.clipboard", " Declaration/definition was copied.") : ""));
+            void vscode.window.showInformationMessage(result.errorText + (copiedToClipboard ? vscode.l10n.t(" Declaration/definition was copied.") : ""));
             return;
         }
 
@@ -4044,8 +4035,8 @@ export class DefaultClient implements Client {
         }
 
         let functionName: string | undefined = await vscode.window.showInputBox({
-            title: localize('handle.extract.name', 'Name the extracted function'),
-            placeHolder: localize('handle.extract.new.function', 'NewFunction')
+            title: vscode.l10n.t('Name the extracted function'),
+            placeHolder: vscode.l10n.t('NewFunction')
         });
 
         if (functionName === undefined || functionName === "") {
@@ -4078,8 +4069,7 @@ export class DefaultClient implements Client {
 
         // Handle error messaging
         if (result.errorText) {
-            void vscode.window.showErrorMessage(`${localize("handle.extract.error",
-                "Extract to function failed: {0}", result.errorText)}`);
+            void vscode.window.showErrorMessage(`${vscode.l10n.t("Extract to function failed: {0}", result.errorText)}`);
             return;
         }
 
@@ -4189,8 +4179,7 @@ export class DefaultClient implements Client {
                         currentTextNewFunctionStart;
                     if (rangeStartCharacter < 0) {
                         // functionName is missing -- unexpected error.
-                        void vscode.window.showErrorMessage(`${localize("invalid.edit",
-                            "Extract to function failed. An invalid edit was generated: '{0}'", edit.newText)}`);
+                        void vscode.window.showErrorMessage(`${vscode.l10n.t("Extract to function failed. An invalid edit was generated: '{0}'", edit.newText)}`);
                         continue;
                     }
                     const replaceEditRange = new vscode.Range(

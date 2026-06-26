@@ -10,7 +10,6 @@ import * as path from 'path';
 import * as semver from 'semver';
 import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import * as which from 'which';
 import * as util from '../common';
 import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isObject, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
@@ -21,9 +20,6 @@ import { getEditorConfigSettings, mapIndentationReferenceToEditorConfig, mapInde
 import { clients } from './extension';
 import { CommentPattern } from './languageConfig';
 import { PersistentState } from './persistentState';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface Excludes {
     [key: string]: (boolean | { when: string });
@@ -937,8 +933,7 @@ export class CppSettings extends Settings {
                             foundEditorConfigWithVcFormatSettings = true;
                             const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
                             if (!didEditorConfigNotice.Value) {
-                                void vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks. Do not change the contents of the single-quoted text."] },
-                                    "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'default' value of the 'C_Cpp.formatting' setting."));
+                                void vscode.window.showInformationMessage(vscode.l10n.t({ message: "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'default' value of the 'C_Cpp.formatting' setting.", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks. Do not change the contents of the single-quoted text."] }));
                                 didEditorConfigNotice.Value = true;
                             }
                             return true;
