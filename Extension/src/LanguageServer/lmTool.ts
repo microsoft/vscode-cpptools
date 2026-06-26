@@ -11,6 +11,7 @@ import * as telemetry from '../telemetry';
 import { ChatContextResult } from './client';
 import { getClients } from './extension';
 import { checkDuration } from './utils';
+const l10n = vscode.l10n;
 
 const MSVC: string = 'MSVC';
 const Clang: string = 'Clang';
@@ -113,7 +114,7 @@ export async function getProjectContext(uri: vscode.Uri, context: { flags: Recor
     catch (exception) {
         try {
             const err: Error = exception as Error;
-            logger.getOutputChannelLogger().appendLine(vscode.l10n.t("Error while retrieving the project context. Reason: {0}", err.message));
+            logger.getOutputChannelLogger().appendLine(l10n.t("Error while retrieving the project context. Reason: {0}", err.message));
         }
         catch {
             // Intentionally swallow any exception.
@@ -182,7 +183,7 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
 
     private async reportError(): Promise<void> {
         try {
-            logger.getOutputChannelLogger().appendLine(vscode.l10n.t("Error while retrieving the #cpp context."));
+            logger.getOutputChannelLogger().appendLine(l10n.t("Error while retrieving the #cpp context."));
         }
         catch {
             // Intentionally swallow any exception.

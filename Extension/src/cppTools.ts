@@ -11,6 +11,7 @@ import { CustomConfigurationProvider1, CustomConfigurationProviderCollection, ge
 import * as LanguageServer from './LanguageServer/extension';
 import { getOutputChannelLogger } from './logger';
 import * as test from './testHook';
+const l10n = vscode.l10n;
 
 export class CppTools implements CppToolsTestApi {
     private version: Version;
@@ -56,7 +57,7 @@ export class CppTools implements CppToolsTestApi {
         if (providers.add(provider, this.version)) {
             const added: CustomConfigurationProvider1 | undefined = providers.get(provider);
             if (added) {
-                getOutputChannelLogger().appendLineAtLevel(5, vscode.l10n.t("Custom configuration provider '{0}' registered", added.name));
+                getOutputChannelLogger().appendLineAtLevel(5, l10n.t("Custom configuration provider '{0}' registered", added.name));
                 this.providers.push(added);
                 LanguageServer.getClients().forEach(client => void client.onRegisterCustomConfigurationProvider(added));
                 this.addNotifyReadyTimer(added);

@@ -21,6 +21,7 @@ import { ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, DebugC
 import { DebuggerType } from './configurations';
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
+const l10n = vscode.l10n;
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensionContext.subscriptions.
 const disposables: vscode.Disposable[] = [];
@@ -60,7 +61,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.AddDebugConfiguration", async (textEditor: vscode.TextEditor, _edit: vscode.TextEditorEdit, ..._args: any[]) => {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!folder) {
-            void vscode.window.showWarningMessage(vscode.l10n.t("Add debug configuration is not available for single file."));
+            void vscode.window.showWarningMessage(l10n.t("Add debug configuration is not available for single file."));
         }
         await debugProvider.addDebugConfiguration(textEditor);
     }));
@@ -169,18 +170,18 @@ async function addSshTargetImpl(): Promise<string> {
     const validConfigFiles: string[] = [];
     for (const configFile of getSshConfigurationFiles()) {
         if (await pathAccessible(configFile) && parseFailures.get(configFile)) {
-            getSshChannel().appendLine(vscode.l10n.t('Cannot modify SSH configuration file because of parse failure "{0}".', configFile));
+            getSshChannel().appendLine(l10n.t('Cannot modify SSH configuration file because of parse failure "{0}".', configFile));
         } else {
             validConfigFiles.push(configFile);
         }
     }
     if (validConfigFiles.length === 0) {
-        throw new Error(vscode.l10n.t('No valid SSH configuration file found.'));
+        throw new Error(l10n.t('No valid SSH configuration file found.'));
     }
 
     const name: string | undefined = await vscode.window.showInputBox({
-        title: vscode.l10n.t('Enter SSH Target Name'),
-        placeHolder: vscode.l10n.t('Example: `mySSHTarget`'),
+        title: l10n.t('Enter SSH Target Name'),
+        placeHolder: l10n.t('Example: `mySSHTarget`'),
         ignoreFocusOut: true
     });
     if (name === undefined) {
@@ -189,8 +190,8 @@ async function addSshTargetImpl(): Promise<string> {
     }
 
     const command: string | undefined = await vscode.window.showInputBox({
-        title: vscode.l10n.t('Enter SSH Connection Command'),
-        placeHolder: vscode.l10n.t('Example: `ssh hello@microsoft.com -A`'),
+        title: l10n.t('Enter SSH Connection Command'),
+        placeHolder: l10n.t('Example: `ssh hello@microsoft.com -A`'),
         ignoreFocusOut: true
     });
     if (!command) {
@@ -199,7 +200,7 @@ async function addSshTargetImpl(): Promise<string> {
 
     const newEntry: { [key: string]: string } = sshCommandToConfig(command, name);
 
-    const targetFile: string | undefined = await vscode.window.showQuickPick(validConfigFiles, { title: vscode.l10n.t('Select an SSH configuration file') });
+    const targetFile: string | undefined = await vscode.window.showQuickPick(validConfigFiles, { title: l10n.t('Select an SSH configuration file') });
     if (!targetFile) {
         return '';
     }
@@ -212,9 +213,9 @@ async function addSshTargetImpl(): Promise<string> {
 }
 
 async function removeSshTargetImpl(node: TargetLeafNode): Promise<boolean> {
-    const labelYes: string = vscode.l10n.t('Yes');
-    const labelNo: string = vscode.l10n.t('No');
-    const confirm: string | undefined = await vscode.window.showInformationMessage(vscode.l10n.t('Are you sure you want to permanently delete "{0}"?', node.name), labelYes, labelNo);
+    const labelYes: string = l10n.t('Yes');
+    const labelNo: string = l10n.t('No');
+    const confirm: string | undefined = await vscode.window.showInformationMessage(l10n.t('Are you sure you want to permanently delete "{0}"?', node.name), labelYes, labelNo);
     if (!confirm || confirm === labelNo) {
         return false;
     }

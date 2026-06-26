@@ -4,10 +4,11 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as vscode from 'vscode';
 import { getExtensionFilePath } from '../common';
 import { lookupString } from '../nativeStrings';
+const l10n = vscode.l10n;
 import path = require('path');
 
 export interface LocalizeStringParams {
@@ -65,5 +66,5 @@ export function getLocalizedHtmlPath(originalPath: string): string {
 }
 
 export function getLocalizedSymbolScope(scope: string, detail: string): string {
-    return vscode.l10n.t({ message: "{0}, {1}", args: [scope, detail], comment: ["{0} is an untranslated C++ keyword (e.g. \"private\") and {1} is either another keyword (e.g. \"typedef\") or a localized property (e.g. a localized version of \"declaration\""] });
+    return l10n.t({ message: "{0}, {1}", args: [scope, detail], comment: ["{0} is an untranslated C++ keyword (e.g. \"private\") and {1} is either another keyword (e.g. \"typedef\") or a localized property (e.g. a localized version of \"declaration\")."] });
 }

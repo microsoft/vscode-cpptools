@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { getFullHostAddress, getFullHostAddressNoPort, ISshHostInfo, ISshLocalForwardInfo, ProcessReturnType } from '../common';
 import { defaultSystemInteractor } from './commandInteractors';
 import { runSshTerminalCommandWithLogin } from './sshCommandRunner';
+const l10n = vscode.l10n;
 
 export async function scp(files: vscode.Uri[], host: ISshHostInfo, targetDir: string, recursive: boolean = true, scpPath?: string, jumpHosts?: ISshHostInfo[], cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
     const args: string[] = [];
@@ -78,16 +79,16 @@ export function ssh(host: ISshHostInfo, command: string, sshPath?: string, jumpH
 function localForwardToArgs(localForward: ISshLocalForwardInfo): string[] {
     // Do not combine error checking and arg conversion for clarity.
     if (localForward.localSocket && (localForward.bindAddress || localForward.port)) {
-        throw Error(vscode.l10n.t('"localSocket" cannot be specified at the same time with "bindAddress" or "port" in localForwards'));
+        throw Error(l10n.t('"localSocket" cannot be specified at the same time with "bindAddress" or "port" in localForwards'));
     }
     if (!localForward.localSocket && !localForward.port) {
-        throw Error(vscode.l10n.t('"port" or "localSocket" required in localForwards'));
+        throw Error(l10n.t('"port" or "localSocket" required in localForwards'));
     }
     if (localForward.remoteSocket && (localForward.host || localForward.hostPort)) {
-        throw Error(vscode.l10n.t('"remoteSocket" cannot be specified at the same time with "host" or "hostPort" in localForwards'));
+        throw Error(l10n.t('"remoteSocket" cannot be specified at the same time with "host" or "hostPort" in localForwards'));
     }
     if (!localForward.remoteSocket && (!localForward.host || !localForward.hostPort)) {
-        throw Error(vscode.l10n.t('"host" and "hostPort", or "remoteSocket" required in localForwards'));
+        throw Error(l10n.t('"host" and "hostPort", or "remoteSocket" required in localForwards'));
     }
 
     let arg: string = '';

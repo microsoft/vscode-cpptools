@@ -9,6 +9,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { buildShellCommandLine, sessionIsWsl } from '../common';
 import { isWindows } from '../constants';
+const l10n = vscode.l10n;
 
 /**
  * A minimal inline Debug Adapter that runs the target program directly without a debug adapter
@@ -189,7 +190,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             }
         }
 
-        const message = vscode.l10n.t({ message: 'No terminal emulator found. Please set the $TERMINAL environment variable to your terminal emulator of choice, or install one of the following: x-terminal-emulator, gnome-terminal, konsole, xterm.', comment: ['{Locked="$TERMINAL"} {Locked="x-terminal-emulator"} {Locked="gnome-terminal"} {Locked="konsole"} {Locked="xterm"}'] });
+        const message = l10n.t({ message: 'No terminal emulator found. Please set the $TERMINAL environment variable to your terminal emulator of choice, or install one of the following: x-terminal-emulator, gnome-terminal, konsole, xterm.', comment: ['{Locked="$TERMINAL"} {Locked="x-terminal-emulator"} {Locked="gnome-terminal"} {Locked="konsole"} {Locked="xterm"}'] });
         vscode.window.showErrorMessage(message);
     }
 

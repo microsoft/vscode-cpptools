@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 import { getOutputChannel } from '../logger';
 import { logDebuggerEvent } from '../telemetry';
 import { RunWithoutDebuggingAdapter } from './runWithoutDebuggingAdapter';
+const l10n = vscode.l10n;
 
 // Registers DebugAdapterDescriptorFactory for `cppdbg` and `cppvsdbg`.
 // NOTE: This file is not automatically tested.
@@ -62,7 +63,7 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterD
             }
 
             if (os.platform() !== 'win32') {
-                void vscode.window.showErrorMessage(vscode.l10n.t("Debugger type '{0}' is not available for non-Windows machines.", "cppvsdbg"));
+                void vscode.window.showErrorMessage(l10n.t("Debugger type '{0}' is not available for non-Windows machines.", "cppvsdbg"));
                 return null;
             } else {
                 return new vscode.DebugAdapterExecutable(
@@ -91,7 +92,7 @@ function logReasonForNoDebugNotSupported(configuration: vscode.DebugConfiguratio
     outputChannel.show(true);
 
     if (configuration.request !== 'launch') {
-        outputChannel.appendLine(vscode.l10n.t("Run Without Debugging is only supported for launch configurations."));
+        outputChannel.appendLine(l10n.t("Run Without Debugging is only supported for launch configurations."));
         return;
     }
     if (configuration.pipeTransport) {
@@ -106,8 +107,8 @@ function logReasonForNoDebugNotSupported(configuration: vscode.DebugConfiguratio
     if (configuration.coreDumpPath) {
         disallowedProperties.push('coreDumpPath');
     }
-    outputChannel.appendLine(vscode.l10n.t("Launch configurations with the following properties cannot be run directly in the terminal: {0}", disallowedProperties.join(', ')));
-    outputChannel.appendLine(vscode.l10n.t("Program output will appear in the Debug Console instead."));
-    outputChannel.appendLine(vscode.l10n.t("To suppress this warning, set the 'ignoreRunWithoutDebuggingWarnings' property to true in your launch configuration."));
+    outputChannel.appendLine(l10n.t("Launch configurations with the following properties cannot be run directly in the terminal: {0}", disallowedProperties.join(', ')));
+    outputChannel.appendLine(l10n.t("Program output will appear in the Debug Console instead."));
+    outputChannel.appendLine(l10n.t("To suppress this warning, set the 'ignoreRunWithoutDebuggingWarnings' property to true in your launch configuration."));
 }
 

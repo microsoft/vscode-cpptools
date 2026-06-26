@@ -19,8 +19,9 @@ import { isWindows } from './constants';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
+const l10n = vscode.l10n;
 
-export const failedToParseJson: string = vscode.l10n.t("Failed to parse json file, possibly due to comments or trailing commas.");
+export const failedToParseJson: string = l10n.t("Failed to parse json file, possibly due to comments or trailing commas.");
 
 export type Mutable<T> = {
     // eslint-disable-next-line @typescript-eslint/array-type
@@ -226,7 +227,7 @@ export function isCppOrRelated(document: vscode.TextDocument): boolean {
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;
-export const extensionNotReadyString: string = vscode.l10n.t('The C/C++ extension is still installing. See the output window for more information.');
+export const extensionNotReadyString: string = l10n.t('The C/C++ extension is still installing. See the output window for more information.');
 
 export function displayExtensionNotReadyPrompt(): void {
     if (!isExtensionNotReadyPromptDisplayed) {
@@ -708,7 +709,7 @@ export function deleteDirectory(directoryPath: string): Promise<void> {
 
 export function getReadmeMessage(): string {
     const readmePath: string = getExtensionFilePath("README.md");
-    const readmeMessage: string = vscode.l10n.t("Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
+    const readmeMessage: string = l10n.t("Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
     return readmeMessage;
 }
 
@@ -774,14 +775,14 @@ export async function spawnChildProcess(program: string, args: string[] = [], co
     const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, skipLogging, cancellationToken);
     const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
     if (programOutput.exitCode) {
-        return { succeeded: false, exitCode, outputError: programOutput.stderr, output: programOutput.stderr || programOutput.stdout || vscode.l10n.t('Process exited with code {0}', String(exitCode)) };
+        return { succeeded: false, exitCode, outputError: programOutput.stderr, output: programOutput.stderr || programOutput.stdout || l10n.t('Process exited with code {0}', String(exitCode)) };
     } else {
         let stdout: string;
         if (programOutput.stdout.length) {
             // Type system doesn't work very well here, so we need call toString
             stdout = programOutput.stdout;
         } else {
-            stdout = vscode.l10n.t('Process executed successfully.');
+            stdout = l10n.t('Process executed successfully.');
         }
         return { succeeded: true, exitCode, outputError: programOutput.stderr, output: stdout };
     }
@@ -804,7 +805,7 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
     }
 
     const cancellationTokenListener: vscode.Disposable | undefined = cancellationToken?.onCancellationRequested(() => {
-        getOutputChannelLogger().appendLine(vscode.l10n.t('Killing process {0}', program));
+        getOutputChannelLogger().appendLine(l10n.t('Killing process {0}', program));
         proc.kill();
     });
 
@@ -868,7 +869,7 @@ export async function allowExecution(file: string): Promise<void> {
             }
         } else {
             getOutputChannelLogger().appendLine("");
-            getOutputChannelLogger().appendLine(vscode.l10n.t("Warning: Expected file {0} is missing.", file));
+            getOutputChannelLogger().appendLine(l10n.t("Warning: Expected file {0} is missing.", file));
         }
     }
 }
@@ -901,7 +902,7 @@ export function checkDistro(platformInfo: PlatformInformation): void {
     if (platformInfo.platform !== 'win32' && platformInfo.platform !== 'linux' && platformInfo.platform !== 'darwin') {
         // this should never happen because VSCode doesn't run on FreeBSD
         // or SunOS (the other platforms supported by node)
-        getOutputChannelLogger().appendLine(vscode.l10n.t("Warning: Debugging has not been tested for this platform.") + " " + getReadmeMessage());
+        getOutputChannelLogger().appendLine(l10n.t("Warning: Debugging has not been tested for this platform.") + " " + getReadmeMessage());
     }
 }
 
@@ -928,11 +929,11 @@ export async function renameAsync(oldName: string, newName: string): Promise<voi
 }
 
 export async function promptForReloadWindowDueToSettingsChange(): Promise<void> {
-    await promptReloadWindow(vscode.l10n.t("Reload the workspace for the settings change to take effect."));
+    await promptReloadWindow(l10n.t("Reload the workspace for the settings change to take effect."));
 }
 
 export async function promptReloadWindow(message: string): Promise<void> {
-    const reload: string = vscode.l10n.t("Reload");
+    const reload: string = l10n.t("Reload");
     const value: string | undefined = await vscode.window.showInformationMessage(message, reload);
     if (value === reload) {
         return vscode.commands.executeCommand("workbench.action.reloadWindow");

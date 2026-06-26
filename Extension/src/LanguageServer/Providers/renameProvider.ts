@@ -9,6 +9,7 @@ import { DefaultClient, workspaceReferences } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CancellationSender, ReferenceType, ReferencesParams, ReferencesResult, getReferenceItemIconPath, getReferenceTagString } from '../references';
 import { CppSettings } from '../settings';
+const l10n = vscode.l10n;
 
 const RenameRequest: RequestType<ReferencesParams, ReferencesResult, void> =
     new RequestType<ReferencesParams, ReferencesResult, void>('cpptools/rename');
@@ -26,7 +27,7 @@ export class RenameProvider implements vscode.RenameProvider {
 
         const settings: CppSettings = new CppSettings();
         if (settings.renameRequiresIdentifier && !util.isValidIdentifier(newName)) {
-            void vscode.window.showErrorMessage(vscode.l10n.t("Invalid identifier provided for the Rename Symbol operation."));
+            void vscode.window.showErrorMessage(l10n.t("Invalid identifier provided for the Rename Symbol operation."));
             return undefined;
         }
 
@@ -64,7 +65,7 @@ export class RenameProvider implements vscode.RenameProvider {
         if (cancelSource.token.isCancellationRequested || response.isCanceled) {
             throw new vscode.CancellationError();
         } else if (response.referenceInfos.length === 0) {
-            void vscode.window.showErrorMessage(vscode.l10n.t("A definition for the selected symbol could not be located."));
+            void vscode.window.showErrorMessage(l10n.t("A definition for the selected symbol could not be located."));
         } else {
             for (const reference of response.referenceInfos) {
                 const uri: vscode.Uri = vscode.Uri.file(reference.file);

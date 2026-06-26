@@ -12,6 +12,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as util from '../common';
 import * as debugUtils from './utils';
+const l10n = vscode.l10n;
 
 export interface AttachItemsProvider {
     getAttachItems(token?: vscode.CancellationToken): Promise<AttachItem[]>;
@@ -83,24 +84,24 @@ export class RemoteAttachPicker {
             processes = await this.getRemoteOSAndProcesses(pipeCmd, quoteArgs);
         } else if (!pipeTransport && useExtendedRemote) {
             if (!miDebuggerPath || !miDebuggerServerAddress) {
-                throw new Error(vscode.l10n.t("{0} in debug configuration requires {1} and {2}", "useExtendedRemote", "miDebuggerPath", "miDebuggerServerAddress"));
+                throw new Error(l10n.t("{0} in debug configuration requires {1} and {2}", "useExtendedRemote", "miDebuggerPath", "miDebuggerServerAddress"));
             }
             processes = await this.getRemoteProcessesExtendedRemote(miDebuggerPath, miDebuggerServerAddress);
         } else {
-            throw new Error(vscode.l10n.t("Chosen debug configuration does not contain {0} or {1}", "pipeTransport", "useExtendedRemote"));
+            throw new Error(l10n.t("Chosen debug configuration does not contain {0} or {1}", "pipeTransport", "useExtendedRemote"));
         }
 
         const attachPickOptions: vscode.QuickPickOptions = {
             matchOnDetail: true,
             matchOnDescription: true,
-            placeHolder: vscode.l10n.t("Select the process to attach to")
+            placeHolder: l10n.t("Select the process to attach to")
         };
 
         const item: AttachItem | undefined = await vscode.window.showQuickPick(processes, attachPickOptions);
         if (item) {
             return item.id;
         } else {
-            throw new Error(vscode.l10n.t("Process not selected."));
+            throw new Error(l10n.t("Process not selected."));
         }
     }
 
@@ -152,7 +153,7 @@ export class RemoteAttachPicker {
         // Processes will follow if listed
         const lines: string[] = output.split(/\r?\n/);
         if (lines.length === 0) {
-            throw new Error(vscode.l10n.t("Pipe transport failed to get OS and processes."));
+            throw new Error(l10n.t("Pipe transport failed to get OS and processes."));
         } else {
             const remoteOS: string = lines[0].replace(/[\r\n]+/g, '');
 
@@ -162,7 +163,7 @@ export class RemoteAttachPicker {
 
             // Only got OS from uname
             if (lines.length === 1) {
-                throw new Error(vscode.l10n.t("Transport attach could not obtain processes list."));
+                throw new Error(l10n.t("Transport attach could not obtain processes list."));
             } else {
                 const processes: string[] = lines.slice(1);
                 return PsProcessParser.ParseProcessFromPsArray(processes)
@@ -197,16 +198,16 @@ export class RemoteAttachPicker {
         }
 
         if (!processListOutput.succeeded) {
-            throw new Error(vscode.l10n.t('Failed to make GDB connection: "{0}".', processListOutput.output));
+            throw new Error(l10n.t('Failed to make GDB connection: "{0}".', processListOutput.output));
         }
 
         if (processListOutput.outputError.length !== 0) {
-            throw new Error(vscode.l10n.t('Failed to make GDB connection: "{0}".', processListOutput.outputError));
+            throw new Error(l10n.t('Failed to make GDB connection: "{0}".', processListOutput.outputError));
         }
 
         const processes: AttachItem[] = this.parseProcessesFromInfoOsProcesses(processListOutput.output);
         if (!processes || processes.length === 0) {
-            throw new Error(vscode.l10n.t('Failed to parse processes: "{0}".', processListOutput.output));
+            throw new Error(l10n.t('Failed to parse processes: "{0}".', processListOutput.output));
         }
         return processes;
     }

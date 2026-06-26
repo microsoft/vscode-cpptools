@@ -20,6 +20,7 @@ import * as vscode from 'vscode';
 import { ISshConfigHostInfo, resolveHome } from "../common";
 import { isWindows } from '../constants';
 import { getSshChannel } from '../logger';
+const l10n = vscode.l10n;
 
 const globAsync: (pattern: string, options?: glob.IOptions | undefined) => Promise<string[]> = promisify(glob);
 
@@ -58,7 +59,7 @@ function extractHostNames(parsedConfig: Configuration): { [host: string]: string
         try {
             resolvedConfig = parsedConfig.compute(host);
         } catch {
-            getSshChannel().appendLine(vscode.l10n.t("Failed to find user info for SSH. This could be caused by VS Code being installed using 'snap'. Please reinstall VS Code using the 'deb' package if you are planning to use SSH features."));
+            getSshChannel().appendLine(l10n.t("Failed to find user info for SSH. This could be caused by VS Code being installed using 'snap'. Please reinstall VS Code using the 'deb' package if you are planning to use SSH features."));
         }
         if (resolvedConfig?.HostName !== undefined) {
             hostNames[host] = resolvedConfig.HostName;
@@ -84,7 +85,7 @@ export async function getSshConfiguration(configurationPath: string, resolveIncl
         parsedSrc = parse(src);
     } catch (err) {
         parseFailures.set(configurationPath, true);
-        getSshChannel().appendLine(vscode.l10n.t("Failed to parse SSH configuration file {0}: {1}", configurationPath, (err as Error).message));
+        getSshChannel().appendLine(l10n.t("Failed to parse SSH configuration file {0}: {1}", configurationPath, (err as Error).message));
         return parse('');
     }
     const config: Configuration = caseNormalizeConfigProps(parsedSrc);
@@ -156,7 +157,7 @@ async function getIncludedConfigFile(
     try {
         includedContents = (await fs.readFile(includePath)).toString();
     } catch {
-        getSshChannel().appendLine(vscode.l10n.t("Failed to read file {0}.", includePath));
+        getSshChannel().appendLine(l10n.t("Failed to read file {0}.", includePath));
         return;
     }
 
@@ -164,7 +165,7 @@ async function getIncludedConfigFile(
     try {
         parsedIncludedContents = parse(includedContents);
     } catch (err) {
-        getSshChannel().appendLine(vscode.l10n.t("Failed to parse SSH configuration file {0}: {1}", includePath, (err as Error).message));
+        getSshChannel().appendLine(l10n.t("Failed to parse SSH configuration file {0}: {1}", includePath, (err as Error).message));
         return;
     }
     await resolveConfigIncludes(parsedIncludedContents, includePath, processedIncludePaths, processedIncludeEntries);
@@ -177,7 +178,7 @@ export async function writeSshConfiguration(configurationPath: string, configura
         await vscode.workspace.fs.createDirectory(vscode.Uri.file(path.dirname(configurationPath)));
         await fs.writeFile(configurationPath, configuration.toString());
     } catch {
-        getSshChannel().appendLine(vscode.l10n.t("Failed to write to file {0}.", configurationPath));
+        getSshChannel().appendLine(l10n.t("Failed to write to file {0}.", configurationPath));
     }
 }
 
@@ -191,7 +192,7 @@ async function getSshConfigSource(configurationPath: string): Promise<string> {
         if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
             return '';
         }
-        getSshChannel().appendLine(vscode.l10n.t("Failed to read file {0}.", configurationPath));
+        getSshChannel().appendLine(l10n.t("Failed to read file {0}.", configurationPath));
     }
 
     return '';

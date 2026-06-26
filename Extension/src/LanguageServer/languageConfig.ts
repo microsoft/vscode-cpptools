@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import { isString } from '../common';
 import { getOutputChannel } from '../logger';
 import { CppSettings } from './settings';
+const l10n = vscode.l10n;
 
 export interface CommentPattern {
     begin: string;
@@ -270,7 +271,7 @@ export function getLanguageConfigFromPatterns(languageId: string, patterns?: (st
         }
     });
     if (duplicates) {
-        getOutputChannel().appendLine(vscode.l10n.t("Duplicate multiline comment patterns detected."));
+        getOutputChannel().appendLine(l10n.t("Duplicate multiline comment patterns detected."));
     }
     return { onEnterRules: beginRules.concat(continueRules).concat(endRules).filter(e => e) }; // Remove any 'undefined' entries
 }

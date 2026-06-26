@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import { getReferenceItemIconPath, getReferenceTagString, ReferenceType } from './references';
 import { NodeType, ReferencesModel, TreeNode } from './referencesModel';
+const l10n = vscode.l10n;
 
 export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     private referencesModel: ReferencesModel | undefined;
@@ -60,7 +61,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
 
                 if (element.node === NodeType.fileWithPendingRef) {
                     resultFile.command = {
-                        title: vscode.l10n.t("Go to reference"),
+                        title: l10n.t("Go to reference"),
                         command: 'C_Cpp.ShowReferenceItem',
                         arguments: [element]
                     };
@@ -84,7 +85,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                 resultRef.tooltip = `[${tag}]\n${element.referenceText}`;
 
                 resultRef.command = {
-                    title: vscode.l10n.t("Go to reference"),
+                    title: l10n.t("Go to reference"),
                     command: 'C_Cpp.ShowReferenceItem',
                     arguments: [element]
                 };

@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+const l10n = vscode.l10n;
 
 export interface Environment {
     name: string;
@@ -69,7 +70,7 @@ export class ParsedEnvironmentFile {
         // show error message if single lines cannot get parsed
         let warning: string | undefined;
         if (parseErrors.length !== 0) {
-            warning = vscode.l10n.t("Ignoring non-parsable lines in {0} {1}: ", "envFile", envFile);
+            warning = l10n.t("Ignoring non-parsable lines in {0} {1}: ", "envFile", envFile);
             parseErrors.forEach(function (value, idx, array): void {
                 warning += "\"" + value + "\"" + ((idx !== array.length - 1) ? ", " : ".");
             });

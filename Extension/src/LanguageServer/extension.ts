@@ -40,6 +40,7 @@ import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
+const l10n = vscode.l10n;
 
 export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
@@ -96,7 +97,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
     const dummy: any[] = [{}]; // To distinguish between entry from CodeActions and the command palette
     return {
         command: { title: 'vcpkgOnlineHelpSuggested', command: 'C_Cpp.VcpkgOnlineHelpSuggested', arguments: dummy },
-        title: vscode.l10n.t("Learn how to install a library for this header with vcpkg"),
+        title: l10n.t("Learn how to install a library for this header with vcpkg"),
         kind: vscode.CodeActionKind.QuickFix
     };
 }
@@ -104,7 +105,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
 function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
     return {
         command: { title: 'vcpkgClipboardInstallSuggested', command: 'C_Cpp.VcpkgClipboardInstallSuggested', arguments: [[port]] },
-        title: vscode.l10n.t("Copy vcpkg command to install '{0}' to the clipboard", port),
+        title: l10n.t("Copy vcpkg command to install '{0}' to the clipboard", port),
         kind: vscode.CodeActionKind.QuickFix
     };
 }
@@ -444,7 +445,7 @@ export async function registerCommands(enabled: boolean): Promise<void> {
 }
 
 function onDisabledCommand() {
-    const message: string = vscode.l10n.t({ message: "IntelliSense-related commands cannot be executed when `C_Cpp.intelliSenseEngine` is set to `disabled`.", comment: [
+    const message: string = l10n.t({ message: "IntelliSense-related commands cannot be executed when `C_Cpp.intelliSenseEngine` is set to `disabled`.", comment: [
                 "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
             ] });
     return vscode.window.showWarningMessage(message);
@@ -518,7 +519,7 @@ async function onSwitchHeaderSource(): Promise<void> {
 
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: vscode.l10n.t('Switching Header/Source...'),
+            title: l10n.t('Switching Header/Source...'),
             cancellable: true
         }, async (_progress, token) => {
             const cancellationListener: vscode.Disposable = token.onCancellationRequested(() => tokenSource.cancel());
@@ -550,7 +551,7 @@ async function selectClient(): Promise<Client> {
                 console.assert("client not found");
             }
         }
-        throw new Error(vscode.l10n.t("client not found"));
+        throw new Error(l10n.t("client not found"));
     }
 }
 
@@ -575,14 +576,14 @@ async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
 
 async function installCompiler(sender?: any): Promise<void> {
     const telemetryProperties = { sender: util.getSenderType(sender), platform: os.platform(), ranCommand: 'false' };
-    const ok = vscode.l10n.t('OK');
+    const ok = l10n.t('OK');
     switch (os.platform()) {
         case "win32":
             showInstallCompilerWalkthrough();
             break;
         case "darwin": {
-            const title = vscode.l10n.t('The clang compiler will now be installed');
-            const detail = vscode.l10n.t('You may be prompted to type your password in the VS Code terminal window to authorize the installation.');
+            const title = l10n.t('The clang compiler will now be installed');
+            const detail = l10n.t('You may be prompted to type your password in the VS Code terminal window to authorize the installation.');
             const response = await vscode.window.showInformationMessage(title, { modal: true, detail }, ok);
             if (response === ok) {
                 const terminal = vscode.window.createTerminal('Install C++ Compiler');
@@ -615,8 +616,8 @@ async function installCompiler(sender?: any): Promise<void> {
                 return undefined;
             })();
             if (installCommand) {
-                const title = vscode.l10n.t('The gcc compiler will now be installed');
-                const detail = vscode.l10n.t('You may be prompted to type your password in the VS Code terminal window to authorize the installation.');
+                const title = l10n.t('The gcc compiler will now be installed');
+                const detail = l10n.t('You may be prompted to type your password in the VS Code terminal window to authorize the installation.');
                 const response = await vscode.window.showInformationMessage(title, { modal: true, detail }, ok);
                 if (response === ok) {
                     const terminal = vscode.window.createTerminal('Install C++ Compiler');
@@ -632,7 +633,7 @@ async function installCompiler(sender?: any): Promise<void> {
 
 async function onSelectConfiguration(config?: string): Promise<void> {
     if (!isFolderOpen()) {
-        void vscode.window.showInformationMessage(vscode.l10n.t('Open a folder first to select a configuration.'));
+        void vscode.window.showInformationMessage(l10n.t('Open a folder first to select a configuration.'));
     } else {
         // This only applies to the active client. You cannot change the configuration for
         // a client that is not active since that client's UI will not be visible.
@@ -642,7 +643,7 @@ async function onSelectConfiguration(config?: string): Promise<void> {
 
 function onSelectConfigurationProvider(): void {
     if (!isFolderOpen()) {
-        void vscode.window.showInformationMessage(vscode.l10n.t('Open a folder first to select a configuration provider.'));
+        void vscode.window.showInformationMessage(l10n.t('Open a folder first to select a configuration provider.'));
     } else {
         void selectClient().then(client => client.handleConfigurationProviderSelectCommand(), logAndReturn.undefined);
     }
@@ -651,7 +652,7 @@ function onSelectConfigurationProvider(): void {
 function onEditConfigurationJSON(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, undefined);
     if (!isFolderOpen()) {
-        void vscode.window.showInformationMessage(vscode.l10n.t('Open a folder first to edit configurations'));
+        void vscode.window.showInformationMessage(l10n.t('Open a folder first to edit configurations'));
     } else {
         void selectClient().then(client => client.handleConfigurationEditJSONCommand(viewColumn), logAndReturn.undefined);
     }
@@ -660,7 +661,7 @@ function onEditConfigurationJSON(viewColumn: vscode.ViewColumn = vscode.ViewColu
 function onEditConfigurationUI(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, undefined);
     if (!isFolderOpen()) {
-        void vscode.window.showInformationMessage(vscode.l10n.t('Open a folder first to edit configurations'));
+        void vscode.window.showInformationMessage(l10n.t('Open a folder first to edit configurations'));
     } else {
         void selectClient().then(client => client.handleConfigurationEditUICommand(viewColumn), logAndReturn.undefined);
     }
@@ -668,7 +669,7 @@ function onEditConfigurationUI(viewColumn: vscode.ViewColumn = vscode.ViewColumn
 
 function onEditConfiguration(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
     if (!isFolderOpen()) {
-        void vscode.window.showInformationMessage(vscode.l10n.t('Open a folder first to edit configurations'));
+        void vscode.window.showInformationMessage(l10n.t('Open a folder first to edit configurations'));
     } else {
         void selectClient().then(client => client.handleConfigurationEditCommand(viewColumn), logAndReturn.undefined);
     }
@@ -722,7 +723,7 @@ async function onRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, ide
 }
 
 // Needed due to https://github.com/microsoft/vscode/issues/148723 .
-const codeActionAbortedString: string = vscode.l10n.t("The code analysis fix could not be applied because the document has changed.");
+const codeActionAbortedString: string = l10n.t("The code analysis fix could not be applied because the document has changed.");
 
 async function onFixThisCodeAnalysisProblem(version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
     if (identifiersAndUris.length < 1) {
@@ -1516,9 +1517,9 @@ export async function preReleaseCheck(): Promise<void> {
         // If the user isn't on the pre-release version, but one is available, prompt them to install it.
         if (preReleaseAvailable) {
             displayedPreReleasePrompt.Value = true;
-            const message: string = vscode.l10n.t("A pre-release version of the C/C++ extension is available. Would you like to switch to it?");
-            const yes: string = vscode.l10n.t("Yes");
-            const no: string = vscode.l10n.t("No");
+            const message: string = l10n.t("A pre-release version of the C/C++ extension is available. Would you like to switch to it?");
+            const yes: string = l10n.t("Yes");
+            const no: string = l10n.t("No");
             void vscode.window.showInformationMessage(message, yes, no).then((selection) => {
                 if (selection === yes) {
                     void vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true }).then(undefined, logAndReturn.undefined);
@@ -1570,8 +1571,8 @@ async function onCopilotHover(): Promise<void> {
             const fileUri = vscode.Uri.file(file);
             if (await vscodelm.fileIsIgnored(fileUri, copilotHoverProvider.getCurrentHoverCancellationToken() ?? CancellationToken.None)) {
                 telemetry.logLanguageServerEvent("CopilotHover", { "Message": "Copilot summary is not available due to content exclusion." });
-                await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, vscode.l10n.t("Copilot summary is not available.") + "\n\n" +
-                    vscode.l10n.t("The file containing this symbol's definition or declaration has been excluded from use with Copilot."));
+                await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, l10n.t("Copilot summary is not available.") + "\n\n" +
+                    l10n.t("The file containing this symbol's definition or declaration has been excluded from use with Copilot."));
                 return;
             }
         }
@@ -1584,7 +1585,7 @@ async function onCopilotHover(): Promise<void> {
     if (requestInfo.content.length === 0) {
         // Context is not available for this symbol.
         telemetry.logLanguageServerEvent("CopilotHover", { "Message": "Copilot summary is not available for this symbol." });
-        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, vscode.l10n.t("Copilot summary is not available for this symbol."));
+        await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, l10n.t("Copilot summary is not available for this symbol."));
         return;
     }
 
@@ -1652,7 +1653,7 @@ async function onCopilotHover(): Promise<void> {
 async function reportCopilotFailure(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, errorMessage: string): Promise<void> {
     telemetry.logLanguageServerEvent("CopilotHoverError", { "ErrorMessage": errorMessage });
     // Display the localized default failure message in the hover.
-    await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, vscode.l10n.t("An error occurred while generating Copilot summary."));
+    await showCopilotContent(copilotHoverProvider, hoverDocument, hoverPosition, l10n.t("An error occurred while generating Copilot summary."));
 }
 
 async function showCopilotContent(copilotHoverProvider: CopilotHoverProvider, hoverDocument: vscode.TextDocument, hoverPosition: vscode.Position, content?: string): Promise<boolean> {

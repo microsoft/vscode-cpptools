@@ -53,15 +53,15 @@ export async function main() {
                 }
                 typeScriptSwitchContent += `            if (stringArgs) {\n`;
                 if (hintValue) {
-                    typeScriptSwitchContent += `                message = vscode.l10n.t({ message: ${JSON.stringify(stringValue)}, args: [${stringArgsList.join(", ")}], comment: [${JSON.stringify(hintValue)}] });\n                break;\n            }\n`;
+                    typeScriptSwitchContent += `                message = l10n.t({ message: ${JSON.stringify(stringValue)}, args: [${stringArgsList.join(", ")}], comment: [${JSON.stringify(hintValue)}] });\n                break;\n            }\n`;
                 } else {
-                    typeScriptSwitchContent += `                message = vscode.l10n.t(${JSON.stringify(stringValue)}, ${stringArgsList.join(", ")});\n                break;\n            }\n`;
+                    typeScriptSwitchContent += `                message = l10n.t(${JSON.stringify(stringValue)}, ${stringArgsList.join(", ")});\n                break;\n            }\n`;
                 }
             }
             if (hintValue) {
-                typeScriptSwitchContent += `            message = vscode.l10n.t({ message: ${JSON.stringify(stringValue)}, comment: [${JSON.stringify(hintValue)}] });\n            break;\n`;
+                typeScriptSwitchContent += `            message = l10n.t({ message: ${JSON.stringify(stringValue)}, comment: [${JSON.stringify(hintValue)}] });\n            break;\n`;
             } else {
-                typeScriptSwitchContent += `            message = vscode.l10n.t(${JSON.stringify(stringValue)});\n            break;\n`;
+                typeScriptSwitchContent += `            message = l10n.t(${JSON.stringify(stringValue)});\n            break;\n`;
             }
         }
         ++stringIndex;
@@ -80,7 +80,7 @@ export async function main() {
 
 'use strict';
 
-import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 
 export const localizedStringCount: number = ${stringIndex};
 

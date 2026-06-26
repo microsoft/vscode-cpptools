@@ -3,9 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import * as vscode from 'vscode';
 import { constants } from 'fs';
-import { TreeItem } from "vscode";
+import { l10n, TreeItem } from "vscode";
 import { extensionContext, ISshConfigHostInfo, pathAccessible } from "../../common";
 import { LabelLeafNode } from "./common";
 
@@ -33,7 +32,7 @@ export class TargetLeafNode extends LabelLeafNode {
         const item: TreeItem = await super.getTreeItem();
         const removable: boolean = await isWritable(this.sshConfigHostInfo.file);
         if (_activeTarget === this.name) {
-            item.description = vscode.l10n.t('[Active]');
+            item.description = l10n.t('[Active]');
             if (removable) {
                 item.contextValue = 'CppSshTargetsView.targetLeafRemovable';
             }
