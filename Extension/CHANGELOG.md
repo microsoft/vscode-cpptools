@@ -2,8 +2,8 @@
 
 ## Version 1.33.2: June 26, 2026
 ### Bug Fixes
-* Fix some regression crashes.
 * Fix a regression with 'Find All References' with functions that exist in both C and C++ files. [#14546](https://github.com/microsoft/vscode-cpptools/issues/14546)
+* Fix some regression crashes.
 
 ## Version 1.33.1: June 23, 2026
 ### Bug Fixes
