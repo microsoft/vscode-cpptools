@@ -13,12 +13,12 @@ import * as tmp from 'tmp';
 import * as vscode from 'vscode';
 import { DocumentFilter, Range } from 'vscode-languageclient';
 import { TargetPopulation } from 'vscode-tas-client';
-import * as which from "which";
 import { ManualPromise } from './Utility/Async/manualPromise';
 import { isWindows } from './constants';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
+import which = require('which');
 const l10n = vscode.l10n;
 
 export const failedToParseJson: string = l10n.t("Failed to parse json file, possibly due to comments or trailing commas.");
@@ -1526,7 +1526,7 @@ export interface ISshLocalForwardInfo {
 
 export function whichAsync(name: string, path?: string): Promise<string | undefined> {
     return new Promise<string | undefined>(resolve => {
-        which(name, path ? { path } : {}, (err, resolved) => {
+        which(name, path ? { path } : {}, (err: Error | null, resolved: string | undefined) => {
             if (err) {
                 resolve(undefined);
             } else {
