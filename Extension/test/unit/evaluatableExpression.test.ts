@@ -32,9 +32,19 @@ describe('computeEvaluatableExpression', () => {
         strictEqual(evaluate('*a.b.|c'), '*a.b.c');
     });
 
-    it('keeps a leading * before -> (binds to the whole chain)', () => {
-        strictEqual(evaluate('*|ptr->member'), '*ptr');
+    it('drops a leading * on an interior member before -> and keeps it on the final member', () => {
+        strictEqual(evaluate('*|ptr->member'), 'ptr');
         strictEqual(evaluate('*ptr->|member'), '*ptr->member');
+    });
+
+    it('drops a leading * before a subscript (the array base is not the dereferenced value)', () => {
+        strictEqual(evaluate('*a.|b[i]'), 'a.b');
+        strictEqual(evaluate('*dbbolz.|nullzwang_ok[DBBOLZ_A_AUS]'), 'dbbolz.nullzwang_ok');
+    });
+
+    it('drops a leading & so the variable shows its value, not its address', () => {
+        strictEqual(evaluate('&|nullzwang_ok'), 'nullzwang_ok');
+        strictEqual(evaluate('&a.b.|c'), 'a.b.c');
     });
 
     it('leaves -> chains without a leading operator unchanged', () => {
@@ -76,5 +86,30 @@ describe('computeEvaluatableExpression', () => {
         strictEqual(evaluate('a[i |+ j].c'), undefined);
         strictEqual(evaluate('a[i +| j].c'), undefined);
         strictEqual(evaluate('a[i +|j].c'), 'j');
+        strictEqual(evaluate('a[i|+1].c'), undefined);
+    });
+
+    it('treats nested subscripts as balanced brackets', () => {
+        strictEqual(evaluate('a|[b[i]]'), 'a[b[i]]');
+        strictEqual(evaluate('a[b|[i]]'), 'b[i]');
+        strictEqual(evaluate('a[b[|i]]'), 'i');
+        strictEqual(evaluate('a[b[i]|]'), 'a[b[i]]');
+    });
+
+    it('keeps a trailing subscript whole when hovering past the last identifier', () => {
+        strictEqual(evaluate('a[i]|'), 'a[i]');
+        strictEqual(evaluate('*a.b[i]|'), '*a.b[i]');
+    });
+
+    it('keeps a leading * on a final subscript element but drops it on an interior one', () => {
+        strictEqual(evaluate('*a.b|[i]'), '*a.b[i]');
+        strictEqual(evaluate('*a.b[i|]'), '*a.b[i]');
+        strictEqual(evaluate('*a.b|[i].c'), 'a.b[i]');
+        strictEqual(evaluate('&a|[i]'), 'a[i]');
+    });
+
+    it('does not grab the whole element when hovering an interior connector', () => {
+        strictEqual(evaluate('*x|.y[i]'), 'x');
+        strictEqual(evaluate('*dbbolz|.nullzwang_ok[DBBOLZ_A_AUS]'), 'dbbolz');
     });
 });
