@@ -5,6 +5,7 @@
 
 import { BasicParser, IParsedOption } from 'posix-getopt';
 import { parse } from 'shell-quote';
+import { isWindows } from '../constants';
 
 /**
  * Mapping of flags to functions that add the relevant flag to the map of
@@ -124,7 +125,10 @@ export class CommandParseError extends Error { }
  * Attempts to convert an SSH command to an SSH config entry.
  */
 export function sshCommandToConfig(command: string, name?: string): { [key: string]: string } {
-    const parts: string[] = parse(command) as string[];
+    // shell-quote's parse() treats '\' as a POSIX escape character and strips it, which mangles
+    // Windows paths (e.g. '-i C:\Users\me\key' becomes 'C:Usersmekey'). On Windows, double the
+    // backslashes first so parse()'s unescaping restores the original single backslashes.
+    const parts: string[] = parse(isWindows ? command.replace(/\\/g, '\\\\') : command) as string[];
 
     // ignore 'ssh' if the user entered that as their first word
     if (parts[0] === 'ssh') {
