@@ -71,4 +71,10 @@ describe('computeEvaluatableExpression', () => {
         strictEqual(evaluate('obj->fn()->|field'), undefined);
         strictEqual(evaluate('(*this).|member'), undefined);
     });
+
+    it('returns undefined when the cursor is on an operator or space inside a subscript', () => {
+        strictEqual(evaluate('a[i |+ j].c'), undefined);
+        strictEqual(evaluate('a[i +| j].c'), undefined);
+        strictEqual(evaluate('a[i +|j].c'), 'j');
+    });
 });

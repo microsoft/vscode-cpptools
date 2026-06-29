@@ -85,6 +85,12 @@ export function computeEvaluatableExpression(line: string, character: number): E
     const openCount: number = (beforeCursor.match(/\[/g) || []).length;
     const closeCount: number = (beforeCursor.match(/\]/g) || []).length;
     if (openCount > closeCount) {
+        // Inside `[...]` the token also spans whitespace and operators (e.g. `a[i + j]`), so the
+        // nearest identifier is only the index when the cursor is actually on it; otherwise the
+        // cursor is not on a token.
+        if (character < wordStart || character > clipEnd) {
+            return undefined;
+        }
         return { startColumn: wordStart, endColumn: clipEnd, expression: word };
     }
 
