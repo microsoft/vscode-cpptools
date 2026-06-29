@@ -1305,6 +1305,23 @@ function bucketSignalAddress(address: string): string {
     return value < 0x10000n ? address : "<non-null>";
 }
 
+// An unsymbolized frame is reported as a raw runtime address. Addresses in the fixed-base main
+// executable (non-PIE on Linux) stay constant across runs and are useful for bucketing, but
+// addresses in the ASLR-randomized shared-library/mmap region (Linux 0x7f..., and on macOS the
+// PIE main image and dyld shared cache) shift every launch and would fragment crash buckets. Keep
+// the low, fixed addresses but replace high (relocated) ones with a stable placeholder. 4 GB is a
+// safe cut: a non-PIE executable's own code loads well below it, while the relocated region is far
+// above it.
+function bucketFrameAddress(address: string): string {
+    let value: bigint;
+    try {
+        value = BigInt(address.trim());
+    } catch {
+        return address; // Not a parseable address; leave it untouched.
+    }
+    return value < 0x100000000n ? address : "<relocated>";
+}
+
 async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
     if (err) {
         if (err.code === "ENOENT") {
@@ -1317,7 +1334,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     let signalInfo: string;
     const isCppToolsSrv2: boolean = crashFile.startsWith("cpptools-srv2");
     const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
-    const telemetryHeader: string = (isCppToolsSrv2 ? "cpptools-srv2 process" : isCppToolsSrv ? "cpptools-srv process" : "cpptools process") + "\n";
+    const processName: string = (isCppToolsSrv2 ? "cpptools-srv2 process" : isCppToolsSrv ? "cpptools-srv process" : "cpptools process") + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
     const startStr: string = isMac ? " _" : "<";
@@ -1354,7 +1371,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         signalType = "SIGMISSING\n";
         signalInfo = "";
     }
-    data = telemetryHeader + signalType + signalInfo;
+    data = processName + signalType + signalInfo;
     let crashCallStack: string = "";
     let validFrameFound: boolean = false;
     for (let lineNum: number = crashStackStartLine; lineNum < lines.length - 3; ++lineNum) { // skip last lines
@@ -1367,7 +1384,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
                 pendingCallStack = "Unexpected offset\n";
             } else {
-                let pendingAddressData: string = line.substring(startAddressPos, endAddressPos) + "\n";
+                let pendingAddressData: string = bucketFrameAddress(line.substring(startAddressPos, endAddressPos)) + "\n";
                 if (containsFilteredTelemetryData(pendingAddressData)) {
                     pendingAddressData = "?\n";
                 }
@@ -1448,7 +1465,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         prevCppCrashCallStackData = crashCallStack;
 
         if (lines.length >= 6 && util.getLoggingLevel() >= 1) {
-            getCrashCallStacksChannel().appendLine(`\n${isCppToolsSrv2 ? "cpptools-srv2" : isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${signalInfo}${crashCallStack}${crashLog.length > 0 ? "\n\n" + crashLog : ""}`);
+            getCrashCallStacksChannel().appendLine(`\n${processName}${crashDate.toLocaleString()}\n${signalType}${signalInfo}${crashCallStack}${crashLog.length > 0 ? "\n\n" + crashLog : ""}`);
         }
     }
 
