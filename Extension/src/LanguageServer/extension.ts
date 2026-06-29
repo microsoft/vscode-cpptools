@@ -1289,6 +1289,22 @@ function containsFilteredTelemetryData(str: string): boolean {
     return regex.test(str);
 }
 
+// Non-null fault addresses are randomized by ASLR (and use-after-free/wild pointers vary run to
+// run), so embedding the raw value in CrashingThreadCallStack would fragment crash buckets and
+// make CrashCount meaningless. Preserve near-null addresses (typical null-pointer dereferences,
+// which are stable and useful for bucketing), but replace arbitrary addresses with a stable
+// placeholder so identical crashes still de-duplicate.
+function bucketSignalAddress(address: string): string {
+    let value: bigint;
+    try {
+        value = BigInt(address.trim());
+    } catch {
+        return address; // Not a parseable address; leave it untouched.
+    }
+    // 0x10000 (64 KB) covers null plus small member/array offsets off a null pointer.
+    return value < 0x10000n ? address : "<non-null>";
+}
+
 async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
     if (err) {
         if (err.code === "ENOENT") {
@@ -1329,7 +1345,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
     if (lines[crashStackStartLine].startsWith("SIG")) {
         signalType = `${lines[crashStackStartLine]}\n`;
-        signalInfo = `si_code=${lines[crashStackStartLine + 1]}, si_addr=${lines[crashStackStartLine + 2]}\n`;
+        signalInfo = `si_code=${lines[crashStackStartLine + 1]}, si_addr=${bucketSignalAddress(lines[crashStackStartLine + 2])}\n`;
         crashStackStartLine += 3;
     } else {
         // The signal type may fail to be written.
@@ -1391,17 +1407,6 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 // Compute pendingOffset.
                 if (isMac) {
                     pendingOffset += line.substring(offsetPos2);
-                    const startAddressPos: number = line.indexOf("0x");
-                    if (startAddressPos === -1 || startAddressPos >= startPos) {
-                        // unexpected
-                        pendingOffset += " <Missing 0x>";
-                    } else {
-                        let pendingAddressData: string = line.substring(startAddressPos, startPos).trimEnd();
-                        if (containsFilteredTelemetryData(pendingAddressData)) {
-                            pendingAddressData = "?";
-                        }
-                        pendingOffset += " " + pendingAddressData;
-                    }
                 } else {
                     const endPos: number = line.indexOf(">", offsetPos2);
                     if (endPos === -1) {
