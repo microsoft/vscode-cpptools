@@ -88,8 +88,13 @@ export function computeEvaluatableExpression(line: string, character: number): E
         return { startColumn: wordStart, endColumn: clipEnd, expression: word };
     }
 
-    // The leading `*`/`&` is dropped only for an interior member directly followed by `.`. On the
-    // final member, or before `->`, it applies to the whole expression and is kept.
+    // The leading `*`/`&` is dropped only for an interior member directly followed by `.`, because
+    // `.` is the only connector whose left operand is not provably a pointer/array, so keeping it
+    // (`*a.b`) would dereference a struct and error. Before `->` or `[]`, or at the end of the
+    // chain, the left operand is a pointer/array, so the leading operator stays valid and is kept
+    // to match the built-in keep-leading-and-clip-right behavior. This is deliberate for `*ptr->m`
+    // and likewise for `*a.b[i]` and `&a[i]`, which evaluate without error (the array decays)
+    // though they show the element/address rather than the hovered operand.
     if (leading === null || clipEnd >= tokenEnd || clipEnd <= exprStart || line.charAt(clipEnd) !== '.') {
         return { startColumn: tokenStart, endColumn: clipEnd, expression: line.substring(tokenStart, clipEnd) };
     }
