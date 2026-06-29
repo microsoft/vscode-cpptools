@@ -1165,13 +1165,10 @@ export function watchForCrashes(crashDirectory: string): void {
 let previousCrashData: string;
 let previousCrashCount: number = 0;
 
-function logCrashTelemetry(data: string, type: string, offsetData?: string, crashLog?: string): void {
+function logCrashTelemetry(data: string, type: string, crashLog?: string): void {
     const crashObject: Record<string, string> = {};
     const crashCountObject: Record<string, number> = {};
     crashObject.CrashingThreadCallStack = data;
-    if (offsetData !== undefined) {
-        crashObject.CrashingThreadCallStackOffsets = offsetData;
-    }
     if (crashLog !== undefined) {
         crashObject.CrashLog = crashLog;
     }
@@ -1185,8 +1182,8 @@ function logMacCrashTelemetry(data: string): void {
     logCrashTelemetry(data, "MacCrash");
 }
 
-function logCppCrashTelemetry(data: string, offsetData?: string, crashLog?: string): void {
-    logCrashTelemetry(data, "CppCrash", offsetData, crashLog);
+function logCppCrashTelemetry(data: string, crashLog?: string): void {
+    logCrashTelemetry(data, "CppCrash", crashLog);
 }
 
 function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
@@ -1301,16 +1298,15 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
 
     const lines: string[] = data.split("\n");
-    let addressData: string;
+    let signalInfo: string;
     const isCppToolsSrv2: boolean = crashFile.startsWith("cpptools-srv2");
     const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
-    const telemetryHeader: string = (isCppToolsSrv2 ? "cpptools-srv2.txt" : isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
+    const telemetryHeader: string = (isCppToolsSrv2 ? "cpptools-srv2 process" : isCppToolsSrv ? "cpptools-srv process" : "cpptools process") + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
     const startStr: string = isMac ? " _" : "<";
     const offsetStr: string = isMac ? " + " : "+";
     const endOffsetStr: string = isMac ? " " : " <";
-    const dotStr: string = "…\n";
     let signalType: string;
     let crashLog: string = "";
     let crashStackStartLine: number = 0;
@@ -1333,16 +1329,16 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
     if (lines[crashStackStartLine].startsWith("SIG")) {
         signalType = `${lines[crashStackStartLine]}\n`;
-        addressData = `${lines[crashStackStartLine + 1]}:${lines[crashStackStartLine + 2]}\n`; // signalCode:signalAddr
+        signalInfo = `si_code=${lines[crashStackStartLine + 1]}, si_addr=${lines[crashStackStartLine + 2]}\n`;
         crashStackStartLine += 3;
     } else {
         // The signal type may fail to be written.
         // Intentionally different from SIGUNKNOWN from cpptools,
         // and not SIG-? to avoid matching the regex in containsFilteredTelemetryData.
         signalType = "SIGMISSING\n";
-        addressData = ".\n";
+        signalInfo = "";
     }
-    data = telemetryHeader + signalType;
+    data = telemetryHeader + signalType + signalInfo;
     let crashCallStack: string = "";
     let validFrameFound: boolean = false;
     for (let lineNum: number = crashStackStartLine; lineNum < lines.length - 3; ++lineNum) { // skip last lines
@@ -1350,23 +1346,21 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         const startPos: number = line.indexOf(startStr);
         let pendingCallStack: string = "";
         if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
-            pendingCallStack = dotStr;
             const startAddressPos: number = line.indexOf("0x");
             const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
             if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
-                addressData += "Unexpected offset\n";
+                pendingCallStack = "Unexpected offset\n";
             } else {
                 let pendingAddressData: string = line.substring(startAddressPos, endAddressPos) + "\n";
                 if (containsFilteredTelemetryData(pendingAddressData)) {
                     pendingAddressData = "?\n";
                 }
-                addressData += pendingAddressData;
+                pendingCallStack = pendingAddressData;
             }
         } else {
             const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
             if (offsetPos === -1) {
                 pendingCallStack = "Missing offsetStr\n";
-                addressData += "\n";
             } else {
                 const startPos2: number = startPos + 1;
                 let funcStr: string = line.substring(startPos2, offsetPos);
@@ -1400,14 +1394,13 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                     const startAddressPos: number = line.indexOf("0x");
                     if (startAddressPos === -1 || startAddressPos >= startPos) {
                         // unexpected
-                        pendingOffset += "<Missing 0x>";
-                        addressData += "\n";
+                        pendingOffset += " <Missing 0x>";
                     } else {
-                        let pendingAddressData: string = line.substring(startAddressPos, startPos) + "\n";
+                        let pendingAddressData: string = line.substring(startAddressPos, startPos).trimEnd();
                         if (containsFilteredTelemetryData(pendingAddressData)) {
-                            pendingAddressData = "?\n";
+                            pendingAddressData = "?";
                         }
-                        addressData += pendingAddressData;
+                        pendingOffset += " " + pendingAddressData;
                     }
                 } else {
                     const endPos: number = line.indexOf(">", offsetPos2);
@@ -1416,8 +1409,6 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                     } else {
                         pendingOffset += line.substring(offsetPos2, endPos);
                     }
-                    addressData += "\n";
-                    // TODO: It seems like addressData should be obtained on Linux in case the function is filtered.
                 }
                 pendingOffset += "\n";
                 pendingCallStack = funcStr + pendingOffset;
@@ -1447,19 +1438,18 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
 
     crashCallStack = crashCallStack.trimEnd();
-    addressData = addressData.trimEnd();
 
     if (crashCallStack !== prevCppCrashCallStackData) {
         prevCppCrashCallStackData = crashCallStack;
 
         if (lines.length >= 6 && util.getLoggingLevel() >= 1) {
-            getCrashCallStacksChannel().appendLine(`\n${isCppToolsSrv2 ? "cpptools-srv2" : isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}${crashLog.length > 0 ? "\n\n" + crashLog : ""}`);
+            getCrashCallStacksChannel().appendLine(`\n${isCppToolsSrv2 ? "cpptools-srv2" : isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${signalInfo}${crashCallStack}${crashLog.length > 0 ? "\n\n" + crashLog : ""}`);
         }
     }
 
     data += crashCallStack;
 
-    logCppCrashTelemetry(data, addressData, crashLog);
+    logCppCrashTelemetry(data, crashLog);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
     if (crashFile === "cpptools.txt") {
