@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.32.2-main",
+    "version": "1.33.2-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -4859,6 +4859,11 @@
                                     ]
                                 },
                                 "default": []
+                            },
+                            "ignoreRunWithoutDebuggingWarnings": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
+                                "default": false
                             }
                         }
                     },
@@ -5895,6 +5900,11 @@
                                         }
                                     }
                                 }
+                            },
+                            "ignoreRunWithoutDebuggingWarnings": {
+                                "type": "boolean",
+                                "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
+                                "default": false
                             }
                         }
                     },
@@ -6931,6 +6941,7 @@
         "serialize-javascript": "^7.0.5",
         "@azure/msal-browser": "^4.29.1",
         "flatted": "^3.4.1",
-        "uuid": "^11.1.1"
+        "uuid": "^11.1.1",
+        "undici": "^7.28.0"
     }
 }
