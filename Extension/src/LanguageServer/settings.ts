@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -296,7 +296,7 @@ export class CppSettings extends Settings {
                 let bundledVersion: string;
                 try {
                     const bundledPath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
-                    const output: string = execSync(`"${bundledPath}" --version`).toString();
+                    const output: string = execFileSync(bundledPath, ['--version']).toString();
                     bundledVersion = output.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
                     if (!semver.valid(bundledVersion)) {
                         return path;
@@ -308,7 +308,7 @@ export class CppSettings extends Settings {
 
                 // Invoke the version on the system to compare versions.  Use ours if it's more recent.
                 try {
-                    const output: string = execSync(`"${path}" --version`).toString();
+                    const output: string = execFileSync(path, ['--version']).toString();
                     const userVersion = output.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
                     if (semver.ltr(userVersion, bundledVersion)) {
                         path = "";
