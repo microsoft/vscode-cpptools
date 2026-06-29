@@ -392,7 +392,7 @@
 	"c_cpp.debuggers.symbolOptions.description": "Opções para controlar como os símbolos (arquivos .pdb) são encontrados e carregados.",
 	"c_cpp.debuggers.unknownBreakpointHandling.description": "Controla como os pontos de interrupção definidos externamente (geralmente por meio de comandos GDB brutos) são tratados quando atingidos.\nOs valores permitidos são \"throw\", que age como se uma exceção fosse lançada pelo aplicativo, e \"stop\", que apenas pausa a sessão de depuração. O valor padrão é \"throw\".",
 	"c_cpp.debuggers.debuginfod.description": "Controla o comportamento do debuginfod do GDB ao baixar símbolos de depuração dos servidores debuginfod.",
-	"c_cpp.debuggers.debuginfod.enabled.description": "If false (default), GDB will not contact debuginfod servers. Set to true to enable debuginfod support.",
+	"c_cpp.debuggers.debuginfod.enabled.description": "Se true (padrão), o suporte de debuginfod do GDB está habilitado. Defina como false para impedir que o GDB entre em contato com servidores depurados.",
 	"c_cpp.debuggers.debuginfod.timeout.description": "O tempo limite em segundos para solicitações de servidor debuginfod. O padrão é 30. Defina como 0 para usar os padrões GDB/libdebuginfod (sem substituição).",
 	"c_cpp.debuggers.VSSymbolOptions.description": "Fornece configuração para localizar e carregar símbolos no adaptador de depuração.",
 	"c_cpp.debuggers.VSSymbolOptions.searchPaths.description": "Matriz de URLs do servidor de símbolos (exemplo: http​://MyExampleSymbolServer) ou diretórios (exemplo: /build/symbols) para pesquisar arquivos .pdb. Esses diretórios serão pesquisados além dos locais padrão, ao lado do módulo e do caminho em que o pdb foi removido originalmente.",
