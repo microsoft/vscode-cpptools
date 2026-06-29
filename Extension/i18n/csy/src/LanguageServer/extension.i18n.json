@@ -7,6 +7,7 @@
 	"learn.how.to.install.a.library": "Jak nainstalovat knihovnu pro tuto hlavičku pomocí vcpkg",
 	"copy.vcpkg.command": "Zkopírovat příkaz vcpkg pro instalaci {0} do schránky",
 	"on.disabled.command": "Příkazy související s IntelliSense se nedají spustit, když je `C_Cpp.intelliSenseEngine` nastavené na `disabled`.",
+	"switch.header.source": "Přepínání záhlaví/zdroje...",
 	"client.not.found": "klient se nenašel",
 	"ok": "OK",
 	"install.compiler.mac.title": "Kompilátor clang se teď nainstaluje.",
