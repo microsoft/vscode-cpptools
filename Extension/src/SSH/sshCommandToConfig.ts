@@ -4,8 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { BasicParser, IParsedOption } from 'posix-getopt';
-import { parse } from 'shell-quote';
-import { isWindows } from '../constants';
+import { extractArgs } from '../common';
 
 /**
  * Mapping of flags to functions that add the relevant flag to the map of
@@ -125,10 +124,10 @@ export class CommandParseError extends Error { }
  * Attempts to convert an SSH command to an SSH config entry.
  */
 export function sshCommandToConfig(command: string, name?: string): { [key: string]: string } {
-    // shell-quote's parse() treats '\' as a POSIX escape character and strips it, which mangles
-    // Windows paths (e.g. '-i C:\Users\me\key' becomes 'C:Usersmekey'). On Windows, double the
-    // backslashes first so parse()'s unescaping restores the original single backslashes.
-    const parts: string[] = parse(isWindows ? command.replace(/\\/g, '\\\\') : command) as string[];
+    // Parse the command line into arguments using the same platform-correct logic we use
+    // everywhere else (MSVC-style quoting on Windows, wordexp elsewhere). This correctly
+    // preserves Windows paths and quoted segments.
+    const parts: string[] = extractArgs(command);
 
     // ignore 'ssh' if the user entered that as their first word
     if (parts[0] === 'ssh') {
@@ -222,7 +221,7 @@ function parseFlags(input: string[], entries: { [key: string]: string }): number
  * are not mentioned on the ssh(1) man page and don't seem to have use in the
  * wild. In the OpenSSH source, they appear to be ignored[3].
  *
- * The `shell-quote` library, like libc does for OpenSSH, takes care of dealing
+ * The `extractArgs` command-line parser, like libc does for OpenSSH, takes care of dealing
  * with quotations for for us.
  *
  *  1. https://github.com/openssh/openssh-portable/blob/e3b6c966b79c3ea5d51b923c3bbdc41e13b96ea0/ssh.c#L999

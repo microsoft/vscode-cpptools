@@ -8,7 +8,6 @@ import { execSync } from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
@@ -297,7 +296,7 @@ export class CppSettings extends Settings {
                 let bundledVersion: string;
                 try {
                     const bundledPath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
-                    const output: string = execSync(quote([bundledPath, '--version'])).toString();
+                    const output: string = execSync(`"${bundledPath}" --version`).toString();
                     bundledVersion = output.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
                     if (!semver.valid(bundledVersion)) {
                         return path;
