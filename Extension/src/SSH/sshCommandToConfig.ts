@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { BasicParser, IParsedOption } from 'posix-getopt';
-import { extractArgs } from '../common';
 
 /**
  * Mapping of flags to functions that add the relevant flag to the map of
@@ -124,10 +123,10 @@ export class CommandParseError extends Error { }
  * Attempts to convert an SSH command to an SSH config entry.
  */
 export function sshCommandToConfig(command: string, name?: string): { [key: string]: string } {
-    // Parse the command line into arguments using the same platform-correct logic we use
-    // everywhere else (MSVC-style quoting on Windows, wordexp elsewhere). This correctly
-    // preserves Windows paths and quoted segments.
-    const parts: string[] = extractArgs(command);
+    // Split the command line into arguments. We deliberately use shell-like tokenization that
+    // strips single and double quotes but treats backslashes as literal characters, so Windows
+    // paths (e.g. -i C:\Users\me\key) and quoted paths with spaces are both preserved.
+    const parts: string[] = splitArgs(command);
 
     // ignore 'ssh' if the user entered that as their first word
     if (parts[0] === 'ssh') {
@@ -168,6 +167,50 @@ export function sshCommandToConfig(command: string, name?: string): { [key: stri
     // this is the case.
     const { Host, HostName, ...options } = entries;
     return { Host, HostName, ...options };
+}
+
+/**
+ * Splits a command line into arguments using shell-like tokenization that behaves
+ * consistently across platforms. Both single and double quotes group their contents
+ * and are removed, unquoted whitespace separates arguments, and backslashes are kept
+ * as literal characters so Windows paths such as `C:\Users\me\key` are preserved
+ * rather than being consumed as escape sequences. An unterminated quote simply runs
+ * to the end of the string (matching the lenient behavior of a shell command line).
+ */
+function splitArgs(command: string): string[] {
+    const args: string[] = [];
+    let current: string = '';
+    let inToken: boolean = false;
+    let quoteChar: string | undefined;
+    for (const c of command) {
+        if (quoteChar !== undefined) {
+            if (c === quoteChar) {
+                quoteChar = undefined;
+            } else {
+                current += c;
+            }
+            continue;
+        }
+        if (c === '"' || c === '\'') {
+            quoteChar = c;
+            inToken = true;
+            continue;
+        }
+        if (c === ' ' || c === '\t' || c === '\r' || c === '\n') {
+            if (inToken) {
+                args.push(current);
+                current = '';
+                inToken = false;
+            }
+            continue;
+        }
+        current += c;
+        inToken = true;
+    }
+    if (inToken) {
+        args.push(current);
+    }
+    return args;
 }
 
 /**
@@ -221,8 +264,8 @@ function parseFlags(input: string[], entries: { [key: string]: string }): number
  * are not mentioned on the ssh(1) man page and don't seem to have use in the
  * wild. In the OpenSSH source, they appear to be ignored[3].
  *
- * The `extractArgs` command-line parser, like libc does for OpenSSH, takes care of dealing
- * with quotations for for us.
+ * The command-line tokenizer, like libc does for OpenSSH, takes care of dealing
+ * with quotations for us.
  *
  *  1. https://github.com/openssh/openssh-portable/blob/e3b6c966b79c3ea5d51b923c3bbdc41e13b96ea0/ssh.c#L999
  *  2. https://tools.ietf.org/html/draft-ietf-secsh-scp-sftp-ssh-uri-04#section-3.3

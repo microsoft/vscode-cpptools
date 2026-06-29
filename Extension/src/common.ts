@@ -1006,7 +1006,7 @@ function legacyExtractArgs(argsString: string): string[] {
     return result;
 }
 
-export function extractArgs(argsString: string): string[] {
+function extractArgs(argsString: string): string[] {
     argsString = argsString.trim();
     if (os.platform() === 'win32') {
         argsString = resolveWindowsEnvironmentVariables(argsString);
