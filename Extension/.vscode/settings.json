@@ -27,12 +27,16 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "vscode.json-language-features",
         "editor.tabSize": 4,
+        // Preserve each file's existing indentation on format/save (i18n/*.json are tab-indented).
+        "editor.detectIndentation": true,
         "files.insertFinalNewline": false
     },
     "[jsonc]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "vscode.json-language-features",
         "editor.tabSize": 4,
+        // Preserve each file's existing indentation on format/save.
+        "editor.detectIndentation": true,
         "files.insertFinalNewline": true
     },
     "[typescript]": {
