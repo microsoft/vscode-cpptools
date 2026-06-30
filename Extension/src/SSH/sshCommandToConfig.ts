@@ -124,8 +124,9 @@ export class CommandParseError extends Error { }
  */
 export function sshCommandToConfig(command: string, name?: string): { [key: string]: string } {
     // Split the command line into arguments. We deliberately use shell-like tokenization that
-    // strips single and double quotes but treats backslashes as literal characters, so Windows
-    // paths (e.g. -i C:\Users\me\key) and quoted paths with spaces are both preserved.
+    // strips single and double quotes and lets an unquoted backslash escape a following space,
+    // while keeping backslashes before other characters literal, so both Unix paths with escaped
+    // spaces (e.g. /home/me/my\ key) and Windows paths (e.g. C:\Users\me\key) are preserved.
     const parts: string[] = splitArgs(command);
 
     // ignore 'ssh' if the user entered that as their first word
@@ -172,17 +173,23 @@ export function sshCommandToConfig(command: string, name?: string): { [key: stri
 /**
  * Splits a command line into arguments using shell-like tokenization that behaves
  * consistently across platforms. Both single and double quotes group their contents
- * and are removed, unquoted whitespace separates arguments, and backslashes are kept
- * as literal characters so Windows paths such as `C:\Users\me\key` are preserved
- * rather than being consumed as escape sequences. An unterminated quote simply runs
- * to the end of the string (matching the lenient behavior of a shell command line).
+ * and are removed, and unquoted whitespace separates arguments.
+ *
+ * Outside of quotes, a backslash escapes only a following whitespace character (so a
+ * Unix path such as `/home/me/my\ key` keeps its space as a single argument). Before
+ * any other character a backslash is kept literal, so Windows paths such as
+ * `C:\Users\me\key` are preserved rather than being consumed as escape sequences.
+ *
+ * An unterminated quote simply runs to the end of the string (matching the lenient
+ * behavior of a shell command line).
  */
-function splitArgs(command: string): string[] {
+export function splitArgs(command: string): string[] {
     const args: string[] = [];
     let current: string = '';
     let inToken: boolean = false;
     let quoteChar: string | undefined;
-    for (const c of command) {
+    for (let i: number = 0; i < command.length; i++) {
+        const c: string = command[i];
         if (quoteChar !== undefined) {
             if (c === quoteChar) {
                 quoteChar = undefined;
@@ -193,6 +200,20 @@ function splitArgs(command: string): string[] {
         }
         if (c === '"' || c === '\'') {
             quoteChar = c;
+            inToken = true;
+            continue;
+        }
+        if (c === '\\') {
+            const next: string | undefined = command[i + 1];
+            // Only escape a following whitespace character; otherwise keep the backslash
+            // literal so Windows path separators survive.
+            if (next === ' ' || next === '\t' || next === '\r' || next === '\n') {
+                current += next;
+                inToken = true;
+                i++;
+                continue;
+            }
+            current += c;
             inToken = true;
             continue;
         }
