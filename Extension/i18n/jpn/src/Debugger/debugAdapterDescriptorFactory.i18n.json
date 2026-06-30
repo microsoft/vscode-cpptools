@@ -6,8 +6,7 @@
 {
 	"debugger.not.available": "デバッガーのタイプ '{0}' は、Windows 以外のコンピューターでは使用できません。",
 	"debugger.noDebug.requestType.not.supported": "デバッグなしで実行は、起動構成でのみサポートされています。",
-	"debugger.noDebug.pipeTransport.not.supported": "'pipeTransport' が設定された構成では、デバッグなしで実行はサポートされていません。",
-	"debugger.noDebug.debugServerPath.not.supported": "'debugServerPath' が設定された構成では、デバッグなしで実行はサポートされていません。",
-	"debugger.noDebug.miDebuggerServerAddress.not.supported": "'miDebuggerServerAddress' が設定された構成では、デバッグなしで実行はサポートされていません。",
-	"debugger.noDebug.coreDumpPath.not.supported": "'coreDumpPath' が設定された構成では、デバッグなしで実行はサポートされていません。"
+	"debugger.unsupported.properties": "次のプロパティを持つ起動構成をターミナルで直接実行することはできません: {0}",
+	"debugger.fallback.message": "代わりに、プログラムの出力がデバッグ コンソールに表示されます。",
+	"debugger.fallback.message2": "この警告を抑制するには、起動構成で \"ignoreRunWithoutDebuggingWarnings\" プロパティを \"true\" に設定します。"
 }
