@@ -406,7 +406,7 @@
 	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description": "Массив модулей, для которых отладчик не должен загружать символы. Поддерживаются подстановочные знаки (например: MyCompany.*.dll)\n\nЭто свойство игнорируется, если для \"mode\" задано значение \"loadAllButExcluded\".",
 	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description": "Массив модулей, для которых отладчик должен загружать символы. Поддерживаются подстановочные знаки (например: MyCompany.*.dll)\n\nЭто свойство игнорируется, если для \"mode\" задано значение \"loadOnlyIncluded\".",
 	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description": "Если значение равно true, для любого модуля, НЕ входящего в массив \"includedModules\", отладчик по-прежнему будет проверять рядом с самим модулем и запускаемым исполняемым файлом, но он не будет проверять пути в списке поиска символов. По умолчанию для этого параметра установлено значение \"true\".\n\nЭто свойство игнорируется, если для параметра \"mode\" установлено значение \"loadOnlyIncluded\".",
-	"c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description": "Если значение равно true, то при запуске без отладки программа не будет запущена в терминале без предупреждения.",
+	"c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description": "Если значение равно true, предупреждение не будет записано в журнал, если при запуске без отладки не удастся запустить программу в терминале.",
 	"c_cpp.semanticTokenTypes.referenceType.description": "Стиль для ссылочных типов C++/CLI.",
 	"c_cpp.semanticTokenTypes.cliProperty.description": "Стиль для свойств C++/CLI.",
 	"c_cpp.semanticTokenTypes.genericType.description": "Стиль для универсальных типов C++/CLI.",
