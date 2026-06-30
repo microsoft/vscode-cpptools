@@ -1332,9 +1332,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
 
     const lines: string[] = data.split("\n");
     let signalInfo: string;
-    const isCppToolsSrv2: boolean = crashFile.startsWith("cpptools-srv2");
-    const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
-    const processName: string = (isCppToolsSrv2 ? "cpptools-srv2 process" : isCppToolsSrv ? "cpptools-srv process" : "cpptools process") + "\n";
+    const processName: string = (crashFile.startsWith("cpptools-srv2") ? "cpptools-srv2 process" :
+        crashFile.startsWith("cpptools-srv") ? "cpptools-srv process" :
+            crashFile.startsWith("cpptools-wordexp") ? "cpptools-wordexp process" : "cpptools process") + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
     const startStr: string = isMac ? " _" : "<";
