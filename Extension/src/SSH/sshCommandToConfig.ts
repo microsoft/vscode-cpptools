@@ -180,8 +180,8 @@ export function sshCommandToConfig(command: string, name?: string): { [key: stri
  * any other character a backslash is kept literal, so Windows paths such as
  * `C:\Users\me\key` are preserved rather than being consumed as escape sequences.
  *
- * An unterminated quote simply runs to the end of the string (matching the lenient
- * behavior of a shell command line).
+ * This tokenizer is intentionally lenient for a single-line input box: an unterminated
+ * quote is not treated as an error but simply runs to the end of the string.
  */
 export function splitArgs(command: string): string[] {
     const args: string[] = [];
@@ -285,8 +285,8 @@ function parseFlags(input: string[], entries: { [key: string]: string }): number
  * are not mentioned on the ssh(1) man page and don't seem to have use in the
  * wild. In the OpenSSH source, they appear to be ignored[3].
  *
- * The command-line tokenizer, like libc does for OpenSSH, takes care of dealing
- * with quotations for us.
+ * The `splitArgs` tokenizer has already stripped any surrounding quotes before this
+ * function sees a token, so it only has to deal with the unquoted connection string.
  *
  *  1. https://github.com/openssh/openssh-portable/blob/e3b6c966b79c3ea5d51b923c3bbdc41e13b96ea0/ssh.c#L999
  *  2. https://tools.ietf.org/html/draft-ietf-secsh-scp-sftp-ssh-uri-04#section-3.3
