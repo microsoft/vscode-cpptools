@@ -7,6 +7,7 @@
 	"learn.how.to.install.a.library": "このヘッダーのライブラリを vcpkg でインストールする方法の詳細",
 	"copy.vcpkg.command": "'{0}' をインストールするための vcpkg コマンドをクリップボードにコピーする",
 	"on.disabled.command": "`C_Cpp.intelliSenseEngine` が `disabled` に設定されている場合、IntelliSense 関連のコマンドは実行できません。",
+	"switch.header.source": "ヘッダー/ソースを切り替えています...",
 	"client.not.found": "クライアントが見つかりませんでした",
 	"ok": "OK",
 	"install.compiler.mac.title": "clang コンパイラがインストールされます",

@@ -48,7 +48,7 @@ chdir($root);
 
 // dump unhandled async errors to the console and exit.
 process.on('unhandledRejection', (reason: any, _promise) => {
-    error(`${reason?.stack?.split(/\r?\n/).filter(l => !l.includes('node:internal') && !l.includes('node_modules')).join('\n')}`);
+    error(`${reason?.stack?.split(/\r?\n/).filter((l: string) => !l.includes('node:internal') && !l.includes('node_modules')).join('\n')}`);
     process.exit(1);
 });
 
