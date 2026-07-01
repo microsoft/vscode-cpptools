@@ -13,9 +13,13 @@ import { install, isolated, options } from "./vscode";
 export async function main() {
     console.log(heading(`Install VS Code`));
     const vscode = await install();
+    if (!vscode) {
+        error('Failed to install VS Code');
+        return;
+    }
 
     console.log(heading('Install latest C/C++ Extension'));
-    const result = await runVSCodeCommand([...vscode?.args ?? [], '--install-extension', 'ms-vscode.cpptools', '--pre-release'], options);
+    const result = await runVSCodeCommand([...vscode.args ?? [], '--install-extension', 'ms-vscode.cpptools', '--pre-release'], options);
     if (result.stdout) {
         console.log(result.stdout.toString());
     }
