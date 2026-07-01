@@ -529,6 +529,20 @@
                             }
                         }
                     },
+                    "problemMatcher": {
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        ],
+                        "description": "%c_cpp.taskDefinitions.problemMatcher.description%"
+                    },
                     "detail": {
                         "type": "string",
                         "description": "%c_cpp.taskDefinitions.detail.description%"
@@ -621,11 +635,18 @@
                                 }
                             },
                             "problemMatcher": {
-                                "type": "array",
-                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%",
-                                "items": {
-                                    "type": "string"
-                                }
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                ],
+                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%"
                             }
                         }
                     },
@@ -717,11 +738,18 @@
                                 }
                             },
                             "problemMatcher": {
-                                "type": "array",
-                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%",
-                                "items": {
-                                    "type": "string"
-                                }
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                ],
+                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%"
                             }
                         }
                     },
@@ -813,11 +841,18 @@
                                 }
                             },
                             "problemMatcher": {
-                                "type": "array",
-                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%",
-                                "items": {
-                                    "type": "string"
-                                }
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                ],
+                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%"
                             }
                         }
                     }

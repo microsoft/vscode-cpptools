@@ -52,6 +52,20 @@
                 }
             }
         },
+        "CppBuildTaskProblemMatcher": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "description": "%c_cpp.taskDefinitions.problemMatcher.description%"
+        },
         "CppBuildTaskPlatformOverride": {
             "type": "object",
             "properties": {
@@ -69,11 +83,7 @@
                     "$ref": "#/definitions/CppBuildTaskOptions"
                 },
                 "problemMatcher": {
-                    "type": "array",
-                    "description": "%c_cpp.taskDefinitions.problemMatcher.description%",
-                    "items": {
-                        "type": "string"
-                    }
+                    "$ref": "#/definitions/CppBuildTaskProblemMatcher"
                 }
             }
         },
@@ -100,6 +110,9 @@
                 },
                 "options": {
                     "$ref": "#/definitions/CppBuildTaskOptions"
+                },
+                "problemMatcher": {
+                    "$ref": "#/definitions/CppBuildTaskProblemMatcher"
                 },
                 "detail": {
                     "type": "string",

@@ -24,8 +24,8 @@ export interface CppBuildTaskDefinition extends TaskDefinition {
     type: string;
     label: string; // The label appears in tasks.json file.
     command: string | util.IQuotedString;
-    args: (string | util.IQuotedString)[];
-    options: cp.ExecOptions | undefined;
+    args?: (string | util.IQuotedString)[];
+    options?: cp.ExecOptions | undefined;
     windows?: CppBuildTaskPlatformOverride;
     linux?: CppBuildTaskPlatformOverride;
     osx?: CppBuildTaskPlatformOverride;
@@ -220,12 +220,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         const editor: TextEditor | undefined = window.activeTextEditor;
         const folder: WorkspaceFolder | undefined = editor ? workspace.getWorkspaceFolder(editor.document.uri) : undefined;
 
-        const taskUsesActiveFile: boolean = platformDefinition.args.some(arg => {
+        const taskUsesActiveFile: boolean = platformDefinition.args?.some(arg => {
             if (util.isString(arg)) {
                 return arg.indexOf('${file}') >= 0;
             }
             return arg.value.indexOf('${file}') >= 0;
-        }); // Need to check this before ${file} is resolved
+        }) || false; // Need to check this before ${file} is resolved
         const scope: WorkspaceFolder | TaskScope = folder ? folder : TaskScope.Workspace;
         const customExecution: CustomExecution = new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> => {
             // When the task is executed, this callback will run. Here, we setup for running the task.
@@ -240,7 +240,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 { taskUsesActiveFile, insertStd: isClang && os.platform() === 'darwin' }
             );
         });
-        const task: CppBuildTask = new CppBuildTask(definition, scope, definition.label, ext.CppSourceStr, customExecution, isCl ? '$msCompile' : '$gcc');
+        const task: CppBuildTask = new CppBuildTask(definition, scope, definition.label, ext.CppSourceStr, customExecution, platformDefinition.problemMatcher ?? (isCl ? '$msCompile' : '$gcc'));
 
         task.group = TaskGroup.Build;
         task.detail = detail ? detail : localize("compiler.details", "compiler:") + " " + (isCl ? compilerName : command);
@@ -287,7 +287,11 @@ export class CppBuildTaskProvider implements TaskProvider {
                 label: task.label,
                 command: task.command,
                 args: task.args,
-                options: task.options
+                options: task.options,
+                windows: task.windows,
+                linux: task.linux,
+                osx: task.osx,
+                problemMatcher: task.problemMatcher
             };
             const cppBuildTask: CppBuildTask = new CppBuildTask(definition, TaskScope.Workspace, task.label, ext.CppSourceStr);
             cppBuildTask.detail = task.detail;
