@@ -6,7 +6,6 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import { CppSettings } from '../LanguageServer/settings';
 import { ManualPromise } from '../Utility/Async/manualPromise';
 import { ISshHostInfo, ProcessReturnType, getNumericLoggingLevel, splitLines, stripEscapeSequences } from '../common';
@@ -21,13 +20,11 @@ import {
     TwoFacInteractor,
     autoFilledPasswordForUsers
 } from './commandInteractors';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+const l10n = vscode.l10n;
 
 export class CanceledError extends Error {
     constructor() {
-        super(localize('ssh.canceled', 'SSH command canceled'));
+        super(l10n.t('SSH command canceled'));
     }
 }
 
@@ -42,7 +39,7 @@ export function showPassphraseInputBox(
     cancelToken?: vscode.CancellationToken
 ): Promise<string | undefined> {
     const keyStr: string = keyName ? `"${keyName}"` : '';
-    const msg: string = localize('ssh.passphrase.input.box', 'Enter passphrase for ssh key {0}', keyStr);
+    const msg: string = l10n.t('Enter passphrase for ssh key {0}', keyStr);
     return showInputBox(msg, prompt, cancelToken);
 }
 
@@ -51,7 +48,7 @@ export function showPasswordInputBox(
     prompt?: string,
     cancelToken?: vscode.CancellationToken
 ): Promise<string | undefined> {
-    const msg: string = user ? localize('ssh.enter.password.for.user', 'Enter password for user "{0}"', user) : localize('ssh.message.enter.password', 'Enter password');
+    const msg: string = user ? l10n.t('Enter password for user "{0}"', user) : l10n.t('Enter password');
     return showInputBox(msg, prompt, cancelToken);
 }
 
@@ -108,7 +105,7 @@ class ConfirmationItem implements vscode.QuickPickItem, vscode.MessageItem {
     }
 }
 
-const continueConfirmationPlaceholder: string = localize('ssh.continue.confirmation.placeholder', 'Are you sure you want to continue?');
+const continueConfirmationPlaceholder: string = l10n.t('Are you sure you want to continue?');
 
 export async function showHostKeyConfirmation(
     host: string,
@@ -116,7 +113,7 @@ export async function showHostKeyConfirmation(
     cancelToken?: vscode.CancellationToken
 ): Promise<string | undefined> {
     return showConfirmationPicker(
-        localize('ssh.host.key.confirmation.title', '"{0}" has fingerprint "{1}".', host, fingerprint),
+        l10n.t('"{0}" has fingerprint "{1}".', host, fingerprint),
         continueConfirmationPlaceholder,
         cancelToken
     );
@@ -137,7 +134,7 @@ async function showConfirmationPicker(
     return new Promise((resolve, reject) => {
         const quickPick: vscode.QuickPick<ConfirmationItem> = vscode.window.createQuickPick<ConfirmationItem>();
         quickPick.canSelectMany = false;
-        quickPick.items = [new ConfirmationItem(localize('continue', 'Continue'), 'yes'), new ConfirmationItem(localize('cancel', 'Cancel'), 'no')];
+        quickPick.items = [new ConfirmationItem(l10n.t('Continue'), 'yes'), new ConfirmationItem(l10n.t('Cancel'), 'no')];
         quickPick.title = title;
         quickPick.placeholder = placeholder;
 
@@ -291,11 +288,11 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
         if (!noClean) {
             clean();
         }
-        getSshChannel().appendLine(cancel ? localize('ssh.terminal.command.canceled', '"{0}" terminal command canceled.', nickname) : localize('ssh.terminal.command.done', '"{0}" terminal command done.', nickname));
+        getSshChannel().appendLine(cancel ? l10n.t('"{0}" terminal command canceled.', nickname) : l10n.t('"{0}" terminal command done.', nickname));
 
         if (cancel) {
             if (continueWithoutExiting) {
-                const warningMessage: string = localize('ssh.continuing.command.canceled', 'Task \'{0}\' is canceled, but the underlying command may not be terminated. Please check manually.', command);
+                const warningMessage: string = l10n.t('Task \'{0}\' is canceled, but the underlying command may not be terminated. Please check manually.', command);
                 getSshChannel().appendLine(warningMessage);
                 void vscode.window.showWarningMessage(warningMessage);
             }
@@ -309,7 +306,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
 
     const failed = (error?: any) => {
         clean();
-        const errorMessage: string = localize('ssh.process.failed', '"{0}" process failed: {1}', nickname, error);
+        const errorMessage: string = l10n.t('"{0}" process failed: {1}', nickname, error);
         getSshChannel().appendLine(errorMessage);
         void vscode.window.showErrorMessage(errorMessage);
         result.reject(error);
@@ -397,7 +394,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
                                 ? interaction.response.replace(/./g, '*')
                                 : interaction.response;
                             if (loggingLevel >= 5) {
-                                getSshChannel().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, logOutput));
+                                getSshChannel().appendLine(l10n.t('"{0}" wrote data to terminal: "{1}".', nickname, logOutput));
                             }
                         }
                     }
@@ -461,7 +458,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
 
             terminal.sendText(sendText);
             if (loggingLevel >= 5) {
-                getSshChannel().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, args.sendText));
+                getSshChannel().appendLine(l10n.t('"{0}" wrote data to terminal: "{1}".', nickname, args.sendText));
             }
         }
 

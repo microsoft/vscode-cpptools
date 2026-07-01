@@ -8,25 +8,22 @@ import { vcvars } from 'node-vcvarsall';
 import { vswhere } from 'node-vswhere';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import { extensionContext, isString, resolveVariables, whichAsync } from '../common';
 import { isWindows } from '../constants';
 import { CppSettings } from './settings';
+const l10n = vscode.l10n;
 
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-
-const errorNoContext = localize('no.context.provided', 'No context provided');
-const errorNotWindows = localize('not.windows', 'The "Set Visual Studio Developer Environment" command is only available on Windows');
-const errorNoVSFound = localize('error.no.vs', 'A Visual Studio installation with the C++ compiler was not found');
-export const errorOperationCancelled = localize('operation.cancelled', 'The operation was cancelled');
-const errorNoHostsFound = localize('no.hosts', 'No hosts found');
-const configuringDevEnv = localize('config.dev.env', 'Configuring developer environment...');
-const selectVSInstallation = localize('select.vs.install', 'Select a Visual Studio installation');
-const advancedOptions = localize('advanced.options', 'Advanced options...');
-const advancedOptionsDescription = localize('advanced.options.desc', 'Select a specific host and target architecture, toolset version, etc.');
-const selectToolsetVersion = localize('select.toolset', 'Select a toolset version');
-const selectHostTargetArch = localize('select.host.target', 'Select a host and target architecture');
+const errorNoContext = l10n.t('No context provided');
+const errorNotWindows = l10n.t('The "Set Visual Studio Developer Environment" command is only available on Windows');
+const errorNoVSFound = l10n.t('A Visual Studio installation with the C++ compiler was not found');
+export const errorOperationCancelled = l10n.t('The operation was cancelled');
+const errorNoHostsFound = l10n.t('No hosts found');
+const configuringDevEnv = l10n.t('Configuring developer environment...');
+const selectVSInstallation = l10n.t('Select a Visual Studio installation');
+const advancedOptions = l10n.t('Advanced options...');
+const advancedOptionsDescription = l10n.t('Select a specific host and target architecture, toolset version, etc.');
+const selectToolsetVersion = l10n.t('Select a toolset version');
+const selectHostTargetArch = l10n.t('Select a host and target architecture');
 
 export function isEnvironmentOverrideApplied(): boolean {
     return extensionContext?.environmentVariableCollection.get('VCToolsInstallDir') !== undefined;
@@ -83,7 +80,7 @@ export async function setEnvironment(context?: vscode.ExtensionContext) {
     }, () => vcvars.getVCVars(vs, options));
 
     if (!vars || !vars['INCLUDE']) {
-        throw new Error(localize('something.wrong', 'Something went wrong: {0}', JSON.stringify(vars)));
+        throw new Error(l10n.t('Something went wrong: {0}', JSON.stringify(vars)));
     }
 
     const host = vars['VSCMD_ARG_HOST_ARCH'];
@@ -98,7 +95,7 @@ export async function setEnvironment(context?: vscode.ExtensionContext) {
     for (const key of Object.keys(vars)) {
         context.environmentVariableCollection.replace(key, vars[key].replace(`%${key}%`, '${env:' + key + '}'));
     }
-    context.environmentVariableCollection.description = localize('dev.env.for', '{0} developer environment for {1}', arch, vsDisplayNameWithSuffix(vs));
+    context.environmentVariableCollection.description = l10n.t('{0} developer environment for {1}', arch, vsDisplayNameWithSuffix(vs));
     context.environmentVariableCollection.persistent = settings.persistVSDeveloperEnvironment;
 
     return true;
@@ -139,7 +136,7 @@ function vsDisplayNameWithSuffix(installation: vswhere.Installation): string {
 async function chooseVSInstallation(installations: vswhere.Installation[]): Promise<vswhere.Installation | undefined> {
     const items: vscode.QuickPickItem[] = installations.map(installation => <vscode.QuickPickItem>{
         label: vsDisplayNameWithSuffix(installation),
-        detail: localize('default.env', 'Default environment for {0}', installation.catalog.productDisplayVersion)
+        detail: l10n.t('Default environment for {0}', installation.catalog.productDisplayVersion)
     });
     items.push({
         label: advancedOptions,
@@ -202,7 +199,7 @@ async function setOptions(compiler: Compiler): Promise<void> {
     if (hostTargets.length > 1) {
         const items = hostTargets.map(ht => <vscode.QuickPickItem>{
             label: vcvars.getArchitecture(ht),
-            description: localize('host.target', 'host = {0}, target = {1}', ht.host, ht.target)
+            description: l10n.t('host = {0}, target = {1}', ht.host, ht.target)
         });
         const selection = await vscode.window.showQuickPick(items, {
             placeHolder: selectHostTargetArch

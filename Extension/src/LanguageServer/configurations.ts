@@ -11,7 +11,6 @@ import * as os from 'os';
 import * as path from 'path';
 import { setTimeout } from 'timers';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import * as which from 'which';
 import { logAndReturn, returns } from '../Utility/Async/returns';
 import * as util from '../common';
@@ -25,10 +24,8 @@ import { CppSettings, OtherSettings } from './settings';
 import { SettingsPanel } from './settingsPanel';
 import { ConfigurationType, getUI } from './ui';
 import { Deferral } from './utils';
+const l10n = vscode.l10n;
 import escapeStringRegExp = require('escape-string-regexp');
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 const configVersion: number = 4;
 
@@ -642,7 +639,7 @@ export class CppProperties {
         if (isValid) {
             return "";
         } else {
-            return localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", configuration.intelliSenseMode);
+            return l10n.t("IntelliSense mode {0} is incompatible with compiler path.", configuration.intelliSenseMode);
         }
     }
 
@@ -1392,7 +1389,7 @@ export class CppProperties {
 
         void this.applyDefaultIncludePathsAndFrameworks().catch(logAndReturn.undefined);
         void this.timeOperation(() => this.updateServerOnFolderSettingsChange()).then(result => {
-            getOutputChannelLogger().appendLineAtLevel(5, localize('resolve.configuration.processed', "Processed c_cpp_properties.json in {0}s", result.duration));
+            getOutputChannelLogger().appendLineAtLevel(5, l10n.t("Processed c_cpp_properties.json in {0}s", result.duration));
         }).catch(logAndReturn.undefined);
     }
 
@@ -1429,7 +1426,7 @@ export class CppProperties {
 
             } catch (errJS) {
                 const err: Error = errJS as Error;
-                const failedToCreate: string = localize("failed.to.create.config.folder", 'Failed to create "{0}"', this.configFolder);
+                const failedToCreate: string = l10n.t('Failed to create "{0}"', this.configFolder);
                 void vscode.window.showErrorMessage(`${failedToCreate}: ${err.message}`);
             }
         }
@@ -1465,7 +1462,7 @@ export class CppProperties {
             // TODO?: Handle when jsonc.parse() throws an exception due to invalid JSON contents.
             const newJson: ConfigurationJson = jsonc.parse(readResults, undefined, true) as any;
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
-                throw { message: localize("invalid.configuration.file", "Invalid configuration file. There must be at least one configuration present in the array.") };
+                throw { message: l10n.t("Invalid configuration file. There must be at least one configuration present in the array.") };
             }
             if (!this.configurationIncomplete && this.configurationJson && this.configurationJson.configurations &&
                 this.CurrentConfigurationIndex >= 0 && this.CurrentConfigurationIndex < this.configurationJson.configurations.length) {
@@ -1541,7 +1538,7 @@ export class CppProperties {
                     this.updateToVersion4();
                 } else {
                     this.configurationJson.version = configVersion;
-                    void vscode.window.showErrorMessage(localize("unknown.properties.version", 'Unknown version number found in c_cpp_properties.json. Some features may not work as expected.'));
+                    void vscode.window.showErrorMessage(l10n.t('Unknown version number found in c_cpp_properties.json. Some features may not work as expected.'));
                 }
             }
 
@@ -1569,7 +1566,7 @@ export class CppProperties {
                     this.writeToJson();
                 } catch {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
-                    void vscode.window.showWarningMessage(localize('update.properties.failed', 'Attempt to update "{0}" failed (do you have write access?)', this.propertiesFile.fsPath));
+                    void vscode.window.showWarningMessage(l10n.t('Attempt to update "{0}" failed (do you have write access?)', this.propertiesFile.fsPath));
                     success = false;
                 }
             }
@@ -1593,7 +1590,7 @@ export class CppProperties {
             }
         } catch (errJS) {
             const err: Error = errJS as Error;
-            const failedToParse: string = localize("failed.to.parse.properties", 'Failed to parse "{0}"', this.propertiesFile.fsPath);
+            const failedToParse: string = l10n.t('Failed to parse "{0}"', this.propertiesFile.fsPath);
             void vscode.window.showErrorMessage(`${failedToParse}: ${err.message}`);
             success = false;
         }
@@ -1696,17 +1693,16 @@ export class CppProperties {
 
             const compilerPathErrors: string[] = [];
             if (compilerPathMayNeedQuotes && !pathExists) {
-                compilerPathErrors.push(localize({ key: "path.with.spaces", comment: ["{Locked=\"{0}\"} The {0} is a double quote character \", and should be located next to the translation for \"double quotes\"."] },
-                    "Compiler path with spaces could not be found. If this was intended to include compiler arguments, surround the compiler path with double quotes ({0}).", '"'));
+                compilerPathErrors.push(l10n.t({ message: "Compiler path with spaces could not be found. If this was intended to include compiler arguments, surround the compiler path with double quotes ({0}).", args: ['"'], comment: ["{Locked=\"{0}\"} The {0} is a double quote character \", and should be located next to the translation for \"double quotes\"."] }));
                 telemetry.CompilerPathMissingQuotes = 1;
             }
 
             if (!pathExists) {
-                const message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
+                const message: string = l10n.t("Cannot find: {0}", resolvedCompilerPath);
                 compilerPathErrors.push(message);
                 telemetry.PathNonExistent = 1;
             } else if (!util.checkExecutableWithoutExtensionExistsSync(resolvedCompilerPath)) {
-                const message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
+                const message: string = l10n.t("Path is not a file: {0}", resolvedCompilerPath);
                 compilerPathErrors.push(message);
                 telemetry.PathNotAFile = 1;
             }
@@ -1754,9 +1750,9 @@ export class CppProperties {
         // Validate paths (directories)
         try {
             const { result, duration } = await this.timeOperation(() => this.validatePath(config.includePath, { globPaths: true }));
-            errors.includePath = result ?? duration >= 10 ? localize('resolve.includePath.took.too.long', "The include path validation took {0}s to evaluate", duration) : undefined;
+            errors.includePath = result ?? duration >= 10 ? l10n.t("The include path validation took {0}s to evaluate", duration) : undefined;
         } catch (e) {
-            errors.includePath = localize('resolve.includePath.failed', "Failed to resolve include path. Error: {0}", (e as Error).message);
+            errors.includePath = l10n.t("Failed to resolve include path. Error: {0}", (e as Error).message);
         }
         errors.macFrameworkPath = await this.validatePath(config.macFrameworkPath);
         errors.browsePath = await this.validatePath(config.browse ? config.browse.path : undefined);
@@ -1825,9 +1821,9 @@ export class CppProperties {
             }
 
             if (!pathExists) {
-                let message: string = localize('cannot.find', "Cannot find: {0}", resolvedPath);
+                let message: string = l10n.t("Cannot find: {0}", resolvedPath);
                 if (quotedPath) {
-                    message += '. ' + localize('wrapped.with.quotes', 'Do not add extra quotes around paths.');
+                    message += '. ' + l10n.t('Do not add extra quotes around paths.');
                 }
                 errors.push(message);
                 continue;
@@ -1835,10 +1831,10 @@ export class CppProperties {
 
             // Check if path is a directory or file
             if (isDirectory && !util.checkDirectoryExistsSync(resolvedPath)) {
-                const message: string = localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
+                const message: string = l10n.t("Path is not a directory: {0}", resolvedPath);
                 errors.push(message);
             } else if (!isDirectory && !util.checkFileExistsSync(resolvedPath)) {
-                const message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedPath);
+                const message: string = l10n.t("Path is not a file: {0}", resolvedPath);
                 errors.push(message);
             }
         }
@@ -1855,7 +1851,7 @@ export class CppProperties {
         // TODO: make configName non-case sensitive.
         const occurrences: number | undefined = this.ConfigurationNames?.filter(function (name): boolean { return name === configName; }).length;
         if (occurrences && occurrences > 1) {
-            errorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
+            errorMsg = l10n.t("{0} is a duplicate. The configuration name should be unique.", configName);
         }
         return errorMsg;
     }
@@ -1959,7 +1955,7 @@ export class CppProperties {
         }
         for (const [configName, allRanges] of configNames) {
             if (allRanges && allRanges.length > 1) {
-                dupErrorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
+                dupErrorMsg = l10n.t("{0} is a duplicate. The configuration name should be unique.", configName);
                 allRanges.forEach(nameRange => {
                     const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(nameRange.start.character),
@@ -2090,10 +2086,10 @@ export class CppProperties {
             dotConfigPath = checkPathExists.path;
         }
         if (!dotConfigPathExists) {
-            dotConfigMessage = localize('cannot.find', "Cannot find: {0}", dotConfigPath);
+            dotConfigMessage = l10n.t("Cannot find: {0}", String(dotConfigPath));
             newSquiggleMetrics.PathNonExistent++;
         } else if (dotConfigPath && !util.checkFileExistsSync(dotConfigPath)) {
-            dotConfigMessage = localize("path.is.not.a.file", "Path is not a file: {0}", dotConfigPath);
+            dotConfigMessage = l10n.t("Path is not a file: {0}", dotConfigPath);
             newSquiggleMetrics.PathNotAFile++;
         }
 
@@ -2139,7 +2135,7 @@ export class CppProperties {
                     const endOffset = curOffset + curPath.length;
                     const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(curTextStartOffset + curOffset), document.positionAt(curTextStartOffset + endOffset)),
-                        localize('resolve.path.took.too.long', "Path took {0}s to evaluate", duration),
+                        l10n.t("Path took {0}s to evaluate", duration),
                         vscode.DiagnosticSeverity.Warning);
                     diagnostics.push(diagnostic);
                 }
@@ -2150,7 +2146,7 @@ export class CppProperties {
                     const endOffset = curOffset + curPath.length;
                     const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(curTextStartOffset + curOffset), document.positionAt(curTextStartOffset + endOffset)),
-                        localize('resolve.path.failed', "Failed to resolve path {0}. Error: {1}", curPath, (e as Error).message),
+                        l10n.t("Failed to resolve path {0}. Error: {1}", curPath, (e as Error).message),
                         vscode.DiagnosticSeverity.Warning);
                     diagnostics.push(diagnostic);
                 }
@@ -2223,16 +2219,16 @@ export class CppProperties {
                         } else {
                             badPath = `"${expandedPaths[0]}"`;
                         }
-                        message = localize('cannot.find', "Cannot find: {0}", badPath);
+                        message = l10n.t("Cannot find: {0}", badPath);
                         if (incorrectExpandedPaths.some(p => p.match(/".*"/) !== null)) {
-                            message += '.\n' + localize('wrapped.with.quotes', 'Do not add extra quotes around paths.');
+                            message += '.\n' + l10n.t('Do not add extra quotes around paths.');
                         }
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
                         // Check for file versus path mismatches.
                         if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) {
                             if (expandedPaths.length > 1) {
-                                message = localize("multiple.paths.not.allowed", "Multiple paths are not allowed.");
+                                message = l10n.t("Multiple paths are not allowed.");
                                 newSquiggleMetrics.MultiplePathsNotAllowed++;
                             } else {
                                 const resolvedPath = this.resolvePath(expandedPaths[0]);
@@ -2240,13 +2236,13 @@ export class CppProperties {
                                     continue;
                                 }
 
-                                message = localize("path.is.not.a.file", "Path is not a file: {0}", expandedPaths[0]);
+                                message = l10n.t("Path is not a file: {0}", expandedPaths[0]);
                                 newSquiggleMetrics.PathNotAFile++;
                             }
                         } else if ((curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
                             (curOffset >= compileCommandsArrayStart && curOffset <= compileCommandsArrayEnd)) {
                             if (expandedPaths.length > 1) {
-                                message = localize("multiple.paths.should.be.separate.entries", "Multiple paths should be separate entries in an array.");
+                                message = l10n.t("Multiple paths should be separate entries in an array.");
                                 newSquiggleMetrics.MultiplePathsShouldBeSeparated++;
                             } else {
                                 const resolvedPath = this.resolvePath(expandedPaths[0]);
@@ -2254,7 +2250,7 @@ export class CppProperties {
                                     continue;
                                 }
 
-                                message = localize("path.is.not.a.file", "Path is not a file: {0}", expandedPaths[0]);
+                                message = l10n.t("Path is not a file: {0}", expandedPaths[0]);
                                 newSquiggleMetrics.PathNotAFile++;
                             }
                         } else {
@@ -2269,11 +2265,11 @@ export class CppProperties {
                             let badPath = "";
                             if (mismatchedPaths.length > 1) {
                                 badPath = mismatchedPaths.map(s => `"${s}"`).join(', ');
-                                message = localize('paths.are.not.directories', "Paths are not directories: {0}", badPath);
+                                message = l10n.t("Paths are not directories: {0}", badPath);
                                 newSquiggleMetrics.PathNotADirectory++;
                             } else if (mismatchedPaths.length === 1) {
                                 badPath = `"${mismatchedPaths[0]}"`;
-                                message = localize('path.is.not.a.directory', "Path is not a directory: {0}", badPath);
+                                message = l10n.t("Path is not a directory: {0}", badPath);
                                 newSquiggleMetrics.PathNotADirectory++;
                             } else {
                                 continue;
@@ -2297,7 +2293,7 @@ export class CppProperties {
                         endOffset = curOffset + curMatch.length;
                         let message: string;
                         if (!pathExists) {
-                            message = localize('cannot.find', "Cannot find: {0}", expandedPaths[0]);
+                            message = l10n.t("Cannot find: {0}", expandedPaths[0]);
                             newSquiggleMetrics.PathNonExistent++;
                             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                                 new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),

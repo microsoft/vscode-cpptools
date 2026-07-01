@@ -5,16 +5,13 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as logger from '../logger';
 import * as telemetry from '../telemetry';
 import { ChatContextResult } from './client';
 import { getClients } from './extension';
 import { checkDuration } from './utils';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+const l10n = vscode.l10n;
 
 const MSVC: string = 'MSVC';
 const Clang: string = 'Clang';
@@ -117,7 +114,7 @@ export async function getProjectContext(uri: vscode.Uri, context: { flags: Recor
     catch (exception) {
         try {
             const err: Error = exception as Error;
-            logger.getOutputChannelLogger().appendLine(localize("copilot.projectcontext.error", "Error while retrieving the project context. Reason: {0}", err.message));
+            logger.getOutputChannelLogger().appendLine(l10n.t("Error while retrieving the project context. Reason: {0}", err.message));
         }
         catch {
             // Intentionally swallow any exception.
@@ -186,7 +183,7 @@ export class CppConfigurationLanguageModelTool implements vscode.LanguageModelTo
 
     private async reportError(): Promise<void> {
         try {
-            logger.getOutputChannelLogger().appendLine(localize("copilot.cppcontext.error", "Error while retrieving the #cpp context."));
+            logger.getOutputChannelLogger().appendLine(l10n.t("Error while retrieving the #cpp context."));
         }
         catch {
             // Intentionally swallow any exception.

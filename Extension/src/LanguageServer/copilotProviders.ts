@@ -6,16 +6,13 @@
 
 import { ContextProviderApiV1 } from '@github/copilot-language-server';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as logger from '../logger';
 import * as telemetry from '../telemetry';
 import { GetIncludesResult } from './client';
 import { getClients } from './extension';
 import { getProjectContext } from './lmTool';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+const l10n = vscode.l10n;
 
 export interface CopilotTrait {
     name: string;
@@ -101,7 +98,7 @@ export async function registerRelatedFilesProvider(): Promise<void> {
                                 throw exception; // Rethrow the cancellation error to be handled by the caller.
                             } else if (exception instanceof Error) {
                                 telemetryProperties["error"] = "true";
-                                logger.getOutputChannelLogger().appendLine(localize("copilot.relatedfilesprovider.error", "Error while retrieving result. Reason: {0}", exception.message));
+                                logger.getOutputChannelLogger().appendLine(l10n.t("Error while retrieving result. Reason: {0}", exception.message));
                             }
 
                             // In case of error retrieving the include files, we signal the caller of absence of the results by returning undefined.

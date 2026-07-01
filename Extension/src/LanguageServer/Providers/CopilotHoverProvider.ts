@@ -4,16 +4,13 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { Position, ResponseError } from 'vscode-languageclient';
-import * as nls from 'vscode-nls';
 import { getVSCodeLanguageModel } from '../../common';
 import { modelSelector } from '../../constants';
 import * as telemetry from '../../telemetry';
 import { DefaultClient, GetCopilotHoverInfoParams, GetCopilotHoverInfoRequest, GetCopilotHoverInfoResult } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CppSettings } from '../settings';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+const l10n = vscode.l10n;
 
 export class CopilotHoverProvider implements vscode.HoverProvider {
     private client: DefaultClient;
@@ -136,7 +133,7 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
 
         this.currentDocument = document;
         this.currentPosition = position;
-        const commandString = "$(sparkle) [" + localize("generate.copilot.description", "Generate Copilot summary") + "](command:C_Cpp.ShowCopilotHover \"" + localize("copilot.disclaimer", "AI-generated content may be incorrect.") + "\")";
+        const commandString = "$(sparkle) [" + l10n.t("Generate Copilot summary") + "](command:C_Cpp.ShowCopilotHover \"" + l10n.t("AI-generated content may be incorrect.") + "\")";
         const commandMarkdown = new vscode.MarkdownString(commandString);
         commandMarkdown.supportThemeIcons = true;
         commandMarkdown.isTrusted = { enabledCommands: ["C_Cpp.ShowCopilotHover"] };

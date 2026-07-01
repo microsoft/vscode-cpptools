@@ -305,7 +305,7 @@ export async function checkPrep() {
     failing = !await assertAnyFolder('dist/walkthrough') && (quiet || warn(`The walkthrough files are not in place.`)) || failing;
     failing = !await assertAnyFolder('dist/html') && (quiet || warn(`The html files are not in place.`)) || failing;
     failing = !await assertAnyFolder('dist/schema') && (quiet || warn(`The schema files are not in place.`)) || failing;
-    failing = !await assertAnyFile('dist/nls.metadata.json') && (quiet || warn(`The extension translation file '${$root}/dist/nls.metadata.json is missing.`)) || failing;
+    failing = !await assertAnyFile('l10n/bundle.l10n.json') && (quiet || warn(`The extension localization bundle '${$root}/l10n/bundle.l10n.json' is missing.`)) || failing;
     failing = await checkDTS() || failing;
 
     if (!failing) {
@@ -317,7 +317,7 @@ export async function checkPrep() {
 export async function checkCompiled() {
     let failing = false;
     failing = await checkDTS() || failing;
-    failing = !await assertAnyFile('dist/src/main.js') && (quiet || warn(`The extension entry point '${$root}/dist/src/main.js is missing.`)) || failing;
+    failing = !await assertAnyFile('dist/src/main.js') && (quiet || warn(`The extension entry point '${$root}/dist/src/main.js' is missing.`)) || failing;
 
     if (!failing) {
         verbose('Compiled files appear to be in place.');
@@ -327,8 +327,8 @@ export async function checkCompiled() {
 
 export async function checkDTS() {
     let failing = false;
-    failing = !await assertAnyFile('vscode.d.ts') && (quiet || warn(`The VSCode import file '${$root}/dist/src/vscode.d.ts is missing.`)) || failing;
-    failing = !await assertAnyFile('vscode.proposed.terminalDataWriteEvent.d.ts') && (quiet || warn(`The VSCode import file '${$root}/dist/src/vscode.proposed.terminalDataWriteEvent.d.ts is missing.`)) || failing;
+    failing = !await assertAnyFile('vscode.d.ts') && (quiet || warn(`The VSCode import file '${$root}/dist/src/vscode.d.ts' is missing.`)) || failing;
+    failing = !await assertAnyFile('vscode.proposed.terminalDataWriteEvent.d.ts') && (quiet || warn(`The VSCode import file '${$root}/dist/src/vscode.proposed.terminalDataWriteEvent.d.ts' is missing.`)) || failing;
 
     if (!failing) {
         verbose('VSCode d.ts files appear to be in place.');

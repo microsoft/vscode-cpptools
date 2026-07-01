@@ -3,17 +3,15 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as plist from 'plist';
-import * as nls from 'vscode-nls';
 import * as util from './common';
 import { LinuxDistribution } from './linuxDistribution';
 import * as logger from './logger';
 import { SessionState, SupportedWindowsVersions } from './sessionState';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+const l10n = vscode.l10n;
 
 export function GetOSName(processPlatform: string | undefined): string | undefined {
     switch (processPlatform) {
@@ -44,7 +42,7 @@ export class PlatformInformation {
                 version = await PlatformInformation.GetDarwinVersion();
                 break;
             default:
-                throw new Error(localize("unknown.os.platform", "Unknown OS platform"));
+                throw new Error(l10n.t("Unknown OS platform"));
         }
 
         return new PlatformInformation(platform, architecture, distribution, version);
@@ -75,10 +73,10 @@ export class PlatformInformation {
             if (systemVersionData) {
                 productDarwinVersion = systemVersionData.ProductVersion;
             } else {
-                errorMessage = localize("missing.plist.productversion", "Could not get ProduceVersion from SystemVersion.plist");
+                errorMessage = l10n.t("Could not get ProductVersion from SystemVersion.plist");
             }
         } else {
-            errorMessage = localize("missing.darwin.systemversion.file", "Failed to find SystemVersion.plist in {0}.", DARWIN_SYSTEM_VERSION_PLIST);
+            errorMessage = l10n.t("Failed to find SystemVersion.plist in {0}.", DARWIN_SYSTEM_VERSION_PLIST);
         }
 
         if (errorMessage) {

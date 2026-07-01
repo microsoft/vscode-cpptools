@@ -7,14 +7,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import * as config from './configurations';
 import { getLocalizedHtmlPath } from './localization';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+const l10n = vscode.l10n;
 
 function deepCopy(obj: any) {
     return JSON.parse(JSON.stringify(obj));
@@ -84,7 +81,7 @@ export class SettingsPanel {
     private panel?: vscode.WebviewPanel;
     private disposablesPanel?: vscode.Disposable;
     private static readonly viewType: string = 'settingsPanel';
-    private static readonly title: string = localize("c.cpp.configurations", 'C/C++ Configurations');
+    private static readonly title: string = l10n.t('C/C++ Configurations');
 
     // Used to workaround a VS Code 1.56 regression in which webViewPanel.onDidChangeViewState
     // gets called before the SettingsApp constructor is finished running.

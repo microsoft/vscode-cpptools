@@ -9,7 +9,6 @@ import * as os from 'os';
 import * as path from 'path';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import * as util from '../common';
 import { isWindows } from '../constants';
 import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
@@ -27,9 +26,7 @@ import { ConfigMenu, ConfigMode, ConfigSource, CppDebugConfiguration, DebuggerEv
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
 import * as debugUtils from './utils';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+const l10n = vscode.l10n;
 
 enum StepType {
     scp = 'scp',
@@ -113,12 +110,12 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             const menuItem: ConfigMenu = { label: config.name, configuration: quickPickConfig, description: config.detail, detail: config.taskStatus };
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
-                menuItem.label = localize("default.configuration.menuitem", "Default Configuration");
+                menuItem.label = l10n.t("Default Configuration");
             }
             return menuItem;
         });
 
-        const selection: ConfigMenu | undefined = await vscode.window.showQuickPick(this.localizeConfigDetail(items), { placeHolder: localize("select.configuration", "Select a configuration") });
+        const selection: ConfigMenu | undefined = await vscode.window.showQuickPick(this.localizeConfigDetail(items), { placeHolder: l10n.t("Select a configuration") });
         if (!selection) {
             Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "configSource": ConfigSource.unknown, "configMode": ConfigMode.unknown, "cancelled": "true", "succeeded": "true" });
             return []; // User canceled it.
@@ -242,13 +239,13 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (config.type === DebuggerType.cppvsdbg) {
             // Fail if cppvsdbg type is running on non-Windows
             if (os.platform() !== 'win32') {
-                void logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
+                void logger.getOutputChannelLogger().showWarningMessage(l10n.t("Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
                 return undefined; // Abort debugging silently.
             }
 
             // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
             if (config.hasOwnProperty("externalConsole")) {
-                void logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
+                void logger.getOutputChannelLogger().showWarningMessage(l10n.t("The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
                 if (config.externalConsole && !config.console) {
                     config.console = "externalTerminal";
                 }
@@ -311,8 +308,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             const frameworkPath: string | undefined = this.getLLDBFrameworkPath();
 
             if (!frameworkPath) {
-                const moreInfoButton: string = localize("lldb.framework.install.xcode", "More Info");
-                const LLDBFrameworkMissingMessage: string = localize("lldb.framework.not.found", "Unable to locate 'LLDB.framework' for lldb-mi. Please install XCode or XCode Command Line Tools.");
+                const moreInfoButton: string = l10n.t("More Info");
+                const LLDBFrameworkMissingMessage: string = l10n.t("Unable to locate 'LLDB.framework' for lldb-mi. Please install XCode or XCode Command Line Tools.");
 
                 void vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton)
                     .then(value => {
@@ -328,7 +325,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         if (config.logging?.engineLogging) {
             const outputChannel: logger.Logger = logger.getOutputChannelLogger();
-            outputChannel.appendLine(localize("debugger.launchConfig", "Launch configuration:"));
+            outputChannel.appendLine(l10n.t("Launch configuration:"));
             outputChannel.appendLine(JSON.stringify(config, undefined, 2));
             // TODO: Enable when https://github.com/microsoft/vscode/issues/108619 is resolved.
             // logger.showOutputChannel();
@@ -338,13 +335,13 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (config.deploySteps && config.deploySteps.length !== 0) {
             const codeVersion: number[] = util.getVsCodeVersion();
             if ((util.isNumber(codeVersion[0]) && codeVersion[0] < 1) || (util.isNumber(codeVersion[0]) && codeVersion[0] === 1 && util.isNumber(codeVersion[1]) && codeVersion[1] < 69)) {
-                void logger.getOutputChannelLogger().showErrorMessage(localize("vs.code.1.69+.required", "'deploySteps' require VS Code 1.69+."));
+                void logger.getOutputChannelLogger().showErrorMessage(l10n.t("'deploySteps' require VS Code 1.69+."));
                 return undefined;
             }
 
             const deploySucceeded: boolean = await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
-                title: localize("running.deploy.steps", "Running deploy steps...")
+                title: l10n.t("Running deploy steps...")
             }, async () => this.deploySteps(config, token));
 
             if (!deploySucceeded || token?.isCancellationRequested) {
@@ -435,7 +432,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     // Non-absolute. Check on $PATH
                     (await util.whichAsync(compilerPath) !== undefined);
                 if (!compilerPathExists) {
-                    logger.getOutputChannelLogger().appendLine(localize('compiler.path.not.exists', "Unable to find {0}. {1} task is ignored.", compilerPath, definition.label));
+                    logger.getOutputChannelLogger().appendLine(l10n.t("Unable to find {0}. {1} task is ignored.", compilerPath, definition.label));
                 }
                 const compilerName: string = path.basename(compilerPath);
                 const newConfig: CppDebugConfiguration = { ...defaultTemplateConfig }; // Copy enumerables and properties
@@ -453,7 +450,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 newConfig.program = definedExePath ? definedExePath : util.defaultExePath();
                 // Add the "detail" property to show the compiler path in QuickPickItem.
                 // This property will be removed before writing the DebugConfiguration in launch.json.
-                newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
+                newConfig.detail = l10n.t("preLaunchTask: {0}", task.name);
                 newConfig.taskDetail = task.detail;
                 newConfig.taskStatus = task.existing ?
                     (task.name === DebugConfigurationProvider.recentBuildTaskLabelStr) ? TaskStatus.recentlyUsed : TaskStatus.configured :
@@ -507,7 +504,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
                             newConfig.miDebuggerPath = usrDebuggerPath;
                         } else {
-                            logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {1} is ignored.", `\"${debuggerName}\"`, compilerName));
+                            logger.getOutputChannelLogger().appendLine(l10n.t("Unable to find the {0} debugger. The debug configuration for {1} is ignored.", `\"${debuggerName}\"`, compilerName));
                             return undefined;
                         }
                     }
@@ -518,7 +515,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         configs.push(defaultTemplateConfig);
         const existingConfigs: CppDebugConfiguration[] | undefined = this.getLaunchConfigs(folder, type)?.map(config => {
             if (!config.detail && config.preLaunchTask) {
-                config.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", config.preLaunchTask);
+                config.detail = l10n.t("preLaunchTask: {0}", config.preLaunchTask);
             }
             config.existing = true;
             return config;
@@ -589,7 +586,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     private buildAndDebugActiveFileStr(): string {
-        return `${localize("build.and.debug.active.file", 'build and debug active file')}`;
+        return `${l10n.t('build and debug active file')}`;
     }
 
     private isClConfiguration(configurationLabel?: string): boolean {
@@ -609,21 +606,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // The user has an environment but cl.exe cannot be found. Prompt the user to update the environment.
         }
 
-        const applyButton = localize("apply.dev.env", "Apply Developer Environment");
-        const applyMessage = localize(
-            {
-                key: "cl.exe.not.available",
-                comment: ["{0} is a command option in a menu."]
-            },
-            "{0} requires the Visual Studio developer environment.", `cl.exe ${this.buildAndDebugActiveFileStr()}`);
-        const updateButton = localize("update.dev.env", "Update Developer Environment");
-        const updateMessage = localize(
-            {
-                key: "update.dev.env",
-                comment: ["{0} is a command option in a menu."]
-            },
-            "{0} requires the Visual Studio developer environment to be updated.", `cl.exe ${this.buildAndDebugActiveFileStr()}`);
-        const cancel = localize("cancel", "Cancel");
+        const applyButton = l10n.t("Apply Developer Environment");
+        const applyMessage = l10n.t({ message: "{0} requires the Visual Studio developer environment.", args: [`cl.exe ${this.buildAndDebugActiveFileStr()}`], comment: ["{0} is a command option in a menu."] });
+        const updateButton = l10n.t("Update Developer Environment");
+        const updateMessage = l10n.t({ message: "{0} requires the Visual Studio developer environment to be updated.", args: [`cl.exe ${this.buildAndDebugActiveFileStr()}`], comment: ["{0} is a command option in a menu."] });
+        const cancel = l10n.t("Cancel");
         const response = await vscode.window.showErrorMessage(
             hasEnvironment ? updateMessage : applyMessage,
             hasEnvironment ? updateButton : applyButton,
@@ -643,8 +630,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (util.hasMsvcEnvironment() && await canFindCl()) {
             return false;
         }
-        const notAppliedMessage = localize("dev.env.not.applied", "The source code could not be built because the Visual Studio developer environment was not applied.");
-        const notFoundMessage = localize("dev.env.not.found", "The source code could not be built because the Visual C++ compiler could not be found.");
+        const notAppliedMessage = l10n.t("The source code could not be built because the Visual Studio developer environment was not applied.");
+        const notFoundMessage = l10n.t("The source code could not be built because the Visual C++ compiler could not be found.");
         void vscode.window.showErrorMessage(hasEnvironment ? notFoundMessage : notAppliedMessage);
         return true;
     }
@@ -666,13 +653,13 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         const outputChannel: logger.Logger = logger.getOutputChannelLogger();
 
-        outputChannel.appendLine(localize("lldb.find.failed", "Missing dependency '{0}' for lldb-mi executable.", LLDBFramework));
-        outputChannel.appendLine(localize("lldb.search.paths", "Searched in:"));
+        outputChannel.appendLine(l10n.t("Missing dependency '{0}' for lldb-mi executable.", LLDBFramework));
+        outputChannel.appendLine(l10n.t("Searched in:"));
         searchPaths.forEach(searchPath => {
             outputChannel.appendLine(`\t${searchPath}`);
         });
         const xcodeCLIInstallCmd: string = "xcode-select --install";
-        outputChannel.appendLine(localize("lldb.install.help", "To resolve this issue, either install XCode through the Apple App Store or install the XCode Command Line Tools by running '{0}' in a Terminal window.", xcodeCLIInstallCmd));
+        outputChannel.appendLine(l10n.t("To resolve this issue, either install XCode through the Apple App Store or install the XCode Command Line Tools by running '{0}' in a Terminal window.", xcodeCLIInstallCmd));
         logger.showOutputChannel();
 
         return undefined;
@@ -701,7 +688,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 delete config.envFile;
             } catch (errJS) {
                 const e: Error = errJS as Error;
-                throw new Error(localize("envfile.failed", "Failed to use {0}. Reason: {1}", "envFile", e.message));
+                throw new Error(l10n.t("Failed to use {0}. Reason: {1}", "envFile", e.message));
             }
         }
     }
@@ -719,7 +706,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 // TODO: pass config.environment as 'additionalEnvironment' to resolveVariables when it is { key: value } instead of { "key": key, "value": value }
                 const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, undefined);
                 if (sourceFileMapSource !== newSourceFileMapSource) {
-                    message = "\t" + localize("replacing.sourcepath", "Replacing {0} '{1}' with '{2}'.", "sourcePath", sourceFileMapSource, newSourceFileMapSource);
+                    message = "\t" + l10n.t("Replacing {0} '{1}' with '{2}'.", "sourcePath", sourceFileMapSource, newSourceFileMapSource);
                     delete config.sourceFileMap[sourceFileMapSource];
                     source = newSourceFileMapSource;
                 }
@@ -729,7 +716,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     if (sourceFileMapTarget !== newSourceFileMapTarget) {
                         // Add a space if source was changed, else just tab the target message.
                         message += message ? ' ' : '\t';
-                        message += localize("replacing.targetpath", "Replacing {0} '{1}' with '{2}'.", "targetPath", sourceFileMapTarget, newSourceFileMapTarget);
+                        message += l10n.t("Replacing {0} '{1}' with '{2}'.", "targetPath", sourceFileMapTarget, newSourceFileMapTarget);
                         target = newSourceFileMapTarget;
                     }
                 } else if (util.isObject(sourceFileMapTarget)) {
@@ -739,7 +726,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     if (sourceFileMapTarget !== newSourceFileMapTarget) {
                         // Add a space if source was changed, else just tab the target message.
                         message += message ? ' ' : '\t';
-                        message += localize("replacing.editorPath", "Replacing {0} '{1}' with '{2}'.", "editorPath", sourceFileMapTarget, newSourceFileMapTarget["editorPath"]);
+                        message += l10n.t("Replacing {0} '{1}' with '{2}'.", "editorPath", sourceFileMapTarget, newSourceFileMapTarget["editorPath"]);
                         target = newSourceFileMapTarget;
                     }
                 }
@@ -751,7 +738,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
 
             if (messages.length > 0) {
-                logger.getOutputChannel().appendLine(localize("resolving.variables.in.sourcefilemap", "Resolving variables in {0}...", "sourceFileMap"));
+                logger.getOutputChannel().appendLine(l10n.t("Resolving variables in {0}...", "sourceFileMap"));
                 messages.forEach((message) => {
                     logger.getOutputChannel().appendLine(message);
                 });
@@ -761,7 +748,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     private static async showFileWarningAsync(message: string, fileName: string): Promise<void> {
-        const openItem: vscode.MessageItem = { title: localize("open.envfile", "Open {0}", "envFile") };
+        const openItem: vscode.MessageItem = { title: l10n.t("Open {0}", "envFile") };
         const result: vscode.MessageItem | undefined = await vscode.window.showWarningMessage(message, openItem);
         if (result && result.title === openItem.title) {
             const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(fileName);
@@ -775,15 +762,15 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         items.map((item: ConfigMenu) => {
             switch (item.detail) {
                 case TaskStatus.recentlyUsed: {
-                    item.detail = localize("recently.used.task", "Recently Used Task");
+                    item.detail = l10n.t("Recently Used Task");
                     break;
                 }
                 case TaskStatus.configured: {
-                    item.detail = localize("configured.task", "Configured Task");
+                    item.detail = l10n.t("Configured Task");
                     break;
                 }
                 case TaskStatus.detected: {
-                    item.detail = localize("detected.task", "Detected Task");
+                    item.detail = l10n.t("Detected Task");
                     break;
                 }
                 default: {
@@ -983,7 +970,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     private async selectConfiguration(textEditor: vscode.TextEditor, pickDefault: boolean = true, onlyWorkspaceFolder: boolean = false): Promise<CppDebugConfiguration | undefined> {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!util.isCppOrCFile(textEditor.document.uri)) {
-            void vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
+            void vscode.window.showErrorMessage(l10n.t('Cannot build and debug because the active file is not a C or C++ source file.'));
             return;
         }
 
@@ -1018,7 +1005,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             sortedItems = sortedItems.concat(items.filter(item => item.detail === undefined));
 
             selection = await vscode.window.showQuickPick(this.localizeConfigDetail(sortedItems), {
-                placeHolder: items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration")
+                placeHolder: items.length === 0 ? l10n.t("No compiler found") : l10n.t("Select a debug configuration")
             });
         }
         if (selection && this.isClConfiguration(selection.configuration.name) && await this.showErrorIfClNotAvailable(selection.configuration.name)) {
@@ -1092,7 +1079,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             case StepType.command: {
                 // VS Code commands are the same regardless of which extension invokes them, so just invoke them here.
                 if (step.args && !Array.isArray(step.args)) {
-                    void logger.getOutputChannelLogger().showErrorMessage(localize('command.args.must.be.array', '"args" in command deploy step must be an array.'));
+                    void logger.getOutputChannelLogger().showErrorMessage(l10n.t('"args" in command deploy step must be an array.'));
                     return false;
                 }
                 const returnCode: unknown = await vscode.commands.executeCommand(step.command, ...step.args);
@@ -1102,7 +1089,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             case StepType.rsync: {
                 const isScp: boolean = stepType === StepType.scp;
                 if (!step.files || !step.targetDir || !step.host) {
-                    void logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.copyFile', '"host", "files", and "targetDir" are required in {0} steps.', isScp ? 'SCP' : 'rsync'));
+                    void logger.getOutputChannelLogger().showErrorMessage(l10n.t('"host", "files", and "targetDir" are required in {0} steps.', isScp ? 'SCP' : 'rsync'));
                     return false;
                 }
                 const host: util.ISshHostInfo = util.isString(step.host) ? { hostName: step.host } : { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
@@ -1115,7 +1102,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         files = files.concat((await globAsync(fileGlob)).map(file => vscode.Uri.file(file)));
                     }
                 } else {
-                    void logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.copyFile', '"files" must be a string or an array of strings in {0} steps.', isScp ? 'SCP' : 'rsync'));
+                    void logger.getOutputChannelLogger().showErrorMessage(l10n.t('"files" must be a string or an array of strings in {0} steps.', isScp ? 'SCP' : 'rsync'));
                     return false;
                 }
 
@@ -1133,7 +1120,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
             case StepType.ssh: {
                 if (!step.host || !step.command) {
-                    void logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.ssh', '"host" and "command" are required for ssh steps.'));
+                    void logger.getOutputChannelLogger().showErrorMessage(l10n.t('"host" and "command" are required for ssh steps.'));
                     return false;
                 }
                 const host: util.ISshHostInfo = util.isString(step.host) ? { hostName: step.host } : { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
@@ -1148,7 +1135,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
             case StepType.shell: {
                 if (!step.command) {
-                    void logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.shell', '"command" is required for shell steps.'));
+                    void logger.getOutputChannelLogger().showErrorMessage(l10n.t('"command" is required for shell steps.'));
                     return false;
                 }
                 const taskResult: util.ProcessReturnType = await util.spawnChildProcess(step.command, undefined, step.continueOn);
@@ -1159,7 +1146,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 break;
             }
             default: {
-                logger.getOutputChannelLogger().appendLine(localize('deploy.step.type.not.supported', 'Deploy step type {0} is not supported.', step.type));
+                logger.getOutputChannelLogger().appendLine(l10n.t('Deploy step type {0} is not supported.', step.type));
                 return false;
             }
         }
@@ -1220,7 +1207,7 @@ export class ConfigurationAssetProviderFactory {
             case 'linux':
                 return new LinuxConfigurationProvider();
             default:
-                throw new Error(localize("unexpected.os", "Unexpected OS type"));
+                throw new Error(l10n.t("Unexpected OS type"));
         }
     }
 }
@@ -1257,16 +1244,16 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
 
 class WindowsConfigurationProvider extends DefaultConfigurationProvider {
     private executable: string = "a.exe";
-    private pipeProgram: string = "<" + localize("path.to.pipe.program", "full path to pipe program such as {0}", "plink.exe").replace(/"/g, '') + ">";
+    private pipeProgram: string = "<" + l10n.t("full path to pipe program such as {0}", "plink.exe").replace(/"/g, '') + ">";
     private MIMode: string = 'gdb';
     private setupCommandsBlock: string = `"setupCommands": [
     {
-        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/"/g, '')}",
+        "description": "${l10n.t("Enable pretty-printing for {0}", "gdb").replace(/"/g, '')}",
         "text": "-enable-pretty-printing",
         "ignoreFailures": true
     },
     {
-        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/"/g, '')}",
+        "description": "${l10n.t("Set Disassembly Flavor to {0}", "Intel").replace(/"/g, '')}",
         "text": "-gdb-set disassembly-flavor intel",
         "ignoreFailures": true
     }
@@ -1300,12 +1287,12 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
     private MIMode: string = 'gdb';
     private setupCommandsBlock: string = `"setupCommands": [
     {
-        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/"/g, '')}",
+        "description": "${l10n.t("Enable pretty-printing for {0}", "gdb").replace(/"/g, '')}",
         "text": "-enable-pretty-printing",
         "ignoreFailures": true
     },
     {
-        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/"/g, '')}",
+        "description": "${l10n.t("Set Disassembly Flavor to {0}", "Intel").replace(/"/g, '')}",
         "text": "-gdb-set disassembly-flavor intel",
         "ignoreFailures": true
     }

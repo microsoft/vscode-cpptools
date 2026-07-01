@@ -4,13 +4,10 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 import { escapeStringForRegex, extensionContext, getFullHostAddress, ISshHostInfo, stripEscapeSequences } from '../common';
 import { isWindows } from '../constants';
 import { getOutputChannelLogger } from '../logger';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+const l10n = vscode.l10n;
 
 /**
  * The users that we autofilled their passwords.
@@ -344,7 +341,7 @@ export class ConnectionFailureInteractor implements IInteractor {
         const result: IInteraction = { postAction: 'keep' };
         if (data.includes('Connection refused') || data.includes('Could not resolve hostname')) {
             result.postAction = 'consume';
-            void getOutputChannelLogger().showErrorMessage(localize('failed.to.connect', 'Failed to connect to {0}', this.hostName));
+            void getOutputChannelLogger().showErrorMessage(l10n.t('Failed to connect to {0}', this.hostName));
         }
         return result;
     }

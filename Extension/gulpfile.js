@@ -8,15 +8,11 @@
 const gulp = require('gulp');
 
 const fs = require('fs');
-const nls = require('vscode-nls-dev');
+const { getL10nJson, getL10nXlf, getL10nFilesFromXlf } = require('@vscode/l10n-dev');
+const fastGlob = require('fast-glob');
 const path = require('path');
 const minimist = require('minimist');
 const es = require('event-stream');
-const sourcemaps = require('gulp-sourcemaps');
-const ts = require('gulp-typescript');
-const typescript = require('typescript');
-const tsProject = ts.createProject('./tsconfig.json', { typescript });
-const filter = require('gulp-filter');
 const vinyl = require('vinyl');
 const parse5 = require('parse5');
 const traverse = require('parse5-traverse');
@@ -123,47 +119,6 @@ const traverseHtml = (contents, nodeCallback, attributeCallback, isFragment) => 
     return htmlTree;
 };
 
-// Traverses the HTML document looking for node and attributes containing data-loc-id, to localize
-// Outputs *.nls.json files containing strings to localize.
-const processHtmlFiles = () => {
-    return es.through(function (file) {
-        let localizationJsonContents = {};
-        let localizationMetadataContents = {
-            messages: [],
-            keys: [],
-            filePath: removePathPrefix(file.path, file.cwd)
-        };
-        let nodeCallback = (locId, locHint, node) => {
-            let subNodeCount = 0;
-            let text = "";
-            node.childNodes.forEach((childNode) => {
-                if (childNode.nodeName == "#text") {
-                    text += childNode.value;
-                } else {
-                    text += `{${subNodeCount++}}`;
-                }
-            });
-            localizationJsonContents[locId] = text;
-            localizationMetadataContents.keys.push(locHint ? { key: locId, comment: [locHint] } : locId);
-            localizationMetadataContents.messages.push(text);
-        };
-        let attributeCallback = (locId, locHint, attribute) => {
-            localizationJsonContents[locId] = attribute.value;
-            localizationMetadataContents.keys.push(locHint ? { key: locId, comment: [locHint] } : locId);
-            localizationMetadataContents.messages.push(attribute.value);
-        };
-        traverseHtml(file.contents.toString(), nodeCallback, attributeCallback, false);
-        this.queue(new vinyl({
-            path: path.join(file.path + '.nls.json'),
-            contents: Buffer.from(JSON.stringify(localizationJsonContents, null, '\t'), 'utf8')
-        }));
-        this.queue(new vinyl({
-            path: path.join(file.path + '.nls.metadata.json'),
-            contents: Buffer.from(JSON.stringify(localizationMetadataContents, null, '\t'), 'utf8')
-        }));
-    });
-};
-
 // descriptionCallback(path, value, parent) is invoked for attributes
 const traverseJson = (jsonTree, descriptionCallback, prefixPath) => {
     for (let fieldName in jsonTree) {
@@ -181,74 +136,107 @@ const traverseJson = (jsonTree, descriptionCallback, prefixPath) => {
     }
 };
 
-// Traverses schema json files looking for "description" fields to localized.
-// The path to the "description" field is used to create a localization key.
-const processJsonSchemaFiles = () => {
-    return es.through(function (file) {
-        let jsonTree = JSON.parse(file.contents.toString());
-        let localizationJsonContents = {};
-        let filePath = removePathPrefix(file.path, file.cwd);
-        let localizationMetadataContents = {
-            messages: [],
-            keys: [],
-            filePath: filePath
-        };
-        let descriptionCallback = (path, value, parent) => {
-            let locId = filePath + "." + path;
-            let locHint = parent.descriptionHint;
-            localizationJsonContents[locId] = value;
-            localizationMetadataContents.keys.push(locHint ? { key: locId, comment: [locHint] } : locId);
-            localizationMetadataContents.messages.push(value);
-        };
-        traverseJson(jsonTree, descriptionCallback, "");
-        this.queue(new vinyl({
-            path: path.join(file.path + '.nls.json'),
-            contents: Buffer.from(JSON.stringify(localizationJsonContents, null, '\t'), 'utf8')
-        }));
-        this.queue(new vinyl({
-            path: path.join(file.path + '.nls.metadata.json'),
-            contents: Buffer.from(JSON.stringify(localizationMetadataContents, null, '\t'), 'utf8')
-        }));
-    });
+// ****************************
+// @vscode/l10n-dev helpers
+//
+// Localization is built around VS Code's l10n support (vscode.l10n.t at runtime and the
+// "l10n" field in package.json). The helpers below collect the English strings from each
+// source kind into the @vscode/l10n-dev "l10n JSON" format ({ key: string | { message, comment } }).
+// The XLF round-trip (translations-export / translations-import) targets the same Microsoft
+// localization (MLCP) pipeline that vscode-nls-dev previously fed.
+// ****************************
+
+// Collect TS source strings (vscode.l10n.t call sites) as a single l10n JSON object.
+const collectSourceL10n = async () => {
+    const files = await fastGlob('src/**/*.ts', { cwd: __dirname });
+    const fileContents = files.map((relativePath) => ({
+        extension: '.ts',
+        contents: fs.readFileSync(path.join(__dirname, relativePath)).toString()
+    }));
+    return getL10nJson(fileContents);
 };
 
-gulp.task("translations-export", (done) => {
+// Collect HTML strings (data-loc-id attributes) as one l10n JSON section per file.
+// Returns [{ name, contents }] where name is the relative file path (used as the XLF unit name).
+const collectHtmlL10n = () => {
+    const results = [];
+    const files = fastGlob.sync([...htmlFilesPatterns, ...walkthroughHtmlFilesPatterns], { cwd: __dirname });
+    for (const relativePath of files) {
+        const fileContents = fs.readFileSync(path.join(__dirname, relativePath)).toString();
+        const contents = {};
+        const nodeCallback = (locId, locHint, node) => {
+            let subNodeCount = 0;
+            let text = "";
+            node.childNodes.forEach((childNode) => {
+                if (childNode.nodeName == "#text") {
+                    text += childNode.value;
+                } else {
+                    text += `{${subNodeCount++}}`;
+                }
+            });
+            contents[locId] = locHint ? { message: text, comment: [locHint] } : text;
+        };
+        const attributeCallback = (locId, locHint, attribute) => {
+            contents[locId] = locHint ? { message: attribute.value, comment: [locHint] } : attribute.value;
+        };
+        traverseHtml(fileContents, nodeCallback, attributeCallback, false);
+        if (Object.keys(contents).length > 0) {
+            results.push({ name: relativePath.replace(/\\/g, '/'), contents });
+        }
+    }
+    return results;
+};
 
-    // Transpile the TS to JS, and let vscode-nls-dev scan the files for calls to localize.
-    let jsStream = tsProject.src()
-        .pipe(sourcemaps.init())
-        .pipe(tsProject()).js
-        .pipe(nls.createMetaDataFiles());
+// Collect JSON schema description strings as one l10n JSON section per file.
+const collectJsonSchemaL10n = () => {
+    const results = [];
+    const files = fastGlob.sync(jsonSchemaFilesPatterns, { cwd: __dirname });
+    for (const relativePath of files) {
+        const jsonTree = JSON.parse(fs.readFileSync(path.join(__dirname, relativePath)).toString());
+        const filePath = relativePath.replace(/\\/g, '/');
+        const contents = {};
+        const descriptionCallback = (descPath, value, parent) => {
+            const locId = filePath + "." + descPath;
+            contents[locId] = parent.descriptionHint ? { message: value, comment: [parent.descriptionHint] } : value;
+        };
+        traverseJson(jsonTree, descriptionCallback, "");
+        if (Object.keys(contents).length > 0) {
+            results.push({ name: filePath, contents });
+        }
+    }
+    return results;
+};
 
-    // Scan html files for tags with the data-loc-id attribute
-    let htmlStream = gulp.src([...htmlFilesPatterns, ...walkthroughHtmlFilesPatterns])
-        .pipe(processHtmlFiles());
+// Maps an imported XLF unit name back to the i18n file it should be written to.
+const importedSectionToI18nPath = (folderName, name) => {
+    if (name === 'bundle') {
+        return path.join('i18n', folderName, 'bundle.l10n.json');
+    }
+    if (name === 'package') {
+        return path.join('i18n', folderName, 'package.i18n.json');
+    }
+    // HTML / JSON schema sections are keyed by their relative source path.
+    return path.join('i18n', folderName, name + '.i18n.json');
+};
 
-    let jsonSchemaStream = gulp.src(jsonSchemaFilesPatterns)
-        .pipe(processJsonSchemaFiles());
+gulp.task("translations-export", async () => {
+    // Build a single XLF containing every English string: TS source, package.json, HTML, and JSON schema.
+    const l10nContents = new Map();
+    l10nContents.set('bundle', await collectSourceL10n());
+    l10nContents.set('package', JSON.parse(fs.readFileSync(path.join(__dirname, 'package.nls.json')).toString()));
+    for (const { name, contents } of collectHtmlL10n()) {
+        l10nContents.set(name, contents);
+    }
+    for (const { name, contents } of collectJsonSchemaL10n()) {
+        l10nContents.set(name, contents);
+    }
 
-    // Merge files from all source streams
-    es.merge(jsStream, htmlStream, jsonSchemaStream)
-
-        // Filter down to only the files we need
-        .pipe(filter(['**/*.nls.json', '**/*.nls.metadata.json']))
-
-        // Consoldate them into nls.metadata.json, which the xlf is built from.
-        .pipe(nls.bundleMetaDataFiles('ms-vscode.cpptools', '.'))
-
-        // filter down to just the resulting metadata files
-        .pipe(filter(['**/nls.metadata.header.json', '**/nls.metadata.json']))
-
-        // Add package.nls.json, used to localized package.json
-        .pipe(gulp.src(["package.nls.json"]))
-
-        // package.nls.json and nls.metadata.json are used to generate the xlf file
-        // Does not re-queue any files to the stream.  Outputs only the XLF file
-        .pipe(nls.createXlfFiles(translationProjectName, translationExtensionName))
-        .pipe(gulp.dest(path.join("..", `${translationProjectName}-localization-export`)))
-        .pipe(es.wait(() => {
-            done();
-        }));
+    const xlf = getL10nXlf(l10nContents);
+    // Match the layout the loc handoff/upload path expects (and that translations-import reads back):
+    // ../vscode-extensions-localization-export/<project>/<extension>.xlf
+    const exportDir = path.join(__dirname, "..", `${translationProjectName}-localization-export`, translationProjectName);
+    fs.mkdirSync(exportDir, { recursive: true });
+    fs.writeFileSync(path.join(exportDir, `${translationExtensionName}.xlf`), xlf);
 });
 
 
@@ -259,23 +247,27 @@ gulp.task("translations-export", (done) => {
 // ****************************
 
 // Imports translations from raw localized MLCP strings to VS Code .i18n.json files
-gulp.task("translations-import", (done) => {
-    let options = minimist(process.argv.slice(2), {
+gulp.task("translations-import", async () => {
+    const options = minimist(process.argv.slice(2), {
         string: "location",
         default: {
             location: "../vscode-translations-import"
         }
     });
-    es.merge(languages.map((language) => {
-        let id = language.transifexId || language.id;
-        return gulp.src(path.join(options.location, id, translationProjectName, `${translationExtensionName}.xlf`))
-            .pipe(nls.prepareJsonFiles())
-            .pipe(gulp.dest(path.join("./i18n", language.folderName)))
-            .pipe(es.wait()); // This is required or it gives `this.pipeTo.end is not a function`.
-    }))
-        .pipe(es.wait(() => {
-            done();
-        }));
+    for (const language of languages) {
+        const id = language.transifexId || language.id;
+        const xlfPath = path.join(options.location, id, translationProjectName, `${translationExtensionName}.xlf`);
+        if (!fs.existsSync(xlfPath)) {
+            continue;
+        }
+        const importedFiles = await getL10nFilesFromXlf(fs.readFileSync(xlfPath).toString());
+        for (const importedFile of importedFiles) {
+            // importedFile.name is the XLF unit name we assigned during export.
+            const outputPath = path.join(__dirname, importedSectionToI18nPath(language.folderName, importedFile.name));
+            fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+            fs.writeFileSync(outputPath, JSON.stringify(importedFile.messages, null, '\t'));
+        }
+    }
 });
 
 // ****************************
@@ -285,25 +277,37 @@ gulp.task("translations-import", (done) => {
 
 // Generate package.nls.*.json files from: ./i18n/*/package.i18n.json
 // Outputs to root path, as these nls files need to be along side package.json
-const generateAdditionalLocFiles = () => {
-    return gulp.src(['package.nls.json'])
-        .pipe(nls.createAdditionalLanguageFiles(languages, 'i18n'))
-        .pipe(gulp.dest('.'));
+const generateAdditionalLocFiles = async () => {
+    const englishPackage = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.nls.json')).toString());
+    for (const language of languages) {
+        const i18nPackage = path.join(__dirname, 'i18n', language.folderName, 'package.i18n.json');
+        if (!fs.existsSync(i18nPackage)) {
+            continue;
+        }
+        const translated = jsonc.parse(fs.readFileSync(i18nPackage).toString());
+        // Start from the English strings so any untranslated keys fall back to English.
+        const merged = { ...englishPackage, ...translated };
+        fs.writeFileSync(path.join(__dirname, `package.nls.${language.id}.json`), JSON.stringify(merged, null, '\t'));
+    }
 };
 
-// Generates ./dist/nls.bundle.<language_id>.json from files in ./i18n/** *//<src_path>/<filename>.i18n.json
-// Localized strings are read from these files at runtime.
-const generateSrcLocBundle = () => {
-    // Transpile the TS to JS, and let vscode-nls-dev scan the files for calls to localize.
-    return tsProject.src()
-        .pipe(sourcemaps.init())
-        .pipe(tsProject()).js
-        .pipe(nls.createMetaDataFiles())
-        .pipe(nls.createAdditionalLanguageFiles(languages, "i18n"))
-        .pipe(nls.bundleMetaDataFiles('ms-vscode.cpptools', 'dist'))
-        .pipe(nls.bundleLanguageFiles())
-        .pipe(filter(['**/nls.bundle.*.json', '**/nls.metadata.header.json', '**/nls.metadata.json']))
-        .pipe(gulp.dest('dist'));
+// Generates ./l10n/bundle.l10n.json (English) and ./l10n/bundle.l10n.<language_id>.json.
+// VS Code loads these at runtime based on the "l10n" field in package.json.
+const generateSrcLocBundle = async () => {
+    const l10nDir = path.join(__dirname, 'l10n');
+    fs.mkdirSync(l10nDir, { recursive: true });
+
+    // English bundle, extracted from the vscode.l10n.t call sites.
+    const englishBundle = await collectSourceL10n();
+    fs.writeFileSync(path.join(l10nDir, 'bundle.l10n.json'), JSON.stringify(englishBundle, null, '\t'));
+
+    // Per-language bundles, copied from the translated bundles produced by translations-import.
+    for (const language of languages) {
+        const translatedBundle = path.join(__dirname, 'i18n', language.folderName, 'bundle.l10n.json');
+        if (fs.existsSync(translatedBundle)) {
+            fs.copyFileSync(translatedBundle, path.join(l10nDir, `bundle.l10n.${language.id}.json`));
+        }
+    }
 };
 
 const generateLocalizedHtmlFilesImpl = (file, relativePath, language, isFragment) => {

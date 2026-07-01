@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { Position, Range, RequestType, ResponseError, TextEdit } from 'vscode-languageclient';
-import * as nls from 'vscode-nls';
 import { DefaultClient } from '../client';
 import {
     CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions
@@ -13,9 +12,7 @@ import { LocalizeStringParams, getLocalizedString } from '../localization';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CppSettings } from '../settings';
 import { makeVscodeRange } from '../utils';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+const l10n = vscode.l10n;
 
 interface GetCodeActionsRequestParams {
     uri: string;
@@ -259,7 +256,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     return false;
                 }
                 const hoverResult: vscode.MarkdownString = result[0].contents[0] as vscode.MarkdownString;
-                if (!hoverResult.value.includes(localize("expands.to", "Expands to:"))) {
+                if (!hoverResult.value.includes(l10n.t("Expands to:"))) {
                     return false;
                 }
                 try {
@@ -283,9 +280,9 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             };
             if (!await processInlineMacro()) {
                 const disabledCodeAction: vscode.CodeAction = {
-                    title: localize({ key: "inline.macro", comment: ["'Inline' is a command and not an adjective, i.e. like 'Expand macro'."] }, "Inline macro"),
+                    title: l10n.t({ message: "Inline macro", comment: ["'Inline' is a command and not an adjective, i.e. like 'Expand macro'."] }),
                     kind: CodeActionProvider.inlineMacroKind,
-                    disabled: { reason: localize("inline.macro.not.available", "Inline macro is not available at this location.") }
+                    disabled: { reason: l10n.t("Inline macro is not available at this location.") }
                 };
                 resultCodeActions.push(disabledCodeAction);
             }
