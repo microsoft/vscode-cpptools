@@ -170,11 +170,8 @@ suite('Run Without Debugging Terminal and Arguments Test', function (this: Mocha
 
             for (const profile of profiles) {
                 const profileSuffix = profile ? ` with ${profile} as the default terminal` : consoleCase.consoleMode === 'integratedTerminal' ? ' with default terminal' : '';
-                test(`No-debug launch via ${consoleCase.label} handles ${programCase.label}${profileSuffix}`, async () => {
-                    if (skipExternalConsole && consoleCase.consoleMode === 'externalTerminal') {
-                        console.log(`\tSkipping external terminal test for ${programCase.label}`);
-                        return;
-                    }
+                const testFunc = skipExternalConsole && consoleCase.consoleMode === 'externalTerminal' ? test.skip : test;
+                testFunc(`No-debug launch via ${consoleCase.label} handles ${programCase.label}${profileSuffix}`, async () => {
                     await setWindowsDefaultTerminalProfile(profile);
 
                     disposeTerminals(executablePaths);
