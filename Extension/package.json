@@ -619,6 +619,13 @@
                                         "description": "%c_cpp.taskDefinitions.options.cwd.description%"
                                     }
                                 }
+                            },
+                            "problemMatcher": {
+                                "type": "array",
+                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%",
+                                "items": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -708,6 +715,13 @@
                                         "description": "%c_cpp.taskDefinitions.options.cwd.description%"
                                     }
                                 }
+                            },
+                            "problemMatcher": {
+                                "type": "array",
+                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%",
+                                "items": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -796,6 +810,13 @@
                                         "type": "string",
                                         "description": "%c_cpp.taskDefinitions.options.cwd.description%"
                                     }
+                                }
+                            },
+                            "problemMatcher": {
+                                "type": "array",
+                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%",
+                                "items": {
+                                    "type": "string"
                                 }
                             }
                         }

@@ -67,6 +67,13 @@
                 },
                 "options": {
                     "$ref": "#/definitions/CppBuildTaskOptions"
+                },
+                "problemMatcher": {
+                    "type": "array",
+                    "description": "%c_cpp.taskDefinitions.problemMatcher.description%",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
