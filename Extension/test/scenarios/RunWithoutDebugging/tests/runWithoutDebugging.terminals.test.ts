@@ -108,7 +108,7 @@ suite('Run Without Debugging Terminal and Arguments Test', function (this: Mocha
         'two words',
         path.join(workspacePath, 'input folder', 'three words.txt')
     ];
-    const skipExternalConsole = process.env.SCENARIO_ARGS?.includes('skipExternalConsole');
+    const skipExternalConsole = process.env.SCENARIO_ARGS?.split(',').includes('skipExternalConsole');
 
     suiteSetup(async function (): Promise<void> {
         const extension: vscode.Extension<any> = vscode.extensions.getExtension('ms-vscode.cpptools') || assert.fail('Extension not found');
