@@ -385,6 +385,7 @@
 	"c_cpp.taskDefinitions.args.quoting.weak.description": "Délimite l’argument en utilisant le caractère de guillemet faible du shell (par exemple \" sous Bash).",
 	"c_cpp.taskDefinitions.options.description": "Options de commande supplémentaires.",
 	"c_cpp.taskDefinitions.options.cwd.description": "Répertoire de travail actif du programme ou script exécuté. En cas d'omission, la racine de l'espace de travail actif de Code est utilisée.",
+	"c_cpp.taskDefinitions.problemMatcher.description": "One or more problem matchers to use to detect compiler errors and warnings in task output.",
 	"c_cpp.taskDefinitions.detail.description": "Détails supplémentaires de la tâche.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Chemins actuels et au moment de la compilation des mêmes arborescences sources. Les fichiers situés dans EditorPath sont mappés au chemin CompileTimePath pour les correspondances de points d'arrêt et sont mappés de CompileTimePath à EditorPath au moment de l'affichage des emplacements d'arborescences des appels de procédure.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "Chemin de l'arborescence source que l'éditeur va utiliser.",

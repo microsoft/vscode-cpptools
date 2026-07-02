@@ -385,6 +385,7 @@
 	"c_cpp.taskDefinitions.args.quoting.weak.description": "使用殼層的弱引號字元來引用引數 (弱引號字元例如 \" 在 Bash 下)。",
 	"c_cpp.taskDefinitions.options.description": "其他命令選項。",
 	"c_cpp.taskDefinitions.options.cwd.description": "所執行程式或指令碼的目前工作目錄。如果省略，則會使用 Code 的目前工作區根目錄。",
+	"c_cpp.taskDefinitions.problemMatcher.description": "One or more problem matchers to use to detect compiler errors and warnings in task output.",
 	"c_cpp.taskDefinitions.detail.description": "工作的其他詳細資料。",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "相同來源樹狀的目前路徑和編譯時間路徑。在顯示 stacktrace 位置時，在 EditorPath 下找到的檔案會對應到 CompileTimePath 路徑，以進行中斷點必對，並會從 CompileTimePath 對應到 EditorPath。",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "編輯器要使用的來源樹狀路徑。",
