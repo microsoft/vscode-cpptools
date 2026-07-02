@@ -529,9 +529,332 @@
                             }
                         }
                     },
+                    "problemMatcher": {
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        ],
+                        "description": "%c_cpp.taskDefinitions.problemMatcher.description%"
+                    },
                     "detail": {
                         "type": "string",
                         "description": "%c_cpp.taskDefinitions.detail.description%"
+                    },
+                    "windows": {
+                        "type": "object",
+                        "properties": {
+                            "command": {
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "required": [
+                                            "value",
+                                            "quoting"
+                                        ],
+                                        "properties": {
+                                            "value": {
+                                                "type": "string",
+                                                "description": "%c_cpp.taskDefinitions.args.value.description%"
+                                            },
+                                            "quoting": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "escape",
+                                                    "strong",
+                                                    "weak"
+                                                ],
+                                                "enumDescriptions": [
+                                                    "%c_cpp.taskDefinitions.args.quoting.escape.description%",
+                                                    "%c_cpp.taskDefinitions.args.quoting.strong.description%",
+                                                    "%c_cpp.taskDefinitions.args.quoting.weak.description%"
+                                                ],
+                                                "default": "strong",
+                                                "description": "%c_cpp.taskDefinitions.args.quoting.description%"
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "args": {
+                                "type": "array",
+                                "description": "%c_cpp.taskDefinitions.args.description%",
+                                "items": {
+                                    "oneOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "value",
+                                                "quoting"
+                                            ],
+                                            "properties": {
+                                                "value": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.taskDefinitions.args.value.description%"
+                                                },
+                                                "quoting": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "escape",
+                                                        "strong",
+                                                        "weak"
+                                                    ],
+                                                    "enumDescriptions": [
+                                                        "%c_cpp.taskDefinitions.args.quoting.escape.description%",
+                                                        "%c_cpp.taskDefinitions.args.quoting.strong.description%",
+                                                        "%c_cpp.taskDefinitions.args.quoting.weak.description%"
+                                                    ],
+                                                    "default": "strong",
+                                                    "description": "%c_cpp.taskDefinitions.args.quoting.description%"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "options": {
+                                "type": "object",
+                                "description": "%c_cpp.taskDefinitions.options.description%",
+                                "properties": {
+                                    "cwd": {
+                                        "type": "string",
+                                        "description": "%c_cpp.taskDefinitions.options.cwd.description%"
+                                    }
+                                }
+                            },
+                            "problemMatcher": {
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                ],
+                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%"
+                            }
+                        }
+                    },
+                    "linux": {
+                        "type": "object",
+                        "properties": {
+                            "command": {
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "required": [
+                                            "value",
+                                            "quoting"
+                                        ],
+                                        "properties": {
+                                            "value": {
+                                                "type": "string",
+                                                "description": "%c_cpp.taskDefinitions.args.value.description%"
+                                            },
+                                            "quoting": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "escape",
+                                                    "strong",
+                                                    "weak"
+                                                ],
+                                                "enumDescriptions": [
+                                                    "%c_cpp.taskDefinitions.args.quoting.escape.description%",
+                                                    "%c_cpp.taskDefinitions.args.quoting.strong.description%",
+                                                    "%c_cpp.taskDefinitions.args.quoting.weak.description%"
+                                                ],
+                                                "default": "strong",
+                                                "description": "%c_cpp.taskDefinitions.args.quoting.description%"
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "args": {
+                                "type": "array",
+                                "description": "%c_cpp.taskDefinitions.args.description%",
+                                "items": {
+                                    "oneOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "value",
+                                                "quoting"
+                                            ],
+                                            "properties": {
+                                                "value": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.taskDefinitions.args.value.description%"
+                                                },
+                                                "quoting": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "escape",
+                                                        "strong",
+                                                        "weak"
+                                                    ],
+                                                    "enumDescriptions": [
+                                                        "%c_cpp.taskDefinitions.args.quoting.escape.description%",
+                                                        "%c_cpp.taskDefinitions.args.quoting.strong.description%",
+                                                        "%c_cpp.taskDefinitions.args.quoting.weak.description%"
+                                                    ],
+                                                    "default": "strong",
+                                                    "description": "%c_cpp.taskDefinitions.args.quoting.description%"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "options": {
+                                "type": "object",
+                                "description": "%c_cpp.taskDefinitions.options.description%",
+                                "properties": {
+                                    "cwd": {
+                                        "type": "string",
+                                        "description": "%c_cpp.taskDefinitions.options.cwd.description%"
+                                    }
+                                }
+                            },
+                            "problemMatcher": {
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                ],
+                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%"
+                            }
+                        }
+                    },
+                    "osx": {
+                        "type": "object",
+                        "properties": {
+                            "command": {
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "required": [
+                                            "value",
+                                            "quoting"
+                                        ],
+                                        "properties": {
+                                            "value": {
+                                                "type": "string",
+                                                "description": "%c_cpp.taskDefinitions.args.value.description%"
+                                            },
+                                            "quoting": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "escape",
+                                                    "strong",
+                                                    "weak"
+                                                ],
+                                                "enumDescriptions": [
+                                                    "%c_cpp.taskDefinitions.args.quoting.escape.description%",
+                                                    "%c_cpp.taskDefinitions.args.quoting.strong.description%",
+                                                    "%c_cpp.taskDefinitions.args.quoting.weak.description%"
+                                                ],
+                                                "default": "strong",
+                                                "description": "%c_cpp.taskDefinitions.args.quoting.description%"
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "args": {
+                                "type": "array",
+                                "description": "%c_cpp.taskDefinitions.args.description%",
+                                "items": {
+                                    "oneOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "value",
+                                                "quoting"
+                                            ],
+                                            "properties": {
+                                                "value": {
+                                                    "type": "string",
+                                                    "description": "%c_cpp.taskDefinitions.args.value.description%"
+                                                },
+                                                "quoting": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "escape",
+                                                        "strong",
+                                                        "weak"
+                                                    ],
+                                                    "enumDescriptions": [
+                                                        "%c_cpp.taskDefinitions.args.quoting.escape.description%",
+                                                        "%c_cpp.taskDefinitions.args.quoting.strong.description%",
+                                                        "%c_cpp.taskDefinitions.args.quoting.weak.description%"
+                                                    ],
+                                                    "default": "strong",
+                                                    "description": "%c_cpp.taskDefinitions.args.quoting.description%"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "options": {
+                                "type": "object",
+                                "description": "%c_cpp.taskDefinitions.options.description%",
+                                "properties": {
+                                    "cwd": {
+                                        "type": "string",
+                                        "description": "%c_cpp.taskDefinitions.options.cwd.description%"
+                                    }
+                                }
+                            },
+                            "problemMatcher": {
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                ],
+                                "description": "%c_cpp.taskDefinitions.problemMatcher.description%"
+                            }
+                        }
                     }
                 }
             }
