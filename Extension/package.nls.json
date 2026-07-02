@@ -1005,6 +1005,7 @@
     "c_cpp.taskDefinitions.args.quoting.weak.description": "Quotes the argument using the shell's weak quote character (e.g. \" under bash).",
     "c_cpp.taskDefinitions.options.description": "Additional command options.",
     "c_cpp.taskDefinitions.options.cwd.description": "The current working directory of the executed program or script. If omitted Code's current workspace root is used.",
+    "c_cpp.taskDefinitions.problemMatcher.description": "One or more problem matchers to use to detect compiler errors and warnings in task output.",
     "c_cpp.taskDefinitions.detail.description": "Additional details of the task.",
     "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Current and compile-time paths to the same source trees. Files found under the EditorPath are mapped to the CompileTimePath path for breakpoint matching and mapped from CompileTimePath to EditorPath when displaying stacktrace locations.",
     "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
