@@ -1,5 +1,17 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.33.2: June 26, 2026
+### Bug Fixes
+* Fix a regression with 'Find All References' with functions that exist in both C and C++ files. [#14546](https://github.com/microsoft/vscode-cpptools/issues/14546)
+* Fix some regression crashes.
+
+## Version 1.33.1: June 23, 2026
+### Bug Fixes
+* Fix 'Find All References' dropping valid references when a template parameter type has a typedef alias in only one translation unit. [#14344](https://github.com/microsoft/vscode-cpptools/issues/14344)
+* Fix a crash regression on file open.
+* Fix IntelliSense incorrectly resolving `#include` files through a symbolic link after the target directory was deleted from disk.
+* Fix "tag parsing finished" status randomly getting reported too soon after a 'Reset IntelliSense Database' command.
+
 ## Version 1.33.0: June 22, 2026
 ### New Feature
 * Unification of tag parsing with the VS implementation. In particular, it's now done using multiple parallel `cpptools-srv2` processes. [PR #14426](https://github.com/microsoft/vscode-cpptools/pull/14426)
