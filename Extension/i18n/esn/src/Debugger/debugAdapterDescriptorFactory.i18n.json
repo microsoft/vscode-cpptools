@@ -7,6 +7,6 @@
 	"debugger.not.available": "El tipo de depurador '{0}' no está disponible para equipos que no son de Windows.",
 	"debugger.noDebug.requestType.not.supported": "Ejecutar sin depuración solo se admite para las configuraciones de inicio.",
 	"debugger.unsupported.properties": "Las configuraciones de inicio con las siguientes propiedades no se pueden ejecutar directamente en el terminal: {0}",
-	"debugger.fallback.message": "La salida del programa aparecerá en el Consola de depuración en su lugar.",
+	"debugger.fallback.message": "En su lugar, la salida del programa aparecerá en la Consola de depuración.",
 	"debugger.fallback.message2": "Para suprimir esta advertencia, establezca la propiedad \"ignoreRunWithoutDebuggingWarnings\" en true en la configuración de inicio."
 }

@@ -393,7 +393,7 @@
 	"c_cpp.debuggers.symbolOptions.description": "Simgelerin (.pdb dosyaları) nasıl bulunup yüklendiğini denetleme seçenekleri.",
 	"c_cpp.debuggers.unknownBreakpointHandling.description": "İsabet ettiğinde harici olarak (genellikle ham GDB komutları aracılığıyla) ayarlanan kesme noktalarının nasıl işlendiğini kontrol eder.\nİzin verilen değerler, uygulama tarafından bir istisna oluşturulmuş gibi davranan \"throw\" ve yalnızca hata ayıklama oturumunu duraklatan \"stop\" değerleridir. Varsayılan değer \"throw\"dur.",
 	"c_cpp.debuggers.debuginfod.description": "debuginfod sunucularından hata ayıklama sembollerini indirmek için GDB'nin debuginfod davranışını denetler.",
-	"c_cpp.debuggers.debuginfod.enabled.description": "If false (default), GDB will not contact debuginfod servers. Set to true to enable debuginfod support.",
+	"c_cpp.debuggers.debuginfod.enabled.description": "false ise (varsayılan), GDB debuginfod sunucularıyla iletişim kurmaz. debuginfod desteğini etkinleştirmek için true olarak ayarlayın.",
 	"c_cpp.debuggers.debuginfod.timeout.description": "debuginfod sunucu istekleri için saniye cinsinden zaman aşımı. Varsayılan değer 30'dur. GDB/libdebuginfod varsayılanlarını kullanmak için 0 değerine ayarlayın (geçersiz kılma yok).",
 	"c_cpp.debuggers.VSSymbolOptions.description": "Sembolleri bulup hata ayıklama bağdaştırıcısına yüklemeye yönelik yapılandırma sağlar.",
 	"c_cpp.debuggers.VSSymbolOptions.searchPaths.description": ".pdb dosyalarını aramak için sembol sunucusu URL’si (ör: http​://MyExampleSymbolServer) veya dizin (ör. /build/symbols) dizisi. Bu dizinler, modülün yanındaki varsayılan konumların yanı sıra, pdb'nin bırakıldığı yolda arama yapar.",
