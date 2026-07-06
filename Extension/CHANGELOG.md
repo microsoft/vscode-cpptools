@@ -1,9 +1,21 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.33.3: July 6, 2026
+### Enhancement
+* Allow platform overrides in `cppbuild` tasks. [#11601](https://github.com/microsoft/vscode-cpptools/issues/11601)
+
+### Bug Fixes
+* Fix `[[no_unique_address]]` empty-base layout `sizeof` being computed too large. [#14524](https://github.com/microsoft/vscode-cpptools/issues/14524)
+* Fix C/C++ debug data-tips on members of a dereferenced expression. [PR #14540](https://github.com/microsoft/vscode-cpptools/pull/14540)
+  * Thanks for the contribution. [@tieo](https://github.com/tieo)
+* Fix `clang-format`/`clang-tidy` version check failing on Windows. [PR #14552](https://github.com/microsoft/vscode-cpptools/pull/14552)
+* Fix Windows backslash paths being mangled when adding an SSH target. [PR #14554](https://github.com/microsoft/vscode-cpptools/pull/14554)
+* Fix "directory_cache" crashes.
+* Fix spurious IntelliSense error on `std::variant` brace-initialization.
+
 ## Version 1.33.2: June 26, 2026
 ### Bug Fixes
 * Fix a regression with 'Find All References' with functions that exist in both C and C++ files. [#14546](https://github.com/microsoft/vscode-cpptools/issues/14546)
-* Fix some regression crashes.
 
 ## Version 1.33.1: June 23, 2026
 ### Bug Fixes

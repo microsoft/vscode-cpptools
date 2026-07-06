@@ -6,8 +6,7 @@
 {
 	"debugger.not.available": "O tipo de depurador '{0}' não está disponível para máquinas que não sejam Windows.",
 	"debugger.noDebug.requestType.not.supported": "A execução sem depuração só tem suporte para configurações de inicialização.",
-	"debugger.noDebug.pipeTransport.not.supported": "Não há suporte para Executar Sem Depuração para configurações com \"pipeTransport\" definido.",
-	"debugger.noDebug.debugServerPath.not.supported": "Não há suporte para Executar sem Depuração em configurações com \"debugServerPath\" definido.",
-	"debugger.noDebug.miDebuggerServerAddress.not.supported": "Não há suporte para Executar sem Depuração para configurações com \"miDebuggerServerAddress\" definido.",
-	"debugger.noDebug.coreDumpPath.not.supported": "Não há suporte para Executar sem Depuração para configurações com o conjunto \"coreDumpPath\"."
+	"debugger.unsupported.properties": "As configurações de inicialização com as seguintes propriedades não podem ser executadas diretamente no terminal: {0}",
+	"debugger.fallback.message": "Em vez disso, a saída do programa será exibida no Console de Depuração.",
+	"debugger.fallback.message2": "Para suprimir esse aviso, defina a propriedade 'ignoreRunWithoutDebuggingWarnings' como verdadeira na configuração de inicialização."
 }

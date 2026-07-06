@@ -23,3 +23,4 @@ jobs:
       platform: mac
       checkout-ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.target-ref || github.ref }}
       yarn-args: --network-timeout 100000
+
