@@ -385,6 +385,7 @@
 	"c_cpp.taskDefinitions.args.quoting.weak.description": "シェルの弱い引用符文字を使用して引数を引用符で囲みます (例:bash の \")。",
 	"c_cpp.taskDefinitions.options.description": "追加のコマンド オプション。",
 	"c_cpp.taskDefinitions.options.cwd.description": "実行されるプログラムまたはスクリプトの現在の作業ディレクトリ。省略すると、Code の現在のワークスペースのルートが使用されます。",
+	"c_cpp.taskDefinitions.problemMatcher.description": "タスク出力でコンパイラー エラーと警告を検出するために使用する 1 つ以上の問題マッチャー。",
 	"c_cpp.taskDefinitions.detail.description": "タスクのその他の詳細。",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "同じソース ツリーへの現在およびコンパイル時のパスです。EditorPath で見つかったファイルは、ブレークポイントの一致のために CompileTimePath パスにマップされ、スタック トレースの場所を表示するときに CompileTimePath から EditorPath にマップされます。",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "エディターで使用されるソース ツリーへのパスです。",

@@ -385,6 +385,7 @@
 	"c_cpp.taskDefinitions.args.quoting.weak.description": "Bağımsız değişkeni kabuğun zayıf alıntı karakteri (ör. \" bash altındaki).",
 	"c_cpp.taskDefinitions.options.description": "Ek komut seçenekleri.",
 	"c_cpp.taskDefinitions.options.cwd.description": "Yürütülen program veya betiğin geçerli çalışma dizini. Atlanırsa Kodun geçerli çalışma alanının kökü kullanılır.",
+	"c_cpp.taskDefinitions.problemMatcher.description": "Görev çıktısında derleyici hatalarını ve uyarılarını algılamak için kullanılacak bir veya daha fazla sorun eşleştiricisi.",
 	"c_cpp.taskDefinitions.detail.description": "Görevin ek ayrıntıları.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Aynı kaynak ağaçlarına yönelik geçerli ve derleme zamanı yolları. EditorPath altında bulunan dosyalar, kesme noktası eşleştirmesi için CompileTimePath yoluna eşlenir ve yığın izleme konumlarını görüntülerken CompileTimePath öğesinden EditorPath'e eşlenir.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "Düzenleyicinin kullanacağı kaynak ağacının yolu.",

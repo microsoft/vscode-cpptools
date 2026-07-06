@@ -385,6 +385,7 @@
 	"c_cpp.taskDefinitions.args.quoting.weak.description": "Entrecomilla el argumento con el carácter de comillas dobles del shell (p. ej.: \" con Bash).",
 	"c_cpp.taskDefinitions.options.description": "Opciones de comando adicionales.",
 	"c_cpp.taskDefinitions.options.cwd.description": "Directorio de trabajo actual del script o el programa ejecutado. Si se omite, se usa la raíz del área de trabajo actual de Code.",
+	"c_cpp.taskDefinitions.problemMatcher.description": "Uno o varios detectores de coincidencias de problemas para detectar errores y advertencias del compilador en la salida de la tarea.",
 	"c_cpp.taskDefinitions.detail.description": "Detalles adicionales de la tarea.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Rutas de acceso actuales y en tiempo de compilación a los mismos árboles de origen. Los archivos que se encuentran en EditorPath se asignan a la ruta de acceso CompileTimePath para la coincidencia de los puntos de interrupción y se asignan de CompileTimePath a EditorPath al mostrar ubicaciones de seguimiento de la pila.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "La ruta de acceso al árbol de origen que el editor va a usar.",
