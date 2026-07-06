@@ -385,6 +385,7 @@
 	"c_cpp.taskDefinitions.args.quoting.weak.description": "使用 Shell 的弱引用字符来引用参数(例如在 bash 下的 \")。",
 	"c_cpp.taskDefinitions.options.description": "其他命令选项。",
 	"c_cpp.taskDefinitions.options.cwd.description": "已执行程序或脚本的当前工作目录。如果省略，则使用代码的当前工作区根。",
+	"c_cpp.taskDefinitions.problemMatcher.description": "用于检测任务输出中编译程序错误和警告的一个或多个问题匹配器。",
 	"c_cpp.taskDefinitions.detail.description": "任务的其他详细信息。",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "相同源树的当前路径和编译时路径。EditorPath 下的文件会映射到 CompileTimePath 路径以进行断点匹配，并在显示 stacktrace 位置时，从 CompileTimePath 映射到 EditorPath。",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "编辑器将使用的源树的路径。",
