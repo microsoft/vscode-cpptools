@@ -10,7 +10,7 @@
     "edit_include_path": "Edit \"includePath\" setting",
     "disable_error_squiggles": "Disable error squiggles",
     "enable_error_squiggles": "Enable all error squiggles",
-    "include_errors_update_include_path_squiggles_disabled2": "#include errors detected. Please update your includePath. Syntax errors will not be reported until included files are found.",
+    "include_errors_update_include_path_squiggles_disabled2": "#include errors detected. Please update your includePath. Syntax errors for this file will not be reported until included files are found.",
     "include_errors_update_include_path_intellisense_disabled": "#include errors detected. Please update your includePath. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
     "include_errors_update_compile_commands_or_include_path_intellisense_disabled": "#include errors detected. Consider updating your compile_commands.json or includePath. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
     "could_not_parse_compile_commands": "\"{0}\" could not be parsed. 'includePath' from c_cpp_properties.json in folder '{1}' will be used instead.",
@@ -120,7 +120,7 @@
     "formatting_diff": "Formatting diffed output:",
     "disable_inactive_regions": "Disable inactive region colorization",
     "error_limit_exceeded": "Error limit exceeded, {0} error(s) not reported.",
-    "include_errors_update_compile_commands_or_include_path_squiggles_disabled2": "#include errors detected. Consider updating your compile_commands.json or includePath. Syntax errors will not be reported until included files are found.",
+    "include_errors_update_compile_commands_or_include_path_squiggles_disabled2": "#include errors detected. Consider updating your compile_commands.json or includePath. Syntax errors for this file will not be reported until included files are found.",
     "cannot_reset_database": "The IntelliSense database could not be reset. To manually reset, close all VS Code instances and then delete this file: {0}",
     "formatting_failed_see_output": "Formatting failed. See the output window for details.",
     "populating_include_completion_cache": "Populating include completion cache.",
@@ -158,7 +158,7 @@
     "fallback_to_no_bitness": "Failed to query compiler. Falling back to no bitness.",
     "intellisense_client_creation_aborted": "IntelliSense client creation aborted: {0}",
     "include_errors_config_provider_intellisense_disabled": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
-    "include_errors_config_provider_squiggles_disabled2": "#include errors detected based on information provided by the configurationProvider setting. Syntax errors will not be reported until included files are found.",
+    "include_errors_config_provider_squiggles_disabled2": "#include errors detected based on information provided by the configurationProvider setting. Syntax errors for this file will not be reported until included files are found.",
     "preprocessor_keyword": {
         "text": "preprocessor keyword",
         "hint": "Refers to C/C++ processor keywords"
