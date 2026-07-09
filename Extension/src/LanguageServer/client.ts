@@ -4452,6 +4452,10 @@ function getSanitizerServerEnv(): NodeJS.ProcessEnv | undefined {
         // Not fatal -- reports will go to stderr instead.
     }
     const withLogPath = (existingOptions: string | undefined, sanitizer: string): string =>
+        // The sanitizer runtime flag parser treats a space (as well as ',', ':', tab, and newline)
+        // as a delimiter between key=value pairs, so a single space is a valid, cross-platform
+        // separator here. Do not use path.delimiter (';' on Windows), which the parser does NOT
+        // treat as a delimiter and which would break parsing for the Windows ASan preset.
         [existingOptions, `log_path=${path.join(logDirectory, sanitizer)}`].filter(Boolean).join(" ");
     return {
         ...process.env,
