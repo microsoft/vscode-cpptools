@@ -385,7 +385,7 @@
 	"c_cpp.taskDefinitions.args.quoting.weak.description": "Cita o argumento usando o caractere de aspas duplas do shell (por exemplo, \" no bash).",
 	"c_cpp.taskDefinitions.options.description": "Opções de comando adicionais.",
 	"c_cpp.taskDefinitions.options.cwd.description": "O diretório de trabalho atual do programa executado ou do script. Se omitido raiz de espaço de trabalho atual do código é usado.",
-	"c_cpp.taskDefinitions.problemMatcher.description": "One or more problem matchers to use to detect compiler errors and warnings in task output.",
+	"c_cpp.taskDefinitions.problemMatcher.description": "Um ou mais detectores de problemas para identificar erros e avisos do compilador na saída da tarefa.",
 	"c_cpp.taskDefinitions.detail.description": "Detalhes adicionais da tarefa.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Os caminhos atual e do tempo de compilação são mapeados para as mesmas árvores de origem. Os arquivos encontrados em EditorPath são mapeados para o caminho CompileTimePath para correspondência de ponto de interrupção e mapeados de CompileTimePath para EditorPath ao exibir os locais de rastreamento de pilha.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "O caminho para a árvore de origem que o editor usará.",
