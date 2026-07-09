@@ -1683,9 +1683,13 @@ export class DefaultClient implements Client {
             throw String('Missing binary at ' + serverModule);
         }
         const serverName: string = this.getName(this.rootFolder);
+        // Opt-in: when CPPTOOLS_SANITIZER_LOG_DIR is set, route sanitizer (TSan/ASan/UBSan) reports
+        // from a sanitizer build to files in that directory (see getSanitizerServerEnv). This is
+        // undefined -- i.e. the environment is inherited unchanged -- for normal builds.
+        const sanitizerServerEnv: NodeJS.ProcessEnv | undefined = getSanitizerServerEnv();
         const serverOptions: ServerOptions = {
-            run: { command: serverModule, options: { detached: false, cwd: util.getExtensionFilePath("bin") } },
-            debug: { command: serverModule, args: [serverName], options: { detached: true, cwd: util.getExtensionFilePath("bin") } }
+            run: { command: serverModule, options: { detached: false, cwd: util.getExtensionFilePath("bin"), env: sanitizerServerEnv } },
+            debug: { command: serverModule, args: [serverName], options: { detached: true, cwd: util.getExtensionFilePath("bin"), env: sanitizerServerEnv } }
         };
 
         // The IntelliSense process should automatically detect when AutoPCH is
@@ -4417,6 +4421,39 @@ function getLanguageServerFileName(): string {
         throw "Invalid Platform";
     }
     return path.resolve(util.getExtensionFilePath("bin"), extensionProcessName);
+}
+
+// Opt-in helper for capturing sanitizer (TSan/ASan/UBSan) diagnostics from a sanitizer build of
+// the language server. The sanitizers print their reports to stderr, which the language-server
+// stdio can swallow. When the CPPTOOLS_SANITIZER_LOG_DIR environment variable is set, this routes
+// each sanitizer's log_path into that directory so every process -- cpptools and its
+// cpptools-srv/-srv2 children, which inherit this environment -- writes its own
+// "<dir>/<sanitizer>.<pid>" file. Any *SAN_OPTIONS the developer already set are preserved.
+// Returns undefined when the variable is unset, leaving the child environment inherited unchanged,
+// so this is a no-op for normal builds and safe to leave checked in. To use it, build a sanitizer
+// preset of the language server, set CPPTOOLS_SANITIZER_LOG_DIR before launching VS Code (or add it
+// to the launch config's "env"), reproduce, then read the "<dir>/<sanitizer>.<pid>" files.
+function getSanitizerServerEnv(): NodeJS.ProcessEnv | undefined {
+    const logDirectory: string | undefined = process.env.CPPTOOLS_SANITIZER_LOG_DIR;
+    if (!logDirectory) {
+        return undefined;
+    }
+    // The sanitizer runtime opens "<log_path>.<pid>" and does not create missing directories, so
+    // ensure the directory exists (best effort). If it can't be created the sanitizer just falls
+    // back to stderr.
+    try {
+        fs.mkdirSync(logDirectory, { recursive: true });
+    } catch {
+        // Not fatal -- reports will go to stderr instead.
+    }
+    const withLogPath = (existingOptions: string | undefined, sanitizer: string): string =>
+        [existingOptions, `log_path=${path.join(logDirectory, sanitizer)}`].filter(Boolean).join(" ");
+    return {
+        ...process.env,
+        TSAN_OPTIONS: withLogPath(process.env.TSAN_OPTIONS, "tsan"),
+        ASAN_OPTIONS: withLogPath(process.env.ASAN_OPTIONS, "asan"),
+        UBSAN_OPTIONS: withLogPath(process.env.UBSAN_OPTIONS, "ubsan")
+    };
 }
 
 /* eslint-disable @typescript-eslint/no-unused-vars */

@@ -10,6 +10,7 @@
     - [From Inside VS Code](#from-inside-vs-code)
     - [From Command line](#from-command-line)
 - [Use of an isolated VS Code environment](#use-of-an-isolated-vs-code-environment)
+- [Capturing sanitizer diagnostics from the language server](#capturing-sanitizer-diagnostics-from-the-language-server)
 - [Testing](#testing)
     - [Unit tests](#unit-tests)
     - [Scenario Tests](#scenario-tests)
@@ -98,6 +99,37 @@ your normal VS Code environment.
 > #### Note  
 > When debugging the scenario tests from VS Code, it has to use the same VS Code binary 
 > as the debugger instance, so the isolated environment can't be used. 
+
+## Capturing sanitizer diagnostics from the language server
+
+When you run a sanitizer build of the language server (a `-tsan`/`-asan` CMake preset that enables
+ThreadSanitizer, AddressSanitizer, or UndefinedBehaviorSanitizer), the sanitizer prints its reports
+to `stderr`. Because the extension talks to the language server over `stdio`, those reports are
+easy to miss, and the exit-time backtrace you see in a crash log only shows the sanitizer shutting
+down -- not the actual report.
+
+To capture the reports, set the `CPPTOOLS_SANITIZER_LOG_DIR` environment variable before launching
+VS Code (or add it to the `env` of the launch config that starts the extension). The extension then
+routes each sanitizer's `log_path` into that directory, so every process -- `cpptools` and the
+`cpptools-srv`/`cpptools-srv2` children it spawns, which inherit the environment -- writes its own
+`<dir>/<sanitizer>.<pid>` file (for example `tsan.12345`). Any `TSAN_OPTIONS`/`ASAN_OPTIONS`/
+`UBSAN_OPTIONS` you already set are preserved.
+
+```bash
+# macOS/Linux
+export CPPTOOLS_SANITIZER_LOG_DIR=/tmp/cpptools-san
+# ...launch VS Code with a sanitizer build of cpptools, reproduce the issue, then:
+cat /tmp/cpptools-san/tsan.*
+```
+
+The **Run Extension (capture sanitizer logs)** configuration in `.vscode/launch.json` sets this
+variable for you (to `${userHome}/cpptools-sanitizer-logs`), so you can just pick it from the Run
+and Debug dropdown instead of exporting the variable yourself.
+
+The variable is opt-in: when it is unset (normal development, CI, released builds) the child
+environment is inherited unchanged, so there is no behavior change. No debugger is required -- and
+because the sanitizer writes to a file, you avoid the shutdown-time hangs that can occur when a
+debugger is attached to a sanitizer process as it exits.
 
 ## Testing
 The test architecture has been reorganized and the layout refactored a bit. 
