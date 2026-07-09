@@ -7,6 +7,7 @@
 	"learn.how.to.install.a.library": "了解如何使用 vcpkg 为此标头安装库",
 	"copy.vcpkg.command": "将用于安装“{0}”的 vcpkg 命令复制到剪贴板",
 	"on.disabled.command": "当 `C_Cpp.intelliSenseEngine` 设置为 `disabled` 时，无法执行与 IntelliSense 相关的命令。",
+	"switch.header.source": "正在切换标头/源...",
 	"client.not.found": "未找到客户端",
 	"ok": "确定",
 	"install.compiler.mac.title": "现在将安装 clang 编译器",

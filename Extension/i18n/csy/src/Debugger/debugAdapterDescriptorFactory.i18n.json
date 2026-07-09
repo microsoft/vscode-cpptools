@@ -6,8 +6,7 @@
 {
 	"debugger.not.available": "Typ ladicího programu {0} není pro počítače, které nepoužívají Windows, k dispozici.",
 	"debugger.noDebug.requestType.not.supported": "Spuštění bez ladění je podporováno pouze pro konfigurace spuštění.",
-	"debugger.noDebug.pipeTransport.not.supported": "Spuštění bez ladění není podporováno pro konfigurace s nastavenou hodnotou pipeTransport.",
-	"debugger.noDebug.debugServerPath.not.supported": "Spuštění bez ladění není podporováno pro konfigurace s nastavenou hodnotou debugServerPath.",
-	"debugger.noDebug.miDebuggerServerAddress.not.supported": "Spuštění bez ladění není podporováno pro konfigurace s nastavenou hodnotou miDebuggerServerAddress.",
-	"debugger.noDebug.coreDumpPath.not.supported": "Spuštění bez ladění není podporováno pro konfigurace s nastavenou hodnotou coreDumpPath."
+	"debugger.unsupported.properties": "Konfigurace spuštění s následujícími vlastnostmi nelze spustit přímo v terminálu: {0}",
+	"debugger.fallback.message": "Výstup programu se místo toho zobrazí v konzole ladění.",
+	"debugger.fallback.message2": "Chcete-li toto upozornění potlačit, nastavte v konfiguraci spuštění vlastnost ignoreRunWithoutDebuggingWarnings na hodnotu true."
 }

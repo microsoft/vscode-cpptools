@@ -6,8 +6,7 @@
 {
 	"debugger.not.available": "调试程序类型“{0}”不适用于非 Windows 计算机。",
 	"debugger.noDebug.requestType.not.supported": "仅启动配置支持“运行但不调试”。",
-	"debugger.noDebug.pipeTransport.not.supported": "已设置 \"pipeTransport\" 的配置不支持“运行但不调试”。",
-	"debugger.noDebug.debugServerPath.not.supported": "已设置 \"debugServerPath\" 的配置不支持“运行但不调试”。",
-	"debugger.noDebug.miDebuggerServerAddress.not.supported": "已设置 \"miDebuggerServerAddress\" 的配置不支持“运行但不调试”。",
-	"debugger.noDebug.coreDumpPath.not.supported": "已设置 \"coreDumpPath\" 的配置不支持“运行但不调试”。"
+	"debugger.unsupported.properties": "具有以下属性的启动配置无法直接在终端中运行: {0}",
+	"debugger.fallback.message": "程序输出将改为显示在调试控制台中。",
+	"debugger.fallback.message2": "若要取消显示此警告，请在启动配置中将 'ignoreRunWithoutDebuggingWarnings' 属性设置为 true。"
 }

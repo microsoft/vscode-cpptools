@@ -7,6 +7,7 @@
 	"learn.how.to.install.a.library": "Découvrir comment installer une bibliothèque pour cet en-tête avec vcpkg",
 	"copy.vcpkg.command": "Copier la commande vcpkg pour installer '{0}' dans le Presse-papiers",
 	"on.disabled.command": "Les commandes liées à IntelliSense ne peuvent pas être exécutées quand `C_Cpp.intelliSenseEngine` a la valeur `disabled`.",
+	"switch.header.source": "Changement d’en-tête/source en cours... Merci de patienter.",
 	"client.not.found": "client introuvable",
 	"ok": "OK",
 	"install.compiler.mac.title": "Le compilateur clang va maintenant être installé",
