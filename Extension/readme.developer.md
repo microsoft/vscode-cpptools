@@ -102,9 +102,9 @@ your normal VS Code environment.
 
 ## Capturing sanitizer diagnostics from the language server
 
-When you run a sanitizer build of the language server (a `-tsan`/`-asan` CMake preset that enables
-ThreadSanitizer, AddressSanitizer, or UndefinedBehaviorSanitizer), the sanitizer prints its reports
-to `stderr`. Because the extension talks to the language server over `stdio`, those reports are
+When you run a sanitizer build of the language server (a `-tsan`/`-asan`/`-ubsan` CMake preset that
+enables ThreadSanitizer, AddressSanitizer, or UndefinedBehaviorSanitizer), the sanitizer prints its
+reports to `stderr`. Because the extension talks to the language server over `stdio`, those reports are
 easy to miss, and the exit-time backtrace you see in a crash log only shows the sanitizer shutting
 down -- not the actual report.
 

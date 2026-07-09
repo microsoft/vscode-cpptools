@@ -4434,10 +4434,15 @@ function getLanguageServerFileName(): string {
 // preset of the language server, set CPPTOOLS_SANITIZER_LOG_DIR before launching VS Code (or add it
 // to the launch config's "env"), reproduce, then read the "<dir>/<sanitizer>.<pid>" files.
 function getSanitizerServerEnv(): NodeJS.ProcessEnv | undefined {
-    const logDirectory: string | undefined = process.env.CPPTOOLS_SANITIZER_LOG_DIR;
-    if (!logDirectory) {
+    const logDirectoryEnv: string | undefined = process.env.CPPTOOLS_SANITIZER_LOG_DIR;
+    if (!logDirectoryEnv) {
         return undefined;
     }
+    // The language server is spawned with cwd set to the "bin" directory (see the ServerOptions
+    // above), so the sanitizer runtime would interpret a relative log_path relative to "bin".
+    // Resolve against that same directory here so the directory we create and the path we hand the
+    // sanitizer always agree, and so a relative CPPTOOLS_SANITIZER_LOG_DIR still works.
+    const logDirectory: string = path.resolve(util.getExtensionFilePath("bin"), logDirectoryEnv);
     // The sanitizer runtime opens "<log_path>.<pid>" and does not create missing directories, so
     // ensure the directory exists (best effort). If it can't be created the sanitizer just falls
     // back to stderr.
