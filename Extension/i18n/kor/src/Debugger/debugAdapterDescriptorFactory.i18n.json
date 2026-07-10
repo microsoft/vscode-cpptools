@@ -6,8 +6,7 @@
 {
 	"debugger.not.available": "Windows가 아닌 머신에서는 '{0}' 디버거 형식을 사용할 수 없습니다.",
 	"debugger.noDebug.requestType.not.supported": "디버깅하지 않고 실행은 시작 구성에만 지원됩니다.",
-	"debugger.noDebug.pipeTransport.not.supported": "'pipeTransport'가 설정된 구성에는 디버깅 없이 실행이 지원되지 않습니다.",
-	"debugger.noDebug.debugServerPath.not.supported": "'debugServerPath'가 설정된 구성에는 디버깅 없이 실행이 지원되지 않습니다.",
-	"debugger.noDebug.miDebuggerServerAddress.not.supported": "'miDebuggerServerAddress'가 설정된 구성에는 디버깅 없이 실행이 지원되지 않습니다.",
-	"debugger.noDebug.coreDumpPath.not.supported": "'coreDumpPath'가 설정된 구성에는 디버깅 없이 실행이 지원되지 않습니다."
+	"debugger.unsupported.properties": "다음 속성이 있는 시작 구성은 터미널에서 직접 실행할 수 없습니다. {0}",
+	"debugger.fallback.message": "프로그램 출력이 대신 디버그 콘솔 표시됩니다.",
+	"debugger.fallback.message2": "이 경고를 표시하지 않으려면 시작 구성에서 'ignoreRunWithoutDebuggingWarnings' 속성을 true로 설정하세요."
 }

@@ -17,7 +17,7 @@ export const settings = resolve(userDir, "User", 'settings.json');
 
 export const options = {
     cachePath: `${isolated}/cache`,
-    launchArgs: ['--no-sandbox', '--disable-updates', '--skip-welcome', '--skip-release-notes', `--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`, '--disable-workspace-trust']
+    launchArgs: ['--no-sandbox', '--disable-updates', '--skip-welcome', '--skip-release-notes', '--disable-extensions', `--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`, '--disable-workspace-trust']
 };
 
 export async function install() {
@@ -34,9 +34,9 @@ export async function install() {
         args.push(`--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`);
 
         // install the appropriate extensions
-        // spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cpptools'], { encoding: 'utf-8', stdio: 'ignore' });
-        // spawnSync(cli, [...args, '--install-extension', 'twxs.cmake'], { encoding: 'utf-8', stdio: 'ignore' });
-        // spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cmake-tools'], { encoding: 'utf-8', stdio: 'ignore' });
+        // runVSCodeCommand([...args, '--install-extension', 'ms-vscode.cpptools'], options);
+        // runVSCodeCommand([...args, '--install-extension', 'twxs.cmake'], options);
+        // runVSCodeCommand([...args, '--install-extension', 'ms-vscode.cmake-tools'], options);
         const settingsJson = await readJson(settings, {});
         if (!settingsJson["workbench.colorTheme"]) {
             settingsJson["workbench.colorTheme"] = "Tomorrow Night Blue";

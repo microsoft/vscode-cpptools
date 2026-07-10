@@ -6,8 +6,7 @@
 {
 	"debugger.not.available": "'{0}' hata ayıklayıcısı türü, Windows dışı makinelerde kullanılamaz.",
 	"debugger.noDebug.requestType.not.supported": "Hata Ayıklama Olmadan Çalıştırma yalnızca başlatma yapılandırmaları için destekleniyor.",
-	"debugger.noDebug.pipeTransport.not.supported": "Hata Ayıklama Olmadan Çalıştırma, 'pipeTransport' ayarlı yapılandırmalar için desteklenmiyor.",
-	"debugger.noDebug.debugServerPath.not.supported": "Hata Ayıklama Olmadan Çalıştırma, 'debugServerPath' ayarlı yapılandırmalar için desteklenmiyor.",
-	"debugger.noDebug.miDebuggerServerAddress.not.supported": "Hata Ayıklama Olmadan Çalıştırma, 'miDebuggerServerAddress' ayarlı yapılandırmalar için desteklenmiyor.",
-	"debugger.noDebug.coreDumpPath.not.supported": "Hata Ayıklama Olmadan Çalıştırma, 'coreDumpPath' ayarlı yapılandırmalar için desteklenmiyor."
+	"debugger.unsupported.properties": "Aşağıdaki özelliklere sahip başlatma yapılandırmaları doğrudan terminalde çalıştırılamaz: {0}",
+	"debugger.fallback.message": "Program çıktısı bunun yerine Hata Ayıklama Konsolu'nda görünecek.",
+	"debugger.fallback.message2": "Bu uyarıyı gizlemek için başlatma yapılandırmanızda 'ignoreRunWithoutDebuggingWarnings' özelliğini true olarak ayarlayın."
 }
