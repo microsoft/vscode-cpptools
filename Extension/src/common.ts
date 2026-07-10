@@ -11,7 +11,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import * as vscode from 'vscode';
-import { DocumentFilter, Range } from 'vscode-languageclient';
+import { Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import { ManualPromise } from './Utility/Async/manualPromise';
@@ -1538,7 +1538,7 @@ export function whichAsync(name: string, path?: string): Promise<string | undefi
     });
 }
 
-export const documentSelector: DocumentFilter[] = [
+export const documentSelector: vscode.DocumentFilter[] = [
     { scheme: 'file', language: 'c' },
     { scheme: 'file', language: 'cpp' },
     { scheme: 'file', language: 'cuda-cpp' }

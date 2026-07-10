@@ -10,12 +10,12 @@ function assertEnvironmentEqual(env: Environment[], name: string, value: string)
     let found: boolean = false;
     for (const e of env) {
         if (e.name === name) {
-            assert(e.value === value, `Checking if ${e.value} == ${value}`);
+            assert.ok(e.value === value, `Checking if ${e.value} == ${value}`);
             found = true;
             break;
         }
     }
-    assert(found, `${name} was not found in env.`);
+    assert.ok(found, `${name} was not found in env.`);
 }
 
 suite("ParsedEnvironmentFile", () => {
@@ -23,7 +23,7 @@ suite("ParsedEnvironmentFile", () => {
         const content: string = `MyName=VALUE`;
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
-        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert.ok(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName", "VALUE");
     });
 
@@ -31,7 +31,7 @@ suite("ParsedEnvironmentFile", () => {
         const content: string = `MyName="VALUE"`;
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
-        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert.ok(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName", "VALUE");
     });
 
@@ -39,7 +39,7 @@ suite("ParsedEnvironmentFile", () => {
         const content: string = "\uFEFFMyName=VALUE";
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
-        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert.ok(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName", "VALUE");
     });
 
@@ -51,7 +51,7 @@ MyName2=Value2
 `;
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
-        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert.ok(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
         assertEnvironmentEqual(result.Env, "MyName2", "Value2");
     });
@@ -68,7 +68,7 @@ MyName2=Value2
 
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", initialEnv);
 
-        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert.ok(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
         assertEnvironmentEqual(result.Env, "ThisShouldNotChange", "StillHere");
         assertEnvironmentEqual(result.Env, "MyName2", "Value2");
@@ -82,7 +82,7 @@ MyName2=Value2
 `;
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
-        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert.ok(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
         assertEnvironmentEqual(result.Env, "MyName2", "Value2");
     });
@@ -96,7 +96,7 @@ MyName2=Value2
 `;
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
-        assert(result.Warning && result.Warning.startsWith("Ignoring non-parsable lines in envFile TestEnvFileName"), 'Checking if warning exists');
+        assert.ok(result.Warning && result.Warning.startsWith("Ignoring non-parsable lines in envFile TestEnvFileName"), 'Checking if warning exists');
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
         assertEnvironmentEqual(result.Env, "MyName2", "Value2");
     });

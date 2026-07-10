@@ -6,7 +6,6 @@
 import { ContextProviderApiV1 } from '@github/copilot-language-server';
 import { ok } from 'assert';
 import { afterEach, beforeEach, describe, it } from 'mocha';
-import * as proxyquire from 'proxyquire';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as util from '../../../../src/common';
@@ -17,6 +16,7 @@ import * as extension from '../../../../src/LanguageServer/extension';
 import * as lmTool from '../../../../src/LanguageServer/lmTool';
 import { ProjectContext } from '../../../../src/LanguageServer/lmTool';
 import * as telemetry from '../../../../src/telemetry';
+import proxyquire = require('proxyquire');
 
 describe('copilotProviders Tests', () => {
     let moduleUnderTest: any;

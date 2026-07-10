@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as jsonc from 'comment-json';
-import * as glob from 'glob';
+import { glob, IOptions } from 'glob';
 import * as os from 'os';
 import * as path from 'path';
 import { promisify } from 'util';
@@ -40,7 +40,7 @@ enum StepType {
     command = 'command'
 }
 
-const globAsync: (pattern: string, options?: glob.IOptions | undefined) => Promise<string[]> = promisify(glob);
+const globAsync: (pattern: string, options?: IOptions | undefined) => Promise<string[]> = promisify(glob);
 
 /*
  * Retrieves configurations from a provider and displays them in a quickpick menu to be selected.

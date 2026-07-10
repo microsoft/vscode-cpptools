@@ -28,7 +28,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, ResponseError, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
+import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, RequestType0, ResponseError, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -608,11 +608,11 @@ export interface SetOpenFileOriginalEncodingParams {
 }
 
 // Requests
-const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
+const PreInitializationRequest: RequestType0<string, void> = new RequestType0<string, void>('cpptools/preinitialize');
 const InitializationRequest: RequestType<CppInitializationParams, CppInitializationResult, void> = new RequestType<CppInitializationParams, CppInitializationResult, void>('cpptools/initialize');
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
-const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void> = new RequestType<void, GetDiagnosticsResult, void>('cpptools/getDiagnostics');
+const GetDiagnosticsRequest: RequestType0<GetDiagnosticsResult, void> = new RequestType0<GetDiagnosticsResult, void>('cpptools/getDiagnostics');
 export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void> = new RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void>('cpptools/getDocumentSymbols');
 export const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void>('cpptools/getWorkspaceSymbols');
 export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void>('cpptools/getFoldingRanges');
@@ -1836,12 +1836,12 @@ export class DefaultClient implements Client {
         await languageClient.start();
 
         if (usesCrashHandler()) {
-            watchForCrashes(await languageClient.sendRequest(PreInitializationRequest, null));
+            watchForCrashes(await languageClient.sendRequest(PreInitializationRequest));
         } else if (os.platform() === "win32") {
             const settings: CppSettings = new CppSettings();
             if ((settings.windowsErrorReportingMode === "default" && !languageClientHasCrashed) ||
                 settings.windowsErrorReportingMode === "enabled") {
-                await languageClient.sendRequest(PreInitializationRequest, null);
+                await languageClient.sendRequest(PreInitializationRequest);
             }
         }
 
@@ -2202,7 +2202,7 @@ export class DefaultClient implements Client {
 
     public async logDiagnostics(): Promise<void> {
         await this.ready;
-        const response: GetDiagnosticsResult = await this.languageClient.sendRequest(GetDiagnosticsRequest, null);
+        const response: GetDiagnosticsResult = await this.languageClient.sendRequest(GetDiagnosticsRequest);
         const diagnosticsChannel: vscode.OutputChannel = getDiagnosticsChannel();
         diagnosticsChannel.clear();
 

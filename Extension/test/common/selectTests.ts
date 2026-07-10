@@ -5,12 +5,12 @@
 
 import { readdir, readFile } from 'fs/promises';
 import { glob as globSync, IOptions } from 'glob';
-import * as Mocha from 'mocha';
 import { basename, dirname, resolve } from 'path';
 import { env } from 'process';
 import { promisify } from 'util';
 import { returns } from '../../src/Utility/Async/returns';
 import { filepath } from '../../src/Utility/Filesystem/filepath';
+import Mocha = require('mocha');
 
 export const glob: (pattern: string, options?: IOptions | undefined) => Promise<string[]> = promisify(globSync);
 

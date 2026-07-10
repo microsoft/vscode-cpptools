@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { promises as fs } from 'fs';
-import * as glob from 'glob';
+import { glob, IOptions } from 'glob';
 import * as os from 'os';
 import * as path from 'path';
 import {
@@ -12,8 +12,8 @@ import {
     ConfigurationEntry,
     Type as ConfigurationEntryType,
     HostConfigurationDirective,
-    ResolvedConfiguration,
-    parse
+    parse,
+    ResolvedConfiguration
 } from 'ssh-config';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
@@ -25,7 +25,7 @@ import { getSshChannel } from '../logger';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-const globAsync: (pattern: string, options?: glob.IOptions | undefined) => Promise<string[]> = promisify(glob);
+const globAsync: (pattern: string, options?: IOptions | undefined) => Promise<string[]> = promisify(glob);
 
 const userSshConfigurationFile: string = path.resolve(os.homedir(), '.ssh/config');
 

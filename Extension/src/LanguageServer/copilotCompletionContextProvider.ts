@@ -5,7 +5,6 @@
 import { ContextResolver, ResolveRequest, SupportedContextItem, type ContextProvider } from '@github/copilot-language-server';
 import { randomUUID } from 'crypto';
 import * as vscode from 'vscode';
-import { DocumentSelector } from 'vscode-languageserver-protocol';
 import { isBoolean, isNumber, isString } from '../common';
 import { getOutputChannelLogger, Logger } from '../logger';
 import * as telemetry from '../telemetry';
@@ -74,7 +73,7 @@ type CacheEntry = [string, CopilotCompletionContextResult];
 export class CopilotCompletionContextProvider implements ContextResolver<SupportedContextItem> {
     private static readonly providerId = 'ms-vscode.cpptools';
     private readonly completionContextCache: Map<string, CacheEntry> = new Map();
-    private static readonly defaultCppDocumentSelector: DocumentSelector = [{ language: 'cpp' }, { language: 'c' }, { language: 'cuda-cpp' }];
+    private static readonly defaultCppDocumentSelector: string[] = ['cpp', 'c', 'cuda-cpp'];
     // The default time budget for providing a value from resolve().
     private static readonly defaultTimeBudgetMs: number = 7;
     // Assume the cache is stale when the distance to the current caret is greater than this value.
