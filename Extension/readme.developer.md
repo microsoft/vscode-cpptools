@@ -102,8 +102,9 @@ your normal VS Code environment.
 
 ## Capturing sanitizer diagnostics from the language server
 
-When you run a sanitizer build of the language server (a `-tsan`/`-asan`/`-ubsan` CMake preset that
-enables ThreadSanitizer, AddressSanitizer, or UndefinedBehaviorSanitizer), the sanitizer prints its
+When you run a sanitizer build of the language server (a `-tsan` or `-asan-ubsan` CMake preset --
+ThreadSanitizer, or AddressSanitizer + UndefinedBehaviorSanitizer combined; on Windows use
+`windows-x64-asan`, ASan only), the sanitizer prints its
 reports to `stderr`. Because the extension talks to the language server over `stdio`, those reports are
 easy to miss, and the exit-time backtrace you see in a crash log only shows the sanitizer shutting
 down -- not the actual report.
@@ -118,8 +119,9 @@ routes each sanitizer's `log_path` into that directory, so every process -- `cpp
 ```bash
 # macOS/Linux
 export CPPTOOLS_SANITIZER_LOG_DIR=/tmp/cpptools-san
-# ...launch VS Code with a sanitizer build of cpptools, reproduce the issue, then:
-cat /tmp/cpptools-san/tsan.*
+# ...launch VS Code with a sanitizer build of cpptools, reproduce the issue, then read the logs.
+# A -tsan build writes tsan.<pid>; a combined -asan-ubsan build writes both asan.<pid> and ubsan.<pid>.
+cat /tmp/cpptools-san/*
 ```
 
 The **Run Extension (capture sanitizer logs)** configuration in `.vscode/launch.json` sets this
