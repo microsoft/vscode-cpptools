@@ -4456,7 +4456,15 @@ function getSanitizerServerEnv(): NodeJS.ProcessEnv | undefined {
         // as a delimiter between key=value pairs, so a single space is a valid, cross-platform
         // separator here. Do not use path.delimiter (';' on Windows), which the parser does NOT
         // treat as a delimiter and which would break parsing for the Windows ASan preset.
-        [existingOptions, `log_path=${path.join(logDirectory, sanitizer)}`].filter(Boolean).join(" ");
+        //
+        // The colon delimiter also matters *inside* the value: a Windows absolute path begins with a
+        // drive letter and colon (e.g. C:\...), so an unquoted log_path=C:\... parses as log_path=C
+        // followed by a stray \... token, and the runtime aborts at startup with
+        // "expected '=' in ASAN_OPTIONS" (exit 1) before any code runs. Wrap the value in single
+        // quotes: the flag parser reads a quoted value verbatim up to the closing quote, so the
+        // embedded colon is preserved. Quoting is harmless on Linux/macOS (the parser strips the
+        // quotes), so it is applied unconditionally rather than only on Windows.
+        [existingOptions, `log_path='${path.join(logDirectory, sanitizer)}'`].filter(Boolean).join(" ");
     return {
         ...process.env,
         TSAN_OPTIONS: withLogPath(process.env.TSAN_OPTIONS, "tsan"),
