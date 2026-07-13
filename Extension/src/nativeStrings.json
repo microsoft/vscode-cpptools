@@ -713,7 +713,7 @@
     },
     "check_requires_source": {
         "text": "--check requires a source file: --check=<file>",
-        "hint": "{Locked=\"--check\"} {Locked=\"--check=<file>\"}"
+        "hint": "{Locked=\"--check\"}"
     },
     "check_source_not_found": {
         "text": "source file not found: {0}",
@@ -725,7 +725,7 @@
     },
     "check_compile_commands_not_discovered": {
         "text": "could not find compile_commands.json in any parent directory of {0}; pass --check-compile-commands=<path> to specify it explicitly",
-        "hint": "{0} is the starting directory path. {Locked=\"compile_commands.json\"} {Locked=\"{0}\"} {Locked=\"--check-compile-commands=<path>\"}"
+        "hint": "{0} is the starting directory path. {Locked=\"compile_commands.json\"} {Locked=\"{0}\"} {Locked=\"--check-compile-commands\"}"
     },
     "check_engine_init_failed": "failed to initialize the language engine",
     "check_no_workspace_folder": {
