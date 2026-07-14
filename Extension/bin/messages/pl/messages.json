@@ -3747,5 +3747,6 @@
     "„static” jest tutaj niestandardowy",
     "funkcja %nd została poprzednio zadeklarowana bez jawnej bazy wyliczenia",
     "brak elementu „typename” jest tutaj niestandardowe",
-    "skrócona składnia szablonu funkcji jest niestandardowa dla przewodników dedukcji"
+    "skrócona składnia szablonu funkcji jest niestandardowa dla przewodników dedukcji",
+    "too many nested user-defined conversions (possible cycle of converting constructors)"
 ]

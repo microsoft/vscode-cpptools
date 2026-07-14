@@ -3747,5 +3747,6 @@
     "„static“ je zde nestandardní",
     "%nd byl dříve deklarován bez explicitního základu výčtu",
     "Chybějící typename je tady nestandardní.",
-    "Zkrácená syntaxe šablony funkce není standardní pro vodítka dedukce"
+    "Zkrácená syntaxe šablony funkce není standardní pro vodítka dedukce",
+    "too many nested user-defined conversions (possible cycle of converting constructors)"
 ]

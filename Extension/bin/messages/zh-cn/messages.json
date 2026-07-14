@@ -3747,5 +3747,6 @@
     "此处使用 \"static\" 不符合标准",
     "之前声明 %nd 时未指定显式枚举基类型",
     "此处缺少 'typename' 属于非标准用法",
-    "缩写函数模板语法对于推导指南是不标准的"
+    "缩写函数模板语法对于推导指南是不标准的",
+    "too many nested user-defined conversions (possible cycle of converting constructors)"
 ]
