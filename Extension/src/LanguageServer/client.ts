@@ -486,8 +486,14 @@ interface CodeAnalysisParams {
     scope: CodeAnalysisScope;
 }
 
+interface RequestCustomConfigsParams {
+    workspaceFolderUri: string;
+    files: string[];
+    batchId: number;
+}
+
 interface FinishedRequestCustomConfigParams {
-    uri: string;
+    batchId: number;
     isProviderRegistered: boolean;
 }
 
@@ -651,7 +657,7 @@ const ClearCustomConfigurationsNotification: NotificationType<WorkspaceFolderPar
 const ClearCustomBrowseConfigurationNotification: NotificationType<WorkspaceFolderParams> = new NotificationType<WorkspaceFolderParams>('cpptools/clearCustomBrowseConfiguration');
 const PreviewReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/previewReferences');
 const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
-const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
+const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfigs');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const DidChangeVisibleTextEditorsNotification: NotificationType<DidChangeVisibleTextEditorsParams> = new NotificationType<DidChangeVisibleTextEditorsParams>('cpptools/didChangeVisibleTextEditors');
 const DidChangeTextEditorVisibleRangesNotification: NotificationType<DidChangeTextEditorVisibleRangesParams> = new NotificationType<DidChangeTextEditorVisibleRangesParams>('cpptools/didChangeTextEditorVisibleRanges');
@@ -674,7 +680,7 @@ const DebugLogNotification: NotificationType<LocalizeStringParams> = new Notific
 const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> = new NotificationType<CompileCommandsPaths>('cpptools/compileCommandsPaths');
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
-const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
+const RequestCustomConfigs: NotificationType<RequestCustomConfigsParams> = new NotificationType<RequestCustomConfigsParams>('cpptools/requestCustomConfigs');
 const PublishRefactorDiagnosticsNotification: NotificationType<PublishRefactorDiagnosticsParams> = new NotificationType<PublishRefactorDiagnosticsParams>('cpptools/publishRefactorDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams> = new NotificationType<ShowMessageWindowParams>('cpptools/showMessageWindow');
 const ShowWarningNotification: NotificationType<ShowWarningParams> = new NotificationType<ShowWarningParams>('cpptools/showWarning');
@@ -804,7 +810,7 @@ export interface Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
-    provideCustomConfiguration(docUri: vscode.Uri): Promise<void>;
+    provideCustomConfigurations(docUris: vscode.Uri[], batchId: number): Promise<void>;
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     toggleReferenceResultsView(): void;
@@ -2274,10 +2280,10 @@ export class DefaultClient implements Client {
         return this.languageClient.sendNotification(RescanFolderNotification);
     }
 
-    public async provideCustomConfiguration(docUri: vscode.Uri): Promise<void> {
+    public async provideCustomConfigurations(docUris: vscode.Uri[], batchId: number): Promise<void> {
         let isProviderRegistered: boolean = false;
         const onFinished: () => void = () => {
-            void this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: docUri.toString(), isProviderRegistered });
+            void this.languageClient.sendNotification(FinishedRequestCustomConfig, { batchId, isProviderRegistered });
         };
         try {
             const providerId: string | undefined = this.configurationProvider;
@@ -2289,29 +2295,22 @@ export class DefaultClient implements Client {
                 return;
             }
             isProviderRegistered = true;
-            const resultCode = await this.provideCustomConfigurationAsync(docUri, provider);
-            telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId, resultCode });
+            const resultCode = await this.provideCustomConfigurationAsync(docUris, provider);
+            telemetry.logLanguageServerEvent('provideCustomConfigurations', { providerId, resultCode });
         } finally {
             onFinished();
         }
     }
 
-    private async provideCustomConfigurationAsync(docUri: vscode.Uri, provider: CustomConfigurationProvider1): Promise<string> {
+    private async provideCustomConfigurationAsync(docUris: vscode.Uri[], provider: CustomConfigurationProvider1): Promise<string> {
         const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
 
         // Need to loop through candidates, to see if we can get a custom configuration from any of them.
         // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
         const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | undefined> = async () => {
-            try {
-                if (!await provider.canProvideConfiguration(docUri, tokenSource.token)) {
-                    return [];
-                }
-            } catch {
-                console.warn("Caught exception from canProvideConfiguration");
-            }
             let configs: util.Mutable<SourceFileConfigurationItem>[] = [];
             try {
-                configs = await provider.provideConfigurations([docUri], tokenSource.token);
+                configs = await provider.provideConfigurations(docUris, tokenSource.token);
             } catch {
                 console.warn("Caught exception from provideConfigurations");
             }
@@ -2367,7 +2366,7 @@ export class DefaultClient implements Client {
         } catch (err) {
             result = "timeout";
             const settings: CppSettings = new CppSettings(this.RootUri);
-            if (settings.isConfigurationWarningsEnabled && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+            if (settings.isConfigurationWarningsEnabled && !vscode.debug.activeDebugSession) {
                 const dismiss: string = localize("dismiss.button", "Dismiss");
                 const disable: string = localize("disable.warnings.button", "Disable Warnings");
                 const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
@@ -2375,8 +2374,8 @@ export class DefaultClient implements Client {
                     return "noConfigName";
                 }
                 let message: string = localize("unable.to.provide.configuration",
-                    "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
-                    provider.name, docUri.fsPath, configName);
+                    "{0} is unable to provide IntelliSense configuration information. Settings from the '{1}' configuration will be used instead.",
+                    provider.name, configName);
                 if (err) {
                     message += ` (${err})`;
                 }
@@ -2392,18 +2391,17 @@ export class DefaultClient implements Client {
         return result;
     }
 
-    private handleRequestCustomConfig(file: string): void {
-        const uri: vscode.Uri = vscode.Uri.file(file);
-        const client: Client = clients.getClientFor(uri);
+    private handleRequestCustomConfigs(params: RequestCustomConfigsParams): void {
+        const workspaceFolderUri: vscode.Uri = vscode.Uri.parse(params.workspaceFolderUri);
+        const client: Client = clients.getClientFor(workspaceFolderUri);
+        if (!client) {
+            return;
+        }
         if (client instanceof DefaultClient) {
             const defaultClient: DefaultClient = client as DefaultClient;
-            void defaultClient.provideCustomConfiguration(uri).catch(logAndReturn.undefined);
+            const uris: vscode.Uri[] = params.files.map(file => vscode.Uri.file(file));
+            void defaultClient.provideCustomConfigurations(uris, params.batchId).catch(logAndReturn.undefined);
         }
-    }
-
-    private isExternalHeader(uri: vscode.Uri): boolean {
-        const rootUri: vscode.Uri | undefined = this.RootUri;
-        return !rootUri || (util.isHeaderFile(uri) && !uri.toString().startsWith(rootUri.toString()));
     }
 
     public async getCurrentConfigName(): Promise<string | undefined> {
@@ -2649,7 +2647,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => void this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesPreview(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
-        this.languageClient.onNotification(RequestCustomConfig, (e) => this.handleRequestCustomConfig(e));
+        this.languageClient.onNotification(RequestCustomConfigs, (e) => this.handleRequestCustomConfigs(e));
         this.languageClient.onNotification(IntelliSenseResultNotification, (e) => this.handleIntelliSenseResult(e));
         this.languageClient.onNotification(PublishRefactorDiagnosticsNotification, publishRefactorDiagnostics);
         RegisterCodeAnalysisNotifications(this.languageClient);
@@ -4458,7 +4456,7 @@ class NullClient implements Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
-    provideCustomConfiguration(docUri: vscode.Uri): Promise<void> { return Promise.resolve(); }
+    provideCustomConfigurations(docUris: vscode.Uri[], batchId: number): Promise<void> { return Promise.resolve(); }
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     toggleReferenceResultsView(): void { }
