@@ -2305,8 +2305,7 @@ export class DefaultClient implements Client {
     private async provideCustomConfigurationAsync(docUris: vscode.Uri[], provider: CustomConfigurationProvider1): Promise<string> {
         const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
 
-        // Need to loop through candidates, to see if we can get a custom configuration from any of them.
-        // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
+        // Wrap the provider lookup in a single task, so we can apply a timeout to the entire duration.
         const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | undefined> = async () => {
             let configs: util.Mutable<SourceFileConfigurationItem>[] = [];
             try {
@@ -2357,7 +2356,13 @@ export class DefaultClient implements Client {
         };
         let result: string = "success";
         try {
-            const configs: SourceFileConfigurationItem[] | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
+            let configs: SourceFileConfigurationItem[] | undefined;
+            // Multi-file requests are async, and do not require a timeout.
+            if (docUris.length > 1) {
+                configs = await provideConfigurationAsync();
+            } else {
+                configs = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
+            }
             if (configs && configs.length > 0) {
                 this.sendCustomConfigurations(configs, provider.version);
             } else {
@@ -2394,9 +2399,6 @@ export class DefaultClient implements Client {
     private handleRequestCustomConfigs(params: RequestCustomConfigsParams): void {
         const workspaceFolderUri: vscode.Uri = vscode.Uri.parse(params.workspaceFolderUri);
         const client: Client = clients.getClientFor(workspaceFolderUri);
-        if (!client) {
-            return;
-        }
         if (client instanceof DefaultClient) {
             const defaultClient: DefaultClient = client as DefaultClient;
             const uris: vscode.Uri[] = params.files.map(file => vscode.Uri.file(file));
