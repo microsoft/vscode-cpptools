@@ -113,19 +113,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             let executableArgs: string[] = args;
             if (!program.match(/["']/) && program.match(/\s/)) {
                 // VS Code does not automatically quote the program path if it has spaces.
-                const shellPath: string | undefined = 'shellPath' in this.terminal.creationOptions
-                    ? this.terminal.creationOptions.shellPath?.toLowerCase()
-                    : undefined;
-                const terminalShell: string | undefined = this.terminal.state.shell?.toLowerCase();
-                const defaultTerminalProfile: string | undefined = isWindows
-                    ? vscode.workspace.getConfiguration('terminal.integrated').get<string>('defaultProfile.windows')?.toLowerCase()
-                    : undefined;
-                const isPowerShell: boolean | undefined =
-                    shellPath?.endsWith('pwsh.exe') || shellPath?.endsWith('powershell.exe') || shellPath?.endsWith('pwsh') ||
-                    terminalShell?.includes('powershell') || terminalShell?.includes('pwsh') ||
-                    defaultTerminalProfile?.includes('powershell') || defaultTerminalProfile?.includes('pwsh');
-
-                if (isPowerShell || (isWindows && isPowerShell === undefined)) { // PowerShell is the default on Windows if we can't determine the shell.
+                if (this.isPowerShellTerminal()) {
                     executable = '&';
                     executableArgs = [program, ...args];
                 } else {
@@ -135,11 +123,33 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             this.terminalExecution = shellIntegration.executeCommand(executable, executableArgs);
         } else {
             const cmdLine: string = buildShellCommandLine('', program, args, true);
-            this.terminal.sendText(cmdLine);
+            // buildShellCommandLine quotes the path, and PowerShell evaluates a quoted path as a string
+            // literal instead of running it, so the call operator is required to invoke it.
+            this.terminal.sendText(this.isPowerShellTerminal() ? `& ${cmdLine}` : cmdLine);
 
             // The terminal manages its own lifecycle; notify VS Code the "debug" session is done.
             this.sendEvent('terminated');
         }
+    }
+
+    /**
+     * Determine whether the integrated terminal is running PowerShell.
+     * PowerShell is assumed on Windows when the shell cannot be determined, since it is the default there.
+     */
+    private isPowerShellTerminal(): boolean {
+        const shellPath: string | undefined = this.terminal && 'shellPath' in this.terminal.creationOptions
+            ? this.terminal.creationOptions.shellPath?.toLowerCase()
+            : undefined;
+        const terminalShell: string | undefined = this.terminal?.state.shell?.toLowerCase();
+        const defaultTerminalProfile: string | undefined = isWindows
+            ? vscode.workspace.getConfiguration('terminal.integrated').get<string>('defaultProfile.windows')?.toLowerCase()
+            : undefined;
+        const isPowerShell: boolean | undefined =
+            shellPath?.endsWith('pwsh.exe') || shellPath?.endsWith('powershell.exe') || shellPath?.endsWith('pwsh') ||
+            terminalShell?.includes('powershell') || terminalShell?.includes('pwsh') ||
+            defaultTerminalProfile?.includes('powershell') || defaultTerminalProfile?.includes('pwsh');
+
+        return Boolean(isPowerShell) || (isWindows && isPowerShell === undefined);
     }
 
     /**
