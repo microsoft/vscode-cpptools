@@ -113,8 +113,15 @@ To capture the reports, set the `CPPTOOLS_SANITIZER_LOG_DIR` environment variabl
 VS Code (or add it to the `env` of the launch config that starts the extension). The extension then
 routes each sanitizer's `log_path` into that directory, so every process -- `cpptools` and the
 `cpptools-srv`/`cpptools-srv2` children it spawns, which inherit the environment -- writes its own
-`<dir>/<sanitizer>.<pid>` file (for example `tsan.12345`). Any `TSAN_OPTIONS`/`ASAN_OPTIONS`/
-`UBSAN_OPTIONS` you already set are preserved.
+`<dir>/<sanitizer>.<pid>` file (for example `tsan.12345`).
+
+The extension also sets capture-friendly defaults so a crash is more likely to leave a usable
+report: UBSan runs with `print_stacktrace=1` (a combined `-asan-ubsan` build catches UB in *abort*
+mode, where the default one-line summary has no stack), and ASan runs with
+`handle_abort=1:abort_on_error=1:disable_coredump=0` so an ASan-detected error -- or an `abort()`
+raised by UBSan -- prints a stack and dumps core. Any `TSAN_OPTIONS`/`ASAN_OPTIONS`/`UBSAN_OPTIONS`
+you set yourself override these defaults; `log_path` is always applied last so reports are never
+misrouted.
 
 ```bash
 # macOS/Linux
@@ -127,6 +134,28 @@ cat /tmp/cpptools-san/*
 The **Run Extension (capture sanitizer logs)** configuration in `.vscode/launch.json` sets this
 variable for you (to `${userHome}/cpptools-sanitizer-logs`), so you can just pick it from the Run
 and Debug dropdown instead of exporting the variable yourself.
+
+### When you get no log at all (signal-killed crashes)
+
+Some crashes bypass the sanitizer's error-reporting path entirely -- a hard `SIGSEGV` (for example a
+stack overflow, where the handler cannot run on the exhausted stack) or a `SIGABRT` -- and leave
+**no** `<dir>/<sanitizer>.<pid>` file. The kernel log (`dmesg`) shows a line like
+`cpptools-srv2: potentially unexpected fatal signal 11` in that case. The `disable_coredump=0`
+default above lets ASan dump core, but the OS still needs core dumps enabled to write one. In the
+shell you launch VS Code from:
+
+```bash
+ulimit -c unlimited
+# core_pattern must point somewhere writable (the server's cwd is bin/, which may be blocked):
+echo "$HOME/cpptools-sanitizer-logs/core.%e.%p" | sudo tee /proc/sys/kernel/core_pattern
+# ...reproduce, then open the core with the matching binary to get a stack:
+gdb Extension/bin/cpptools-srv2 "$HOME/cpptools-sanitizer-logs/core.cpptools-srv2.<pid>" -ex bt
+```
+
+If a combined `-asan-ubsan` build still won't pinpoint the fault, build the sanitizers separately: an
+`-asan`-only build removes UBSan's `abort()` as a confounder, and building UBSan with
+`-fsanitize-recover=undefined` plus `UBSAN_OPTIONS=halt_on_error=0` makes it report every UB site and
+continue instead of aborting at the first one.
 
 The variable is opt-in: when it is unset (normal development, CI, released builds) the child
 environment is inherited unchanged, so there is no behavior change. No debugger is required -- and

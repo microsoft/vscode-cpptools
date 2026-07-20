@@ -1693,9 +1693,22 @@ export class DefaultClient implements Client {
         // from a sanitizer build to files in that directory (see getSanitizerServerEnv). This is
         // undefined -- i.e. the environment is inherited unchanged -- for normal builds.
         const sanitizerServerEnv: NodeJS.ProcessEnv | undefined = getSanitizerServerEnv();
+        // On the opt-in sanitizer path, re-exec the server through a shell that raises the core-dump
+        // soft limit first. A signal-killed crash (e.g. a SIGSEGV the sanitizer handler cannot report
+        // on an exhausted stack) only leaves a core when RLIMIT_CORE is non-zero, but the extension
+        // host typically inherits "ulimit -c 0" and Node cannot call setrlimit on itself. The shell
+        // raises the soft limit to the (unlimited) hard limit, then exec keeps the same pid and stdio
+        // so the language client is unaffected. No-op for normal builds (sanitizerServerEnv undefined)
+        // and on Windows, which uses Windows Error Reporting rather than core dumps.
+        const wrapForCoreDump = (args: string[]): { command: string; args: string[] } | undefined =>
+            sanitizerServerEnv && process.platform !== "win32"
+                ? { command: "/bin/sh", args: ["-c", 'ulimit -c unlimited 2>/dev/null; exec "$@"', "cpptools", serverModule, ...args] }
+                : undefined;
+        const runWrapper = wrapForCoreDump([]);
+        const debugWrapper = wrapForCoreDump([serverName]);
         const serverOptions: ServerOptions = {
-            run: { command: serverModule, options: { detached: false, cwd: util.getExtensionFilePath("bin"), env: sanitizerServerEnv } },
-            debug: { command: serverModule, args: [serverName], options: { detached: true, cwd: util.getExtensionFilePath("bin"), env: sanitizerServerEnv } }
+            run: { command: runWrapper?.command ?? serverModule, args: runWrapper?.args, options: { detached: false, cwd: util.getExtensionFilePath("bin"), env: sanitizerServerEnv } },
+            debug: { command: debugWrapper?.command ?? serverModule, args: debugWrapper?.args ?? [serverName], options: { detached: true, cwd: util.getExtensionFilePath("bin"), env: sanitizerServerEnv } }
         };
 
         // The IntelliSense process should automatically detect when AutoPCH is
@@ -4428,11 +4441,31 @@ function getLanguageServerFileName(): string {
 // stdio can swallow. When the CPPTOOLS_SANITIZER_LOG_DIR environment variable is set, this routes
 // each sanitizer's log_path into that directory so every process -- cpptools and its
 // cpptools-srv/-srv2 children, which inherit this environment -- writes its own
-// "<dir>/<sanitizer>.<pid>" file. Any *SAN_OPTIONS the developer already set are preserved.
+// "<dir>/<sanitizer>.<pid>" file, and sets capture-friendly defaults (see sanitizerCaptureDefaults)
+// so signal-killed crashes still leave a usable report or core. Any *SAN_OPTIONS the developer
+// already set override those defaults, and log_path always wins so reports cannot be misrouted.
 // Returns undefined when the variable is unset, leaving the child environment inherited unchanged,
 // so this is a no-op for normal builds and safe to leave checked in. To use it, build a sanitizer
 // preset of the language server, set CPPTOOLS_SANITIZER_LOG_DIR before launching VS Code (or add it
 // to the launch config's "env"), reproduce, then read the "<dir>/<sanitizer>.<pid>" files.
+//
+// Per-sanitizer defaults that maximize the chance a crash produces a usable report or core. These
+// are prepended before the developer's own *SAN_OPTIONS (which override them) and before log_path
+// (which always wins), so they are safe defaults rather than hard overrides.
+//   asan:  A combined ASan+UBSan build catches UB via abort() (UBSan abort mode) and hard memory
+//          faults via SIGSEGV. handle_abort=1 makes ASan intercept abort() and print a report with
+//          a stack instead of dying silently; abort_on_error=1 + disable_coredump=0 make an
+//          ASan-detected error dump core, giving a full stack even when a signal truncates the
+//          log_path report (e.g. a stack-overflow SIGSEGV the handler cannot fully report).
+//   ubsan: print_stacktrace=1 -- without it, a UBSan report in abort mode is a single summary line
+//          with no stack, so the actual UB site is invisible.
+//   tsan:  no extra defaults (its reports already carry stacks; extra options risk perf/memory cost
+//          on already-heavy TSan runs).
+const sanitizerCaptureDefaults: { readonly [sanitizer: string]: string } = {
+    asan: "handle_abort=1:abort_on_error=1:disable_coredump=0",
+    ubsan: "print_stacktrace=1",
+    tsan: ""
+};
 function getSanitizerServerEnv(): NodeJS.ProcessEnv | undefined {
     const logDirectoryEnv: string | undefined = process.env.CPPTOOLS_SANITIZER_LOG_DIR;
     if (!logDirectoryEnv) {
@@ -4451,11 +4484,16 @@ function getSanitizerServerEnv(): NodeJS.ProcessEnv | undefined {
     } catch {
         // Not fatal -- reports will go to stderr instead.
     }
-    const withLogPath = (existingOptions: string | undefined, sanitizer: string): string =>
+    const buildOptions = (existingOptions: string | undefined, sanitizer: string): string =>
         // The sanitizer runtime flag parser treats a space (as well as ',', ':', tab, and newline)
         // as a delimiter between key=value pairs, so a single space is a valid, cross-platform
         // separator here. Do not use path.delimiter (';' on Windows), which the parser does NOT
         // treat as a delimiter and which would break parsing for the Windows ASan preset.
+        //
+        // Ordering matters because the parser applies duplicate keys left-to-right, last-wins:
+        // capture defaults first (weakest), then the developer's own options (so they win over the
+        // defaults), then log_path last (so it can never be overridden and reports are never
+        // misrouted).
         //
         // The colon delimiter also matters *inside* the value: a Windows absolute path begins with a
         // drive letter and colon (e.g. C:\...), so an unquoted log_path=C:\... parses as log_path=C
@@ -4464,12 +4502,12 @@ function getSanitizerServerEnv(): NodeJS.ProcessEnv | undefined {
         // quotes: the flag parser reads a quoted value verbatim up to the closing quote, so the
         // embedded colon is preserved. Quoting is harmless on Linux/macOS (the parser strips the
         // quotes), so it is applied unconditionally rather than only on Windows.
-        [existingOptions, `log_path='${path.join(logDirectory, sanitizer)}'`].filter(Boolean).join(" ");
+        [sanitizerCaptureDefaults[sanitizer], existingOptions, `log_path='${path.join(logDirectory, sanitizer)}'`].filter(Boolean).join(" ");
     return {
         ...process.env,
-        TSAN_OPTIONS: withLogPath(process.env.TSAN_OPTIONS, "tsan"),
-        ASAN_OPTIONS: withLogPath(process.env.ASAN_OPTIONS, "asan"),
-        UBSAN_OPTIONS: withLogPath(process.env.UBSAN_OPTIONS, "ubsan")
+        TSAN_OPTIONS: buildOptions(process.env.TSAN_OPTIONS, "tsan"),
+        ASAN_OPTIONS: buildOptions(process.env.ASAN_OPTIONS, "asan"),
+        UBSAN_OPTIONS: buildOptions(process.env.UBSAN_OPTIONS, "ubsan")
     };
 }
 
