@@ -698,5 +698,54 @@
     "status_indexing_files_with_text": "Indexing files {0}",
     "help_allow_missing_lsp_config": "Allow the server to start even if the specified --lsp-config file does not exist.",
     "initialize_failed_during_engine_setup": "Initialization failed during engine setup.",
-    "important_label": "Important:"
+    "important_label": "Important:",
+    "help_check": {
+        "text": "Validate a source file against compile_commands.json by fully parsing and analyzing it, reporting any diagnostics. Exits non-zero if errors are found.",
+        "hint": "{Locked=\"compile_commands.json\"}"
+    },
+    "help_check_compile_commands": {
+        "text": "Path to a specific compile_commands.json (or its directory) to use with --check. Defaults to auto-discovery.",
+        "hint": "{Locked=\"compile_commands.json\"} {Locked=\"--check\"}"
+    },
+    "check_not_authorized": {
+        "text": "not authorized; sign in is required to run --check",
+        "hint": "{Locked=\"--check\"}"
+    },
+    "check_requires_source": {
+        "text": "--check requires a source file: --check=<file>",
+        "hint": "{Locked=\"--check\"} {Locked=\"--check=\"}"
+    },
+    "check_source_not_found": {
+        "text": "source file not found: {0}",
+        "hint": "{0} is the source file path. {Locked=\"{0}\"}"
+    },
+    "check_compile_commands_not_found": {
+        "text": "compile_commands.json not found: {0}",
+        "hint": "{0} is the file path. {Locked=\"compile_commands.json\"} {Locked=\"{0}\"}"
+    },
+    "check_compile_commands_not_discovered": {
+        "text": "could not find compile_commands.json in any parent directory of {0}; pass --check-compile-commands=<path> to specify it explicitly",
+        "hint": "{0} is the starting directory path. {Locked=\"compile_commands.json\"} {Locked=\"{0}\"} {Locked=\"--check-compile-commands=\"}"
+    },
+    "check_engine_init_failed": "failed to initialize the language engine",
+    "check_no_workspace_folder": {
+        "text": "no workspace folder resolved for {0}",
+        "hint": "{0} is the source file path. {Locked=\"{0}\"}"
+    },
+    "check_not_in_compile_commands": {
+        "text": "{0} is not present in {1}",
+        "hint": "{0} is the source file path. {1} is the compile_commands.json path. {Locked=\"{0}\"} {Locked=\"{1}\"}"
+    },
+    "check_read_failed": {
+        "text": "failed to read {0}",
+        "hint": "{0} is the file path. {Locked=\"{0}\"}"
+    },
+    "check_open_failed": {
+        "text": "failed to open {0} for analysis",
+        "hint": "{0} is the source file path. {Locked=\"{0}\"}"
+    },
+    "check_timed_out": {
+        "text": "timed out waiting for analysis of {0} to finish",
+        "hint": "{0} is the source file path. {Locked=\"{0}\"}"
+    }
 }
