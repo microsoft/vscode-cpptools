@@ -116,10 +116,12 @@ routes each sanitizer's `log_path` into that directory, so every process -- `cpp
 `<dir>/<sanitizer>.<pid>` file (for example `tsan.12345`).
 
 The extension also sets capture-friendly defaults so a crash is more likely to leave a usable
-report: UBSan runs with `print_stacktrace=1` (a combined `-asan-ubsan` build catches UB in *abort*
-mode, where the default one-line summary has no stack), and ASan runs with
+report: UBSan runs with `print_stacktrace=1` (a combined `-asan-ubsan` build makes UBSan
+recoverable, so it logs each UB site with a stack and continues rather than aborting at the first;
+without this the default one-line summary has no stack), and ASan runs with
 `handle_abort=1:abort_on_error=1:disable_coredump=0` so an ASan-detected error -- or an `abort()`
-raised by UBSan -- prints a stack and dumps core. Any `TSAN_OPTIONS`/`ASAN_OPTIONS`/`UBSAN_OPTIONS`
+raised by UBSan when you run it in fatal mode (`UBSAN_OPTIONS=halt_on_error=1`) -- prints a stack and
+dumps core. Any `TSAN_OPTIONS`/`ASAN_OPTIONS`/`UBSAN_OPTIONS`
 you set yourself override these defaults; `log_path` is always applied last so reports are never
 misrouted.
 
@@ -152,10 +154,11 @@ echo "$HOME/cpptools-sanitizer-logs/core.%e.%p" | sudo tee /proc/sys/kernel/core
 gdb Extension/bin/cpptools-srv2 "$HOME/cpptools-sanitizer-logs/core.cpptools-srv2.<pid>" -ex bt
 ```
 
-If a combined `-asan-ubsan` build still won't pinpoint the fault, build the sanitizers separately: an
-`-asan`-only build removes UBSan's `abort()` as a confounder, and building UBSan with
-`-fsanitize-recover=undefined` plus `UBSAN_OPTIONS=halt_on_error=0` makes it report every UB site and
-continue instead of aborting at the first one.
+If a combined `-asan-ubsan` build still won't pinpoint the fault, note that its UBSan is already
+recoverable: it logs every UB site with a stack and continues instead of aborting at the first one.
+To make UBSan stop at the first UB again, set `UBSAN_OPTIONS=halt_on_error=1`; to remove UBSan
+entirely as a confounder and isolate an ASan-only fault, build an `-asan`-only preset
+(`-DVSCODE_SANITIZER=address`).
 
 The variable is opt-in: when it is unset (normal development, CI, released builds) the child
 environment is inherited unchanged, so there is no behavior change. No debugger is required -- and

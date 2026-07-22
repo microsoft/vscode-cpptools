@@ -4452,13 +4452,16 @@ function getLanguageServerFileName(): string {
 // Per-sanitizer defaults that maximize the chance a crash produces a usable report or core. These
 // are prepended before the developer's own *SAN_OPTIONS (which override them) and before log_path
 // (which always wins), so they are safe defaults rather than hard overrides.
-//   asan:  A combined ASan+UBSan build catches UB via abort() (UBSan abort mode) and hard memory
-//          faults via SIGSEGV. handle_abort=1 makes ASan intercept abort() and print a report with
-//          a stack instead of dying silently; abort_on_error=1 + disable_coredump=0 make an
-//          ASan-detected error dump core, giving a full stack even when a signal truncates the
-//          log_path report (e.g. a stack-overflow SIGSEGV the handler cannot fully report).
-//   ubsan: print_stacktrace=1 -- without it, a UBSan report in abort mode is a single summary line
-//          with no stack, so the actual UB site is invisible.
+//   asan:  A combined ASan+UBSan build detects hard memory faults via SIGSEGV and, when UBSan is
+//          run in fatal mode (UBSAN_OPTIONS=halt_on_error=1), UB via abort(). handle_abort=1 makes
+//          ASan intercept any abort() and print a report with a stack instead of dying silently;
+//          abort_on_error=1 + disable_coredump=0 make an ASan-detected error dump core, giving a
+//          full stack even when a signal truncates the log_path report (e.g. a stack-overflow
+//          SIGSEGV the handler cannot fully report).
+//   ubsan: print_stacktrace=1 -- the combined -asan-ubsan build makes UBSan recoverable, so it logs
+//          each UB site and continues (halt_on_error defaults to 0) instead of aborting at the
+//          first; without print_stacktrace each report is a single summary line with no stack, so
+//          the actual UB site is invisible.
 //   tsan:  no extra defaults (its reports already carry stacks; extra options risk perf/memory cost
 //          on already-heavy TSan runs).
 const sanitizerCaptureDefaults: { readonly [sanitizer: string]: string } = {
