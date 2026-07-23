@@ -2,6 +2,7 @@
 
 ## Version 1.33.4: July 8, 2026
 ### Bug Fixes
+* Fix remote process selection on systems with personality-dependent `ps` option parsing. [#14442](https://github.com/microsoft/vscode-cpptools/issues/14442)
 * Fix the wording for the `#include` errors detected message. [#8227](https://github.com/microsoft/vscode-cpptools/issues/8227)
 * Fix another "directory_cache" crash.
 * Update some localization.
