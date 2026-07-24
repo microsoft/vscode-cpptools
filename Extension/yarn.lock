@@ -1737,14 +1737,14 @@ boundary@^2.0.0:
   integrity sha1-FpyLHw1Ezywlk4lnoyjzfgpOXvw=
 
 brace-expansion@^1.1.7:
-  version "1.1.15"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-1.1.15.tgz#a6d90d54067236e5f42570a3b7378d594d9b7738"
-  integrity sha1-ptkNVAZyNuX0JXCjtzeNWU2bdzg=
+  version "1.1.16"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-1.1.16.tgz#723d3a30c0558c225abc9fc479a73e14e26c3c2f"
+  integrity sha1-cj06MMBVjCJavJ/Eeac+FOJsPC8=
   dependencies:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
 
-brace-expansion@^1.1.7@^1.1.16, brace-expansion@^2.0.1@^2.1.2, brace-expansion@^5.0.2@^5.0.7:
+brace-expansion@^5.0.2:
   version "5.0.8"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-5.0.8.tgz#135ad0d8d808eb18eb5e0ec9a21f3a0b92ef18cf"
   integrity sha1-E1rQ2NgI6xjrXg7Joh86C5LvGM8=
@@ -1752,18 +1752,11 @@ brace-expansion@^1.1.7@^1.1.16, brace-expansion@^2.0.1@^2.1.2, brace-expansion@^
     balanced-match "^4.0.2"
 
 brace-expansion@^2.0.1:
-  version "2.1.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-2.1.1.tgz#c68b1c4111c76aae3a6fba55d496cee10c39dad8"
-  integrity sha1-xoscQRHHaq46b7pV1JbO4Qw52tg=
+  version "2.1.2"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-2.1.2.tgz#0bba2271feb7d458b0d31ad13625aaa4754431e2"
+  integrity sha1-C7oicf631Fiw0xrRNiWqpHVEMeI=
   dependencies:
     balanced-match "^1.0.0"
-
-brace-expansion@^5.0.2:
-  version "5.0.6"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-5.0.6.tgz#ec68fe0a641a29d8711579caf641d05bae1f2285"
-  integrity sha1-7Gj+CmQaKdhxFXnK9kHQW64fIoU=
-  dependencies:
-    balanced-match "^4.0.2"
 
 braces@^3.0.3, braces@~3.0.2:
   version "3.0.3"
@@ -4500,10 +4493,10 @@ mute-stream@~0.0.4:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/mute-stream/-/mute-stream-0.0.8.tgz#1630c42b2251ff81e2a283de96a5497ea92e5e0d"
   integrity sha1-FjDEKyJR/4HiooPelqVJfqkuXg0=
 
-nanoid@^3.3.11:
-  version "3.3.11"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/nanoid/-/nanoid-3.3.11.tgz#4f4f112cefbe303202f2199838128936266d185b"
-  integrity sha1-T08RLO++MDIC8hmYOBKJNiZtGFs=
+nanoid@^3.3.16:
+  version "3.3.16"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/nanoid/-/nanoid-3.3.16.tgz#a04d8ec4b1f10009d2d533947aefe4293737816c"
+  integrity sha1-oE2OxLHxAAnS1TOUeu/kKTc3gWw=
 
 napi-build-utils@^2.0.0:
   version "2.0.0"
@@ -5003,12 +4996,12 @@ possible-typed-array-names@^1.0.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/possible-typed-array-names/-/possible-typed-array-names-1.1.0.tgz#93e3582bc0e5426586d9d07b79ee40fc841de4ae"
   integrity sha1-k+NYK8DlQmWG2dB7ee5A/IQd5K4=
 
-postcss@^7.0.16, postcss@^8.5.14:
-  version "8.5.14"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/postcss/-/postcss-8.5.14.tgz#a66c2d7808fadf69ebb5b84a03f8bafd76c4919c"
-  integrity sha1-pmwteAj632nrtbhKA/i6/XbEkZw=
+postcss@^7.0.16, postcss@^8.5.18:
+  version "8.5.22"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/postcss/-/postcss-8.5.22.tgz#086a0d5685a715acf5950ebbcb1538faf3051697"
+  integrity sha1-CGoNVoWnFaz1lQ67yxU4+vMFFpc=
   dependencies:
-    nanoid "^3.3.11"
+    nanoid "^3.3.16"
     picocolors "^1.1.1"
     source-map-js "^1.2.1"
 
