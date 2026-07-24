@@ -7258,16 +7258,13 @@
         "which": "^2.0.2"
     },
     "resolutions": {
-        "postcss": "^8.5.14",
+        "postcss": "^8.5.18",
         "gulp-typescript/**/glob-parent": "^5.1.2",
         "serialize-javascript": "^7.0.5",
         "@azure/msal-browser": "^4.29.1",
         "flatted": "^3.4.1",
         "uuid": "^11.1.1",
         "undici": "^7.28.0",
-        "brace-expansion@^1.1.7": "^1.1.16",
-        "brace-expansion@^2.0.1": "^2.1.2",
-        "brace-expansion@^5.0.2": "^5.0.7",
         "fast-uri": "^3.1.4"
     }
 }
