@@ -7204,7 +7204,7 @@
         "@vscode/debugprotocol": "^1.65.0",
         "@vscode/dts": "^0.4.0",
         "@vscode/test-electron": "^2.3.10",
-        "@vscode/vsce": "^3.9.1",
+        "@vscode/vsce": "^3.9.2",
         "async-child-process": "^1.1.1",
         "await-notify": "^1.0.1",
         "eslint": "^9.39.2",
@@ -7264,6 +7264,10 @@
         "@azure/msal-browser": "^4.29.1",
         "flatted": "^3.4.1",
         "uuid": "^11.1.1",
-        "undici": "^7.28.0"
+        "undici": "^7.28.0",
+        "brace-expansion@^1.1.7": "^1.1.16",
+        "brace-expansion@^2.0.1": "^2.1.2",
+        "brace-expansion@^5.0.2": "^5.0.7",
+        "fast-uri": "^3.1.4"
     }
 }
