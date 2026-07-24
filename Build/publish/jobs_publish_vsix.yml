@@ -31,7 +31,7 @@ jobs:
         $aadToken = az account get-access-token --query accessToken --resource $(AzureGuid) -o tsv
         Write-Host "##vso[task.setvariable variable=AAD_TOKEN;issecret=true]$aadToken"
 
-  - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.9.1
+  - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.9.2
     displayName: Install vsce
 
   - script: npm rebuild @vscode/vsce-sign --ignore-scripts=false
