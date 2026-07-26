@@ -3747,6 +3747,5 @@
     "„static“ entspricht hier nicht dem Standard",
     "%nd wurde zuvor ohne explizite Enumerationsbasis deklariert",
     "Fehlender „typename“ entspricht hier nicht dem Standard.",
-    "Die abgekürzte Funktionsvorlagensyntax entspricht nicht dem Standard für Deduktionsleitfäden.",
-    "too many nested user-defined conversions (possible cycle of converting constructors)"
+    "Die abgekürzte Funktionsvorlagensyntax entspricht nicht dem Standard für Deduktionsleitfäden."
 ]
