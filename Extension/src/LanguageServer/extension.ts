@@ -1362,8 +1362,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
     if (lines[crashStackStartLine].startsWith("SIG")) {
         signalType = `${lines[crashStackStartLine]}\n`;
-        const siCode: string = lines[crashStackStartLine + 1] ?? "";
-        const siAddr: string = lines[crashStackStartLine + 2] ?? "";
+        const siCodeRaw: string | undefined = lines[crashStackStartLine + 1];
+        const siAddrRaw: string | undefined = lines[crashStackStartLine + 2];
+        const siCode: string = siCodeRaw?.trim() ?? "";
+        const siAddr: string = siAddrRaw?.trim() ?? "";
         const signalInfoParts: string[] = [];
         if (siCode.length > 0) {
             signalInfoParts.push(`si_code=${siCode}`);
@@ -1372,7 +1374,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             signalInfoParts.push(`si_addr=${bucketSignalAddress(siAddr)}`);
         }
         signalInfo = signalInfoParts.length > 0 ? `${signalInfoParts.join(", ")}\n` : "";
-        crashStackStartLine += 3;
+        // Only advance past the header lines that actually exist so a missing si_code/si_addr
+        // line does not cause the first stack frame to be skipped.
+        crashStackStartLine += 1 + (siCodeRaw !== undefined ? 1 : 0) + (siAddrRaw !== undefined ? 1 : 0);
     } else {
         // The signal type may fail to be written.
         // Intentionally different from SIGUNKNOWN from cpptools,
