@@ -1362,7 +1362,16 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
     if (lines[crashStackStartLine].startsWith("SIG")) {
         signalType = `${lines[crashStackStartLine]}\n`;
-        signalInfo = `si_code=${lines[crashStackStartLine + 1]}, si_addr=${bucketSignalAddress(lines[crashStackStartLine + 2])}\n`;
+        const siCode: string = lines[crashStackStartLine + 1] ?? "";
+        const siAddr: string = lines[crashStackStartLine + 2] ?? "";
+        const signalInfoParts: string[] = [];
+        if (siCode.length > 0) {
+            signalInfoParts.push(`si_code=${siCode}`);
+        }
+        if (siAddr.length > 0) {
+            signalInfoParts.push(`si_addr=${bucketSignalAddress(siAddr)}`);
+        }
+        signalInfo = signalInfoParts.length > 0 ? `${signalInfoParts.join(", ")}\n` : "";
         crashStackStartLine += 3;
     } else {
         // The signal type may fail to be written.
