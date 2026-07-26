@@ -3747,5 +3747,6 @@
     "'static' はここでは非標準です",
     "%nd は、明示的な列挙型ベースなしで以前に宣言されました",
     "見つからない 'typename' はここでは非標準です",
-    "省略形の関数テンプレート構文は、推論ガイドでは非標準です"
+    "省略形の関数テンプレート構文は、推論ガイドでは非標準です",
+    "too many nested user-defined conversions (possible cycle of converting constructors)"
 ]

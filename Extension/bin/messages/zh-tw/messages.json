@@ -3747,5 +3747,6 @@
     "此處使用的 'static' 非標準",
     "%nd 先前宣告時未明確指定的列舉基底",
     "此處缺少 'typename' 非標準用法",
-    "簡化函式範本語法在推導指南中並非標準用法"
+    "簡化函式範本語法在推導指南中並非標準用法",
+    "too many nested user-defined conversions (possible cycle of converting constructors)"
 ]

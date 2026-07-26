@@ -3747,5 +3747,6 @@
     "여기서 'static'은 표준이 아닙니다.",
     "%nd은(는) 이전에 명시적 열거형 기반 없이 선언되었습니다.",
     "여기서 누락된 'typename'이 표준이 아닙니다.",
-    "약식 함수 템플릿 구문은 추론 가이드에 대한 표준이 아닙니다."
+    "약식 함수 템플릿 구문은 추론 가이드에 대한 표준이 아닙니다.",
+    "too many nested user-defined conversions (possible cycle of converting constructors)"
 ]

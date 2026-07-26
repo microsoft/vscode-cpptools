@@ -3747,5 +3747,6 @@
     "« static » n’est pas standard ici",
     "%nd a été déclaré précédemment sans base d’énumération explicite",
     "le mot-clé « typename » manquant n’est pas standard ici",
-    "la syntaxe abrégée du modèle de fonction n’est pas standard pour les guides de déduction"
+    "la syntaxe abrégée du modèle de fonction n’est pas standard pour les guides de déduction",
+    "too many nested user-defined conversions (possible cycle of converting constructors)"
 ]

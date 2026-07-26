@@ -3747,5 +3747,6 @@
     "\"static\" no es estándar aquí",
     "%nd se declaró previamente sin una base explícita de enumeración",
     "falta 'typename' no estándar aquí",
-    "La sintaxis abreviada de las plantillas de funciones no es estándar para las guías de deducción"
+    "La sintaxis abreviada de las plantillas de funciones no es estándar para las guías de deducción",
+    "too many nested user-defined conversions (possible cycle of converting constructors)"
 ]

@@ -3747,5 +3747,6 @@
     "\"static\" não é padrão aqui",
     "%nd foi declarado anteriormente sem uma base de enumeração explícita",
     "\"typename\" ausente não é padrão aqui",
-    "a sintaxe abreviada de template de função é não padrão para guias de dedução"
+    "a sintaxe abreviada de template de função é não padrão para guias de dedução",
+    "too many nested user-defined conversions (possible cycle of converting constructors)"
 ]

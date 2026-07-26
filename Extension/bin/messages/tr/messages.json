@@ -3747,5 +3747,6 @@
     "'static' burada standart dışıdır",
     "%nd daha önce açık bir sabit liste tabanı olmadan tanımlanmıştı",
     "eksik 'typename' burada standart dışı",
-    "kısaltılmış işlev şablonu sözdizimi çıkarsama kılavuzları için standart değil"
+    "kısaltılmış işlev şablonu sözdizimi çıkarsama kılavuzları için standart değil",
+    "too many nested user-defined conversions (possible cycle of converting constructors)"
 ]
