@@ -1427,7 +1427,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                         funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
                     }
                 }
-                if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
+                if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("terminate_handler(") || funcStr.startsWith("_sigtramp"))) {
                     continue; // Skip these on early frames.
                 }
                 validFrameFound = true;
