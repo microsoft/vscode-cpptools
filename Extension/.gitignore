@@ -9,11 +9,17 @@ dist
 server
 debugAdapters
 LLVM
+bin/assert_dialog.sh
 bin/cpptools*
+bin/edge_cli
+bin/isense_driver
 bin/libc.so
+bin/LICENSE.txt
+bin/scout_driver
+bin/unittests
+bin/vcpkgsrvtest
 bin/*.dll
 bin/.vs
-bin/LICENSE.txt
 
 # ignore lock files
 install.lock
