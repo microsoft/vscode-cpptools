@@ -2646,7 +2646,7 @@ SOFTWARE.
 ---------------------------------------------------------
 
 tas-client 0.2.33 - MIT
-
+https://github.com/microsoft/tas-client
 
 MIT License
 
@@ -2877,7 +2877,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 ---------------------------------------------------------
 
 vscode-tas-client 0.1.84 - MIT
-
+https://github.com/microsoft/tas-client
 
 MIT License
 
