@@ -1,5 +1,22 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.33.5: July 28, 2026
+### Bug Fixes
+* Fix the remote process picker `ps` command not working with some shells. [#14442](https://github.com/microsoft/vscode-cpptools/issues/14442)
+  * Thanks for the contribution. [@HuzaifaAbdulRehman](https://github.com/HuzaifaAbdulRehman) [PR #14592](https://github.com/microsoft/vscode-cpptools/pull/14592)
+* Fix a spurious IntelliSense error with class template argument deduction (CTAD). [#14453](https://github.com/microsoft/vscode-cpptools/issues/14453), [#14459](https://github.com/microsoft/vscode-cpptools/issues/14459), [#14504](https://github.com/microsoft/vscode-cpptools/issues/14504)
+* Fix 'Run C/C++ File' not running the program in PowerShell when terminal shell integration is unavailable. [#14583](https://github.com/microsoft/vscode-cpptools/issues/14583)
+  * Thanks for the contribution. [@owevertonguedes (Weverton Guedes)](https://github.com/owevertonguedes) [PR #14585](https://github.com/microsoft/vscode-cpptools/pull/14585)
+* Fix the build tools walkthrough for Visual Studio 2026. [PR #14589](https://github.com/microsoft/vscode-cpptools/pull/14589)
+* Fix empty database folders being created in every folder of a multi-root workspace.
+* Fix 'Rescan Workspace' triggering a full database reset instead of only a rescan.
+* Fix several potential deadlocks and data races in the language server.
+* Reduce memory usage to help avoid out-of-memory crashes.
+* Fix an incorrect `#include` casing error on Linux.
+* Fix an IntelliSense crash.
+* Various localization updates.
+* Update dependencies.
+
 ## Version 1.33.4: July 8, 2026
 ### Bug Fixes
 * Fix the wording for the `#include` errors detected message. [#8227](https://github.com/microsoft/vscode-cpptools/issues/8227)
