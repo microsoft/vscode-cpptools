@@ -7,10 +7,29 @@
 import { Disposable } from 'vscode';
 import { CancellationToken, NotificationHandler, NotificationType, RequestType } from 'vscode-languageclient';
 import { LanguageClient } from 'vscode-languageclient/node';
-import { DispatchQueue } from './dispatchQueue';
+import { ManualSignal } from '../Utility/Async/manualSignal';
 
 export class LanguageClientGuard {
     private languageClient?: LanguageClient;
+    private readonly started = new ManualSignal<void>(true);
+
+    /**
+     * Returns a promise that waits initialization and/or a change to configuration to complete (i.e. language client is ready-to-use)
+     */
+    get ready(): Promise<void> {
+        return this.started;
+    }
+
+    get isStarted(): boolean {
+        return this.started.isCompleted;
+    }
+    set isStarted(value: boolean) {
+        if (value) {
+            this.started.resolve();
+        } else {
+            this.started.reset();
+        }
+    }
 
     public get isInitialized(): boolean {
         return !!this.languageClient;
@@ -41,7 +60,7 @@ export class LanguageClientGuard {
         if (!this.languageClient) {
             throw new Error("Attempting to use languageClient before initialized");
         }
-        await DispatchQueue.instance.ready;
+        await this.ready;
         return this.languageClient.sendRequest(type, params, token);
     }
 
@@ -49,7 +68,7 @@ export class LanguageClientGuard {
         if (!this.languageClient) {
             throw new Error("Attempting to use languageClient before initialized");
         }
-        await DispatchQueue.instance.ready;
+        await this.ready;
         return this.languageClient.sendNotification(type, params);
     }
 

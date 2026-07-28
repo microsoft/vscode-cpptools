@@ -23,7 +23,6 @@ import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 // End provider imports
 
 import { CodeSnippet, Trait } from '@github/copilot-language-server';
-import { ok } from 'assert';
 import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
@@ -56,7 +55,6 @@ import * as configs from './configurations';
 import { CopilotCompletionContextFeatures, CopilotCompletionContextProvider } from './copilotCompletionContextProvider';
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from './customProviders';
 import { DataBinding } from './dataBinding';
-import { DispatchQueue } from './dispatchQueue';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, isWritingCrashCallStack, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LanguageClientGuard } from './languageClientGuard';
@@ -781,7 +779,6 @@ class ClientModel {
 
 export interface Client {
     readonly ready: Promise<void>;
-    enqueue<T>(task: () => Promise<T>): Promise<T>;
     InitializingWorkspaceChanged: vscode.Event<boolean>;
     IndexingWorkspaceChanged: vscode.Event<boolean>;
     ParsingWorkspaceChanged: vscode.Event<boolean>;
@@ -908,7 +905,6 @@ export class DefaultClient implements Client {
     private rootRealPath: string;
     private workspaceStoragePath: string;
     private trackedDocuments = new Map<string, vscode.TextDocument>();
-    private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private settingsTracker: SettingsTracker;
     private loggingLevel: number = 1;
@@ -1361,9 +1357,9 @@ export class DefaultClient implements Client {
             if (firstClientStarted === undefined || languageClientCrashedNeedsRestart) {
                 if (languageClientCrashedNeedsRestart) {
                     languageClientCrashedNeedsRestart = false;
-                    // if we're recovering, the isStarted needs to be reset.
+                    // if we're recovering, the isStarted needs to be reset
                     // because we're starting the first client again.
-                    DispatchQueue.instance.isStarted.reset();
+                    this.languageClient.isStarted = false;
                 }
                 firstClientStarted = this.createLanguageClient();
                 util.setProgress(util.getProgressExecutableStarted());
@@ -1373,7 +1369,6 @@ export class DefaultClient implements Client {
 
         } catch (errJS) {
             const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
-            this.isSupported = false; // Running on an OS we don't support yet.
             if (!failureMessageShown) {
                 failureMessageShown = true;
                 let additionalInfo: string;
@@ -1393,10 +1388,11 @@ export class DefaultClient implements Client {
         ui = getUI();
         ui.bind(this);
         if ((await firstClientStarted).wasShutdown) {
-            this.isSupported = false;
-            DispatchQueue.instance.isStarted.resolve();
+            this.languageClient.isStarted = true;
             return;
         }
+        this.languageClient.isStarted = true;
+        compilerDefaults = await this.requestCompiler();
 
         try {
             const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
@@ -1472,7 +1468,6 @@ export class DefaultClient implements Client {
                 });
                 // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                 // The event handlers must be set before this happens.
-                compilerDefaults = await this.requestCompiler();
                 DefaultClient.updateClientConfigurations();
                 clients.forEach(client => {
                     if (client instanceof DefaultClient) {
@@ -1482,14 +1477,11 @@ export class DefaultClient implements Client {
                 });
             }
         } catch (err) {
-            this.isSupported = false; // Running on an OS we don't support yet.
             if (!failureMessageShown) {
                 failureMessageShown = true;
                 void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", String(err)));
             }
         }
-
-        DispatchQueue.instance.isStarted.resolve();
     }
 
     private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, workspaceFolder: vscode.WorkspaceFolder | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
@@ -1860,6 +1852,7 @@ export class DefaultClient implements Client {
         // Don't set the inner language client on the wrapper until after initialization is complete.
         // This ensures the order of the initialization messages.
         languageClient.setLanguageClient(client);
+
         return { wasShutdown: initializeResult.shouldShutdown };
     }
 
@@ -2505,30 +2498,9 @@ export class DefaultClient implements Client {
 
     /**
      * a Promise that can be awaited to know when it's ok to proceed.
-     *
-     * This is a lighter-weight complement to `enqueue()`
-     *
-     * Use `await <client>.ready` when you need to ensure that the client is initialized, and to run in order
-     * Use `enqueue()` when you want to ensure that subsequent calls are blocked until a critical bit of code is run.
-     *
-     * This is lightweight, because if the queue is empty, then the only thing to wait for is the client itself to be initialized
      */
     get ready(): Promise<void> {
-        return DispatchQueue.instance.ready;
-    }
-
-    /**
-     * Enqueue a task to ensure that the order is maintained. The tasks are executed sequentially after the client is ready.
-     *
-     * this is a bit more expensive than `.ready` - this ensures the task is absolutely finished executing before allowing
-     * the dispatcher to move forward.
-     *
-     * Use `enqueue()` when you want to ensure that subsequent calls are blocked until a critical bit of code is run.
-     * Use `await <client>.ready` when you need to ensure that the client is initialized, and still run in order.
-     */
-    enqueue<T>(task: () => Promise<T>) {
-        ok(this.isSupported, localize("unsupported.client", "Unsupported client"));
-        return DispatchQueue.instance.enqueue(task);
+        return this.languageClient.ready;
     }
 
     private static async withLspCancellationHandling<T>(task: () => Promise<T>, token: vscode.CancellationToken): Promise<T> {
@@ -3050,18 +3022,16 @@ export class DefaultClient implements Client {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootUri.toString()
         };
-        return this.enqueue(async () => {
-            // Don't use withLspCancellationHandling() or withCancellation() here. If the switch target is already known,
-            // the caller should still be able to use it even if the progress notification was just cancelled.
-            try {
-                return await this.languageClient.sendRequest(SwitchHeaderSourceRequest, params, token);
-            } catch (e: any) {
-                if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
-                    throw new vscode.CancellationError();
-                }
-                throw e;
+        // Don't use withLspCancellationHandling() or withCancellation() here. If the switch target is already known,
+        // the caller should still be able to use it even if the progress notification was just cancelled.
+        try {
+            return await this.languageClient.sendRequest(SwitchHeaderSourceRequest, params, token);
+        } catch (e: any) {
+            if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                throw new vscode.CancellationError();
             }
-        });
+            throw e;
+        }
     }
 
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
@@ -4397,9 +4367,6 @@ class NullClient implements Client {
 
     readonly ready: Promise<void> = Promise.resolve();
 
-    async enqueue<T>(task: () => Promise<T>) {
-        return task();
-    }
     public get InitializingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IndexingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ParsingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }

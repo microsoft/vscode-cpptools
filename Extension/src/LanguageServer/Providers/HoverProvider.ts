@@ -10,11 +10,10 @@ import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CppSettings } from '../settings';
 
 export class HoverProvider implements vscode.HoverProvider {
-    private client: DefaultClient;
     private lastContent: vscode.MarkdownString[] | undefined;
     private readonly hasContent = new ManualSignal<boolean>(true);
-    constructor(client: DefaultClient) {
-        this.client = client;
+
+    constructor(private client: DefaultClient) {
     }
 
     public async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | undefined> {

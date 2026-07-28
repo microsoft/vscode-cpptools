@@ -185,11 +185,11 @@ export async function activate(): Promise<void> {
     disposables.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
-    disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
+    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges(e => onDidChangeTextEditorVisibleRanges(e)));
+    disposables.push(vscode.window.onDidChangeActiveTextEditor(e => onDidChangeActiveTextEditor(e)));
     ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
-    disposables.push(vscode.window.onDidChangeTextEditorSelection((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorSelection(e))));
-    disposables.push(vscode.window.onDidChangeVisibleTextEditors((e) => clients.ActiveClient.enqueue(async () => onDidChangeVisibleTextEditors(e))));
+    disposables.push(vscode.window.onDidChangeTextEditorSelection(e => onDidChangeTextEditorSelection(e)));
+    disposables.push(vscode.window.onDidChangeVisibleTextEditors(e => onDidChangeVisibleTextEditors(e)));
     updateLanguageConfigurations();
 
     reportMacCrashes();

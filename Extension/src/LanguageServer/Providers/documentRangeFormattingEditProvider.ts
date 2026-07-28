@@ -11,9 +11,7 @@ import { CppSettings } from '../settings';
 import { makeVscodeTextEdits } from '../utils';
 
 export class DocumentRangeFormattingEditProvider implements vscode.DocumentRangeFormattingEditProvider {
-    private client: DefaultClient;
-    constructor(client: DefaultClient) {
-        this.client = client;
+    constructor(private client: DefaultClient) {
     }
 
     public async provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range,

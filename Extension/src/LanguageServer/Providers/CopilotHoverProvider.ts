@@ -16,7 +16,6 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class CopilotHoverProvider implements vscode.HoverProvider {
-    private client: DefaultClient;
     private currentDocument: vscode.TextDocument | undefined;
     private currentPosition: vscode.Position | undefined;
     private currentCancellationToken: vscode.CancellationToken | undefined;
@@ -30,8 +29,8 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
     private chatModelId: string | undefined; // Save the selected model ID to avoid trying the same unavailable model repeatedly.
     // Flag to avoid querying the LanguageModelChat repeatedly if no model is found
     private checkedChatModel: boolean = false;
-    constructor(client: DefaultClient) {
-        this.client = client;
+
+    constructor(private client: DefaultClient) {
     }
 
     public async getCachedChatModel(): Promise<vscode.LanguageModelChat | undefined> {

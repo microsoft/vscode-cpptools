@@ -11,9 +11,7 @@ import { CppSettings } from '../settings';
 import { makeVscodeTextEdits } from '../utils';
 
 export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvider {
-    private client: DefaultClient;
-    constructor(client: DefaultClient) {
-        this.client = client;
+    constructor(private client: DefaultClient) {
     }
 
     public async provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
