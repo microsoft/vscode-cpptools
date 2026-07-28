@@ -2810,7 +2810,7 @@
     "Nejde vyhodnotit hodnotu nekompletní položky %t.",
     "Systém ignoroval návratovou hodnotu z rutiny deklarované pomocí atributu nodiscard.",
     "Systém ignoroval typ návratové hodnoty s atributem nodiscard.",
-    "Atribut nodiscard neplatí pro destruktory nebo rutiny s návratovým typem void.",
+    "Atribut nodiscard neplatí pro destruktory nebo rutiny s návratovým typem void.",
     "Atribut fallthrough platí jenom pro příkazy null.",
     "Atribut fallthrough se může vyskytovat jenom uvnitř příkazu switch.",
     "Příkaz fallthrough musí předcházet návěstí větve příkazu switch nebo výchozí hodnotě.",

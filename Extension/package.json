@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.33.4-main",
+    "version": "1.33.5-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -7204,7 +7204,7 @@
         "@vscode/debugprotocol": "^1.65.0",
         "@vscode/dts": "^0.4.0",
         "@vscode/test-electron": "^2.3.10",
-        "@vscode/vsce": "^3.9.1",
+        "@vscode/vsce": "^3.9.2",
         "async-child-process": "^1.1.1",
         "await-notify": "^1.0.1",
         "eslint": "^9.39.2",
@@ -7258,12 +7258,13 @@
         "which": "^2.0.2"
     },
     "resolutions": {
-        "postcss": "^8.5.14",
+        "postcss": "^8.5.18",
         "gulp-typescript/**/glob-parent": "^5.1.2",
         "serialize-javascript": "^7.0.5",
         "@azure/msal-browser": "^4.29.1",
         "flatted": "^3.4.1",
         "uuid": "^11.1.1",
-        "undici": "^7.28.0"
+        "undici": "^7.28.0",
+        "fast-uri": "^3.1.4"
     }
 }
