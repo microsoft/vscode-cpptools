@@ -21,7 +21,6 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
         if (settings.formattingEngine === "disabled") {
             return [];
         }
-        await this.client.ready;
         const filePath: string = document.uri.fsPath;
         if (options.onChanges) {
             let insertSpacesSet: boolean = false;

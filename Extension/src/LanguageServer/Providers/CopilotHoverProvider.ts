@@ -171,7 +171,6 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
             position: Position.create(position.line, position.character)
         };
 
-        await this.client.ready;
         if (this.currentCancellationToken?.isCancellationRequested) {
             throw new vscode.CancellationError();
         }

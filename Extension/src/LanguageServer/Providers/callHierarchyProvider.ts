@@ -221,8 +221,6 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.CallHierarchyItem | undefined> {
-        await this.client.ready;
-
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
         workspaceReferences.clearViews();
 
@@ -261,7 +259,6 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken): Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
-        await this.client.ready;
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
         const CallHierarchyCallsToEvent: string = "CallHierarchyCallsTo";
@@ -315,8 +312,6 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
             this.logTelemetry(CallHierarchyCallsFromEvent, CallHierarchyRequestStatus.Failed);
             return undefined;
         }
-
-        await this.client.ready;
 
         const result: vscode.CallHierarchyOutgoingCall[] | undefined =
             await sendCallHierarchyCallsFromRequest(this.client, item, token);

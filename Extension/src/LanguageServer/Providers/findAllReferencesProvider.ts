@@ -63,7 +63,6 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
     }
 
     public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
-        await this.client.ready;
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
         // Listen to a cancellation for this request. When this request is cancelled,

@@ -36,7 +36,6 @@ export class HoverProvider implements vscode.HoverProvider {
             textDocument: { uri: document.uri.toString() },
             position: Position.create(position.line, position.character)
         };
-        await this.client.ready;
         let hoverResult: vscode.Hover;
         try {
             hoverResult = await this.client.languageClient.sendRequest(HoverRequest, params, token);

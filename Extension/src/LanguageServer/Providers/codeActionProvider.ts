@@ -51,7 +51,6 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
 
     public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection,
         context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.Command | vscode.CodeAction)[]> {
-        await this.client.ready;
         let r: Range;
         if (range instanceof vscode.Selection) {
             if (range.active.isBefore(range.anchor)) {
