@@ -2329,6 +2329,19 @@ export class DefaultClient implements Client {
                 const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
                 if (fileConfiguration?.mergeConfigurations) {
                     configs = deepCopy(configs);
+                }
+                // Only the include paths from the provider are checked for recursive includes, so
+                // this has to happen before the include paths from c_cpp_properties.json are
+                // appended below, where a trailing '**' is a supported way to recurse.
+                if (configs instanceof Array) {
+                    configs.forEach(config => {
+                        if (util.isArrayOfString(config?.configuration?.includePath) &&
+                            config.configuration.includePath.some(path => path.endsWith('**'))) {
+                            console.warn("custom include paths should not use recursive includes ('**')");
+                        }
+                    });
+                }
+                if (fileConfiguration?.mergeConfigurations) {
                     configs.forEach(config => {
                         if (fileConfiguration.includePath) {
                             fileConfiguration.includePath.forEach(p => {
@@ -3457,9 +3470,6 @@ export class DefaultClient implements Client {
                 this.configurationLogging.set(uri, JSON.stringify(item.configuration, null, 4));
                 out.appendLineAtLevel(6, `  uri: ${uri}`);
                 out.appendLineAtLevel(6, `  config: ${JSON.stringify(item.configuration, null, 2)}`);
-                if (item.configuration.includePath.some(path => path.endsWith('**'))) {
-                    console.warn("custom include paths should not use recursive includes ('**')");
-                }
                 // Separate compiler path and args before sending to language client
                 const itemConfig: util.Mutable<InternalSourceFileConfiguration> = deepCopy(item.configuration);
                 if (util.isString(itemConfig.compilerPath)) {
