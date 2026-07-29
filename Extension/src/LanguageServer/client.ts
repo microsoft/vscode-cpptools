@@ -2162,12 +2162,12 @@ export class DefaultClient implements Client {
                 // This is to get around the (fixed) CMake Tools bug: https://github.com/microsoft/vscode-cmake-tools/issues/1073
                 for (const c of config.browsePath) {
                     if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(c)) === this.RootFolder) {
-                        void this.sendCustomBrowseConfiguration(config, currentProvider.extensionId, currentProvider.version);
+                        this.sendCustomBrowseConfiguration(config, currentProvider.extensionId, currentProvider.version);
                         break;
                     }
                 }
             } else {
-                void this.sendCustomBrowseConfiguration(config, currentProvider.extensionId, currentProvider.version);
+                this.sendCustomBrowseConfiguration(config, currentProvider.extensionId, currentProvider.version);
             }
             if (!hasCompleted) {
                 hasCompleted = true;
@@ -2181,7 +2181,7 @@ export class DefaultClient implements Client {
         global.setTimeout(() => {
             if (!hasCompleted) {
                 hasCompleted = true;
-                void this.sendCustomBrowseConfiguration(null, undefined, Version.v0, true);
+                this.sendCustomBrowseConfiguration(null, undefined, Version.v0, true);
                 if (currentProvider.version >= Version.v2) {
                     console.warn(`Configuration Provider timed out in ${configProviderTimeout}ms.`);
                     void this.resumeParsing().catch(logAndReturn.undefined);
@@ -2348,7 +2348,7 @@ export class DefaultClient implements Client {
                 configs = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
             }
             if (configs && configs.length > 0) {
-                void this.sendCustomConfigurations(configs, provider.version);
+                this.sendCustomConfigurations(configs, provider.version);
             } else {
                 result = "noConfigurations";
             }
@@ -2496,7 +2496,7 @@ export class DefaultClient implements Client {
     }
 
     /**
-     * a Promise that can be awaited to know when it's ok to proceed.
+     * a Promise that can be awaited to know when the language client (cpptools) is up and running.
      */
     get ready(): Promise<void> {
         return this.languageClient.ready;
@@ -2723,7 +2723,7 @@ export class DefaultClient implements Client {
                 }
             });
 
-            this.rootPathFileWatcher.onDidDelete(async (uri) => {
+            this.rootPathFileWatcher.onDidDelete((uri) => {
                 if (uri.scheme !== 'file') {
                     return;
                 }
@@ -3231,7 +3231,7 @@ export class DefaultClient implements Client {
                 // This ensures we don't start tag parsing without it, and undo'ing work we have to re-do when the (likely same) browse config arrives
                 // Should only execute on launch, for the initial delivery of configurations
                 if (this.lastCustomBrowseConfiguration.Value) {
-                    void this.sendCustomBrowseConfiguration(this.lastCustomBrowseConfiguration.Value, this.lastCustomBrowseConfigurationProviderId.Value, this.lastCustomBrowseConfigurationProviderVersion.Value);
+                    this.sendCustomBrowseConfiguration(this.lastCustomBrowseConfiguration.Value, this.lastCustomBrowseConfigurationProviderId.Value, this.lastCustomBrowseConfigurationProviderVersion.Value);
                     params.isReady = false;
                 }
                 this.doneInitialCustomBrowseConfigurationCheck = true;

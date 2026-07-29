@@ -21,7 +21,7 @@ export class LanguageClient {
     }
 
     /**
-     * set the initialization state of the underlying RPC client.
+     * Set the initialization state of the underlying RPC client.
      * This is used to indicate that the underlying RPC client has been initialized and is ready to send requests.
      * If resetting the RPC client, set this to false.
      */
@@ -42,7 +42,7 @@ export class LanguageClient {
     }
 
     /**
-     * Sets the underlying RPC client.
+     * Set the underlying RPC client.
      * This should only be called once during initialization.
      */
     public setLanguageClient(languageClient?: rpc.LanguageClient): void {
@@ -80,6 +80,7 @@ export class LanguageClient {
     }
 
     public onNotification<P>(type: NotificationType<P>, handler: NotificationHandler<P>): Disposable {
+        // These messages come from cpptools, and therefore it is not needed to await the ready signal.
         return this.rpcClient.onNotification(type, handler);
     }
 
