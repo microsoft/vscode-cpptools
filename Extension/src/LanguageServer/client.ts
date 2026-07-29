@@ -27,8 +27,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, ResponseError, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
-import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
+import { CloseAction, DidOpenTextDocumentParams, ErrorAction, NotificationType, Position, Range, RequestType, ResponseError, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageclient';
+import * as rpc from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
 import { ManualPromise } from '../Utility/Async/manualPromise';
@@ -57,7 +57,7 @@ import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderE
 import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, isWritingCrashCallStack, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
-import { LanguageClientGuard } from './languageClientGuard';
+import { LanguageClient } from './languageClient';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
 import { RequestCancelled, ServerCancelled, createProtocolFilter } from './protocolFilter';
@@ -86,7 +86,7 @@ export function hasTrustedCompilerPaths(): boolean {
 }
 
 // Data shared by all clients.
-const languageClient: LanguageClientGuard = new LanguageClientGuard();
+const languageClient: LanguageClient = new LanguageClient();
 let firstClientStarted: Promise<{ wasShutdown: boolean }>;
 let languageClientHasCrashed: boolean = false;
 let languageClientCrashedNeedsRestart: boolean = false;
@@ -979,10 +979,7 @@ export class DefaultClient implements Client {
         return this.model.referencesCommandMode.Value;
     }
 
-    public get languageClient(): LanguageClientGuard {
-        if (!languageClient) {
-            throw new Error("Attempting to use languageClient before initialized");
-        }
+    public get languageClient(): LanguageClient {
         return languageClient;
     }
 
@@ -1360,13 +1357,13 @@ export class DefaultClient implements Client {
                     // if we're recovering, the isStarted needs to be reset
                     // because we're starting the first client again.
                     this.languageClient.isStarted = false;
+                    this.languageClient.setLanguageClient(undefined);
                 }
                 firstClientStarted = this.createLanguageClient();
                 util.setProgress(util.getProgressExecutableStarted());
                 isFirstClient = true;
             }
             void this.init(rootUri, isFirstClient).catch(logAndReturn.undefined);
-
         } catch (errJS) {
             const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
             if (!failureMessageShown) {
@@ -1669,7 +1666,7 @@ export class DefaultClient implements Client {
         // from a sanitizer build to files in that directory (see getSanitizerServerEnv). This is
         // undefined -- i.e. the environment is inherited unchanged -- for normal builds.
         const sanitizerServerEnv: NodeJS.ProcessEnv | undefined = getSanitizerServerEnv();
-        const serverOptions: ServerOptions = {
+        const serverOptions: rpc.ServerOptions = {
             run: { command: serverModule, options: { detached: false, cwd: util.getExtensionFilePath("bin"), env: sanitizerServerEnv } },
             debug: { command: serverModule, args: [serverName], options: { detached: true, cwd: util.getExtensionFilePath("bin"), env: sanitizerServerEnv } }
         };
@@ -1732,7 +1729,7 @@ export class DefaultClient implements Client {
             loggingLevel: this.loggingLevel
         };
 
-        const clientOptions: LanguageClientOptions = {
+        const clientOptions: rpc.LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'c' },
                 { scheme: 'file', language: 'cpp' },
@@ -1819,8 +1816,10 @@ export class DefaultClient implements Client {
         // Refresh initializing state in UI.
         this.model.isInitializingWorkspace.Value = true;
 
-        // Create the language client
-        const client = new LanguageClient(`cpptools`, serverOptions, clientOptions);
+        // Create the language client that spawns cpptools and configures RPC over stdin/stdout.
+        // This is the ONLY place outside of the LanguageClient wrapper where the VS Code LanguageClient class should be used directly.
+        // All other code should use the LanguageClient wrapper class.
+        const client = new rpc.LanguageClient(`cpptools`, serverOptions, clientOptions);
         client.onNotification(DebugProtocolNotification, logDebugProtocol);
         client.onNotification(DebugLogNotification, logLocalized);
         client.onNotification(LogTelemetryNotification, (e) => void this.logTelemetry(e));

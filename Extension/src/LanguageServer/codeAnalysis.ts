@@ -8,7 +8,7 @@ import { NotificationType, Range } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { Location, WorkspaceEdit } from './commonTypes';
 import { CppSourceStr } from './extension';
-import { LanguageClientGuard } from './languageClientGuard';
+import { LanguageClient } from './languageClient';
 import { LocalizeStringParams, getLocalizedString } from './localization';
 import { CppSettings } from './settings';
 import { makeVscodeLocation, makeVscodeRange, makeVscodeTextEdits, rangeEquals } from './utils';
@@ -18,7 +18,7 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let diagnosticsCollectionCodeAnalysis: vscode.DiagnosticCollection;
 
-export function RegisterCodeAnalysisNotifications(languageClient: LanguageClientGuard): void {
+export function RegisterCodeAnalysisNotifications(languageClient: LanguageClient): void {
     languageClient.onNotification(PublishCodeAnalysisDiagnosticsNotification, publishCodeAnalysisDiagnostics);
     languageClient.onNotification(PublishRemoveCodeAnalysisCodeActionFixesNotification, publishRemoveCodeAnalysisCodeActionFixes);
 }
