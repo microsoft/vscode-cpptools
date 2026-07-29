@@ -1388,8 +1388,6 @@ export class DefaultClient implements Client {
             this.languageClient.isStarted = true;
             return;
         }
-        this.languageClient.isStarted = true;
-        compilerDefaults = await this.requestCompiler();
 
         try {
             const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
@@ -1398,6 +1396,10 @@ export class DefaultClient implements Client {
             this.innerConfiguration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
             this.innerConfiguration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
             this.disposables.push(this.innerConfiguration);
+
+            // This could be set earlier, but the task provider expects it to also mean that `this.innerConfiguration` is set.
+            this.languageClient.isStarted = true;
+            compilerDefaults = await this.requestCompiler();
 
             telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
             failureMessageShown = false;
@@ -2496,7 +2498,8 @@ export class DefaultClient implements Client {
     }
 
     /**
-     * a Promise that can be awaited to know when the language client (cpptools) is up and running.
+     * A Promise that can be awaited to know when the language client (cpptools) is up and running.
+     * It also implies that `this.innerConfiguration` is set.
      */
     get ready(): Promise<void> {
         return this.languageClient.ready;
