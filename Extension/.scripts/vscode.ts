@@ -15,7 +15,12 @@ export const extensionsDir = resolve(isolated, 'extensions');
 export const userDir = resolve(isolated, 'user-data');
 export const settings = resolve(userDir, "User", 'settings.json');
 
+// Pin the test VS Code build; the newest stable can ship a bundle layout that the installed
+// @vscode/test-electron fails to launch (macOS arm64 1.131.0 spawns Electron with ENOENT).
+export const testVSCodeVersion = '1.130.0';
+
 export const options = {
+    version: testVSCodeVersion,
     cachePath: `${isolated}/cache`,
     launchArgs: ['--no-sandbox', '--disable-updates', '--skip-welcome', '--skip-release-notes', '--disable-extensions', `--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`, '--disable-workspace-trust']
 };
