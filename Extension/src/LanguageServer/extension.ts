@@ -293,7 +293,9 @@ export function updateLanguageConfigurations(): void {
 async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
     clients.forEach(client => {
         if (client instanceof DefaultClient) {
-            void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
+            if (['C_Cpp', 'files', 'editor', 'search', 'workbench'].some(section => event.affectsConfiguration(section, client.RootUri))) {
+                void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
+            }
         }
     });
 }
