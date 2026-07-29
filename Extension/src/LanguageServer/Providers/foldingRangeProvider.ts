@@ -26,7 +26,6 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     }
 
     async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext, token: vscode.CancellationToken): Promise<vscode.FoldingRange[] | undefined> {
-        await this.client.ready;
         const settings: CppSettings = new CppSettings();
         if (!settings.codeFolding) {
             return [];
