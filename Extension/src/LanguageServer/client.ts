@@ -1848,11 +1848,11 @@ export class DefaultClient implements Client {
         if (initializeResult.shouldShutdown) {
             await client.stop();
             await clients.recreateClients(true);
+        } else {
+            // Don't set the inner language client on the wrapper until after initialization is complete.
+            // This ensures the order of the initialization messages.
+            languageClient.setLanguageClient(client);
         }
-
-        // Don't set the inner language client on the wrapper until after initialization is complete.
-        // This ensures the order of the initialization messages.
-        languageClient.setLanguageClient(client);
 
         return { wasShutdown: initializeResult.shouldShutdown };
     }
