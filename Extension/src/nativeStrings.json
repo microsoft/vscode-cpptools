@@ -750,10 +750,10 @@
     },
     "failed_to_open_browse_db_lock_file": {
         "text": "Failed to open browse database lock file: {0} (errno={1})",
-        "hint": "{0} is the lock file path. {1} is the errno value. {Locked=\"{0}\"} {Locked=\"{1}\"}"
+        "hint": "{0} is the lock file path. {1} is the errno value. {Locked=\"{0}\"} {Locked=\"errno={1}\"}"
     },
     "failed_to_lock_browse_db_lock_file": {
         "text": "Failed to lock browse database lock file: {0} (errno={1})",
-        "hint": "{0} is the lock file path. {1} is the errno value. {Locked=\"{0}\"} {Locked=\"{1}\"}"
+        "hint": "{0} is the lock file path. {1} is the errno value. {Locked=\"{0}\"} {Locked=\"errno={1}\"}"
     }
 }
