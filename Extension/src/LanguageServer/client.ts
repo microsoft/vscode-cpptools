@@ -2328,6 +2328,21 @@ export class DefaultClient implements Client {
             if (configs && configs.length > 0 && configs[0]) {
                 const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
                 if (fileConfiguration?.mergeConfigurations) {
+                    // deepCopy is a JSON round trip, which a vscode.Uri does not survive. The copy is
+                    // a plain object that is neither a string nor a Uri, so sendCustomConfigurations
+                    // discards the item. The uri field also accepts a string, so normalize it into a
+                    // new item before copying, without assigning into what the provider returned or
+                    // calling a method on its array.
+                    if (configs instanceof Array) {
+                        const normalized: util.Mutable<SourceFileConfigurationItem>[] = [];
+                        const count: number = configs.length;
+                        for (let i: number = 0; i < count; ++i) {
+                            const config: util.Mutable<SourceFileConfigurationItem> = configs[i];
+                            const uri = config?.uri;
+                            normalized.push(util.isUri(uri) ? { uri: uri.toString(), configuration: config.configuration } : config);
+                        }
+                        configs = normalized;
+                    }
                     configs = deepCopy(configs);
                     configs.forEach(config => {
                         if (fileConfiguration.includePath) {
