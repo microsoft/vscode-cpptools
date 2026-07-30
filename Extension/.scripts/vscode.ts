@@ -15,9 +15,9 @@ export const extensionsDir = resolve(isolated, 'extensions');
 export const userDir = resolve(isolated, 'user-data');
 export const settings = resolve(userDir, "User", 'settings.json');
 
-// Pin the test VS Code build; the newest stable can ship a bundle layout that the installed
-// @vscode/test-electron fails to launch (macOS arm64 1.131.0 spawns Electron with ENOENT).
-export const testVSCodeVersion = '1.130.0';
+// Pin the test VS Code build to a known-good stable release for deterministic CI instead of
+// always pulling latest. Launching macOS 1.110+ builds requires @vscode/test-electron >= 3.1.0.
+export const testVSCodeVersion = '1.131.0';
 
 export const options = {
     version: testVSCodeVersion,
