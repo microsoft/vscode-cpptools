@@ -38,7 +38,7 @@ import { CppConfigurationLanguageModelTool } from './lmTool';
 import { getLocaleId } from './localization';
 import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
-import { CppSettings } from './settings';
+import { CppSettings, trackedSections } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
 
@@ -293,7 +293,7 @@ export function updateLanguageConfigurations(): void {
 async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
     clients.forEach(client => {
         if (client instanceof DefaultClient) {
-            if (['C_Cpp', 'files', 'editor', 'search', 'workbench'].some(section => event.affectsConfiguration(section, client.RootUri))) {
+            if (trackedSections.some(section => event.affectsConfiguration(section, client.RootUri))) {
                 void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
             }
         }
