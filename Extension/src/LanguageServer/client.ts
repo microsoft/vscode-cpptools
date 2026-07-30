@@ -1767,8 +1767,8 @@ export class DefaultClient implements Client {
             errorHandler: {
                 error: (error, message, count) => {
                     telemetry.logLanguageServerEvent("languageClientError", {
-                        error: error.toString(),
-                        message: message?.toString() ?? '',
+                        clientError: error.toString(),
+                        clientMessage: message?.toString() ?? '',
                         count: count?.toString() ?? ''
                     });
                     return { action: ErrorAction.Continue };
