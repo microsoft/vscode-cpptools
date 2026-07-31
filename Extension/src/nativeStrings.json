@@ -756,7 +756,10 @@
         "text": "Failed to lock browse database lock file: {0} (errno={1})",
         "hint": "{0} is the lock file path. {1} is the errno value. {Locked=\"{0}\"} {Locked=\"errno\"} {Locked=\"{1}\"}"
     },
-    "cannot_find_temp": "Cannot find TMP or TEMP environment variables!",
+    "cannot_find_temp": {
+        "text": "Cannot find TMP or TEMP environment variables!",
+        "hint": "{Locked=\"TMP\"} {Locked=\"TEMP\"}"
+    },
     "pausing_parsing_threads": "Pausing parsing threads.",
     "resuming_parsing_threads": "Resuming parsing threads.",
     "blocking_browse_database_operations": "Blocking browse database operations.",
