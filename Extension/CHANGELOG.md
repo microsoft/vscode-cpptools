@@ -1,5 +1,16 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.33.6: July 31, 2026
+### Bug Fixes
+* Fix a spurious recursive includes (`**`) debug console log warning for paths merged from `c_cpp_properties.json` when `C_Cpp.mergeConfigurations` is enabled. [#14125](https://github.com/microsoft/vscode-cpptools/issues/14125)
+  * Thanks for the contribution. [@owevertonguedes (Weverton Guedes)](https://github.com/owevertonguedes) [PR #14620](https://github.com/microsoft/vscode-cpptools/pull/14620)
+* Fix custom configurations being discarded when `C_Cpp.mergeConfigurations` is enabled and a provider supplies the file `uri` as a `vscode.Uri`. [#14621](https://github.com/microsoft/vscode-cpptools/issues/14621)
+  * Thanks for the contribution. [@owevertonguedes (Weverton Guedes)](https://github.com/owevertonguedes) [PR #14624](https://github.com/microsoft/vscode-cpptools/pull/14624)
+* Fix potential browse database corruption when the same workspace is opened by multiple processes on Linux and macOS.
+* Fix a crash when reading files saved in certain multibyte encodings such as GB18030 or EUC-JP.
+* Fix an incorrect file path in an error message on Windows.
+* Other potential crash fixes.
+
 ## Version 1.33.5: July 28, 2026
 ### Bug Fixes
 * Fix the remote process picker `ps` command not working with some shells. [#14442](https://github.com/microsoft/vscode-cpptools/issues/14442)
