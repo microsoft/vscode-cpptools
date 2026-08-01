@@ -10,6 +10,7 @@ server
 debugAdapters
 LLVM
 bin/assert_dialog.sh
+bin/binaryVersion.json
 bin/cpptools*
 bin/edge_cli
 bin/isense_driver
