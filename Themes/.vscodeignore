@@ -3,4 +3,5 @@
 
 # ignore development files
 .gitignore
+.npmrc
 package-lock.json
