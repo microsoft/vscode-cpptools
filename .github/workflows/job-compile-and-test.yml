@@ -25,12 +25,12 @@ jobs:
     runs-on: ${{ inputs.runner-env }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           ref: ${{ inputs.checkout-ref }}
 
       - name: Use Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
 
@@ -80,21 +80,21 @@ jobs:
 
       - name: Run languageServer integration tests (linux/macOS)
         if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
-        uses: coactions/setup-xvfb@v1
+        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
         with:
           run: yarn test --scenario=SingleRootProject
           working-directory: Extension
 
       - name: Run E2E IntelliSense features tests (linux/macOS)
         if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
-        uses: coactions/setup-xvfb@v1
+        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
         with:
           run: yarn test --scenario=MultirootDeadlockTest
           working-directory: Extension
 
       - name: Run RunWithoutDebugging tests (linux/macOS)
         if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
-        uses: coactions/setup-xvfb@v1
+        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
         with:
           run: yarn test --scenario=RunWithoutDebugging --scenario-arg=skipExternalConsole
           working-directory: Extension
