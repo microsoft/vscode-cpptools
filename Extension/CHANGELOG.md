@@ -10,7 +10,6 @@
 * Fix potential browse database corruption when the same workspace is opened by multiple processes on Linux and macOS.
 * Fix a crash when reading files saved in certain multibyte encodings such as GB18030 or EUC-JP.
 * Fix an incorrect file path in an error message on Windows.
-* Various localization updates.
 * Other potential crash fixes.
 * Update dependencies.
 
