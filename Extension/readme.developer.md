@@ -35,7 +35,7 @@
 
 ### Required Tools 
 
-* [Node.js](https://nodejs.org/en/download/) v16.*
+* [Node.js](https://nodejs.org/en/download/) 24.x
 * npm (comes with Node.js)
 
 ### Setting up the repository
