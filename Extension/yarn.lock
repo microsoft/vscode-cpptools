@@ -6242,9 +6242,9 @@ undici-types@~7.18.0:
   integrity sha1-KTV6iee3ykrvO/D9P9DNc4hCKek=
 
 undici@^7.19.0, undici@^7.28.0:
-  version "7.28.0"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/undici/-/undici-7.28.0.tgz#97d64564198b285bc281f0e8e29597e3d11fe7ec"
-  integrity sha1-l9ZFZBmLKFvCgfDo4pWX49Ef5+w=
+  version "7.29.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/undici/-/undici-7.29.0.tgz#ae0f6f62e06e057a9cbb7b2b5fde2bb74f791b8f"
+  integrity sha1-rg9vYuBuBXqcu3srX94rt095G48=
 
 unicorn-magic@^0.1.0:
   version "0.1.0"
