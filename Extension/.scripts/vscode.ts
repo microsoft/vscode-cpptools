@@ -4,13 +4,12 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
-import { createHash } from 'crypto';
-import { tmpdir } from 'os';
 import { resolve } from 'path';
 import { verbose } from '../src/Utility/Text/streams';
 import { mkdir, readJson, rimraf, write } from './common';
+import { getVSCodeTestIsolate } from './vscodeTestPath';
 
-export const isolated = resolve(tmpdir(), '.vscode-test', createHash('sha256').update(__dirname).digest('hex').substring(0, 6));
+export const isolated = getVSCodeTestIsolate(__dirname);
 export const extensionsDir = resolve(isolated, 'extensions');
 export const userDir = resolve(isolated, 'user-data');
 export const settings = resolve(userDir, "User", 'settings.json');
