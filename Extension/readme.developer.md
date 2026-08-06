@@ -84,7 +84,7 @@ user folders, etc).
 The scripts that install VS Code retain it in a per-user cache directory:
 
 * Windows: `%LOCALAPPDATA%/Microsoft/vscode-cpptools/vscode-test/<UID>` (or
-    `~/AppData/Local/Microsoft/vscode-cpptools/vscode-test/<UID>` if `%LOCALAPPDATA%` is unavailable)
+    `%USERPROFILE%\AppData\Local\Microsoft\vscode-cpptools\vscode-test\<UID>` if `%LOCALAPPDATA%` is unavailable)
 * macOS: `~/Library/Caches/vscode-cpptools/vscode-test/<UID>`
 * Linux: `${XDG_CACHE_HOME:-~/.cache}/vscode-cpptools/vscode-test/<UID>`
 
@@ -98,7 +98,7 @@ The [`test scripts`](#yarn-test) will automatically install and use this isolate
 
 You can invoke VS Code from the command line using the [`yarn code`](#yarn-code) script.
 
-If you want to remove the isolate environment use the `yarn code reset` or `yarn test reset` scripts
+If you want to remove the isolated environment use the `yarn code reset` or `yarn test reset` scripts
 to delete only the current checkout's hashed folder and remove all of its configuration files. Next
 time you use the `yarn test` or `yarn code` commands, it will reinstall a fresh isolated environment.
 

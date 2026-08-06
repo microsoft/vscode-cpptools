@@ -17,6 +17,9 @@ export function getVSCodeTestIsolate(
     let root: string;
 
     if (override) {
+        if (!path.isAbsolute(override)) {
+            throw new Error('CPPTOOLS_VSCODE_TEST_ROOT must be an absolute path.');
+        }
         root = override;
     } else {
         switch (platform) {

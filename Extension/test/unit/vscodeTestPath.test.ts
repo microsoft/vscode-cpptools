@@ -59,4 +59,13 @@ describe('VS Code test isolate path', () => {
         assert.strictEqual(posix.dirname(first), '/test-root');
         assert.strictEqual(posix.dirname(second), '/test-root');
     });
+
+    it('rejects relative CPPTOOLS_VSCODE_TEST_ROOT values', () => {
+        assert.throws(
+            () => getVSCodeTestIsolate(posixScriptDirectory, 'linux', { CPPTOOLS_VSCODE_TEST_ROOT: 'test-root' }, '/home/developer'),
+            /CPPTOOLS_VSCODE_TEST_ROOT must be an absolute path/);
+        assert.throws(
+            () => getVSCodeTestIsolate(windowsScriptDirectory, 'win32', { CPPTOOLS_VSCODE_TEST_ROOT: 'C:' }, 'C:\\Users\\developer'),
+            /CPPTOOLS_VSCODE_TEST_ROOT must be an absolute path/);
+    });
 });
