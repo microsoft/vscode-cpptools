@@ -23,15 +23,21 @@ export function getVSCodeTestIsolate(
         root = override;
     } else {
         switch (platform) {
-            case 'win32':
-                root = path.resolve(environment.LOCALAPPDATA || path.resolve(homeDirectory, 'AppData', 'Local'), 'Microsoft', 'vscode-cpptools', 'vscode-test');
+            case 'win32': {
+                const localAppData = environment.LOCALAPPDATA;
+                const cacheDirectory = localAppData && path.isAbsolute(localAppData) ? localAppData : path.resolve(homeDirectory, 'AppData', 'Local');
+                root = path.resolve(cacheDirectory, 'Microsoft', 'vscode-cpptools', 'vscode-test');
                 break;
+            }
             case 'darwin':
                 root = path.resolve(homeDirectory, 'Library', 'Caches', 'vscode-cpptools', 'vscode-test');
                 break;
-            default:
-                root = path.resolve(environment.XDG_CACHE_HOME || path.resolve(homeDirectory, '.cache'), 'vscode-cpptools', 'vscode-test');
+            default: {
+                const xdgCacheHome = environment.XDG_CACHE_HOME;
+                const cacheDirectory = xdgCacheHome && path.isAbsolute(xdgCacheHome) ? xdgCacheHome : path.resolve(homeDirectory, '.cache');
+                root = path.resolve(cacheDirectory, 'vscode-cpptools', 'vscode-test');
                 break;
+            }
         }
     }
 

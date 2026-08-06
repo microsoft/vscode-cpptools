@@ -24,9 +24,14 @@ describe('VS Code test isolate path', () => {
     });
 
     it('falls back to the user cache directory on Linux', () => {
+        const expected = posix.resolve('/home/developer', '.cache', 'vscode-cpptools', 'vscode-test', getWorktreeHash(posixScriptDirectory));
+
         assert.strictEqual(
             getVSCodeTestIsolate(posixScriptDirectory, 'linux', {}, '/home/developer'),
-            posix.resolve('/home/developer', '.cache', 'vscode-cpptools', 'vscode-test', getWorktreeHash(posixScriptDirectory)));
+            expected);
+        assert.strictEqual(
+            getVSCodeTestIsolate(posixScriptDirectory, 'linux', { XDG_CACHE_HOME: 'relative-cache' }, '/home/developer'),
+            expected);
     });
 
     it('uses the user cache directory on macOS', () => {
@@ -42,9 +47,14 @@ describe('VS Code test isolate path', () => {
     });
 
     it('falls back to the user profile on Windows', () => {
+        const expected = win32.resolve('C:\\Users\\developer', 'AppData', 'Local', 'Microsoft', 'vscode-cpptools', 'vscode-test', getWorktreeHash(windowsScriptDirectory));
+
         assert.strictEqual(
             getVSCodeTestIsolate(windowsScriptDirectory, 'win32', {}, 'C:\\Users\\developer'),
-            win32.resolve('C:\\Users\\developer', 'AppData', 'Local', 'Microsoft', 'vscode-cpptools', 'vscode-test', getWorktreeHash(windowsScriptDirectory)));
+            expected);
+        assert.strictEqual(
+            getVSCodeTestIsolate(windowsScriptDirectory, 'win32', { LOCALAPPDATA: 'relative-cache' }, 'C:\\Users\\developer'),
+            expected);
     });
 
     it('honors CPPTOOLS_VSCODE_TEST_ROOT without sharing worktree isolates', () => {

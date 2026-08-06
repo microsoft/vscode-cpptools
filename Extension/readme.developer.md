@@ -83,12 +83,12 @@ user folders, etc).
 
 The scripts that install VS Code retain it in a per-user cache directory:
 
-* Windows: `%LOCALAPPDATA%/Microsoft/vscode-cpptools/vscode-test/<UID>` (or
+* Windows: `%LOCALAPPDATA%\Microsoft\vscode-cpptools\vscode-test\<UID>` (or
     `%USERPROFILE%\AppData\Local\Microsoft\vscode-cpptools\vscode-test\<UID>` if `%LOCALAPPDATA%` is unavailable)
 * macOS: `~/Library/Caches/vscode-cpptools/vscode-test/<UID>`
 * Linux: `${XDG_CACHE_HOME:-~/.cache}/vscode-cpptools/vscode-test/<UID>`
 
-`<UID>` is a six-character hash calculated from the extension folder. This permits multiple
+`<UID>` is a six-character hash calculated from the checkout's `.scripts` directory path. This permits multiple
 checkouts of the source repository, with each checkout retaining its own isolated `cache`,
 `extensions`, and `user-data` folders across runs. Set `CPPTOOLS_VSCODE_TEST_ROOT` to an absolute
 directory to override the platform-specific `vscode-test` root; the checkout-specific `<UID>` is
