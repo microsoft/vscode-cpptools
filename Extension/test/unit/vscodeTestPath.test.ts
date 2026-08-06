@@ -55,6 +55,9 @@ describe('VS Code test isolate path', () => {
         assert.strictEqual(
             getVSCodeTestIsolate(windowsScriptDirectory, 'win32', { LOCALAPPDATA: 'relative-cache' }, 'C:\\Users\\developer'),
             expected);
+        assert.strictEqual(
+            getVSCodeTestIsolate(windowsScriptDirectory, 'win32', { LOCALAPPDATA: '\\relative-cache' }, 'C:\\Users\\developer'),
+            expected);
     });
 
     it('honors CPPTOOLS_VSCODE_TEST_ROOT without sharing worktree isolates', () => {
@@ -70,12 +73,30 @@ describe('VS Code test isolate path', () => {
         assert.strictEqual(posix.dirname(second), '/test-root');
     });
 
-    it('rejects relative CPPTOOLS_VSCODE_TEST_ROOT values', () => {
+    it('accepts fully qualified Windows CPPTOOLS_VSCODE_TEST_ROOT values', () => {
+        const driveRoot = 'D:\\test-root';
+        const uncRoot = '\\\\server\\share\\test-root';
+
+        assert.strictEqual(
+            getVSCodeTestIsolate(windowsScriptDirectory, 'win32', { CPPTOOLS_VSCODE_TEST_ROOT: driveRoot }, 'C:\\Users\\developer'),
+            win32.resolve(driveRoot, getWorktreeHash(windowsScriptDirectory)));
+        assert.strictEqual(
+            getVSCodeTestIsolate(windowsScriptDirectory, 'win32', { CPPTOOLS_VSCODE_TEST_ROOT: uncRoot }, 'C:\\Users\\developer'),
+            win32.resolve(uncRoot, getWorktreeHash(windowsScriptDirectory)));
+    });
+
+    it('rejects non-fully-qualified CPPTOOLS_VSCODE_TEST_ROOT values', () => {
         assert.throws(
             () => getVSCodeTestIsolate(posixScriptDirectory, 'linux', { CPPTOOLS_VSCODE_TEST_ROOT: 'test-root' }, '/home/developer'),
-            /CPPTOOLS_VSCODE_TEST_ROOT must be an absolute path/);
+            /CPPTOOLS_VSCODE_TEST_ROOT must be a fully qualified absolute path/);
         assert.throws(
             () => getVSCodeTestIsolate(windowsScriptDirectory, 'win32', { CPPTOOLS_VSCODE_TEST_ROOT: 'C:' }, 'C:\\Users\\developer'),
-            /CPPTOOLS_VSCODE_TEST_ROOT must be an absolute path/);
+            /CPPTOOLS_VSCODE_TEST_ROOT must be a fully qualified absolute path/);
+        assert.throws(
+            () => getVSCodeTestIsolate(windowsScriptDirectory, 'win32', { CPPTOOLS_VSCODE_TEST_ROOT: '\\test-root' }, 'C:\\Users\\developer'),
+            /CPPTOOLS_VSCODE_TEST_ROOT must be a fully qualified absolute path/);
+        assert.throws(
+            () => getVSCodeTestIsolate(windowsScriptDirectory, 'win32', { CPPTOOLS_VSCODE_TEST_ROOT: '/test-root' }, 'C:\\Users\\developer'),
+            /CPPTOOLS_VSCODE_TEST_ROOT must be a fully qualified absolute path/);
     });
 });

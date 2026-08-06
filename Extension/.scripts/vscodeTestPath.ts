@@ -7,6 +7,11 @@ import { createHash } from 'crypto';
 import { homedir } from 'os';
 import { posix, win32 } from 'path';
 
+function isFullyQualifiedPath(value: string, platform: NodeJS.Platform): boolean {
+    const path = platform === 'win32' ? win32 : posix;
+    return path.isAbsolute(value) && (platform !== 'win32' || path.parse(value).root.length > 1);
+}
+
 export function getVSCodeTestIsolate(
     scriptDirectory: string,
     platform: NodeJS.Platform = process.platform,
@@ -17,15 +22,15 @@ export function getVSCodeTestIsolate(
     let root: string;
 
     if (override) {
-        if (!path.isAbsolute(override)) {
-            throw new Error('CPPTOOLS_VSCODE_TEST_ROOT must be an absolute path.');
+        if (!isFullyQualifiedPath(override, platform)) {
+            throw new Error('CPPTOOLS_VSCODE_TEST_ROOT must be a fully qualified absolute path.');
         }
         root = override;
     } else {
         switch (platform) {
             case 'win32': {
                 const localAppData = environment.LOCALAPPDATA;
-                const cacheDirectory = localAppData && path.isAbsolute(localAppData) ? localAppData : path.resolve(homeDirectory, 'AppData', 'Local');
+                const cacheDirectory = localAppData && isFullyQualifiedPath(localAppData, platform) ? localAppData : path.resolve(homeDirectory, 'AppData', 'Local');
                 root = path.resolve(cacheDirectory, 'Microsoft', 'vscode-cpptools', 'vscode-test');
                 break;
             }
@@ -34,7 +39,7 @@ export function getVSCodeTestIsolate(
                 break;
             default: {
                 const xdgCacheHome = environment.XDG_CACHE_HOME;
-                const cacheDirectory = xdgCacheHome && path.isAbsolute(xdgCacheHome) ? xdgCacheHome : path.resolve(homeDirectory, '.cache');
+                const cacheDirectory = xdgCacheHome && isFullyQualifiedPath(xdgCacheHome, platform) ? xdgCacheHome : path.resolve(homeDirectory, '.cache');
                 root = path.resolve(cacheDirectory, 'vscode-cpptools', 'vscode-test');
                 break;
             }

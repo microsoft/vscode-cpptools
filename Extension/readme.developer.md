@@ -88,11 +88,14 @@ The scripts that install VS Code retain it in a per-user cache directory:
 * macOS: `~/Library/Caches/vscode-cpptools/vscode-test/<UID>`
 * Linux: `${XDG_CACHE_HOME:-~/.cache}/vscode-cpptools/vscode-test/<UID>`
 
+The environment-based cache locations are used only when they are fully qualified. On Windows,
+they must include a drive or UNC share. Unsupported values fall back to the per-user locations shown above.
+
 `<UID>` is a six-character hash calculated from the checkout's `.scripts` directory path. This permits multiple
 checkouts of the source repository, with each checkout retaining its own isolated `cache`,
-`extensions`, and `user-data` folders across runs. Set `CPPTOOLS_VSCODE_TEST_ROOT` to an absolute
-directory to override the platform-specific `vscode-test` root; the checkout-specific `<UID>` is
-still appended to the override.
+`extensions`, and `user-data` folders across runs. Set `CPPTOOLS_VSCODE_TEST_ROOT` to a fully qualified
+absolute directory to override the platform-specific `vscode-test` root. The same Windows drive or UNC
+share requirement applies. The checkout-specific `<UID>` is still appended to the override.
 
 The [`test scripts`](#yarn-test) will automatically install and use this isolated environment.
 
