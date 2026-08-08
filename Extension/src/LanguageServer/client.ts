@@ -1765,14 +1765,7 @@ export class DefaultClient implements Client {
             initializationOptions: lspInitializationOptions,
             middleware: createProtocolFilter(),
             errorHandler: {
-                error: (error, message, count) => {
-                    telemetry.logLanguageServerEvent("languageClientError", {
-                        clientError: error.toString(),
-                        clientMessage: message?.toString() ?? '',
-                        count: count?.toString() ?? ''
-                    });
-                    return { action: ErrorAction.Continue };
-                },
+                error: (_error, _message, _count) => ({ action: ErrorAction.Continue }),
                 closed: () => {
                     languageClientHasCrashed = true;
                     languageClientCrashTimes.push(Date.now());
