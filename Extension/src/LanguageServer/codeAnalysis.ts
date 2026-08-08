@@ -4,10 +4,11 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { LanguageClient, NotificationType, Range } from 'vscode-languageclient/node';
+import { NotificationType, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { Location, WorkspaceEdit } from './commonTypes';
 import { CppSourceStr } from './extension';
+import { LanguageClient } from './languageClient';
 import { LocalizeStringParams, getLocalizedString } from './localization';
 import { CppSettings } from './settings';
 import { makeVscodeLocation, makeVscodeRange, makeVscodeTextEdits, rangeEquals } from './utils';

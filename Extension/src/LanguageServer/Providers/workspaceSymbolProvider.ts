@@ -10,9 +10,7 @@ import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { makeVscodeLocation } from '../utils';
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
-    private client: DefaultClient;
-    constructor(client: DefaultClient) {
-        this.client = client;
+    constructor(private client: DefaultClient) {
     }
 
     public async provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
