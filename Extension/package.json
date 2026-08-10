@@ -7259,6 +7259,7 @@
     },
     "resolutions": {
         "postcss": "^8.5.23",
+        "nanoid": "^3.3.17",
         "gulp-typescript/**/glob-parent": "^5.1.2",
         "serialize-javascript": "^7.0.5",
         "@azure/msal-browser": "^4.29.1",
