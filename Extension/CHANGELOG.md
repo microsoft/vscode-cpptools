@@ -1,5 +1,14 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.33.7: August 11, 2026
+### Bug Fixes
+* Fix another crash when reading files saved in certain multibyte encodings such as GB18030 or EUC-JP.
+* Fix newly created files not being associated with the correct configuration in the browse database.
+* Fix the language server becoming unresponsive during browse database initialization.
+* Fix stale diagnostics and missing code actions after editing visible headers.
+* Fix `/ZW:nostdlib` not being processed correctly by IntelliSense.
+* Update dependencies.
+
 ## Version 1.33.6: August 4, 2026
 ### Bug Fixes
 * Fix a spurious recursive includes (`**`) debug console log warning for paths merged from `c_cpp_properties.json` when `C_Cpp.mergeConfigurations` is enabled. [#14125](https://github.com/microsoft/vscode-cpptools/issues/14125)
