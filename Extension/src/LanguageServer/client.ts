@@ -223,7 +223,9 @@ interface FileChangedParams extends WorkspaceFolderParams {
 
 interface InputRegion {
     startLine: number;
+    startColumn?: number;
     endLine: number;
+    endColumn?: number;
 }
 
 interface DecorationRangesPair {
@@ -3054,7 +3056,11 @@ export class DefaultClient implements Client {
             this.inactiveRegionsDecorations.set(uriString, currentSet);
         }
 
-        Array.prototype.push.apply(currentSet.ranges, inactiveRegions.map(element => new vscode.Range(element.startLine, 0, element.endLine, 0)));
+        Array.prototype.push.apply(currentSet.ranges, inactiveRegions.map(element => new vscode.Range(
+            element.startLine,
+            element.startColumn ?? 0,
+            element.endLine,
+            element.endColumn ?? 0)));
 
         // Apply the decorations to all *visible* text editors
         const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uriString);
