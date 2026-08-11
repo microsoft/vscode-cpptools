@@ -419,7 +419,7 @@
 	"help_allow_missing_lsp_config": "指定された --lsp-config ファイルが存在しない場合でも、サーバーの起動を許可します。",
 	"initialize_failed_during_engine_setup": "エンジンのセットアップ中に初期化に失敗しました。",
 	"important_label": "重要:",
-	"help_check": "全体的な解析と分析を行ない診断を報告することで、compile_commands.json に対しソース ファイルを検証します。エラーが見つかった場合は 0 以外を終了します。",
+	"help_check": "ソース ファイルを完全に構文解析および分析して診断を報告し、compile_commands.json に照らして検証します。エラーが見つかった場合は、0 以外の終了コードで終了します。",
 	"help_check_compile_commands": "--check とともに使用する、特定のcompile_commands.json (またはそのディレクトリ) へのパス。既定値は自動検出です。",
 	"check_not_authorized": "未承認: --check を実行するにはサインインが必要です",
 	"check_requires_source": "--check にはソース ファイルが必要です: --check=<file>",
@@ -427,11 +427,11 @@
 	"check_compile_commands_not_found": "compile_commands.json が見つかりません: {0}",
 	"check_compile_commands_not_discovered": "{0} のいずれの親ディレクトリにも、compile_commands.json が見つかりませんでした。--check-compile-commands=<path> を渡して明示的に指定してください",
 	"check_engine_init_failed": "言語エンジンの初期化に失敗しました",
-	"check_no_workspace_folder": "{0} について解決されたワークスペース フォルダーはありません",
+	"check_no_workspace_folder": "{0} のワークスペース フォルダーを解決できませんでした",
 	"check_not_in_compile_commands": "{0} は {1} 内に存在しません",
 	"check_read_failed": "{0} の読み取りに失敗しました",
 	"check_open_failed": "分析のために {0} を開けませんでした",
-	"check_timed_out": "{0} の分析完了の待機がタイムアウトしました",
+	"check_timed_out": "{0} の分析が完了するのを待機中にタイムアウトしました",
 	"failed_to_open_browse_db_lock_file": "参照データベースのロック ファイルを開けませんでした: {0} (errno={1})",
 	"failed_to_lock_browse_db_lock_file": "参照データベースのロック ファイルをロックできませんでした: {0} (errno={1})"
 }

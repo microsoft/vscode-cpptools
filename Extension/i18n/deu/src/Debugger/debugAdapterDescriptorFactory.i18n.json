@@ -8,5 +8,5 @@
 	"debugger.noDebug.requestType.not.supported": "„Ausführen ohne Debuggen“ wird nur für Startkonfigurationen unterstützt.",
 	"debugger.unsupported.properties": "Startkonfigurationen mit den folgenden Eigenschaften können nicht direkt im Terminal ausgeführt werden: {0}",
 	"debugger.fallback.message": "Die Programmausgabe wird stattdessen in der Debugging-Konsole angezeigt.",
-	"debugger.fallback.message2": "Um diese Warnung zu unterdrücken, legen Sie die Eigenschaft „ignoreRunWithoutDebuggingWarnings“ in Ihrer Startkonfiguration auf TRUE fest."
+	"debugger.fallback.message2": "Um diese Warnung zu unterdrücken, legen Sie die Eigenschaft „ignoreRunWithoutDebuggingWarnings“ in Ihrer Startkonfiguration auf \"true\" fest."
 }
