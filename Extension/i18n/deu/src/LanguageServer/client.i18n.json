@@ -26,7 +26,7 @@
 	"loggingLevel.changed": "{0} wurde geändert in {1}",
 	"dismiss.button": "Schließen",
 	"disable.warnings.button": "Warnungen deaktivieren",
-	"unable.to.provide.configuration": "{0} kann keine IntelliSense-Konfigurationsinformationen für \"{1}\" bereitstellen. Stattdessen werden Einstellungen aus der Konfiguration \"{2}\" verwendet.",
+	"unable.to.provide.configuration": "{0} kann keine IntelliSense-Konfigurationsinformationen bereitstellen. Stattdessen werden Einstellungen aus der Konfiguration „{1}“ verwendet.",
 	"config.not.found": "Der angeforderte Konfigurationsname wurde nicht gefunden: {0}",
 	"unsupported.client": "Nicht unterstützter Client",
 	"timed.out": "Timeout nach {0} ms.",
