@@ -26,7 +26,7 @@
 	"loggingLevel.changed": "{0} が次に変更されました: {1}",
 	"dismiss.button": "消去",
 	"disable.warnings.button": "警告を無効にする",
-	"unable.to.provide.configuration": "{0} が '{1}' の IntelliSense 構成情報を指定できません。'{2}' 構成からの設定が代わりに使用されます。",
+	"unable.to.provide.configuration": "{0} は IntelliSense の構成情報を提供できません。代わりに、'{1}' 構成からの設定が使用されます。",
 	"config.not.found": "要求された構成名が見つかりません: {0}",
 	"unsupported.client": "サポートされていないクライアント",
 	"timed.out": "{0} ミリ秒でタイムアウトしました。",
