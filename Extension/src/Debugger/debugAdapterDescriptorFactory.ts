@@ -112,6 +112,6 @@ function logReasonForNoDebugNotSupported(configuration: vscode.DebugConfiguratio
     }
     outputChannel.appendLine(localize("debugger.unsupported.properties", "Launch configurations with the following properties cannot be run directly in the terminal: {0}", disallowedProperties.join(', ')));
     outputChannel.appendLine(localize("debugger.fallback.message", "Program output will appear in the Debug Console instead."));
-    outputChannel.appendLine(localize("debugger.fallback.message2", "To suppress this warning, set the 'ignoreRunWithoutDebuggingWarnings' property to true in your launch configuration."));
+    outputChannel.appendLine(localize({ key: "debugger.fallback.message2", comment: ["{Locked=\"ignoreRunWithoutDebuggingWarnings\"} {Locked=\"true\"}"] }, "To suppress this warning, set the 'ignoreRunWithoutDebuggingWarnings' property to true in your launch configuration."));
 }
 
