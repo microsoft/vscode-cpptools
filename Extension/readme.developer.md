@@ -35,7 +35,7 @@
 
 ### Required Tools 
 
-* [Node.js](https://nodejs.org/en/download/) v16.*
+* [Node.js](https://nodejs.org/en/download/) 24.x
 * npm (comes with Node.js)
 
 ### Setting up the repository
@@ -81,17 +81,33 @@ The scripts for this repository now support running VS Code and the extension in
 completely isolated environment (separate install of VS Code, private extensions and 
 user folders, etc). 
 
-The scripts that install VS Code place it in a `$ENV:TMP/.vscode-test/<UID>` folder where
-`<UID>` is a has calculated from the extension folder (this permits multiple checkouts of 
-the source repository and each gets it's own isolated environment).
+The scripts that install VS Code retain it in a per-user cache directory:
+
+* Windows: `%LOCALAPPDATA%\Microsoft\vscode-cpptools\vscode-test\<UID>` (or
+    `%USERPROFILE%\AppData\Local\Microsoft\vscode-cpptools\vscode-test\<UID>` if `%LOCALAPPDATA%` is unavailable)
+* macOS: `~/Library/Caches/vscode-cpptools/vscode-test/<UID>`
+* Linux: `${XDG_CACHE_HOME:-~/.cache}/vscode-cpptools/vscode-test/<UID>`
+
+The environment-based cache locations are used only when they are fully qualified. On Windows,
+they must include a drive or UNC share. Unsupported values fall back to the per-user locations shown above.
+
+`<UID>` is a six-character hash calculated from the checkout's `.scripts` directory path. This permits multiple
+checkouts of the source repository, with each checkout retaining its own isolated `cache`,
+`extensions`, and `user-data` folders across runs. Set `CPPTOOLS_VSCODE_TEST_ROOT` to a fully qualified
+absolute directory to override the platform-specific `vscode-test` root. The same Windows drive or UNC
+share requirement applies. The checkout-specific `<UID>` is still appended to the override.
 
 The [`test scripts`](#yarn-test) will automatically install and use this isolated environment.
 
 You can invoke VS Code from the command line using the [`yarn code`](#yarn-code) script.
 
-If you want to remove the isolate environment use the `yarn code reset` or `yarn test reset` scripts
-to delete the folders and remove all of the configuration files. Next time you use the `yarn test` or 
-`yarn code` commands, it will reinstall a fresh isolated environment.
+If you want to remove the isolated environment use the `yarn code reset` or `yarn test reset` scripts
+to delete only the current checkout's hashed folder and remove all of its configuration files. Next
+time you use the `yarn test` or `yarn code` commands, it will reinstall a fresh isolated environment.
+
+Isolates created by earlier versions under the system temporary directory are not migrated or
+removed automatically. After ensuring that no test runs are using them, you can remove the old
+`.vscode-test` folder from the system temporary directory once to reclaim that space.
 
 The Isolated environment has the theme automatically set to blue so that it is visually distinct from
 your normal VS Code environment.
