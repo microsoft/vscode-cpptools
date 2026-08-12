@@ -5,7 +5,7 @@
 import * as fs from "fs";
 import * as path from 'path';
 import { parseString } from 'xml2js';
-import { mkdir, write } from './common';
+import { glob, mkdir, write } from './common';
 
 export async function main() {
 
@@ -45,11 +45,16 @@ export async function main() {
 
     const locFolderNames = fs.readdirSync(localizeRepoPath).filter(f => fs.lstatSync(path.join(localizeRepoPath, f)).isDirectory());
     for (const locFolderName of locFolderNames) {
-        const lclPath = path.join(localizeRepoPath, locFolderName, locFolderName === "csy" ? "VC/vc/cpfeui.dll.lcl" : "vc/vc/cpfeui.dll.lcl");
         const languageInfo = languages.find(l => l.folderName === locFolderName);
         if (!languageInfo) {
             return;
         }
+        const localePath = path.join(localizeRepoPath, locFolderName);
+        const lclPaths = await glob("vc/vc/cpfeui.dll.lcl", { cwd: localePath, nocase: true, nodir: true });
+        if (lclPaths.length !== 1) {
+            throw new Error(`Expected one cpfeui.dll.lcl under '${localePath}', found ${lclPaths.length}.`);
+        }
+        const lclPath = path.join(localePath, lclPaths[0]);
         const languageId = languageInfo.id;
         const outputLanguageFolder = path.join(cpptoolsRepoPath, "Extension/bin/messages", languageId);
         const outputPath = path.join(outputLanguageFolder, "messages.json");
