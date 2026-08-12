@@ -2999,7 +2999,7 @@
     "'this'에 대한 할당(오래된 구문)은 C++11 모드와 호환되지 않습니다.",
     "알 수 없는 오류가 발생했습니다. IntelliSense PCH 파일이 생성되지 않았습니다.",
     "하나 이상의 원격 경로를 기존 로컬 경로에 매핑할 수 없습니다. IntelliSense 성능이 저하될 수 있습니다.",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,
@@ -3747,6 +3747,5 @@
     "여기서 'static'은 표준이 아닙니다.",
     "%nd은(는) 이전에 명시적 열거형 기반 없이 선언되었습니다.",
     "여기서 누락된 'typename'이 표준이 아닙니다.",
-    "약식 함수 템플릿 구문은 추론 가이드에 대한 표준이 아닙니다.",
-    "too many nested user-defined conversions (possible cycle of converting routines)"
+    "약식 함수 템플릿 구문은 추론 가이드에 대한 표준이 아닙니다."
 ]
