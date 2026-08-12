@@ -2999,7 +2999,7 @@
     "Die Zuweisung zum this-Anachronismus ist mit dem C++11-Modus nicht kompatibel.",
     "Unbekannter Fehler. Es wurde keine IntelliSense PCH-Datei generiert.",
     "Mindestens ein Remotepfad kann vorhandenen lokalen Pfaden nicht zugeordnet werden. Die IntelliSense-Funktionen werden ggf. beeinträchtigt.",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,
@@ -3747,6 +3747,5 @@
     "„static“ entspricht hier nicht dem Standard",
     "%nd wurde zuvor ohne explizite Enumerationsbasis deklariert",
     "Fehlender „typename“ entspricht hier nicht dem Standard.",
-    "Die abgekürzte Funktionsvorlagensyntax entspricht nicht dem Standard für Deduktionsleitfäden.",
-    "too many nested user-defined conversions (possible cycle of converting routines)"
+    "Die abgekürzte Funktionsvorlagensyntax entspricht nicht dem Standard für Deduktionsleitfäden."
 ]
