@@ -221,9 +221,16 @@ interface FileChangedParams extends WorkspaceFolderParams {
     uri: string;
 }
 
-interface InputRegion {
+interface InputLineRange {
     startLine: number;
     endLine: number;
+}
+
+interface InputRegion {
+    startLine: number;
+    startColumn: number;
+    endLine: number;
+    endColumn: number;
 }
 
 interface DecorationRangesPair {
@@ -374,7 +381,7 @@ export enum FoldingRangeKind {
 
 export interface CppFoldingRange {
     kind: FoldingRangeKind;
-    range: InputRegion;
+    range: InputLineRange;
 }
 
 export interface GetFoldingRangesResult {
@@ -3054,7 +3061,8 @@ export class DefaultClient implements Client {
             this.inactiveRegionsDecorations.set(uriString, currentSet);
         }
 
-        Array.prototype.push.apply(currentSet.ranges, inactiveRegions.map(element => new vscode.Range(element.startLine, 0, element.endLine, 0)));
+        Array.prototype.push.apply(currentSet.ranges, inactiveRegions.map(element =>
+            new vscode.Range(element.startLine, element.startColumn, element.endLine, element.endColumn)));
 
         // Apply the decorations to all *visible* text editors
         const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uriString);
