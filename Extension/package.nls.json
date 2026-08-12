@@ -863,17 +863,52 @@
     "c_cpp.debuggers.pipeTransport.pipeEnv.description": "Environment variables passed to the pipe program.",
     "c_cpp.debuggers.pipeTransport.quoteArgs.description": "If the pipeProgram's individual arguments contain characters (such as spaces or tabs), should it be quoted? If 'false', the debugger command will no longer be automatically quoted. Default is 'true'.",
     "c_cpp.debuggers.logging.description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
-    "c_cpp.debuggers.logging.exceptions.description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
-    "c_cpp.debuggers.logging.moduleLoad.description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
-    "c_cpp.debuggers.logging.programOutput.description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
-    "c_cpp.debuggers.logging.engineLogging.description": "Optional flag to determine whether diagnostic debug engine messages should be logged to the Debug Console. Defaults to false.",
-    "c_cpp.debuggers.logging.trace.description": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
-    "c_cpp.debuggers.logging.traceResponse.description": "Optional flag to determine whether diagnostic adapter command and response tracing should be logged to the Debug Console. Defaults to false.",
+    "c_cpp.debuggers.logging.exceptions.description": {
+        "message": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+        "comment": [
+            "{Locked=\"true\"}"
+        ]
+    },
+    "c_cpp.debuggers.logging.moduleLoad.description": {
+        "message": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+        "comment": [
+            "{Locked=\"true\"}"
+        ]
+    },
+    "c_cpp.debuggers.logging.programOutput.description": {
+        "message": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+        "comment": [
+            "{Locked=\"true\"}"
+        ]
+    },
+    "c_cpp.debuggers.logging.engineLogging.description": {
+        "message": "Optional flag to determine whether diagnostic debug engine messages should be logged to the Debug Console. Defaults to false.",
+        "comment": [
+            "{Locked=\"false\"}"
+        ]
+    },
+    "c_cpp.debuggers.logging.trace.description": {
+        "message": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
+        "comment": [
+            "{Locked=\"false\"}"
+        ]
+    },
+    "c_cpp.debuggers.logging.traceResponse.description": {
+        "message": "Optional flag to determine whether diagnostic adapter command and response tracing should be logged to the Debug Console. Defaults to false.",
+        "comment": [
+            "{Locked=\"false\"}"
+        ]
+    },
     "c_cpp.debuggers.cppvsdbg.logging.threadExit.description": "Optional flag to determine whether thread exit messages should be logged to the Debug Console. Default: false.",
     "c_cpp.debuggers.cppvsdbg.logging.processExit.description": "Optional flag to determine whether target process exit messages should be logged to the Debug Console. Default: true.",
     "c_cpp.debuggers.text.description": "The debugger command to execute.",
     "c_cpp.debuggers.description.description": "Optional description for the command.",
-    "c_cpp.debuggers.ignoreFailures.description": "If true, failures from the command should be ignored. Default value is false.",
+    "c_cpp.debuggers.ignoreFailures.description": {
+        "message": "If true, failures from the command should be ignored. Default value is false.",
+        "comment": [
+            "{Locked=\"true\"} {Locked=\"false\"}"
+        ]
+    },
     "c_cpp.debuggers.program.description": "Full path to program executable.",
     "c_cpp.debuggers.args.description": "Command line arguments passed to the program.",
     "c_cpp.debuggers.targetArchitecture.description": "The architecture of the debuggee. This will automatically be detected unless this parameter is set. Allowed values are x86, arm, arm64, mips, x64, amd64, x86_64.",
@@ -912,14 +947,29 @@
     "c_cpp.debuggers.filterStderr.description": "Search stderr stream for server-started pattern and log stderr to debug output. Defaults to false.",
     "c_cpp.debuggers.serverLaunchTimeout.description": "Optional time, in milliseconds, for the debugger to wait for the debugServer to start up. Default is 10000.",
     "c_cpp.debuggers.coreDumpPath.description": "Optional full path to a core dump file for the specified program. Defaults to null.",
-    "c_cpp.debuggers.cppdbg.externalConsole.description": "If true, a console is launched for the debuggee. If false, on Linux and Windows, it will appear in the Integrated Console.",
-    "c_cpp.debuggers.cppvsdbg.externalConsole.description": "[Deprecated by 'console'] If true, a console is launched for the debuggee. If false, no console is launched.",
+    "c_cpp.debuggers.cppdbg.externalConsole.description": {
+        "message": "If true, a console is launched for the debuggee. If false, on Linux and Windows, it will appear in the Integrated Console.",
+        "comment": [
+            "{Locked=\"true\"} {Locked=\"false\"}"
+        ]
+    },
+    "c_cpp.debuggers.cppvsdbg.externalConsole.description": {
+        "message": "[Deprecated by 'console'] If true, a console is launched for the debuggee. If false, no console is launched.",
+        "comment": [
+            "{Locked=\"'console'\"} {Locked=\"true\"} {Locked=\"false\"}"
+        ]
+    },
     "c_cpp.debuggers.cppvsdbg.console.description": "Where to launch the debug target. Defaults to 'internalConsole' if not defined.",
     "c_cpp.debuggers.cppvsdbg.console.internalConsole.description": "Output to the VS Code Debug Console. This doesn't support reading console input (ex:'std::cin' or 'scanf').",
     "c_cpp.debuggers.cppvsdbg.console.integratedTerminal.description": "VS Code's integrated terminal.",
     "c_cpp.debuggers.cppvsdbg.console.externalTerminal.description": "Console applications will be launched in an external terminal window. The window will be reused in relaunch scenarios and will not automatically disappear when the application exits.",
     "c_cpp.debuggers.cppvsdbg.console.newExternalWindow.description": "Console applications will be launched in their own external console window which will end when the application stops. Non-console applications will run without a terminal, and stdout/stderr will be ignored.",
-    "c_cpp.debuggers.avoidWindowsConsoleRedirection.description": "If true, disables debuggee console redirection that is required for Integrated Terminal support.",
+    "c_cpp.debuggers.avoidWindowsConsoleRedirection.description": {
+        "message": "If true, disables debuggee console redirection that is required for Integrated Terminal support.",
+        "comment": [
+            "{Locked=\"true\"}"
+        ]
+    },
     "c_cpp.debuggers.sourceFileMap.markdownDescription": {
         "message": "Optional source file mappings passed to the debug engine. Example: `{ \"<original source path>\": \"<current source path>\" }`.",
         "comment": [
@@ -940,10 +990,25 @@
     },
     "c_cpp.debuggers.symbolSearchPath.description": "Semicolon separated list of directories to use to search for symbol (that is, pdb or .so) files. Example: \"c:\\dir1;c:\\dir2\".",
     "c_cpp.debuggers.dumpPath.description": "Optional full path to a dump file for the specified program. Example: \"c:\\temp\\app.dmp\". Defaults to null.",
-    "c_cpp.debuggers.enableDebugHeap.description": "If false, the process will be launched with debug heap disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
+    "c_cpp.debuggers.enableDebugHeap.description": {
+        "message": "If false, the process will be launched with debug heap disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
+        "comment": [
+            "{Locked=\"false\"} {Locked=\"_NO_DEBUG_HEAP\"} {Locked=\"1\"}"
+        ]
+    },
     "c_cpp.debuggers.symbolLoadInfo.description": "Explicit control of symbol loading.",
-    "c_cpp.debuggers.symbolLoadInfo.loadAll.description": "If true, symbols for all libs will be loaded, otherwise no solib symbols will be loaded. Default value is true.",
-    "c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "List of filenames (wildcards allowed) separated by semicolons ';'. Modifies behavior of LoadAll. If LoadAll is true then don't load symbols for libs that match any name in the list. Otherwise only load symbols for libs that match. Example: \"foo.so;bar.so\".",
+    "c_cpp.debuggers.symbolLoadInfo.loadAll.description": {
+        "message": "If true, symbols for all libs will be loaded, otherwise no solib symbols will be loaded. Default value is true.",
+        "comment": [
+            "{Locked=\"true\"}"
+        ]
+    },
+    "c_cpp.debuggers.symbolLoadInfo.exceptionList.description": {
+        "message": "List of filenames (wildcards allowed) separated by semicolons ';'. Modifies behavior of LoadAll. If LoadAll is true then don't load symbols for libs that match any name in the list. Otherwise only load symbols for libs that match. Example: \"foo.so;bar.so\".",
+        "comment": [
+            "{Locked=\";\"} {Locked=\"LoadAll\"} {Locked=\"true\"} {Locked=\"foo.so;bar.so\"}"
+        ]
+    },
     "c_cpp.debuggers.requireExactSource.description": "Optional flag to require current source code to match the pdb.",
     "c_cpp.debuggers.stopAtConnect.description": "If true, the debugger should stop after connecting to the target. If false, the debugger will continue after connecting. Defaults to false.",
     "c_cpp.debuggers.hardwareBreakpoints.description": "Explicit control of hardware breakpoint behavior for remote targets.",
@@ -1005,12 +1070,26 @@
     "c_cpp.taskDefinitions.args.quoting.weak.description": "Quotes the argument using the shell's weak quote character (e.g. \" under bash).",
     "c_cpp.taskDefinitions.options.description": "Additional command options.",
     "c_cpp.taskDefinitions.options.cwd.description": "The current working directory of the executed program or script. If omitted Code's current workspace root is used.",
+    "c_cpp.taskDefinitions.problemMatcher.description": "One or more problem matchers to use to detect compiler errors and warnings in task output.",
     "c_cpp.taskDefinitions.detail.description": "Additional details of the task.",
     "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Current and compile-time paths to the same source trees. Files found under the EditorPath are mapped to the CompileTimePath path for breakpoint matching and mapped from CompileTimePath to EditorPath when displaying stacktrace locations.",
     "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
-    "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations.",
+    "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": {
+        "message": "Set to false if this entry is only used for stack frame location mapping. Set to true if this entry should also be used when specifying breakpoint locations.",
+        "comment": [
+            "{Locked=\"false\"} {Locked=\"true\"}"
+        ]
+    },
     "c_cpp.debuggers.symbolOptions.description": "Options to control how symbols (.pdb files) are found and loaded.",
     "c_cpp.debuggers.unknownBreakpointHandling.description": "Controls how breakpoints set externally (usually via raw GDB commands) are handled when hit.\nAllowed values are \"throw\", which acts as if an exception was thrown by the application, and \"stop\", which only pauses the debug session. The default value is \"throw\".",
+    "c_cpp.debuggers.debuginfod.description": "Controls GDB's debuginfod behavior for downloading debug symbols from debuginfod servers.",
+    "c_cpp.debuggers.debuginfod.enabled.description": {
+        "message": "If false (default), GDB will not contact debuginfod servers. Set to true to enable debuginfod support.",
+        "comment": [
+            "{Locked=\"false\"} {Locked=\"GDB\"} {Locked=\"true\"} {Locked=\"debuginfod\"}"
+        ]
+    },
+    "c_cpp.debuggers.debuginfod.timeout.description": "The timeout in seconds for debuginfod server requests. Default is 30. Set to 0 to use GDB/libdebuginfod defaults (no override).",
     "c_cpp.debuggers.VSSymbolOptions.description": "Provides configuration for locating and loading symbols to the debug adapter.",
     "c_cpp.debuggers.VSSymbolOptions.searchPaths.description": "Array of symbol server URLs (example: http\u200b://MyExampleSymbolServer) or directories (example: /build/symbols) to search for .pdb files. These directories will be searched in addition to the default locations -- next to the module and the path where the pdb was originally dropped to.",
     "c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description": "If 'true' the Microsoft Symbol server (https\u200b://msdl.microsoft.com\u200b/download/symbols) is added to the symbols search path. If unspecified, this option defaults to 'false'.",
@@ -1023,6 +1102,12 @@
     "c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description": "Array of modules that the debugger should NOT load symbols for. Wildcards (example: MyCompany.*.dll) are supported.\n\nThis property is ignored unless 'mode' is set to 'loadAllButExcluded'.",
     "c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description": "Array of modules that the debugger should load symbols for. Wildcards (example: MyCompany.*.dll) are supported.\n\nThis property is ignored unless 'mode' is set to 'loadOnlyIncluded'.",
     "c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description": "If true, for any module NOT in the 'includedModules' array, the debugger will still check next to the module itself and the launching executable, but it will not check paths on the symbol search list. This option defaults to 'true'.\n\nThis property is ignored unless 'mode' is set to 'loadOnlyIncluded'.",
+    "c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description": {
+        "message": "If true, no warning will be logged when run without debugging fails to launch the program in the terminal.",
+        "comment": [
+            "{Locked=\"true\"}"
+        ]
+    },
     "c_cpp.semanticTokenTypes.referenceType.description": "Style for C++/CLI reference types.",
     "c_cpp.semanticTokenTypes.cliProperty.description": "Style for C++/CLI properties.",
     "c_cpp.semanticTokenTypes.genericType.description": "Style for C++/CLI generic types.",

@@ -5,8 +5,9 @@
 
 import { cp, readdir, rm, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
-import { $args, $root, green, heading, note } from './common';
+import { basename, join } from 'node:path';
+import { verbose } from '../src/Utility/Text/streams';
+import { $args, $root, Git, green, heading, note, warn } from './common';
 
 const extensionPrefix = 'ms-vscode.cpptools-';
 const foldersToCopy = ['bin', 'debugAdapters', 'LLVM'] as const;
@@ -73,17 +74,47 @@ async function getInstalledExtensions(root: string): Promise<InstalledExtension[
     }
 }
 
-async function findLatestInstalledExtension(providedPath?: string): Promise<string> {
-    if (providedPath) {
-        return providedPath;
+async function findExtensionsFolder(root: string): Promise<string | undefined> {
+    try {
+        const entries = await readdir(root, { withFileTypes: true });
+        for (const entry of entries) {
+            if (entry.isDirectory()) {
+                if (entry.name === 'extensions') {
+                    const extensionEntries = await readdir(join(root, entry.name), { withFileTypes: true });
+                    for (const extensionEntry of extensionEntries) {
+                        if (extensionEntry.isDirectory() && extensionEntry.name.startsWith(extensionPrefix)) {
+                            return join(root, entry.name);
+                        }
+                    }
+                } else {
+                    const result = await findExtensionsFolder(join(root, entry.name));
+                    if (result) {
+                        return result;
+                    }
+                }
+            }
+        }
+    } catch {
+        // Ignore errors (permission denied, etc.)
     }
+    return undefined;
+}
 
+async function findLatestInstalledExtension(providedPath?: string): Promise<string> {
     const searchRoots: string[] = [
         join(homedir(), '.vscode', 'extensions'),
         join(homedir(), '.vscode-insiders', 'extensions'),
         join(homedir(), '.vscode-server', 'extensions'),
         join(homedir(), '.vscode-server-insiders', 'extensions')
     ];
+    if (providedPath) {
+        // find a folder called 'extensions' recursively under the provided path and add it to the front of the search roots
+        const extensionsFolderPath = await findExtensionsFolder(providedPath);
+        if (extensionsFolderPath) {
+            verbose(`Found extensions folder under provided path: ${extensionsFolderPath}`);
+            searchRoots.unshift(extensionsFolderPath);
+        }
+    }
 
     const installed: InstalledExtension[] = (await Promise.all(searchRoots.map(each => getInstalledExtensions(each)))).flat();
     if (!installed.length) {
@@ -94,7 +125,34 @@ async function findLatestInstalledExtension(providedPath?: string): Promise<stri
     return installed[0].path;
 }
 
-export async function main(sourcePath = $args[0]) {
+/**
+ * A few files inside the copied folders are checked into the repo (for example bin/cpp.hint and
+ * bin/messages/**). The copy overwrites them with the installed extension's versions, which can differ
+ * in line endings or content and then show up as spurious local modifications. Restore any tracked files
+ * that the copy changed so only the untracked binaries remain in the working tree.
+ */
+async function restoreTrackedFiles(): Promise<void> {
+    const modified = await Git('ls-files', '--modified', '--', ...foldersToCopy);
+    if (modified.code) {
+        warn(`Unable to determine which tracked files to restore: ${modified.error.all().join('\n')}`);
+        return;
+    }
+
+    const files = modified.stdio.all().map(line => line.trim()).filter(line => line.length > 0);
+    if (!files.length) {
+        return;
+    }
+
+    const restored = await Git('checkout', '--', ...files);
+    if (restored.code) {
+        warn(`Unable to restore tracked files after copy: ${restored.error.all().join('\n')}`);
+        return;
+    }
+
+    note(`Restored ${files.length} tracked ${files.length === 1 ? 'file' : 'files'} overwritten by the copy.`);
+}
+
+export async function main(sourcePath = $args[0]): Promise<string | undefined> {
     console.log(heading('Copy installed extension binaries'));
 
     const installedExtensionPath: string = await findLatestInstalledExtension(sourcePath);
@@ -110,4 +168,9 @@ export async function main(sourcePath = $args[0]) {
     }
 
     note(`Copied installed binaries into ${$root}`);
+
+    await restoreTrackedFiles();
+
+    const installedVersion = tryParseVersion(basename(installedExtensionPath));
+    return installedVersion?.join('.');
 }

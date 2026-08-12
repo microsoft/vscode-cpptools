@@ -7,6 +7,7 @@
 	"learn.how.to.install.a.library": "vcpkg ile bu üst bilgi için bir kitaplık yüklemeyi öğrenin",
 	"copy.vcpkg.command": "'{0}' yükleme vcpkg komutunu panoya kopyalayın",
 	"on.disabled.command": "`C_Cpp.intelliSenseEngine` `disabled` olarak ayarlandığında IntelliSense ile ilgili komutlar yürütülemez.",
+	"switch.header.source": "Başlık/Kaynak Değiştiriliyor...",
 	"client.not.found": "istemci bulunamadı",
 	"ok": "Tamam",
 	"install.compiler.mac.title": "Clang derleyicisi şimdi kurulacak",

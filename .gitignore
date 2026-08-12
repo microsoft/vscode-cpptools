@@ -13,3 +13,5 @@ OneLocBuild
 
 # ignore imported localization xlf directory
 vscode-translations-import
+
+.vscode/settings.json

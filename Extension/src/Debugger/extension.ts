@@ -14,13 +14,14 @@ import { SshTargetsProvider, getActiveSshTarget, initializeSshTargets, selectSsh
 import { TargetLeafNode, setActiveSshTarget } from '../SSH/TargetsView/targetNodes';
 import { sshCommandToConfig } from '../SSH/sshCommandToConfig';
 import { getSshConfiguration, getSshConfigurationFiles, parseFailures, writeSshConfiguration } from '../SSH/sshHosts';
-import { pathAccessible } from '../common';
+import { documentSelector, pathAccessible } from '../common';
 import { instrument } from '../instrumentation';
 import { getSshChannel } from '../logger';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, DebugConfigurationProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { DebuggerType } from './configurations';
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
+import { EvaluatableExpressionProvider } from './evaluatableExpressionProvider';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensionContext.subscriptions.
@@ -81,6 +82,9 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     // Register Debug Adapters
     disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppvsdbg, new CppvsdbgDebugAdapterDescriptorFactory(context)));
     disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppdbg, new CppdbgDebugAdapterDescriptorFactory(context)));
+
+    // Supplies the expression evaluated by debug data-tips when hovering C/C++ source.
+    disposables.push(vscode.languages.registerEvaluatableExpressionProvider(documentSelector, instrument(new EvaluatableExpressionProvider())));
 
     // SSH Targets View
     await initializeSshTargets();

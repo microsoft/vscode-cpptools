@@ -7,6 +7,7 @@
 	"learn.how.to.install.a.library": "了解如何使用 vcpkg 安裝此標頭的程式庫",
 	"copy.vcpkg.command": "將用於安裝 '{0}' 的 vcpkg 命令複製到剪貼簿",
 	"on.disabled.command": "當 `C_Cpp.intelliSenseEngine` 設為 `disabled` 時，無法執行IntelliSense 的相關命令。",
+	"switch.header.source": "正在切換標頭/來源...",
 	"client.not.found": "找不到用戶端",
 	"ok": "確定",
 	"install.compiler.mac.title": "現在將安裝 clang 編譯器",

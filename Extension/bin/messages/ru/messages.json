@@ -2999,7 +2999,7 @@
     "назначение устаревшему элементу this несовместимо с режимом C++11",
     "произошла неизвестная ошибка.  PCH-файл IntelliSense не был создан.",
     "Один или несколько удаленных путей не могут быть сопоставлены с существующими локальными путями. Использование IntelliSense может быть ограничено.",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,

@@ -4,20 +4,24 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
-import { createHash } from 'crypto';
-import { tmpdir } from 'os';
 import { resolve } from 'path';
 import { verbose } from '../src/Utility/Text/streams';
 import { mkdir, readJson, rimraf, write } from './common';
+import { getVSCodeTestIsolate } from './vscodeTestPath';
 
-export const isolated = resolve(tmpdir(), '.vscode-test', createHash('sha256').update(__dirname).digest('hex').substring(0, 6));
+export const isolated = getVSCodeTestIsolate(__dirname);
 export const extensionsDir = resolve(isolated, 'extensions');
 export const userDir = resolve(isolated, 'user-data');
 export const settings = resolve(userDir, "User", 'settings.json');
 
+// Pin the test VS Code build to a known-good stable release for deterministic CI instead of
+// always pulling latest. Launching macOS 1.110+ builds requires @vscode/test-electron >= 3.1.0.
+export const testVSCodeVersion = '1.131.0';
+
 export const options = {
+    version: testVSCodeVersion,
     cachePath: `${isolated}/cache`,
-    launchArgs: ['--no-sandbox', '--disable-updates', '--skip-welcome', '--skip-release-notes', `--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`, '--disable-workspace-trust']
+    launchArgs: ['--no-sandbox', '--disable-updates', '--skip-welcome', '--skip-release-notes', '--disable-extensions', `--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`, '--disable-workspace-trust']
 };
 
 export async function install() {
@@ -34,9 +38,9 @@ export async function install() {
         args.push(`--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`);
 
         // install the appropriate extensions
-        // spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cpptools'], { encoding: 'utf-8', stdio: 'ignore' });
-        // spawnSync(cli, [...args, '--install-extension', 'twxs.cmake'], { encoding: 'utf-8', stdio: 'ignore' });
-        // spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cmake-tools'], { encoding: 'utf-8', stdio: 'ignore' });
+        // runVSCodeCommand([...args, '--install-extension', 'ms-vscode.cpptools'], options);
+        // runVSCodeCommand([...args, '--install-extension', 'twxs.cmake'], options);
+        // runVSCodeCommand([...args, '--install-extension', 'ms-vscode.cmake-tools'], options);
         const settingsJson = await readJson(settings, {});
         if (!settingsJson["workbench.colorTheme"]) {
             settingsJson["workbench.colorTheme"] = "Tomorrow Night Blue";

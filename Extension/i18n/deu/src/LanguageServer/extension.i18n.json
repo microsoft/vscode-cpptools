@@ -7,6 +7,7 @@
 	"learn.how.to.install.a.library": "Erfahren Sie, wie Sie mit vcpkg eine Bibliothek für diesen Header installieren.",
 	"copy.vcpkg.command": "vcpkg-Befehl zum Installieren von \"{0}\" in die Zwischenablage kopieren",
 	"on.disabled.command": "IntelliSense-bezogene Befehle können nicht ausgeführt werden, wenn `C_Cpp.intelliSenseEngine` auf `disabled` festgelegt ist.",
+	"switch.header.source": "Header/Quelle wird gewechselt...",
 	"client.not.found": "Client nicht gefunden.",
 	"ok": "OK",
 	"install.compiler.mac.title": "Der Clang-Compiler wird jetzt installiert.",

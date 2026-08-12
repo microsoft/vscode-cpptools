@@ -10,6 +10,7 @@
     - [From Inside VS Code](#from-inside-vs-code)
     - [From Command line](#from-command-line)
 - [Use of an isolated VS Code environment](#use-of-an-isolated-vs-code-environment)
+- [Capturing sanitizer diagnostics from the language server](#capturing-sanitizer-diagnostics-from-the-language-server)
 - [Testing](#testing)
     - [Unit tests](#unit-tests)
     - [Scenario Tests](#scenario-tests)
@@ -34,7 +35,7 @@
 
 ### Required Tools 
 
-* [Node.js](https://nodejs.org/en/download/) v16.*
+* [Node.js](https://nodejs.org/en/download/) 24.x
 * npm (comes with Node.js)
 
 ### Setting up the repository
@@ -80,17 +81,33 @@ The scripts for this repository now support running VS Code and the extension in
 completely isolated environment (separate install of VS Code, private extensions and 
 user folders, etc). 
 
-The scripts that install VS Code place it in a `$ENV:TMP/.vscode-test/<UID>` folder where
-`<UID>` is a has calculated from the extension folder (this permits multiple checkouts of 
-the source repository and each gets it's own isolated environment).
+The scripts that install VS Code retain it in a per-user cache directory:
+
+* Windows: `%LOCALAPPDATA%\Microsoft\vscode-cpptools\vscode-test\<UID>` (or
+    `%USERPROFILE%\AppData\Local\Microsoft\vscode-cpptools\vscode-test\<UID>` if `%LOCALAPPDATA%` is unavailable)
+* macOS: `~/Library/Caches/vscode-cpptools/vscode-test/<UID>`
+* Linux: `${XDG_CACHE_HOME:-~/.cache}/vscode-cpptools/vscode-test/<UID>`
+
+The environment-based cache locations are used only when they are fully qualified. On Windows,
+they must include a drive or UNC share. Unsupported values fall back to the per-user locations shown above.
+
+`<UID>` is a six-character hash calculated from the checkout's `.scripts` directory path. This permits multiple
+checkouts of the source repository, with each checkout retaining its own isolated `cache`,
+`extensions`, and `user-data` folders across runs. Set `CPPTOOLS_VSCODE_TEST_ROOT` to a fully qualified
+absolute directory to override the platform-specific `vscode-test` root. The same Windows drive or UNC
+share requirement applies. The checkout-specific `<UID>` is still appended to the override.
 
 The [`test scripts`](#yarn-test) will automatically install and use this isolated environment.
 
 You can invoke VS Code from the command line using the [`yarn code`](#yarn-code) script.
 
-If you want to remove the isolate environment use the `yarn code reset` or `yarn test reset` scripts
-to delete the folders and remove all of the configuration files. Next time you use the `yarn test` or 
-`yarn code` commands, it will reinstall a fresh isolated environment.
+If you want to remove the isolated environment use the `yarn code reset` or `yarn test reset` scripts
+to delete only the current checkout's hashed folder and remove all of its configuration files. Next
+time you use the `yarn test` or `yarn code` commands, it will reinstall a fresh isolated environment.
+
+Isolates created by earlier versions under the system temporary directory are not migrated or
+removed automatically. After ensuring that no test runs are using them, you can remove the old
+`.vscode-test` folder from the system temporary directory once to reclaim that space.
 
 The Isolated environment has the theme automatically set to blue so that it is visually distinct from
 your normal VS Code environment.
@@ -98,6 +115,39 @@ your normal VS Code environment.
 > #### Note  
 > When debugging the scenario tests from VS Code, it has to use the same VS Code binary 
 > as the debugger instance, so the isolated environment can't be used. 
+
+## Capturing sanitizer diagnostics from the language server
+
+When you run a sanitizer build of the language server (a `-tsan` or `-asan-ubsan` CMake preset --
+ThreadSanitizer, or AddressSanitizer + UndefinedBehaviorSanitizer combined; on Windows use
+`windows-x64-asan`, ASan only), the sanitizer prints its
+reports to `stderr`. Because the extension talks to the language server over `stdio`, those reports are
+easy to miss, and the exit-time backtrace you see in a crash log only shows the sanitizer shutting
+down -- not the actual report.
+
+To capture the reports, set the `CPPTOOLS_SANITIZER_LOG_DIR` environment variable before launching
+VS Code (or add it to the `env` of the launch config that starts the extension). The extension then
+routes each sanitizer's `log_path` into that directory, so every process -- `cpptools` and the
+`cpptools-srv`/`cpptools-srv2` children it spawns, which inherit the environment -- writes its own
+`<dir>/<sanitizer>.<pid>` file (for example `tsan.12345`). Any `TSAN_OPTIONS`/`ASAN_OPTIONS`/
+`UBSAN_OPTIONS` you already set are preserved.
+
+```bash
+# macOS/Linux
+export CPPTOOLS_SANITIZER_LOG_DIR=/tmp/cpptools-san
+# ...launch VS Code with a sanitizer build of cpptools, reproduce the issue, then read the logs.
+# A -tsan build writes tsan.<pid>; a combined -asan-ubsan build writes both asan.<pid> and ubsan.<pid>.
+cat /tmp/cpptools-san/*
+```
+
+The **Run Extension (capture sanitizer logs)** configuration in `.vscode/launch.json` sets this
+variable for you (to `${userHome}/cpptools-sanitizer-logs`), so you can just pick it from the Run
+and Debug dropdown instead of exporting the variable yourself.
+
+The variable is opt-in: when it is unset (normal development, CI, released builds) the child
+environment is inherited unchanged, so there is no behavior change. No debugger is required -- and
+because the sanitizer writes to a file, you avoid the shutdown-time hangs that can occur when a
+debugger is attached to a sanitizer process as it exits.
 
 ## Testing
 The test architecture has been reorganized and the layout refactored a bit. 

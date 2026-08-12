@@ -6,8 +6,7 @@
 {
 	"debugger.not.available": "Тип отладчика \"{0}\" недоступен для компьютеров с операционной системой, отличной от Windows.",
 	"debugger.noDebug.requestType.not.supported": "Запуск без отладки поддерживается только для конфигураций запуска.",
-	"debugger.noDebug.pipeTransport.not.supported": "Запуск без отладки не поддерживается для конфигураций с настроенным параметром \"pipeTransport\".",
-	"debugger.noDebug.debugServerPath.not.supported": "Запуск без отладки не поддерживается для конфигураций с настроенным параметром \"debugServerPath\".",
-	"debugger.noDebug.miDebuggerServerAddress.not.supported": "Запуск без отладки не поддерживается для конфигураций с настроенным параметром \"miDebuggerServerAddress\".",
-	"debugger.noDebug.coreDumpPath.not.supported": "Запуск без отладки не поддерживается для конфигураций с настроенным параметром \"coreDumpPath\"."
+	"debugger.unsupported.properties": "Конфигурации запуска со следующими свойствами нельзя запускать напрямую в терминале: {0}",
+	"debugger.fallback.message": "Выходные данные программы будут отображаться на консоли отладки.",
+	"debugger.fallback.message2": "Чтобы скрыть это предупреждение, задайте для свойства ignoreRunWithoutDebuggingWarnings значение true в конфигурации запуска."
 }

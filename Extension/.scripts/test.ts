@@ -14,7 +14,7 @@ import { filepath } from '../src/Utility/Filesystem/filepath';
 import { is } from '../src/Utility/System/guards';
 import { verbose } from '../src/Utility/Text/streams';
 import { getTestInfo } from '../test/common/selectTests';
-import { $args, $root, $scenario, assertAnyFile, assertAnyFolder, brightGreen, checkBinaries, cmdSwitch, cyan, error, gray, green, readJson, red, writeJson } from './common';
+import { $args, $root, $scenario, $scenarioArgs, assertAnyFile, assertAnyFolder, brightGreen, checkBinaries, cmdSwitch, cyan, error, gray, green, readJson, red, writeJson } from './common';
 import { install, isolated, options } from './vscode';
 
 export { install, reset } from './vscode';
@@ -27,6 +27,7 @@ const filters = [
     /^Unexpected token A/,
     /Cannot register 'cmake.cmakePath'/,
     /\[DEP0005\] DeprecationWarning/,
+    /\[DEP0169\] DeprecationWarning/,
     /--trace-deprecation/,
     /Iconv-lite warning/,
     /^Extension '/,
@@ -90,7 +91,8 @@ async function scenarioTests(assets: string, name: string, workspace: string) {
         extensionTestsPath: resolve($root, 'dist/test/common/selectTests'),
         launchArgs: workspace ? [...options.launchArgs, workspace] : options.launchArgs,
         extensionTestsEnv: {
-            SCENARIO: assets
+            SCENARIO: assets,
+            SCENARIO_ARGS: $scenarioArgs.join(',')
         }
     });
 }
