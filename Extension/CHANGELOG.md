@@ -1,93 +1,55 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.33.7: August 11, 2026
-### Bug Fixes
-* Fix another crash when reading files saved in certain multibyte encodings such as GB18030 or EUC-JP.
-* Fix newly created files not being associated with the correct configuration in the browse database.
-* Fix the language server becoming unresponsive during browse database initialization.
-* Fix stale diagnostics and missing code actions after editing visible headers.
-* Fix `/ZW:nostdlib` not being processed correctly by IntelliSense.
-* Update dependencies.
-
-## Version 1.33.6: August 4, 2026
-### Bug Fixes
-* Fix a spurious recursive includes (`**`) debug console log warning for paths merged from `c_cpp_properties.json` when `C_Cpp.mergeConfigurations` is enabled. [#14125](https://github.com/microsoft/vscode-cpptools/issues/14125)
-  * Thanks for the contribution. [@owevertonguedes (Weverton Guedes)](https://github.com/owevertonguedes) [PR #14620](https://github.com/microsoft/vscode-cpptools/pull/14620)
-* Fix custom configurations being discarded when `C_Cpp.mergeConfigurations` is enabled and a provider supplies the file `uri` as a `vscode.Uri`. [#14621](https://github.com/microsoft/vscode-cpptools/issues/14621)
-  * Thanks for the contribution. [@owevertonguedes (Weverton Guedes)](https://github.com/owevertonguedes) [PR #14624](https://github.com/microsoft/vscode-cpptools/pull/14624)
-* Fix a tag parser crash when a UTF-8 string literal is concatenated with a narrow string literal containing an invalid multibyte sequence.
-* Fix potential browse database corruption when the same workspace is opened by multiple processes on Linux and macOS.
-* Fix a crash when reading files saved in certain multibyte encodings such as GB18030 or EUC-JP.
-* Fix an incorrect file path in an error message on Windows.
-* Other potential crash fixes.
-* Update dependencies.
-
-## Version 1.33.5: July 28, 2026
-### Bug Fixes
-* Fix the remote process picker `ps` command not working with some shells. [#14442](https://github.com/microsoft/vscode-cpptools/issues/14442)
-  * Thanks for the contribution. [@HuzaifaAbdulRehman](https://github.com/HuzaifaAbdulRehman) [PR #14592](https://github.com/microsoft/vscode-cpptools/pull/14592)
-* Fix a spurious IntelliSense error with class template argument deduction (CTAD). [#14453](https://github.com/microsoft/vscode-cpptools/issues/14453), [#14459](https://github.com/microsoft/vscode-cpptools/issues/14459), [#14504](https://github.com/microsoft/vscode-cpptools/issues/14504)
-* Fix 'Run C/C++ File' not running the program in PowerShell when terminal shell integration is unavailable. [#14583](https://github.com/microsoft/vscode-cpptools/issues/14583)
-  * Thanks for the contribution. [@owevertonguedes (Weverton Guedes)](https://github.com/owevertonguedes) [PR #14585](https://github.com/microsoft/vscode-cpptools/pull/14585)
-* Fix the build tools walkthrough for Visual Studio 2026. [PR #14589](https://github.com/microsoft/vscode-cpptools/pull/14589)
-* Fix empty database folders being created in every folder of a multi-root workspace.
-* Fix 'Rescan Workspace' triggering a full database reset instead of only a rescan.
-* Fix several potential deadlocks and data races in the language server.
-* Reduce memory usage to help avoid out-of-memory crashes.
-* Fix an incorrect `#include` casing error on Linux.
-* Fix an IntelliSense crash.
-* Various localization updates.
-* Update dependencies.
-
-## Version 1.33.4: July 8, 2026
-### Bug Fixes
-* Fix the wording for the `#include` errors detected message. [#8227](https://github.com/microsoft/vscode-cpptools/issues/8227)
-* Fix another "directory_cache" crash.
-* Update some localization.
-
-## Version 1.33.3: July 6, 2026
-### Enhancement
-* Allow platform overrides in `cppbuild` tasks. [#11601](https://github.com/microsoft/vscode-cpptools/issues/11601)
-
-### Bug Fixes
-* Fix `[[no_unique_address]]` empty-base layout `sizeof` being computed too large. [#14524](https://github.com/microsoft/vscode-cpptools/issues/14524)
-* Fix C/C++ debug data-tips on members of a dereferenced expression. [PR #14540](https://github.com/microsoft/vscode-cpptools/pull/14540)
-  * Thanks for the contribution. [@tieo](https://github.com/tieo)
-* Fix `clang-format`/`clang-tidy` version check failing on Windows. [PR #14552](https://github.com/microsoft/vscode-cpptools/pull/14552)
-* Fix Windows backslash paths being mangled when adding an SSH target. [PR #14554](https://github.com/microsoft/vscode-cpptools/pull/14554)
-* Fix "directory_cache" crashes.
-* Fix spurious IntelliSense error on `std::variant` brace-initialization.
-
-## Version 1.33.2: June 26, 2026
-### Bug Fixes
-* Fix a regression with 'Find All References' with functions that exist in both C and C++ files. [#14546](https://github.com/microsoft/vscode-cpptools/issues/14546)
-
-## Version 1.33.1: June 23, 2026
-### Bug Fixes
-* Fix 'Find All References' dropping valid references when a template parameter type has a typedef alias in only one translation unit. [#14344](https://github.com/microsoft/vscode-cpptools/issues/14344)
-* Fix a crash regression on file open.
-* Fix IntelliSense incorrectly resolving `#include` files through a symbolic link after the target directory was deleted from disk.
-* Fix "tag parsing finished" status randomly getting reported too soon after a 'Reset IntelliSense Database' command.
-
-## Version 1.33.0: June 22, 2026
+## Version 1.33.8: August 17, 2026
 ### New Feature
 * Unification of tag parsing with the VS implementation. In particular, it's now done using multiple parallel `cpptools-srv2` processes. [PR #14426](https://github.com/microsoft/vscode-cpptools/pull/14426)
 
 ### Enhancements
+* Allow platform overrides in `cppbuild` tasks. [#11601](https://github.com/microsoft/vscode-cpptools/issues/11601)
 * Add the `debuginfod` launch option to the `cppdbg` debugger schema. [#14458](https://github.com/microsoft/vscode-cpptools/issues/14458), [#14460](https://github.com/microsoft/vscode-cpptools/issues/14460), [PR #14471](https://github.com/microsoft/vscode-cpptools/pull/14471), [PR #14506](https://github.com/microsoft/vscode-cpptools/pull/14506), [MIEngine#1562](https://github.com/microsoft/MIEngine/issues/1562)
 * Add the `ignoreRunWithoutDebuggingWarnings` property to allow 'Run without debugging' warnings to be suppressed. [#14515](https://github.com/microsoft/vscode-cpptools/issues/14515)
-* Various localization updates.
 
 ### Bug Fixes
+* Fix the wording for the `#include` errors detected message. [#8227](https://github.com/microsoft/vscode-cpptools/issues/8227)
 * Fix an incorrect `invalid type conversion` IntelliSense error. [#11294](https://github.com/microsoft/vscode-cpptools/issues/11294)
 * Fix include completion (with recursive includes) still suggesting headers from a deleted folder. [#12636](https://github.com/microsoft/vscode-cpptools/issues/12636)
+* Fix a spurious recursive includes (`**`) debug console log warning for paths merged from `c_cpp_properties.json` when `C_Cpp.mergeConfigurations` is enabled. [#14125](https://github.com/microsoft/vscode-cpptools/issues/14125)
+  * Thanks for the contribution. [@owevertonguedes (Weverton Guedes)](https://github.com/owevertonguedes) [PR #14620](https://github.com/microsoft/vscode-cpptools/pull/14620)
+* Fix 'Find All References' dropping valid references when a template parameter type has a typedef alias in only one translation unit. [#14344](https://github.com/microsoft/vscode-cpptools/issues/14344)
+* Fix the remote process picker `ps` command not working with some shells. [#14442](https://github.com/microsoft/vscode-cpptools/issues/14442)
+  * Thanks for the contribution. [@HuzaifaAbdulRehman](https://github.com/HuzaifaAbdulRehman) [PR #14592](https://github.com/microsoft/vscode-cpptools/pull/14592)
+* Fix a spurious IntelliSense error with class template argument deduction (CTAD). [#14453](https://github.com/microsoft/vscode-cpptools/issues/14453), [#14459](https://github.com/microsoft/vscode-cpptools/issues/14459), [#14504](https://github.com/microsoft/vscode-cpptools/issues/14504)
 * Add `important` to `C_Cpp.doxygen.sectionTags`. [PR #14473](https://github.com/microsoft/vscode-cpptools/pull/14473)
 * Update the minimum supported VS Code version to 1.77. [PR #14502](https://github.com/microsoft/vscode-cpptools/pull/14502)
 * Fix issues with the debugger `launch.json` schema. [PR #14523](https://github.com/microsoft/vscode-cpptools/pull/14523)
+* Fix `[[no_unique_address]]` empty-base layout `sizeof` being computed too large. [#14524](https://github.com/microsoft/vscode-cpptools/issues/14524)
 * Fix `${env:VAR}` and `${env.VAR}` not expanding to an empty string when the environment variable is unset, to match VS Code's behavior. [PR #14535](https://github.com/microsoft/vscode-cpptools/pull/14535)
   * Thanks for the contribution. [@notable-equivalent](https://github.com/notable-equivalent)
+* Fix C/C++ debug data-tips on members of a dereferenced expression. [PR #14540](https://github.com/microsoft/vscode-cpptools/pull/14540)
+  * Thanks for the contribution. [@tieo](https://github.com/tieo)
+* Fix Windows backslash paths being mangled when adding an SSH target. [PR #14554](https://github.com/microsoft/vscode-cpptools/pull/14554)
+* Fix 'Run C/C++ File' not running the program in PowerShell when terminal shell integration is unavailable. [#14583](https://github.com/microsoft/vscode-cpptools/issues/14583)
+  * Thanks for the contribution. [@owevertonguedes (Weverton Guedes)](https://github.com/owevertonguedes) [PR #14585](https://github.com/microsoft/vscode-cpptools/pull/14585)
+* Fix the build tools walkthrough for Visual Studio 2026. [PR #14589](https://github.com/microsoft/vscode-cpptools/pull/14589)
+* Fix custom configurations being discarded when `C_Cpp.mergeConfigurations` is enabled and a provider supplies the file `uri` as a `vscode.Uri`. [#14621](https://github.com/microsoft/vscode-cpptools/issues/14621)
+  * Thanks for the contribution. [@owevertonguedes (Weverton Guedes)](https://github.com/owevertonguedes) [PR #14624](https://github.com/microsoft/vscode-cpptools/pull/14624)
+* Fix a tag parser crash when a UTF-8 string literal is concatenated with a narrow string literal containing an invalid multibyte sequence.
+* Fix IntelliSense incorrectly resolving `#include` files through a symbolic link after the target directory was deleted from disk.
+* Fix potential browse database corruption when the same workspace is opened by multiple processes on Linux and macOS.
+* Fix crashes when reading files saved in certain multibyte encodings such as GB18030 or EUC-JP.
+* Fix empty database folders being created in every folder of a multi-root workspace.
 * Fix the `C_Cpp.refactoring.includeHeader` setting not honoring `always`.
+* Fix spurious IntelliSense error on `std::variant` brace-initialization.
+* Fix several potential deadlocks and data races in the language server.
+* Fix an incorrect file path in an error message on Windows.
+* Reduce memory usage to help avoid out-of-memory crashes.
+* Fix stale diagnostics after editing visible headers.
+* Fix several crashes in the recursive include cache.
+* Fix an incorrect `#include` casing error on Linux.
 * Various other fixes found internally.
+* Various localization updates.
+* Fix an IntelliSense crash.
+* Update dependencies.
 
 ## Version 1.32.2: April 28, 2026
 ### New Feature
