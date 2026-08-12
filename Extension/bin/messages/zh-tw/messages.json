@@ -2999,7 +2999,7 @@
     "'this' 用法已過時，且這種指派與 C++11 模式不相容",
     "發生未知的錯誤。未產生 IntelliSense PCH 檔案。",
     "有一或多個遠端路徑無法對應到現有的本機路徑。IntelliSense 的效能可能會變差。",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,

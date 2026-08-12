@@ -26,7 +26,7 @@
 	"loggingLevel.changed": "{0} {1} olarak değiştirildi",
 	"dismiss.button": "Kapat",
 	"disable.warnings.button": "Uyarıları Devre Dışı Bırak",
-	"unable.to.provide.configuration": "{0}, '{1}' için IntelliSense yapılandırma bilgilerini sağlayamıyor. Bunun yerine '{2}' yapılandırmasındaki ayarlar kullanılacak.",
+	"unable.to.provide.configuration": "{0}, IntelliSense yapılandırma bilgilerini sağlayamıyor. Bunun yerine '{1}' yapılandırmasındaki ayarlar kullanılacak.",
 	"config.not.found": "İstenen yapılandırma adı bulunamadı: {0}",
 	"unsupported.client": "Desteklenmeyen istemci",
 	"timed.out": "{0} ms'de zaman aşımına uğradı.",

@@ -26,7 +26,7 @@
 	"loggingLevel.changed": "{0} 已變更為: {1}",
 	"dismiss.button": "關閉",
 	"disable.warnings.button": "停用警告",
-	"unable.to.provide.configuration": "{0} 無法提供 '{1}' 的 IntelliSense 組態資訊。將改用來自 '{2}' 組態的設定。",
+	"unable.to.provide.configuration": "{0} 無法提供 IntelliSense 組態資訊。將改為使用來自 '{1}' 組態的設定。",
 	"config.not.found": "找不到要求的組態名稱: {0}",
 	"unsupported.client": "不支援的用戶端",
 	"timed.out": "逾時 ({0} 毫秒內)。",

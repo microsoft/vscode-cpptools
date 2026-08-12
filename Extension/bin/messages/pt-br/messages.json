@@ -2999,7 +2999,7 @@
     "a atribuição ao anacronismo 'this' não é compatível com o modo C++11",
     "erro desconhecido. Não foi gerado um arquivo PCH do IntelliSense.",
     "Um ou mais caminhos remotos não podem ser mapeados para os caminhos locais existentes. A experiência do IntelliSense pode ser degradada.",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,

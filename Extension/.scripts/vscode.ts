@@ -4,18 +4,22 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
-import { createHash } from 'crypto';
-import { tmpdir } from 'os';
 import { resolve } from 'path';
 import { verbose } from '../src/Utility/Text/streams';
 import { mkdir, readJson, rimraf, write } from './common';
+import { getVSCodeTestIsolate } from './vscodeTestPath';
 
-export const isolated = resolve(tmpdir(), '.vscode-test', createHash('sha256').update(__dirname).digest('hex').substring(0, 6));
+export const isolated = getVSCodeTestIsolate(__dirname);
 export const extensionsDir = resolve(isolated, 'extensions');
 export const userDir = resolve(isolated, 'user-data');
 export const settings = resolve(userDir, "User", 'settings.json');
 
+// Pin the test VS Code build to a known-good stable release for deterministic CI instead of
+// always pulling latest. Launching macOS 1.110+ builds requires @vscode/test-electron >= 3.1.0.
+export const testVSCodeVersion = '1.131.0';
+
 export const options = {
+    version: testVSCodeVersion,
     cachePath: `${isolated}/cache`,
     launchArgs: ['--no-sandbox', '--disable-updates', '--skip-welcome', '--skip-release-notes', '--disable-extensions', `--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`, '--disable-workspace-trust']
 };

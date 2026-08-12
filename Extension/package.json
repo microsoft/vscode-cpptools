@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.33.4-main",
+    "version": "1.33.7-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -7163,6 +7163,8 @@
         "scripts": "ts-node -T .scripts/scripts.ts",
         "show": "ts-node -T .scripts/clean.ts show",
         "clean": "ts-node -T .scripts/clean.ts",
+        "test-yarn-lock": "node --test .scripts/verifyYarnLock.test.mjs",
+        "verify-yarn-lock": "node .scripts/verifyYarnLock.mjs",
         "test": "yarn install && (yarn verify prep --quiet || yarn prep) && (yarn verify compiled --quiet || yarn build) && ts-node -T .scripts/test.ts",
         "code": "yarn install && (yarn verify compiled --quiet || yarn build) && yarn verify binaries && ts-node -T .scripts/code.ts",
         "verify": "ts-node -T .scripts/verify.ts",
@@ -7172,7 +7174,7 @@
         "watch": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build tsconfig.json --watch",
         "rebuild": "yarn install && yarn clean && yarn prep && yarn build",
         "vsix-prepublish": "npm run bootstrap && yarn clean && yarn webpack",
-        "webpack": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build ui.tsconfig.json && webpack --mode production --env vscode_nls",
+        "webpack": "yarn install --frozen-lockfile && (yarn verify prep --quiet || yarn prep) && tsc --build ui.tsconfig.json && webpack --mode production --env vscode_nls",
         "generate-native-strings": "ts-node -T ./.scripts/generateNativeStrings.ts",
         "generate-options-schema": "ts-node -T ./.scripts/generateOptionsSchema.ts",
         "copy-walkthrough-media": "ts-node -T ./.scripts/copyWalkthruMedia.ts",
@@ -7203,8 +7205,8 @@
         "@vscode/debugadapter": "^1.65.0",
         "@vscode/debugprotocol": "^1.65.0",
         "@vscode/dts": "^0.4.0",
-        "@vscode/test-electron": "^2.3.10",
-        "@vscode/vsce": "^3.9.1",
+        "@vscode/test-electron": "^3.1.0",
+        "@vscode/vsce": "^3.9.2",
         "async-child-process": "^1.1.1",
         "await-notify": "^1.0.1",
         "eslint": "^9.39.2",
@@ -7258,12 +7260,14 @@
         "which": "^2.0.2"
     },
     "resolutions": {
-        "postcss": "^8.5.14",
+        "postcss": "^8.5.23",
+        "nanoid": "^3.3.17",
         "gulp-typescript/**/glob-parent": "^5.1.2",
         "serialize-javascript": "^7.0.5",
         "@azure/msal-browser": "^4.29.1",
         "flatted": "^3.4.1",
         "uuid": "^11.1.1",
-        "undici": "^7.28.0"
+        "undici": "^7.29.0",
+        "fast-uri": "^3.1.5"
     }
 }
