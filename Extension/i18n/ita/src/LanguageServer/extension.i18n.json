@@ -7,6 +7,7 @@
 	"learn.how.to.install.a.library": "Informazioni su come installare una libreria per questa intestazione con vcpkg",
 	"copy.vcpkg.command": "Copiare il comando vcpkg per installare '{0}' negli Appunti",
 	"on.disabled.command": "Non è possibile eseguire comandi correlati a IntelliSense quando `C_Cpp.intelliSenseEngine` è impostato su `disabled`.",
+	"switch.header.source": "Scambio intestazione/origine in corso...",
 	"client.not.found": "client non trovato",
 	"ok": "OK",
 	"install.compiler.mac.title": "Il compilatore clang verrà ora installato",

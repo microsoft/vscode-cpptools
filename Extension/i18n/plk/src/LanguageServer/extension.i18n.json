@@ -7,6 +7,7 @@
 	"learn.how.to.install.a.library": "Dowiedz się, jak zainstalować bibliotekę dla tego nagłówka przy użyciu menedżera vcpkg",
 	"copy.vcpkg.command": "Skopiuj polecenie vcpkg, aby zainstalować element „{0}” w schowku",
 	"on.disabled.command": "Nie można wykonywać poleceń związanych z funkcją IntelliSense, gdy właściwość `C_Cpp.intelliSenseEngine` ma wartość `disabled`.",
+	"switch.header.source": "Trwa przełączanie nagłówka/źródła...",
 	"client.not.found": "nie znaleziono klienta",
 	"ok": "OK",
 	"install.compiler.mac.title": "Kompilator clang zostanie teraz zainstalowany",

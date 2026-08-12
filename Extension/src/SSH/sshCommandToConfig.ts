@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { BasicParser, IParsedOption } from 'posix-getopt';
-import { parse } from 'shell-quote';
 
 /**
  * Mapping of flags to functions that add the relevant flag to the map of
@@ -124,7 +123,11 @@ export class CommandParseError extends Error { }
  * Attempts to convert an SSH command to an SSH config entry.
  */
 export function sshCommandToConfig(command: string, name?: string): { [key: string]: string } {
-    const parts: string[] = parse(command) as string[];
+    // Split the command line into arguments. We deliberately use shell-like tokenization that
+    // strips single and double quotes and lets an unquoted backslash escape a following space,
+    // while keeping backslashes before other characters literal, so both Unix paths with escaped
+    // spaces (e.g. /home/me/my\ key) and Windows paths (e.g. C:\Users\me\key) are preserved.
+    const parts: string[] = splitArgs(command);
 
     // ignore 'ssh' if the user entered that as their first word
     if (parts[0] === 'ssh') {
@@ -165,6 +168,70 @@ export function sshCommandToConfig(command: string, name?: string): { [key: stri
     // this is the case.
     const { Host, HostName, ...options } = entries;
     return { Host, HostName, ...options };
+}
+
+/**
+ * Splits a command line into arguments using shell-like tokenization that behaves
+ * consistently across platforms. Both single and double quotes group their contents
+ * and are removed, and unquoted whitespace separates arguments.
+ *
+ * Outside of quotes, a backslash escapes only a following whitespace character (so a
+ * Unix path such as `/home/me/my\ key` keeps its space as a single argument). Before
+ * any other character a backslash is kept literal, so Windows paths such as
+ * `C:\Users\me\key` are preserved rather than being consumed as escape sequences.
+ *
+ * This tokenizer is intentionally lenient for a single-line input box: an unterminated
+ * quote is not treated as an error but simply runs to the end of the string.
+ */
+export function splitArgs(command: string): string[] {
+    const args: string[] = [];
+    let current: string = '';
+    let inToken: boolean = false;
+    let quoteChar: string | undefined;
+    for (let i: number = 0; i < command.length; i++) {
+        const c: string = command[i];
+        if (quoteChar !== undefined) {
+            if (c === quoteChar) {
+                quoteChar = undefined;
+            } else {
+                current += c;
+            }
+            continue;
+        }
+        if (c === '"' || c === '\'') {
+            quoteChar = c;
+            inToken = true;
+            continue;
+        }
+        if (c === '\\') {
+            const next: string | undefined = command[i + 1];
+            // Only escape a following whitespace character; otherwise keep the backslash
+            // literal so Windows path separators survive.
+            if (next === ' ' || next === '\t' || next === '\r' || next === '\n') {
+                current += next;
+                inToken = true;
+                i++;
+                continue;
+            }
+            current += c;
+            inToken = true;
+            continue;
+        }
+        if (c === ' ' || c === '\t' || c === '\r' || c === '\n') {
+            if (inToken) {
+                args.push(current);
+                current = '';
+                inToken = false;
+            }
+            continue;
+        }
+        current += c;
+        inToken = true;
+    }
+    if (inToken) {
+        args.push(current);
+    }
+    return args;
 }
 
 /**
@@ -218,8 +285,8 @@ function parseFlags(input: string[], entries: { [key: string]: string }): number
  * are not mentioned on the ssh(1) man page and don't seem to have use in the
  * wild. In the OpenSSH source, they appear to be ignored[3].
  *
- * The `shell-quote` library, like libc does for OpenSSH, takes care of dealing
- * with quotations for for us.
+ * The `splitArgs` tokenizer has already stripped any surrounding quotes before this
+ * function sees a token, so it only has to deal with the unquoted connection string.
  *
  *  1. https://github.com/openssh/openssh-portable/blob/e3b6c966b79c3ea5d51b923c3bbdc41e13b96ea0/ssh.c#L999
  *  2. https://tools.ietf.org/html/draft-ietf-secsh-scp-sftp-ssh-uri-04#section-3.3

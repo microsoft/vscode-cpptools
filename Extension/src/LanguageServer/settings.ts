@@ -4,11 +4,10 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
@@ -32,6 +31,10 @@ export interface Excludes {
 export interface Associations {
     [key: string]: string;
 }
+
+// The settings sections that we provide accessors for.
+// This is used to filter out settings changed events that do not impact the extension.
+export const trackedSections: string[] = ['C_Cpp', 'editor', 'files', 'search', 'workbench'];
 
 // Settings that can be undefined have default values assigned in the native code or are meant to return undefined.
 export interface WorkspaceFolderSettingsParams {
@@ -297,7 +300,7 @@ export class CppSettings extends Settings {
                 let bundledVersion: string;
                 try {
                     const bundledPath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
-                    const output: string = execSync(quote([bundledPath, '--version'])).toString();
+                    const output: string = execFileSync(bundledPath, ['--version']).toString();
                     bundledVersion = output.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
                     if (!semver.valid(bundledVersion)) {
                         return path;
@@ -309,7 +312,7 @@ export class CppSettings extends Settings {
 
                 // Invoke the version on the system to compare versions.  Use ours if it's more recent.
                 try {
-                    const output: string = execSync(`"${path}" --version`).toString();
+                    const output: string = execFileSync(path, ['--version']).toString();
                     const userVersion = output.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
                     if (semver.ltr(userVersion, bundledVersion)) {
                         path = "";
@@ -454,7 +457,6 @@ export class CppSettings extends Settings {
     public get defaultBrowsePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.browse.path"); }
     public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.browse.databaseFilename")); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
-    public get defaultRecursiveIncludesReduce(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.reduce"); }
     public get defaultRecursiveIncludesPriority(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.priority"); }
     public get defaultRecursiveIncludesOrder(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.order"); }
     public get defaultSystemIncludePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.systemIncludePath"); }

@@ -192,7 +192,6 @@
     },
     "SourceFileMapEntry": {
       "type": "object",
-      "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%",
       "default": {
         "<source-path>": {
           "editorPath": "",
@@ -235,6 +234,24 @@
           "type": "integer",
           "description": "%c_cpp.debuggers.hardwareBreakpoints.limit.description%",
           "default": 0
+        }
+      }
+    },
+    "Debuginfod": {
+      "type": "object",
+      "description": "%c_cpp.debuggers.debuginfod.description%",
+      "default": {},
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.debuginfod.enabled.description%",
+          "default": false
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "%c_cpp.debuggers.debuginfod.timeout.description%",
+          "minimum": 0,
+          "default": 30
         }
       }
     },
@@ -819,11 +836,21 @@
           "default": "throw",
           "description": "%c_cpp.debuggers.unknownBreakpointHandling.description%"
         },
+        "debuginfod": {
+          "$ref": "#/definitions/Debuginfod",
+          "description": "%c_cpp.debuggers.debuginfod.description%",
+          "default": {}
+        },
         "variables": {
           "$ref": "#/definitions/Variables"
         },
         "deploySteps": {
           "$ref": "#/definitions/DeploySteps"
+        },
+        "ignoreRunWithoutDebuggingWarnings": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
+          "default": false
         }
       }
     },
@@ -834,11 +861,6 @@
         "program"
       ],
       "properties": {
-        "program": {
-          "type": "string",
-          "description": "%c_cpp.debuggers.program.description%",
-          "default": "${workspaceRoot}/a.out"
-        },
         "targetArchitecture": {
           "type": "string",
           "description": "%c_cpp.debuggers.targetArchitecture.description%",
@@ -884,6 +906,10 @@
           "description": "%c_cpp.debuggers.useExtendedRemote.description%",
           "default": false
         },
+        "program": {
+          "type": "string",
+          "markdownDescription": "%c_cpp.debuggers.program.attach.markdownDescription%"
+        },
         "processId": {
           "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",
           "anyOf": [
@@ -920,6 +946,11 @@
               "$ref": "#/definitions/SourceFileMapEntry"
             }
           ]
+        },
+        "debuginfod": {
+          "$ref": "#/definitions/Debuginfod",
+          "description": "%c_cpp.debuggers.debuginfod.description%",
+          "default": {}
         },
         "logging": {
           "$ref": "#/definitions/Logging",
@@ -1090,20 +1121,27 @@
             "searchPaths": [],
             "searchMicrosoftSymbolServer": false
           }
+        },
+        "ignoreRunWithoutDebuggingWarnings": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.ignoreRunWithoutDebuggingWarnings.description%",
+          "default": false
         }
       }
     },
     "CppvsdbgAttachOptions": {
       "type": "object",
       "default": {},
-      "required": [
-        "processId"
-      ],
+      "required": [],
       "properties": {
         "symbolSearchPath": {
           "type": "string",
           "description": "%c_cpp.debuggers.symbolSearchPath.description%",
           "default": ""
+        },
+        "program": {
+          "type": "string",
+          "markdownDescription": "%c_cpp.debuggers.program.attach.markdownDescription%"
         },
         "processId": {
           "markdownDescription": "%c_cpp.debuggers.processId.anyOf.markdownDescription%",

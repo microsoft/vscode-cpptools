@@ -2999,7 +2999,7 @@
     "Die Zuweisung zum this-Anachronismus ist mit dem C++11-Modus nicht kompatibel.",
     "Unbekannter Fehler. Es wurde keine IntelliSense PCH-Datei generiert.",
     "Mindestens ein Remotepfad kann vorhandenen lokalen Pfaden nicht zugeordnet werden. Die IntelliSense-Funktionen werden ggf. beeinträchtigt.",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,

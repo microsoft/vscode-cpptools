@@ -6,8 +6,7 @@
 {
 	"debugger.not.available": "Typ debugera „{0}” nie jest dostępny dla maszyn z systemem innym niż Windows.",
 	"debugger.noDebug.requestType.not.supported": "Uruchamianie bez debugowania jest obsługiwane tylko dla konfiguracji uruchamiania.",
-	"debugger.noDebug.pipeTransport.not.supported": "Uruchamianie bez debugowania nie jest obsługiwane dla konfiguracji z ustawionym parametrem „pipeTransport”.",
-	"debugger.noDebug.debugServerPath.not.supported": "Uruchamianie bez debugowania nie jest obsługiwane dla konfiguracji z ustawionym parametrem „debugServerPath”.",
-	"debugger.noDebug.miDebuggerServerAddress.not.supported": "Uruchamianie bez debugowania nie jest obsługiwane dla konfiguracji z ustawionym parametrem „miDebuggerServerAddress”.",
-	"debugger.noDebug.coreDumpPath.not.supported": "Uruchamianie bez debugowania nie jest obsługiwane dla konfiguracji z ustawionym parametrem „coreDumpPath”."
+	"debugger.unsupported.properties": "Nie można uruchomić konfiguracji uruchamiania z następującymi właściwościami bezpośrednio w terminalu: {0}",
+	"debugger.fallback.message": "Zamiast tego dane wyjściowe programu będą wyświetlane w konsoli debugowania.",
+	"debugger.fallback.message2": "Aby pominąć to ostrzeżenie, ustaw właściwość „ignoreRunWithoutDebuggingWarnings” na wartość true w konfiguracji uruchamiania."
 }

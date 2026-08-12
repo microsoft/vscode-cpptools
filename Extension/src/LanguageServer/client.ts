@@ -486,8 +486,14 @@ interface CodeAnalysisParams {
     scope: CodeAnalysisScope;
 }
 
+interface RequestCustomConfigsParams {
+    workspaceFolderUri: string;
+    files: string[];
+    batchId: number;
+}
+
 interface FinishedRequestCustomConfigParams {
-    uri: string;
+    batchId: number;
     isProviderRegistered: boolean;
 }
 
@@ -625,12 +631,12 @@ const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefin
 const ExtractToFunctionRequest: RequestType<ExtractToFunctionParams, WorkspaceEditResult, void> = new RequestType<ExtractToFunctionParams, WorkspaceEditResult, void>('cpptools/extractToFunction');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
-const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
 const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
 const CppContextRequest: RequestType<TextDocumentIdentifier, ChatContextResult, void> = new RequestType<TextDocumentIdentifier, ChatContextResult, void>('cpptools/getChatContext');
 const CopilotCompletionContextRequest: RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void> = new RequestType<CopilotCompletionContextParams, CopilotCompletionContextResult, void>('cpptools/getCompletionContext');
 
 // Notifications to the server
+const ChangeCppPropertiesNotification: NotificationType<CppPropertiesParams> = new NotificationType<CppPropertiesParams>('cpptools/didChangeCppProperties');
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileCreated');
 const FileChangedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileChanged');
@@ -651,7 +657,7 @@ const ClearCustomConfigurationsNotification: NotificationType<WorkspaceFolderPar
 const ClearCustomBrowseConfigurationNotification: NotificationType<WorkspaceFolderParams> = new NotificationType<WorkspaceFolderParams>('cpptools/clearCustomBrowseConfiguration');
 const PreviewReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/previewReferences');
 const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
-const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
+const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfigs');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const DidChangeVisibleTextEditorsNotification: NotificationType<DidChangeVisibleTextEditorsParams> = new NotificationType<DidChangeVisibleTextEditorsParams>('cpptools/didChangeVisibleTextEditors');
 const DidChangeTextEditorVisibleRangesNotification: NotificationType<DidChangeTextEditorVisibleRangesParams> = new NotificationType<DidChangeTextEditorVisibleRangesParams>('cpptools/didChangeTextEditorVisibleRanges');
@@ -674,7 +680,7 @@ const DebugLogNotification: NotificationType<LocalizeStringParams> = new Notific
 const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> = new NotificationType<CompileCommandsPaths>('cpptools/compileCommandsPaths');
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
-const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
+const RequestCustomConfigs: NotificationType<RequestCustomConfigsParams> = new NotificationType<RequestCustomConfigsParams>('cpptools/requestCustomConfigs');
 const PublishRefactorDiagnosticsNotification: NotificationType<PublishRefactorDiagnosticsParams> = new NotificationType<PublishRefactorDiagnosticsParams>('cpptools/publishRefactorDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams> = new NotificationType<ShowMessageWindowParams>('cpptools/showMessageWindow');
 const ShowWarningNotification: NotificationType<ShowWarningParams> = new NotificationType<ShowWarningParams>('cpptools/showWarning');
@@ -804,7 +810,7 @@ export interface Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
-    provideCustomConfiguration(docUri: vscode.Uri): Promise<void>;
+    provideCustomConfigurations(docUris: vscode.Uri[], batchId: number): Promise<void>;
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     toggleReferenceResultsView(): void;
@@ -818,7 +824,7 @@ export interface Client {
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined>;
     takeOwnership(document: vscode.TextDocument): void;
     sendDidOpen(document: vscode.TextDocument): Promise<void>;
-    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string>;
+    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string>;
     updateActiveDocumentTextOptions(): void;
     didChangeActiveEditor(editor?: vscode.TextEditor, selection?: Range): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
@@ -1683,9 +1689,13 @@ export class DefaultClient implements Client {
             throw String('Missing binary at ' + serverModule);
         }
         const serverName: string = this.getName(this.rootFolder);
+        // Opt-in: when CPPTOOLS_SANITIZER_LOG_DIR is set, route sanitizer (TSan/ASan/UBSan) reports
+        // from a sanitizer build to files in that directory (see getSanitizerServerEnv). This is
+        // undefined -- i.e. the environment is inherited unchanged -- for normal builds.
+        const sanitizerServerEnv: NodeJS.ProcessEnv | undefined = getSanitizerServerEnv();
         const serverOptions: ServerOptions = {
-            run: { command: serverModule, options: { detached: false, cwd: util.getExtensionFilePath("bin") } },
-            debug: { command: serverModule, args: [serverName], options: { detached: true, cwd: util.getExtensionFilePath("bin") } }
+            run: { command: serverModule, options: { detached: false, cwd: util.getExtensionFilePath("bin"), env: sanitizerServerEnv } },
+            debug: { command: serverModule, args: [serverName], options: { detached: true, cwd: util.getExtensionFilePath("bin"), env: sanitizerServerEnv } }
         };
 
         // The IntelliSense process should automatically detect when AutoPCH is
@@ -1810,6 +1820,21 @@ export class DefaultClient implements Client {
 
             // TODO: should I set the output channel? Does this sort output between servers?
         };
+
+        // Reset all UI state to default, in case this is a restart after a crash.
+        this.model.isIndexingWorkspace.Value = false;
+        this.model.isParsingWorkspace.Value = false;
+        this.model.isParsingWorkspacePaused.Value = false;
+        this.model.isParsingFiles.Value = false;
+        this.model.isUpdatingIntelliSense.Value = false;
+        this.model.isRunningCodeAnalysis.Value = false;
+        this.model.isCodeAnalysisPaused.Value = false;
+        this.model.codeAnalysisProcessed.Value = 0;
+        this.model.codeAnalysisTotal.Value = 0;
+        this.model.parsingWorkspaceStatus.Value = "";
+
+        // Refresh initializing state in UI.
+        this.model.isInitializingWorkspace.Value = true;
 
         // Create the language client
         languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
@@ -2259,10 +2284,10 @@ export class DefaultClient implements Client {
         return this.languageClient.sendNotification(RescanFolderNotification);
     }
 
-    public async provideCustomConfiguration(docUri: vscode.Uri): Promise<void> {
+    public async provideCustomConfigurations(docUris: vscode.Uri[], batchId: number): Promise<void> {
         let isProviderRegistered: boolean = false;
         const onFinished: () => void = () => {
-            void this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: docUri.toString(), isProviderRegistered });
+            void this.languageClient.sendNotification(FinishedRequestCustomConfig, { batchId, isProviderRegistered });
         };
         try {
             const providerId: string | undefined = this.configurationProvider;
@@ -2274,29 +2299,21 @@ export class DefaultClient implements Client {
                 return;
             }
             isProviderRegistered = true;
-            const resultCode = await this.provideCustomConfigurationAsync(docUri, provider);
-            telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId, resultCode });
+            const resultCode = await this.provideCustomConfigurationAsync(docUris, provider);
+            telemetry.logLanguageServerEvent('provideCustomConfigurations', { providerId, resultCode });
         } finally {
             onFinished();
         }
     }
 
-    private async provideCustomConfigurationAsync(docUri: vscode.Uri, provider: CustomConfigurationProvider1): Promise<string> {
+    private async provideCustomConfigurationAsync(docUris: vscode.Uri[], provider: CustomConfigurationProvider1): Promise<string> {
         const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
 
-        // Need to loop through candidates, to see if we can get a custom configuration from any of them.
-        // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
+        // Wrap the provider lookup in a single task, so we can apply a timeout to the entire duration.
         const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | undefined> = async () => {
-            try {
-                if (!await provider.canProvideConfiguration(docUri, tokenSource.token)) {
-                    return [];
-                }
-            } catch {
-                console.warn("Caught exception from canProvideConfiguration");
-            }
             let configs: util.Mutable<SourceFileConfigurationItem>[] = [];
             try {
-                configs = await provider.provideConfigurations([docUri], tokenSource.token);
+                configs = await provider.provideConfigurations(docUris, tokenSource.token);
             } catch {
                 console.warn("Caught exception from provideConfigurations");
             }
@@ -2304,7 +2321,35 @@ export class DefaultClient implements Client {
             if (configs && configs.length > 0 && configs[0]) {
                 const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
                 if (fileConfiguration?.mergeConfigurations) {
+                    // deepCopy is a JSON round trip, which a vscode.Uri does not survive. The copy is
+                    // a plain object that is neither a string nor a Uri, so sendCustomConfigurations
+                    // discards the item. The uri field also accepts a string, so normalize it into a
+                    // new item before copying, without assigning into what the provider returned or
+                    // calling a method on its array.
+                    if (configs instanceof Array) {
+                        const normalized: util.Mutable<SourceFileConfigurationItem>[] = [];
+                        const count: number = configs.length;
+                        for (let i: number = 0; i < count; ++i) {
+                            const config: util.Mutable<SourceFileConfigurationItem> = configs[i];
+                            const uri = config?.uri;
+                            normalized.push(util.isUri(uri) ? { uri: uri.toString(), configuration: config.configuration } : config);
+                        }
+                        configs = normalized;
+                    }
                     configs = deepCopy(configs);
+                }
+                // Only the include paths from the provider are checked for recursive includes, so
+                // this has to happen before the include paths from c_cpp_properties.json are
+                // appended below, where a trailing '**' is a supported way to recurse.
+                if (configs instanceof Array) {
+                    configs.forEach(config => {
+                        if (util.isArrayOfString(config?.configuration?.includePath) &&
+                            config.configuration.includePath.some(path => path.endsWith('**'))) {
+                            console.warn("custom include paths should not use recursive includes ('**')");
+                        }
+                    });
+                }
+                if (fileConfiguration?.mergeConfigurations) {
                     configs.forEach(config => {
                         if (fileConfiguration.includePath) {
                             fileConfiguration.includePath.forEach(p => {
@@ -2343,7 +2388,13 @@ export class DefaultClient implements Client {
         };
         let result: string = "success";
         try {
-            const configs: SourceFileConfigurationItem[] | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
+            let configs: SourceFileConfigurationItem[] | undefined;
+            // Multi-file requests are async, and do not require a timeout.
+            if (docUris.length > 1) {
+                configs = await provideConfigurationAsync();
+            } else {
+                configs = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
+            }
             if (configs && configs.length > 0) {
                 this.sendCustomConfigurations(configs, provider.version);
             } else {
@@ -2352,7 +2403,7 @@ export class DefaultClient implements Client {
         } catch (err) {
             result = "timeout";
             const settings: CppSettings = new CppSettings(this.RootUri);
-            if (settings.isConfigurationWarningsEnabled && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+            if (settings.isConfigurationWarningsEnabled && !vscode.debug.activeDebugSession) {
                 const dismiss: string = localize("dismiss.button", "Dismiss");
                 const disable: string = localize("disable.warnings.button", "Disable Warnings");
                 const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
@@ -2360,8 +2411,8 @@ export class DefaultClient implements Client {
                     return "noConfigName";
                 }
                 let message: string = localize("unable.to.provide.configuration",
-                    "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
-                    provider.name, docUri.fsPath, configName);
+                    "{0} is unable to provide IntelliSense configuration information. Settings from the '{1}' configuration will be used instead.",
+                    provider.name, configName);
                 if (err) {
                     message += ` (${err})`;
                 }
@@ -2377,18 +2428,14 @@ export class DefaultClient implements Client {
         return result;
     }
 
-    private handleRequestCustomConfig(file: string): void {
-        const uri: vscode.Uri = vscode.Uri.file(file);
-        const client: Client = clients.getClientFor(uri);
+    private handleRequestCustomConfigs(params: RequestCustomConfigsParams): void {
+        const workspaceFolderUri: vscode.Uri = vscode.Uri.parse(params.workspaceFolderUri);
+        const client: Client = clients.getClientFor(workspaceFolderUri);
         if (client instanceof DefaultClient) {
             const defaultClient: DefaultClient = client as DefaultClient;
-            void defaultClient.provideCustomConfiguration(uri).catch(logAndReturn.undefined);
+            const uris: vscode.Uri[] = params.files.map(file => vscode.Uri.file(file));
+            void defaultClient.provideCustomConfigurations(uris, params.batchId).catch(logAndReturn.undefined);
         }
-    }
-
-    private isExternalHeader(uri: vscode.Uri): boolean {
-        const rootUri: vscode.Uri | undefined = this.RootUri;
-        return !rootUri || (util.isHeaderFile(uri) && !uri.toString().startsWith(rootUri.toString()));
     }
 
     public async getCurrentConfigName(): Promise<string | undefined> {
@@ -2634,7 +2681,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => void this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesPreview(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
-        this.languageClient.onNotification(RequestCustomConfig, (e) => this.handleRequestCustomConfig(e));
+        this.languageClient.onNotification(RequestCustomConfigs, (e) => this.handleRequestCustomConfigs(e));
         this.languageClient.onNotification(IntelliSenseResultNotification, (e) => this.handleIntelliSenseResult(e));
         this.languageClient.onNotification(PublishRefactorDiagnosticsNotification, publishRefactorDiagnostics);
         RegisterCodeAnalysisNotifications(this.languageClient);
@@ -2921,6 +2968,11 @@ export class DefaultClient implements Client {
                 this.model.isIndexingWorkspace.Value = true;
                 this.model.isInitializingWorkspace.Value = false;
                 this.model.isParsingWorkspace.Value = false;
+            } else if (message.endsWith("Failed")) {
+                this.model.isInitializingWorkspace.Value = false;
+                this.model.isIndexingWorkspace.Value = false;
+                this.model.isParsingWorkspace.Value = false;
+                this.model.isParsingFiles.Value = false;
             } else if (message.endsWith("files")) {
                 this.model.isParsingFiles.Value = true;
             } else if (message.endsWith("IntelliSense")) {
@@ -3085,12 +3137,23 @@ export class DefaultClient implements Client {
     /**
      * requests to the language server
      */
-    public async requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Promise<string> {
+    public async requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Promise<string> {
         const params: SwitchHeaderSourceParams = {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootUri.toString()
         };
-        return this.enqueue(async () => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
+        return this.enqueue(async () => {
+            // Don't use withLspCancellationHandling() or withCancellation() here. If the switch target is already known,
+            // the caller should still be able to use it even if the progress notification was just cancelled.
+            try {
+                return await this.languageClient.sendRequest(SwitchHeaderSourceRequest, params, token);
+            } catch (e: any) {
+                if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
+                    throw new vscode.CancellationError();
+                }
+                throw e;
+            }
+        });
     }
 
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
@@ -3291,7 +3354,7 @@ export class DefaultClient implements Client {
             params.configurations.push(modifiedConfig);
         });
 
-        await this.languageClient.sendRequest(ChangeCppPropertiesRequest, params);
+        await this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
         if (!!this.lastCustomBrowseConfigurationProviderId && !!this.lastCustomBrowseConfiguration && !!this.lastCustomBrowseConfigurationProviderVersion) {
             if (!this.doneInitialCustomBrowseConfigurationCheck) {
                 // Send the last custom browse configuration we received from this provider.
@@ -3415,9 +3478,6 @@ export class DefaultClient implements Client {
                 this.configurationLogging.set(uri, JSON.stringify(item.configuration, null, 4));
                 out.appendLineAtLevel(6, `  uri: ${uri}`);
                 out.appendLineAtLevel(6, `  config: ${JSON.stringify(item.configuration, null, 2)}`);
-                if (item.configuration.includePath.some(path => path.endsWith('**'))) {
-                    console.warn("custom include paths should not use recursive includes ('**')");
-                }
                 // Separate compiler path and args before sending to language client
                 const itemConfig: util.Mutable<InternalSourceFileConfiguration> = deepCopy(item.configuration);
                 if (util.isString(itemConfig.compilerPath)) {
@@ -4388,6 +4448,56 @@ function getLanguageServerFileName(): string {
     return path.resolve(util.getExtensionFilePath("bin"), extensionProcessName);
 }
 
+// Opt-in helper for capturing sanitizer (TSan/ASan/UBSan) diagnostics from a sanitizer build of
+// the language server. The sanitizers print their reports to stderr, which the language-server
+// stdio can swallow. When the CPPTOOLS_SANITIZER_LOG_DIR environment variable is set, this routes
+// each sanitizer's log_path into that directory so every process -- cpptools and its
+// cpptools-srv/-srv2 children, which inherit this environment -- writes its own
+// "<dir>/<sanitizer>.<pid>" file. Any *SAN_OPTIONS the developer already set are preserved.
+// Returns undefined when the variable is unset, leaving the child environment inherited unchanged,
+// so this is a no-op for normal builds and safe to leave checked in. To use it, build a sanitizer
+// preset of the language server, set CPPTOOLS_SANITIZER_LOG_DIR before launching VS Code (or add it
+// to the launch config's "env"), reproduce, then read the "<dir>/<sanitizer>.<pid>" files.
+function getSanitizerServerEnv(): NodeJS.ProcessEnv | undefined {
+    const logDirectoryEnv: string | undefined = process.env.CPPTOOLS_SANITIZER_LOG_DIR;
+    if (!logDirectoryEnv) {
+        return undefined;
+    }
+    // The language server is spawned with cwd set to the "bin" directory (see the ServerOptions
+    // above), so the sanitizer runtime would interpret a relative log_path relative to "bin".
+    // Resolve against that same directory here so the directory we create and the path we hand the
+    // sanitizer always agree, and so a relative CPPTOOLS_SANITIZER_LOG_DIR still works.
+    const logDirectory: string = path.resolve(util.getExtensionFilePath("bin"), logDirectoryEnv);
+    // The sanitizer runtime opens "<log_path>.<pid>" and does not create missing directories, so
+    // ensure the directory exists (best effort). If it can't be created the sanitizer just falls
+    // back to stderr.
+    try {
+        fs.mkdirSync(logDirectory, { recursive: true });
+    } catch {
+        // Not fatal -- reports will go to stderr instead.
+    }
+    const withLogPath = (existingOptions: string | undefined, sanitizer: string): string =>
+        // The sanitizer runtime flag parser treats a space (as well as ',', ':', tab, and newline)
+        // as a delimiter between key=value pairs, so a single space is a valid, cross-platform
+        // separator here. Do not use path.delimiter (';' on Windows), which the parser does NOT
+        // treat as a delimiter and which would break parsing for the Windows ASan preset.
+        //
+        // The colon delimiter also matters *inside* the value: a Windows absolute path begins with a
+        // drive letter and colon (e.g. C:\...), so an unquoted log_path=C:\... parses as log_path=C
+        // followed by a stray \... token, and the runtime aborts at startup with
+        // "expected '=' in ASAN_OPTIONS" (exit 1) before any code runs. Wrap the value in single
+        // quotes: the flag parser reads a quoted value verbatim up to the closing quote, so the
+        // embedded colon is preserved. Quoting is harmless on Linux/macOS (the parser strips the
+        // quotes), so it is applied unconditionally rather than only on Windows.
+        [existingOptions, `log_path='${path.join(logDirectory, sanitizer)}'`].filter(Boolean).join(" ");
+    return {
+        ...process.env,
+        TSAN_OPTIONS: withLogPath(process.env.TSAN_OPTIONS, "tsan"),
+        ASAN_OPTIONS: withLogPath(process.env.ASAN_OPTIONS, "asan"),
+        UBSAN_OPTIONS: withLogPath(process.env.UBSAN_OPTIONS, "ubsan")
+    };
+}
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 class NullClient implements Client {
     private booleanEvent = new vscode.EventEmitter<boolean>();
@@ -4427,7 +4537,7 @@ class NullClient implements Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
-    provideCustomConfiguration(docUri: vscode.Uri): Promise<void> { return Promise.resolve(); }
+    provideCustomConfigurations(docUris: vscode.Uri[], batchId: number): Promise<void> { return Promise.resolve(); }
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     toggleReferenceResultsView(): void { }
@@ -4441,7 +4551,7 @@ class NullClient implements Client {
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): void { }
     sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
-    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string> { return Promise.resolve(""); }
+    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string> { return Promise.resolve(""); }
     updateActiveDocumentTextOptions(): void { }
     didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }

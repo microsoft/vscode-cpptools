@@ -14,12 +14,12 @@ import * as vscode from 'vscode';
 import { DocumentFilter, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
-import * as which from "which";
 import { ManualPromise } from './Utility/Async/manualPromise';
 import { isWindows } from './constants';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
+import which = require('which');
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -399,14 +399,12 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     const cycleCache = new Set<string>();
     while (!cycleCache.has(ret)) {
         cycleCache.add(ret);
-        ret = ret.replace(regexp(), (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
-            // Historically, if the variable didn't have anything before the "." or ":"
-            // it was assumed to be an environment variable
-            if (!varType) {
-                varType = "env";
-            }
+        ret = ret.replace(regexp(), (match: string, ignored1: string | undefined, varType: string | undefined, ignored2: string | undefined, name: string) => {
             let newValue: string | undefined;
             switch (varType) {
+                // Historically, if the variable didn't have anything before the "." or ":"
+                // it was assumed to be an environment variable
+                case undefined:
                 case "env": {
                     if (additionalEnvironment) {
                         const v: string | string[] | undefined = additionalEnvironment[name];
@@ -424,6 +422,12 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                     }
                     if (newValue === undefined) {
                         newValue = process.env[name];
+                    }
+
+                    // If the environment variable is not set, we return an empty string. Only do
+                    // this for ${env:X} variables, not ${X} variables.
+                    if (newValue === undefined && varType !== undefined) {
+                        newValue = "";
                     }
                     break;
                 }
@@ -1524,7 +1528,7 @@ export interface ISshLocalForwardInfo {
 
 export function whichAsync(name: string, path?: string): Promise<string | undefined> {
     return new Promise<string | undefined>(resolve => {
-        which(name, path ? { path } : {}, (err, resolved) => {
+        which(name, path ? { path } : {}, (err: Error | null, resolved: string | undefined) => {
             if (err) {
                 resolve(undefined);
             } else {

@@ -85,8 +85,13 @@ function replaceReferences(definitions: any, objects: any): any {
             objects[key].anyOf = replaceReferences(definitions, objects[key].anyOf);
         }
 
-        // Recursively replace references if this object has properties.
-        if (objects[key].hasOwnProperty('type') && objects[key].type === 'object' && objects[key].properties !== null) {
+        // Handle 'oneOf' with references
+        if (objects[key].hasOwnProperty('oneOf')) {
+            objects[key].oneOf = replaceReferences(definitions, objects[key].oneOf);
+        }
+
+        // Recursively replace references if this schema node has properties.
+        if (objects[key].hasOwnProperty('properties') && objects[key].properties !== null) {
             objects[key].properties = replaceReferences(definitions, objects[key].properties);
             objects[key].properties = updateDefaults(objects[key].properties, objects[key].default);
         }
@@ -117,11 +122,13 @@ function mergeReferences(baseDefinitions: any, additionalDefinitions: any): void
 export async function main() {
     const packageJSON: any = JSON.parse(await read(resolve($root, 'package.json')));
     const schemaJSON: any = JSON.parse(await read(resolve($root, 'tools/OptionsSchema.json')));
+    const taskDefinitionsJSON: any = JSON.parse(await read(resolve($root, 'tools/TaskDefinitionsSchema.json')));
     const symbolSettingsJSON: any = JSON.parse(await read(resolve($root, 'tools/VSSymbolSettings.json')));
 
     mergeReferences(schemaJSON.definitions, symbolSettingsJSON.definitions);
 
     schemaJSON.definitions = replaceReferences(schemaJSON.definitions, schemaJSON.definitions);
+    taskDefinitionsJSON.definitions = replaceReferences(taskDefinitionsJSON.definitions, taskDefinitionsJSON.definitions);
 
     // Hard Code adding in configurationAttributes launch and attach.
     // cppdbg
@@ -131,6 +138,9 @@ export async function main() {
     // cppvsdbg
     packageJSON.contributes.debuggers[1].configurationAttributes.launch = schemaJSON.definitions.CppvsdbgLaunchOptions;
     packageJSON.contributes.debuggers[1].configurationAttributes.attach = schemaJSON.definitions.CppvsdbgAttachOptions;
+
+    // task definitions
+    packageJSON.contributes.taskDefinitions = [taskDefinitionsJSON.definitions.CppBuildTaskDefinition];
 
     let content: string = JSON.stringify(packageJSON, null, 4);
 

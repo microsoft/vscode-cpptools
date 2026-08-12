@@ -2999,7 +2999,7 @@
     "la asignación al anacronismo \"this\" no es compatible con el modo C++11",
     "error desconocido. No se generó un archivo IntelliSense PCH.",
     "No se pueden asignar una o varias rutas remotas a las rutas locales actuales. La experiencia con IntelliSense puede degradarse.",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,
