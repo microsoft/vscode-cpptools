@@ -2999,7 +2999,7 @@
     "przypisanie do przestarzałej konstrukcji „this” nie jest zgodne z trybem C++11",
     "wystąpił nieznany błąd. Nie wygenerowano pliku PCH funkcji IntelliSense.",
     "Nie można zamapować co najmniej jednej ścieżki zdalnej na istniejące ścieżki lokalne. Może to mieć negatywny wpływ na działanie funkcji IntelliSense.",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,
@@ -3747,6 +3747,5 @@
     "„static” jest tutaj niestandardowy",
     "funkcja %nd została poprzednio zadeklarowana bez jawnej bazy wyliczenia",
     "brak elementu „typename” jest tutaj niestandardowe",
-    "skrócona składnia szablonu funkcji jest niestandardowa dla przewodników dedukcji",
-    "too many nested user-defined conversions (possible cycle of converting routines)"
+    "skrócona składnia szablonu funkcji jest niestandardowa dla przewodników dedukcji"
 ]

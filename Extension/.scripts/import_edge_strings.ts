@@ -45,7 +45,7 @@ export async function main() {
 
     const locFolderNames = fs.readdirSync(localizeRepoPath).filter(f => fs.lstatSync(path.join(localizeRepoPath, f)).isDirectory());
     for (const locFolderName of locFolderNames) {
-        const lclPath = path.join(localizeRepoPath, locFolderName, "vc/vc/cpfeui.dll.lcl");
+        const lclPath = path.join(localizeRepoPath, locFolderName, (locFolderName == "csy" ? "VC/vc/cpfeui.dll.lcl" : "vc/vc/cpfeui.dll.lcl"));
         const languageInfo = languages.find(l => l.folderName === locFolderName);
         if (!languageInfo) {
             return;
