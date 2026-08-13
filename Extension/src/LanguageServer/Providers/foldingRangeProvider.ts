@@ -8,10 +8,14 @@ import { ManualPromise } from '../../Utility/Async/manualPromise';
 import { CppFoldingRange, DefaultClient, FoldingRangeKind, GetFoldingRangesParams, GetFoldingRangesRequest, GetFoldingRangesResult } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
 import { CppSettings } from '../settings';
-import { collectAccessSpecifierFoldingRanges } from './foldingRangeUtils';
+import { collectAccessSpecifierFoldingRanges, mergeFoldingRangesWithLimit } from './foldingRangeUtils';
 
 interface FoldingRangeRequestInfo {
     promise: ManualPromise<vscode.FoldingRange[] | undefined> | undefined;
+}
+
+interface FoldingContextWithRangeLimit {
+    rangeLimit?: number;
 }
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
@@ -46,14 +50,11 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
             promise: undefined
         };
         this.pendingRequests.set(document.uri.toString(), foldingRangeRequestInfo);
+        const rangeLimit: number | undefined = (context as FoldingContextWithRangeLimit).rangeLimit;
 
         const promise: Promise<vscode.FoldingRange[] | undefined> = this.requestRanges(document.uri.toString(), token).then((ranges: vscode.FoldingRange[] | undefined) => {
-            const accessSpecifierRanges: vscode.FoldingRange[] = collectAccessSpecifierFoldingRanges(document.getText()) as vscode.FoldingRange[];
-            if (ranges === undefined) {
-                return accessSpecifierRanges;
-            }
-
-            return ranges.concat(accessSpecifierRanges);
+            const accessSpecifierRanges = collectAccessSpecifierFoldingRanges(document.getText());
+            return mergeFoldingRangesWithLimit(ranges, accessSpecifierRanges, rangeLimit) as vscode.FoldingRange[];
         });
         await promise;
         this.pendingRequests.delete(document.uri.toString());

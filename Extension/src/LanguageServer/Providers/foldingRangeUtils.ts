@@ -3,9 +3,43 @@ export interface FoldingRangeLike {
     end: number;
 }
 
-const accessSpecifierPattern: RegExp = /^\s*(public|protected|private)\s*:\s*$/;
+export function mergeFoldingRangesWithLimit(primary: FoldingRangeLike[] | undefined, secondary: FoldingRangeLike[], rangeLimit: number | undefined): FoldingRangeLike[] {
+    const mergedRanges: FoldingRangeLike[] = (primary ?? []).concat(secondary);
 
-function stripLineForFolding(line: string, inBlockComment: boolean): { text: string; inBlockComment: boolean; } {
+    if (rangeLimit === undefined) {
+        return mergedRanges;
+    }
+
+    if (rangeLimit <= 0) {
+        return [];
+    }
+
+    // Keep existing server ranges first, then append access-specifier ranges until the limit.
+    return mergedRanges.slice(0, rangeLimit);
+}
+
+const accessSpecifierPattern: RegExp = /^\s*(public|protected|private)\s*:\s*$/;
+const classDeclarationStartPattern: RegExp = /^\s*(?:template\s*<.*>\s*)?(class|struct|union)\b/;
+
+interface FoldingScanState {
+    inBlockComment: boolean;
+    rawStringDelimiter?: string;
+}
+
+function tryConsumeRawStringStart(line: string, index: number): { consumed: number; rawStringDelimiter: string; } | undefined {
+    const remaining = line.slice(index);
+    const match = /^(?:u8|u|U|L)?R"([^ ()\\\t\r\n]{0,16})\(/.exec(remaining);
+    if (match === null) {
+        return undefined;
+    }
+
+    return {
+        consumed: match[0].length,
+        rawStringDelimiter: match[1]
+    };
+}
+
+function stripLineForFolding(line: string, state: FoldingScanState): { text: string; state: FoldingScanState; } {
     let result = '';
     let index = 0;
     let inString: '"' | '\'' | undefined;
@@ -14,9 +48,22 @@ function stripLineForFolding(line: string, inBlockComment: boolean): { text: str
         const character = line[index];
         const nextCharacter = line[index + 1];
 
-        if (inBlockComment) {
+        if (state.rawStringDelimiter !== undefined) {
+            const rawStringTerminator = `)${state.rawStringDelimiter}"`;
+            const rawStringEndIndex = line.indexOf(rawStringTerminator, index);
+            if (rawStringEndIndex < 0) {
+                index = line.length;
+                continue;
+            }
+
+            state.rawStringDelimiter = undefined;
+            index = rawStringEndIndex + rawStringTerminator.length;
+            continue;
+        }
+
+        if (state.inBlockComment) {
             if (character === '*' && nextCharacter === '/') {
-                inBlockComment = false;
+                state.inBlockComment = false;
                 index += 2;
                 continue;
             }
@@ -44,8 +91,15 @@ function stripLineForFolding(line: string, inBlockComment: boolean): { text: str
         }
 
         if (character === '/' && nextCharacter === '*') {
-            inBlockComment = true;
+            state.inBlockComment = true;
             index += 2;
+            continue;
+        }
+
+        const rawStringStart = tryConsumeRawStringStart(line, index);
+        if (rawStringStart !== undefined) {
+            state.rawStringDelimiter = rawStringStart.rawStringDelimiter;
+            index += rawStringStart.consumed;
             continue;
         }
 
@@ -59,7 +113,7 @@ function stripLineForFolding(line: string, inBlockComment: boolean): { text: str
         index++;
     }
 
-    return { text: result, inBlockComment };
+    return { text: result, state };
 }
 
 function countCharacter(line: string, character: string): number {
@@ -78,13 +132,14 @@ export function collectAccessSpecifierFoldingRanges(text: string): FoldingRangeL
     const classBodyDepths: number[] = [];
     const lines: string[] = text.split(/\r?\n/);
 
-    let inBlockComment = false;
+    const scanState: FoldingScanState = {
+        inBlockComment: false
+    };
     let braceDepth = 0;
     let pendingClassDeclaration = false;
 
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-        const strippedLine = stripLineForFolding(lines[lineIndex], inBlockComment);
-        inBlockComment = strippedLine.inBlockComment;
+        const strippedLine = stripLineForFolding(lines[lineIndex], scanState);
 
         const lineText = strippedLine.text;
         const currentDepth = braceDepth;
@@ -99,7 +154,7 @@ export function collectAccessSpecifierFoldingRanges(text: string): FoldingRangeL
             activeSectionsByDepth.set(currentDepth, lineIndex);
         }
 
-        if (/^\s*(class|struct|union)\b/.test(lineText)) {
+        if (classDeclarationStartPattern.test(lineText)) {
             pendingClassDeclaration = true;
         }
 
