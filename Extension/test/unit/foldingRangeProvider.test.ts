@@ -7,7 +7,7 @@ import { deepStrictEqual } from 'assert';
 import { describe, it } from 'mocha';
 import { collectAccessSpecifierFoldingRanges } from '../../src/LanguageServer/Providers/foldingRangeUtils';
 
-function toRangeTuples(text: string): Array<[number, number]> {
+function toRangeTuples(text: string): [number, number][] {
     return collectAccessSpecifierFoldingRanges(text).map(range => [range.start, range.end]);
 }
 
