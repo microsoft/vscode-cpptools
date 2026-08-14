@@ -6,6 +6,7 @@
 import { CppSettings } from '../LanguageServer/settings';
 import { AttachItem, showQuickPick } from './attachQuickPick';
 import { PsProcessParser } from './nativeAttach';
+import { filterProcessItems } from './processFilter';
 
 import * as os from 'os';
 import * as path from 'path';
@@ -94,7 +95,7 @@ export class RemoteAttachPicker {
             throw new Error(localize("no.pipetransport.useextendedremote", "Chosen debug configuration does not contain {0} or {1}", "pipeTransport", "useExtendedRemote"));
         }
 
-        const matchingProcesses: AttachItem[] | undefined = this.getMatchingProcessesFromConfig(processes, config);
+        const matchingProcesses: AttachItem[] | undefined = filterProcessItems(processes, config?.processFilter);
         if (matchingProcesses?.length === 1) {
             return matchingProcesses[0].id;
         }
@@ -114,27 +115,6 @@ export class RemoteAttachPicker {
         } else {
             throw new Error(localize("process.not.selected", "Process not selected."));
         }
-    }
-
-    private getMatchingProcessesFromConfig(processes: AttachItem[], config: any): AttachItem[] | undefined {
-        const processFilter: string | undefined = typeof config?.processFilter === 'string' ? config.processFilter.trim() : undefined;
-        if (!processFilter) {
-            return undefined;
-        }
-
-        let processRegex: RegExp;
-        try {
-            processRegex = new RegExp(processFilter);
-        } catch {
-            throw new Error(`Invalid processFilter regular expression: ${processFilter}`);
-        }
-
-        return processes.filter((p: AttachItem) => {
-            const label: string = p.label ?? "";
-            const description: string = p.description ?? "";
-            const detail: string = p.detail ?? "";
-            return processRegex.test(label) || processRegex.test(description) || processRegex.test(detail);
-        });
     }
 
     // Creates a string to run on the host machine which will execute a shell script on the remote machine to retrieve OS and processes
