@@ -5259,6 +5259,11 @@
                                     }
                                 ]
                             },
+                            "processFilter": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.processFilter.description%",
+                                "default": ""
+                            },
                             "filterStdout": {
                                 "type": "boolean",
                                 "description": "%c_cpp.debuggers.filterStdout.description%",
