@@ -3990,6 +3990,11 @@
                 "category": "C/C++"
             },
             {
+                "command": "C_Cpp.SelectTranslationUnit",
+                "title": "%c_cpp.command.selectTranslationUnit.title%",
+                "category": "C/C++"
+            },
+            {
                 "command": "C_Cpp.EnableErrorSquiggles",
                 "title": "%c_cpp.command.enableErrorSquiggles.title%",
                 "category": "C/C++"
@@ -6535,6 +6540,10 @@
                 {
                     "command": "C_Cpp.SwitchHeaderSource",
                     "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.SelectTranslationUnit",
+                    "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
                 },
                 {
                     "command": "C_Cpp.EnableErrorSquiggles",
