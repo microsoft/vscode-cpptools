@@ -1404,7 +1404,7 @@ export class DefaultClient implements Client {
             this.innerConfiguration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
             this.disposables.push(this.innerConfiguration);
 
-            // This could be set earlier, but the task provider expects it to also mean that `this.innerConfiguration` is set.
+            // Ideally this would be set earlier, but the task provider expects it to also mean that `this.innerConfiguration` is set.
             this.languageClient.isStarted = true;
             compilerDefaults = await this.requestCompiler();
 
@@ -4214,8 +4214,7 @@ export class DefaultClient implements Client {
     }
 
     public onInterval(): void {
-        // These events can be discarded until the language client is ready.
-        // Don't queue them up with this.notifyWhenLanguageClientReady calls.
+        // These events can be discarded until the language client is ready. Don't queue them up.
         if (this.languageClient.isInitialized && this.configuration !== undefined) {
             void this.languageClient.sendNotification(IntervalTimerNotification).catch(logAndReturn.undefined);
             this.configuration.checkCppProperties();

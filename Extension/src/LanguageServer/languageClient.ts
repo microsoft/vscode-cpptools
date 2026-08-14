@@ -51,7 +51,7 @@ export class LanguageClient {
 
     /**
      * Validate and return the underlying RPC client.
-     * Strips away the `undefined` type from the RPC client.
+     * Strips away the `undefined` type from `this._rpcClient`.
      */
     private get rpcClient(): rpc.LanguageClient {
         if (!this._rpcClient) {
@@ -80,7 +80,7 @@ export class LanguageClient {
     }
 
     public onNotification<P>(type: NotificationType<P>, handler: NotificationHandler<P>): Disposable {
-        // These messages come from cpptools, and therefore it is not needed to await the ready signal.
+        // These messages are received from cpptools, and therefore it is not needed to await the ready signal.
         return this.rpcClient.onNotification(type, handler);
     }
 
