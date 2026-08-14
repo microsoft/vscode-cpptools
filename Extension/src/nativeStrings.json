@@ -776,6 +776,6 @@
     },
     "browse_database_disabled_incompatible_storage": {
         "text": "The browse database was disabled because its storage location does not support SQLite WAL shared memory. Set browse.databaseFilename to a local path.",
-        "hint": "SQLite WAL shared memory requires a compatible local filesystem. browse.databaseFilename is a setting name. {Locked=\"SQLite WAL\"} {Locked=\"browse.databaseFilename\"}"
+        "hint": "browse.databaseFilename is a setting name. {Locked=\"SQLite WAL\"} {Locked=\"browse.databaseFilename\"}"
     }
 }
