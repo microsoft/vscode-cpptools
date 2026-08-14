@@ -385,7 +385,7 @@
 	"c_cpp.taskDefinitions.args.quoting.weak.description": "Uzavře argument do jednoduchých uvozovek prostředí (například \" pomocí znaku Bash).",
 	"c_cpp.taskDefinitions.options.description": "Další možnosti příkazu.",
 	"c_cpp.taskDefinitions.options.cwd.description": "The current working directory of the executed program or script. If omitted Code's current workspace root is used.",
-	"c_cpp.taskDefinitions.problemMatcher.description": "One or more problem matchers to use to detect compiler errors and warnings in task output.",
+	"c_cpp.taskDefinitions.problemMatcher.description": "Jeden nebo více porovnávačů (matcherů) problémů používaných k detekci chyb a upozornění kompilátoru ve výstupu úlohy.",
 	"c_cpp.taskDefinitions.detail.description": "Další podrobnosti o úloze.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Aktuální cesta a cesta při kompilaci ke stejným zdrojovým stromům. Soubory, které se najdou na cestě EditorPath, se namapují na cestu CompileTimePath pro odpovídající zarážku, která se při zobrazování umístění stacktrace mapuje z CompileTimePath na EditorPath.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "Cesta ke zdrojovému souboru, který se použije v editoru",

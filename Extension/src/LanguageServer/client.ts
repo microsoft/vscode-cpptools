@@ -219,9 +219,16 @@ interface FileChangedParams extends WorkspaceFolderParams {
     uri: string;
 }
 
-interface InputRegion {
+interface InputLineRange {
     startLine: number;
     endLine: number;
+}
+
+interface InputRegion {
+    startLine: number;
+    startColumn: number;
+    endLine: number;
+    endColumn: number;
 }
 
 interface DecorationRangesPair {
@@ -372,7 +379,7 @@ export enum FoldingRangeKind {
 
 export interface CppFoldingRange {
     kind: FoldingRangeKind;
-    range: InputRegion;
+    range: InputLineRange;
 }
 
 export interface GetFoldingRangesResult {
@@ -1740,14 +1747,7 @@ export class DefaultClient implements Client {
             initializationOptions: lspInitializationOptions,
             middleware: createProtocolFilter(),
             errorHandler: {
-                error: (error, message, count) => {
-                    telemetry.logLanguageServerEvent("languageClientError", {
-                        error: error.toString(),
-                        message: message?.toString() ?? '',
-                        count: count?.toString() ?? ''
-                    });
-                    return { action: ErrorAction.Continue };
-                },
+                error: (_error, _message, _count) => ({ action: ErrorAction.Continue }),
                 closed: () => {
                     languageClientHasCrashed = true;
                     languageClientCrashTimes.push(Date.now());
@@ -2303,7 +2303,35 @@ export class DefaultClient implements Client {
             if (configs && configs.length > 0 && configs[0]) {
                 const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
                 if (fileConfiguration?.mergeConfigurations) {
+                    // deepCopy is a JSON round trip, which a vscode.Uri does not survive. The copy is
+                    // a plain object that is neither a string nor a Uri, so sendCustomConfigurations
+                    // discards the item. The uri field also accepts a string, so normalize it into a
+                    // new item before copying, without assigning into what the provider returned or
+                    // calling a method on its array.
+                    if (configs instanceof Array) {
+                        const normalized: util.Mutable<SourceFileConfigurationItem>[] = [];
+                        const count: number = configs.length;
+                        for (let i: number = 0; i < count; ++i) {
+                            const config: util.Mutable<SourceFileConfigurationItem> = configs[i];
+                            const uri = config?.uri;
+                            normalized.push(util.isUri(uri) ? { uri: uri.toString(), configuration: config.configuration } : config);
+                        }
+                        configs = normalized;
+                    }
                     configs = deepCopy(configs);
+                }
+                // Only the include paths from the provider are checked for recursive includes, so
+                // this has to happen before the include paths from c_cpp_properties.json are
+                // appended below, where a trailing '**' is a supported way to recurse.
+                if (configs instanceof Array) {
+                    configs.forEach(config => {
+                        if (util.isArrayOfString(config?.configuration?.includePath) &&
+                            config.configuration.includePath.some(path => path.endsWith('**'))) {
+                            console.warn("custom include paths should not use recursive includes ('**')");
+                        }
+                    });
+                }
+                if (fileConfiguration?.mergeConfigurations) {
                     configs.forEach(config => {
                         if (fileConfiguration.includePath) {
                             fileConfiguration.includePath.forEach(p => {
@@ -2936,7 +2964,8 @@ export class DefaultClient implements Client {
             this.inactiveRegionsDecorations.set(uriString, currentSet);
         }
 
-        Array.prototype.push.apply(currentSet.ranges, inactiveRegions.map(element => new vscode.Range(element.startLine, 0, element.endLine, 0)));
+        Array.prototype.push.apply(currentSet.ranges, inactiveRegions.map(element =>
+            new vscode.Range(element.startLine, element.startColumn, element.endLine, element.endColumn)));
 
         // Apply the decorations to all *visible* text editors
         const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uriString);
@@ -3349,9 +3378,6 @@ export class DefaultClient implements Client {
                 this.configurationLogging.set(uri, JSON.stringify(item.configuration, null, 4));
                 out.appendLineAtLevel(6, `  uri: ${uri}`);
                 out.appendLineAtLevel(6, `  config: ${JSON.stringify(item.configuration, null, 2)}`);
-                if (item.configuration.includePath.some(path => path.endsWith('**'))) {
-                    console.warn("custom include paths should not use recursive includes ('**')");
-                }
                 // Separate compiler path and args before sending to language client
                 const itemConfig: util.Mutable<InternalSourceFileConfiguration> = deepCopy(item.configuration);
                 if (util.isString(itemConfig.compilerPath)) {

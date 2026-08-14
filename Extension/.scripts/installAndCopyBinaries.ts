@@ -6,7 +6,7 @@
 import { runVSCodeCommand } from '@vscode/test-electron';
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { $root, error, heading, note } from './common';
+import { $root, error, heading, note, warn } from './common';
 import * as copy from './copyExtensionBinaries';
 import { install, isolated, options } from "./vscode";
 
@@ -24,7 +24,9 @@ export async function main() {
         console.log(result.stdout.toString());
     }
     if (result.stderr) {
-        error(result.stderr.toString());
+        // runVSCodeCommand resolves only when the command succeeds (it throws on a non-zero exit), so stderr here is
+        // non-fatal output such as Node deprecation warnings and must not be reported as an error.
+        warn(result.stderr.toString());
     }
 
     const binaryVersion = await copy.main(isolated);

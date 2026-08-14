@@ -2999,7 +2999,7 @@
     "'this' への代入 (旧形式) は C++11 モードと互換性がありません",
     "不明なエラーが発生しました。IntelliSense PCH ファイルは生成されませんでした。",
     "1 つ以上のリモート パスを既存のローカル パスにマップできません。IntelliSense の機能が低下する可能性があります。",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,

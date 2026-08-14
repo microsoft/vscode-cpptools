@@ -26,7 +26,7 @@
 	"loggingLevel.changed": "{0} a été changé en : {1}",
 	"dismiss.button": "Ignorer",
 	"disable.warnings.button": "Désactiver les avertissements",
-	"unable.to.provide.configuration": "{0} ne peut pas fournir les informations de configuration IntelliSense de '{1}'. Les paramètres de la configuration de '{2}' sont utilisés à la place.",
+	"unable.to.provide.configuration": "{0} ne peut pas fournir les informations de configuration IntelliSense. Les paramètres de la configuration de « {1} » sont utilisés en remplacement.",
 	"config.not.found": "Le nom de configuration demandé est introuvable : {0}",
 	"unsupported.client": "Client non pris en charge",
 	"timed.out": "Expiration du délai d'attente dans {0} ms.",

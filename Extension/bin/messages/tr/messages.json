@@ -2999,7 +2999,7 @@
     "'this' anakronizmine yönelik atama C++11 modu ile uyumlu değil",
     "bilinmeyen bir hata oluştu. IntelliSense PCH dosyası oluşturulmadı.",
     "Bir veya daha fazla uzak yol, mevcut yerel yollarla eşlenemiyor. IntelliSense deneyimi bozulabilir.",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,

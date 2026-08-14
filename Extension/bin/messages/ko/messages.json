@@ -2999,7 +2999,7 @@
     "'this'에 대한 할당(오래된 구문)은 C++11 모드와 호환되지 않습니다.",
     "알 수 없는 오류가 발생했습니다. IntelliSense PCH 파일이 생성되지 않았습니다.",
     "하나 이상의 원격 경로를 기존 로컬 경로에 매핑할 수 없습니다. IntelliSense 성능이 저하될 수 있습니다.",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,

@@ -10,9 +10,18 @@
     "edit_include_path": "Edit \"includePath\" setting",
     "disable_error_squiggles": "Disable error squiggles",
     "enable_error_squiggles": "Enable all error squiggles",
-    "include_errors_update_include_path_squiggles_disabled2": "#include errors detected. Please update your includePath. Syntax errors for this file will not be reported until included files are found.",
-    "include_errors_update_include_path_intellisense_disabled": "#include errors detected. Please update your includePath. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
-    "include_errors_update_compile_commands_or_include_path_intellisense_disabled": "#include errors detected. Consider updating your compile_commands.json or includePath. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
+    "include_errors_update_include_path_squiggles_disabled2": {
+        "text": "#include errors detected. Please update your includePath. Syntax errors for this file will not be reported until included files are found.",
+        "hint": "{Locked=\"#include\"} {Locked=\"includePath\"}"
+    },
+    "include_errors_update_include_path_intellisense_disabled": {
+        "text": "#include errors detected. Please update your includePath. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
+        "hint": "{0} is the translation unit. {Locked=\"#include\"} {Locked=\"includePath\"} {Locked=\"{0}\"}"
+    },
+    "include_errors_update_compile_commands_or_include_path_intellisense_disabled": {
+        "text": "#include errors detected. Consider updating your compile_commands.json or includePath. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
+        "hint": "{0} is the translation unit. {Locked=\"#include\"} {Locked=\"compile_commands.json\"} {Locked=\"includePath\"} {Locked=\"{0}\"}"
+    },
     "could_not_parse_compile_commands": "\"{0}\" could not be parsed. 'includePath' from c_cpp_properties.json in folder '{1}' will be used instead.",
     "could_not_find_compile_commands": "\"{0}\" could not be found. 'includePath' from c_cpp_properties.json in folder '{1}' will be used instead.",
     "file_not_found_in_path": "\"{0}\" not found in \"{1}\". 'includePath' from c_cpp_properties.json in folder '{2}' will be used for this file instead.",
@@ -120,7 +129,10 @@
     "formatting_diff": "Formatting diffed output:",
     "disable_inactive_regions": "Disable inactive region colorization",
     "error_limit_exceeded": "Error limit exceeded, {0} error(s) not reported.",
-    "include_errors_update_compile_commands_or_include_path_squiggles_disabled2": "#include errors detected. Consider updating your compile_commands.json or includePath. Syntax errors for this file will not be reported until included files are found.",
+    "include_errors_update_compile_commands_or_include_path_squiggles_disabled2": {
+        "text": "#include errors detected. Consider updating your compile_commands.json or includePath. Syntax errors for this file will not be reported until included files are found.",
+        "hint": "{Locked=\"#include\"} {Locked=\"compile_commands.json\"} {Locked=\"includePath\"}"
+    },
     "cannot_reset_database": "The IntelliSense database could not be reset. To manually reset, close all VS Code instances and then delete this file: {0}",
     "formatting_failed_see_output": "Formatting failed. See the output window for details.",
     "populating_include_completion_cache": "Populating include completion cache.",
@@ -157,8 +169,14 @@
     "fallback_to_64_bit_mode2": "Failed to query compiler. Falling back to 64-bit intelliSenseMode.",
     "fallback_to_no_bitness": "Failed to query compiler. Falling back to no bitness.",
     "intellisense_client_creation_aborted": "IntelliSense client creation aborted: {0}",
-    "include_errors_config_provider_intellisense_disabled": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
-    "include_errors_config_provider_squiggles_disabled2": "#include errors detected based on information provided by the configurationProvider setting. Syntax errors for this file will not be reported until included files are found.",
+    "include_errors_config_provider_intellisense_disabled": {
+        "text": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
+        "hint": "{0} is the translation unit. {Locked=\"#include\"} {Locked=\"configurationProvider\"} {Locked=\"{0}\"}"
+    },
+    "include_errors_config_provider_squiggles_disabled2": {
+        "text": "#include errors detected based on information provided by the configurationProvider setting. Syntax errors for this file will not be reported until included files are found.",
+        "hint": "{Locked=\"#include\"} {Locked=\"configurationProvider\"}"
+    },
     "preprocessor_keyword": {
         "text": "preprocessor keyword",
         "hint": "Refers to C/C++ processor keywords"
@@ -713,7 +731,7 @@
     },
     "check_requires_source": {
         "text": "--check requires a source file: --check=<file>",
-        "hint": "{Locked=\"--check\"} {Locked=\"--check=\"}"
+        "hint": "<file> is a placeholder for the source file path and should be translated. {Locked=\"--check\"} {Locked=\"--check=\"}"
     },
     "check_source_not_found": {
         "text": "source file not found: {0}",
@@ -725,7 +743,7 @@
     },
     "check_compile_commands_not_discovered": {
         "text": "could not find compile_commands.json in any parent directory of {0}; pass --check-compile-commands=<path> to specify it explicitly",
-        "hint": "{0} is the starting directory path. {Locked=\"compile_commands.json\"} {Locked=\"{0}\"} {Locked=\"--check-compile-commands=\"}"
+        "hint": "{0} is the starting directory path. <path> is a placeholder for the compile_commands.json path and should be translated. {Locked=\"compile_commands.json\"} {Locked=\"{0}\"} {Locked=\"--check-compile-commands=\"}"
     },
     "check_engine_init_failed": "failed to initialize the language engine",
     "check_no_workspace_folder": {
@@ -747,5 +765,13 @@
     "check_timed_out": {
         "text": "timed out waiting for analysis of {0} to finish",
         "hint": "{0} is the source file path. {Locked=\"{0}\"}"
+    },
+    "failed_to_open_browse_db_lock_file": {
+        "text": "Failed to open browse database lock file: {0} (errno={1})",
+        "hint": "{0} is the lock file path. {1} is the errno value. {Locked=\"{0}\"} {Locked=\"errno\"} {Locked=\"{1}\"}"
+    },
+    "failed_to_lock_browse_db_lock_file": {
+        "text": "Failed to lock browse database lock file: {0} (errno={1})",
+        "hint": "{0} is the lock file path. {1} is the errno value. {Locked=\"{0}\"} {Locked=\"errno\"} {Locked=\"{1}\"}"
     }
 }

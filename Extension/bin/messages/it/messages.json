@@ -2999,7 +2999,7 @@
     "l'assegnazione all'anacronismo 'this' non è compatibile con la modalità C++11",
     "si è verificato un errore sconosciuto. Non è stato generato alcun file PCH IntelliSense.",
     "Non è possibile eseguire il mapping di uno o più percorsi remoti a percorsi locali esistenti. L'operazione potrebbe influire negativamente sull'esperienza IntelliSense.",
-    null,
+    "too many nested user-defined conversions (possible cycle of converting routines)",
     null,
     null,
     null,
