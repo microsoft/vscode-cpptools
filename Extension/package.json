@@ -6672,18 +6672,24 @@
         },
         "configurationDefaults": {
             "[cpp]": {
+                "editor.gotoLocation.alternativeDeclarationCommand": "editor.action.revealDefinition",
+                "editor.gotoLocation.alternativeDefinitionCommand": "editor.action.revealDeclaration",
                 "editor.wordBasedSuggestions": "off",
                 "editor.semanticHighlighting.enabled": true,
                 "editor.stickyScroll.defaultModel": "foldingProviderModel",
                 "editor.suggest.insertMode": "replace"
             },
             "[cuda-cpp]": {
+                "editor.gotoLocation.alternativeDeclarationCommand": "editor.action.revealDefinition",
+                "editor.gotoLocation.alternativeDefinitionCommand": "editor.action.revealDeclaration",
                 "editor.wordBasedSuggestions": "off",
                 "editor.semanticHighlighting.enabled": true,
                 "editor.stickyScroll.defaultModel": "foldingProviderModel",
                 "editor.suggest.insertMode": "replace"
             },
             "[c]": {
+                "editor.gotoLocation.alternativeDeclarationCommand": "editor.action.revealDefinition",
+                "editor.gotoLocation.alternativeDefinitionCommand": "editor.action.revealDeclaration",
                 "editor.wordBasedSuggestions": "off",
                 "editor.semanticHighlighting.enabled": true,
                 "editor.stickyScroll.defaultModel": "foldingProviderModel",
