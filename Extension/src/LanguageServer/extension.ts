@@ -25,7 +25,7 @@ import * as telemetry from '../telemetry';
 import { CopilotHoverProvider } from './Providers/CopilotHoverProvider';
 import { sendCallHierarchyCallsFromRequest, sendCallHierarchyCallsToRequest, sendPrepareCallHierarchyRequest } from './Providers/callHierarchyProvider';
 import { sendFindAllReferencesRequest } from './Providers/findAllReferencesProvider';
-import { sendGoToDefinitionRequest } from './Providers/goToDefinitionProvider';
+import { sendGoToDefinitionForAgentRequest, sendStandardGoToDefinitionRequest } from './Providers/goToDefinitionProvider';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
@@ -405,6 +405,7 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', enabled ? onShowReferencesProgress : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.FindAllReferences', enabled ? onFindAllReferences : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToDefinition', enabled ? onGoToDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToDefinitionForAgent', enabled ? onGoToDefinitionForAgent : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PrepareCallHierarchy', enabled ? onPrepareCallHierarchy : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CallHierarchyCallsTo', enabled ? onCallHierarchyCallsTo : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CallHierarchyCallsFrom', enabled ? onCallHierarchyCallsFrom : onDisabledCommand));
@@ -893,7 +894,21 @@ async function onGoToDefinition(uri: vscode.Uri, position: vscode.Position, toke
     }
 
     await client.ready;
-    return sendGoToDefinitionRequest(client, uri, position, token ?? CancellationToken.None);
+    return sendStandardGoToDefinitionRequest(client, uri, position, token ?? CancellationToken.None);
+}
+
+async function onGoToDefinitionForAgent(uri: vscode.Uri, position: vscode.Position, token?: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+    if (!uri || !position) {
+        throw new Error("C_Cpp.GoToDefinitionForAgent requires both a uri and position.");
+    }
+
+    const client: Client = clients.getClientFor(uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    await client.ready;
+    return sendGoToDefinitionForAgentRequest(client, uri, position, token ?? CancellationToken.None);
 }
 
 async function onPrepareCallHierarchy(uri: vscode.Uri, position: vscode.Position, token?: vscode.CancellationToken): Promise<vscode.CallHierarchyItem[] | undefined> {

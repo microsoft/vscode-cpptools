@@ -3,9 +3,15 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { Definition, DefinitionLink, DefinitionRequest, Position, ResponseError, TextDocumentPositionParams } from 'vscode-languageclient';
+import { Definition, DefinitionLink, Position, RequestType, ResponseError, TextDocumentPositionParams } from 'vscode-languageclient';
 import { DefaultClient } from '../client';
 import { RequestCancelled, ServerCancelled } from '../protocolFilter';
+
+const StandardDefinitionRequest: RequestType<TextDocumentPositionParams, Definition | DefinitionLink[] | null, void> =
+    new RequestType<TextDocumentPositionParams, Definition | DefinitionLink[] | null, void>('textDocument/definition');
+
+const DefinitionForAgentRequest: RequestType<TextDocumentPositionParams, Definition | DefinitionLink[] | null, void> =
+    new RequestType<TextDocumentPositionParams, Definition | DefinitionLink[] | null, void>('cpptools/definitionForAgent');
 
 function convertDefinitionsToLocations(definitionsResult: vscode.Definition | vscode.DefinitionLink[] | undefined): vscode.Location[] {
     if (!definitionsResult) {
@@ -28,14 +34,20 @@ function convertDefinitionsToLocations(definitionsResult: vscode.Definition | vs
     return result;
 }
 
-export async function sendGoToDefinitionRequest(client: DefaultClient, uri: vscode.Uri, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+async function sendGoToDefinitionRequest(
+    client: DefaultClient,
+    uri: vscode.Uri,
+    position: vscode.Position,
+    token: vscode.CancellationToken,
+    requestType: RequestType<TextDocumentPositionParams, Definition | DefinitionLink[] | null, void>
+): Promise<vscode.Location[] | undefined> {
     const params: TextDocumentPositionParams = {
         position: Position.create(position.line, position.character),
         textDocument: { uri: uri.toString() }
     };
     let response: Definition | DefinitionLink[] | null;
     try {
-        response = await client.languageClient.sendRequest(DefinitionRequest.type, params, token);
+        response = await client.languageClient.sendRequest(requestType, params, token);
     } catch (e: any) {
         if (e instanceof ResponseError && (e.code === RequestCancelled || e.code === ServerCancelled)) {
             return undefined;
@@ -54,4 +66,22 @@ export async function sendGoToDefinitionRequest(client: DefaultClient, uri: vsco
     }
 
     return convertDefinitionsToLocations(result);
+}
+
+export function sendStandardGoToDefinitionRequest(
+    client: DefaultClient,
+    uri: vscode.Uri,
+    position: vscode.Position,
+    token: vscode.CancellationToken
+): Promise<vscode.Location[] | undefined> {
+    return sendGoToDefinitionRequest(client, uri, position, token, StandardDefinitionRequest);
+}
+
+export function sendGoToDefinitionForAgentRequest(
+    client: DefaultClient,
+    uri: vscode.Uri,
+    position: vscode.Position,
+    token: vscode.CancellationToken
+): Promise<vscode.Location[] | undefined> {
+    return sendGoToDefinitionRequest(client, uri, position, token, DefinitionForAgentRequest);
 }
