@@ -217,6 +217,16 @@ interface SwitchHeaderSourceParams extends WorkspaceFolderParams {
     switchHeaderSourceFileName: string;
 }
 
+interface GetTranslationUnitSourceCandidatesResult {
+    candidates: string[];
+    currentTranslationUnit: string;
+}
+
+interface SelectTranslationUnitParams {
+    uri: string;
+    translationUnit: string;
+}
+
 interface FileChangedParams extends WorkspaceFolderParams {
     uri: string;
 }
@@ -625,6 +635,7 @@ const PreInitializationRequest: RequestType<void, string, void> = new RequestTyp
 const InitializationRequest: RequestType<CppInitializationParams, CppInitializationResult, void> = new RequestType<CppInitializationParams, CppInitializationResult, void>('cpptools/initialize');
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
+const GetTranslationUnitSourceCandidatesRequest: RequestType<TextDocumentIdentifier, GetTranslationUnitSourceCandidatesResult, void> = new RequestType<TextDocumentIdentifier, GetTranslationUnitSourceCandidatesResult, void>('cpptools/getTranslationUnitSourceCandidates');
 const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void> = new RequestType<void, GetDiagnosticsResult, void>('cpptools/getDiagnostics');
 export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void> = new RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void>('cpptools/getDocumentSymbols');
 export const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void>('cpptools/getWorkspaceSymbols');
@@ -653,6 +664,7 @@ const PauseParsingNotification: NotificationType<void> = new NotificationType<vo
 const ResumeParsingNotification: NotificationType<void> = new NotificationType<void>('cpptools/resumeParsing');
 const DidChangeActiveEditorNotification: NotificationType<DidChangeActiveEditorParams> = new NotificationType<DidChangeActiveEditorParams>('cpptools/didChangeActiveEditor');
 const RestartIntelliSenseForFileNotification: NotificationType<TextDocumentIdentifier> = new NotificationType<TextDocumentIdentifier>('cpptools/restartIntelliSenseForFile');
+const SelectTranslationUnitNotification: NotificationType<SelectTranslationUnitParams> = new NotificationType<SelectTranslationUnitParams>('cpptools/selectTranslationUnit');
 const DidChangeTextEditorSelectionNotification: NotificationType<Range> = new NotificationType<Range>('cpptools/didChangeTextEditorSelection');
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams> = new NotificationType<FolderSelectedSettingParams>('cpptools/didChangeSelectedSetting');
@@ -832,6 +844,8 @@ export interface Client {
     takeOwnership(document: vscode.TextDocument): void;
     sendDidOpen(document: vscode.TextDocument): Promise<void>;
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string>;
+    getTranslationUnitSourceCandidates(uri: vscode.Uri): Promise<GetTranslationUnitSourceCandidatesResult>;
+    selectTranslationUnit(uri: vscode.Uri, translationUnit: string): Promise<void>;
     updateActiveDocumentTextOptions(): void;
     didChangeActiveEditor(editor?: vscode.TextEditor, selection?: Range): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
@@ -3164,6 +3178,20 @@ export class DefaultClient implements Client {
         });
     }
 
+    public async getTranslationUnitSourceCandidates(uri: vscode.Uri): Promise<GetTranslationUnitSourceCandidatesResult> {
+        const params: TextDocumentIdentifier = { uri: uri.toString() };
+        await this.ready;
+        return this.languageClient.sendRequest(
+            GetTranslationUnitSourceCandidatesRequest,
+            params);
+    }
+
+    public async selectTranslationUnit(uri: vscode.Uri, translationUnit: string): Promise<void> {
+        const params: SelectTranslationUnitParams = { uri: uri.toString(), translationUnit };
+        await this.ready;
+        return this.languageClient.sendNotification(SelectTranslationUnitNotification, params).catch(logAndReturn.undefined);
+    }
+
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
         const params: QueryDefaultCompilerParams = {
             newTrustedCompilerPath: newCompilerPath ?? ""
@@ -4560,6 +4588,10 @@ class NullClient implements Client {
     takeOwnership(document: vscode.TextDocument): void { }
     sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string> { return Promise.resolve(""); }
+    getTranslationUnitSourceCandidates(uri: vscode.Uri): Promise<GetTranslationUnitSourceCandidatesResult> {
+        return Promise.resolve({ candidates: [], currentTranslationUnit: "" });
+    }
+    selectTranslationUnit(uri: vscode.Uri, translationUnit: string): Promise<void> { return Promise.resolve(); }
     updateActiveDocumentTextOptions(): void { }
     didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
