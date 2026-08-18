@@ -927,6 +927,7 @@
             "{Locked=\"[ { \\\"name\\\": \\\"\"} {Locked=\"\\\", \\\"value\\\": \\\"\"} {Locked=\"\\\" } ]\"} {Locked=\"[ { \\\"\"} {Locked=\"\\\": \\\"\"} {Locked=\"\\\" } ]\"}"
         ]
     },
+    "c_cpp.debuggers.env.description": "Object of environment variables to add to the environment for the program. Example: { \"MY_VAR\": \"value\" }. Use `environment` for the array-of-objects form.",
     "c_cpp.debuggers.envFile.description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE.",
     "c_cpp.debuggers.additionalSOLibSearchPath.description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
     "c_cpp.debuggers.MIMode.description": "Indicates the console debugger that the MIDebugEngine will connect to. Allowed values are \"gdb\" \"lldb\".",
