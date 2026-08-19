@@ -14,6 +14,18 @@ import { isWindows } from '../constants';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize = nls.loadMessageBundle();
 
+type LaunchEnvironmentEntry = { name: string; value: string; };
+
+type LaunchConfiguration = {
+    program?: string;
+    args?: string[];
+    cwd?: string;
+    environment?: LaunchEnvironmentEntry[];
+    env?: Record<string, string>;
+    console?: string;
+    externalConsole?: boolean;
+};
+
 /**
  * A minimal inline Debug Adapter that runs the target program directly without a debug adapter
  * when the user invokes "Run Without Debugging".
@@ -59,25 +71,23 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     }
 
     private async launch(request: { command: string; seq: number; arguments?: any; }): Promise<void> {
-        const config = request.arguments as {
-            program?: string;
-            args?: string[];
-            cwd?: string;
-            environment?: { name: string; value: string; }[];
-            console?: string;
-            externalConsole?: boolean;
-        };
+        const config = request.arguments as LaunchConfiguration;
 
         const program: string = config.program ?? '';
         const args: string[] = config.args ?? [];
         const cwd: string | undefined = config.cwd;
-        const environment: { name: string; value: string; }[] = config.environment ?? [];
+        const environment: LaunchEnvironmentEntry[] = config.environment ?? [];
+        const envObject: Record<string, string> = config.env ?? {};
         const consoleMode: string = config.console ?? (config.externalConsole ? 'externalTerminal' : 'integratedTerminal');
 
-        // Merge the launch config's environment variables on top of the inherited process environment.
+        // Merge environment values in this order: inherited process environment, legacy
+        // `environment` entries, then shorthand `env` values (higher precedence).
         const env: NodeJS.ProcessEnv = { ...process.env };
         for (const e of environment) {
             env[e.name] = e.value;
+        }
+        for (const [key, value] of Object.entries(envObject)) {
+            env[key] = value;
         }
 
         this.sendResponse(request, {});
