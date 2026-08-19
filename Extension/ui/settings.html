@@ -6,6 +6,17 @@
     <meta http-equiv="Content-Security-Policy" content="style-src 'unsafe-inline'; script-src 'nonce-{{nonce}}';">
 
     <style type="text/css">
+        :root {
+            --cpptools-foreground: var(--vscode-foreground);
+            --cpptools-background: var(--vscode-editor-background, var(--vscode-background));
+            --cpptools-input-foreground: var(--vscode-settings-textInputForeground, var(--vscode-input-foreground));
+            --cpptools-input-background: var(--vscode-settings-textInputBackground, var(--vscode-input-background));
+            --cpptools-input-border: var(--vscode-settings-textInputBorder, var(--vscode-input-border));
+            --cpptools-dropdown-foreground: var(--vscode-settings-dropdownForeground, var(--vscode-input-foreground));
+            --cpptools-dropdown-background: var(--vscode-settings-dropdownBackground, var(--vscode-input-background));
+            --cpptools-dropdown-border: var(--vscode-settings-dropdownBorder, var(--vscode-input-border));
+        }
+
         @media (max-width: 1140px) {
             #sidebar {
                 display: none;
@@ -121,7 +132,9 @@
         }
 
         body {
-            line-height: 19px
+            line-height: 19px;
+            color: var(--cpptools-foreground);
+            background: var(--cpptools-background);
         }
 
         body:not(.tabbing) button:focus {
@@ -216,14 +229,14 @@
             height: 27px;
             font-size: 13px;
             font-family:sans-serif;
-            color: var(--vscode-settings-dropdownForeground);
-            background: var(--vscode-settings-dropdownBackground);
-            border: 1px solid var(--vscode-settings-dropdownBorder);
+            color: var(--cpptools-dropdown-foreground);
+            background: var(--cpptools-dropdown-background);
+            border: 1px solid var(--cpptools-dropdown-border);
         }
 
         .select-editable {
             position: relative;
-            background-color: var(--vscode-settings-textInputBackground);
+            background-color: var(--cpptools-input-background);
             width: 800px;
             height: 31px;
         }
@@ -232,11 +245,16 @@
             position: absolute;
             font-size: 13px;
             font-family: sans-serif;
-            border: 1px solid var(--vscode-settings-textInputBorder);
+            border: 1px solid var(--cpptools-dropdown-border);
             height: 31px;
             margin: auto;
-            color: var(--vscode-settings-textInputForeground);
-            background: var(--vscode-settings-textInputBackground);
+            color: transparent;
+            background: var(--cpptools-dropdown-background);
+        }
+
+        .select-editable select option {
+            color: var(--cpptools-dropdown-foreground);
+            background: var(--cpptools-dropdown-background);
         }
 
         .select-editable input {
@@ -248,8 +266,8 @@
             height: 17px;
             font-size: 13px;
             border: none;
-            color: var(--vscode-settings-textInputForeground);
-            background: var(--vscode-settings-textInputBackground);
+            color: var(--cpptools-input-foreground);
+            background: var(--cpptools-input-background);
         }
 
         .select-editable input:focus {
@@ -284,31 +302,31 @@
         /** Theming */
 
         .vscode-light {
-            color: #1e1e1e
+            color: var(--cpptools-foreground)
         }
 
         .vscode-dark {
-            color: #ddd
+            color: var(--cpptools-foreground)
         }
 
         .vscode-high-contrast {
-            color: #fff
+            color: var(--cpptools-foreground)
         }
 
         .vscode-light code {
-            color: #a31515
+            color: var(--vscode-textPreformat-foreground, var(--cpptools-foreground))
         }
 
         .vscode-dark code {
-            color: #d7ba7d
+            color: var(--vscode-textPreformat-foreground, var(--cpptools-foreground))
         }
 
         .vscode-light code > div {
-            background-color: rgba(220, 220, 220, .4)
+            background-color: var(--vscode-textCodeBlock-background, var(--cpptools-background))
         }
 
         .vscode-dark code > div {
-            background-color: rgba(10, 10, 10, .4)
+            background-color: var(--vscode-textCodeBlock-background, var(--cpptools-background))
         }
 
         .vscode-light .input-disabled {
@@ -329,7 +347,7 @@
         }
 
         .vscode-high-contrast code > div {
-            background-color: #000
+            background-color: var(--vscode-textCodeBlock-background, var(--cpptools-background))
         }
 
         .vscode-high-contrast h1 {
@@ -385,11 +403,11 @@
         }
 
         .vscode-light a {
-            color: #4080D0
+            color: var(--vscode-textLink-foreground)
         }
 
         .vscode-dark a {
-            color: #a2c1e8
+            color: var(--vscode-textLink-foreground)
         }
 
     </style>
