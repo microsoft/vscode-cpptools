@@ -3,16 +3,21 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { describe, it } from 'mocha';
+import { before, describe, it } from 'mocha';
 import { deepEqual, equal, ok } from 'node:assert';
 import * as path from 'path';
 import { Uri } from 'vscode';
 import { extractCompilerPathAndArgs } from '../../../../src/common';
 import { isWindows } from '../../../../src/constants';
 import { CppProperties } from '../../../../src/LanguageServer/configurations';
+import * as testHelpers from '../../../common/testHelpers';
 
 const assetsFolder = Uri.file(path.normalize(path.join(__dirname.replace(/dist[\/\\]/, ''), '..', 'assets')));
 const assetsFolderFsPath = assetsFolder.fsPath;
+
+before(async () => {
+    await testHelpers.activateCppExtension();
+});
 
 // A simple test counter for the tests that loop over several cases.
 // This is to make it easier to see which test failed in the output.
