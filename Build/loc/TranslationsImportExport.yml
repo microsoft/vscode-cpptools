@@ -56,6 +56,7 @@ extends:
         - task: CmdLine@2
           inputs:
             script: 'cd Extension && yarn install'
+          retryCountOnTaskFailure: 3
 
         - task: CmdLine@2
           inputs:
