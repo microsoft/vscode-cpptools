@@ -14,7 +14,6 @@ interface FoldingRangeRequestInfo {
 }
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
-    private client: DefaultClient;
     public onDidChangeFoldingRangesEvent = new vscode.EventEmitter<void>();
     public onDidChangeFoldingRanges?: vscode.Event<void>;
 
@@ -22,12 +21,11 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     // for the same file without waiting for the prior request to complete or cancelling them.
     private pendingRequests: Map<string, FoldingRangeRequestInfo> = new Map<string, FoldingRangeRequestInfo>();
 
-    constructor(client: DefaultClient) {
-        this.client = client;
+    constructor(private client: DefaultClient) {
         this.onDidChangeFoldingRanges = this.onDidChangeFoldingRangesEvent.event;
     }
+
     async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext, token: vscode.CancellationToken): Promise<vscode.FoldingRange[] | undefined> {
-        await this.client.ready;
         const settings: CppSettings = new CppSettings();
         if (!settings.codeFolding) {
             return [];

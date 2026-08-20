@@ -11,9 +11,7 @@ import { CppSettings } from '../settings';
 import { makeVscodeTextEdits } from '../utils';
 
 export class DocumentRangeFormattingEditProvider implements vscode.DocumentRangeFormattingEditProvider {
-    private client: DefaultClient;
-    constructor(client: DefaultClient) {
-        this.client = client;
+    constructor(private client: DefaultClient) {
     }
 
     public async provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range,
@@ -22,7 +20,6 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
         if (settings.formattingEngine === "disabled") {
             return [];
         }
-        await this.client.ready;
         const filePath: string = document.uri.fsPath;
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {

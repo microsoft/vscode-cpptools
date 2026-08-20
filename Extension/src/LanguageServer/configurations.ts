@@ -136,7 +136,7 @@ export interface CompilerDefaults {
     trustedCompilerFound: boolean;
 }
 
-export class CppProperties {
+export class CppProperties implements vscode.Disposable {
     private client: DefaultClient;
     private rootUri: vscode.Uri | undefined;
     private propertiesFile: vscode.Uri | undefined | null = undefined; // undefined and null values are handled differently
