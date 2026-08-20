@@ -6,6 +6,7 @@
 import { CppSettings } from '../LanguageServer/settings';
 import { AttachItem, showQuickPick } from './attachQuickPick';
 import { PsProcessParser } from './nativeAttach';
+import { filterProcessItems } from './processFilter';
 
 import * as os from 'os';
 import * as path from 'path';
@@ -92,6 +93,14 @@ export class RemoteAttachPicker {
             processes = await this.getRemoteProcessesExtendedRemote(miDebuggerPath, miDebuggerServerAddress);
         } else {
             throw new Error(localize("no.pipetransport.useextendedremote", "Chosen debug configuration does not contain {0} or {1}", "pipeTransport", "useExtendedRemote"));
+        }
+
+        const matchingProcesses: AttachItem[] | undefined = filterProcessItems(processes, config?.processFilter);
+        if (matchingProcesses?.length === 1) {
+            return matchingProcesses[0].id;
+        }
+        if (matchingProcesses && matchingProcesses.length > 1) {
+            processes = matchingProcesses;
         }
 
         const attachPickOptions: vscode.QuickPickOptions = {
