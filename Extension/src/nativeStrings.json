@@ -773,5 +773,9 @@
     "failed_to_lock_browse_db_lock_file": {
         "text": "Failed to lock browse database lock file: {0} (errno={1})",
         "hint": "{0} is the lock file path. {1} is the errno value. {Locked=\"{0}\"} {Locked=\"errno\"} {Locked=\"{1}\"}"
+    },
+    "browse_database_disabled_incompatible_storage": {
+        "text": "The browse database was disabled because its storage location does not support SQLite WAL shared memory. Set browse.databaseFilename to a local path.",
+        "hint": "browse.databaseFilename is a setting name. {Locked=\"SQLite WAL\"} {Locked=\"browse.databaseFilename\"}"
     }
 }

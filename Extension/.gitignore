@@ -17,6 +17,7 @@ bin/isense_driver
 bin/libc.so
 bin/LICENSE.txt
 bin/scout_driver
+bin/process_wait_test_helper
 bin/unittests
 bin/vcpkgsrvtest
 bin/*.dll
