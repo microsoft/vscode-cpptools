@@ -149,8 +149,8 @@ test('accepts workspace targets and bundled package entries without separate int
             'packages/local': { name: 'local', version: '1.0.0' },
             'node_modules/bundler': {
                 version: '1.0.0',
-                resolved: 'https://registry.example/bundler/-/bundler-1.0.0.tgz',
-                integrity: `sha512-${Buffer.alloc(64).toString('base64')}`,
+                resolved: `${registry}bundler/-/bundler-1.0.0.tgz`,
+                integrity: `sha1-${Buffer.alloc(20).toString('base64')}`,
                 bundleDependencies: ['bundled']
             },
             'node_modules/bundler/node_modules/bundled': { version: '1.0.0', inBundle: true }
@@ -158,7 +158,9 @@ test('accepts workspace targets and bundled package entries without separate int
     }, null, 2)}\n`);
 
     const { tarballs } = loadPackageLocks([packageLockPath]);
-    assert.deepEqual(tarballs, []);
+    assert.equal(tarballs.length, 1);
+    assert.equal(tarballs[0].packageId, 'bundler@1.0.0');
+    assert.deepEqual(tarballs[0].packageEntries.map(packageEntry => packageEntry.integrity), [`sha1-${Buffer.alloc(20).toString('base64')}`]);
 });
 
 test('rejects fake bundled and malformed link entries without integrity', t => {
@@ -196,6 +198,42 @@ test('rejects a link target that is independently resolved without integrity', t
                 version: '1.0.0',
                 resolved: 'https://registry.example/target/-/target-1.0.0.tgz'
             }
+        }
+    }, null, 2)}\n`);
+
+    assert.throws(() => loadPackageLocks([packageLockPath]), /does not have locked integrity or an explicit local resolution/);
+});
+
+test('rejects protocol, absolute, and traversal workspace link targets', t => {
+    const temporaryDirectory = createTemporaryDirectory(t);
+    for (const [name, resolved] of [
+        ['protocol', 'https://example.test/package.tgz'],
+        ['file-traversal', 'file:../../outside'],
+        ['absolute', '/packages/local'],
+        ['traversal', '../packages/local']
+    ]) {
+        const packageLockPath = path.join(temporaryDirectory, `${name}.json`);
+        fs.writeFileSync(packageLockPath, `${JSON.stringify({
+            lockfileVersion: 3,
+            packages: {
+                '': { name: 'fixture' },
+                'node_modules/local': { resolved, link: true },
+                'packages/local': { name: 'local', version: '1.0.0' }
+            }
+        }, null, 2)}\n`);
+        assert.throws(() => loadPackageLocks([packageLockPath]), /does not have locked integrity or an explicit local resolution/);
+    }
+});
+
+test('rejects an exact parent-directory workspace link target', t => {
+    const temporaryDirectory = createTemporaryDirectory(t);
+    const packageLockPath = path.join(temporaryDirectory, 'parent.json');
+    fs.writeFileSync(packageLockPath, `${JSON.stringify({
+        lockfileVersion: 3,
+        packages: {
+            '': { name: 'fixture' },
+            'node_modules/local': { resolved: '..', link: true },
+            '..': { name: 'outside', version: '1.0.0' }
         }
     }, null, 2)}\n`);
 

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { hasSupportedIntegrityAlgorithm } from './subresourceIntegrity.mjs';
+import { hasLockedIntegrity } from './subresourceIntegrity.mjs';
 
 const excludedDirectoryNames = new Set(['.git', 'node_modules']);
 
@@ -24,10 +24,28 @@ function findPackageLockPaths(repositoryRoot) {
     return packageLockPaths;
 }
 
+function getWorkspaceTargetPath(packageEntry) {
+    if (packageEntry.link !== true || typeof packageEntry.resolved !== 'string') {
+        return undefined;
+    }
+
+    const workspacePath = packageEntry.resolved.replaceAll('\\', '/');
+    const normalizedPath = path.posix.normalize(workspacePath);
+    return workspacePath.length > 0
+        && !/^[A-Za-z][A-Za-z0-9+.-]*:/.test(workspacePath)
+        && !path.posix.isAbsolute(workspacePath)
+        && normalizedPath === workspacePath
+        && normalizedPath !== '.'
+        && normalizedPath !== '..'
+        && !normalizedPath.startsWith('../')
+        ? normalizedPath
+        : undefined;
+}
+
 function getWorkspacePaths(packages) {
     return new Set(Object.values(packages)
-        .filter(packageEntry => packageEntry.link === true && typeof packageEntry.resolved === 'string' && packageEntry.resolved.length > 0)
-        .map(packageEntry => packageEntry.resolved.replaceAll('\\', '/'))
+        .map(getWorkspaceTargetPath)
+        .filter(workspacePath => workspacePath !== undefined)
         .filter(workspacePath => {
             const workspaceEntry = packages[workspacePath];
             return !workspacePath.split('/').includes('node_modules')
@@ -45,7 +63,7 @@ function isBundledPackageEntry(packages, packagePath, packageEntry) {
     let ancestorPath = packagePath.slice(0, packagePath.lastIndexOf('/node_modules/'));
     while (ancestorPath) {
         const ancestorEntry = packages[ancestorPath];
-        if (ancestorEntry && hasSupportedIntegrityAlgorithm(ancestorEntry.integrity)) {
+        if (ancestorEntry && hasLockedIntegrity(ancestorEntry.integrity)) {
             const relativePath = packagePath.slice(`${ancestorPath}/node_modules/`.length);
             const relativeSegments = relativePath.split('/');
             const packageName = relativeSegments[0].startsWith('@')
@@ -65,9 +83,9 @@ function isBundledPackageEntry(packages, packagePath, packageEntry) {
 
 function isExplicitLocalPackageEntry(packages, workspacePaths, packagePath, packageEntry) {
     const normalizedPackagePath = packagePath.replaceAll('\\', '/');
-    return (packageEntry.link === true && typeof packageEntry.resolved === 'string' && packageEntry.resolved.length > 0)
+    return workspacePaths.has(getWorkspaceTargetPath(packageEntry))
         || workspacePaths.has(normalizedPackagePath)
-        || (typeof packageEntry.resolved === 'string' && /^(?:file|link|workspace):/i.test(packageEntry.resolved))
+        || (packageEntry.link !== true && typeof packageEntry.resolved === 'string' && /^(?:file|link|workspace):/i.test(packageEntry.resolved))
         || isBundledPackageEntry(packages, normalizedPackagePath, packageEntry);
 }
 

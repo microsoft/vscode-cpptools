@@ -126,6 +126,10 @@ test('reports npm package entries without a SHA-2 digest', () => {
       'packages/local': { name: 'local', version: '1.0.0' },
       'node_modules/remote-link': { link: true, resolved: 'node_modules/remote-target' },
       'node_modules/remote-target': { version: '1.0.0', resolved: 'https://registry.example/remote-1.0.0.tgz' },
+      'node_modules/protocol-link': { link: true, resolved: 'https://example.test/package.tgz' },
+      'node_modules/file-traversal-link': { link: true, resolved: 'file:../../outside' },
+      'node_modules/absolute-link': { link: true, resolved: '/packages/local' },
+      'node_modules/traversal-link': { link: true, resolved: '../packages/local' },
       'node_modules/malformed-link': { link: true },
       'node_modules/fake-bundled': { version: '1.0.0', inBundle: true },
       'node_modules/bundler': { integrity: sha512Integrity, bundleDependencies: ['bundled'] },
@@ -139,7 +143,12 @@ test('reports npm package entries without a SHA-2 digest', () => {
     { packagePath: 'node_modules/invalid-sha2', integrity: 'sha512-invalid' },
     { packagePath: 'node_modules/missing', integrity: '<missing>' },
     { packagePath: 'node_modules/missing-resolution', integrity: '<missing>' },
+    { packagePath: 'node_modules/remote-link', integrity: '<missing>' },
     { packagePath: 'node_modules/remote-target', integrity: '<missing>' },
+    { packagePath: 'node_modules/protocol-link', integrity: '<missing>' },
+    { packagePath: 'node_modules/file-traversal-link', integrity: '<missing>' },
+    { packagePath: 'node_modules/absolute-link', integrity: '<missing>' },
+    { packagePath: 'node_modules/traversal-link', integrity: '<missing>' },
     { packagePath: 'node_modules/malformed-link', integrity: '<missing>' },
     { packagePath: 'node_modules/fake-bundled', integrity: '<missing>' }
   ]);
