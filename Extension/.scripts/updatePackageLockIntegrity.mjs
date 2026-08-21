@@ -6,7 +6,7 @@ import process from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL, URL } from 'node:url';
 import { findPackageLockPaths, getWorkspacePaths, isExplicitLocalPackageEntry } from './packageLockFiles.mjs';
-import { calculateIntegrity, hasSupportedIntegrityAlgorithm } from './subresourceIntegrity.mjs';
+import { calculateIntegrity, hasSupportedIntegrityAlgorithm, integrityMatchesContent } from './subresourceIntegrity.mjs';
 
 const approvedRegistryPrefix = 'https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/';
 const approvedRegistryUrl = new URL(approvedRegistryPrefix);
@@ -33,8 +33,7 @@ function getPackageNameFromResolvedUrl(resolved, requireApprovedRegistry = true)
 }
 
 function updatePackageIntegrity(packageEntry, tarball) {
-    const sha1Integrity = calculateIntegrity('sha1', tarball);
-    if (!packageEntry.integrity.split(/\s+/).includes(sha1Integrity)) {
+    if (!integrityMatchesContent(packageEntry.integrity, 'sha1', tarball)) {
         throw new Error(`Downloaded tarball does not match the locked integrity for ${packageEntry.resolved}.`);
     }
 

@@ -51,6 +51,18 @@ test('replaces matching SHA-1 integrity with SHA-512', () => {
     );
 });
 
+test('replaces matching unpadded and metadata-suffixed SHA-1 integrity', () => {
+    const packageEntry = {
+        resolved: `${registry}fixture/-/fixture-1.0.0.tgz`,
+        integrity: 'sha1-Uc/zwfC8WfYYfnBAzBKk6bHsp6o?source=legacy'
+    };
+
+    assert.equal(
+        updatePackageIntegrity(packageEntry, Buffer.from('fixture')),
+        'sha512-lOlQ7aSocOZWXUThS5DxbAo4HNaTBFKcgfa9QIrxPFFVFrhBfgBfwxCT+qSxPekkNkVt0lKJqyhnw6V2+pSESQ=='
+    );
+});
+
 test('rejects tarball bytes that do not match locked SHA-1', () => {
     const packageEntry = {
         resolved: `${registry}fixture/-/fixture-1.0.0.tgz`,
