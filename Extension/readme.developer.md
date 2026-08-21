@@ -46,7 +46,7 @@
 
 `npm run bootstrap`
 
-`npm run bootstrap` installs Yarn `1.22.22` globally from the internal npm feed and then runs `yarn install --frozen-lockfile`.
+`npm run bootstrap` installs Yarn `1.22.22` from the internal npm feed using `.yarn-bootstrap/package-lock.json`, exposes the verified local package globally, and then runs `yarn install --frozen-lockfile`.
 On some systems, global npm install may require elevated permissions.
 
 It's also good practice to run `npm run bootstrap` after merging from upstream or switching branches. 
