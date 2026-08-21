@@ -66,9 +66,18 @@ missing@1.0.0:
   version "1.0.0"
   resolved "HTTPS://registry.example/missing-1.0.0.tgz"
 
+missing-resolution@1.0.0:
+  version "1.0.0"
+
+"remote-marker@https://example.test/@file:/package.tgz":
+  version "1.0.0"
+
 local@1.0.0:
   version "1.0.0"
   resolved "file:../local"
+
+"local-selector@file:../local":
+  version "1.0.0"
 `;
 
     assert.deepEqual(findUnsupportedIntegrityEntries(lockfile), [
@@ -76,7 +85,9 @@ local@1.0.0:
         { selector: 'unsupported@1.0.0', line: 7, integrity: 'md5-unsupported' },
         { selector: 'quoted@1.0.0', line: 11, integrity: 'sha1-quoted' },
         { selector: 'invalid-sha2@1.0.0', line: 15, integrity: 'sha512-invalid' },
-        { selector: 'missing@1.0.0', line: 17, integrity: '<missing>' }
+        { selector: 'missing@1.0.0', line: 17, integrity: '<missing>' },
+        { selector: 'missing-resolution@1.0.0', line: 21, integrity: '<missing>' },
+        { selector: '"remote-marker@https://example.test/@file:/package.tgz"', line: 24, integrity: '<missing>' }
     ]);
 });
 
@@ -109,7 +120,16 @@ test('reports npm package entries without a SHA-2 digest', () => {
       'node_modules/unsupported': { integrity: 'md5-unsupported' },
       'node_modules/invalid-sha2': { integrity: 'sha512-invalid' },
       'node_modules/missing': { resolved: 'HTTPS://registry.example/missing-1.0.0.tgz' },
-      'node_modules/local': { resolved: 'file:../local' }
+      'node_modules/missing-resolution': { version: '1.0.0' },
+      'node_modules/local': { resolved: 'file:../local' },
+      'node_modules/link': { link: true, resolved: 'packages/local' },
+      'packages/local': { name: 'local', version: '1.0.0' },
+      'node_modules/remote-link': { link: true, resolved: 'node_modules/remote-target' },
+      'node_modules/remote-target': { version: '1.0.0', resolved: 'https://registry.example/remote-1.0.0.tgz' },
+      'node_modules/malformed-link': { link: true },
+      'node_modules/fake-bundled': { version: '1.0.0', inBundle: true },
+      'node_modules/bundler': { integrity: sha512Integrity, bundleDependencies: ['bundled'] },
+      'node_modules/bundler/node_modules/bundled': { version: '1.0.0', inBundle: true }
     }
   };
 
@@ -117,7 +137,11 @@ test('reports npm package entries without a SHA-2 digest', () => {
     { packagePath: 'node_modules/legacy', integrity: 'sha1-legacy' },
     { packagePath: 'node_modules/unsupported', integrity: 'md5-unsupported' },
     { packagePath: 'node_modules/invalid-sha2', integrity: 'sha512-invalid' },
-    { packagePath: 'node_modules/missing', integrity: '<missing>' }
+    { packagePath: 'node_modules/missing', integrity: '<missing>' },
+    { packagePath: 'node_modules/missing-resolution', integrity: '<missing>' },
+    { packagePath: 'node_modules/remote-target', integrity: '<missing>' },
+    { packagePath: 'node_modules/malformed-link', integrity: '<missing>' },
+    { packagePath: 'node_modules/fake-bundled', integrity: '<missing>' }
   ]);
 });
 

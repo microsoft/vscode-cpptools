@@ -121,7 +121,85 @@ test('rejects uppercase network URLs without integrity', t => {
         }
     }, null, 2)}\n`);
 
-    assert.throws(() => loadPackageLocks([packageLockPath]), /network resolution without locked integrity/);
+    assert.throws(() => loadPackageLocks([packageLockPath]), /does not have locked integrity or an explicit local resolution/);
+});
+
+test('rejects non-root package entries without resolution or integrity', t => {
+    const temporaryDirectory = createTemporaryDirectory(t);
+    const packageLockPath = path.join(temporaryDirectory, 'package-lock.json');
+    fs.writeFileSync(packageLockPath, `${JSON.stringify({
+        lockfileVersion: 3,
+        packages: {
+            '': { name: 'fixture' },
+            'node_modules/fixture': { version: '1.0.0' }
+        }
+    }, null, 2)}\n`);
+
+    assert.throws(() => loadPackageLocks([packageLockPath]), /does not have locked integrity or an explicit local resolution/);
+});
+
+test('accepts workspace targets and bundled package entries without separate integrity', t => {
+    const temporaryDirectory = createTemporaryDirectory(t);
+    const packageLockPath = path.join(temporaryDirectory, 'package-lock.json');
+    fs.writeFileSync(packageLockPath, `${JSON.stringify({
+        lockfileVersion: 3,
+        packages: {
+            '': { name: 'fixture' },
+            'node_modules/local': { resolved: 'packages/local', link: true },
+            'packages/local': { name: 'local', version: '1.0.0' },
+            'node_modules/bundler': {
+                version: '1.0.0',
+                resolved: 'https://registry.example/bundler/-/bundler-1.0.0.tgz',
+                integrity: `sha512-${Buffer.alloc(64).toString('base64')}`,
+                bundleDependencies: ['bundled']
+            },
+            'node_modules/bundler/node_modules/bundled': { version: '1.0.0', inBundle: true }
+        }
+    }, null, 2)}\n`);
+
+    const { tarballs } = loadPackageLocks([packageLockPath]);
+    assert.deepEqual(tarballs, []);
+});
+
+test('rejects fake bundled and malformed link entries without integrity', t => {
+    const temporaryDirectory = createTemporaryDirectory(t);
+    const fakeBundleLockPath = path.join(temporaryDirectory, 'fake-bundle-lock.json');
+    const malformedLinkLockPath = path.join(temporaryDirectory, 'malformed-link-lock.json');
+    fs.writeFileSync(fakeBundleLockPath, `${JSON.stringify({
+        lockfileVersion: 3,
+        packages: {
+            '': { name: 'fixture' },
+            'node_modules/fake-bundled': { version: '1.0.0', inBundle: true }
+        }
+    }, null, 2)}\n`);
+    fs.writeFileSync(malformedLinkLockPath, `${JSON.stringify({
+        lockfileVersion: 3,
+        packages: {
+            '': { name: 'fixture' },
+            'node_modules/malformed-link': { link: true }
+        }
+    }, null, 2)}\n`);
+
+    assert.throws(() => loadPackageLocks([fakeBundleLockPath]), /does not have locked integrity or an explicit local resolution/);
+    assert.throws(() => loadPackageLocks([malformedLinkLockPath]), /does not have locked integrity or an explicit local resolution/);
+});
+
+test('rejects a link target that is independently resolved without integrity', t => {
+    const temporaryDirectory = createTemporaryDirectory(t);
+    const packageLockPath = path.join(temporaryDirectory, 'package-lock.json');
+    fs.writeFileSync(packageLockPath, `${JSON.stringify({
+        lockfileVersion: 3,
+        packages: {
+            '': { name: 'fixture' },
+            'node_modules/remote': { resolved: 'node_modules/target', link: true },
+            'node_modules/target': {
+                version: '1.0.0',
+                resolved: 'https://registry.example/target/-/target-1.0.0.tgz'
+            }
+        }
+    }, null, 2)}\n`);
+
+    assert.throws(() => loadPackageLocks([packageLockPath]), /does not have locked integrity or an explicit local resolution/);
 });
 
 test('rejects duplicate or missing npm pack results', t => {

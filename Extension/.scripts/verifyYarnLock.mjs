@@ -2,13 +2,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { findPackageLockPaths } from './packageLockFiles.mjs';
+import { findPackageLockPaths, getWorkspacePaths, isExplicitLocalPackageEntry } from './packageLockFiles.mjs';
 import { hasSupportedIntegrityAlgorithm } from './subresourceIntegrity.mjs';
 
 const dependencySections = ['dependencies', 'devDependencies', 'optionalDependencies'];
 
-function isNetworkResolution(resolved) {
-    return typeof resolved === 'string' && /^https?:\/\//i.test(resolved);
+function isExplicitLocalResolution(resolved) {
+    return typeof resolved === 'string' && /^(?:file|link|workspace):/i.test(resolved);
+}
+
+function hasExplicitLocalSelector(selector) {
+    return parseLockfileKey(selector).every(pattern => {
+        const packageSeparator = pattern.startsWith('@') ? pattern.indexOf('@', 1) : pattern.indexOf('@');
+        return packageSeparator !== -1 && /^(?:file|link|workspace):/i.test(pattern.slice(packageSeparator + 1));
+    });
 }
 
 function parseLockfileKey(key) {
@@ -82,7 +89,9 @@ function findUnsupportedIntegrityEntries(lockfile) {
     let currentEntry;
 
     function finishEntry() {
-        if (currentEntry && isNetworkResolution(currentEntry.resolved) && currentEntry.integrity === undefined) {
+        if (currentEntry && currentEntry.integrity === undefined
+            && !isExplicitLocalResolution(currentEntry.resolved)
+            && !hasExplicitLocalSelector(currentEntry.selector)) {
             unsupportedEntries.push({
                 selector: currentEntry.selector,
                 line: currentEntry.line,
@@ -139,13 +148,16 @@ function findUnsupportedPackageLockIntegrityEntries(packageLock) {
     }
 
     const unsupportedEntries = [];
+    const workspacePaths = getWorkspacePaths(packageLock.packages);
     for (const [packagePath, packageEntry] of Object.entries(packageLock.packages)) {
         if (packageEntry.integrity !== undefined && !hasSupportedIntegrityAlgorithm(packageEntry.integrity)) {
             unsupportedEntries.push({
                 packagePath: packagePath || '<root>',
                 integrity: typeof packageEntry.integrity === 'string' ? packageEntry.integrity : '<invalid>'
             });
-        } else if (isNetworkResolution(packageEntry.resolved) && packageEntry.integrity === undefined) {
+        } else if (packagePath !== ''
+            && packageEntry.integrity === undefined
+            && !isExplicitLocalPackageEntry(packageLock.packages, workspacePaths, packagePath, packageEntry)) {
             unsupportedEntries.push({
                 packagePath: packagePath || '<root>',
                 integrity: '<missing>'

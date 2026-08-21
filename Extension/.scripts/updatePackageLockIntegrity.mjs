@@ -5,7 +5,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL, URL } from 'node:url';
-import { findPackageLockPaths } from './packageLockFiles.mjs';
+import { findPackageLockPaths, getWorkspacePaths, isExplicitLocalPackageEntry } from './packageLockFiles.mjs';
 import { calculateIntegrity, hasSupportedIntegrityAlgorithm } from './subresourceIntegrity.mjs';
 
 const approvedRegistryPrefix = 'https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/';
@@ -58,12 +58,14 @@ function loadPackageLocks(packageLockPaths) {
         const indentation = /^([ \t]+)"/m.exec(text)?.[1] ?? '  ';
         const newline = text.includes('\r\n') ? '\r\n' : '\n';
         packageLocks.push({ packageLockPath, packageLock, indentation, newline, originalText: text });
+        const workspacePaths = getWorkspacePaths(packageLock.packages);
 
         for (const [packagePath, packageEntry] of Object.entries(packageLock.packages)) {
             const hasSupportedIntegrity = hasSupportedIntegrityAlgorithm(packageEntry.integrity);
             if (typeof packageEntry.integrity !== 'string') {
-                if (typeof packageEntry.resolved === 'string' && /^https?:\/\//i.test(packageEntry.resolved)) {
-                    throw new Error(`${packageLockPath}: ${packagePath || '<root>'} has a network resolution without locked integrity.`);
+                const isExplicitLocalEntry = isExplicitLocalPackageEntry(packageLock.packages, workspacePaths, packagePath, packageEntry);
+                if (packagePath !== '' && !isExplicitLocalEntry) {
+                    throw new Error(`${packageLockPath}: ${packagePath} does not have locked integrity or an explicit local resolution.`);
                 }
                 continue;
             }
