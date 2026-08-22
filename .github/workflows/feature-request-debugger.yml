@@ -20,7 +20,7 @@ jobs:
       - name: Checkout Actions
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Actions
-        run: cd ./.github/actions && npm install --production && cd ../..
+        run: cd ./.github/actions && npm ci --omit=dev && cd ../..
       - name: Add Comment
         uses: ./.github/actions/AddComment
         with:

@@ -34,8 +34,8 @@ jobs:
         with:
           node-version: 24
 
-      - name: Validate Yarn lockfile
-        run: yarn test-yarn-lock && yarn verify-yarn-lock
+      - name: Validate dependency lockfiles
+        run: yarn test-lockfiles && yarn verify-lockfiles
         working-directory: Extension
 
       - name: Install Dependencies

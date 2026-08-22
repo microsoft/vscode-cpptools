@@ -48,9 +48,9 @@ jobs:
       script: |
         export SRC_DIR=$(echo $BUILD_SOURCESDIRECTORY | sed 's|\\|/|g')
         cd "$SRC_DIR/${{ parameters.srcDir }}"
-        npm install
+        npm ci
         if [ $? -ne 0 ]; then
-          echo "npm install failed, sleeping for 30s before retrying..."
+          echo "npm ci failed, sleeping for 30s before retrying..."
           sleep 30
           exit 1
         fi
