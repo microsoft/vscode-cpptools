@@ -433,5 +433,6 @@
 	"check_open_failed": "nie można otworzyć {0} do analizy",
 	"check_timed_out": "przekroczono limit czasu oczekiwania na zakończenie analizy {0}",
 	"failed_to_open_browse_db_lock_file": "Nie można otworzyć pliku blokady bazy danych przeglądania: {0} (errno={1})",
-	"failed_to_lock_browse_db_lock_file": "Nie można zablokować pliku blokady bazy danych przeglądania: {0} (errno={1})"
+	"failed_to_lock_browse_db_lock_file": "Nie można zablokować pliku blokady bazy danych przeglądania: {0} (errno={1})",
+	"browse_database_disabled_incompatible_storage": "The browse database was disabled because its storage location does not support SQLite WAL shared memory. Set browse.databaseFilename to a local path."
 }

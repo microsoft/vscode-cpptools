@@ -346,9 +346,9 @@
 	"auth_denied": "El usuario denegó la autorización.",
 	"auth_unexpected_error": "Error inesperado durante el sondeo: {0}",
 	"auth_login_failed": "Error de inicio de sesión de GitHub. Intente ejecutar con --login desde la línea de comandos para iniciar sesión.",
-	"auth_login_failed_plugin": "Error de inicio de sesión de GitHub. Ejecute npx @microsoft/cpp-language-server --login",
+	"auth_login_failed_plugin": "Error de inicio de sesión de GitHub. Run npx @microsoft/cpp-language-server --login",
 	"auth_eula_required": "Se debe aceptar el EULA para continuar. Se ejecuta con --accept-eula.",
-	"auth_eula_required_plugin": "Se debe aceptar el EULA para continuar. Ejecute npx @microsoft/cpp-language-server --accept-eula",
+	"auth_eula_required_plugin": "Se debe aceptar el EULA para continuar. Run npx @microsoft/cpp-language-server --accept-eula",
 	"auth_already_authenticated": "Ya se ha autenticado con GitHub. Use --force-login para volver a autenticarse.",
 	"config_unsupported_version": "Error de inicialización: versión de configuración no admitida. Solo se admite la versión 1.",
 	"config_file_not_found": "Error de inicialización: no se encontró el archivo de configuración ''{0}\".",
@@ -425,7 +425,7 @@
 	"check_requires_source": "--check requiere un archivo de origen: --check=<file>",
 	"check_source_not_found": "no se encuentra el archivo de origen: {0}",
 	"check_compile_commands_not_found": "No se encontró compile_commands.json: {0}",
-	"check_compile_commands_not_discovered": "no se pudo encontrar compile_commands.json en ningún directorio padre de {0}; pase --check-compile-commands=<path> para indicarlo explícitamente",
+	"check_compile_commands_not_discovered": "no se pudo encontrar compile_commands.json en ningún directorio principal de {0}; pase --check-compile-commands=<path> para indicarlo explícitamente",
 	"check_engine_init_failed": "no se pudo inicializar el motor de lenguaje",
 	"check_no_workspace_folder": "no se resolvió ninguna carpeta del área de trabajo para {0}",
 	"check_not_in_compile_commands": "{0} no se encuentra en {1}",
@@ -433,5 +433,6 @@
 	"check_open_failed": "no se pudo abrir {0} para su análisis",
 	"check_timed_out": "se agotó el tiempo de espera para finalizar el análisis de {0}",
 	"failed_to_open_browse_db_lock_file": "No se pudo abrir el archivo de bloqueo de la base de datos de exploración: {0} (errno={1})",
-	"failed_to_lock_browse_db_lock_file": "No se pudo bloquear el archivo de bloqueo de la base de datos de exploración: {0} (errno={1})"
+	"failed_to_lock_browse_db_lock_file": "No se pudo bloquear el archivo de bloqueo de la base de datos de exploración: {0} (errno={1})",
+	"browse_database_disabled_incompatible_storage": "The browse database was disabled because its storage location does not support SQLite WAL shared memory. Set browse.databaseFilename to a local path."
 }

@@ -419,13 +419,13 @@
 	"help_allow_missing_lsp_config": "Zulassen, dass der Server gestartet wird, auch wenn die angegebene --lsp-config-Datei nicht vorhanden ist.",
 	"initialize_failed_during_engine_setup": "Fehler bei der Initialisierung während der Engine-Einrichtung.",
 	"important_label": "Wichtig:",
-	"help_check": "Validieren Sie eine Quelldatei gegenüber der compile_commands.json, indem Sie sie vollständig parsen und analysieren und Diagnosen melden. Der Befehl wird mit einem Exitcode ungleich null beendet, wenn Fehler gefunden werden.",
+	"help_check": "Validieren Sie eine Quelldatei gegenüber der compile_commands.json, indem Sie sie vollständig parsen und analysieren und Diagnosen melden. Wird mit einem anderen Wert als Null, wenn Fehler gefunden werden.",
 	"help_check_compile_commands": "Pfad zu einem bestimmten compile_commands.json (oder dessen Verzeichnis), das mit „--check“ verwendet werden soll. Standardmäßig wird die automatische Ermittlung verwendet.",
 	"check_not_authorized": "nicht autorisiert; zum Ausführen von „--check“ ist eine Anmeldung erforderlich",
 	"check_requires_source": "„--check“ erfordert eine Quelldatei: --check=<file>",
 	"check_source_not_found": "Quelldatei nicht gefunden: {0}",
 	"check_compile_commands_not_found": "compile_commands.json nicht gefunden: {0}",
-	"check_compile_commands_not_discovered": "compile_commands.json wurde in keinem übergeordneten Verzeichnis von {0} gefunden; übergeben Sie --check-compile-commands=<path>, um den Pfad explizit anzugeben",
+	"check_compile_commands_not_discovered": "compile_commands.json wurde in keinem übergeordneten Verzeichnis von {0} gefunden; „--check-compile-commands=<path>“ durchlaufen lassen, um es explizit anzugeben",
 	"check_engine_init_failed": "Fehler beim Initialisieren der Sprach-Engine",
 	"check_no_workspace_folder": "Kein Arbeitsbereichsordner aufgelöst für {0}",
 	"check_not_in_compile_commands": "{0} ist nicht vorhanden in {1}",
@@ -433,5 +433,6 @@
 	"check_open_failed": "Fehler beim Öffnen von {0} zur Analyse",
 	"check_timed_out": "Timeout beim Warten auf den Abschluss der Analyse von {0}",
 	"failed_to_open_browse_db_lock_file": "Fehler beim Öffnen der Sperrdatei der Browse-Datenbank: {0} (errno={1})",
-	"failed_to_lock_browse_db_lock_file": "Fehler beim Sperren der Sperrdatei der Browse-Datenbank: {0} (errno={1})"
+	"failed_to_lock_browse_db_lock_file": "Fehler beim Sperren der Sperrdatei der Browse-Datenbank: {0} (errno={1})",
+	"browse_database_disabled_incompatible_storage": "The browse database was disabled because its storage location does not support SQLite WAL shared memory. Set browse.databaseFilename to a local path."
 }
