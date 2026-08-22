@@ -421,7 +421,7 @@
 	"important_label": "Önemli:",
 	"help_check": "Bir kaynak dosyayı compile_commands.json ile tam ayrıştırıp analiz ederek doğrular ve tüm tanılamaları raporlar. Hatalar bulunursa sıfır olmayan bir değerle çıkar.",
 	"help_check_compile_commands": "--check ile kullanılacak belirli bir compile_commands.json (veya dizini) için yol. Varsayılan olarak otomatik bulmaya çalışır.",
-	"check_not_authorized": "yetki yok; --check seçeneğini kullanmak için giriş yapmak gerekiyor",
+	"check_not_authorized": "--check'i çalıştırmak için yetki yok; giriş yapmak gerekiyor",
 	"check_requires_source": "--check bir kaynak dosya gerektirir: --check=<file>",
 	"check_source_not_found": "kaynak dosya bulunamadı: {0}",
 	"check_compile_commands_not_found": "compile_commands.json bulunamadı: {0}",
@@ -433,5 +433,6 @@
 	"check_open_failed": "{0} analiz için açılamadı",
 	"check_timed_out": "{0} analizinin tamamlanması beklenirken zaman aşımına uğradı",
 	"failed_to_open_browse_db_lock_file": "Gözatma veritabanı kilit dosyası açılamadı: {0} (errno={1})",
-	"failed_to_lock_browse_db_lock_file": "Gözatma veritabanı kilit dosyası kilitlenemedi: {0} (errno={1})"
+	"failed_to_lock_browse_db_lock_file": "Gözatma veritabanı kilit dosyası kilitlenemedi: {0} (errno={1})",
+	"browse_database_disabled_incompatible_storage": "The browse database was disabled because its storage location does not support SQLite WAL shared memory. Set browse.databaseFilename to a local path."
 }

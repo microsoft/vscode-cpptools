@@ -433,5 +433,6 @@
 	"check_open_failed": "无法打开 {0} 进行分析",
 	"check_timed_out": "等待 {0} 分析完成时超时",
 	"failed_to_open_browse_db_lock_file": "未能打开浏览数据库锁定文件: {0} (errno={1})",
-	"failed_to_lock_browse_db_lock_file": "未能锁定浏览数据库锁定文件: {0} (errno={1})"
+	"failed_to_lock_browse_db_lock_file": "未能锁定浏览数据库锁定文件: {0} (errno={1})",
+	"browse_database_disabled_incompatible_storage": "The browse database was disabled because its storage location does not support SQLite WAL shared memory. Set browse.databaseFilename to a local path."
 }

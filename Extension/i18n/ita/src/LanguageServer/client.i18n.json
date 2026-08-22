@@ -26,7 +26,7 @@
 	"loggingLevel.changed": "{0} è stato modificato in: {1}",
 	"dismiss.button": "Ignora",
 	"disable.warnings.button": "Disabilita avvisi",
-	"unable.to.provide.configuration": "{0} non è in grado di fornire le informazioni di configurazione IntelliSense. Verranno usate le impostazioni della configurazione di '{1}'.",
+	"unable.to.provide.configuration": "{0} non in grado di fornire le informazioni di configurazione IntelliSense. Verranno usate le impostazioni della configurazione di '{1}'.",
 	"config.not.found": "Il nome di configurazione richiesto non è stato trovato: {0}",
 	"unsupported.client": "Client non supportato",
 	"timed.out": "Timeout raggiunto in {0} ms.",
