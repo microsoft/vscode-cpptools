@@ -773,5 +773,13 @@
     "failed_to_lock_browse_db_lock_file": {
         "text": "Failed to lock browse database lock file: {0} (errno={1})",
         "hint": "{0} is the lock file path. {1} is the errno value. {Locked=\"{0}\"} {Locked=\"errno\"} {Locked=\"{1}\"}"
+    },
+    "selected_translation_unit_not_include_file_previous": {
+        "text": "The selected translation unit '{0}' does not include '{1}'. IntelliSense will restore the previous translation unit if it is still available; otherwise, it will use '{1}' as a header-only translation unit.",
+        "hint": "{0} is the selected translation unit path. {1} is the active file path. {Locked=\"IntelliSense\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
+    },
+    "selected_translation_unit_not_include_file_header_only": {
+        "text": "The selected translation unit '{0}' does not include '{1}'. No previous translation unit is available, so IntelliSense will use '{1}' as a header-only translation unit.",
+        "hint": "{0} is the selected translation unit path. {1} is the active file path. {Locked=\"IntelliSense\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
     }
 }
