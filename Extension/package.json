@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.33.7-main",
+    "version": "1.34.0-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -7261,7 +7261,7 @@
     },
     "resolutions": {
         "postcss": "^8.5.23",
-        "nanoid": "^3.3.17",
+        "nanoid": "^3.3.18",
         "gulp-typescript/**/glob-parent": "^5.1.2",
         "serialize-javascript": "^7.0.5",
         "@azure/msal-browser": "^4.29.1",
