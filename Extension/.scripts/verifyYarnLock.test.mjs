@@ -1,11 +1,20 @@
 import { Buffer } from 'node:buffer';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { findMissingSelectors, findUnsupportedIntegrityEntries, findUnsupportedPackageLockIntegrityEntries } from './verifyYarnLock.mjs';
+import { findMissingSelectors, findUnsupportedIntegrityEntries, findUnsupportedPackageLockIntegrityEntries, validatePackageLocks } from './verifyYarnLock.mjs';
 
 const sha256Integrity = `sha256-${Buffer.alloc(32).toString('base64')}`;
 const sha384Integrity = `sha384-${Buffer.alloc(48).toString('base64')}`;
 const sha512Integrity = `sha512-${Buffer.alloc(64).toString('base64')}`;
+
+function createTemporaryDirectory(t) {
+  const temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'cpptools-lock-verifier-test-'));
+  t.after(() => fs.rmSync(temporaryDirectory, { recursive: true, force: true }));
+  return temporaryDirectory;
+}
 
 test('reports a stale resolution selector', () => {
     const manifest = { resolutions: { 'fast-uri': '^3.1.5' } };
@@ -167,4 +176,18 @@ test('accepts npm package entries with a SHA-2 digest', () => {
   };
 
   assert.deepEqual(findUnsupportedPackageLockIntegrityEntries(packageLock), []);
+});
+
+test('reports the package-lock path for parse and schema failures', t => {
+    const temporaryDirectory = createTemporaryDirectory(t);
+    const malformedPath = path.join(temporaryDirectory, 'malformed-package-lock.json');
+    const missingPackagesPath = path.join(temporaryDirectory, 'missing-packages-package-lock.json');
+    fs.writeFileSync(malformedPath, '{ invalid json');
+    fs.writeFileSync(missingPackagesPath, '{}\n');
+
+    assert.throws(() => validatePackageLocks([malformedPath]), error => error.message.startsWith(`${malformedPath}: `));
+    assert.throws(
+        () => validatePackageLocks([missingPackagesPath]),
+      error => error.message === `${missingPackagesPath}: package-lock.json does not contain a packages object.`
+    );
 });
