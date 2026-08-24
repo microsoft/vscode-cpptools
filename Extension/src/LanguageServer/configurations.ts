@@ -14,7 +14,7 @@ import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
 import { logAndReturn, returns } from '../Utility/Async/returns';
-import { escapePathForSquiggles } from '../Utility/Text/escape';
+import { escapePathForSquiggles, getTextMatchOffsets } from '../Utility/Text/escape';
 import * as util from '../common';
 import { isWindows } from '../constants';
 import { getOutputChannelLogger } from '../logger';
@@ -2134,8 +2134,7 @@ export class CppProperties implements vscode.Disposable {
                 expandedPaths = result ?? [];
                 if (duration > 10 && configMatches) {
                     newSquiggleMetrics.SlowPathResolution++;
-                    const curOffset = curText.indexOf(configMatches[0]);
-                    const endOffset = curOffset + curPath.length;
+                    const [curOffset, endOffset] = getTextMatchOffsets(curText, configMatches[0]);
                     const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(curTextStartOffset + curOffset), document.positionAt(curTextStartOffset + endOffset)),
                         localize('resolve.path.took.too.long', "Path took {0}s to evaluate", duration),
@@ -2145,8 +2144,7 @@ export class CppProperties implements vscode.Disposable {
             } catch (e) {
                 expandedPaths = [];
                 if (configMatches) {
-                    const curOffset = curText.indexOf(configMatches[0]);
-                    const endOffset = curOffset + curPath.length;
+                    const [curOffset, endOffset] = getTextMatchOffsets(curText, configMatches[0]);
                     const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(curTextStartOffset + curOffset), document.positionAt(curTextStartOffset + endOffset)),
                         localize('resolve.path.failed', "Failed to resolve path {0}. Error: {1}", curPath, (e as Error).message),
