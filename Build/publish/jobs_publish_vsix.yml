@@ -2,6 +2,9 @@ parameters:
 - name: vsixName
   type: string
   default: ''
+- name: srcDir
+  type: string
+  default: ''
 
 jobs:
 - job: Publish
@@ -16,10 +19,15 @@ jobs:
       targetPath: $(Build.StagingDirectory)\vsix
 
   steps:
+  - checkout: self
+
   - task: NodeTool@0
     displayName: Use Node 22.x
     inputs:
       versionSpec: 22.x
+
+  - script: IF EXIST %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc del %SYSTEMDRIVE%\Users\%USERNAME%\.npmrc
+    displayName: Delete .npmrc if it exists
 
   - task: AzureCLI@2
     displayName: Generate AAD_TOKEN
@@ -31,16 +39,24 @@ jobs:
         $aadToken = az account get-access-token --query accessToken --resource $(AzureGuid) -o tsv
         Write-Host "##vso[task.setvariable variable=AAD_TOKEN;issecret=true]$aadToken"
 
-  - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.9.2
-    displayName: Install vsce
+  - script: npm ci --include=dev --include=optional
+    displayName: Install dependencies
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
 
   - script: npm rebuild @vscode/vsce-sign --ignore-scripts=false
     displayName: Rebuild vsce-sign binary
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
 
   - script: if not exist node_modules\@vscode\vsce-sign\bin\vsce-sign.exe (echo Missing vsce-sign.exe && exit 1)
     displayName: Verify vsce-sign binary exists
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+
+  - script: npx vsce verify-signature -i $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -m $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.manifest -s $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
+    displayName: Verify VSIX signature
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
 
   - script: npx vsce publish --skip-duplicate -i $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.vsix --manifestPath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.manifest --signaturePath $(Build.StagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
     displayName: Publish to Marketplace
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
     env:
       VSCE_PAT: $(AAD_TOKEN)
