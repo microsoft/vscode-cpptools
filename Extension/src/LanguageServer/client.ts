@@ -1411,8 +1411,6 @@ export class DefaultClient implements Client {
             failureMessageShown = false;
 
             if (isFirstClient) {
-                compilerDefaults = await this.requestCompiler();
-
                 workspaceReferences = new refs.ReferencesManager(this);
                 // Only register file watchers and providers after the extension has finished initializing,
                 // e.g. prevents empty c_cpp_properties.json from generation.
@@ -1475,6 +1473,7 @@ export class DefaultClient implements Client {
                 });
                 // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                 // The event handlers must be set before this happens.
+                compilerDefaults = await this.requestCompiler();
                 DefaultClient.updateClientConfigurations();
                 clients.forEach(client => {
                     if (client instanceof DefaultClient) {
