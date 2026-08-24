@@ -7159,7 +7159,7 @@
     },
     "scripts": {
         "bootstrap": "npm run bootstrap:yarn && yarn install --frozen-lockfile",
-        "bootstrap:yarn": "npm install -g yarn@1.22.22 --registry=https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/",
+        "bootstrap:yarn": "npm ci --prefix .yarn-bootstrap --include=dev --ignore-scripts --no-audit --no-fund --registry=https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/ && npm install -g ./.yarn-bootstrap/node_modules/yarn --install-links --ignore-scripts --offline --no-audit --no-fund",
         "scripts": "ts-node -T .scripts/scripts.ts",
         "show": "ts-node -T .scripts/clean.ts show",
         "clean": "ts-node -T .scripts/clean.ts",
