@@ -184,9 +184,13 @@ function validateYarnLock(packageJsonPath, yarnLockPath) {
 function validatePackageLocks(packageLockPaths) {
     const unsupportedEntries = [];
     for (const packageLockPath of packageLockPaths) {
-        const packageLock = JSON.parse(fs.readFileSync(packageLockPath, 'utf8'));
-        for (const entry of findUnsupportedPackageLockIntegrityEntries(packageLock)) {
-            unsupportedEntries.push({ packageLockPath, ...entry });
+        try {
+            const packageLock = JSON.parse(fs.readFileSync(packageLockPath, 'utf8'));
+            for (const entry of findUnsupportedPackageLockIntegrityEntries(packageLock)) {
+                unsupportedEntries.push({ packageLockPath, ...entry });
+            }
+        } catch (error) {
+            throw new Error(`${packageLockPath}: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
         }
     }
 
