@@ -3,7 +3,8 @@ parameters:
   archs: ["x86_64", "arm64"]
 
 jobs:
-- job:
+- job: Sign
+  displayName: Sign LLDB-MI
   pool:
     name: VSEngSS-MicroBuild2022-1ES
   steps:
@@ -27,4 +28,102 @@ jobs:
       inputs:
         targetPath: '$(Pipeline.Workspace)\Artifacts\lldb-mi_${{ arch }}.zip'
         artifactName: 'lldb-mi_${{ arch }}_zip'
+
+- job: VerifySignatures
+  displayName: Verify LLDB-MI signatures
+  dependsOn: Sign
+  pool:
+    vmImage: macOS-latest
+  steps:
+  - ${{ each arch in parameters.archs }}:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Downloading lldb-mi_${{ arch }}_zip'
+      inputs:
+        targetPath: '$(Pipeline.Workspace)/signed_lldb-mi_${{ arch }}'
+        artifactName: 'lldb-mi_${{ arch }}_zip'
+
+    - task: Bash@3
+      displayName: 'Verify lldb-mi_${{ arch }} signature'
+      inputs:
+        targetType: inline
+        script: |
+          set -euo pipefail
+
+          arch='${{ arch }}'
+          artifact_dir='$(Pipeline.Workspace)/signed_lldb-mi_${{ arch }}'
+          zip_path="${artifact_dir}/lldb-mi_${arch}.zip"
+          extract_dir="${artifact_dir}/extracted"
+          expected_binary="${extract_dir}/debugAdapters/lldb-mi_${arch}/bin/lldb-mi"
+          expected_entitlements='$(Build.SourcesDirectory)/Build/lldb-mi/debugger-entitlements.plist'
+
+          rm -rf "$extract_dir"
+          mkdir -p "$extract_dir"
+          unzip -q "$zip_path" -d "$extract_dir"
+
+          binary_count="$(find "$extract_dir" -type f -name lldb-mi | wc -l | tr -d '[:space:]')"
+          if [[ "$binary_count" != 1 || ! -f "$expected_binary" ]]; then
+            echo "##[error]Expected exactly one lldb-mi binary at $expected_binary."
+            find "$extract_dir" -name lldb-mi -print
+            exit 1
+          fi
+
+          actual_archs="$(lipo -archs "$expected_binary")"
+          if [[ "$actual_archs" != "$arch" ]]; then
+            echo "##[error]Expected architecture $arch, found $actual_archs."
+            exit 1
+          fi
+
+          codesign --verify --strict --verbose=4 "$expected_binary"
+          signature_details="$(codesign --display --verbose=4 "$expected_binary" 2>&1)"
+          printf '%s\n' "$signature_details"
+
+          if printf '%s\n' "$signature_details" | grep -q '^Signature=adhoc$'; then
+            echo '##[error]The final lldb-mi binary still has an ad-hoc signature.'
+            exit 1
+          fi
+
+          authority_count="$(printf '%s\n' "$signature_details" | grep -c '^Authority=' || true)"
+          if (( authority_count < 2 )); then
+            echo "##[error]Expected a signing authority chain, found $authority_count authority entries."
+            exit 1
+          fi
+
+          actual_entitlements="${artifact_dir}/actual-entitlements-${arch}.plist"
+          codesign --display --entitlements "$actual_entitlements" --xml "$expected_binary"
+          python3 - "$expected_entitlements" "$actual_entitlements" <<'PY'
+          import plistlib
+          import sys
+
+          with open(sys.argv[1], "rb") as expected_file:
+              expected = plistlib.load(expected_file)
+          with open(sys.argv[2], "rb") as actual_file:
+              actual = plistlib.load(actual_file)
+
+          if actual != expected:
+              print(f"##[error]Expected entitlements: {expected}")
+              print(f"##[error]Actual entitlements: {actual}")
+              sys.exit(1)
+          PY
+
+          tampered_binary="${artifact_dir}/tampered-lldb-mi-${arch}"
+          cp "$expected_binary" "$tampered_binary"
+          python3 - "$tampered_binary" <<'PY'
+          import os
+          import sys
+
+          tamper_offset = 16384
+          with open(sys.argv[1], "r+b") as binary_file:
+              if os.fstat(binary_file.fileno()).st_size <= tamper_offset:
+                  print("##[error]The lldb-mi binary is too small for the tamper check.")
+                  sys.exit(1)
+              binary_file.seek(tamper_offset)
+              original = binary_file.read(1)
+              binary_file.seek(tamper_offset)
+              binary_file.write(bytes([original[0] ^ 1]))
+          PY
+
+          if codesign --verify --strict --verbose=4 "$tampered_binary"; then
+            echo '##[error]codesign accepted a modified lldb-mi binary.'
+            exit 1
+          fi
 ...
