@@ -61,11 +61,13 @@ export class LanguageClient {
         return this._rpcClient;
     }
 
-    public get protocol2CodeConverter(): rpc.LanguageClient["protocol2CodeConverter"] {
+    public async getProtocol2CodeConverter(): Promise<rpc.LanguageClient["protocol2CodeConverter"]> {
+        await this.ready;
         return this.rpcClient.protocol2CodeConverter;
     }
 
-    public get code2ProtocolConverter(): rpc.LanguageClient["code2ProtocolConverter"] {
+    public async getCode2ProtocolConverter(): Promise<rpc.LanguageClient["code2ProtocolConverter"]> {
+        await this.ready;
         return this.rpcClient.code2ProtocolConverter;
     }
 

@@ -1406,12 +1406,13 @@ export class DefaultClient implements Client {
 
             // Ideally this would be set earlier, but the task provider expects it to also mean that `this.innerConfiguration` is set.
             this.languageClient.isStarted = true;
-            compilerDefaults = await this.requestCompiler();
 
             telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
             failureMessageShown = false;
 
             if (isFirstClient) {
+                compilerDefaults = await this.requestCompiler();
+
                 workspaceReferences = new refs.ReferencesManager(this);
                 // Only register file watchers and providers after the extension has finished initializing,
                 // e.g. prevents empty c_cpp_properties.json from generation.
@@ -3142,7 +3143,8 @@ export class DefaultClient implements Client {
      * send notifications to the language server to restart IntelliSense for the selected file.
      */
     public async restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> {
-        return this.languageClient.sendNotification(RestartIntelliSenseForFileNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)).catch(logAndReturn.undefined);
+        const code2ProtocolConverter = await this.languageClient.getCode2ProtocolConverter();
+        return this.languageClient.sendNotification(RestartIntelliSenseForFileNotification, code2ProtocolConverter.asTextDocumentIdentifier(document)).catch(logAndReturn.undefined);
     }
 
     /**
