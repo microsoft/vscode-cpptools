@@ -27,16 +27,16 @@ jobs:
 - job: LLDB_MI_${{ parameters.llvm_arch }}
   timeoutInMinutes: 360
   pool:
-    ${{if eq(parameters['llvm_arch'], 'arm64')}}:
-      name: cpptoolsMacM1pool
+    name: Azure Pipelines
+    ${{ if eq(parameters['llvm_arch'], 'arm64') }}:
+      vmImage: macOS-15-arm64
     ${{ else }}:
-      vmImage: macOS-latest
+      vmImage: macOS-15
   steps:
-  - ${{ if ne(parameters['llvm_arch'], 'arm64') }}:
-    - task: UsePythonVersion@0
-      displayName: 'Use Python 3.11'
-      inputs:
-        versionSpec: '3.11'
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.11'
+    inputs:
+      versionSpec: '3.11'
 
   - task: CmdLine@2
     displayName: 'Install Dependencies'
