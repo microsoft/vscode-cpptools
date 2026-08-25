@@ -4216,7 +4216,7 @@ export class DefaultClient implements Client {
 
     public onInterval(): void {
         // These events can be discarded until the language client is ready. Don't queue them up.
-        if (this.languageClient.isInitialized && this.configuration !== undefined) {
+        if (this.isInitialized() && this.configuration !== undefined) {
             void this.languageClient.sendNotification(IntervalTimerNotification).catch(logAndReturn.undefined);
             this.configuration.checkCppProperties();
             this.configuration.checkCompileCommands();
