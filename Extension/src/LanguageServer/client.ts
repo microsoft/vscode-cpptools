@@ -952,7 +952,7 @@ export class DefaultClient implements Client {
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
-    public isInitialized(): boolean { return this.languageClient.isInitialized; }
+    public isInitialized(): boolean { return this.languageClient.isInitialized && this.innerConfiguration !== undefined; }
     public getShowConfigureIntelliSenseButton(): boolean { return this.showConfigureIntelliSenseButton; }
     public setShowConfigureIntelliSenseButton(show: boolean): void { this.showConfigureIntelliSenseButton = show; }
 
