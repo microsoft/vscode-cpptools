@@ -43,7 +43,22 @@ jobs:
         working-directory: Extension
 
       - name: Install Dependencies
-        run: yarn install ${{ inputs.yarn-args }}
+        shell: bash
+        env:
+          YARN_ARGS: ${{ inputs.yarn-args }}
+        run: |
+          read -r -a yarn_args <<< "$YARN_ARGS"
+          for attempt in 1 2 3; do
+            if yarn install "${yarn_args[@]}"; then
+              exit 0
+            fi
+            if (( attempt == 3 )); then
+              exit 1
+            fi
+            delay=$((attempt * 15))
+            printf 'yarn install failed; retrying in %d seconds.\n' "$delay" >&2
+            sleep "$delay"
+          done
         working-directory: Extension
 
       - name: Install gdb (linux)
