@@ -88,7 +88,7 @@ jobs:
         log_and_exec_cmd "git clone ${{ parameters.llvm_repo }} llvm-project"
         log_and_exec_cmd "cd llvm-project"
         log_and_exec_cmd "git checkout ${{ parameters.llvm_commit }}"
-        if ! log_and_exec_cmd "git cherry-pick --no-commit 81fc5f7909a4ef5a8d4b5da2a10f77f7cb01ba63 73e15b5edb4fa4a77e68c299a6e3b21e610d351f"
+        if ! log_and_exec_cmd "git cherry-pick --no-commit 81fc5f7909a4ef5a8d4b5da2a10f77f7cb01ba63 73e15b5edb4fa4a77e68c299a6e3b21e610d351f f0a25fe0b746f56295d5c02116ba28d2f965c175"
         then
           echo "##[error] applying LLVM compatibility fixes failed"
           exit 1
