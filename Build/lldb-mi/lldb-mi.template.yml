@@ -37,6 +37,23 @@ jobs:
     displayName: 'Use Python 3.11'
     inputs:
       versionSpec: '3.11'
+      ${{ if eq(parameters['llvm_arch'], 'arm64') }}:
+        architecture: arm64
+      ${{ else }}:
+        architecture: x64
+
+  - task: CmdLine@2
+    displayName: 'Verify Python 3.11'
+    inputs:
+      script: |
+        set -euo pipefail
+        python_executable='$(pythonLocation)/bin/python3'
+        python_architecture="$("$python_executable" -c 'import platform; print(platform.machine())')"
+        if [[ "$python_architecture" != '${{ parameters.llvm_arch }}' ]]; then
+          echo "##[error]Expected Python architecture ${{ parameters.llvm_arch }}, found $python_architecture."
+          exit 1
+        fi
+        "$python_executable" -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib(True, False, ''))"
 
   - task: CmdLine@2
     displayName: 'Install Dependencies'
@@ -76,7 +93,7 @@ jobs:
         log_and_exec_cmd "mkdir $(Build.StagingDirectory)/buildspace/llvm-build"
         log_and_exec_cmd "cd $(Build.StagingDirectory)/buildspace/llvm-build"
 
-        log_and_exec_cmd "cmake -DLLVM_ENABLE_PROJECTS=clang;lldb -DCMAKE_BUILD_TYPE=${{ parameters.llvm_build_type }} -DCMAKE_INSTALL_PREFIX=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=${{ parameters.llvm_arch }} ${{ parameters.llvm_additional_parameters }} -GNinja $(Build.StagingDirectory)/llvm-project/llvm"
+        log_and_exec_cmd "cmake -DLLVM_ENABLE_PROJECTS=clang;lldb -DCMAKE_BUILD_TYPE=${{ parameters.llvm_build_type }} -DCMAKE_INSTALL_PREFIX=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=${{ parameters.llvm_arch }} -DPYTHON_HOME=$(pythonLocation) -DPython3_EXECUTABLE=$(pythonLocation)/bin/python3 ${{ parameters.llvm_additional_parameters }} -GNinja $(Build.StagingDirectory)/llvm-project/llvm"
         if [[ $? -ne 0 ]]
         then
           echo "##[error] cmake llvm failed"
