@@ -38,6 +38,10 @@ jobs:
         run: yarn test-lockfiles && yarn verify-lockfiles
         working-directory: Extension
 
+      - name: Validate LLDB-MI component manifest
+        run: yarn test-lldb-mi-component-manifest && yarn verify-lldb-mi-component-manifest
+        working-directory: Extension
+
       - name: Install Dependencies
         run: yarn install ${{ inputs.yarn-args }}
         working-directory: Extension
