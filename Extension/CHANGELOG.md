@@ -1,8 +1,10 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.34.0: August 21, 2026
+## Version 1.34.0: August 25, 2026
 ### Enhancements
-* Improve workspace indexing performance by reducing redundant browse paths from `compile_commands.json` and avoiding unnecessary tag parsing of non-included extensionless files. [#14693](https://github.com/microsoft/vscode-cpptools/issues/14693)
+* Add folding support for C++ `public`, `private`, and `protected` access sections. [#14645](https://github.com/microsoft/vscode-cpptools/issues/14645)
+  * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14675](https://github.com/microsoft/vscode-cpptools/pull/14675)
+* Improve workspace indexing performance and reduce memory usage by deduplicating browse paths from `compile_commands.json`, excluding unrelated files from the browse database, and avoiding unnecessary tag parsing of non-included extensionless files. [#14693](https://github.com/microsoft/vscode-cpptools/issues/14693)
 * Reduce language server memory usage and RPC overhead for large messages and browse database snapshots.
 * Add IntelliSense support for C23 `_BitInt`, C++26 pack indexing, and C++26 structured binding packs.
 
@@ -10,12 +12,14 @@
 * Fix inactive code being dimmed from the wrong column when a preprocessor directive is preceded by a comment. [#12882](https://github.com/microsoft/vscode-cpptools/issues/12882)
   * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14666](https://github.com/microsoft/vscode-cpptools/pull/14666)
 * Fix enum member completion in a `switch` label before the trailing `:`. [#14605](https://github.com/microsoft/vscode-cpptools/issues/14605)
+* Fix extension crashes caused by events communicating with the language client before it is ready. [PR #14617](https://github.com/microsoft/vscode-cpptools/pull/14617)
 * Fix configuration path diagnostics for paths containing regular expression metacharacters and for incorrect source ranges. [PR #14674](https://github.com/microsoft/vscode-cpptools/pull/14674), [PR #14679](https://github.com/microsoft/vscode-cpptools/pull/14679)
 * Prevent browse database crashes on filesystems that do not support SQLite WAL shared memory, and warn when no compatible database location is available. [PR #14683](https://github.com/microsoft/vscode-cpptools/pull/14683)
 * Fix runaway CPU and memory usage caused by cyclic document symbol data, and prevent `cpptools` from remaining active after VS Code exits. [#14689](https://github.com/microsoft/vscode-cpptools/issues/14689)
+* Fix several language server crashes during startup, shutdown, diagnostic processing, and concurrent code model updates.
 * Fix various IntelliSense completion, navigation, false error, code analysis, formatting, and colorization issues.
-* Fix several language server crashes during startup, shutdown, and diagnostic processing.
 * Fix a potential language server deadlock caused by inconsistent lock ordering.
+* Harden temporary file storage on Linux and macOS.
 * Various localization updates.
 * Update dependencies.
 
