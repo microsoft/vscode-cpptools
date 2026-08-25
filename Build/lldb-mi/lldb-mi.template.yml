@@ -32,6 +32,12 @@ jobs:
     ${{ else }}:
       vmImage: macOS-latest
   steps:
+  - ${{ if ne(parameters['llvm_arch'], 'arm64') }}:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.11'
+      inputs:
+        versionSpec: '3.11'
+
   - task: CmdLine@2
     displayName: 'Install Dependencies'
     inputs:
