@@ -143,7 +143,11 @@ jobs:
         # Create a separate build directory for building lldb-mi.
         log_and_exec_cmd "mkdir build"
         log_and_exec_cmd "cd build"
-        log_and_exec_cmd "cmake -DCMAKE_PREFIX_PATH=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=${{ parameters.llvm_arch }} ${{ parameters.lldb_mi_additional_parameters }} -GNinja .."
+        if ! log_and_exec_cmd "cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_PREFIX_PATH=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=${{ parameters.llvm_arch }} ${{ parameters.lldb_mi_additional_parameters }} -GNinja .."
+        then
+          echo "##[error] cmake lldb-mi failed"
+          exit 1
+        fi
         log_and_exec_cmd "ninja"
         if [[ $? -ne 0 ]]
         then
