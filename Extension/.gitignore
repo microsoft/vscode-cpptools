@@ -20,6 +20,7 @@ bin/scout_driver
 bin/process_wait_test_helper
 bin/unittests
 bin/vcpkgsrvtest
+bin/xobjgen
 bin/*.dll
 bin/.vs
 
