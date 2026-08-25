@@ -47,7 +47,7 @@ jobs:
     inputs:
       script: |
         set -euo pipefail
-        python_executable='$(pythonLocation)/bin/python3'
+        python_executable="$(command -v python3)"
         python_architecture="$("$python_executable" -c 'import platform; print(platform.machine())')"
         if [[ "$python_architecture" != '${{ parameters.llvm_arch }}' ]]; then
           echo "##[error]Expected Python architecture ${{ parameters.llvm_arch }}, found $python_architecture."
@@ -76,6 +76,9 @@ jobs:
           $1
         }
 
+        python_executable="$(command -v python3)"
+        python_home="$("$python_executable" -c 'import sys; print(sys.prefix)')"
+
         log_and_exec_cmd "sudo rm -rf /Library/Developer/CommandLineTools"
         log_and_exec_cmd "sudo xcode-select --switch /Applications/XCode.app"
 
@@ -93,7 +96,7 @@ jobs:
         log_and_exec_cmd "mkdir $(Build.StagingDirectory)/buildspace/llvm-build"
         log_and_exec_cmd "cd $(Build.StagingDirectory)/buildspace/llvm-build"
 
-        log_and_exec_cmd "cmake -DLLVM_ENABLE_PROJECTS=clang;lldb -DCMAKE_BUILD_TYPE=${{ parameters.llvm_build_type }} -DCMAKE_INSTALL_PREFIX=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=${{ parameters.llvm_arch }} -DPYTHON_HOME=$(pythonLocation) -DPython3_EXECUTABLE=$(pythonLocation)/bin/python3 ${{ parameters.llvm_additional_parameters }} -GNinja $(Build.StagingDirectory)/llvm-project/llvm"
+        log_and_exec_cmd "cmake -DLLVM_ENABLE_PROJECTS=clang;lldb -DCMAKE_BUILD_TYPE=${{ parameters.llvm_build_type }} -DCMAKE_INSTALL_PREFIX=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=${{ parameters.llvm_arch }} -DPYTHON_HOME=$python_home -DPython3_EXECUTABLE=$python_executable ${{ parameters.llvm_additional_parameters }} -GNinja $(Build.StagingDirectory)/llvm-project/llvm"
         if [[ $? -ne 0 ]]
         then
           echo "##[error] cmake llvm failed"
