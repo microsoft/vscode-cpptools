@@ -27,6 +27,7 @@ const filters = [
     /^Unexpected token A/,
     /Cannot register 'cmake.cmakePath'/,
     /\[DEP0005\] DeprecationWarning/,
+    /\[DEP0169\] DeprecationWarning/,
     /--trace-deprecation/,
     /Iconv-lite warning/,
     /^Extension '/,

@@ -23,6 +23,31 @@
             "preLaunchTask": "watch"
         },
         {
+            // debugs the extension with sanitizer (TSan/ASan/UBSan) reports captured to files.
+            // Requires a sanitizer build of the cpptools language server. Each process writes
+            // ${userHome}/cpptools-sanitizer-logs/<sanitizer>.<pid> (see readme.developer.md).
+            "name": "Run Extension (capture sanitizer logs)",
+            "type": "extensionHost",
+            "request": "launch",
+            "env": {
+                "CPPTOOLS_SANITIZER_LOG_DIR": "${userHome}/cpptools-sanitizer-logs"
+            },
+            "args": [
+                "--no-sandbox",
+                "--disable-updates",
+                "--skip-welcome",
+                "--skip-release-notes",
+                "--disable-workspace-trust",
+                "--extensionDevelopmentPath=${workspaceFolder}",
+            ],
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceFolder}/dist/**"
+            ],
+            // you can use a watch task as a prelaunch task and it works like you'd want it to.
+            "preLaunchTask": "watch"
+        },
+        {
             // debugs the extension (selecting the workspace)
             "name": "Run Extension-Select Workspace",
             "type": "extensionHost",

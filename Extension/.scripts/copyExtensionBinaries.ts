@@ -7,7 +7,7 @@ import { cp, readdir, rm, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { basename, join } from 'node:path';
 import { verbose } from '../src/Utility/Text/streams';
-import { $args, $root, green, heading, note } from './common';
+import { $args, $root, Git, green, heading, note, warn } from './common';
 
 const extensionPrefix = 'ms-vscode.cpptools-';
 const foldersToCopy = ['bin', 'debugAdapters', 'LLVM'] as const;
@@ -125,6 +125,33 @@ async function findLatestInstalledExtension(providedPath?: string): Promise<stri
     return installed[0].path;
 }
 
+/**
+ * A few files inside the copied folders are checked into the repo (for example bin/cpp.hint and
+ * bin/messages/**). The copy overwrites them with the installed extension's versions, which can differ
+ * in line endings or content and then show up as spurious local modifications. Restore any tracked files
+ * that the copy changed so only the untracked binaries remain in the working tree.
+ */
+async function restoreTrackedFiles(): Promise<void> {
+    const modified = await Git('ls-files', '--modified', '--', ...foldersToCopy);
+    if (modified.code) {
+        warn(`Unable to determine which tracked files to restore: ${modified.error.all().join('\n')}`);
+        return;
+    }
+
+    const files = modified.stdio.all().map(line => line.trim()).filter(line => line.length > 0);
+    if (!files.length) {
+        return;
+    }
+
+    const restored = await Git('checkout', '--', ...files);
+    if (restored.code) {
+        warn(`Unable to restore tracked files after copy: ${restored.error.all().join('\n')}`);
+        return;
+    }
+
+    note(`Restored ${files.length} tracked ${files.length === 1 ? 'file' : 'files'} overwritten by the copy.`);
+}
+
 export async function main(sourcePath = $args[0]): Promise<string | undefined> {
     console.log(heading('Copy installed extension binaries'));
 
@@ -141,6 +168,8 @@ export async function main(sourcePath = $args[0]): Promise<string | undefined> {
     }
 
     note(`Copied installed binaries into ${$root}`);
+
+    await restoreTrackedFiles();
 
     const installedVersion = tryParseVersion(basename(installedExtensionPath));
     return installedVersion?.join('.');

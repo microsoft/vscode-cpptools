@@ -32,6 +32,10 @@ export interface Associations {
     [key: string]: string;
 }
 
+// The settings sections that we provide accessors for.
+// This is used to filter out settings changed events that do not impact the extension.
+export const trackedSections: string[] = ['C_Cpp', 'editor', 'files', 'search', 'workbench'];
+
 // Settings that can be undefined have default values assigned in the native code or are meant to return undefined.
 export interface WorkspaceFolderSettingsParams {
     uri: string | undefined;

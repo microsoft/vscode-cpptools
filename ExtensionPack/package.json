@@ -42,7 +42,7 @@
         "ms-vscode.cmake-tools"
     ],
     "devDependencies": {
-        "@vscode/vsce": "^3.9.1"
+        "@vscode/vsce": "^3.9.2"
     },
     "overrides": {
         "@azure/msal-browser": "^4.29.1"

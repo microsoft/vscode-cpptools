@@ -385,7 +385,7 @@
 	"c_cpp.taskDefinitions.args.quoting.weak.description": "Umieszcza argument w cudzysłowach przy użyciu słabego symbolu cudzysłowu powłoki (np. ” w ramach powłoki Bash).",
 	"c_cpp.taskDefinitions.options.description": "Dodatkowe opcje poleceń.",
 	"c_cpp.taskDefinitions.options.cwd.description": "The current working directory of the executed program or script. If omitted Code's current workspace root is used.",
-	"c_cpp.taskDefinitions.problemMatcher.description": "One or more problem matchers to use to detect compiler errors and warnings in task output.",
+	"c_cpp.taskDefinitions.problemMatcher.description": "Co najmniej jedno dopasowanie problemu w celu użycia do wykrywania błędów kompilatora i ostrzeżeń w danych wyjściowych zadania.",
 	"c_cpp.taskDefinitions.detail.description": "Dodatkowe dane szczegółowe zadania.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Ścieżki bieżące i czasu kompilacji do tych samych drzew źródeł. Pliki znalezione w ścieżce EditorPath są mapowane na ścieżkę CompileTimePath na potrzeby dopasowywania punktu przerwania i mapowane ze ścieżki CompileTimePath na ścieżkę EditorPath podczas wyświetlania lokalizacji śladu stosu.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "Ścieżka do drzewa źródeł, które będzie używane przez edytor.",

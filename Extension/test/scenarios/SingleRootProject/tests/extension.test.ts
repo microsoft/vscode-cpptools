@@ -126,6 +126,12 @@ suite("Pick Process Tests", () => {
         assert.equal(process2.pid, '15220');
     });
 
+    test("Use portable ps options on Linux", () => {
+        assert.equal(
+            PsProcessParser.psLinuxCommand,
+            `ps axww -o pid= -o comm=${'a'.repeat(49)} -o args=`);
+    });
+
     test('Parse valid CIM output', () => {
         // output from the command used in CimAttachItemsProvider
         const cimOutput: string = String.raw`[
