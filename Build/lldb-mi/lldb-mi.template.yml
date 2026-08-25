@@ -88,6 +88,11 @@ jobs:
         log_and_exec_cmd "git clone ${{ parameters.llvm_repo }} llvm-project"
         log_and_exec_cmd "cd llvm-project"
         log_and_exec_cmd "git checkout ${{ parameters.llvm_commit }}"
+        if ! log_and_exec_cmd "git cherry-pick --no-commit 81fc5f7909a4ef5a8d4b5da2a10f77f7cb01ba63"
+        then
+          echo "##[error] applying LLVM SWIG compatibility fix failed"
+          exit 1
+        fi
 
         log_and_exec_cmd "./lldb/scripts/macos-setup-codesign.sh"
 
