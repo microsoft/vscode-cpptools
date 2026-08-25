@@ -40,9 +40,7 @@ export const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, Get
     new RequestType<GetCodeActionsRequestParams, GetCodeActionsResult, void>('cpptools/getCodeActions');
 
 export class CodeActionProvider implements vscode.CodeActionProvider {
-    private client: DefaultClient;
-    constructor(client: DefaultClient) {
-        this.client = client;
+    constructor(private client: DefaultClient) {
     }
 
     private static inlineMacroKind: vscode.CodeActionKind = vscode.CodeActionKind.RefactorInline.append("macro");
@@ -51,7 +49,6 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
 
     public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection,
         context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.Command | vscode.CodeAction)[]> {
-        await this.client.ready;
         let r: Range;
         if (range instanceof vscode.Selection) {
             if (range.active.isBefore(range.anchor)) {

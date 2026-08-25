@@ -185,11 +185,11 @@ export async function activate(): Promise<void> {
     disposables.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
-    disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
+    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges(e => onDidChangeTextEditorVisibleRanges(e)));
+    disposables.push(vscode.window.onDidChangeActiveTextEditor(e => onDidChangeActiveTextEditor(e)));
     ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
-    disposables.push(vscode.window.onDidChangeTextEditorSelection((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorSelection(e))));
-    disposables.push(vscode.window.onDidChangeVisibleTextEditors((e) => clients.ActiveClient.enqueue(async () => onDidChangeVisibleTextEditors(e))));
+    disposables.push(vscode.window.onDidChangeTextEditorSelection(e => onDidChangeTextEditorSelection(e)));
+    disposables.push(vscode.window.onDidChangeVisibleTextEditors(e => onDidChangeVisibleTextEditors(e)));
     updateLanguageConfigurations();
 
     reportMacCrashes();
@@ -565,12 +565,10 @@ async function selectClient(): Promise<Client> {
 }
 
 async function onResetDatabase(): Promise<void> {
-    await clients.ActiveClient.ready;
     return clients.ActiveClient.resetDatabase();
 }
 
 async function onRescanCompilers(sender?: any): Promise<void> {
-    await clients.ActiveClient.ready;
     return clients.ActiveClient.rescanCompilers(sender);
 }
 
@@ -579,7 +577,6 @@ async function onAddMissingInclude(): Promise<void> {
 }
 
 async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
-    await clients.ActiveClient.ready;
     return clients.ActiveClient.promptSelectIntelliSenseConfiguration(sender);
 }
 
@@ -877,7 +874,6 @@ async function onFindAllReferences(uri: vscode.Uri, position: vscode.Position, t
         return undefined;
     }
 
-    await client.ready;
     const result = await sendFindAllReferencesRequest(client, uri, position, token ?? CancellationToken.None);
     return result?.locations;
 }
@@ -892,7 +888,6 @@ async function onGoToDefinition(uri: vscode.Uri, position: vscode.Position, toke
         return undefined;
     }
 
-    await client.ready;
     return sendGoToDefinitionRequest(client, uri, position, token ?? CancellationToken.None);
 }
 
@@ -906,7 +901,6 @@ async function onPrepareCallHierarchy(uri: vscode.Uri, position: vscode.Position
         return undefined;
     }
 
-    await client.ready;
     return sendPrepareCallHierarchyRequest(client, uri, position, token ?? CancellationToken.None);
 }
 
@@ -920,7 +914,6 @@ async function onCallHierarchyCallsTo(item: vscode.CallHierarchyItem, token?: vs
         return undefined;
     }
 
-    await client.ready;
     return sendCallHierarchyCallsToRequest(client, item, token ?? CancellationToken.None);
 }
 
@@ -934,7 +927,6 @@ async function onCallHierarchyCallsFrom(item: vscode.CallHierarchyItem, token?: 
         return undefined;
     }
 
-    await client.ready;
     return sendCallHierarchyCallsFromRequest(client, item, token ?? CancellationToken.None);
 }
 
