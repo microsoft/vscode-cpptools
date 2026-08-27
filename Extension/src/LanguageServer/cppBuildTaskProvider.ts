@@ -93,8 +93,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         // Don't offer tasks if the active file's extension is not a recognized C/C++ extension.
-        const fileIsCpp: boolean = util.isCppFile(editor.document.uri);
-        const fileIsC: boolean = util.isCFile(editor.document.uri);
+        const fileIsCpp: boolean = util.isCppFile(editor.document.uri, editor.document.languageId);
+        const fileIsC: boolean = util.isCFile(editor.document.uri, editor.document.languageId);
         if (!(fileIsCpp || fileIsC)) {
             return emptyTasks;
         }
@@ -421,7 +421,9 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     }
 
     async openAsync(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
-        if (this.buildOptions.taskUsesActiveFile && !util.isCppOrCFile(window.activeTextEditor?.document.uri)) {
+        if (this.buildOptions.taskUsesActiveFile && !util.isCppOrCFile(
+            window.activeTextEditor?.document.uri,
+            window.activeTextEditor?.document.languageId)) {
             this.writeEmitter.fire(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.') + this.endOfLine);
             this.closeEmitter.fire(-1);
             return;

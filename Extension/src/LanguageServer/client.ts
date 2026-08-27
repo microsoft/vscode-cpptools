@@ -35,6 +35,7 @@ import { ManualPromise } from '../Utility/Async/manualPromise';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import { isWindows } from '../constants';
+import { FileTypeMappings, hasNativeFileTypeMappings, isTagParsableFile, resetFileTypeMappings, updateFileTypeMappings } from '../fileType';
 import { instrument, isInstrumentationEnabled } from '../instrumentation';
 import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
 import { localizedStringCount, lookupString } from '../nativeStrings';
@@ -528,6 +529,7 @@ interface CppInitializationParams {
 
 interface CppInitializationResult {
     shouldShutdown: boolean;
+    fileTypeMappings?: FileTypeMappings;
 }
 
 interface TagParseStatus {
@@ -683,6 +685,7 @@ const ReportStatusNotification: NotificationType<ReportStatusNotificationBody> =
 const DebugProtocolNotification: NotificationType<DebugProtocolParams> = new NotificationType<DebugProtocolParams>('cpptools/debugProtocol');
 const DebugLogNotification: NotificationType<LocalizeStringParams> = new NotificationType<LocalizeStringParams>('cpptools/debugLog');
 const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> = new NotificationType<CompileCommandsPaths>('cpptools/compileCommandsPaths');
+const FileTypeMappingsNotification: NotificationType<FileTypeMappings> = new NotificationType<FileTypeMappings>('cpptools/fileTypeMappings');
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
 const RequestCustomConfigs: NotificationType<RequestCustomConfigsParams> = new NotificationType<RequestCustomConfigsParams>('cpptools/requestCustomConfigs');
@@ -1406,6 +1409,7 @@ export class DefaultClient implements Client {
 
             // Ideally this would be set earlier, but the task provider expects it to also mean that `this.innerConfiguration` is set.
             this.languageClient.isStarted = true;
+            this.updateActiveDocumentTextOptions();
 
             telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
             failureMessageShown = false;
@@ -1843,6 +1847,12 @@ export class DefaultClient implements Client {
         // A request is used in order to wait for completion and ensure that no subsequent
         // higher priority message may be processed before the Initialization request.
         const initializeResult = await client.sendRequest(InitializationRequest, cppInitializationParams);
+        if (initializeResult.fileTypeMappings) {
+            updateFileTypeMappings(initializeResult.fileTypeMappings);
+        } else {
+            resetFileTypeMappings();
+        }
+        DebugConfigurationProvider.ClearDetectedBuildTasks();
 
         // If the server requested shutdown, then reload with the failsafe (null) client.
         if (initializeResult.shouldShutdown) {
@@ -2589,6 +2599,11 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportStatusNotification, (e) => void this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => void this.promptCompileCommands(e));
+        this.languageClient.onNotification(FileTypeMappingsNotification, (mappings) => {
+            updateFileTypeMappings(mappings);
+            DebugConfigurationProvider.ClearDetectedBuildTasks();
+            clients.ActiveClient.updateActiveDocumentTextOptions();
+        });
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesPreview(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
         this.languageClient.onNotification(RequestCustomConfigs, (e) => this.handleRequestCustomConfigs(e));
@@ -2718,7 +2733,7 @@ export class DefaultClient implements Client {
                 void this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() }).catch(logAndReturn.undefined);
             });
 
-            // TODO: Handle new associations without a reload.
+            // Fallback for native binaries that do not publish effective file type mappings.
             this.associations_for_did_change = new Set<string>(["cu", "cuh", "c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "txx", "tpp", "idl"]);
             const assocs: any = new OtherSettings().filesAssociations;
             for (const assoc in assocs) {
@@ -2739,17 +2754,18 @@ export class DefaultClient implements Client {
                     cachedEditorConfigLookups.clear();
                     this.updateActiveDocumentTextOptions();
                 }
-                if (dotIndex !== -1) {
-                    const ext: string = uri.fsPath.substring(dotIndex + 1);
-                    if (this.associations_for_did_change?.has(ext)) {
-                        // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
-                        // which causes a large backlog of "files to parse" to accumulate.
-                        // We workaround this via only sending the change message if the modified time is within 10 seconds.
-                        const mtime: Date = fs.statSync(uri.fsPath).mtime;
-                        const duration: number = Date.now() - mtime.getTime();
-                        if (duration < 10000) {
-                            void this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() }).catch(logAndReturn.undefined);
-                        }
+                const ext: string | undefined = dotIndex !== -1 ? uri.fsPath.substring(dotIndex + 1) : undefined;
+                const isTrackedFile: boolean = hasNativeFileTypeMappings()
+                    ? isTagParsableFile(uri.fsPath)
+                    : ext !== undefined && this.associations_for_did_change?.has(ext) === true;
+                if (isTrackedFile) {
+                    // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
+                    // which causes a large backlog of "files to parse" to accumulate.
+                    // We workaround this via only sending the change message if the modified time is within 10 seconds.
+                    const mtime: Date = fs.statSync(uri.fsPath).mtime;
+                    const duration: number = Date.now() - mtime.getTime();
+                    if (duration < 10000) {
+                        void this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() }).catch(logAndReturn.undefined);
                     }
                 }
             });
@@ -3079,7 +3095,7 @@ export class DefaultClient implements Client {
     public updateActiveDocumentTextOptions(): void {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor && util.isCpp(editor.document)) {
-            void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(editor.document.uri));
+            void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(editor.document.uri, editor.document.languageId));
             void SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
             const settings: CppSettings = new CppSettings(this.RootUri);
