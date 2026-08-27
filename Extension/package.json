@@ -68,6 +68,13 @@
         "languages": [
             {
                 "id": "cpp",
+                "extensions": [
+                    ".ccm",
+                    ".cppm",
+                    ".hip",
+                    ".ixx",
+                    ".sycl"
+                ],
                 "filenames": [
                     "algorithm",
                     "any",

@@ -20,6 +20,10 @@ describe('file type mappings', () => {
         equal(hasNativeFileTypeMappings(), false);
         deepStrictEqual(classifyFilePath('file.hpp'), { name: '.hpp', kind: 'header', language: 'cpp' });
         deepStrictEqual(classifyFilePath('file.C'), { name: '.C', kind: 'source', language: 'cpp' });
+        for (const extension of ['ccm', 'cppm', 'hip', 'ixx', 'sycl']) {
+            deepStrictEqual(classifyFilePath(`file.${extension}`), { name: `.${extension}`, kind: 'source', language: 'cpp' });
+            equal(isTagParsableFile(`file.${extension}`), true);
+        }
         deepStrictEqual(classifyFilePath('Makefile'), { name: '', kind: 'header' });
     });
 

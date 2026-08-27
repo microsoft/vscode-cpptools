@@ -23,7 +23,7 @@ const bootstrapMappings: FileTypeMappings = {
     extensions: [
         ...['.cuh', '.hpp', '.hh', '.hxx', '.h++', '.hp', '.h', '.inl', '.ipp', '.tcc', '.txx', '.tpp', '.tlh', '.tli']
             .map(name => ({ name, kind: 'header' as const, language: name === '.cuh' ? 'cuda' as const : 'cpp' as const })),
-        ...['.cu', '.cpp', '.cc', '.cxx', '.c++', '.cp', '.ii', '.ino']
+        ...['.cu', '.cpp', '.cc', '.ccm', '.cxx', '.c++', '.cp', '.cppm', '.hip', '.ii', '.ino', '.ixx', '.sycl']
             .map(name => ({ name, kind: 'source' as const, language: name === '.cu' ? 'cuda' as const : 'cpp' as const })),
         ...['.c', '.i'].map(name => ({ name, kind: 'source' as const, language: 'c' as const })),
         { name: '.idl', kind: 'idl' }

@@ -2734,7 +2734,7 @@ export class DefaultClient implements Client {
             });
 
             // Fallback for native binaries that do not publish effective file type mappings.
-            this.associations_for_did_change = new Set<string>(["cu", "cuh", "c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "txx", "tpp", "idl"]);
+            this.associations_for_did_change = new Set<string>(["cu", "cuh", "c", "i", "cpp", "cc", "ccm", "cxx", "c++", "cp", "cppm", "hip", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "ixx", "sycl", "tcc", "txx", "tpp", "idl"]);
             const assocs: any = new OtherSettings().filesAssociations;
             for (const assoc in assocs) {
                 const dotIndex: number = assoc.lastIndexOf('.');
