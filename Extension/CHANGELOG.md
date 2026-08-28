@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.34.1: August 28, 2026
+### Bug Fixes
+* Fix formatting not inserting the final newline requested by `InsertNewlineAtEOF`. [#12680](https://github.com/microsoft/vscode-cpptools/issues/12680)
+* Fix nested quoted `#include` directives failing to resolve source-relative headers when `-iquote` paths are used. [#13606](https://github.com/microsoft/vscode-cpptools/issues/13606)
+* Fix incorrect semantic highlighting for explicit function template specializations. [#14491](https://github.com/microsoft/vscode-cpptools/issues/14491)
+* Fix IntelliSense using `c17` instead of GCC's default GNU C language standard. [#14560](https://github.com/microsoft/vscode-cpptools/issues/14560)
+* Fix unnecessary IntelliSense reparsing after unrelated settings changes and incorrect language updates after `files.associations` changes.
+* Fix custom C/C++ `files.associations` entries with certain non-ASCII characters being ignored on Windows.
+* Fix `cpptools-srv` crashes under memory pressure while reading or processing RPC messages.
+
 ## Version 1.34.0: August 25, 2026
 ### Enhancements
 * Add folding support for C++ `public`, `private`, and `protected` access sections. [#14645](https://github.com/microsoft/vscode-cpptools/issues/14645)
