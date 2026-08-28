@@ -73,16 +73,11 @@ export class CppBuildTaskProvider implements TaskProvider {
         return _task;
     }
 
-    // Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
+    // Generate tasks to build the current file based on the user's detected compilers, compilerPath setting, and file type.
     public async getTasks(appendSourceToName: boolean = false): Promise<CppBuildTask[]> {
         const editor: TextEditor | undefined = window.activeTextEditor;
         const emptyTasks: CppBuildTask[] = [];
         if (!editor) {
-            return emptyTasks;
-        }
-
-        const fileExt: string = path.extname(editor.document.fileName);
-        if (!fileExt) {
             return emptyTasks;
         }
 
@@ -92,7 +87,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             return emptyTasks;
         }
 
-        // Don't offer tasks if the active file's extension is not a recognized C/C++ extension.
+        // Don't offer tasks if the active file is not a recognized C/C++ source file.
         const fileIsCpp: boolean = util.isCppFile(editor.document.uri, editor.document.languageId);
         const fileIsC: boolean = util.isCFile(editor.document.uri, editor.document.languageId);
         if (!(fileIsCpp || fileIsC)) {

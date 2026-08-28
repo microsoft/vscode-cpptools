@@ -546,12 +546,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return;
         }
 
-        const fileExt: string = path.extname(editor.document.fileName);
-        if (!fileExt) {
-            DebugConfigurationProvider.detectedBuildTasks = emptyTasks;
-            return;
-        }
-
         // Don't offer tasks for header files.
         const isHeader: boolean = util.isHeaderFile(editor.document.uri);
         if (isHeader) {
@@ -559,7 +553,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return;
         }
 
-        // Don't offer tasks if the active file's extension is not a recognized C/C++ extension.
+        // Don't offer tasks if the active file is not a recognized C/C++ source file.
         const fileIsCpp: boolean = util.isCppFile(editor.document.uri, editor.document.languageId);
         const fileIsC: boolean = util.isCFile(editor.document.uri, editor.document.languageId);
         if (!(fileIsCpp || fileIsC)) {
