@@ -1736,7 +1736,7 @@ export class DefaultClient implements Client {
             localizedStrings: localizedStrings,
             settings: this.getAllSettings()
         };
-        resetFileTypeMappings(cppInitializationParams.caseSensitiveFileSupport);
+        resetFileTypeMappings();
 
         this.loggingLevel = util.getNumericLoggingLevel(cppInitializationParams.settings.loggingLevel);
         const lspInitializationOptions: LspInitializationOptions = {
@@ -1849,9 +1849,9 @@ export class DefaultClient implements Client {
         // higher priority message may be processed before the Initialization request.
         const initializeResult = await client.sendRequest(InitializationRequest, cppInitializationParams);
         if (initializeResult.fileTypeMappings) {
-            updateFileTypeMappings(initializeResult.fileTypeMappings, cppInitializationParams.caseSensitiveFileSupport);
+            updateFileTypeMappings(initializeResult.fileTypeMappings);
         } else {
-            resetFileTypeMappings(cppInitializationParams.caseSensitiveFileSupport);
+            resetFileTypeMappings();
         }
         DebugConfigurationProvider.ClearDetectedBuildTasks();
 
@@ -2735,17 +2735,13 @@ export class DefaultClient implements Client {
             });
 
             // Fallback for custom associations when native binaries do not publish effective file type mappings.
-            const caseSensitiveFileSupport: boolean = new CppSettings().isCaseSensitiveFileSupportEnabled;
-            const getAssociationKey: (extension: string) => string = caseSensitiveFileSupport
-                ? (extension: string): string => extension
-                : (extension: string): string => extension.toLowerCase();
             this.associations_for_did_change = new Set<string>();
             const assocs: any = new OtherSettings().filesAssociations;
             for (const assoc in assocs) {
                 const dotIndex: number = assoc.lastIndexOf('.');
                 if (dotIndex !== -1) {
                     const ext: string = assoc.substring(dotIndex + 1);
-                    this.associations_for_did_change.add(getAssociationKey(ext));
+                    this.associations_for_did_change.add(ext.toLowerCase());
                 }
             }
             this.rootPathFileWatcher.onDidChange(async (uri) => {
@@ -2763,7 +2759,7 @@ export class DefaultClient implements Client {
                 const isTrackedFile: boolean = hasNativeFileTypeMappings()
                     ? isTagParsableFile(uri.fsPath)
                     : isTagParsableFile(uri.fsPath) ||
-                        (ext !== undefined && this.associations_for_did_change?.has(getAssociationKey(ext)) === true);
+                        (ext !== undefined && this.associations_for_did_change?.has(ext.toLowerCase()) === true);
                 if (isTrackedFile) {
                     // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
                     // which causes a large backlog of "files to parse" to accumulate.
