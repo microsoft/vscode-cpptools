@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
+import { isWindows } from './constants';
 
 export type FileTypeKind = 'source' | 'header' | 'idl' | 'resource' | 'other';
 export type FileTypeLanguage = 'c' | 'cpp' | 'cuda';
@@ -34,27 +35,34 @@ const bootstrapMappings: FileTypeMappings = {
 let extensionMappings: ReadonlyMap<string, FileTypeMapping>;
 let filenameMappings: ReadonlyMap<string, FileTypeMapping>;
 let nativeMappingsAvailable: boolean = false;
+let caseSensitiveFileSupport: boolean = !isWindows;
+
+function getMappingKey(name: string): string {
+    return caseSensitiveFileSupport ? name : name.toLowerCase();
+}
 
 function createMappingMap(mappings: FileTypeMapping[]): ReadonlyMap<string, FileTypeMapping> {
     const result: Map<string, FileTypeMapping> = new Map<string, FileTypeMapping>();
     for (const mapping of mappings) {
-        result.set(mapping.name.toLowerCase(), { ...mapping, name: mapping.name.toLowerCase() });
+        result.set(getMappingKey(mapping.name), { ...mapping });
     }
     return result;
 }
 
-export function resetFileTypeMappings(): void {
+export function resetFileTypeMappings(caseSensitive: boolean = !isWindows): void {
+    caseSensitiveFileSupport = caseSensitive;
     extensionMappings = createMappingMap(bootstrapMappings.extensions);
     filenameMappings = createMappingMap(bootstrapMappings.filenames);
     nativeMappingsAvailable = false;
 }
 
-export function updateFileTypeMappings(mappings: FileTypeMappings | undefined): void {
+export function updateFileTypeMappings(mappings: FileTypeMappings | undefined, caseSensitive: boolean = caseSensitiveFileSupport): void {
     if (!mappings) {
-        resetFileTypeMappings();
+        resetFileTypeMappings(caseSensitive);
         return;
     }
 
+    caseSensitiveFileSupport = caseSensitive;
     extensionMappings = createMappingMap(mappings.extensions);
     filenameMappings = createMappingMap(mappings.filenames);
     nativeMappingsAvailable = true;
@@ -66,18 +74,17 @@ export function hasNativeFileTypeMappings(): boolean {
 
 function getRegisteredFileType(filePath: string): FileTypeMapping | undefined {
     const filename: string = path.basename(filePath);
-    const filenameMapping: FileTypeMapping | undefined = filenameMappings.get(filename.toLowerCase());
+    const filenameMapping: FileTypeMapping | undefined = filenameMappings.get(getMappingKey(filename));
     if (filenameMapping) {
         return filenameMapping;
     }
 
     const extension: string = path.extname(filename);
-    // VS Code initially assigns uppercase .C files to C. Preserve the extension's
-    // long-standing correction until the exact filename association is installed.
+    // Uppercase .C is an exact, case-sensitive C++ association by convention.
     if (extension === '.C') {
         return { name: extension, kind: 'source', language: 'cpp' };
     }
-    return extensionMappings.get(extension.toLowerCase());
+    return extensionMappings.get(getMappingKey(extension));
 }
 
 export function classifyFilePath(filePath: string, languageId?: string): FileTypeMapping | undefined {

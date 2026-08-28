@@ -1409,7 +1409,7 @@ export class DefaultClient implements Client {
 
             // Ideally this would be set earlier, but the task provider expects it to also mean that `this.innerConfiguration` is set.
             this.languageClient.isStarted = true;
-            this.updateActiveDocumentTextOptions();
+            clients.ActiveClient.updateActiveDocumentTextOptions();
 
             telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
             failureMessageShown = false;
@@ -1736,6 +1736,7 @@ export class DefaultClient implements Client {
             localizedStrings: localizedStrings,
             settings: this.getAllSettings()
         };
+        resetFileTypeMappings(cppInitializationParams.caseSensitiveFileSupport);
 
         this.loggingLevel = util.getNumericLoggingLevel(cppInitializationParams.settings.loggingLevel);
         const lspInitializationOptions: LspInitializationOptions = {
@@ -1848,9 +1849,9 @@ export class DefaultClient implements Client {
         // higher priority message may be processed before the Initialization request.
         const initializeResult = await client.sendRequest(InitializationRequest, cppInitializationParams);
         if (initializeResult.fileTypeMappings) {
-            updateFileTypeMappings(initializeResult.fileTypeMappings);
+            updateFileTypeMappings(initializeResult.fileTypeMappings, cppInitializationParams.caseSensitiveFileSupport);
         } else {
-            resetFileTypeMappings();
+            resetFileTypeMappings(cppInitializationParams.caseSensitiveFileSupport);
         }
         DebugConfigurationProvider.ClearDetectedBuildTasks();
 
@@ -2733,14 +2734,18 @@ export class DefaultClient implements Client {
                 void this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() }).catch(logAndReturn.undefined);
             });
 
-            // Fallback for native binaries that do not publish effective file type mappings.
-            this.associations_for_did_change = new Set<string>(["cu", "cuh", "c", "i", "cpp", "cc", "ccm", "cxx", "c++", "cp", "cppm", "hip", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "ixx", "sycl", "tcc", "txx", "tpp", "idl"]);
+            // Fallback for custom associations when native binaries do not publish effective file type mappings.
+            const caseSensitiveFileSupport: boolean = new CppSettings().isCaseSensitiveFileSupportEnabled;
+            const getAssociationKey: (extension: string) => string = caseSensitiveFileSupport
+                ? (extension: string): string => extension
+                : (extension: string): string => extension.toLowerCase();
+            this.associations_for_did_change = new Set<string>();
             const assocs: any = new OtherSettings().filesAssociations;
             for (const assoc in assocs) {
                 const dotIndex: number = assoc.lastIndexOf('.');
                 if (dotIndex !== -1) {
                     const ext: string = assoc.substring(dotIndex + 1);
-                    this.associations_for_did_change.add(ext);
+                    this.associations_for_did_change.add(getAssociationKey(ext));
                 }
             }
             this.rootPathFileWatcher.onDidChange(async (uri) => {
@@ -2757,7 +2762,8 @@ export class DefaultClient implements Client {
                 const ext: string | undefined = dotIndex !== -1 ? uri.fsPath.substring(dotIndex + 1) : undefined;
                 const isTrackedFile: boolean = hasNativeFileTypeMappings()
                     ? isTagParsableFile(uri.fsPath)
-                    : ext !== undefined && this.associations_for_did_change?.has(ext) === true;
+                    : isTagParsableFile(uri.fsPath) ||
+                        (ext !== undefined && this.associations_for_did_change?.has(getAssociationKey(ext)) === true);
                 if (isTrackedFile) {
                     // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
                     // which causes a large backlog of "files to parse" to accumulate.
