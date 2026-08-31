@@ -2,7 +2,7 @@
 
 ## Version 1.34.2: August 31, 2026
 ### Enhancements
-* Improve C/C++ file classification by supporting extensionless headers and additional extensions such as `.cppm` throughout extension features. [PR #14711](https://github.com/microsoft/vscode-cpptools/pull/14711)
+* Improve C/C++ file classification by supporting extensionless headers and additional extensions such as `.hip` throughout extension features. [PR #14711](https://github.com/microsoft/vscode-cpptools/pull/14711)
 * Update the bundled `clang-tidy` and `clang-format` from 22.1.3 to 23.1.0, including available `clang-tidy` check suggestions and documentation. [PR #14713](https://github.com/microsoft/vscode-cpptools/pull/14713)
 
 ### Bug Fixes
