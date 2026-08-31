@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.34.2: August 31, 2026
+### Enhancements
+* Improve C/C++ file classification by supporting extensionless headers and additional extensions such as `.cppm` throughout extension features. [PR #14711](https://github.com/microsoft/vscode-cpptools/pull/14711)
+* Update the bundled `clang-tidy` and `clang-format` from 22.1.3 to 23.1.0, including available `clang-tidy` check suggestions and documentation. [PR #14713](https://github.com/microsoft/vscode-cpptools/pull/14713)
+
+### Bug Fixes
+* Fix high CPU and memory usage in workspaces with multiple symbolic links that point to ancestor directories. [#14689](https://github.com/microsoft/vscode-cpptools/issues/14689)
+* Fix include completion and symbol navigation using stale recursive include data after files are replaced by directories or symbolic link roots change.
+* Fix 'Find All References' misclassifying references in inactive preprocessor regions after falling back to header-only IntelliSense.
+
 ## Version 1.34.1: August 28, 2026
 ### Bug Fixes
 * Fix formatting not inserting the final newline requested by `InsertNewlineAtEOF`. [#12680](https://github.com/microsoft/vscode-cpptools/issues/12680)
