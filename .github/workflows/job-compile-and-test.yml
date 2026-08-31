@@ -34,15 +34,47 @@ jobs:
         with:
           node-version: 24
 
+      - name: Validate Yarn lockfile
+        run: yarn test-yarn-lock && yarn verify-yarn-lock
+        working-directory: Extension
+
+      - name: Validate LLDB-MI component manifest
+        run: yarn test-lldb-mi-component-manifest && yarn verify-lldb-mi-component-manifest
+        working-directory: Extension
+
       - name: Install Dependencies
-        run: yarn install ${{ inputs.yarn-args }}
+        shell: bash
+        env:
+          YARN_ARGS: ${{ inputs.yarn-args }}
+        run: |
+          read -r -a yarn_args <<< "$YARN_ARGS"
+          for attempt in 1 2 3; do
+            if yarn install "${yarn_args[@]}"; then
+              exit 0
+            fi
+            if (( attempt == 3 )); then
+              exit 1
+            fi
+            delay=$((attempt * 15))
+            printf 'yarn install failed; retrying in %d seconds.\n' "$delay" >&2
+            sleep "$delay"
+          done
         working-directory: Extension
 
       - name: Install gdb (linux)
         if: ${{ inputs.platform == 'linux' }}
+        timeout-minutes: 10
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gdb
+          sudo apt-get \
+            -o Acquire::Retries=3 \
+            -o Acquire::http::Timeout=30 \
+            -o Acquire::https::Timeout=30 \
+            update
+          sudo apt-get \
+            -o Acquire::Retries=3 \
+            -o Acquire::http::Timeout=30 \
+            -o Acquire::https::Timeout=30 \
+            install -y gdb
 
       - name: Compile Sources
         run: yarn run compile
