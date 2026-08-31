@@ -15,6 +15,7 @@
     "c_cpp.command.installCompiler.title": "Install a C++ Compiler",
     "c_cpp.command.rescanCompilers.title": "Rescan for Compilers",
     "c_cpp.command.switchHeaderSource.title": "Switch Header/Source",
+    "c_cpp.command.selectTranslationUnit.title": "Select a Translation Unit...",
     "c_cpp.command.enableErrorSquiggles.title": "Enable Error Squiggles",
     "c_cpp.command.disableErrorSquiggles.title": "Disable Error Squiggles",
     "c_cpp.command.toggleDimInactiveRegions.title": "Toggle Inactive Region Colorization",
