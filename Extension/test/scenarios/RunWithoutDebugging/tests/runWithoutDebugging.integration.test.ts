@@ -10,6 +10,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as util from '../../../../src/common';
 import { isMacOS, isWindows } from '../../../../src/constants';
+import { ConfigurationAssetProviderFactory, DebugConfigurationProvider } from '../../../../src/Debugger/configurationProvider';
+import { DebuggerType } from '../../../../src/Debugger/configurations';
 import { compileProgram } from './compileProgram';
 
 interface TrackerState {
@@ -153,7 +155,10 @@ async function waitForResultFileText(filePath: string, timeoutMs: number): Promi
     while (Date.now() < deadline) {
         try {
             lastContents = await util.readFileText(filePath, 'utf8');
-            return lastContents.trim();
+            const trimmedContents = lastContents.trim();
+            if (trimmedContents.length > 0) {
+                return trimmedContents;
+            }
         } catch (error) {
             if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
                 throw error;
@@ -203,6 +208,33 @@ suite('Run Without Debugging Test', function (): void {
         await util.deleteFile(envResultFilePath);
     });
 
+    test('DebugConfigurationProvider should convert env object to environment array for cppdbg and preserve precedence', async () => {
+        const provider = new DebugConfigurationProvider(ConfigurationAssetProviderFactory.getConfigurationProvider(), DebuggerType.cppdbg);
+        const inputConfig: any = {
+            name: 'Test Cppdbg Env Resolution',
+            type: 'cppdbg',
+            request: 'launch',
+            program: envExecutablePath,
+            environment: [
+                { name: 'TEST_VAR', value: 'from_environment' },
+                { name: 'OTHER_VAR', value: 'from_environment_2' }
+            ],
+            env: {
+                TEST_VAR: 'from_env',
+                NEW_VAR: 'from_env_2'
+            }
+        };
+
+        const resolvedConfig = await provider.resolveDebugConfigurationWithSubstitutedVariables(workspaceFolder, inputConfig);
+        assert.ok(resolvedConfig, 'Resolved config should not be undefined or null.');
+        assert.strictEqual(resolvedConfig.env, undefined, 'config.env should be removed after conversion.');
+        assert.deepStrictEqual(resolvedConfig.environment, [
+            { name: 'TEST_VAR', value: 'from_env' },
+            { name: 'OTHER_VAR', value: 'from_environment_2' },
+            { name: 'NEW_VAR', value: 'from_env_2' }
+        ], 'config.environment should merge environment entries with env precedence.');
+    });
+
     test('Run Without Debugging should apply env and prefer it over environment entries', async () => {
         const testVarName = 'CPPTOOLS_NO_DEBUG_ENV_TEST';
         const expectedValue = 'value-from-env-object';
@@ -210,27 +242,46 @@ suite('Run Without Debugging Test', function (): void {
         const envConfig: Record<string, string> = {
             [testVarName]: expectedValue
         };
+        const envSessionName = `${sessionName} Env`;
+        const debugSessionTerminated = createSessionTerminatedPromise(envSessionName);
 
-        const started = await vscode.debug.startDebugging(
-            workspaceFolder,
-            {
-                name: `${sessionName} Env`,
-                type: debugType,
-                request: 'launch',
-                program: envExecutablePath,
-                args: [testVarName, envResultFilePath],
-                cwd: workspacePath,
-                environment: [{ name: testVarName, value: fallbackValue }],
-                env: envConfig,
-                externalConsole: debugType === 'cppdbg' ? false : undefined,
-                console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
-            },
-            { noDebug: true });
+        let launchedSession: vscode.DebugSession | undefined;
+        const startedSubscription = vscode.debug.onDidStartDebugSession((session) => {
+            if (session.name === envSessionName) {
+                launchedSession = session;
+            }
+        });
 
-        assert.strictEqual(started, true, 'The noDebug launch with env did not start successfully.');
-        const actualValue = await waitForResultFileText(envResultFilePath, 10000);
+        try {
+            const started = await vscode.debug.startDebugging(
+                workspaceFolder,
+                {
+                    name: envSessionName,
+                    type: debugType,
+                    request: 'launch',
+                    program: envExecutablePath,
+                    args: [testVarName, envResultFilePath],
+                    cwd: workspacePath,
+                    environment: [{ name: testVarName, value: fallbackValue }],
+                    env: envConfig,
+                    externalConsole: debugType === 'cppdbg' ? false : undefined,
+                    console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
+                },
+                { noDebug: true });
 
-        assert.strictEqual(actualValue, expectedValue, 'Expected env object values to be applied and take precedence over environment entries.');
+            assert.strictEqual(started, true, 'The noDebug launch with env did not start successfully.');
+            const actualValue = await waitForResultFileText(envResultFilePath, 10000);
+
+            assert.strictEqual(actualValue, expectedValue, 'Expected env object values to be applied and take precedence over environment entries.');
+            await debugSessionTerminated;
+        } finally {
+            startedSubscription.dispose();
+            const sessionToStop = launchedSession ?? (vscode.debug.activeDebugSession?.name === envSessionName ? vscode.debug.activeDebugSession : undefined);
+            if (sessionToStop) {
+                await vscode.debug.stopDebugging(sessionToStop);
+            }
+            await util.deleteFile(envResultFilePath);
+        }
     });
 
     test('Run Without Debugging should not break on breakpoints and write the expected result file', async () => {
