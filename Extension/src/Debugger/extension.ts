@@ -14,7 +14,7 @@ import { SshTargetsProvider, getActiveSshTarget, initializeSshTargets, selectSsh
 import { TargetLeafNode, setActiveSshTarget } from '../SSH/TargetsView/targetNodes';
 import { sshCommandToConfig } from '../SSH/sshCommandToConfig';
 import { getSshConfiguration, getSshConfigurationFiles, parseFailures, writeSshConfiguration } from '../SSH/sshHosts';
-import { documentSelector, isCpp, isCppOrCFile, isFolderOpen, pathAccessible } from '../common';
+import { documentSelector, isCpp, isCppOrCFile, pathAccessible } from '../common';
 import { instrument } from '../instrumentation';
 import { getSshChannel } from '../logger';
 import { SessionState } from '../sessionState';
@@ -139,12 +139,11 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
 }
 
 export function updateBuildAndDebugSessionState(editor?: vscode.TextEditor): void {
+    void SessionState.buildAndDebugIsFolderOpen.set(vscode.workspace.workspaceFolders !== undefined);
     if (editor && isCpp(editor.document)) {
         void SessionState.buildAndDebugIsSourceFile.set(isCppOrCFile(editor.document.uri, editor.document.languageId));
-        void SessionState.buildAndDebugIsFolderOpen.set(isFolderOpen(editor.document.uri));
     } else {
         void SessionState.buildAndDebugIsSourceFile.set(false);
-        void SessionState.buildAndDebugIsFolderOpen.set(false);
     }
 }
 

@@ -13,7 +13,7 @@ suite("BuildAndDebug SessionState Tests", () => {
     test("updateBuildAndDebugSessionState sets false when editor is undefined", () => {
         updateBuildAndDebugSessionState(undefined);
         assert.strictEqual(SessionState.buildAndDebugIsSourceFile.get(), false);
-        assert.strictEqual(SessionState.buildAndDebugIsFolderOpen.get(), false);
+        assert.strictEqual(SessionState.buildAndDebugIsFolderOpen.get(), true);
     });
 
     test("updateBuildAndDebugSessionState sets false for non-C/C++ editor", () => {
@@ -25,7 +25,7 @@ suite("BuildAndDebug SessionState Tests", () => {
         };
         updateBuildAndDebugSessionState(mockEditor);
         assert.strictEqual(SessionState.buildAndDebugIsSourceFile.get(), false);
-        assert.strictEqual(SessionState.buildAndDebugIsFolderOpen.get(), false);
+        assert.strictEqual(SessionState.buildAndDebugIsFolderOpen.get(), true);
     });
 
     test("updateBuildAndDebugSessionState sets true for C/C++ source file", () => {
@@ -51,6 +51,6 @@ suite("BuildAndDebug SessionState Tests", () => {
         };
         updateBuildAndDebugSessionState(mockEditor);
         assert.strictEqual(SessionState.buildAndDebugIsSourceFile.get(), false);
-        assert.strictEqual(SessionState.buildAndDebugIsFolderOpen.get(), false);
+        assert.strictEqual(SessionState.buildAndDebugIsFolderOpen.get(), true);
     });
 });
