@@ -1,8 +1,30 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.34.0: August 21, 2026
+## Version 1.34.2: August 31, 2026
 ### Enhancements
-* Improve workspace indexing performance by reducing redundant browse paths from `compile_commands.json` and avoiding unnecessary tag parsing of non-included extensionless files. [#14693](https://github.com/microsoft/vscode-cpptools/issues/14693)
+* Improve C/C++ file classification by supporting extensionless headers and additional extensions such as `.hip` throughout extension features. [PR #14711](https://github.com/microsoft/vscode-cpptools/pull/14711)
+* Update the bundled `clang-tidy` and `clang-format` from 22.1.3 to 23.1.0, including available `clang-tidy` check suggestions and documentation. [PR #14713](https://github.com/microsoft/vscode-cpptools/pull/14713)
+
+### Bug Fixes
+* Fix high CPU and memory usage in workspaces with multiple symbolic links that point to ancestor directories. [#14689](https://github.com/microsoft/vscode-cpptools/issues/14689)
+* Fix include completion and symbol navigation using stale recursive include data after files are replaced by directories or symbolic link roots change.
+* Fix 'Find All References' misclassifying references in inactive preprocessor regions after falling back to header-only IntelliSense.
+
+## Version 1.34.1: August 28, 2026
+### Bug Fixes
+* Fix formatting not inserting the final newline requested by `InsertNewlineAtEOF`. [#12680](https://github.com/microsoft/vscode-cpptools/issues/12680)
+* Fix nested quoted `#include` directives failing to resolve source-relative headers when `-iquote` paths are used. [#13606](https://github.com/microsoft/vscode-cpptools/issues/13606)
+* Fix incorrect semantic highlighting for explicit function template specializations. [#14491](https://github.com/microsoft/vscode-cpptools/issues/14491)
+* Fix IntelliSense using `c17` instead of GCC's default GNU C language standard. [#14560](https://github.com/microsoft/vscode-cpptools/issues/14560)
+* Fix unnecessary IntelliSense reparsing after unrelated settings changes and incorrect language updates after `files.associations` changes.
+* Fix custom C/C++ `files.associations` entries with certain non-ASCII characters being ignored on Windows.
+* Fix `cpptools-srv` crashes under memory pressure while reading or processing RPC messages.
+
+## Version 1.34.0: August 25, 2026
+### Enhancements
+* Add folding support for C++ `public`, `private`, and `protected` access sections. [#14645](https://github.com/microsoft/vscode-cpptools/issues/14645)
+  * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14675](https://github.com/microsoft/vscode-cpptools/pull/14675)
+* Improve workspace indexing performance and reduce memory usage by deduplicating browse paths from `compile_commands.json`, excluding unrelated files from the browse database, and avoiding unnecessary tag parsing of non-included extensionless files. [#14693](https://github.com/microsoft/vscode-cpptools/issues/14693)
 * Reduce language server memory usage and RPC overhead for large messages and browse database snapshots.
 * Add IntelliSense support for C23 `_BitInt`, C++26 pack indexing, and C++26 structured binding packs.
 
@@ -10,12 +32,14 @@
 * Fix inactive code being dimmed from the wrong column when a preprocessor directive is preceded by a comment. [#12882](https://github.com/microsoft/vscode-cpptools/issues/12882)
   * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14666](https://github.com/microsoft/vscode-cpptools/pull/14666)
 * Fix enum member completion in a `switch` label before the trailing `:`. [#14605](https://github.com/microsoft/vscode-cpptools/issues/14605)
+* Fix extension crashes caused by events communicating with the language client before it is ready. [PR #14617](https://github.com/microsoft/vscode-cpptools/pull/14617)
 * Fix configuration path diagnostics for paths containing regular expression metacharacters and for incorrect source ranges. [PR #14674](https://github.com/microsoft/vscode-cpptools/pull/14674), [PR #14679](https://github.com/microsoft/vscode-cpptools/pull/14679)
 * Prevent browse database crashes on filesystems that do not support SQLite WAL shared memory, and warn when no compatible database location is available. [PR #14683](https://github.com/microsoft/vscode-cpptools/pull/14683)
 * Fix runaway CPU and memory usage caused by cyclic document symbol data, and prevent `cpptools` from remaining active after VS Code exits. [#14689](https://github.com/microsoft/vscode-cpptools/issues/14689)
+* Fix several language server crashes during startup, shutdown, diagnostic processing, and concurrent code model updates.
 * Fix various IntelliSense completion, navigation, false error, code analysis, formatting, and colorization issues.
-* Fix several language server crashes during startup, shutdown, and diagnostic processing.
 * Fix a potential language server deadlock caused by inconsistent lock ordering.
+* Harden temporary file storage on Linux and macOS.
 * Various localization updates.
 * Update dependencies.
 
