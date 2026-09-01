@@ -6,7 +6,9 @@ jobs:
 - job: Sign
   displayName: Sign LLDB-MI
   pool:
-    name: VSEngSS-MicroBuild2022-1ES
+    name: VSEng-MicroBuildVSStable
+    demands:
+    - Agent.OS -equals Windows_NT
   steps:
   - checkout: none
 
