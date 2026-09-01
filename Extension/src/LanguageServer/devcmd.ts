@@ -17,7 +17,7 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 const errorNoContext = localize('no.context.provided', 'No context provided');
-const errorNotWindows = localize('not.windows', 'The "Set Visual Studio Developer Environment" command is only available on Windows');
+export const errorNotWindows = localize('not.windows', 'The "Set Visual Studio Developer Environment" command is only available on Windows');
 const errorNoVSFound = localize('error.no.vs', 'A Visual Studio installation with the C++ compiler was not found');
 export const errorOperationCancelled = localize('operation.cancelled', 'The operation was cancelled');
 const errorNoHostsFound = localize('no.hosts', 'No hosts found');

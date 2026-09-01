@@ -4493,10 +4493,10 @@ mute-stream@~0.0.4:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/mute-stream/-/mute-stream-0.0.8.tgz#1630c42b2251ff81e2a283de96a5497ea92e5e0d"
   integrity sha1-FjDEKyJR/4HiooPelqVJfqkuXg0=
 
-nanoid@^3.3.16, nanoid@^3.3.17:
-  version "3.3.17"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/nanoid/-/nanoid-3.3.17.tgz#f1c3aa253c52547956a52c50bff754316f61037a"
-  integrity sha1-8cOqJTxSVHlWpSxQv/dUMW9hA3o=
+nanoid@^3.3.16, nanoid@^3.3.18:
+  version "3.3.18"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/nanoid/-/nanoid-3.3.18.tgz#f66a2de1199ffde0fcf21c8a5f13106b1c081913"
+  integrity sha1-9mot4Rmf/eD88hyKXxMQaxwIGRM=
 
 napi-build-utils@^2.0.0:
   version "2.0.0"
