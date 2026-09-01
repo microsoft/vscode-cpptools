@@ -498,7 +498,53 @@ async function onSelectTranslationUnit(): Promise<void> {
     }
 
     const client: Client = clients.ActiveClient;
-    const result = await client.getTranslationUnitSourceCandidates(activeEditor.document.uri);
+    const result = await (async () => {
+        const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+        try {
+            const candidatesPromise = client.getTranslationUnitSourceCandidates(activeEditor.document.uri, tokenSource.token);
+            const showProgress: boolean = await new Promise<boolean>((resolve, reject) => {
+                const timer: NodeJS.Timeout = global.setTimeout(() => resolve(true), 2000);
+                void candidatesPromise.then(() => {
+                    clearTimeout(timer);
+                    resolve(false);
+                }, (e) => {
+                    clearTimeout(timer);
+                    reject(e);
+                });
+            });
+
+            if (!showProgress) {
+                return await candidatesPromise;
+            }
+
+            return await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: localize('find.translation.units', 'Finding Translation Units...'),
+                cancellable: true
+            }, async (_progress, token) => {
+                const cancellationListener: vscode.Disposable = token.onCancellationRequested(() => tokenSource.cancel());
+                try {
+                    return await candidatesPromise;
+                } finally {
+                    cancellationListener.dispose();
+                }
+            });
+        } catch (e) {
+            if (e instanceof vscode.CancellationError) {
+                return undefined;
+            }
+            throw e;
+        } finally {
+            tokenSource.dispose();
+        }
+    })();
+    if (result === undefined) {
+        return;
+    }
+    if (result.candidates.length === 0) {
+        void vscode.window.showInformationMessage(localize('no.translation.units.found', 'No translation units were found for the active file.'));
+        return;
+    }
     const currentTranslationUnit: string = getEditorPath(result.currentTranslationUnit);
     const items: TranslationUnitQuickPickItem[] = result.candidates.map(candidate => {
         const editorPath: string = getEditorPath(candidate);

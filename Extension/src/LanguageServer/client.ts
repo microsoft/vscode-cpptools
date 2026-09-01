@@ -844,7 +844,7 @@ export interface Client {
     takeOwnership(document: vscode.TextDocument): void;
     sendDidOpen(document: vscode.TextDocument): Promise<void>;
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string>;
-    getTranslationUnitSourceCandidates(uri: vscode.Uri): Promise<GetTranslationUnitSourceCandidatesResult>;
+    getTranslationUnitSourceCandidates(uri: vscode.Uri, token: vscode.CancellationToken): Promise<GetTranslationUnitSourceCandidatesResult>;
     selectTranslationUnit(uri: vscode.Uri, translationUnit: string): Promise<void>;
     updateActiveDocumentTextOptions(): void;
     didChangeActiveEditor(editor?: vscode.TextEditor, selection?: Range): Promise<void>;
@@ -3097,12 +3097,11 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async getTranslationUnitSourceCandidates(uri: vscode.Uri): Promise<GetTranslationUnitSourceCandidatesResult> {
+    public async getTranslationUnitSourceCandidates(uri: vscode.Uri, token: vscode.CancellationToken): Promise<GetTranslationUnitSourceCandidatesResult> {
         const params: TextDocumentIdentifier = { uri: uri.toString() };
-        await this.ready;
-        return this.languageClient.sendRequest(
-            GetTranslationUnitSourceCandidatesRequest,
-            params);
+        await withCancellation(this.ready, token);
+        return DefaultClient.withLspCancellationHandling(
+            () => this.languageClient.sendRequest(GetTranslationUnitSourceCandidatesRequest, params, token), token);
     }
 
     public async selectTranslationUnit(uri: vscode.Uri, translationUnit: string): Promise<void> {
@@ -4483,7 +4482,7 @@ class NullClient implements Client {
     takeOwnership(document: vscode.TextDocument): void { }
     sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string> { return Promise.resolve(""); }
-    getTranslationUnitSourceCandidates(uri: vscode.Uri): Promise<GetTranslationUnitSourceCandidatesResult> {
+    getTranslationUnitSourceCandidates(uri: vscode.Uri, token: vscode.CancellationToken): Promise<GetTranslationUnitSourceCandidatesResult> {
         return Promise.resolve({ candidates: [], currentTranslationUnit: "" });
     }
     selectTranslationUnit(uri: vscode.Uri, translationUnit: string): Promise<void> { return Promise.resolve(); }
