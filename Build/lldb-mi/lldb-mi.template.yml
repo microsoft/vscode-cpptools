@@ -94,6 +94,81 @@ jobs:
           exit 1
         fi
 
+        # SWIG 4.5 does not provide Python 2 PyInt aliases; normalize the pinned bindings before generating wrappers.
+        "$python_executable" - <<'PY'
+        from pathlib import Path
+
+        bindings = Path("lldb/bindings")
+        typemaps = bindings / "python/python-typemaps.swig"
+        source = typemaps.read_text()
+        replacements = (
+          (
+            "   if (!PyInt_Check($input)) {\n"
+            "       PyErr_SetString(PyExc_ValueError, \"Expecting an integer\");\n"
+            "       return NULL;\n"
+            "   }\n"
+            "   $2 = PyInt_AsLong($input);",
+            "   if (!PyLong_Check($input)) {\n"
+            "       PyErr_SetString(PyExc_ValueError, \"Expecting an integer\");\n"
+            "       return NULL;\n"
+            "   }\n"
+            "   $2 = PyLong_AsLong($input);",
+            2,
+          ),
+          (
+            "   if (PyInt_Check($input)) {\n"
+            "      $2 = PyInt_AsLong($input);\n"
+            "   } else if (PyLong_Check($input)) {\n"
+            "      $2 = PyLong_AsLong($input);",
+            "   if (PyLong_Check($input)) {\n"
+            "      $2 = PyLong_AsLong($input);",
+            1,
+          ),
+          (
+            "  if (PyInt_Check(obj))\n"
+            "    number = static_cast<T>(PyInt_AsLong(obj));\n"
+            "  else if (PyLong_Check(obj))\n"
+            "    number = PyLongAsT<T>(obj);",
+            "  if (PyLong_Check(obj))\n"
+            "    number = PyLongAsT<T>(obj);",
+            1,
+          ),
+          (
+            "        PyObject* item = PyInt_FromLong($1[j]);",
+            "        PyObject* item = PyLong_FromLong($1[j]);",
+            1,
+          ),
+        )
+        for old, new, expected_count in replacements:
+          if source.count(old) != expected_count:
+            raise SystemExit(f"expected {expected_count} occurrences of {old!r}")
+          source = source.replace(old, new)
+        typemaps.write_text(source)
+
+        safe_cast = bindings / "python/python-swigsafecast.swig"
+        source = safe_cast.read_text()
+        old = "    return PyInt_FromLong(*c_int);"
+        if source.count(old) != 1:
+          raise SystemExit("expected exactly one PyInt_FromLong safe-cast use")
+        safe_cast.write_text(source.replace(old, "    return PyLong_FromLong(*c_int);"))
+
+        remaining = []
+        for path in bindings.rglob("*"):
+          if not path.is_file():
+            continue
+          try:
+            lines = path.read_text().splitlines()
+          except UnicodeDecodeError:
+            continue
+          remaining.extend(
+            f"{path}:{line_number}:{line.strip()}"
+            for line_number, line in enumerate(lines, 1)
+            if "PyInt_" in line
+          )
+        if remaining:
+          raise SystemExit("unsupported Python 2 APIs remain:\n" + "\n".join(remaining))
+        PY
+
         log_and_exec_cmd "./lldb/scripts/macos-setup-codesign.sh"
 
         log_and_exec_cmd "cd .."
