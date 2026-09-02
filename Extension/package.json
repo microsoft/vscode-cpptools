@@ -7221,7 +7221,6 @@
         "gulp": "^5.0.0",
         "gulp-env": "^0.4.0",
         "gulp-filter": "^7.0.0",
-        "gulp-sourcemaps": "^3.0.0",
         "gulp-typescript": "^5.0.1",
         "minimist": "^1.2.8",
         "mocha": "^10.4.0",
