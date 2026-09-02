@@ -139,10 +139,11 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
 }
 
 export function updateBuildAndDebugSessionState(editor?: vscode.TextEditor): void {
-    void SessionState.buildAndDebugIsFolderOpen.set(vscode.workspace.workspaceFolders !== undefined);
     if (editor && isCpp(editor.document)) {
+        void SessionState.buildAndDebugIsFolderOpen.set(vscode.workspace.getWorkspaceFolder(editor.document.uri) !== undefined);
         void SessionState.buildAndDebugIsSourceFile.set(isCppOrCFile(editor.document.uri, editor.document.languageId));
     } else {
+        void SessionState.buildAndDebugIsFolderOpen.set(vscode.workspace.workspaceFolders !== undefined);
         void SessionState.buildAndDebugIsSourceFile.set(false);
     }
 }
