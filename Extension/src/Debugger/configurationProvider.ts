@@ -270,9 +270,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Add environment variables from .env file
         this.resolveEnvFile(config, folder);
 
-        // cppdbg (MIEngine) consumes the legacy `environment` array, not `env`.
+        // Debug adapters consume the legacy `environment` array, not `env`.
         // Convert here so both syntaxes work while preserving `env` precedence.
-        this.resolveEnvObjectForCppdbg(config);
+        this.resolveEnvObject(config);
 
         await this.expand(config, folder);
 
@@ -710,8 +710,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
     }
 
-    private resolveEnvObjectForCppdbg(config: CppDebugConfiguration): void {
-        if (config.type !== DebuggerType.cppdbg || config.request !== 'launch') {
+    private resolveEnvObject(config: CppDebugConfiguration): void {
+        if ((config.type !== DebuggerType.cppdbg && config.type !== DebuggerType.cppvsdbg) || config.request !== 'launch') {
             return;
         }
 
