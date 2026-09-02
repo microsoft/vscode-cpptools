@@ -48,7 +48,7 @@ export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
 
 let prevMacCrashFile: string;
-const pendingCppCrashFiles: Set<string> = new Set<string>();
+const pendingCppCrashPaths: Set<string> = new Set<string>();
 let prevCppCrashCallStackData: string = "";
 export let clients: ClientCollection;
 let activeDocument: vscode.TextDocument | undefined;
@@ -1115,7 +1115,6 @@ export function usesCrashHandler(): boolean {
 
 export function watchForCrashes(crashDirectory: string): void {
     if (crashDirectory !== "") {
-        pendingCppCrashFiles.clear();
         fs.stat(crashDirectory, (err) => {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
@@ -1131,21 +1130,22 @@ export function watchForCrashes(crashDirectory: string): void {
                     if (event !== "change") {
                         return;
                     }
-                    if (!filename || pendingCppCrashFiles.has(filename)) {
+                    if (!filename || !filename.startsWith("cpptools")) {
                         return;
                     }
-                    if (!filename.startsWith("cpptools")) {
+                    const crashPath: string = path.resolve(crashDirectory, filename);
+                    if (pendingCppCrashPaths.has(crashPath)) {
                         return;
                     }
-                    pendingCppCrashFiles.add(filename);
+                    pendingCppCrashPaths.add(crashPath);
                     const crashDate: Date = new Date();
                     isWritingCrashCallStack = true;
 
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
                         isWritingCrashCallStack = false;
-                        pendingCppCrashFiles.delete(filename);
-                        fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
+                        pendingCppCrashPaths.delete(crashPath);
+                        fs.readFile(crashPath, 'utf8', (err, data) => {
                             void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
                         });
                     }, 5000);
