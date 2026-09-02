@@ -135,6 +135,12 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     // even if the language server (IntelliSense) is disabled.
     updateBuildAndDebugSessionState(vscode.window.activeTextEditor);
     disposables.push(vscode.window.onDidChangeActiveTextEditor(editor => updateBuildAndDebugSessionState(editor)));
+    disposables.push(vscode.workspace.onDidOpenTextDocument(document => {
+        const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (activeEditor?.document.uri.toString() === document.uri.toString()) {
+            updateBuildAndDebugSessionState(activeEditor);
+        }
+    }));
     disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(() => updateBuildAndDebugSessionState(vscode.window.activeTextEditor)));
 }
 
