@@ -2318,9 +2318,24 @@ export class DefaultClient implements Client {
 
         // Wrap the provider lookup in a single task, so we can apply a timeout to the entire duration.
         const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | undefined> = async () => {
+            const supportedUris: vscode.Uri[] = [];
+            for (const uri of docUris) {
+                try {
+                    if (!await provider.canProvideConfiguration(uri, tokenSource.token)) {
+                        continue;
+                    }
+                } catch {
+                    console.warn("Caught exception from canProvideConfiguration");
+                }
+                supportedUris.push(uri);
+            }
+            if (supportedUris.length === 0) {
+                return [];
+            }
+
             let configs: util.Mutable<SourceFileConfigurationItem>[] = [];
             try {
-                configs = await provider.provideConfigurations(docUris, tokenSource.token);
+                configs = await provider.provideConfigurations(supportedUris, tokenSource.token);
             } catch {
                 console.warn("Caught exception from provideConfigurations");
             }
