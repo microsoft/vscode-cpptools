@@ -4,10 +4,11 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { LanguageClient, NotificationType, Range } from 'vscode-languageclient/node';
+import { NotificationType, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { Location, WorkspaceEdit } from './commonTypes';
 import { CppSourceStr } from './extension';
+import { LanguageClient } from './languageClient';
 import { LocalizeStringParams, getLocalizedString } from './localization';
 import { CppSettings } from './settings';
 import { makeVscodeLocation, makeVscodeRange, makeVscodeTextEdits, rangeEquals } from './utils';
@@ -379,7 +380,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                     docPage = `checks${checksGroup}/${checksPage}.html`;
                 }
                 // TODO: This should be checking the clang-tidy version used to better support usage of older versions.
-                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/22.1.0/tools/clang/tools/extra/docs/clang-tidy/${docPage}`);
+                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/23.1.0/tools/clang/tools/extra/docs/clang-tidy/${docPage}`);
                 diagnostic.code = { value: identifier.code, target: primaryDocUri };
 
                 if (new CppSettings().clangTidyCodeActionShowDocumentation) {
