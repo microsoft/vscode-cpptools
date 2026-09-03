@@ -2330,7 +2330,7 @@ export class DefaultClient implements Client {
                 supportedUris.push(uri);
             }
             if (supportedUris.length === 0) {
-                return [];
+                return undefined;
             }
 
             let configs: util.Mutable<SourceFileConfigurationItem>[] = [];
