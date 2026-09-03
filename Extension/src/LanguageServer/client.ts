@@ -2774,7 +2774,7 @@ export class DefaultClient implements Client {
                 const isTrackedFile: boolean = hasNativeFileTypeMappings()
                     ? isTagParsableFile(uri.fsPath)
                     : isTagParsableFile(uri.fsPath) ||
-                        (ext !== undefined && this.associations_for_did_change?.has(ext.toLowerCase()) === true);
+                    (ext !== undefined && this.associations_for_did_change?.has(ext.toLowerCase()) === true);
                 if (isTrackedFile) {
                     // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
                     // which causes a large backlog of "files to parse" to accumulate.
