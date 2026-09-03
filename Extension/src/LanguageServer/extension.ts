@@ -1143,8 +1143,8 @@ export function watchForCrashes(crashDirectory: string): void {
 
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
-                        isWritingCrashCallStack = false;
                         pendingCppCrashPaths.delete(crashPath);
+                        isWritingCrashCallStack = pendingCppCrashPaths.size > 0;
                         fs.readFile(crashPath, 'utf8', (err, data) => {
                             void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
                         });
