@@ -323,7 +323,7 @@
 	"c_cpp.debuggers.serverLaunchTimeout.description": "Optionale Zeit in Millisekunden, während der der Debugger auf den Start von debugServer wartet. Der Standardwert ist 10.000.",
 	"c_cpp.debuggers.coreDumpPath.description": "Optionaler vollständiger Pfad zu einer Kern-Speicherabbilddatei für das angegebene Programm. Der Standardwert ist \"NULL\".",
 	"c_cpp.debuggers.cppdbg.externalConsole.description": "Wenn dieser Wert auf \"true\" festgelegt ist, wird eine Konsole für die zu debuggende Komponente gestartet. Bei \"false\" wird die Komponente unter Linux und Windows in der integrierten Konsole angezeigt.",
-	"c_cpp.debuggers.cppvsdbg.externalConsole.description": "[Veraltet für \"console\"] Wenn dieser Wert auf \"true\" festgelegt ist, wird eine Konsole für die zu debuggende Komponente gestartet. Bei \"false\" wird keine Konsole gestartet.",
+	"c_cpp.debuggers.cppvsdbg.externalConsole.description": "[Veraltet für 'console'] Wenn dieser Wert auf \"true\" festgelegt ist, wird eine Konsole für die zu debuggende Komponente gestartet. Bei \"false\" wird keine Konsole gestartet.",
 	"c_cpp.debuggers.cppvsdbg.console.description": "Gibt an, wo das Debugziel gestartet wird. Wenn keine Angabe vorliegt, wird standardmäßig „internalConsole“ verwendet.",
 	"c_cpp.debuggers.cppvsdbg.console.internalConsole.description": "Die Ausgabe an die Debugging-Konsole von VS Code. Das Lesen von Konsoleneingaben (z. B. `std::cin` oder `scanf`) wird nicht unterstützt.",
 	"c_cpp.debuggers.cppvsdbg.console.integratedTerminal.description": "Das integrierte Terminal von VS Code.",
