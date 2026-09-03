@@ -66,6 +66,7 @@
       "@vscode/vsce": "^3.9.2"
   },
   "overrides": {
-    "@azure/msal-browser": "^4.29.1"
+    "@azure/msal-browser": "^4.29.1",
+    "fast-uri": "^3.1.6"
   }
 }
