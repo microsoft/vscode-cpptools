@@ -48,7 +48,7 @@ export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
 
 let prevMacCrashFile: string;
-let prevCppCrashFile: string;
+const pendingCppCrashPaths: Set<string> = new Set<string>();
 let prevCppCrashCallStackData: string = "";
 export let clients: ClientCollection;
 let activeDocument: vscode.TextDocument | undefined;
@@ -1208,7 +1208,6 @@ export function usesCrashHandler(): boolean {
 
 export function watchForCrashes(crashDirectory: string): void {
     if (crashDirectory !== "") {
-        prevCppCrashFile = "";
         fs.stat(crashDirectory, (err) => {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
@@ -1224,20 +1223,22 @@ export function watchForCrashes(crashDirectory: string): void {
                     if (event !== "change") {
                         return;
                     }
-                    if (!filename || filename === prevCppCrashFile) {
+                    if (!filename || !filename.startsWith("cpptools")) {
                         return;
                     }
-                    prevCppCrashFile = filename;
-                    if (!filename.startsWith("cpptools")) {
+                    const crashPath: string = path.resolve(crashDirectory, filename);
+                    if (pendingCppCrashPaths.has(crashPath)) {
                         return;
                     }
+                    pendingCppCrashPaths.add(crashPath);
                     const crashDate: Date = new Date();
                     isWritingCrashCallStack = true;
 
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
-                        isWritingCrashCallStack = false;
-                        fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
+                        pendingCppCrashPaths.delete(crashPath);
+                        isWritingCrashCallStack = pendingCppCrashPaths.size > 0;
+                        fs.readFile(crashPath, 'utf8', (err, data) => {
                             void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
                         });
                     }, 5000);
@@ -1415,6 +1416,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             return; // ignore known issue
         }
         return logCppCrashTelemetry("readFile: " + err.code);
+    }
+    if (data.length === 0) {
+        return;
     }
 
     const lines: string[] = data.split("\n");
