@@ -2920,10 +2920,10 @@ fast-levenshtein@^3.0.0:
   dependencies:
     fastest-levenshtein "^1.0.7"
 
-fast-uri@^3.0.1, fast-uri@^3.1.5:
-  version "3.1.5"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/fast-uri/-/fast-uri-3.1.5.tgz#610f37419a030270430cecd68d74e3d4d96725d0"
-  integrity "sha1-YQ83QZoDAnBDDOzWjXTj1NlnJdA= sha512-gHwA1O9LDIcKunMKhObS/HimwtehO1nPUECKAu5TpKgaO19fcWEl4bliWe1jWxVFvIXztJjjQ4L8XQ1EU9f7Jw=="
+fast-uri@^3.0.1, fast-uri@^3.1.6:
+  version "3.1.6"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/fast-uri/-/fast-uri-3.1.6.tgz#bfdd308ef763f835fed059f3c6c925f708e33e3a"
+  integrity sha1-v90wjvdj+DX+0Fnzxskl9wjjPjo=
 
 fastest-levenshtein@^1.0.12, fastest-levenshtein@^1.0.7:
   version "1.0.16"
