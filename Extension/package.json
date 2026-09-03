@@ -4899,7 +4899,7 @@
                                                 "recursive": {
                                                     "type": "boolean",
                                                     "description": "%c_cpp.debuggers.deploySteps.copyFile.recursive.description%",
-                                                    "default": "true"
+                                                    "default": true
                                                 },
                                                 "debug": {
                                                     "type": "boolean",
@@ -5700,7 +5700,7 @@
                                                 "recursive": {
                                                     "type": "boolean",
                                                     "description": "%c_cpp.debuggers.deploySteps.copyFile.recursive.description%",
-                                                    "default": "true"
+                                                    "default": true
                                                 },
                                                 "debug": {
                                                     "type": "boolean",

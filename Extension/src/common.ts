@@ -822,7 +822,7 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
             stdout += str;
             if (continueOn) {
                 const continueOnReg: string = escapeStringForRegex(continueOn);
-                if (stdout.search(continueOnReg)) {
+                if (stdout.search(continueOnReg) >= 0) {
                     result.resolve({ stdout: stdout.trim(), stderr: stderr.trim() });
                 }
             }
