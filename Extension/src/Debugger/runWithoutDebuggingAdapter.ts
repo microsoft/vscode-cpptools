@@ -13,6 +13,7 @@ import { isWindows } from '../constants';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize = nls.loadMessageBundle();
+const terminalEnvironments = new WeakMap<vscode.Terminal, NodeJS.ProcessEnv>();
 
 type LaunchEnvironmentEntry = { name: string; value: string | null; };
 
@@ -38,7 +39,6 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     private seq: number = 1;
     private childProcess?: cp.ChildProcess;
     private terminal?: vscode.Terminal;
-    private terminalEnvironment?: NodeJS.ProcessEnv;
     private terminalExecution?: vscode.TerminalShellExecution;
     private hasTerminated: boolean = false;
 
@@ -96,7 +96,10 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         }
         for (const [key, value] of Object.entries(envObject)) {
             if (value === null) {
-                delete env[key];
+                const keysToDelete = isWindows
+                    ? Object.keys(env).filter(name => name.toLowerCase() === key.toLowerCase())
+                    : [key];
+                keysToDelete.forEach(name => delete env[name]);
             } else {
                 env[key] = value;
             }
@@ -118,7 +121,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     private async launchIntegratedTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv): Promise<void> {
         const terminalName = path.normalize(program);
         let existingTerminal = vscode.window.terminals.find(t => t.name === terminalName);
-        if (existingTerminal && !this.environmentsEqual(this.terminalEnvironment, env)) {
+        if (existingTerminal && !this.environmentsEqual(terminalEnvironments.get(existingTerminal), env)) {
             existingTerminal.dispose();
             existingTerminal = undefined;
         }
@@ -127,7 +130,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             cwd,
             env: env as Record<string, string>
         });
-        this.terminalEnvironment = env;
+        terminalEnvironments.set(this.terminal, env);
         this.terminal.show(true);
 
         const shellIntegration: vscode.TerminalShellIntegration | undefined =

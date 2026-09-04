@@ -928,9 +928,9 @@
         ]
     },
     "c_cpp.debuggers.env.description": {
-        "message": "Object of environment variables to add to the environment for the program. Example: { \"MY_VAR\": \"value\" }. Use `environment` for the array-of-objects form.",
+        "message": "Object of environment variables for the program. String values add or replace variables, while null removes inherited variables. Example: { \"MY_VAR\": \"value\" }. Use `environment` for the array-of-objects form.",
         "comment": [
-            "{Locked=\"{ \\\"MY_VAR\\\": \\\"value\\\" }\"} {Locked=\"`environment`\"}"
+            "{Locked=\"null\"} {Locked=\"{ \\\"MY_VAR\\\": \\\"value\\\" }\"} {Locked=\"`environment`\"}"
         ]
     },
     "c_cpp.debuggers.envFile.description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE.",
