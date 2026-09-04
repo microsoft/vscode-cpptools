@@ -35,7 +35,7 @@ import { ManualPromise } from '../Utility/Async/manualPromise';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import { isWindows } from '../constants';
-import { FileTypeMappings, hasNativeFileTypeMappings, isTagParsableFile, resetFileTypeMappings, updateFileTypeMappings } from '../fileType';
+import { FileTypeMappings, resetFileTypeMappings, updateFileTypeMappings } from '../fileType';
 import { instrument, isInstrumentationEnabled } from '../instrumentation';
 import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
 import { localizedStringCount, lookupString } from '../nativeStrings';
@@ -2716,8 +2716,6 @@ export class DefaultClient implements Client {
         }
     }
 
-    private associations_for_did_change?: Set<string>;
-
     /**
      * listen for file created/deleted events under the ${workspaceFolder} folder
      */
@@ -2749,41 +2747,23 @@ export class DefaultClient implements Client {
                 void this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() }).catch(logAndReturn.undefined);
             });
 
-            // Fallback for custom associations when native binaries do not publish effective file type mappings.
-            this.associations_for_did_change = new Set<string>();
-            const assocs: any = new OtherSettings().filesAssociations;
-            for (const assoc in assocs) {
-                const dotIndex: number = assoc.lastIndexOf('.');
-                if (dotIndex !== -1) {
-                    const ext: string = assoc.substring(dotIndex + 1);
-                    this.associations_for_did_change.add(ext.toLowerCase());
-                }
-            }
             this.rootPathFileWatcher.onDidChange(async (uri) => {
                 if (uri.scheme !== 'file') {
                     return;
                 }
-                const dotIndex: number = uri.fsPath.lastIndexOf('.');
                 const fileName: string = path.basename(uri.fsPath).toLowerCase();
                 if (fileName === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
                     cachedEditorConfigLookups.clear();
                     this.updateActiveDocumentTextOptions();
                 }
-                const ext: string | undefined = dotIndex !== -1 ? uri.fsPath.substring(dotIndex + 1) : undefined;
-                const isTrackedFile: boolean = hasNativeFileTypeMappings()
-                    ? isTagParsableFile(uri.fsPath)
-                    : isTagParsableFile(uri.fsPath) ||
-                    (ext !== undefined && this.associations_for_did_change?.has(ext.toLowerCase()) === true);
-                if (isTrackedFile) {
-                    // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
-                    // which causes a large backlog of "files to parse" to accumulate.
-                    // We workaround this via only sending the change message if the modified time is within 10 seconds.
-                    const mtime: Date = fs.statSync(uri.fsPath).mtime;
-                    const duration: number = Date.now() - mtime.getTime();
-                    if (duration < 10000) {
-                        void this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() }).catch(logAndReturn.undefined);
-                    }
+                // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
+                // which causes a large backlog of file notifications to accumulate.
+                // We workaround this via only sending the change message if the modified time is within 10 seconds.
+                const mtime: Date = fs.statSync(uri.fsPath).mtime;
+                const duration: number = Date.now() - mtime.getTime();
+                if (duration < 10000) {
+                    void this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() }).catch(logAndReturn.undefined);
                 }
             });
 
