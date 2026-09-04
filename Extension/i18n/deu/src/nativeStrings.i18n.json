@@ -433,5 +433,6 @@
 	"check_open_failed": "Fehler beim Öffnen von {0} zur Analyse",
 	"check_timed_out": "Timeout beim Warten auf den Abschluss der Analyse von {0}",
 	"failed_to_open_browse_db_lock_file": "Fehler beim Öffnen der Sperrdatei der Browse-Datenbank: {0} (errno={1})",
-	"failed_to_lock_browse_db_lock_file": "Fehler beim Sperren der Sperrdatei der Browse-Datenbank: {0} (errno={1})"
+	"failed_to_lock_browse_db_lock_file": "Fehler beim Sperren der Sperrdatei der Browse-Datenbank: {0} (errno={1})",
+	"browse_database_disabled_incompatible_storage": "Die Browse-Datenbank wurde deaktiviert, da ihr Speicherort den gemeinsam genutzten Speicher von SQLite WAL nicht unterstützt. Legen Sie browse.databaseFilename auf einen lokalen Pfad fest."
 }
