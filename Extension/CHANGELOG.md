@@ -1,5 +1,23 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.34.3: September 4, 2026
+### Enhancement
+* Add the `processFilter` launch option to filter or automatically select processes for remote `cppdbg` attach configurations. [#14682](https://github.com/microsoft/vscode-cpptools/issues/14682)
+  * Thanks for the contribution. [@afreof (Adrian Freihofer)](https://github.com/afreof) [PR #14684](https://github.com/microsoft/vscode-cpptools/pull/14684)
+
+### Bug Fixes
+* Fix 'C/C++: Edit Configurations (UI)' not fully respecting custom theme colors. [#11263](https://github.com/microsoft/vscode-cpptools/issues/11263)
+  * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14692](https://github.com/microsoft/vscode-cpptools/pull/14692)
+* Fix 'Run/Debug C/C++ File' buttons being hidden when `C_Cpp.intelliSenseEngine` is set to `disabled`. [#13001](https://github.com/microsoft/vscode-cpptools/issues/13001)
+  * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14719](https://github.com/microsoft/vscode-cpptools/pull/14719)
+* Fix false IntelliSense errors for EnTT multi-component views caused by heterogeneous `auto` non-type template parameter packs. [#14456](https://github.com/microsoft/vscode-cpptools/issues/14456)
+* Fix false IntelliSense errors for GNU ARM stack-pointer clobbers, including CMSIS `__set_PSP` and `__set_MSP`. [#14486](https://github.com/microsoft/vscode-cpptools/issues/14486)
+* Fix false IntelliSense errors for constrained hidden friend function templates that use `requires` expressions. [#14696](https://github.com/microsoft/vscode-cpptools/issues/14696)
+* Fix compiler and include paths from some custom configuration providers being ignored. [#14724](https://github.com/microsoft/vscode-cpptools/issues/14724)
+* Fix a `cpptools-srv2` crash when tag parsing a C macro that stringizes `__VA_OPT__`.
+* Various localization updates.
+* Update dependencies.
+
 ## Version 1.34.2: August 31, 2026
 ### Enhancements
 * Improve C/C++ file classification by supporting extensionless headers and additional extensions such as `.hip` throughout extension features. [PR #14711](https://github.com/microsoft/vscode-cpptools/pull/14711)
