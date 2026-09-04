@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.34.2-main",
+    "version": "1.34.3-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -5259,6 +5259,11 @@
                                         "default": 0
                                     }
                                 ]
+                            },
+                            "processFilter": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.processFilter.description%",
+                                "default": ""
                             },
                             "filterStdout": {
                                 "type": "boolean",
