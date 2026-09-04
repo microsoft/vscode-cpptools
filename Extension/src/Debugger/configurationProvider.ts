@@ -715,16 +715,16 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         const environment: Environment[] = util.isArray(config.environment) ? config.environment : [];
-        const mergedEnvironment = new Map<string, string>();
+        const mergedEnvironment = new Map<string, string | null>();
 
         for (const entry of environment) {
-            if (util.isString(entry?.name) && util.isString(entry?.value)) {
+            if (util.isString(entry?.name) && (util.isString(entry?.value) || entry?.value === null)) {
                 mergedEnvironment.set(entry.name, entry.value);
             }
         }
 
         for (const [name, value] of Object.entries(envObject)) {
-            if (util.isString(value)) {
+            if (util.isString(value) || value === null) {
                 mergedEnvironment.set(name, value);
             }
         }

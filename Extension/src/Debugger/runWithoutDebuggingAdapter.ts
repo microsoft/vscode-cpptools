@@ -14,14 +14,14 @@ import { isWindows } from '../constants';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize = nls.loadMessageBundle();
 
-type LaunchEnvironmentEntry = { name: string; value: string; };
+type LaunchEnvironmentEntry = { name: string; value: string | null; };
 
 type LaunchConfiguration = {
     program?: string;
     args?: string[];
     cwd?: string;
     environment?: LaunchEnvironmentEntry[];
-    env?: Record<string, string>;
+    env?: Record<string, string | null>;
     console?: string;
     externalConsole?: boolean;
 };
@@ -38,6 +38,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     private seq: number = 1;
     private childProcess?: cp.ChildProcess;
     private terminal?: vscode.Terminal;
+    private terminalEnvironment?: NodeJS.ProcessEnv;
     private terminalExecution?: vscode.TerminalShellExecution;
     private hasTerminated: boolean = false;
 
@@ -77,17 +78,25 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         const args: string[] = config.args ?? [];
         const cwd: string | undefined = config.cwd;
         const environment: LaunchEnvironmentEntry[] = config.environment ?? [];
-        const envObject: Record<string, string> = config.env ?? {};
+        const envObject: Record<string, string | null> = config.env ?? {};
         const consoleMode: string = config.console ?? (config.externalConsole ? 'externalTerminal' : 'integratedTerminal');
 
         // Merge environment values in this order: inherited process environment, legacy
         // `environment` entries, then shorthand `env` values (higher precedence).
         const env: NodeJS.ProcessEnv = { ...process.env };
         for (const e of environment) {
-            env[e.name] = e.value;
+            if (e.value === null) {
+                delete env[e.name];
+            } else {
+                env[e.name] = e.value;
+            }
         }
         for (const [key, value] of Object.entries(envObject)) {
-            env[key] = value;
+            if (value === null) {
+                delete env[key];
+            } else {
+                env[key] = value;
+            }
         }
 
         this.sendResponse(request, {});
@@ -105,12 +114,17 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
      */
     private async launchIntegratedTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv): Promise<void> {
         const terminalName = path.normalize(program);
-        const existingTerminal = vscode.window.terminals.find(t => t.name === terminalName);
+        let existingTerminal = vscode.window.terminals.find(t => t.name === terminalName);
+        if (existingTerminal && !this.environmentsEqual(this.terminalEnvironment, env)) {
+            existingTerminal.dispose();
+            existingTerminal = undefined;
+        }
         this.terminal = existingTerminal ?? vscode.window.createTerminal({
             name: terminalName,
             cwd,
             env: env as Record<string, string>
         });
+        this.terminalEnvironment = env;
         this.terminal.show(true);
 
         const shellIntegration: vscode.TerminalShellIntegration | undefined =
@@ -220,6 +234,20 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
 
     private escapeQuotes(arg: string): string {
         return arg.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    }
+
+    private environmentsEqual(first: NodeJS.ProcessEnv | undefined, second: NodeJS.ProcessEnv): boolean {
+        if (!first) {
+            return false;
+        }
+
+        const firstKeys = Object.keys(first);
+        const secondKeys = Object.keys(second);
+        if (firstKeys.length !== secondKeys.length) {
+            return false;
+        }
+
+        return firstKeys.every(key => first[key] === second[key]);
     }
 
     private waitForShellIntegration(terminal: vscode.Terminal, timeoutMs: number): Promise<vscode.TerminalShellIntegration | undefined> {

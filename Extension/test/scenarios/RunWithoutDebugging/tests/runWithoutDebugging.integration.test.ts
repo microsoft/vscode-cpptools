@@ -171,6 +171,26 @@ async function waitForResultFileText(filePath: string, timeoutMs: number): Promi
     assert.fail(`Timed out waiting for output in ${filePath}. Last contents: ${lastContents}`);
 }
 
+async function waitForResultFile(filePath: string, timeoutMs: number): Promise<string> {
+    const deadline = Date.now() + timeoutMs;
+    let lastContents = '';
+
+    while (Date.now() < deadline) {
+        try {
+            lastContents = await util.readFileText(filePath, 'utf8');
+            return lastContents.trim();
+        } catch (error) {
+            if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+                throw error;
+            }
+        }
+
+        await new Promise<void>(resolve => setTimeout(resolve, 100));
+    }
+
+    assert.fail(`Timed out waiting for output file in ${filePath}. Last contents: ${lastContents}`);
+}
+
 suite('Run Without Debugging Test', function (): void {
     const expectedResultValue = 37;
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0] ?? assert.fail('No workspace folder available');
@@ -281,6 +301,79 @@ suite('Run Without Debugging Test', function (): void {
                 await vscode.debug.stopDebugging(sessionToStop);
             }
             await util.deleteFile(envResultFilePath);
+        }
+    });
+
+    test('Run Without Debugging should remove inherited env values when env is null', async () => {
+        const testVarName = 'CPPTOOLS_NO_DEBUG_NULL_ENV_TEST';
+        const inheritedValue = 'inherited-value';
+        const envSessionName = `${sessionName} Null Env`;
+        const previousValue = process.env[testVarName];
+        process.env[testVarName] = inheritedValue;
+
+        try {
+            const started = await vscode.debug.startDebugging(
+                workspaceFolder,
+                {
+                    name: envSessionName,
+                    type: debugType,
+                    request: 'launch',
+                    program: envExecutablePath,
+                    args: [testVarName, envResultFilePath],
+                    cwd: workspacePath,
+                    env: { [testVarName]: null },
+                    externalConsole: debugType === 'cppdbg' ? false : undefined,
+                    console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
+                },
+                { noDebug: true });
+
+            assert.strictEqual(started, true, 'The noDebug launch with a null env value did not start successfully.');
+            assert.strictEqual(await waitForResultFile(envResultFilePath, 10000), '', 'A null env value should remove the inherited variable.');
+        } finally {
+            if (previousValue === undefined) {
+                delete process.env[testVarName];
+            } else {
+                process.env[testVarName] = previousValue;
+            }
+            await util.deleteFile(envResultFilePath);
+        }
+    });
+
+    test('Run Without Debugging should refresh a reused terminal when env changes', async () => {
+        const testVarName = 'CPPTOOLS_NO_DEBUG_REUSED_TERMINAL_ENV_TEST';
+        const firstValue = 'first-launch-value';
+        const secondValue = 'second-launch-value';
+        const firstResultFilePath = path.join(workspacePath, 'runWithoutDebuggingFirstEnvResult.txt');
+        const secondResultFilePath = path.join(workspacePath, 'runWithoutDebuggingSecondEnvResult.txt');
+
+        try {
+            const launch = async (resultFilePath: string, value: string, name: string): Promise<string> => {
+                const started = await vscode.debug.startDebugging(
+                    workspaceFolder,
+                    {
+                        name,
+                        type: debugType,
+                        request: 'launch',
+                        program: envExecutablePath,
+                        args: [testVarName, resultFilePath],
+                        cwd: workspacePath,
+                        env: { [testVarName]: value },
+                        externalConsole: debugType === 'cppdbg' ? false : undefined,
+                        console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
+                    },
+                    { noDebug: true });
+
+                assert.strictEqual(started, true, `The ${name} noDebug launch did not start successfully.`);
+                return waitForResultFileText(resultFilePath, 10000);
+            };
+
+            assert.strictEqual(await launch(firstResultFilePath, firstValue, `${sessionName} First Env`), firstValue);
+            assert.strictEqual(await launch(secondResultFilePath, secondValue, `${sessionName} Second Env`), secondValue);
+        } finally {
+            await util.deleteFile(firstResultFilePath);
+            await util.deleteFile(secondResultFilePath);
+            const terminalName = path.normalize(envExecutablePath);
+            vscode.window.terminals.filter(terminal => terminal.name === terminalName).forEach(terminal => terminal.dispose());
         }
     });
 

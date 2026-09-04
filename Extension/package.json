@@ -4383,7 +4383,10 @@
                                 "type": "object",
                                 "description": "%c_cpp.debuggers.env.description%",
                                 "additionalProperties": {
-                                    "type": "string"
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
                                 },
                                 "default": {}
                             },
@@ -6064,7 +6067,10 @@
                                 "type": "object",
                                 "description": "%c_cpp.debuggers.env.description%",
                                 "additionalProperties": {
-                                    "type": "string"
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
                                 },
                                 "default": {}
                             },
