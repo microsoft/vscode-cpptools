@@ -13,7 +13,9 @@ import { isWindows } from '../constants';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize = nls.loadMessageBundle();
-const terminalEnvironments = new WeakMap<vscode.Terminal, NodeJS.ProcessEnv>();
+type TerminalEnvironment = NonNullable<vscode.TerminalOptions['env']>;
+const managedTerminals = new Map<string, vscode.Terminal>();
+const terminalEnvironments = new WeakMap<vscode.Terminal, TerminalEnvironment>();
 
 type LaunchEnvironmentEntry = { name: string; value: string | null; };
 
@@ -84,31 +86,18 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         // Merge environment values in this order: inherited process environment, legacy
         // `environment` entries, then shorthand `env` values (higher precedence).
         const env: NodeJS.ProcessEnv = { ...process.env };
+        const terminalEnv: TerminalEnvironment = {};
         for (const e of environment) {
-            if (e.value === null) {
-                const keysToDelete = isWindows
-                    ? Object.keys(env).filter(key => key.toLowerCase() === e.name.toLowerCase())
-                    : [e.name];
-                keysToDelete.forEach(key => delete env[key]);
-            } else {
-                env[e.name] = e.value;
-            }
+            this.applyEnvironmentValue(env, terminalEnv, e.name, e.value);
         }
         for (const [key, value] of Object.entries(envObject)) {
-            if (value === null) {
-                const keysToDelete = isWindows
-                    ? Object.keys(env).filter(name => name.toLowerCase() === key.toLowerCase())
-                    : [key];
-                keysToDelete.forEach(name => delete env[name]);
-            } else {
-                env[key] = value;
-            }
+            this.applyEnvironmentValue(env, terminalEnv, key, value);
         }
 
         this.sendResponse(request, {});
 
         if (consoleMode === 'integratedTerminal' || consoleMode === 'internalConsole') {
-            await this.launchIntegratedTerminal(program, args, cwd, env);
+            await this.launchIntegratedTerminal(program, args, cwd, terminalEnv);
         } else if (consoleMode === 'externalTerminal') {
             this.launchExternalTerminal(program, args, cwd, env);
         }
@@ -118,18 +107,24 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
      * Launch the program in a VS Code integrated terminal.
      * The terminal will remain open after the program exits and be reused for the next session, if applicable.
      */
-    private async launchIntegratedTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv): Promise<void> {
+    private async launchIntegratedTerminal(program: string, args: string[], cwd: string | undefined, env: TerminalEnvironment): Promise<void> {
         const terminalName = path.normalize(program);
-        let existingTerminal = vscode.window.terminals.find(t => t.name === terminalName);
+        const managedTerminal = managedTerminals.get(terminalName);
+        let existingTerminal = managedTerminal && vscode.window.terminals.includes(managedTerminal) ? managedTerminal : undefined;
+        if (!existingTerminal) {
+            managedTerminals.delete(terminalName);
+        }
         if (existingTerminal && !this.environmentsEqual(terminalEnvironments.get(existingTerminal), env)) {
             existingTerminal.dispose();
             existingTerminal = undefined;
+            managedTerminals.delete(terminalName);
         }
         this.terminal = existingTerminal ?? vscode.window.createTerminal({
             name: terminalName,
             cwd,
-            env: env as Record<string, string>
+            env
         });
+        managedTerminals.set(terminalName, this.terminal);
         terminalEnvironments.set(this.terminal, env);
         this.terminal.show(true);
 
@@ -242,7 +237,27 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         return arg.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     }
 
-    private environmentsEqual(first: NodeJS.ProcessEnv | undefined, second: NodeJS.ProcessEnv): boolean {
+    private applyEnvironmentValue(processEnv: NodeJS.ProcessEnv, terminalEnv: TerminalEnvironment, name: string, value: string | null): void {
+        const matchingKeys = isWindows
+            ? new Set([...Object.keys(processEnv), ...Object.keys(terminalEnv)].filter(key => key.toLowerCase() === name.toLowerCase()))
+            : new Set([name]);
+
+        for (const key of matchingKeys) {
+            delete processEnv[key];
+            if (key !== name || value === null) {
+                terminalEnv[key] = null;
+            }
+        }
+
+        if (value === null) {
+            terminalEnv[name] = null;
+        } else {
+            processEnv[name] = value;
+            terminalEnv[name] = value;
+        }
+    }
+
+    private environmentsEqual(first: TerminalEnvironment | undefined, second: TerminalEnvironment): boolean {
         if (!first) {
             return false;
         }

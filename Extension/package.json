@@ -4373,7 +4373,10 @@
                                             "type": "string"
                                         },
                                         "value": {
-                                            "type": "string"
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
                                         }
                                     }
                                 },
@@ -6057,7 +6060,10 @@
                                             "type": "string"
                                         },
                                         "value": {
-                                            "type": "string"
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
                                         }
                                     }
                                 },

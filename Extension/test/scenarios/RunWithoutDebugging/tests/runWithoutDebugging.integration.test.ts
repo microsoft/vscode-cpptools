@@ -241,7 +241,8 @@ suite('Run Without Debugging Test', function (): void {
             ],
             env: {
                 TEST_VAR: 'from_env',
-                NEW_VAR: 'from_env_2'
+                NEW_VAR: 'from_env_2',
+                REMOVED_VAR: null
             }
         };
 
@@ -251,7 +252,8 @@ suite('Run Without Debugging Test', function (): void {
         assert.deepStrictEqual(resolvedConfig.environment, [
             { name: 'TEST_VAR', value: 'from_env' },
             { name: 'OTHER_VAR', value: 'from_environment_2' },
-            { name: 'NEW_VAR', value: 'from_env_2' }
+            { name: 'NEW_VAR', value: 'from_env_2' },
+            { name: 'REMOVED_VAR', value: null }
         ], 'config.environment should merge environment entries with env precedence.');
     });
 
@@ -309,7 +311,15 @@ suite('Run Without Debugging Test', function (): void {
         const inheritedValue = 'inherited-value';
         const envSessionName = `${sessionName} Null Env`;
         const previousValue = process.env[testVarName];
+        const debugSessionTerminated = createSessionTerminatedPromise(envSessionName);
         process.env[testVarName] = inheritedValue;
+
+        let launchedSession: vscode.DebugSession | undefined;
+        const startedSubscription = vscode.debug.onDidStartDebugSession((session) => {
+            if (session.name === envSessionName) {
+                launchedSession = session;
+            }
+        });
 
         try {
             const started = await vscode.debug.startDebugging(
@@ -328,8 +338,14 @@ suite('Run Without Debugging Test', function (): void {
                 { noDebug: true });
 
             assert.strictEqual(started, true, 'The noDebug launch with a null env value did not start successfully.');
+            await debugSessionTerminated;
             assert.strictEqual(await waitForResultFile(envResultFilePath, 10000), '', 'A null env value should remove the inherited variable.');
         } finally {
+            startedSubscription.dispose();
+            const sessionToStop = launchedSession ?? (vscode.debug.activeDebugSession?.name === envSessionName ? vscode.debug.activeDebugSession : undefined);
+            if (sessionToStop) {
+                await vscode.debug.stopDebugging(sessionToStop);
+            }
             if (previousValue === undefined) {
                 delete process.env[testVarName];
             } else {
@@ -348,23 +364,40 @@ suite('Run Without Debugging Test', function (): void {
 
         try {
             const launch = async (resultFilePath: string, value: string, name: string): Promise<string> => {
-                const started = await vscode.debug.startDebugging(
-                    workspaceFolder,
-                    {
-                        name,
-                        type: debugType,
-                        request: 'launch',
-                        program: envExecutablePath,
-                        args: [testVarName, resultFilePath],
-                        cwd: workspacePath,
-                        env: { [testVarName]: value },
-                        externalConsole: debugType === 'cppdbg' ? false : undefined,
-                        console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
-                    },
-                    { noDebug: true });
+                const debugSessionTerminated = createSessionTerminatedPromise(name);
+                let launchedSession: vscode.DebugSession | undefined;
+                const startedSubscription = vscode.debug.onDidStartDebugSession((session) => {
+                    if (session.name === name) {
+                        launchedSession = session;
+                    }
+                });
 
-                assert.strictEqual(started, true, `The ${name} noDebug launch did not start successfully.`);
-                return waitForResultFileText(resultFilePath, 10000);
+                try {
+                    const started = await vscode.debug.startDebugging(
+                        workspaceFolder,
+                        {
+                            name,
+                            type: debugType,
+                            request: 'launch',
+                            program: envExecutablePath,
+                            args: [testVarName, resultFilePath],
+                            cwd: workspacePath,
+                            env: { [testVarName]: value },
+                            externalConsole: debugType === 'cppdbg' ? false : undefined,
+                            console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
+                        },
+                        { noDebug: true });
+
+                    assert.strictEqual(started, true, `The ${name} noDebug launch did not start successfully.`);
+                    await debugSessionTerminated;
+                    return waitForResultFileText(resultFilePath, 10000);
+                } finally {
+                    startedSubscription.dispose();
+                    const sessionToStop = launchedSession ?? (vscode.debug.activeDebugSession?.name === name ? vscode.debug.activeDebugSession : undefined);
+                    if (sessionToStop) {
+                        await vscode.debug.stopDebugging(sessionToStop);
+                    }
+                }
             };
 
             assert.strictEqual(await launch(firstResultFilePath, firstValue, `${sessionName} First Env`), firstValue);

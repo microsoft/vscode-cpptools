@@ -166,7 +166,10 @@
           "type": "string"
         },
         "value": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },
