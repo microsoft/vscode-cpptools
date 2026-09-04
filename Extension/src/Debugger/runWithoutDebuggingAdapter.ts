@@ -86,7 +86,10 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         const env: NodeJS.ProcessEnv = { ...process.env };
         for (const e of environment) {
             if (e.value === null) {
-                delete env[e.name];
+                const keysToDelete = isWindows
+                    ? Object.keys(env).filter(key => key.toLowerCase() === e.name.toLowerCase())
+                    : [e.name];
+                keysToDelete.forEach(key => delete env[key]);
             } else {
                 env[e.name] = e.value;
             }
