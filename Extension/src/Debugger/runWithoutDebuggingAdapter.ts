@@ -17,6 +17,15 @@ type TerminalEnvironment = NonNullable<vscode.TerminalOptions['env']>;
 const managedTerminals = new Map<string, vscode.Terminal>();
 const terminalEnvironments = new WeakMap<vscode.Terminal, TerminalEnvironment>();
 
+vscode.window.onDidCloseTerminal(closedTerminal => {
+    for (const [terminalName, terminal] of managedTerminals) {
+        if (terminal === closedTerminal) {
+            managedTerminals.delete(terminalName);
+            return;
+        }
+    }
+});
+
 type LaunchEnvironmentEntry = { name: string; value: string | null; };
 
 type LaunchConfiguration = {
