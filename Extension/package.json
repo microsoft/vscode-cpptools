@@ -4379,6 +4379,14 @@
                                 },
                                 "default": []
                             },
+                            "env": {
+                                "type": "object",
+                                "description": "%c_cpp.debuggers.env.description%",
+                                "additionalProperties": {
+                                    "type": "string"
+                                },
+                                "default": {}
+                            },
                             "envFile": {
                                 "type": "string",
                                 "description": "%c_cpp.debuggers.envFile.description%",
@@ -6051,6 +6059,14 @@
                                     }
                                 },
                                 "default": []
+                            },
+                            "env": {
+                                "type": "object",
+                                "description": "%c_cpp.debuggers.env.description%",
+                                "additionalProperties": {
+                                    "type": "string"
+                                },
+                                "default": {}
                             },
                             "envFile": {
                                 "type": "string",

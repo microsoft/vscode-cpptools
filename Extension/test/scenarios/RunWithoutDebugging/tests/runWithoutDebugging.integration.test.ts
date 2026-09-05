@@ -10,6 +10,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as util from '../../../../src/common';
 import { isMacOS, isWindows } from '../../../../src/constants';
+import { ConfigurationAssetProviderFactory, DebugConfigurationProvider } from '../../../../src/Debugger/configurationProvider';
+import { DebuggerType } from '../../../../src/Debugger/configurations';
 import { compileProgram } from './compileProgram';
 
 interface TrackerState {
@@ -146,15 +148,42 @@ async function waitForResultFileValue(filePath: string, timeoutMs: number): Prom
     assert.fail(`Timed out waiting for numeric result in ${filePath}. Last contents: ${lastContents}`);
 }
 
+async function waitForResultFileText(filePath: string, timeoutMs: number): Promise<string> {
+    const deadline = Date.now() + timeoutMs;
+    let lastContents = '';
+
+    while (Date.now() < deadline) {
+        try {
+            lastContents = await util.readFileText(filePath, 'utf8');
+            const trimmedContents = lastContents.trim();
+            if (trimmedContents.length > 0) {
+                return trimmedContents;
+            }
+        } catch (error) {
+            if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+                throw error;
+            }
+        }
+
+        await new Promise<void>(resolve => setTimeout(resolve, 100));
+    }
+
+    assert.fail(`Timed out waiting for output in ${filePath}. Last contents: ${lastContents}`);
+}
+
 suite('Run Without Debugging Test', function (): void {
     const expectedResultValue = 37;
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0] ?? assert.fail('No workspace folder available');
     const workspacePath = workspaceFolder.uri.fsPath;
     const sourceFile = path.join(workspacePath, 'debugTest.cpp');
+    const envSourceFile = path.join(workspacePath, 'envTest.cpp');
     const sourceUri = vscode.Uri.file(sourceFile);
     const resultFilePath = path.join(workspacePath, 'runWithoutDebuggingResult.txt');
+    const envResultFilePath = path.join(workspacePath, 'runWithoutDebuggingEnvResult.txt');
     const executableName = isWindows ? 'debugTestProgram.exe' : 'debugTestProgram';
     const executablePath = path.join(workspacePath, executableName);
+    const envExecutableName = isWindows ? 'envTestProgram.exe' : 'envTestProgram';
+    const envExecutablePath = path.join(workspacePath, envExecutableName);
     const sessionName = 'Run Without Debugging Result File';
     const debugType = isWindows ? 'cppvsdbg' : 'cppdbg';
     const miMode = isMacOS ? 'lldb' : 'gdb';
@@ -165,6 +194,7 @@ suite('Run Without Debugging Test', function (): void {
             await extension.activate();
         }
         await compileProgram(workspacePath, sourceFile, executablePath);
+        await compileProgram(workspacePath, envSourceFile, envExecutablePath);
     });
 
     suiteTeardown(async function (): Promise<void> {
@@ -175,6 +205,138 @@ suite('Run Without Debugging Test', function (): void {
 
     setup(async function (): Promise<void> {
         await util.deleteFile(resultFilePath);
+        await util.deleteFile(envResultFilePath);
+    });
+
+    test('DebugConfigurationProvider should convert env object to environment array for cppdbg and preserve precedence', async () => {
+        const provider = new DebugConfigurationProvider(ConfigurationAssetProviderFactory.getConfigurationProvider(), DebuggerType.cppdbg);
+        const inputConfig: any = {
+            name: 'Test Cppdbg Env Resolution',
+            type: 'cppdbg',
+            request: 'launch',
+            program: envExecutablePath,
+            environment: [
+                { name: 'TEST_VAR', value: 'from_environment' },
+                { name: 'OTHER_VAR', value: 'from_environment_2' }
+            ],
+            env: {
+                TEST_VAR: 'from_env',
+                NEW_VAR: 'from_env_2'
+            }
+        };
+
+        const resolvedConfig = await provider.resolveDebugConfigurationWithSubstitutedVariables(workspaceFolder, inputConfig);
+        assert.ok(resolvedConfig, 'Resolved config should not be undefined or null.');
+        assert.strictEqual(resolvedConfig.env, undefined, 'config.env should be removed after conversion.');
+        assert.deepStrictEqual(resolvedConfig.environment, [
+            { name: 'TEST_VAR', value: 'from_env' },
+            { name: 'OTHER_VAR', value: 'from_environment_2' },
+            { name: 'NEW_VAR', value: 'from_env_2' }
+        ], 'config.environment should merge environment entries with env precedence.');
+    });
+
+    test('Run Without Debugging should apply env and prefer it over environment entries', async () => {
+        const testVarName = 'CPPTOOLS_NO_DEBUG_ENV_TEST';
+        const expectedValue = 'value-from-env-object';
+        const fallbackValue = 'value-from-environment-array';
+        const envConfig: Record<string, string> = {
+            [testVarName]: expectedValue
+        };
+        const envSessionName = `${sessionName} Env`;
+        const debugSessionTerminated = createSessionTerminatedPromise(envSessionName);
+
+        let launchedSession: vscode.DebugSession | undefined;
+        const startedSubscription = vscode.debug.onDidStartDebugSession((session) => {
+            if (session.name === envSessionName) {
+                launchedSession = session;
+            }
+        });
+
+        try {
+            const started = await vscode.debug.startDebugging(
+                workspaceFolder,
+                {
+                    name: envSessionName,
+                    type: debugType,
+                    request: 'launch',
+                    program: envExecutablePath,
+                    args: [testVarName, envResultFilePath],
+                    cwd: workspacePath,
+                    environment: [{ name: testVarName, value: fallbackValue }],
+                    env: envConfig,
+                    externalConsole: debugType === 'cppdbg' ? false : undefined,
+                    console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
+                },
+                { noDebug: true });
+
+            assert.strictEqual(started, true, 'The noDebug launch with env did not start successfully.');
+            const actualValue = await waitForResultFileText(envResultFilePath, 10000);
+
+            assert.strictEqual(actualValue, expectedValue, 'Expected env object values to be applied and take precedence over environment entries.');
+            await debugSessionTerminated;
+        } finally {
+            startedSubscription.dispose();
+            const sessionToStop = launchedSession ?? (vscode.debug.activeDebugSession?.name === envSessionName ? vscode.debug.activeDebugSession : undefined);
+            if (sessionToStop) {
+                await vscode.debug.stopDebugging(sessionToStop);
+            }
+            await util.deleteFile(envResultFilePath);
+        }
+    });
+
+    test('Run Without Debugging should refresh a reused terminal when env changes', async () => {
+        const testVarName = 'CPPTOOLS_NO_DEBUG_REUSED_TERMINAL_ENV_TEST';
+        const firstValue = 'first-launch-value';
+        const secondValue = 'second-launch-value';
+        const firstResultFilePath = path.join(workspacePath, 'runWithoutDebuggingFirstEnvResult.txt');
+        const secondResultFilePath = path.join(workspacePath, 'runWithoutDebuggingSecondEnvResult.txt');
+
+        try {
+            const launch = async (resultFilePath: string, value: string, name: string): Promise<string> => {
+                const debugSessionTerminated = createSessionTerminatedPromise(name);
+                let launchedSession: vscode.DebugSession | undefined;
+                const startedSubscription = vscode.debug.onDidStartDebugSession((session) => {
+                    if (session.name === name) {
+                        launchedSession = session;
+                    }
+                });
+
+                try {
+                    const started = await vscode.debug.startDebugging(
+                        workspaceFolder,
+                        {
+                            name,
+                            type: debugType,
+                            request: 'launch',
+                            program: envExecutablePath,
+                            args: [testVarName, resultFilePath],
+                            cwd: workspacePath,
+                            env: { [testVarName]: value },
+                            externalConsole: debugType === 'cppdbg' ? false : undefined,
+                            console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
+                        },
+                        { noDebug: true });
+
+                    assert.strictEqual(started, true, `The ${name} noDebug launch did not start successfully.`);
+                    await debugSessionTerminated;
+                    return waitForResultFileText(resultFilePath, 10000);
+                } finally {
+                    startedSubscription.dispose();
+                    const sessionToStop = launchedSession ?? (vscode.debug.activeDebugSession?.name === name ? vscode.debug.activeDebugSession : undefined);
+                    if (sessionToStop) {
+                        await vscode.debug.stopDebugging(sessionToStop);
+                    }
+                }
+            };
+
+            assert.strictEqual(await launch(firstResultFilePath, firstValue, `${sessionName} First Env`), firstValue);
+            assert.strictEqual(await launch(secondResultFilePath, secondValue, `${sessionName} Second Env`), secondValue);
+        } finally {
+            await util.deleteFile(firstResultFilePath);
+            await util.deleteFile(secondResultFilePath);
+            const terminalName = path.normalize(envExecutablePath);
+            vscode.window.terminals.filter(terminal => terminal.name === terminalName).forEach(terminal => terminal.dispose());
+        }
     });
 
     test('Run Without Debugging should not break on breakpoints and write the expected result file', async () => {
@@ -211,6 +373,7 @@ suite('Run Without Debugging Test', function (): void {
             tracker.dispose();
             vscode.debug.removeBreakpoints([breakpoint]);
             await util.deleteFile(resultFilePath);
+            await util.deleteFile(envResultFilePath);
         }
     });
 
@@ -261,6 +424,7 @@ suite('Run Without Debugging Test', function (): void {
             tracker.dispose();
             vscode.debug.removeBreakpoints([breakpoint]);
             await util.deleteFile(resultFilePath);
+            await util.deleteFile(envResultFilePath);
         }
     });
 
