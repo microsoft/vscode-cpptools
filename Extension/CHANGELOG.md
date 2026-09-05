@@ -1,61 +1,42 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.34.3: September 4, 2026
-### Enhancement
-* Add the `processFilter` launch option to filter or automatically select processes for remote `cppdbg` attach configurations. [#14682](https://github.com/microsoft/vscode-cpptools/issues/14682)
-  * Thanks for the contribution. [@afreof (Adrian Freihofer)](https://github.com/afreof) [PR #14684](https://github.com/microsoft/vscode-cpptools/pull/14684)
-
-### Bug Fixes
-* Fix 'C/C++: Edit Configurations (UI)' not fully respecting custom theme colors. [#11263](https://github.com/microsoft/vscode-cpptools/issues/11263)
-  * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14692](https://github.com/microsoft/vscode-cpptools/pull/14692)
-* Fix 'Run/Debug C/C++ File' buttons being hidden when `C_Cpp.intelliSenseEngine` is set to `disabled`. [#13001](https://github.com/microsoft/vscode-cpptools/issues/13001)
-  * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14719](https://github.com/microsoft/vscode-cpptools/pull/14719)
-* Fix false IntelliSense errors for EnTT multi-component views caused by heterogeneous `auto` non-type template parameter packs. [#14456](https://github.com/microsoft/vscode-cpptools/issues/14456)
-* Fix false IntelliSense errors for GNU ARM stack-pointer clobbers, including CMSIS `__set_PSP` and `__set_MSP`. [#14486](https://github.com/microsoft/vscode-cpptools/issues/14486)
-* Fix false IntelliSense errors for constrained hidden friend function templates that use `requires` expressions. [#14696](https://github.com/microsoft/vscode-cpptools/issues/14696)
-* Fix compiler and include paths from some custom configuration providers being ignored. [#14724](https://github.com/microsoft/vscode-cpptools/issues/14724)
-* Fix a `cpptools-srv2` crash when tag parsing a C macro that stringizes `__VA_OPT__`.
-* Various localization updates.
-* Update dependencies.
-
-## Version 1.34.2: August 31, 2026
-### Enhancements
-* Improve C/C++ file classification by supporting extensionless headers and additional extensions such as `.hip` throughout extension features. [PR #14711](https://github.com/microsoft/vscode-cpptools/pull/14711)
-* Update the bundled `clang-tidy` and `clang-format` from 22.1.3 to 23.1.0, including available `clang-tidy` check suggestions and documentation. [PR #14713](https://github.com/microsoft/vscode-cpptools/pull/14713)
-
-### Bug Fixes
-* Fix high CPU and memory usage in workspaces with multiple symbolic links that point to ancestor directories. [#14689](https://github.com/microsoft/vscode-cpptools/issues/14689)
-* Fix include completion and symbol navigation using stale recursive include data after files are replaced by directories or symbolic link roots change.
-* Fix 'Find All References' misclassifying references in inactive preprocessor regions after falling back to header-only IntelliSense.
-
-## Version 1.34.1: August 28, 2026
-### Bug Fixes
-* Fix formatting not inserting the final newline requested by `InsertNewlineAtEOF`. [#12680](https://github.com/microsoft/vscode-cpptools/issues/12680)
-* Fix nested quoted `#include` directives failing to resolve source-relative headers when `-iquote` paths are used. [#13606](https://github.com/microsoft/vscode-cpptools/issues/13606)
-* Fix incorrect semantic highlighting for explicit function template specializations. [#14491](https://github.com/microsoft/vscode-cpptools/issues/14491)
-* Fix IntelliSense using `c17` instead of GCC's default GNU C language standard. [#14560](https://github.com/microsoft/vscode-cpptools/issues/14560)
-* Fix unnecessary IntelliSense reparsing after unrelated settings changes and incorrect language updates after `files.associations` changes.
-* Fix custom C/C++ `files.associations` entries with certain non-ASCII characters being ignored on Windows.
-* Fix `cpptools-srv` crashes under memory pressure while reading or processing RPC messages.
-
-## Version 1.34.0: August 25, 2026
+## Version 1.34.4: September 9, 2026
 ### Enhancements
 * Add folding support for C++ `public`, `private`, and `protected` access sections. [#14645](https://github.com/microsoft/vscode-cpptools/issues/14645)
   * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14675](https://github.com/microsoft/vscode-cpptools/pull/14675)
+* Add the `processFilter` launch option to filter or automatically select processes for remote `cppdbg` attach configurations. [#14682](https://github.com/microsoft/vscode-cpptools/issues/14682)
+  * Thanks for the contribution. [@afreof (Adrian Freihofer)](https://github.com/afreof) [PR #14684](https://github.com/microsoft/vscode-cpptools/pull/14684)
 * Improve workspace indexing performance and reduce memory usage by deduplicating browse paths from `compile_commands.json`, excluding unrelated files from the browse database, and avoiding unnecessary tag parsing of non-included extensionless files. [#14693](https://github.com/microsoft/vscode-cpptools/issues/14693)
+* Improve C/C++ file classification by supporting extensionless headers and additional extensions such as `.hip` throughout extension features. [PR #14711](https://github.com/microsoft/vscode-cpptools/pull/14711)
+* Update the bundled `clang-tidy` and `clang-format` from 22.1.3 to 23.1.0, including available `clang-tidy` check suggestions and documentation. [PR #14713](https://github.com/microsoft/vscode-cpptools/pull/14713)
 * Reduce language server memory usage and RPC overhead for large messages and browse database snapshots.
 * Add IntelliSense support for C23 `_BitInt`, C++26 pack indexing, and C++26 structured binding packs.
 
 ### Bug Fixes
+* Fix 'C/C++: Edit Configurations (UI)' not fully respecting custom theme colors. [#11263](https://github.com/microsoft/vscode-cpptools/issues/11263)
+  * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14692](https://github.com/microsoft/vscode-cpptools/pull/14692)
+* Fix formatting not inserting the final newline requested by `InsertNewlineAtEOF`. [#12680](https://github.com/microsoft/vscode-cpptools/issues/12680)
 * Fix inactive code being dimmed from the wrong column when a preprocessor directive is preceded by a comment. [#12882](https://github.com/microsoft/vscode-cpptools/issues/12882)
   * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14666](https://github.com/microsoft/vscode-cpptools/pull/14666)
+* Fix 'Run/Debug C/C++ File' buttons being hidden when `C_Cpp.intelliSenseEngine` is set to `disabled`. [#13001](https://github.com/microsoft/vscode-cpptools/issues/13001)
+  * Thanks for the contribution. [@8prashant (Prashant Kumar Rai)](https://github.com/8prashant) [PR #14719](https://github.com/microsoft/vscode-cpptools/pull/14719)
+* Fix nested quoted `#include` directives failing to resolve source-relative headers when `-iquote` paths are used. [#13606](https://github.com/microsoft/vscode-cpptools/issues/13606)
+* Fix false IntelliSense errors for EnTT multi-component views caused by heterogeneous `auto` non-type template parameter packs. [#14456](https://github.com/microsoft/vscode-cpptools/issues/14456)
+* Fix false IntelliSense errors for GNU ARM stack-pointer clobbers, including CMSIS `__set_PSP` and `__set_MSP`. [#14486](https://github.com/microsoft/vscode-cpptools/issues/14486)
+* Fix incorrect semantic highlighting for explicit function template specializations. [#14491](https://github.com/microsoft/vscode-cpptools/issues/14491)
+* Fix IntelliSense using `c17` instead of GCC's default GNU C language standard. [#14560](https://github.com/microsoft/vscode-cpptools/issues/14560)
 * Fix enum member completion in a `switch` label before the trailing `:`. [#14605](https://github.com/microsoft/vscode-cpptools/issues/14605)
 * Fix extension crashes caused by events communicating with the language client before it is ready. [PR #14617](https://github.com/microsoft/vscode-cpptools/pull/14617)
 * Fix configuration path diagnostics for paths containing regular expression metacharacters and for incorrect source ranges. [PR #14674](https://github.com/microsoft/vscode-cpptools/pull/14674), [PR #14679](https://github.com/microsoft/vscode-cpptools/pull/14679)
 * Prevent browse database crashes on filesystems that do not support SQLite WAL shared memory, and warn when no compatible database location is available. [PR #14683](https://github.com/microsoft/vscode-cpptools/pull/14683)
-* Fix runaway CPU and memory usage caused by cyclic document symbol data, and prevent `cpptools` from remaining active after VS Code exits. [#14689](https://github.com/microsoft/vscode-cpptools/issues/14689)
+* Fix runaway CPU and memory usage in workspaces with cyclic document symbol data or multiple symbolic links that point to ancestor directories, and prevent `cpptools` from remaining active after VS Code exits. [#14689](https://github.com/microsoft/vscode-cpptools/issues/14689)
+* Fix false IntelliSense errors for constrained hidden friend function templates that use `requires` expressions. [#14696](https://github.com/microsoft/vscode-cpptools/issues/14696)
+* Fix include completion and symbol navigation using stale recursive include data after files are replaced by directories or symbolic link roots change.
+* Fix unnecessary IntelliSense reparsing after unrelated settings changes and incorrect language updates after `files.associations` changes.
+* Fix 'Find All References' misclassifying references in inactive preprocessor regions after falling back to header-only IntelliSense.
 * Fix several language server crashes during startup, shutdown, diagnostic processing, and concurrent code model updates.
 * Fix various IntelliSense completion, navigation, false error, code analysis, formatting, and colorization issues.
+* Fix custom C/C++ `files.associations` entries with certain non-ASCII characters being ignored on Windows.
 * Fix a potential language server deadlock caused by inconsistent lock ordering.
 * Harden temporary file storage on Linux and macOS.
 * Various localization updates.
