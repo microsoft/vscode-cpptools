@@ -332,6 +332,7 @@
 	"c_cpp.debuggers.avoidWindowsConsoleRedirection.description": "若為 true，則停用整合式終端機支援需要的偵錯項目主控台重新導向。",
 	"c_cpp.debuggers.sourceFileMap.markdownDescription": "傳遞至偵錯引擎的選擇性來源檔案對應。範例: `{ \"<原始來源路徑>\": \"<目前來源路徑>\" }`。",
 	"c_cpp.debuggers.processId.anyOf.markdownDescription": "要附加偵錯工具的選擇性處理序識別碼。使用 `${command:pickProcess}` 可取得要附加的本機執行中處理序清單。請注意，某些平台需要系統管理員權限才能附加至處理序。",
+	"c_cpp.debuggers.processFilter.description": "Optional regular expression used to match remote attach candidates by label, description, or detail. If exactly one process matches, the debugger attaches automatically. If multiple processes match, the process picker is shown with only matching entries. If no process matches, the full process picker is shown. An invalid regular expression reports an error.",
 	"c_cpp.debuggers.program.attach.markdownDescription": "程式可執行檔的完整路徑。偵錯工具會搜尋符合此可執行路徑的執行中處理序，並連結至該處理序。如果有多個處理序相符，將會顯示選取提示。這是載入已連結處理序之偵錯符號的必要欄位。",
 	"c_cpp.debuggers.symbolSearchPath.description": "要用於搜尋符號 (即 pdb 或 .so) 檔案的目錄清單 (以分號分隔)。範例: \"c:\\dir1;c:\\dir2\"。",
 	"c_cpp.debuggers.dumpPath.description": "指定程式之傾印檔案的選擇性完整路徑。範例: \"c:\\temp\\app.dmp\"。預設為 null。",
