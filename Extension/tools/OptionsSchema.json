@@ -166,10 +166,7 @@
           "type": "string"
         },
         "value": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": "string"
         }
       }
     },
@@ -713,10 +710,7 @@
           "type": "object",
           "description": "%c_cpp.debuggers.env.description%",
           "additionalProperties": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "default": {}
         },
@@ -1036,10 +1030,7 @@
           "type": "object",
           "description": "%c_cpp.debuggers.env.description%",
           "additionalProperties": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "default": {}
         },

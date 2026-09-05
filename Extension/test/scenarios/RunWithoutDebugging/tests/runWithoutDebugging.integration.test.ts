@@ -171,26 +171,6 @@ async function waitForResultFileText(filePath: string, timeoutMs: number): Promi
     assert.fail(`Timed out waiting for output in ${filePath}. Last contents: ${lastContents}`);
 }
 
-async function waitForResultFile(filePath: string, timeoutMs: number): Promise<string> {
-    const deadline = Date.now() + timeoutMs;
-    let lastContents = '';
-
-    while (Date.now() < deadline) {
-        try {
-            lastContents = await util.readFileText(filePath, 'utf8');
-            return lastContents.trim();
-        } catch (error) {
-            if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-                throw error;
-            }
-        }
-
-        await new Promise<void>(resolve => setTimeout(resolve, 100));
-    }
-
-    assert.fail(`Timed out waiting for output file in ${filePath}. Last contents: ${lastContents}`);
-}
-
 suite('Run Without Debugging Test', function (): void {
     const expectedResultValue = 37;
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0] ?? assert.fail('No workspace folder available');
@@ -241,8 +221,7 @@ suite('Run Without Debugging Test', function (): void {
             ],
             env: {
                 TEST_VAR: 'from_env',
-                NEW_VAR: 'from_env_2',
-                REMOVED_VAR: null
+                NEW_VAR: 'from_env_2'
             }
         };
 
@@ -252,8 +231,7 @@ suite('Run Without Debugging Test', function (): void {
         assert.deepStrictEqual(resolvedConfig.environment, [
             { name: 'TEST_VAR', value: 'from_env' },
             { name: 'OTHER_VAR', value: 'from_environment_2' },
-            { name: 'NEW_VAR', value: 'from_env_2' },
-            { name: 'REMOVED_VAR', value: null }
+            { name: 'NEW_VAR', value: 'from_env_2' }
         ], 'config.environment should merge environment entries with env precedence.');
     });
 
@@ -301,55 +279,6 @@ suite('Run Without Debugging Test', function (): void {
             const sessionToStop = launchedSession ?? (vscode.debug.activeDebugSession?.name === envSessionName ? vscode.debug.activeDebugSession : undefined);
             if (sessionToStop) {
                 await vscode.debug.stopDebugging(sessionToStop);
-            }
-            await util.deleteFile(envResultFilePath);
-        }
-    });
-
-    test('Run Without Debugging should remove inherited env values when env is null', async () => {
-        const testVarName = 'CPPTOOLS_NO_DEBUG_NULL_ENV_TEST';
-        const inheritedValue = 'inherited-value';
-        const envSessionName = `${sessionName} Null Env`;
-        const previousValue = process.env[testVarName];
-        const debugSessionTerminated = createSessionTerminatedPromise(envSessionName);
-        process.env[testVarName] = inheritedValue;
-
-        let launchedSession: vscode.DebugSession | undefined;
-        const startedSubscription = vscode.debug.onDidStartDebugSession((session) => {
-            if (session.name === envSessionName) {
-                launchedSession = session;
-            }
-        });
-
-        try {
-            const started = await vscode.debug.startDebugging(
-                workspaceFolder,
-                {
-                    name: envSessionName,
-                    type: debugType,
-                    request: 'launch',
-                    program: envExecutablePath,
-                    args: [testVarName, envResultFilePath],
-                    cwd: workspacePath,
-                    env: { [testVarName]: null },
-                    externalConsole: debugType === 'cppdbg' ? false : undefined,
-                    console: debugType === 'cppvsdbg' ? 'internalConsole' : undefined
-                },
-                { noDebug: true });
-
-            assert.strictEqual(started, true, 'The noDebug launch with a null env value did not start successfully.');
-            await debugSessionTerminated;
-            assert.strictEqual(await waitForResultFile(envResultFilePath, 10000), '', 'A null env value should remove the inherited variable.');
-        } finally {
-            startedSubscription.dispose();
-            const sessionToStop = launchedSession ?? (vscode.debug.activeDebugSession?.name === envSessionName ? vscode.debug.activeDebugSession : undefined);
-            if (sessionToStop) {
-                await vscode.debug.stopDebugging(sessionToStop);
-            }
-            if (previousValue === undefined) {
-                delete process.env[testVarName];
-            } else {
-                process.env[testVarName] = previousValue;
             }
             await util.deleteFile(envResultFilePath);
         }
