@@ -332,6 +332,7 @@
 	"c_cpp.debuggers.avoidWindowsConsoleRedirection.description": "true の場合、統合ターミナルのサポートに必要なデバッグ対象のコンソール リダイレクトが無効になります。",
 	"c_cpp.debuggers.sourceFileMap.markdownDescription": "デバッグ エンジンに渡されるオプションのソース ファイル マッピング。例: `{ \"<元のソース パス>\": \"<現在のソース パス>\" }`。",
 	"c_cpp.debuggers.processId.anyOf.markdownDescription": "デバッガーをアタッチするためのオプションのプロセス ID。ローカルで実行される、アタッチ先プロセスのリストを取得するには、`${command:pickProcess}` を使用します。一部のプラットフォームでは、プロセスにアタッチするために管理者特権が必要となることに注意してください。",
+	"c_cpp.debuggers.processFilter.description": "Optional regular expression used to match remote attach candidates by label, description, or detail. If exactly one process matches, the debugger attaches automatically. If multiple processes match, the process picker is shown with only matching entries. If no process matches, the full process picker is shown. An invalid regular expression reports an error.",
 	"c_cpp.debuggers.program.attach.markdownDescription": "プログラム実行可能ファイルへの完全なパス。デバッガーは、この実行可能ファイルのパスに一致する実行中のプロセスを検索し、アタッチします。複数のプロセスが一致する場合は、選択プロンプトが表示されます。アタッチされたプロセスのデバッグ シンボルを読み込むには、このフィールドが必要です。",
 	"c_cpp.debuggers.symbolSearchPath.description": "シンボル (つまり pdb または .so) ファイルの検索に使用する、セミコロンで区切られたディレクトリの一覧です。例: \"c:\\dir1;c:\\dir2\"。",
 	"c_cpp.debuggers.dumpPath.description": "指定したプログラムのダンプ ファイルへの完全なパスです (オプション)。例: \"c:\\temp\\app.dmp\"。既定値は null です。",
