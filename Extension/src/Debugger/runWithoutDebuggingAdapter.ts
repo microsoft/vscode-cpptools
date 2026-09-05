@@ -16,6 +16,7 @@ const localize = nls.loadMessageBundle();
 type TerminalEnvironment = NonNullable<vscode.TerminalOptions['env']>;
 const managedTerminals = new Map<string, vscode.Terminal>();
 const terminalEnvironments = new WeakMap<vscode.Terminal, TerminalEnvironment>();
+const activeTerminals = new WeakSet<vscode.Terminal>();
 
 vscode.window.onDidCloseTerminal(closedTerminal => {
     for (const [terminalName, terminal] of managedTerminals) {
@@ -123,7 +124,9 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         if (!existingTerminal) {
             managedTerminals.delete(terminalName);
         }
-        if (existingTerminal && !this.environmentsEqual(terminalEnvironments.get(existingTerminal), env)) {
+        if (existingTerminal && activeTerminals.has(existingTerminal)) {
+            existingTerminal = undefined;
+        } else if (existingTerminal && !this.environmentsEqual(terminalEnvironments.get(existingTerminal), env)) {
             existingTerminal.dispose();
             existingTerminal = undefined;
             managedTerminals.delete(terminalName);
@@ -135,6 +138,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         });
         managedTerminals.set(terminalName, this.terminal);
         terminalEnvironments.set(this.terminal, env);
+        activeTerminals.add(this.terminal);
         this.terminal.show(true);
 
         const shellIntegration: vscode.TerminalShellIntegration | undefined =
@@ -357,6 +361,9 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             }
 
             this.hasTerminated = true;
+            if (this.terminal) {
+                activeTerminals.delete(this.terminal);
+            }
             this.disposeTerminalListeners();
         }
 
@@ -370,6 +377,9 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
 
     public dispose(): void {
         this.terminateProcess();
+        if (this.terminal) {
+            activeTerminals.delete(this.terminal);
+        }
         this.disposeTerminalListeners();
         this.sendMessageEmitter.dispose();
     }
