@@ -19,6 +19,7 @@ const terminalEnvironments = new WeakMap<vscode.Terminal, TerminalEnvironment>()
 const activeTerminals = new WeakSet<vscode.Terminal>();
 
 vscode.window.onDidCloseTerminal(closedTerminal => {
+    activeTerminals.delete(closedTerminal);
     for (const [terminalName, terminal] of managedTerminals) {
         if (terminal === closedTerminal) {
             managedTerminals.delete(terminalName);
@@ -52,6 +53,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     private childProcess?: cp.ChildProcess;
     private terminal?: vscode.Terminal;
     private terminalExecution?: vscode.TerminalShellExecution;
+    private releaseTerminalOnTerminate: boolean = false;
     private hasTerminated: boolean = false;
 
     public handleMessage(message: vscode.DebugProtocolMessage): void {
@@ -146,6 +148,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
 
         // Not all terminals support shell integration. If it's not available, we'll just send the command as text though we won't be able to monitor its execution.
         if (shellIntegration) {
+            this.releaseTerminalOnTerminate = true;
             this.monitorIntegratedTerminal(this.terminal);
             let executable: string = program;
             let executableArgs: string[] = args;
@@ -361,7 +364,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             }
 
             this.hasTerminated = true;
-            if (this.terminal) {
+            if (this.releaseTerminalOnTerminate && this.terminal) {
                 activeTerminals.delete(this.terminal);
             }
             this.disposeTerminalListeners();
@@ -377,7 +380,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
 
     public dispose(): void {
         this.terminateProcess();
-        if (this.terminal) {
+        if (this.releaseTerminalOnTerminate && this.terminal) {
             activeTerminals.delete(this.terminal);
         }
         this.disposeTerminalListeners();
