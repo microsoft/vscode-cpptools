@@ -926,7 +926,7 @@ export class DefaultClient implements Client {
     private browsePath?: string[];
     private hoverProvider: HoverProvider | undefined;
     private copilotHoverProvider: CopilotHoverProvider | undefined;
-    private copilotCompletionProvider?: CopilotCompletionContextProvider;
+    private static copilotCompletionProvider?: CopilotCompletionContextProvider;
 
     public lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     public lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
@@ -1450,9 +1450,9 @@ export class DefaultClient implements Client {
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                 }
 
-                this.copilotCompletionProvider = CopilotCompletionContextProvider.Create();
+                DefaultClient.copilotCompletionProvider = CopilotCompletionContextProvider.Create();
                 util.setProgress(util.getProgressCopilotSuccess());
-                this.disposables.push(this.copilotCompletionProvider);
+                this.disposables.push(DefaultClient.copilotCompletionProvider);
 
                 // Listen for messages from the language server.
                 this.registerNotifications();
@@ -1875,6 +1875,7 @@ export class DefaultClient implements Client {
 
     public async onDidChangeSettings(_event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> {
         const defaultClient: Client = clients.getDefaultClient();
+        DefaultClient.copilotCompletionProvider?.clear();
         if (this === defaultClient) {
             // Only send the updated settings information once, as it includes values for all folders.
             void this.sendDidChangeSettings().catch(logAndReturn.undefined);
@@ -2023,6 +2024,7 @@ export class DefaultClient implements Client {
 
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
         if (util.isCpp(textDocumentChangeEvent.document)) {
+            DefaultClient.copilotCompletionProvider?.clear();
             // If any file has changed, we need to abort the current rename operation
             if (workspaceReferences !== undefined // Occurs when a document changes before cpptools starts.
                 && workspaceReferences.renamePending) {
@@ -2056,7 +2058,7 @@ export class DefaultClient implements Client {
         if (diagnosticsCollectionIntelliSense) {
             diagnosticsCollectionIntelliSense.delete(document.uri);
         }
-        this.copilotCompletionProvider?.removeFile(uri);
+        DefaultClient.copilotCompletionProvider?.removeFile(uri);
         openFileVersions.delete(uri);
     }
 

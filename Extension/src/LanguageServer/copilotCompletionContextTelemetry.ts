@@ -92,7 +92,7 @@ export class CopilotCompletionContextTelemetry {
         this.addMetric('response.traitsCount', traitsCount ?? -1);
     }
 
-    public addRequestMetadata(uri: string, caretOffset: number, completionId: string,
+    public addRequestMetadata(caretOffset: number, completionId: string,
         languageId: string, { featureFlag, timeBudgetMs, maxCaretDistance, maxSnippetCount, maxSnippetLength, doAggregateSnippets }: {
             featureFlag?: CopilotCompletionContextFeatures; timeBudgetMs?: number; maxCaretDistance?: number;
             maxSnippetCount?: number; maxSnippetLength?: number; doAggregateSnippets?: boolean;
