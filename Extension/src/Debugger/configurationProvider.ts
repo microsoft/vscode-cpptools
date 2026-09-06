@@ -716,7 +716,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         const environment: Environment[] = util.isArray(config.environment) ? config.environment : [];
         const mergedEnvironment = new Map<string, Environment>();
-        const getEnvironmentKey = (name: string): string => isWindows ? name.toLowerCase() : name;
+        const isCaseInsensitiveTarget = config.type === DebuggerType.cppvsdbg || (isWindows && !config.pipeTransport && !config.miDebuggerServerAddress && !config.useExtendedRemote);
+        const getEnvironmentKey = (name: string): string => isCaseInsensitiveTarget ? name.toLowerCase() : name;
 
         for (const entry of environment) {
             if (util.isString(entry?.name) && util.isString(entry?.value)) {

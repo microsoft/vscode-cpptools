@@ -239,6 +239,35 @@ suite('Run Without Debugging Test', function (): void {
         ], 'config.environment should merge environment entries with env precedence.');
     });
 
+    test('DebugConfigurationProvider should preserve case-distinct env names for remote cppdbg targets', async () => {
+        const provider = new DebugConfigurationProvider(ConfigurationAssetProviderFactory.getConfigurationProvider(), DebuggerType.cppdbg);
+        const inputConfig: any = {
+            name: 'Test Remote Cppdbg Env Resolution',
+            type: 'cppdbg',
+            request: 'launch',
+            program: envExecutablePath,
+            pipeTransport: {
+                pipeProgram: 'ssh',
+                pipeArgs: [],
+                pipeCwd: '',
+                debuggerPath: '/usr/bin/gdb'
+            },
+            environment: [
+                { name: 'PATH', value: 'from_environment_path' }
+            ],
+            env: {
+                Path: 'from_env_path'
+            }
+        };
+
+        const resolvedConfig = await provider.resolveDebugConfigurationWithSubstitutedVariables(workspaceFolder, inputConfig);
+        assert.ok(resolvedConfig, 'Resolved config should not be undefined or null.');
+        assert.deepStrictEqual(resolvedConfig.environment, [
+            { name: 'PATH', value: 'from_environment_path' },
+            { name: 'Path', value: 'from_env_path' }
+        ], 'Remote cppdbg targets should preserve case-distinct environment names.');
+    });
+
     test('Run Without Debugging should apply env and prefer it over environment entries', async () => {
         const testVarName = 'CPPTOOLS_NO_DEBUG_ENV_TEST';
         const expectedValue = 'value-from-env-object';
