@@ -12,6 +12,7 @@ import * as util from '../../../../src/common';
 import { isMacOS, isWindows } from '../../../../src/constants';
 import { ConfigurationAssetProviderFactory, DebugConfigurationProvider } from '../../../../src/Debugger/configurationProvider';
 import { DebuggerType } from '../../../../src/Debugger/configurations';
+import { RunWithoutDebuggingAdapter } from '../../../../src/Debugger/runWithoutDebuggingAdapter';
 import { compileProgram } from './compileProgram';
 
 interface TrackerState {
@@ -266,6 +267,26 @@ suite('Run Without Debugging Test', function (): void {
             { name: 'PATH', value: 'from_environment_path' },
             { name: 'Path', value: 'from_env_path' }
         ], 'Remote cppdbg targets should preserve case-distinct environment names.');
+    });
+
+    test('RunWithoutDebuggingAdapter should build escaped macOS external terminal env command', () => {
+        const adapter = new RunWithoutDebuggingAdapter() as unknown as {
+            buildMacOSExternalTerminalCommand(cmdLine: string, env: Record<string, string | null | undefined>): string;
+            escapeQuotes(arg: string): string;
+        };
+        const terminalCommand = adapter.buildMacOSExternalTerminalCommand('"/tmp/test app" "arg value"', {
+            QUOTE_VAR: `it's "fine"`,
+            REMOVE_ME: null,
+            SKIP_ME: undefined
+        });
+        const appleScriptCommand = adapter.escapeQuotes(terminalCommand);
+
+        assert.ok(terminalCommand.startsWith('/usr/bin/env '), 'Expected macOS external terminal command to use /usr/bin/env.');
+        assert.ok(terminalCommand.includes(`'QUOTE_VAR=it'\\''s "fine"'`), 'Expected shell-escaped quoted environment value.');
+        assert.ok(terminalCommand.includes(`-u 'REMOVE_ME'`), 'Expected null environment values to be unset.');
+        assert.ok(!terminalCommand.includes('SKIP_ME'), 'Expected undefined environment values to be omitted.');
+        assert.ok(appleScriptCommand.includes('\\\\'), 'Expected shell escape backslashes to be escaped for AppleScript.');
+        assert.ok(appleScriptCommand.includes('\\"fine\\"'), 'Expected double quotes to be escaped for AppleScript.');
     });
 
     test('Run Without Debugging should apply env and prefer it over environment entries', async () => {
