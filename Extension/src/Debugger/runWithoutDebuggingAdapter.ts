@@ -111,7 +111,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         if (consoleMode === 'integratedTerminal' || consoleMode === 'internalConsole') {
             await this.launchIntegratedTerminal(program, args, cwd, terminalEnv);
         } else if (consoleMode === 'externalTerminal') {
-            this.launchExternalTerminal(program, args, cwd, env);
+            this.launchExternalTerminal(program, args, cwd, env, terminalEnv);
         }
     }
 
@@ -167,6 +167,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             // buildShellCommandLine quotes the path, and PowerShell evaluates a quoted path as a string
             // literal instead of running it, so the call operator is required to invoke it.
             this.terminal.sendText(this.isPowerShellTerminal() ? `& ${cmdLine}` : cmdLine);
+            activeTerminals.delete(this.terminal);
 
             // The terminal manages its own lifecycle; notify VS Code the "debug" session is done.
             this.sendEvent('terminated');
@@ -196,13 +197,14 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     /**
      * Launch the program in an external terminal. We do not keep track of this terminal or the spawned process.
      */
-    private launchExternalTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv): void {
+    private launchExternalTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv, terminalEnv: TerminalEnvironment): void {
         const cmdLine: string = buildShellCommandLine('', program, args, true);
         const platform: string = os.platform();
         if (platform === 'win32') {
             cp.spawn('cmd.exe', ['/c', 'start', 'cmd.exe', '/K', `"${cmdLine}"`], { cwd, env, windowsVerbatimArguments: true, detached: true, stdio: 'ignore' }).unref();
         } else if (platform === 'darwin') {
-            cp.spawn('osascript', ['-e', `tell application "Terminal" to do script "${this.escapeQuotes(cmdLine)}"`], { cwd, env, detached: true, stdio: 'ignore' }).unref();
+            const terminalCommand = this.buildMacOSExternalTerminalCommand(cmdLine, terminalEnv);
+            cp.spawn('osascript', ['-e', `tell application "Terminal" to do script "${this.escapeQuotes(terminalCommand)}"`], { cwd, env, detached: true, stdio: 'ignore' }).unref();
         } else if (platform === 'linux' && sessionIsWsl()) {
             cp.spawn('/mnt/c/Windows/System32/cmd.exe', ['/c', 'start', 'bash', '-c', `${cmdLine};read -p 'Press enter to continue...'`], { env, detached: true, stdio: 'ignore' }).unref();
         } else { // platform === 'linux'
@@ -247,6 +249,22 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         const message = localize({ key: 'no.terminal.emulator', comment: ['{Locked="$TERMINAL"} {Locked="x-terminal-emulator"} {Locked="gnome-terminal"} {Locked="konsole"} {Locked="xterm"}'] },
             'No terminal emulator found. Please set the $TERMINAL environment variable to your terminal emulator of choice, or install one of the following: x-terminal-emulator, gnome-terminal, konsole, xterm.');
         vscode.window.showErrorMessage(message);
+    }
+
+    private buildMacOSExternalTerminalCommand(cmdLine: string, env: TerminalEnvironment): string {
+        const envArgs = Object.entries(env).flatMap(([name, value]) => {
+            if (value === null) {
+                return ['-u', this.escapeShellArg(name)];
+            }
+
+            return value === undefined ? [] : [this.escapeShellArg(`${name}=${value}`)];
+        });
+
+        return envArgs.length === 0 ? cmdLine : `/usr/bin/env ${envArgs.join(' ')} ${cmdLine}`;
+    }
+
+    private escapeShellArg(arg: string): string {
+        return `'${arg.replace(/'/g, `'\\''`)}'`;
     }
 
     private escapeQuotes(arg: string): string {
