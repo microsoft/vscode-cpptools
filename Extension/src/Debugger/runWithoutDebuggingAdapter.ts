@@ -167,7 +167,9 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             // buildShellCommandLine quotes the path, and PowerShell evaluates a quoted path as a string
             // literal instead of running it, so the call operator is required to invoke it.
             this.terminal.sendText(this.isPowerShellTerminal() ? `& ${cmdLine}` : cmdLine);
-            activeTerminals.delete(this.terminal);
+            if (managedTerminals.get(terminalName) === this.terminal) {
+                managedTerminals.delete(terminalName);
+            }
 
             // The terminal manages its own lifecycle; notify VS Code the "debug" session is done.
             this.sendEvent('terminated');
