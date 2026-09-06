@@ -210,6 +210,7 @@ suite('Run Without Debugging Test', function (): void {
 
     test('DebugConfigurationProvider should convert env object to environment array for cppdbg and preserve precedence', async () => {
         const provider = new DebugConfigurationProvider(ConfigurationAssetProviderFactory.getConfigurationProvider(), DebuggerType.cppdbg);
+        const pathOverrideName = isWindows ? 'Path' : 'PATH';
         const inputConfig: any = {
             name: 'Test Cppdbg Env Resolution',
             type: 'cppdbg',
@@ -217,10 +218,12 @@ suite('Run Without Debugging Test', function (): void {
             program: envExecutablePath,
             environment: [
                 { name: 'TEST_VAR', value: 'from_environment' },
-                { name: 'OTHER_VAR', value: 'from_environment_2' }
+                { name: 'OTHER_VAR', value: 'from_environment_2' },
+                { name: 'PATH', value: 'from_environment_path' }
             ],
             env: {
                 TEST_VAR: 'from_env',
+                [pathOverrideName]: 'from_env_path',
                 NEW_VAR: 'from_env_2'
             }
         };
@@ -231,6 +234,7 @@ suite('Run Without Debugging Test', function (): void {
         assert.deepStrictEqual(resolvedConfig.environment, [
             { name: 'TEST_VAR', value: 'from_env' },
             { name: 'OTHER_VAR', value: 'from_environment_2' },
+            { name: pathOverrideName, value: 'from_env_path' },
             { name: 'NEW_VAR', value: 'from_env_2' }
         ], 'config.environment should merge environment entries with env precedence.');
     });

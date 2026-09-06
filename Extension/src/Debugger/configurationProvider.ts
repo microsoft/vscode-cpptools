@@ -715,21 +715,22 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         const environment: Environment[] = util.isArray(config.environment) ? config.environment : [];
-        const mergedEnvironment = new Map<string, string>();
+        const mergedEnvironment = new Map<string, Environment>();
+        const getEnvironmentKey = (name: string): string => isWindows ? name.toLowerCase() : name;
 
         for (const entry of environment) {
             if (util.isString(entry?.name) && util.isString(entry?.value)) {
-                mergedEnvironment.set(entry.name, entry.value);
+                mergedEnvironment.set(getEnvironmentKey(entry.name), { name: entry.name, value: entry.value });
             }
         }
 
         for (const [name, value] of Object.entries(envObject)) {
             if (util.isString(value)) {
-                mergedEnvironment.set(name, value);
+                mergedEnvironment.set(getEnvironmentKey(name), { name, value });
             }
         }
 
-        config.environment = Array.from(mergedEnvironment.entries()).map(([name, value]) => ({ name, value }));
+        config.environment = Array.from(mergedEnvironment.values());
         delete config.env;
     }
 
