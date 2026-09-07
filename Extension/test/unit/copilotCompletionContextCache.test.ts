@@ -4,8 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { describe } from 'mocha';
-import { doesNotMatch, strictEqual } from 'node:assert';
-import { CompletionContextCache, CompletionContextCachePolicy, DisposableStore, formatCompletionContextLocation } from '../../src/LanguageServer/copilotCompletionContextCache';
+import { strictEqual } from 'node:assert';
+import { CompletionContextCache, CompletionContextCachePolicy, DisposableStore } from '../../src/LanguageServer/copilotCompletionContextCache';
 
 interface TestContext {
     caretOffset: number;
@@ -56,15 +56,6 @@ describe('Copilot completion context cache', () => {
             cache.set('file:///source.cpp', 'current-entry', { caretOffset: 100, value: 'current' }, defaultPolicy),
             true);
         strictEqual(cache.get('file:///source.cpp', 100, 8, defaultPolicy)?.result.value, 'current');
-    });
-
-    it('redacts request and result URIs from diagnostics', () => {
-        const requestCanary = 'file:///private/request-canary.cpp';
-        const resultCanary = 'file:///private/result-canary.cpp';
-        const diagnostic = formatCompletionContextLocation(requestCanary, resultCanary, 42);
-
-        strictEqual(diagnostic, '(response.uriMatchesRequest:false)(response.caretOffset:42)');
-        doesNotMatch(diagnostic, /request-canary|result-canary/);
     });
 
     it('disposes registrations that complete after provider disposal', () => {

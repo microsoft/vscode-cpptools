@@ -59,10 +59,6 @@ export class CompletionContextCache<T extends { caretOffset: number }> {
     }
 }
 
-export function formatCompletionContextLocation(requestUri: string, sourceFileUri: string, caretOffset: number): string {
-    return `(response.uriMatchesRequest:${sourceFileUri === requestUri})(response.caretOffset:${caretOffset})`;
-}
-
 export class DisposableStore<T extends { dispose(): unknown }> {
     private disposables: T[] = [];
     private disposed = false;
