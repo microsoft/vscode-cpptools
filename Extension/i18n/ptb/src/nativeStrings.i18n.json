@@ -159,7 +159,7 @@
 	"fallback_to_64_bit_mode2": "Falha ao consultar o compilador. Voltando para o intelliSenseMode de 64 bits.",
 	"fallback_to_no_bitness": "Falha ao consultar o compilador. Voltando para nenhum número de bit.",
 	"intellisense_client_creation_aborted": "Criação de cliente do IntelliSense anulada: {0}",
-	"include_errors_config_provider_intellisense_disabled": "Foram detectados erros de #include com base nas informações fornecidas pela configuração configurationProvider. Os recursos do IntelliSense para essa unidade de conversão ({0}) serão fornecidos pelo Analisador de Marca.",
+	"include_errors_config_provider_intellisense_disabled": "Foram detectados erros de #include com base nas informações fornecidas pela configuração configurationProvider. Os recursos do IntelliSense para essa unidade de tradução ({0}) serão fornecidos pelo Analisador de Marca.",
 	"include_errors_config_provider_squiggles_disabled2": "Foram detectados erros de #include com base nas informações fornecidas pela configuração configurationProvider. Erros de sintaxe para este arquivo não serão relatados até que os arquivos incluídos sejam encontrados.",
 	"preprocessor_keyword": "palavra-chave do pré-processador",
 	"c_keyword": "Palavra-chave C",
@@ -433,5 +433,6 @@
 	"check_open_failed": "falhou ao abrir {0} para análise",
 	"check_timed_out": "tempo limite esgotado enquanto aguardava a conclusão da análise de {0}",
 	"failed_to_open_browse_db_lock_file": "Não foi possível abrir o arquivo de bloqueio do banco de dados de navegação: {0} (errno={1})",
-	"failed_to_lock_browse_db_lock_file": "Não foi possível bloquear o arquivo de bloqueio do banco de dados de navegação: {0} (errno={1})"
+	"failed_to_lock_browse_db_lock_file": "Não foi possível bloquear o arquivo de bloqueio do banco de dados de navegação: {0} (errno={1})",
+	"browse_database_disabled_incompatible_storage": "O banco de dados de navegação foi desabilitado porque seu local de armazenamento não dá suporte à memória compartilhada do SQLite WAL. Defina browse.databaseFilename como um caminho local."
 }

@@ -4,8 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { describe, it } from 'mocha';
-import { doesNotMatch, match, strictEqual } from 'node:assert';
-import { escapePathForSquiggles } from '../../src/Utility/Text/escape';
+import { deepStrictEqual, doesNotMatch, match, ok, strictEqual } from 'node:assert';
+import { escapePathForSquiggles, getTextMatchOffsets } from '../../src/Utility/Text/escape';
 
 describe('Text escaping', () => {
     it('escapes paths for matching their JSON spelling', () => {
@@ -28,5 +28,31 @@ describe('Text escaping', () => {
         match(sourcePath, pattern);
         doesNotMatch(String.raw`C:\sdk\[headers]+(x)?.h\say\"hello\"and\"goodbye`, pattern);
         doesNotMatch(String.raw`C:\\sdk\\headers+(x)?.h\\say\"hello\"and\"goodbye`, pattern);
+    });
+
+    it('uses the full source match for a non-first semicolon-delimited path', () => {
+        const parsedPath: string = 'second';
+        const sourceMatch: string = '"first;second;third"';
+        const text: string = `"includePath": [${sourceMatch}]`;
+        const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapePathForSquiggles(parsedPath)}(?="|;).*?"`, 'g');
+        const matches: string[] | null = text.match(pattern);
+
+        ok(matches);
+        strictEqual(matches?.[0], sourceMatch);
+        const startOffset: number = text.indexOf(sourceMatch);
+        deepStrictEqual(getTextMatchOffsets(text, matches[0]), [startOffset, startOffset + sourceMatch.length]);
+    });
+
+    it('uses the JSON source length when it differs from the parsed path', () => {
+        const parsedPath: string = 'folder"quoted"';
+        const sourceMatch: string = String.raw`"folder\"quoted\""`;
+        const text: string = `"includePath": [${sourceMatch}]`;
+        const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapePathForSquiggles(parsedPath)}(?="|;).*?"`, 'g');
+        const matches: string[] | null = text.match(pattern);
+
+        ok(matches);
+        strictEqual(matches?.[0], sourceMatch);
+        const startOffset: number = text.indexOf(sourceMatch);
+        deepStrictEqual(getTextMatchOffsets(text, matches[0]), [startOffset, startOffset + sourceMatch.length]);
     });
 });

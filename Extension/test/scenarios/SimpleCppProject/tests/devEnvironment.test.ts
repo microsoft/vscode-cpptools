@@ -7,7 +7,7 @@ import { suite } from 'mocha';
 import * as vscode from 'vscode';
 import * as util from '../../../../src/common';
 import { isWindows } from "../../../../src/constants";
-import { errorOperationCancelled } from '../../../../src/LanguageServer/devcmd';
+import { errorNotWindows } from '../../../../src/LanguageServer/devcmd';
 
 suite("set developer environment", () => {
     if (isWindows) {
@@ -32,7 +32,7 @@ suite("set developer environment", () => {
                 equal(false, true, "Should not be able to set developer environment on non-Windows platform.");
             }
             catch (e) {
-                equal((e as Error).message, errorOperationCancelled, "Should throw error when trying to set developer environment on non-Windows platform.");
+                equal((e as Error).message, errorNotWindows, "Should throw error when trying to set developer environment on non-Windows platform.");
             }
             equal(util.hasMsvcEnvironment(), false, "MSVC environment should not be set on non-Windows platforms.");
         });
