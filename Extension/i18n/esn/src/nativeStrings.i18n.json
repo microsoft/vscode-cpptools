@@ -351,8 +351,8 @@
 	"auth_eula_required_plugin": "Se debe aceptar el EULA para continuar. Ejecute npx @microsoft/cpp-language-server --accept-eula",
 	"auth_already_authenticated": "Ya se ha autenticado con GitHub. Use --force-login para volver a autenticarse.",
 	"config_unsupported_version": "Error de inicialización: versión de configuración no admitida. Solo se admite la versión 1.",
-	"config_file_not_found": "Error de inicialización: no se encontró el archivo de configuración ''{0}\".",
-	"config_parse_failed": "Error de inicialización: no se puede analizar el archivo de configuración ''{0}\". Compruebe el formato JSON. Error: {1}",
+	"config_file_not_found": "Error de inicialización: no se encontró el archivo de configuración '{0}'.",
+	"config_parse_failed": "Error de inicialización: no se puede analizar el archivo de configuración '{0}'. Compruebe el formato JSON. Error: {1}",
 	"config_repo_path_invalid": "Error de inicialización: \"repositoryPath\" no está configurado o no es válido.",
 	"config_missing_source": "Error de inicialización: se debe configurar \"compileCommands\" o \"cppProperties\".",
 	"config_dual_source": "Error de inicialización: no se pueden configurar a la vez \"compileCommands\" y \"cppProperties\".",
@@ -433,5 +433,6 @@
 	"check_open_failed": "no se pudo abrir {0} para su análisis",
 	"check_timed_out": "se agotó el tiempo de espera para finalizar el análisis de {0}",
 	"failed_to_open_browse_db_lock_file": "No se pudo abrir el archivo de bloqueo de la base de datos de exploración: {0} (errno={1})",
-	"failed_to_lock_browse_db_lock_file": "No se pudo bloquear el archivo de bloqueo de la base de datos de exploración: {0} (errno={1})"
+	"failed_to_lock_browse_db_lock_file": "No se pudo bloquear el archivo de bloqueo de la base de datos de exploración: {0} (errno={1})",
+	"browse_database_disabled_incompatible_storage": "La base de datos de exploración se deshabilitó porque su ubicación de almacenamiento no admite la memoria compartida de SQLite WAL. Establezca browse.databaseFilename en una ruta de acceso local."
 }

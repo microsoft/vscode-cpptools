@@ -5,8 +5,7 @@
 import * as vscode from 'vscode';
 import { ManualPromise } from '../../Utility/Async/manualPromise';
 
-interface FileData
-{
+interface FileData {
     version: number;
     promise: ManualPromise<vscode.SemanticTokens>;
     tokenBuilder: vscode.SemanticTokensBuilder;

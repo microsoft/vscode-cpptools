@@ -28,7 +28,6 @@
 	"disable.warnings.button": "Désactiver les avertissements",
 	"unable.to.provide.configuration": "{0} ne peut pas fournir les informations de configuration IntelliSense. Les paramètres de la configuration de « {1} » sont utilisés en remplacement.",
 	"config.not.found": "Le nom de configuration demandé est introuvable : {0}",
-	"unsupported.client": "Client non pris en charge",
 	"timed.out": "Expiration du délai d'attente dans {0} ms.",
 	"parsing.stats.large.project": "{0} fichiers listés avec {1} fichiers sources C/C++ détectés. Vous pourriez envisager d’exclure certains fichiers pour un meilleur niveau de performance.",
 	"learn.more": "En savoir plus",
