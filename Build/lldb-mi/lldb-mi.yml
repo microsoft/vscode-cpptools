@@ -4,9 +4,11 @@ parameters:
   type: string
   default: Release
 
+# This production pipeline builds and signs only reviewed code from main.
 stages:
 - stage: Build
   dependsOn: []
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
   jobs:
   - template: lldb-mi.template.yml
     parameters:
@@ -19,7 +21,6 @@ stages:
 
 - stage: Signing
   dependsOn: ["Build"]
-  # Production signing is only valid for reviewed code committed to main.
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
   - template: lldb-mi-sign.template.yml
