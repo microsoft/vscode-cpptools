@@ -2760,8 +2760,11 @@ export class DefaultClient implements Client {
                 // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
                 // which causes a large backlog of file notifications to accumulate.
                 // We workaround this via only sending the change message if the modified time is within 10 seconds.
-                const mtime: Date = fs.statSync(uri.fsPath).mtime;
-                const duration: number = Date.now() - mtime.getTime();
+                const stats: fs.Stats | undefined = await util.fsStat(uri.fsPath);
+                if (!stats) {
+                    return;
+                }
+                const duration: number = Date.now() - stats.mtime.getTime();
                 if (duration < 10000) {
                     void this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() }).catch(logAndReturn.undefined);
                 }
