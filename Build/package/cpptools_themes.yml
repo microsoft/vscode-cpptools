@@ -32,7 +32,7 @@ extends:
         image: 1ESPT-Windows2025
         os: windows
     settings:
-      networkIsolationPolicy: Permissive,CFSClean,CFSClean2,CFSClean3
+      networkIsolationPolicy: CFSClean,CFSClean2,CFSClean3
 
     stages:
     - stage: package
