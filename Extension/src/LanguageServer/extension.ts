@@ -48,7 +48,7 @@ export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
 
 let prevMacCrashFile: string;
-let prevCppCrashFile: string;
+const pendingCppCrashPaths: Set<string> = new Set<string>();
 let prevCppCrashCallStackData: string = "";
 export let clients: ClientCollection;
 let activeDocument: vscode.TextDocument | undefined;
@@ -185,11 +185,11 @@ export async function activate(): Promise<void> {
     disposables.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
-    disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
+    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges(e => onDidChangeTextEditorVisibleRanges(e)));
+    disposables.push(vscode.window.onDidChangeActiveTextEditor(e => onDidChangeActiveTextEditor(e)));
     ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
-    disposables.push(vscode.window.onDidChangeTextEditorSelection((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorSelection(e))));
-    disposables.push(vscode.window.onDidChangeVisibleTextEditors((e) => clients.ActiveClient.enqueue(async () => onDidChangeVisibleTextEditors(e))));
+    disposables.push(vscode.window.onDidChangeTextEditorSelection(e => onDidChangeTextEditorSelection(e)));
+    disposables.push(vscode.window.onDidChangeVisibleTextEditors(e => onDidChangeVisibleTextEditors(e)));
     updateLanguageConfigurations();
 
     reportMacCrashes();
@@ -565,12 +565,10 @@ async function selectClient(): Promise<Client> {
 }
 
 async function onResetDatabase(): Promise<void> {
-    await clients.ActiveClient.ready;
     return clients.ActiveClient.resetDatabase();
 }
 
 async function onRescanCompilers(sender?: any): Promise<void> {
-    await clients.ActiveClient.ready;
     return clients.ActiveClient.rescanCompilers(sender);
 }
 
@@ -579,7 +577,6 @@ async function onAddMissingInclude(): Promise<void> {
 }
 
 async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
-    await clients.ActiveClient.ready;
     return clients.ActiveClient.promptSelectIntelliSenseConfiguration(sender);
 }
 
@@ -877,7 +874,6 @@ async function onFindAllReferences(uri: vscode.Uri, position: vscode.Position, t
         return undefined;
     }
 
-    await client.ready;
     const result = await sendFindAllReferencesRequest(client, uri, position, token ?? CancellationToken.None);
     return result?.locations;
 }
@@ -892,7 +888,6 @@ async function onGoToDefinition(uri: vscode.Uri, position: vscode.Position, toke
         return undefined;
     }
 
-    await client.ready;
     return sendGoToDefinitionRequest(client, uri, position, token ?? CancellationToken.None);
 }
 
@@ -906,7 +901,6 @@ async function onPrepareCallHierarchy(uri: vscode.Uri, position: vscode.Position
         return undefined;
     }
 
-    await client.ready;
     return sendPrepareCallHierarchyRequest(client, uri, position, token ?? CancellationToken.None);
 }
 
@@ -920,7 +914,6 @@ async function onCallHierarchyCallsTo(item: vscode.CallHierarchyItem, token?: vs
         return undefined;
     }
 
-    await client.ready;
     return sendCallHierarchyCallsToRequest(client, item, token ?? CancellationToken.None);
 }
 
@@ -934,7 +927,6 @@ async function onCallHierarchyCallsFrom(item: vscode.CallHierarchyItem, token?: 
         return undefined;
     }
 
-    await client.ready;
     return sendCallHierarchyCallsFromRequest(client, item, token ?? CancellationToken.None);
 }
 
@@ -1123,7 +1115,6 @@ export function usesCrashHandler(): boolean {
 
 export function watchForCrashes(crashDirectory: string): void {
     if (crashDirectory !== "") {
-        prevCppCrashFile = "";
         fs.stat(crashDirectory, (err) => {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
@@ -1139,20 +1130,22 @@ export function watchForCrashes(crashDirectory: string): void {
                     if (event !== "change") {
                         return;
                     }
-                    if (!filename || filename === prevCppCrashFile) {
+                    if (!filename || !filename.startsWith("cpptools")) {
                         return;
                     }
-                    prevCppCrashFile = filename;
-                    if (!filename.startsWith("cpptools")) {
+                    const crashPath: string = path.resolve(crashDirectory, filename);
+                    if (pendingCppCrashPaths.has(crashPath)) {
                         return;
                     }
+                    pendingCppCrashPaths.add(crashPath);
                     const crashDate: Date = new Date();
                     isWritingCrashCallStack = true;
 
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
-                        isWritingCrashCallStack = false;
-                        fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
+                        pendingCppCrashPaths.delete(crashPath);
+                        isWritingCrashCallStack = pendingCppCrashPaths.size > 0;
+                        fs.readFile(crashPath, 'utf8', (err, data) => {
                             void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
                         });
                     }, 5000);
@@ -1330,6 +1323,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             return; // ignore known issue
         }
         return logCppCrashTelemetry("readFile: " + err.code);
+    }
+    if (data.length === 0) {
+        return;
     }
 
     const lines: string[] = data.split("\n");

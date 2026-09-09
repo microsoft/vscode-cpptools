@@ -14,9 +14,10 @@ import { SshTargetsProvider, getActiveSshTarget, initializeSshTargets, selectSsh
 import { TargetLeafNode, setActiveSshTarget } from '../SSH/TargetsView/targetNodes';
 import { sshCommandToConfig } from '../SSH/sshCommandToConfig';
 import { getSshConfiguration, getSshConfigurationFiles, parseFailures, writeSshConfiguration } from '../SSH/sshHosts';
-import { documentSelector, pathAccessible } from '../common';
+import { documentSelector, isCpp, isCppOrCFile, pathAccessible } from '../common';
 import { instrument } from '../instrumentation';
 import { getSshChannel } from '../logger';
+import { SessionState } from '../sessionState';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, DebugConfigurationProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { DebuggerType } from './configurations';
@@ -129,6 +130,28 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
             }
         }
     }));
+
+    // Track active editor changes so "Run and Debug" button session state is kept up to date
+    // even if the language server (IntelliSense) is disabled.
+    updateBuildAndDebugSessionState(vscode.window.activeTextEditor);
+    disposables.push(vscode.window.onDidChangeActiveTextEditor(editor => updateBuildAndDebugSessionState(editor)));
+    disposables.push(vscode.workspace.onDidOpenTextDocument(document => {
+        const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (activeEditor?.document.uri.toString() === document.uri.toString()) {
+            updateBuildAndDebugSessionState(activeEditor);
+        }
+    }));
+    disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(() => updateBuildAndDebugSessionState(vscode.window.activeTextEditor)));
+}
+
+export function updateBuildAndDebugSessionState(editor?: vscode.TextEditor): void {
+    if (editor && isCpp(editor.document)) {
+        void SessionState.buildAndDebugIsFolderOpen.set(vscode.workspace.getWorkspaceFolder(editor.document.uri) !== undefined);
+        void SessionState.buildAndDebugIsSourceFile.set(isCppOrCFile(editor.document.uri, editor.document.languageId));
+    } else {
+        void SessionState.buildAndDebugIsFolderOpen.set(vscode.workspace.workspaceFolders !== undefined);
+        void SessionState.buildAndDebugIsSourceFile.set(false);
+    }
 }
 
 export function dispose(): void {
