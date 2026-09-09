@@ -88,6 +88,10 @@ jobs:
         run: yarn test
         working-directory: Extension
 
+      - name: Test VS Code acquisition
+        run: yarn test-vscode-acquisition
+        working-directory: Extension
+
       - name: Acquire Native Binaries
         run: yarn install-and-copy-binaries-for-test
         working-directory: Extension
