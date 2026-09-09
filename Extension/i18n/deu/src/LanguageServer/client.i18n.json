@@ -28,7 +28,6 @@
 	"disable.warnings.button": "Warnungen deaktivieren",
 	"unable.to.provide.configuration": "{0} kann keine IntelliSense-Konfigurationsinformationen bereitstellen. Stattdessen werden Einstellungen aus der Konfiguration „{1}“ verwendet.",
 	"config.not.found": "Der angeforderte Konfigurationsname wurde nicht gefunden: {0}",
-	"unsupported.client": "Nicht unterstützter Client",
 	"timed.out": "Timeout nach {0} ms.",
 	"parsing.stats.large.project": "Aufgezählte {0}-Dateien mit {1} C/C++-Quelldateien erkannt. Sie sollten in Betracht ziehen, einige Dateien auszuschließen, um die Leistung zu optimieren.",
 	"learn.more": "Weitere Informationen",
