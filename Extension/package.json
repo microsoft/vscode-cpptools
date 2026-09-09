@@ -7170,6 +7170,7 @@
         "show": "ts-node -T .scripts/clean.ts show",
         "clean": "ts-node -T .scripts/clean.ts",
         "test-lldb-mi-component-manifest": "node --test .scripts/verifyLldbMiComponentManifest.test.mjs",
+        "test-vscode-acquisition": "node --test .scripts/vscode.test.mjs",
         "test-yarn-lock": "node --test .scripts/verifyYarnLock.test.mjs",
         "verify-lldb-mi-component-manifest": "node .scripts/verifyLldbMiComponentManifest.mjs",
         "verify-yarn-lock": "node .scripts/verifyYarnLock.mjs",
