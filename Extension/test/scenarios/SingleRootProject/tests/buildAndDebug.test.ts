@@ -86,7 +86,7 @@ suite("BuildAndDebug SessionState Tests", () => {
             await assertSessionState(true, false);
         } finally {
             await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
-            await fs.promises.rm(temporaryDirectory, { recursive: true, force: true });
+            await fs.promises.rm(temporaryDirectory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
         }
     });
 
