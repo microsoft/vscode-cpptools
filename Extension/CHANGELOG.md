@@ -1,5 +1,16 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.35.0: September 10, 2026
+### Enhancement
+* Improve workspace indexing performance.
+
+### Bug Fixes
+* Fix false IntelliSense errors when initializing a variable with a value from the same unnamed enum. [#14726](https://github.com/microsoft/vscode-cpptools/issues/14726)
+* Fix the workspace parsing status briefly reporting completion while a newer parse is still running.
+* Fix 'Create Declaration/Definition' incorrectly being offered for explicit template instantiations.
+* Fix tag parser hangs when database initialization fails or shutdown interrupts a pending request.
+* Various localization updates.
+
 ## Version 1.34.4: September 9, 2026
 ### Enhancements
 * Add folding support for C++ `public`, `private`, and `protected` access sections. [#14645](https://github.com/microsoft/vscode-cpptools/issues/14645)
