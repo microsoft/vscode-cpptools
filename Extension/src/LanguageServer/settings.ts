@@ -299,7 +299,7 @@ export class CppSettings extends Settings {
                 // Attempt to invoke both our own version of clang-* to see if we can successfully execute it, and to get its version.
                 let bundledVersion: string;
                 try {
-                    const bundledPath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
+                    const bundledPath: string = getExtensionFilePath(`./bin/${clangName}`);
                     const output: string = execFileSync(bundledPath, ['--version']).toString();
                     bundledVersion = output.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
                     if (!semver.valid(bundledVersion)) {

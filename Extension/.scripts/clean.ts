@@ -14,7 +14,7 @@ import { $root, Git, brightGreen, cyan, getModifiedIgnoredFiles, rimraf } from '
 // list all untracked and ignored files that are modified/created: `git clean -Xd -n`
 
 export async function main() {
-    await rimraf(resolve($root, 'dist'));
+    await rimraf(resolve($root, 'dist'), resolve($root, 'LLVM'));
 }
 
 export async function all() {
