@@ -1,0 +1,18 @@
+2026-09-10 06:22:06.805 [info] [AgentHost:renderer] Acquiring MessagePort to agent host...
+2026-09-10 06:22:07.137 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey=undefined conversationKey=undefined modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:22:07.494 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/ZjZjYjc0NDMtMDFhMy00ZGNjLTgzMDItY2E3ZGZiNmYwNDU5" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:22:07.538 [info] [AgentHost:renderer] MessagePort acquired, creating client...
+2026-09-10 06:22:07.703 [info] [AgentHost:renderer] Protocol connection established; clientId=14fe13b1-25bf-4f81-8116-77c4ce21bcd9
+2026-09-10 06:22:07.731 [info] Started local extension host with pid 28800.
+2026-09-10 06:22:07.832 [info] [AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+2026-09-10 06:22:07.880 [info] Loading development extension at i:\BackFile\code\hornet-cpptools\Extension
+2026-09-10 06:22:08.937 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:22:09.075 [info] [AgentHost] Clearing authentication for resource: https://api.github.com
+2026-09-10 06:22:09.169 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:22:09.180 [info] [AgentHost] Clearing authentication for resource: https://api.github.com/repos
+2026-09-10 06:22:09.258 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:22:09.281 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:22:09.509 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/ZjZjYjc0NDMtMDFhMy00ZGNjLTgzMDItY2E3ZGZiNmYwNDU5" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:22:10.577 [info] Settings Sync: Account status changed from uninitialized to unavailable
+2026-09-10 06:22:12.817 [info] [AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+2026-09-10 06:22:13.930 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/ZjZjYjc0NDMtMDFhMy00ZGNjLTgzMDItY2E3ZGZiNmYwNDU5" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"

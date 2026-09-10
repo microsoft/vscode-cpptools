@@ -1,0 +1,19 @@
+2026-09-10 06:22:09.240 [info] [main] Log level: Info
+2026-09-10 06:22:09.240 [info] [main] Validating found git in: "C:\Program Files\Git\cmd\git.exe"
+2026-09-10 06:22:09.240 [info] [main] Validating found git in: "C:\Program Files (x86)\Git\cmd\git.exe"
+2026-09-10 06:22:09.240 [info] [main] Validating found git in: "C:\Program Files\Git\cmd\git.exe"
+2026-09-10 06:22:09.240 [info] [main] Validating found git in: "C:\Users\LiXueqiang\AppData\Local\Programs\Git\cmd\git.exe"
+2026-09-10 06:22:09.436 [info] [main] Validating found git in: "D:\Software\Git\cmd\git.exe"
+2026-09-10 06:22:09.636 [info] [main] Using git "2.53.0.windows.1" from "D:\Software\Git\cmd\git.exe"
+2026-09-10 06:22:09.636 [info] [Model][doInitialScan] Initial repository scan started
+2026-09-10 06:22:09.845 [info] > git rev-parse --show-toplevel [184ms]
+2026-09-10 06:22:10.091 [info] > git rev-parse --show-toplevel [204ms]
+2026-09-10 06:22:10.096 [info] [Model][doInitialScan] Initial repository scan completed - repositories (0), closed repositories (0), parent repositories (1), unsafe repositories (0)
+2026-09-10 06:22:10.262 [info] > git rev-parse --show-toplevel [155ms]
+2026-09-10 06:22:10.673 [info] > git rev-parse --show-toplevel [129ms]
+2026-09-10 06:22:10.810 [info] > git rev-parse --show-toplevel [128ms]
+2026-09-10 06:22:10.952 [info] > git rev-parse --show-toplevel [129ms]
+2026-09-10 06:22:11.644 [info] > git rev-parse --show-toplevel [103ms]
+2026-09-10 06:22:11.953 [info] > git rev-parse --show-toplevel [111ms]
+2026-09-10 06:22:12.698 [info] > git rev-parse --show-toplevel [115ms]
+2026-09-10 06:22:13.702 [info] > git rev-parse --show-toplevel [79ms]

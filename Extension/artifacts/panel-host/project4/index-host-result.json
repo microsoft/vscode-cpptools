@@ -1,0 +1,4 @@
+{
+  "passed": false,
+  "error": "Error: Timed out: panel screenshot\n\tat waitFor (i:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\hornet\\index.vscode.cjs:16:15)\n\tat async exports.run (i:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\hornet\\index.vscode.cjs:48:13)"
+}

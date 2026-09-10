@@ -1,0 +1,5 @@
+
+[main 2026-09-09T15:07:22.695Z] StorageMainService: creating application shared storage
+[main 2026-09-09T15:07:22.757Z] [shared storage] Creating shared storage database at ':memory:' (wasCreated: true)
+[main 2026-09-09T15:07:22.759Z] [shared storage] Initializing fallback application storage (path: in-memory)
+[main 2026-09-09T15:07:22.784Z] [shared storage] Fallback application storage initialized with 3 items

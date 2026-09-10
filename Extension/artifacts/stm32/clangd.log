@@ -1,0 +1,222 @@
+[Index] Discovering C/C++ sources and compile commands
+[Index] Starting clangd for 38 source files
+Starting D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+I[08:06:00.716] clangd version 22.1.0 (https://github.com/llvm/llvm-project 4434dabb69916856b824f68a64b029c67175e532)
+I[08:06:00.717] Features: windows+grpc
+I[08:06:00.717] PID: 20944
+I[08:06:00.717] Working directory: I:\BackFile\code\stm32_freertos
+I[08:06:00.717] argv[0]: D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+I[08:06:00.717] argv[1]: --background-index
+I[08:06:00.717] argv[2]: --enable-config=0
+I[08:06:00.717] argv[3]: --compile-commands-dir=I:\BackFile\code\hornet-cpptools\Extension\artifacts\stm32\db
+I[08:06:00.717] argv[4]: -j=10
+I[08:06:00.717] Starting LSP over stdin/stdout
+I[08:06:00.717] <-- initialize(0)
+I[08:06:00.734] --> reply:initialize(0) 16 ms
+Compiler ready
+[Index] Loading compilation database (38 source files)
+[Index] Parsing I:\BackFile\code\stm32_freertos\core\src\common.c
+I[08:06:00.735] <-- initialized
+I[08:06:00.737] <-- textDocument/didOpen
+I[08:06:00.737] <-- textDocument/documentSymbol(1)
+I[08:06:00.738] Loaded compilation database from I:\BackFile\code\hornet-cpptools\Extension\artifacts\stm32\db\compile_commands.json
+I[08:06:00.738] --> window/workDoneProgress/create(0)
+I[08:06:00.738] Enqueueing 38 commands for indexing
+I[08:06:00.738] ASTWorker building file I:\BackFile\code\stm32_freertos\core\src\common.c version 0 with command 
+[I:\BackFile\code\stm32_freertos\build\Debug]
+"C:\\Users\\LiXueqiang\\AppData\\Local\\stm32cube\\bundles\\gnu-tools-for-stm32\\14.3.1+st.2\\bin\\arm-none-eabi-gcc.exe" --target=arm-none-eabi -DDEBUG -DSTM32F103xE -DUSE_HAL_DRIVER -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../core/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include/legacy -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/cmsis_rtos_v2 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/portable/gcc/arm_cm3 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/device/stm32f1xx/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/include -mcpu=cortex-m3 -Wall -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o "CMakeFiles\\stm32f103_freertos.dir\\core\\src\\common.c.obj" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\stm32_freertos\\core\\src\\common.c"
+I[08:06:00.739] <-- reply(0)
+I[08:06:00.739] --> $/progress
+I[08:06:00.739] --> $/progress
+[Index] Building project index (0%)
+[Index] 0/1 (0%)
+I[08:06:00.749] --> $/progress
+I[08:06:00.749] --> $/progress
+I[08:06:00.749] --> $/progress
+I[08:06:00.749] --> $/progress
+I[08:06:00.749] --> $/progress
+I[08:06:00.749] --> $/progress
+I[08:06:00.749] --> $/progress
+I[08:06:00.749] --> $/progress
+I[08:06:00.749] --> $/progress
+I[08:06:00.749] --> $/progress
+[Index] 0/39 (0%)
+I[08:06:00.749] --> $/progress
+I[08:06:00.749] --> $/progress
+[Index] 1/39 (2%)
+I[08:06:00.791] Indexed I:\BackFile\code\stm32_freertos\free_rtos\list.c (341 symbols, 1765 refs, 38 files)
+I[08:06:00.838] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal.c (1269 symbols, 16893 refs, 42 files)
+I[08:06:00.840] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_rcc_ex.c (1266 symbols, 16932 refs, 42 files)
+I[08:06:00.846] Built preamble of size 2483556 for file I:\BackFile\code\stm32_freertos\core\src\common.c version 0 in 0.09 seconds
+I[08:06:00.847] Indexing c17 standard library in the context of I:\BackFile\code\stm32_freertos\core\src\common.c
+I[08:06:00.857] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_gpio_ex.c (1266 symbols, 16745 refs, 42 files)
+I[08:06:00.859] Indexed I:\BackFile\code\stm32_freertos\core\src\key_control.c (1800 symbols, 18523 refs, 57 files)
+I[08:06:00.862] Indexed I:\BackFile\code\stm32_freertos\core\src\freertos.c (1529 symbols, 17844 refs, 52 files)
+I[08:06:00.865] Indexed I:\BackFile\code\stm32_freertos\core\src\led_control.c (1788 symbols, 18502 refs, 55 files)
+I[08:06:00.866] --> textDocument/publishDiagnostics
+I[08:06:00.867] --> reply:textDocument/documentSymbol(1) 129 ms
+I[08:06:00.868] <-- textDocument/documentSymbol(2)
+I[08:06:00.868] --> reply:textDocument/documentSymbol(2) 0 ms
+I[08:06:00.872] Indexed I:\BackFile\code\stm32_freertos\core\src\main.c (1811 symbols, 18650 refs, 58 files)
+I[08:06:00.889] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_i2c.c (1299 symbols, 22787 refs, 42 files)
+I[08:06:00.889] Indexed I:\BackFile\code\stm32_freertos\free_rtos\cmsis_rtos_v2\cmsis_os2.c (1947 symbols, 20814 refs, 72 files)
+I[08:06:00.946] Indexed c17 standard library (incomplete due to errors): 2435 symbols, 11 filtered
+I[08:06:01.111] --> $/progress
+I[08:06:01.111] --> $/progress
+[Index] 2/39 (5%)
+I[08:06:01.114] Indexed I:\BackFile\code\stm32_freertos\drivers\cmsis\device\stm32f1xx\src\gcc\startup_stm32f103xe.s (0 symbols, 0 refs, 1 files)
+I[08:06:01.114] Failed to compile I:\BackFile\code\stm32_freertos\drivers\cmsis\device\stm32f1xx\src\gcc\startup_stm32f103xe.s, index may be incomplete
+I[08:06:01.129] --> $/progress
+I[08:06:01.129] --> $/progress
+[Index] 3/39 (7%)
+I[08:06:01.196] Indexed I:\BackFile\code\stm32_freertos\core\src\stm32f1xx_it.c (252 symbols, 15045 refs, 53 files)
+I[08:06:01.294] --> $/progress
+I[08:06:01.294] --> $/progress
+[Index] 4/39 (10%)
+I[08:06:01.304] --> $/progress
+I[08:06:01.304] --> $/progress
+[Index] 5/39 (12%)
+I[08:06:01.327] --> $/progress
+I[08:06:01.327] --> $/progress
+[Index] 6/39 (15%)
+I[08:06:01.329] --> $/progress
+I[08:06:01.329] --> $/progress
+[Index] 7/39 (17%)
+I[08:06:01.355] Indexed I:\BackFile\code\stm32_freertos\drivers\cmsis\device\stm32f1xx\src\system_stm32f1xx.c (11 symbols, 14078 refs, 42 files)
+I[08:06:01.360] Indexed I:\BackFile\code\stm32_freertos\free_rtos\stream_buffer.c (99 symbols, 2061 refs, 41 files)
+I[08:06:01.366] --> $/progress
+I[08:06:01.366] --> $/progress
+[Index] 8/39 (20%)
+I[08:06:01.367] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_pwr.c (18 symbols, 14144 refs, 42 files)
+I[08:06:01.371] --> $/progress
+I[08:06:01.371] --> $/progress
+[Index] 9/39 (23%)
+I[08:06:01.382] --> $/progress
+I[08:06:01.382] --> $/progress
+[Index] 10/39 (25%)
+I[08:06:01.394] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_gpio.c (8 symbols, 14158 refs, 42 files)
+I[08:06:01.406] --> $/progress
+I[08:06:01.406] --> $/progress
+I[08:06:01.406] Indexed I:\BackFile\code\stm32_freertos\free_rtos\portable\gcc\arm_cm3\port.c (16 symbols, 920 refs, 26 files)
+[Index] 11/39 (28%)
+I[08:06:01.410] --> $/progress
+I[08:06:01.410] --> $/progress
+[Index] 12/39 (30%)
+I[08:06:01.416] --> $/progress
+I[08:06:01.416] --> $/progress
+[Index] 13/39 (33%)
+I[08:06:01.422] --> $/progress
+I[08:06:01.422] --> $/progress
+[Index] 14/39 (35%)
+I[08:06:01.443] --> $/progress
+I[08:06:01.443] --> $/progress
+[Index] 15/39 (38%)
+I[08:06:01.444] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_rcc.c (15 symbols, 14782 refs, 42 files)
+I[08:06:01.446] Indexed I:\BackFile\code\stm32_freertos\free_rtos\event_groups.c (21 symbols, 1676 refs, 41 files)
+I[08:06:01.446] --> $/progress
+I[08:06:01.446] --> $/progress
+[Index] 16/39 (41%)
+I[08:06:01.448] Indexed I:\BackFile\code\stm32_freertos\free_rtos\croutine.c (13 symbols, 828 refs, 27 files)
+I[08:06:01.453] Indexed I:\BackFile\code\stm32_freertos\free_rtos\timers.c (45 symbols, 2051 refs, 41 files)
+I[08:06:01.453] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_uart.c (62 symbols, 16134 refs, 42 files)
+I[08:06:01.456] --> $/progress
+I[08:06:01.456] --> $/progress
+[Index] 17/39 (43%)
+I[08:06:01.459] --> $/progress
+I[08:06:01.459] --> $/progress
+[Index] 18/39 (46%)
+I[08:06:01.461] --> $/progress
+I[08:06:01.461] --> $/progress
+[Index] 19/39 (48%)
+I[08:06:01.463] --> $/progress
+I[08:06:01.463] --> $/progress
+[Index] 20/39 (51%)
+I[08:06:01.463] --> $/progress
+I[08:06:01.463] --> $/progress
+[Index] 21/39 (53%)
+I[08:06:01.467] --> $/progress
+I[08:06:01.467] --> $/progress
+[Index] 22/39 (56%)
+I[08:06:01.470] Indexed I:\BackFile\code\stm32_freertos\core\src\sysmem.c (8 symbols, 625 refs, 28 files)
+I[08:06:01.476] Indexed I:\BackFile\code\stm32_freertos\free_rtos\portable\mem_mang\heap_4.c (21 symbols, 1492 refs, 39 files)
+I[08:06:01.481] --> $/progress
+I[08:06:01.481] --> $/progress
+[Index] 23/39 (58%)
+I[08:06:01.486] --> $/progress
+I[08:06:01.486] --> $/progress
+[Index] 24/39 (61%)
+I[08:06:01.489] Indexed I:\BackFile\code\stm32_freertos\core\src\common.c (238 symbols, 15100 refs, 54 files)
+I[08:06:01.502] Indexed I:\BackFile\code\stm32_freertos\free_rtos\queue.c (67 symbols, 2810 refs, 44 files)
+I[08:06:01.505] Indexed I:\BackFile\code\stm32_freertos\core\src\syscalls.c (451 symbols, 2467 refs, 55 files)
+I[08:06:01.507] --> $/progress
+I[08:06:01.507] --> $/progress
+[Index] 25/39 (64%)
+I[08:06:01.509] --> $/progress
+I[08:06:01.509] --> $/progress
+[Index] 26/39 (66%)
+I[08:06:01.530] Indexed I:\BackFile\code\stm32_freertos\core\src\stm32f1xx_hal_msp.c (9 symbols, 14150 refs, 43 files)
+I[08:06:01.534] Indexed I:\BackFile\code\stm32_freertos\core\src\tm1637_control.c (29 symbols, 14883 refs, 55 files)
+I[08:06:01.536] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_dma.c (13 symbols, 14554 refs, 42 files)
+I[08:06:01.539] --> $/progress
+I[08:06:01.539] --> $/progress
+[Index] 27/39 (69%)
+I[08:06:01.541] --> $/progress
+I[08:06:01.541] --> $/progress
+[Index] 28/39 (71%)
+I[08:06:01.543] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_flash_ex.c (17 symbols, 14510 refs, 43 files)
+I[08:06:01.547] --> $/progress
+I[08:06:01.547] --> $/progress
+[Index] 29/39 (74%)
+I[08:06:01.550] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_exti.c (9 symbols, 14182 refs, 42 files)
+I[08:06:01.555] --> $/progress
+[Index] 30/39 (76%)
+I[08:06:01.559] --> $/progress
+[Index] 31/39 (79%)
+I[08:06:01.562] --> $/progress
+[Index] 32/39 (82%)
+I[08:06:01.563] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_can.c (36 symbols, 14946 refs, 42 files)
+I[08:06:01.572] --> $/progress
+[Index] 33/39 (84%)
+I[08:06:01.577] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_cortex.c (15 symbols, 14026 refs, 42 files)
+I[08:06:01.578] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_flash.c (17 symbols, 14322 refs, 43 files)
+I[08:06:01.586] --> $/progress
+[Index] 34/39 (87%)
+I[08:06:01.593] --> $/progress
+[Index] 35/39 (89%)
+I[08:06:01.594] Indexed I:\BackFile\code\stm32_freertos\free_rtos\tasks.c (83 symbols, 3445 refs, 45 files)
+I[08:06:01.602] --> $/progress
+[Index] 36/39 (92%)
+I[08:06:01.608] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_usart.c (44 symbols, 15538 refs, 42 files)
+I[08:06:01.610] Indexed I:\BackFile\code\stm32_freertos\core\src\beep_control.c (4 symbols, 14748 refs, 55 files)
+I[08:06:01.616] --> $/progress
+[Index] 37/39 (94%)
+I[08:06:01.619] --> $/progress
+[Index] 38/39 (97%)
+I[08:06:01.647] --> $/progress
+[Index] Background indexing finished; waiting for pending work
+[Index] Background indexing finished; waiting for pending work
+[Index] Background indexing finished; waiting for pending work
+Index ready: 38 source files (cached for next startup)
+[Index] Index ready: 38 source files (cached for next startup) (100%)
+I[08:06:03.151] <-- textDocument/didOpen
+I[08:06:03.152] ASTWorker building file I:\BackFile\code\stm32_freertos\core\src\main.c version 1 with command 
+[I:\BackFile\code\stm32_freertos\build\Debug]
+"C:\\Users\\LiXueqiang\\AppData\\Local\\stm32cube\\bundles\\gnu-tools-for-stm32\\14.3.1+st.2\\bin\\arm-none-eabi-gcc.exe" --target=arm-none-eabi -DDEBUG -DSTM32F103xE -DUSE_HAL_DRIVER -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../core/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include/legacy -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/cmsis_rtos_v2 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/portable/gcc/arm_cm3 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/device/stm32f1xx/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/include -mcpu=cortex-m3 -Wall -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o "CMakeFiles\\stm32f103_freertos.dir\\core\\src\\main.c.obj" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\stm32_freertos\\core\\src\\main.c"
+I[08:06:03.153] <-- textDocument/prepareCallHierarchy(3)
+I[08:06:03.217] Built preamble of size 2480000 for file I:\BackFile\code\stm32_freertos\core\src\main.c version 1 in 0.06 seconds
+I[08:06:03.232] --> textDocument/publishDiagnostics
+I[08:06:03.232] --> reply:textDocument/prepareCallHierarchy(3) 78 ms
+I[08:06:03.233] <-- textDocument/documentSymbol(4)
+I[08:06:03.233] --> reply:textDocument/documentSymbol(4) 0 ms
+I[08:06:03.234] <-- textDocument/references(5)
+I[08:06:03.234] --> reply:textDocument/references(5) 0 ms
+I[08:06:03.235] <-- callHierarchy/incomingCalls(6)
+I[08:06:03.235] --> reply:callHierarchy/incomingCalls(6) 0 ms
+I[08:06:03.236] <-- textDocument/documentSymbol(7)
+I[08:06:03.236] --> reply:textDocument/documentSymbol(7) 0 ms
+I[08:06:03.236] <-- callHierarchy/outgoingCalls(8)
+I[08:06:03.236] --> reply:callHierarchy/outgoingCalls(8) 0 ms
+I[08:06:03.238] <-- shutdown(9)
+I[08:06:03.238] --> reply:shutdown(9) 0 ms
+I[08:06:03.238] <-- exit
+I[08:06:03.238] LSP finished, exiting with status 0

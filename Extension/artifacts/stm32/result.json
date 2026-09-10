@@ -1,0 +1,16 @@
+{
+  "source": "I:\\BackFile\\code\\stm32_freertos\\build\\Debug\\compile_commands.json",
+  "files": 38,
+  "symbols": [
+    "SystemClockConfig"
+  ],
+  "incoming": [
+    "main"
+  ],
+  "outgoing": [
+    "ErrorHandler",
+    "HAL_RccClockConfig",
+    "HAL_RccOscConfig"
+  ],
+  "errors": []
+}

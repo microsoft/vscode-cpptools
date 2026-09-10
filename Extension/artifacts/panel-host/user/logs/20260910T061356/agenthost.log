@@ -1,0 +1,45 @@
+2026-09-10 06:13:57.948 [info] Agent Host process started successfully
+2026-09-10 06:13:57.981 [info] AgentService initialized
+2026-09-10 06:13:57.987 [info] Registering agent provider: copilotcli
+2026-09-10 06:13:57.990 [info] Registering agent provider: claude
+2026-09-10 06:13:58.009 [info] [Copilot] BYOK bridge changed; refreshing models
+2026-09-10 06:13:58.010 [info] [Copilot] BYOK bridge changed; refreshing models
+2026-09-10 06:13:58.015 [info] [Copilot] BYOK bridge changed; refreshing models
+2026-09-10 06:13:58.022 [info] [Claude] Models refreshed (merged). Count: 0, 
+2026-09-10 06:13:58.024 [info] [ProtocolServer] Initialize: clientId=80079ff9-c38e-422c-a80c-8bfa71a80dc1, protocolVersions=[1.0.0, 0.9.0, 0.8.0, 0.7.0, 0.6.0, 0.5.2, 0.5.1]
+2026-09-10 06:13:58.053 [info] [AgentService] showExternalSessions changed 'none' -> 'recent'; queueing session list reconciliation
+2026-09-10 06:13:58.084 [info] [CommandAutoApprover] Tree-sitter initialized (bash=available, powershell=available)
+2026-09-10 06:13:58.101 [info] [Copilot] Listing chats to migrate...
+2026-09-10 06:13:58.102 [info] [Copilot] Starting CopilotClient...
+2026-09-10 06:13:58.103 [info] [Copilot] Set CLI env: GITHUB_COPILOT_INTEGRATION_ID=vscode-chat
+2026-09-10 06:13:58.106 [info] [Copilot] Resolved CLI path: d:\Software\Microsoft\Visual Studio Code\88e44fa0e0\resources\app\node_modules.asar.unpacked\@github\copilot-win32-x64\index.js
+2026-09-10 06:13:58.186 [info] [Claude] SDK not downloaded yet; deferring the migratable chat list
+2026-09-10 06:13:58.323 [info] [Claude] Auth token unchanged
+2026-09-10 06:13:58.417 [info] [WebSocketProtocol] Server listening on socket \\.\pipe\vscode-agent-host-ff6b9e55db65722126acea7b88459f23c02eb8c169d9cc0032f7e65db48e4f5d-asrk-npdRFP14HvORxlk_g
+2026-09-10 06:13:59.180 [info] [Copilot] CopilotClient started successfully
+2026-09-10 06:13:59.180 [info] [Copilot] Restarting CopilotClient (CAPI proxy configuration changed (proxy (none) -> http://127.0.0.1:7890))
+2026-09-10 06:13:59.187 [warning] [AgentService] initial provider catalog for copilotcli was unavailable; retrying before accessing sessions Request session.list failed with message: JSON-RPC server handle disposed
+2026-09-10 06:13:59.187 [info] [Copilot] Listing chats to migrate...
+2026-09-10 06:13:59.187 [warning] [AgentService] initial provider catalog for copilotcli was unavailable; retrying before accessing sessions Request session.list failed with message: JSON-RPC server handle disposed
+2026-09-10 06:13:59.187 [warning] [AgentService] provider initialization failed before Automations could refresh for copilotcli Request session.list failed with message: JSON-RPC server handle disposed
+2026-09-10 06:13:59.187 [warning] [AgentService] Failed to restore Agent-Merge-enabled sessions Request session.list failed with message: JSON-RPC server handle disposed
+2026-09-10 06:13:59.233 [info] [Copilot] Starting CopilotClient...
+2026-09-10 06:13:59.233 [info] [Copilot] Resolved CAPI proxy and forwarded HTTP_PROXY/HTTPS_PROXY to Copilot SDK
+2026-09-10 06:13:59.233 [info] [Copilot] Set CLI env: GITHUB_COPILOT_INTEGRATION_ID=vscode-chat
+2026-09-10 06:13:59.234 [info] [Copilot] Resolved CLI path: d:\Software\Microsoft\Visual Studio Code\88e44fa0e0\resources\app\node_modules.asar.unpacked\@github\copilot-win32-x64\index.js
+2026-09-10 06:13:59.991 [info] [Copilot] CopilotClient started successfully
+2026-09-10 06:14:00.009 [info] [Copilot] Listed 0 SDK session(s) for chats to migrate
+2026-09-10 06:14:00.009 [info] [Copilot] Found 0 legacy sessions
+2026-09-10 06:14:00.014 [info] [Copilot] Listing discoverable chats...
+2026-09-10 06:14:00.015 [info] [AgentService] listSessions computed 0 of 0 session(s) for mode 'last30Days' in 1961ms (0 state-manager fallback)
+2026-09-10 06:14:00.015 [info] [AgentService] External session reconciliation done in 1961ms (mode: 'recent', previous: 'none'): 0 published, 0 retracted, 0 visible
+2026-09-10 06:14:00.015 [info] [Copilot] Listed 0 SDK session(s) for discoverable chats
+2026-09-10 06:14:00.016 [info] [AgentService] listSessions computed 0 of 0 session(s) for mode 'recent' in 1695ms (0 state-manager fallback)
+2026-09-10 06:14:00.016 [info] [AgentService] pruned 0 stale external session row(s) older than 30 days
+2026-09-10 06:14:00.017 [info] [Copilot] Chat discovery: 0 SDK session(s) -> 0 external, 0 adoptable legacy extension-host, 0 suppressed adoptable legacy extension-host, 0 suppressed archived legacy extension-host, 0 already known to Agent Host, 0 without a working directory, 0 with unsupported or missing client name, 0 outside the import window, 0 without repository metadata, 0 failed to classify (adopt legacy extension-host chats: false)
+2026-09-10 06:14:00.017 [info] [Claude] SDK not downloaded yet; deferring chat discovery
+2026-09-10 06:14:01.920 [info] [ProtocolServer] Client disconnected: 80079ff9-c38e-422c-a80c-8bfa71a80dc1, subscriptions=1
+2026-09-10 06:14:01.929 [info] [Copilot] BYOK bridge changed; refreshing models
+2026-09-10 06:14:01.930 [info] [Copilot] BYOK bridge changed; refreshing models
+2026-09-10 06:14:01.934 [info] AgentService: shutting down all providers...
+2026-09-10 06:14:01.934 [info] [Copilot] Shutting down...

@@ -1,0 +1,69 @@
+2026-09-10 06:16:56.861 [info] [AgentHost:renderer] Acquiring MessagePort to agent host...
+2026-09-10 06:16:57.035 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey=undefined conversationKey=undefined modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:16:57.226 [info] [AgentHost:renderer] MessagePort acquired, creating client...
+2026-09-10 06:16:57.264 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/N2Y5Mjk4MjItNDY3MC00NjdlLTk3ZTktODFkYjIzNDg2YzM2" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:16:57.336 [info] [AgentHost:renderer] Protocol connection established; clientId=f2f357aa-6775-4368-bd52-0a2e3f520d18
+2026-09-10 06:16:57.338 [info] Started local extension host with pid 30312.
+2026-09-10 06:16:57.611 [info] [AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+2026-09-10 06:16:57.631 [info] Loading development extension at i:\BackFile\code\hornet-cpptools\Extension
+2026-09-10 06:16:58.139 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.143 [info] [AgentHost] Clearing authentication for resource: https://api.github.com
+2026-09-10 06:16:58.189 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.191 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.192 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.193 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.194 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.195 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.196 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.198 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.199 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.200 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.201 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.201 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.205 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.216 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.217 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.218 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.219 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.220 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.220 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.221 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.222 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.223 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.224 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.225 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.225 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.226 [info] [AgentHost] Clearing authentication for resource: https://api.github.com/repos
+2026-09-10 06:16:58.238 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.240 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.242 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.244 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.245 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.247 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.248 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.249 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.253 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.254 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.255 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.256 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.258 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:16:58.259 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/N2Y5Mjk4MjItNDY3MC00NjdlLTk3ZTktODFkYjIzNDg2YzM2" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:16:58.298 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.302 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.303 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.304 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.306 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.308 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.309 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.310 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.310 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.311 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.312 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.313 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.315 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:16:58.316 [info] Settings Sync: Account status changed from uninitialized to unavailable
+2026-09-10 06:17:00.541 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/N2Y5Mjk4MjItNDY3MC00NjdlLTk3ZTktODFkYjIzNDg2YzM2" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:17:02.620 [info] [AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+2026-09-10 06:17:31.302 [error] Error: Timed out: panel screenshot
+	at waitFor (i:\BackFile\code\hornet-cpptools\Extension\test\hornet\index.vscode.cjs:16:15)
+	at async exports.run (i:\BackFile\code\hornet-cpptools\Extension\test\hornet\index.vscode.cjs:46:13)

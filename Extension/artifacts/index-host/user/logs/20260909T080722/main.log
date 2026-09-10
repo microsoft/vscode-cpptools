@@ -1,0 +1,18 @@
+2026-09-09 08:07:22.770 [error] Error: Unable to create or open registry key
+    at Object.setDeviceId (D:\Software\Microsoft\Visual Studio Code\88e44fa0e0\resources\app\node_modules.asar\@vscode\deviceid\dist\storage.js:100:25)
+    at Module.getDeviceId (D:\Software\Microsoft\Visual Studio Code\88e44fa0e0\resources\app\node_modules.asar\@vscode\deviceid\dist\devdeviceid.js:46:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Gg (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:460:5508)
+    at async _I (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:505:93754)
+    at async Xk (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:505:94201)
+    at async Promise.all (index 2)
+    at async $s.startup (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:561:11024)
+    at async Jx.startup (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:592:54632)
+2026-09-09 08:07:22.771 [info] StorageMainService: creating application shared storage
+2026-09-09 08:07:22.771 [info] [shared storage] Creating shared storage database at ':memory:' (wasCreated: true)
+2026-09-09 08:07:22.771 [info] [shared storage] Initializing fallback application storage (path: in-memory)
+2026-09-09 08:07:22.771 [error] Error: Error mutex already exists
+    at $s.installMutex (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:561:27488)
+2026-09-09 08:07:22.771 [error] CodeWindow: renderer process gone (reason: launch-failed, code: 49)
+2026-09-09 08:07:22.784 [info] [shared storage] Fallback application storage initialized with 3 items
+2026-09-09 08:07:22.790 [error] CodeWindow: renderer process gone (reason: launch-failed, code: 49)

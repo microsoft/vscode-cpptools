@@ -1,0 +1,11 @@
+[main 2026-09-10T15:10:18.700Z] Error: Error mutex already exists
+    at Ks.installMutex (file:///D:/Software/Microsoft/Visual%20Studio%20Code/645f29cc31/resources/app/out/main.js:561:27488)
+[main 2026-09-10T15:10:19.926Z] [AgentHost:stderr] (node:27228) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `Code --trace-deprecation ...` to show where the warning was created)
+
+(node:25996) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `Code --trace-deprecation ...` to show where the warning was created)
+Unknown channel: agentHostClientByokLm
+Unknown channel: agentHostClientProxy
+Unknown channel: agentHostClientProxy
+Unknown channel: agentHostClientProxy

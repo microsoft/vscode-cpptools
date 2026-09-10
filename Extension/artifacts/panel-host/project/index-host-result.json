@@ -1,0 +1,4 @@
+{
+  "passed": false,
+  "error": "Error: command 'workbench.view.extension.hornet-cpp.graphPanel' not found\n    at qgt._tryExecuteCommand (vscode-file://vscode-app/d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/workbench.desktop.main.js:2003:4832)\n    at qgt.executeCommand (vscode-file://vscode-app/d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/workbench.desktop.main.js:2003:4732)"
+}

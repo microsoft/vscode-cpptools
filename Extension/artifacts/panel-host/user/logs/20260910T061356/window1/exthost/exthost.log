@@ -1,0 +1,39 @@
+2026-09-10 06:13:58.625 [info] Extension host with pid 18136 started
+2026-09-10 06:13:58.625 [info] Skipping acquiring lock for i:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\user\User\workspaceStorage\61495d554a25e6350ab15e45b50a1edd.
+2026-09-10 06:13:58.729 [info] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2026-09-10 06:13:58.755 [info] ExtensionService#_doActivateExtension vscode.github-authentication, startup: false, activationEvent: 'onAuthenticationRequest:github'
+2026-09-10 06:13:58.861 [info] ExtensionService#_doActivateExtension vscode.git-base, startup: true, activationEvent: '*', root cause: vscode.git
+2026-09-10 06:13:58.906 [info] ExtensionService#_doActivateExtension vscode.git, startup: true, activationEvent: '*'
+2026-09-10 06:13:58.969 [info] ExtensionService#_doActivateExtension vscode.github, startup: true, activationEvent: '*'
+2026-09-10 06:13:59.034 [info] ExtensionService#_doActivateExtension hornet.hornet-cpp, startup: true, activationEvent: 'workspaceContains:**/CMakeLists.txt,**/*.{c,cc,cpp,cxx,h,hh,hpp,hxx,cu,cuh}'
+2026-09-10 06:13:59.296 [warning] [vscode.git] Accessing a resource scoped configuration without providing a resource is not expected. To get the effective value for 'git.openRepositoryInParentFolders', provide the URI of a resource or 'null' for any resource.
+2026-09-10 06:13:59.296 [warning] [vscode.git] Accessing a resource scoped configuration without providing a resource is not expected. To get the effective value for 'git.showProgress', provide the URI of a resource or 'null' for any resource.
+2026-09-10 06:13:59.318 [info] Eager extensions activated
+2026-09-10 06:13:59.336 [info] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2026-09-10 06:13:59.339 [info] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2026-09-10 06:14:00.452 [info] ExtensionService#_doActivateExtension vscode.configuration-editing, startup: false, activationEvent: 'onLanguage:jsonc'
+2026-09-10 06:14:00.460 [info] ExtensionService#_doActivateExtension vscode.json-language-features, startup: false, activationEvent: 'onLanguage:jsonc'
+2026-09-10 06:14:00.534 [info] ExtensionService#_doActivateExtension vscode.typescript-language-features, startup: false, activationEvent: 'onLanguage:jsonc'
+2026-09-10 06:14:01.866 [warning] hornet.hornet-cpp created a webview without a content security policy: https://aka.ms/vscode-webview-missing-csp
+2026-09-10 06:14:01.890 [info] Extension host terminating: received terminate message from renderer
+2026-09-10 06:14:01.955 [error] Error: Channel has been closed
+	at o (file:///d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3524)
+	at Object.appendLine (file:///d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3663)
+	at Object.log (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:14046:24)
+	at Socket.<anonymous> (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:12030:52)
+	at Socket.emit (node:events:509:28)
+	at addChunk (node:internal/streams/readable:563:12)
+	at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+	at Readable.push (node:internal/streams/readable:394:5)
+	at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+2026-09-10 06:14:01.965 [error] Error: Channel has been closed
+	at o (file:///d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3524)
+	at Object.appendLine (file:///d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3663)
+	at Object.log (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:14046:24)
+	at Socket.<anonymous> (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:12030:52)
+	at Socket.emit (node:events:509:28)
+	at addChunk (node:internal/streams/readable:563:12)
+	at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+	at Readable.push (node:internal/streams/readable:394:5)
+	at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+2026-09-10 06:14:01.967 [info] Extension host with pid 18136 exiting with code 0

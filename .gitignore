@@ -15,3 +15,4 @@ OneLocBuild
 vscode-translations-import
 
 .vscode/settings.json
+.npm-cache/

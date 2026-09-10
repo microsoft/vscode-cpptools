@@ -1,5 +1,4 @@
-# Reuable workflow for compiling and testing extension.
-name: Compile and test extension
+name: Compile and test Hornet extension
 
 on:
   workflow_call:
@@ -8,138 +7,40 @@ on:
         required: true
         type: string
       platform:
-        # Expects 'mac', 'linux', or 'windows'
         required: true
         type: string
       checkout-ref:
         required: false
         type: string
-      yarn-args:
-        type: string
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ${{ inputs.runner-env }}
-
+    defaults:
+      run:
+        working-directory: Extension
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.checkout-ref }}
-
-      - name: Use Node.js 24
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
-
-      - name: Validate Yarn lockfile
-        run: yarn test-yarn-lock && yarn verify-yarn-lock
-        working-directory: Extension
-
-      - name: Validate LLDB-MI component manifest
-        run: yarn test-lldb-mi-component-manifest && yarn verify-lldb-mi-component-manifest
-        working-directory: Extension
-
-      - name: Install Dependencies
-        shell: bash
-        env:
-          YARN_ARGS: ${{ inputs.yarn-args }}
-        run: |
-          read -r -a yarn_args <<< "$YARN_ARGS"
-          for attempt in 1 2 3; do
-            if yarn install "${yarn_args[@]}"; then
-              exit 0
-            fi
-            if (( attempt == 3 )); then
-              exit 1
-            fi
-            delay=$((attempt * 15))
-            printf 'yarn install failed; retrying in %d seconds.\n' "$delay" >&2
-            sleep "$delay"
-          done
-        working-directory: Extension
-
-      - name: Install gdb (linux)
-        if: ${{ inputs.platform == 'linux' }}
-        timeout-minutes: 10
-        run: |
-          sudo apt-get \
-            -o Acquire::Retries=3 \
-            -o Acquire::http::Timeout=30 \
-            -o Acquire::https::Timeout=30 \
-            update
-          sudo apt-get \
-            -o Acquire::Retries=3 \
-            -o Acquire::http::Timeout=30 \
-            -o Acquire::https::Timeout=30 \
-            install -y gdb
-
-      - name: Compile Sources
-        run: yarn run compile
-        working-directory: Extension
-
-      - name: Run Linter
-        run: yarn run lint
-        working-directory: Extension
-
+          cache: npm
+          cache-dependency-path: Extension/package-lock.json
+      - name: Install public dependencies
+        run: npm ci
+      - name: Compile sources
+        run: npm run compile
       - name: Run unit tests
-        run: yarn test
-        working-directory: Extension
-
-      - name: Acquire Native Binaries
-        run: yarn install-and-copy-binaries-for-test
-        working-directory: Extension
-
-      - name: Run languageServer integration tests (Windows)
-        if: ${{ inputs.platform == 'windows' }}
-        run: yarn test --scenario=SingleRootProject
-        working-directory: Extension
-
-      - name: Run SimpleCppProject tests (Windows)
-        if: ${{ inputs.platform == 'windows' }}
-        run: yarn test --scenario=SimpleCppProject
-        working-directory: Extension
-
-      - name: Run E2E IntelliSense features tests (Windows)
-        if: ${{ inputs.platform == 'windows' }}
-        run: yarn test --scenario=MultirootDeadlockTest
-        working-directory: Extension
-
-      - name: Run RunWithoutDebugging tests (Windows)
-        if: ${{ inputs.platform == 'windows' }}
-        run: yarn test --scenario=RunWithoutDebugging
-        working-directory: Extension
-
-      # NOTE: For mac/linux run the tests with xvfb-action for UI support.
-      # Another way to start xvfb https://github.com/microsoft/vscode-test/blob/master/sample/azure-pipelines.yml
-
-      - name: Run languageServer integration tests (linux/macOS)
-        if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
-        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
+        run: npm test
+      - name: Package universal VSIX on this host
+        run: npm run package
+      - uses: actions/upload-artifact@v4
         with:
-          run: yarn test --scenario=SingleRootProject
-          working-directory: Extension
-
-      - name: Run SimpleCppProject tests (linux/macOS)
-        if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
-        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
-        with:
-          run: yarn test --scenario=SimpleCppProject
-          working-directory: Extension
-
-      - name: Run E2E IntelliSense features tests (linux/macOS)
-        if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
-        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
-        with:
-          run: yarn test --scenario=MultirootDeadlockTest
-          working-directory: Extension
-
-      - name: Run RunWithoutDebugging tests (linux/macOS)
-        if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
-        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
-        with:
-          run: yarn test --scenario=RunWithoutDebugging --scenario-arg=skipExternalConsole
-          working-directory: Extension
-
+          name: hornet-${{ inputs.platform }}
+          path: Extension/*.vsix
+          if-no-files-found: error

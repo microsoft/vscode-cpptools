@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "version": "0.1.5",
+  "shards": [
+    ".vscode\\hornet\\compile-db\\fallback\\.cache\\clangd\\index\\a.cpp.304F1DDA49C590B3.idx",
+    ".vscode\\hornet\\compile-db\\fallback\\.cache\\clangd\\index\\b.cpp.F5024A8E3FDD5BFD.idx",
+    ".vscode\\hornet\\compile-db\\fallback\\.cache\\clangd\\index\\new.cpp.D8A24C50A8721013.idx"
+  ]
+}

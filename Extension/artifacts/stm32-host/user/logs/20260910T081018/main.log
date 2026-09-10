@@ -1,0 +1,12 @@
+2026-09-10 08:10:18.711 [info] StorageMainService: creating application shared storage
+2026-09-10 08:10:18.711 [info] [shared storage] Creating shared storage database at ':memory:' (wasCreated: true)
+2026-09-10 08:10:18.711 [info] [shared storage] Initializing fallback application storage (path: in-memory)
+2026-09-10 08:10:18.711 [error] Error: Error mutex already exists
+    at Ks.installMutex (file:///D:/Software/Microsoft/Visual%20Studio%20Code/645f29cc31/resources/app/out/main.js:561:27488)
+2026-09-10 08:10:18.724 [info] [shared storage] Fallback application storage initialized with 3 items
+2026-09-10 08:10:19.497 [info] update#setState idle
+2026-09-10 08:10:19.525 [info] AgentHostProcessManager: agent host started
+2026-09-10 08:10:19.927 [error] [AgentHost:stderr] (node:27228) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `Code --trace-deprecation ...` to show where the warning was created)
+
+2026-09-10 08:10:25.857 [info] Extension host with pid 19996 exited with code: 0, signal: unknown.

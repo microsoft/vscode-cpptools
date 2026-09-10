@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "version": "0.1.9",
+  "managed": "i:\\BackFile\\code\\stm32_freertos\\.vscode\\hornet\\compile-db\\compile_commands.json",
+  "commands": 38,
+  "incoming": [
+    "main"
+  ],
+  "outgoing": [
+    "ErrorHandler",
+    "HAL_RccClockConfig",
+    "HAL_RccOscConfig"
+  ],
+  "errors": []
+}

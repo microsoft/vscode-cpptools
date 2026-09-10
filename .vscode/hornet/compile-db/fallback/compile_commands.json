@@ -1,0 +1,592 @@
+[
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Code Samples\\BoxConsoleSample\\box_sample.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Code Samples\\BoxConsoleSample\\box_sample.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Code Samples\\Fib\\main.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Code Samples\\Fib\\main.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Code Samples\\Fib\\thread.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Code Samples\\Fib\\thread.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\a.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\a.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\b.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\b.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\new.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\new.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project2\\a.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project2\\a.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project2\\b.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project2\\b.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project2\\new.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project2\\new.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\NoWorkspace\\assets\\open_file.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\NoWorkspace\\assets\\open_file.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\RunWithoutDebugging\\assets\\argsTest.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\RunWithoutDebugging\\assets\\argsTest.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\RunWithoutDebugging\\assets\\debugTest.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\RunWithoutDebugging\\assets\\debugTest.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SimpleCppProject\\assets\\main.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SimpleCppProject\\assets\\main.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SimpleCppProject\\assets\\main1.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SimpleCppProject\\assets\\main1.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SimpleCppProject\\assets\\main2.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SimpleCppProject\\assets\\main2.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SimpleCppProject\\assets\\main3.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SimpleCppProject\\assets\\main3.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\code_folding.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\code_folding.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\doxygen_generation.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\doxygen_generation.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\doxygen.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\doxygen.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\inlay_hints.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\inlay_hints.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\main.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\main.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\quickInfo.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\quickInfo.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\references.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\references.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\semantic_colorization.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\semantic_colorization.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\code_folding.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\code_folding.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\doxygen_generation.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\doxygen_generation.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\doxygen.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\doxygen.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\inlay_hints.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\inlay_hints.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\main.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\main.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\quickInfo.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\quickInfo.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\references.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\references.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\semantic_colorization.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultirootDeadlockTest\\assets\\SingleRootProject\\semantic_colorization.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_A\\main.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_A\\main.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_A\\quickInfo.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_A\\quickInfo.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_A\\references.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_A\\references.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_A\\semantic_colorization.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_A\\semantic_colorization.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_B\\main.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_B\\main.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_B\\quickInfo.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_B\\quickInfo.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_B\\references.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_B\\references.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_B\\semantic_colorization.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_B\\semantic_colorization.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_C\\main.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_C\\main.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_C\\quickInfo.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_C\\quickInfo.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_C\\references.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_C\\references.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_C\\semantic_colorization.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\MultiRootProjects\\assets\\project_C\\semantic_colorization.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\call_hierarchy\\call_test1.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\call_hierarchy\\call_test1.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\call_hierarchy\\call_test2.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\call_hierarchy\\call_test2.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Auto.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Auto.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\C_File.c",
+    "arguments": [
+      "clang",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\C_File.c"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\cdd_test1.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\cdd_test1.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Class.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Class.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\ClassConstructor.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\ClassConstructor.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\FunctionTypes.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\FunctionTypes.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Global.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Global.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\LightBulb.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\LightBulb.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Multi.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Multi.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\MultiNamespace.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\MultiNamespace.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Namespace.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Namespace.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Scope.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Scope.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Templates.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\test\\scenarios\\SingleRootProject\\assets\\create_declaration_definition\\Templates.cpp"
+    ]
+  }
+]

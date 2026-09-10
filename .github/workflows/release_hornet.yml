@@ -1,0 +1,84 @@
+name: Package and release Hornet
+
+on:
+  workflow_dispatch:
+    inputs:
+      pre-release:
+        description: Build pre-release VSIX packages
+        type: boolean
+        default: false
+      github-draft:
+        description: Upload packages to a draft GitHub Release
+        type: boolean
+        default: false
+      marketplace:
+        description: Publish packages to the public VS Code Marketplace
+        type: boolean
+        default: false
+      openvsx:
+        description: Publish packages to Open VSX
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: Extension
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: Extension/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Package all desktop and server targets
+        env:
+          PRE_RELEASE: ${{ inputs.pre-release }}
+        run: |
+          flags=()
+          if [[ "$PRE_RELEASE" == true ]]; then flags+=(--pre-release); fi
+          npm run package:all -- "${flags[@]}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hornet-vsix
+          path: Extension/artifacts/*.vsix
+          if-no-files-found: error
+      - name: Create draft GitHub Release
+        if: ${{ inputs.github-draft }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_SHA: ${{ github.sha }}
+          PRE_RELEASE: ${{ inputs.pre-release }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          flags=()
+          if [[ "$PRE_RELEASE" == true ]]; then tag="$tag-pre-release"; flags+=(--prerelease); fi
+          gh release create "$tag" artifacts/*.vsix --target "$RELEASE_SHA" --draft "${flags[@]}" --title "Hornet C/C++ $version" --generate-notes
+      - name: Publish reviewed packages to Marketplace
+        if: ${{ inputs.marketplace }}
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          files=()
+          for file in artifacts/*.vsix; do files+=(--vsix "$file"); done
+          npm run publish:marketplace -- "${files[@]}"
+      - name: Publish reviewed packages to Open VSX
+        if: ${{ inputs.openvsx }}
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          files=()
+          for file in artifacts/*.vsix; do files+=(--vsix "$file"); done
+          npm run publish:openvsx -- "${files[@]}"

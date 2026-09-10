@@ -1,0 +1,15 @@
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+[main 2026-09-09T15:10:06.797Z] Error: Error mutex already exists
+    at $s.installMutex (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:561:27488)
+[main 2026-09-09T15:10:07.544Z] [AgentHost:stderr] (node:26212) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `Code --trace-deprecation ...` to show where the warning was created)
+
+[hornet.hornet-cpp]: 'configuration.semanticTokenType.description' must be defined and can not be empty
+(node:14696) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `Code --trace-deprecation ...` to show where the warning was created)
+Unknown channel: agentHostClientByokLm
+Unknown channel: agentHostClientProxy
+Unknown channel: agentHostClientProxy

@@ -1,0 +1,1 @@
+{"net":{"http_server_properties":{"servers":[{"anonymization":[],"server":"https://main.vscode-cdn.net","supports_spdy":true},{"anonymization":[],"server":"https://update.code.visualstudio.com","supports_spdy":true},{"anonymization":[],"server":"https://marketplace.visualstudio.com","supports_spdy":true}],"version":5},"network_qualities":{"CAASABiAgICA+P////8B":"3G"}}}

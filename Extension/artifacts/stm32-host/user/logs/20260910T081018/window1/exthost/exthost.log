@@ -1,0 +1,36 @@
+2026-09-10 08:10:20.519 [info] Extension host with pid 19996 started
+2026-09-10 08:10:20.519 [info] Skipping acquiring lock for i:\BackFile\code\hornet-cpptools\Extension\artifacts\stm32-host\user\User\workspaceStorage\94a880a43aac17c09baaef9502a40b14.
+2026-09-10 08:10:20.627 [info] ExtensionService#_doActivateExtension vscode.github-authentication, startup: false, activationEvent: 'onAuthenticationRequest:github'
+2026-09-10 08:10:20.653 [info] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2026-09-10 08:10:20.722 [info] ExtensionService#_doActivateExtension vscode.git-base, startup: true, activationEvent: '*', root cause: vscode.git
+2026-09-10 08:10:20.762 [info] ExtensionService#_doActivateExtension vscode.git, startup: true, activationEvent: '*'
+2026-09-10 08:10:20.825 [info] ExtensionService#_doActivateExtension vscode.github, startup: true, activationEvent: '*'
+2026-09-10 08:10:20.897 [info] ExtensionService#_doActivateExtension hornet.hornet-cpp, startup: true, activationEvent: 'workspaceContains:**/CMakeLists.txt,**/*.{c,cc,cpp,cxx,h,hh,hpp,hxx,cu,cuh}'
+2026-09-10 08:10:21.339 [warning] [vscode.git] Accessing a resource scoped configuration without providing a resource is not expected. To get the effective value for 'git.openRepositoryInParentFolders', provide the URI of a resource or 'null' for any resource.
+2026-09-10 08:10:21.339 [warning] [vscode.git] Accessing a resource scoped configuration without providing a resource is not expected. To get the effective value for 'git.showProgress', provide the URI of a resource or 'null' for any resource.
+2026-09-10 08:10:21.374 [info] Eager extensions activated
+2026-09-10 08:10:21.407 [info] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2026-09-10 08:10:21.413 [info] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2026-09-10 08:10:25.576 [info] Extension host terminating: received terminate message from renderer
+2026-09-10 08:10:25.591 [error] Unable to refresh tree view hornet-cpp.callGraph: Canceled
+2026-09-10 08:10:25.594 [error] Error: Channel has been closed
+	at o (file:///d:/Software/Microsoft/Visual%20Studio%20Code/645f29cc31/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3524)
+	at Object.appendLine (file:///d:/Software/Microsoft/Visual%20Studio%20Code/645f29cc31/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3663)
+	at Object.log (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:14196:24)
+	at Socket.<anonymous> (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:12139:52)
+	at Socket.emit (node:events:509:28)
+	at addChunk (node:internal/streams/readable:563:12)
+	at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+	at Readable.push (node:internal/streams/readable:394:5)
+	at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+2026-09-10 08:10:25.606 [error] Error: Channel has been closed
+	at o (file:///d:/Software/Microsoft/Visual%20Studio%20Code/645f29cc31/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3524)
+	at Object.appendLine (file:///d:/Software/Microsoft/Visual%20Studio%20Code/645f29cc31/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3663)
+	at Object.log (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:14196:24)
+	at Socket.<anonymous> (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:12139:52)
+	at Socket.emit (node:events:509:28)
+	at addChunk (node:internal/streams/readable:563:12)
+	at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+	at Readable.push (node:internal/streams/readable:394:5)
+	at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+2026-09-10 08:10:25.856 [info] Extension host with pid 19996 exiting with code 0

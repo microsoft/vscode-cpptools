@@ -1,0 +1,18 @@
+[21708:0909/080722.630:ERROR:content\browser\gpu\gpu_process_host.cc:1017] GPU process exited unexpectedly: exit_code=-1073741515
+[main 2026-09-09T15:07:22.687Z] Error: Unable to create or open registry key
+    at Object.setDeviceId (D:\Software\Microsoft\Visual Studio Code\88e44fa0e0\resources\app\node_modules.asar\@vscode\deviceid\dist\storage.js:100:25)
+    at Module.getDeviceId (D:\Software\Microsoft\Visual Studio Code\88e44fa0e0\resources\app\node_modules.asar\@vscode\deviceid\dist\devdeviceid.js:46:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Gg (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:460:5508)
+    at async _I (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:505:93754)
+    at async Xk (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:505:94201)
+    at async Promise.all (index 2)
+    at async $s.startup (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:561:11024)
+    at async Jx.startup (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:592:54632)
+[21708:0909/080722.693:ERROR:content\browser\gpu\gpu_process_host.cc:1017] GPU process exited unexpectedly: exit_code=-1073741515
+[main 2026-09-09T15:07:22.761Z] Error: Error mutex already exists
+    at $s.installMutex (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:561:27488)
+[21708:0909/080722.766:ERROR:content\browser\gpu\gpu_process_host.cc:1017] GPU process exited unexpectedly: exit_code=-1073741515
+[main 2026-09-09T15:07:22.771Z] CodeWindow: renderer process gone (reason: launch-failed, code: 49)
+[main 2026-09-09T15:07:22.790Z] CodeWindow: renderer process gone (reason: launch-failed, code: 49)
+[21708:0909/080722.804:ERROR:content\browser\gpu\gpu_process_host.cc:1017] GPU process exited unexpectedly: exit_code=-1073741515

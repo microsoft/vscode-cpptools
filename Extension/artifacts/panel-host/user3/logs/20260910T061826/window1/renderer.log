@@ -1,0 +1,21 @@
+2026-09-10 06:18:27.023 [info] [AgentHost:renderer] Acquiring MessagePort to agent host...
+2026-09-10 06:18:27.225 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey=undefined conversationKey=undefined modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:18:27.517 [info] [AgentHost:renderer] MessagePort acquired, creating client...
+2026-09-10 06:18:27.537 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NzM4NGIzMWYtNDlhNi00MmVjLTkwOGUtNzAzYjE0MmM1MGQw" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:18:27.648 [info] [AgentHost:renderer] Protocol connection established; clientId=ef05cfb1-6b4c-49e8-a6ad-929054893c6b
+2026-09-10 06:18:27.652 [info] Started local extension host with pid 13948.
+2026-09-10 06:18:27.781 [info] [AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+2026-09-10 06:18:27.836 [info] Loading development extension at i:\BackFile\code\hornet-cpptools\Extension
+2026-09-10 06:18:28.528 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:18:28.543 [info] [AgentHost] Clearing authentication for resource: https://api.github.com
+2026-09-10 06:18:28.584 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:18:28.594 [info] [AgentHost] Clearing authentication for resource: https://api.github.com/repos
+2026-09-10 06:18:28.609 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:18:28.619 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:18:28.638 [info] Settings Sync: Account status changed from uninitialized to unavailable
+2026-09-10 06:18:28.660 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NzM4NGIzMWYtNDlhNi00MmVjLTkwOGUtNzAzYjE0MmM1MGQw" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:18:32.470 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NzM4NGIzMWYtNDlhNi00MmVjLTkwOGUtNzAzYjE0MmM1MGQw" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:18:32.774 [info] [AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+2026-09-10 06:19:02.818 [error] Error: Timed out: panel screenshot
+	at waitFor (i:\BackFile\code\hornet-cpptools\Extension\test\hornet\index.vscode.cjs:16:15)
+	at async exports.run (i:\BackFile\code\hornet-cpptools\Extension\test\hornet\index.vscode.cjs:48:13)

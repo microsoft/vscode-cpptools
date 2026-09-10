@@ -1,0 +1,329 @@
+Hornet C/C++ 0.1.9 (i:\BackFile\code\hornet-cpptools\Extension)
+[2026-09-10T15:10:20.969Z] [stm32_freertos] [Compiler] Using build configuration: i:\BackFile\code\stm32_freertos\build\Debug\compile_commands.json
+[2026-09-10T15:10:20.998Z] [stm32_freertos] [Compiler] Compilation database: 38 files from 1 sources
+[2026-09-10T15:10:21.001Z] [stm32_freertos] [Compiler] Using build configuration: i:\BackFile\code\stm32_freertos\build\Debug\compile_commands.json
+[2026-09-10T15:10:21.025Z] [stm32_freertos] [Compiler] Compilation database: 38 files from 1 sources
+[2026-09-10T15:10:21.040Z] [stm32_freertos] [Compiler] [Index] Discovering C/C++ sources and compile commands
+[2026-09-10T15:10:21.043Z] [stm32_freertos] [Compiler] [Index] Starting clangd for 38 source files
+[2026-09-10T15:10:21.044Z] [stm32_freertos] [Compiler] Starting D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+[2026-09-10T15:10:21.113Z] [stm32_freertos] [Compiler] I[08:10:21.112] clangd version 22.1.0 (https://github.com/llvm/llvm-project 4434dabb69916856b824f68a64b029c67175e532)
+I[08:10:21.113] Features: windows+grpc
+I[08:10:21.113] PID: 17504
+I[08:10:21.113] Working directory: i:\BackFile\code\stm32_freertos
+I[08:10:21.113] argv[0]: D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+I[08:10:21.113] argv[1]: --background-index
+I[08:10:21.113] argv[2]: --enable-config=0
+I[08:10:21.113] argv[3]: --compile-commands-dir=I:\BackFile\code\stm32_freertos\.vscode\hornet\compile-db
+I[08:10:21.113] argv[4]: -j=10
+[2026-09-10T15:10:21.113Z] [stm32_freertos] [Compiler] I[08:10:21.113] Starting LSP over stdin/stdout
+I[08:10:21.113] <-- initialize(0)
+[2026-09-10T15:10:21.133Z] [stm32_freertos] [Compiler] I[08:10:21.133] --> reply:initialize(0) 19 ms
+[2026-09-10T15:10:21.136Z] [stm32_freertos] [Compiler] Compiler ready
+[2026-09-10T15:10:21.140Z] [stm32_freertos] [Compiler] [Index] Loading compilation database (38 source files)
+[2026-09-10T15:10:21.140Z] [stm32_freertos] [Compiler] [Index] Parsing I:\BackFile\code\stm32_freertos\core\src\beep_control.c
+[2026-09-10T15:10:21.145Z] [stm32_freertos] [Compiler] I[08:10:21.136] <-- initialized
+[2026-09-10T15:10:21.146Z] [stm32_freertos] [Compiler] I[08:10:21.147] <-- textDocument/didOpen
+[2026-09-10T15:10:21.147Z] [stm32_freertos] [Compiler] I[08:10:21.147] <-- textDocument/documentSymbol(1)
+[2026-09-10T15:10:21.148Z] [stm32_freertos] [Compiler] I[08:10:21.148] Loaded compilation database from I:\BackFile\code\stm32_freertos\.vscode\hornet\compile-db\compile_commands.json
+I[08:10:21.148] --> window/workDoneProgress/create(0)
+I[08:10:21.148] Enqueueing 38 commands for indexing
+I[08:10:21.149] ASTWorker building file I:\BackFile\code\stm32_freertos\core\src\beep_control.c version 0 with command 
+[I:\BackFile\code\stm32_freertos\build\Debug]
+"C:\\Users\\LiXueqiang\\AppData\\Local\\stm32cube\\bundles\\gnu-tools-for-stm32\\14.3.1+st.2\\bin\\arm-none-eabi-gcc.exe" --target=arm-none-eabi -DDEBUG -DSTM32F103xE -DUSE_HAL_DRIVER -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../core/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include/legacy -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/cmsis_rtos_v2 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/portable/gcc/arm_cm3 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/device/stm32f1xx/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/include -mcpu=cortex-m3 -Wall -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o "CMakeFiles\\stm32f103_freertos.dir\\core\\src\\beep_control.c.obj" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\stm32_freertos\\core\\src\\beep_control.c"
+[2026-09-10T15:10:21.150Z] [stm32_freertos] [Compiler] I[08:10:21.150] <-- reply(0)
+I[08:10:21.150] --> $/progress
+[2026-09-10T15:10:21.150Z] [stm32_freertos] [Compiler] I[08:10:21.150] --> $/progress
+[2026-09-10T15:10:21.151Z] [stm32_freertos] [Compiler] [Index] Building project index (0%)
+[2026-09-10T15:10:21.152Z] [stm32_freertos] [Compiler] [Index] 0/1 (0%)
+[2026-09-10T15:10:21.162Z] [stm32_freertos] [Compiler] I[08:10:21.162] --> $/progress
+I[08:10:21.162] --> $/progress
+[2026-09-10T15:10:21.162Z] [stm32_freertos] [Compiler] I[08:10:21.162] --> $/progress
+I[08:10:21.162] --> $/progress
+I[08:10:21.162] --> $/progress
+I[08:10:21.162] --> $/progress
+I[08:10:21.162] --> $/progress
+I[08:10:21.162] --> $/progress
+I[08:10:21.163] --> $/progress
+I[08:10:21.163] --> $/progress
+I[08:10:21.163] --> $/progress
+I[08:10:21.163] --> $/progress
+[2026-09-10T15:10:21.163Z] [stm32_freertos] [Compiler] [Index] 0/39 (0%)
+[2026-09-10T15:10:21.164Z] [stm32_freertos] [Compiler] [Index] 1/39 (2%)
+[2026-09-10T15:10:21.280Z] [stm32_freertos] [Compiler] I[08:10:21.261] Indexed I:\BackFile\code\stm32_freertos\free_rtos\stream_buffer.c (432 symbols, 2666 refs, 41 files)
+I[08:10:21.263] Indexed I:\BackFile\code\stm32_freertos\free_rtos\portable\mem_mang\heap_4.c (479 symbols, 2322 refs, 39 files)
+[2026-09-10T15:10:21.291Z] [stm32_freertos] [Compiler] I[08:10:21.281] Built preamble of size 2475436 for file I:\BackFile\code\stm32_freertos\core\src\beep_control.c version 0 in 0.13 seconds
+I[08:10:21.282] Indexing c17 standard library in the context of I:\BackFile\code\stm32_freertos\core\src\beep_control.c
+[2026-09-10T15:10:21.304Z] [stm32_freertos] [Compiler] I[08:10:21.304] --> textDocument/publishDiagnostics
+[2026-09-10T15:10:21.305Z] [stm32_freertos] [Compiler] I[08:10:21.305] --> reply:textDocument/documentSymbol(1) 157 ms
+[2026-09-10T15:10:21.310Z] [stm32_freertos] [Compiler] I[08:10:21.311] <-- textDocument/documentSymbol(2)
+[2026-09-10T15:10:21.311Z] [stm32_freertos] [Compiler] I[08:10:21.311] --> reply:textDocument/documentSymbol(2) 0 ms
+[2026-09-10T15:10:21.388Z] [stm32_freertos] [Compiler] I[08:10:21.369] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_flash_ex.c (1277 symbols, 17292 refs, 43 files)
+I[08:10:21.371] Indexed c17 standard library (incomplete due to errors): 2435 symbols, 11 filtered
+I[08:10:21.377] Indexed I:\BackFile\code\stm32_freertos\core\src\stm32f1xx_it.c (1535 symbols, 17865 refs, 53 files)
+I[08:10:21.379] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_dma.c (1267 symbols, 17336 refs, 42 files)
+I[08:10:21.387] Indexed I:\BackFile\code\stm32_freertos\core\src\main.c (1811 symbols, 18650 refs, 58 files)
+[2026-09-10T15:10:21.391Z] [stm32_freertos] [Compiler] Using build configuration: i:\BackFile\code\stm32_freertos\build\Debug\compile_commands.json
+[2026-09-10T15:10:21.400Z] [stm32_freertos] [Compiler] I[08:10:21.396] Indexed I:\BackFile\code\stm32_freertos\core\src\key_control.c (1800 symbols, 18523 refs, 57 files)
+I[08:10:21.398] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_rcc.c (1267 symbols, 17564 refs, 42 files)
+I[08:10:21.398] Indexed I:\BackFile\code\stm32_freertos\core\src\led_control.c (1788 symbols, 18502 refs, 55 files)
+[2026-09-10T15:10:21.449Z] [stm32_freertos] [Compiler] I[08:10:21.439] Indexed I:\BackFile\code\stm32_freertos\free_rtos\cmsis_rtos_v2\cmsis_os2.c (1947 symbols, 20814 refs, 72 files)
+[2026-09-10T15:10:21.461Z] [stm32_freertos] [Compiler] Compilation database: 38 files from 1 sources
+[2026-09-10T15:10:21.463Z] [stm32_freertos] [Compiler] Using build configuration: i:\BackFile\code\stm32_freertos\build\Debug\compile_commands.json
+[2026-09-10T15:10:21.488Z] [stm32_freertos] [Compiler] Compilation database: 38 files from 1 sources
+[2026-09-10T15:10:21.492Z] [stm32_freertos] [Compiler] I[08:10:21.491] <-- shutdown(3)
+I[08:10:21.491] --> reply:shutdown(3) 0 ms
+[2026-09-10T15:10:21.498Z] [stm32_freertos] [Compiler] I[08:10:21.493] <-- exit
+I[08:10:21.493] LSP finished, exiting with status 0
+[2026-09-10T15:10:21.540Z] [stm32_freertos] [Compiler] Index build: Error: Index build interrupted by a language-service restart.
+[2026-09-10T15:10:21.703Z] [stm32_freertos] [Compiler] I[08:10:21.703] --> $/progress
+[2026-09-10T15:10:21.742Z] [stm32_freertos] [Compiler] I[08:10:21.742] --> $/progress
+[2026-09-10T15:10:21.894Z] [stm32_freertos] [Compiler] I[08:10:21.895] --> $/progress
+[2026-09-10T15:10:22.012Z] [stm32_freertos] [Compiler] [Index] Discovering C/C++ sources and compile commands
+[2026-09-10T15:10:22.014Z] [stm32_freertos] [Compiler] [Index] Starting clangd for 38 source files
+[2026-09-10T15:10:22.015Z] [stm32_freertos] [Compiler] Starting D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+[2026-09-10T15:10:22.086Z] [stm32_freertos] [Compiler] I[08:10:22.084] clangd version 22.1.0 (https://github.com/llvm/llvm-project 4434dabb69916856b824f68a64b029c67175e532)
+I[08:10:22.085] Features: windows+grpc
+I[08:10:22.085] PID: 5520
+I[08:10:22.085] Working directory: i:\BackFile\code\stm32_freertos
+I[08:10:22.085] argv[0]: D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+I[08:10:22.085] argv[1]: --background-index
+I[08:10:22.085] argv[2]: --enable-config=0
+I[08:10:22.085] argv[3]: --compile-commands-dir=I:\BackFile\code\stm32_freertos\.vscode\hornet\compile-db
+I[08:10:22.085] argv[4]: -j=10
+I[08:10:22.085] Starting LSP over stdin/stdout
+I[08:10:22.086] <-- initialize(0)
+[2026-09-10T15:10:22.108Z] [stm32_freertos] [Compiler] I[08:10:22.108] --> reply:initialize(0) 22 ms
+[2026-09-10T15:10:22.108Z] [stm32_freertos] [Compiler] Compiler ready
+[2026-09-10T15:10:22.113Z] [stm32_freertos] [Compiler] [Index] Loading compilation database (38 source files)
+[2026-09-10T15:10:22.113Z] [stm32_freertos] [Compiler] [Index] Parsing I:\BackFile\code\stm32_freertos\core\src\beep_control.c
+[2026-09-10T15:10:22.114Z] [stm32_freertos] [Compiler] I[08:10:22.109] <-- initialized
+[2026-09-10T15:10:22.120Z] [stm32_freertos] [Compiler] I[08:10:22.120] <-- textDocument/didOpen
+[2026-09-10T15:10:22.120Z] [stm32_freertos] [Compiler] I[08:10:22.120] <-- textDocument/documentSymbol(1)
+[2026-09-10T15:10:22.121Z] [stm32_freertos] [Compiler] I[08:10:22.121] Loaded compilation database from I:\BackFile\code\stm32_freertos\.vscode\hornet\compile-db\compile_commands.json
+I[08:10:22.121] --> window/workDoneProgress/create(0)
+[2026-09-10T15:10:22.121Z] [stm32_freertos] [Compiler] I[08:10:22.121] Enqueueing 38 commands for indexing
+[2026-09-10T15:10:22.121Z] [stm32_freertos] [Compiler] I[08:10:22.121] ASTWorker building file I:\BackFile\code\stm32_freertos\core\src\beep_control.c version 0 with command 
+[I:\BackFile\code\stm32_freertos\build\Debug]
+"C:\\Users\\LiXueqiang\\AppData\\Local\\stm32cube\\bundles\\gnu-tools-for-stm32\\14.3.1+st.2\\bin\\arm-none-eabi-gcc.exe" --target=arm-none-eabi -DDEBUG -DSTM32F103xE -DUSE_HAL_DRIVER -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../core/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include/legacy -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/cmsis_rtos_v2 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/portable/gcc/arm_cm3 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/device/stm32f1xx/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/include -mcpu=cortex-m3 -Wall -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o "CMakeFiles\\stm32f103_freertos.dir\\core\\src\\beep_control.c.obj" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\stm32_freertos\\core\\src\\beep_control.c"
+[2026-09-10T15:10:22.122Z] [stm32_freertos] [Compiler] I[08:10:22.122] <-- reply(0)
+I[08:10:22.122] --> $/progress
+I[08:10:22.122] --> $/progress
+[2026-09-10T15:10:22.122Z] [stm32_freertos] [Compiler] [Index] Building project index (0%)
+[2026-09-10T15:10:22.122Z] [stm32_freertos] [Compiler] [Index] 0/1 (0%)
+[2026-09-10T15:10:22.213Z] [stm32_freertos] [Compiler] I[08:10:22.213] --> $/progress
+I[08:10:22.213] --> $/progress
+I[08:10:22.213] --> $/progress
+[2026-09-10T15:10:22.213Z] [stm32_freertos] [Compiler] I[08:10:22.213] --> $/progress
+I[08:10:22.213] --> $/progress
+I[08:10:22.213] --> $/progress
+I[08:10:22.213] --> $/progress
+I[08:10:22.213] --> $/progress
+[2026-09-10T15:10:22.213Z] [stm32_freertos] [Compiler] [Index] 0/33 (0%)
+[2026-09-10T15:10:22.214Z] [stm32_freertos] [Compiler] I[08:10:22.213] --> $/progress
+I[08:10:22.214] --> $/progress
+I[08:10:22.214] --> $/progress
+I[08:10:22.214] --> $/progress
+[2026-09-10T15:10:22.215Z] [stm32_freertos] [Compiler] I[08:10:22.215] Built preamble of size 2475436 for file I:\BackFile\code\stm32_freertos\core\src\beep_control.c version 0 in 0.09 seconds
+[2026-09-10T15:10:22.215Z] [stm32_freertos] [Compiler] [Index] 1/33 (3%)
+[2026-09-10T15:10:22.216Z] [stm32_freertos] [Compiler] I[08:10:22.216] Indexing c17 standard library in the context of I:\BackFile\code\stm32_freertos\core\src\beep_control.c
+[2026-09-10T15:10:22.244Z] [stm32_freertos] [Compiler] I[08:10:22.245] --> textDocument/publishDiagnostics
+[2026-09-10T15:10:22.245Z] [stm32_freertos] [Compiler] I[08:10:22.245] --> reply:textDocument/documentSymbol(1) 124 ms
+[2026-09-10T15:10:22.249Z] [stm32_freertos] [Compiler] I[08:10:22.249] <-- textDocument/documentSymbol(2)
+[2026-09-10T15:10:22.249Z] [stm32_freertos] [Compiler] I[08:10:22.250] --> reply:textDocument/documentSymbol(2) 0 ms
+[2026-09-10T15:10:22.303Z] [stm32_freertos] [Compiler] I[08:10:22.286] Indexed I:\BackFile\code\stm32_freertos\free_rtos\list.c (6 symbols, 1208 refs, 38 files)
+I[08:10:22.299] Indexed I:\BackFile\code\stm32_freertos\free_rtos\event_groups.c (22 symbols, 1677 refs, 41 files)
+[2026-09-10T15:10:22.310Z] [stm32_freertos] [Compiler] I[08:10:22.309] Indexed c17 standard library (incomplete due to errors): 2435 symbols, 11 filtered
+[2026-09-10T15:10:22.323Z] [stm32_freertos] [Compiler] I[08:10:22.323] --> $/progress
+I[08:10:22.323] --> $/progress
+[2026-09-10T15:10:22.323Z] [stm32_freertos] [Compiler] [Index] 2/33 (6%)
+[2026-09-10T15:10:22.335Z] [stm32_freertos] [Compiler] I[08:10:22.334] --> $/progress
+I[08:10:22.334] --> $/progress
+[2026-09-10T15:10:22.335Z] [stm32_freertos] [Compiler] [Index] 3/33 (9%)
+[2026-09-10T15:10:22.367Z] [stm32_freertos] [Compiler] I[08:10:22.367] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_gpio.c (8 symbols, 14158 refs, 42 files)
+[2026-09-10T15:10:22.376Z] [stm32_freertos] [Compiler] I[08:10:22.376] Indexed I:\BackFile\code\stm32_freertos\core\src\stm32f1xx_it.c (31 symbols, 14604 refs, 53 files)
+[2026-09-10T15:10:22.391Z] [stm32_freertos] [Compiler] I[08:10:22.381] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_flash.c (16 symbols, 14318 refs, 43 files)
+I[08:10:22.385] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal.c (28 symbols, 14111 refs, 42 files)
+[2026-09-10T15:10:22.392Z] [stm32_freertos] [Compiler] I[08:10:22.392] --> $/progress
+I[08:10:22.392] --> $/progress
+[2026-09-10T15:10:22.392Z] [stm32_freertos] [Compiler] [Index] 4/33 (12%)
+[2026-09-10T15:10:22.402Z] [stm32_freertos] [Compiler] I[08:10:22.402] --> $/progress
+I[08:10:22.402] --> $/progress
+[2026-09-10T15:10:22.403Z] [stm32_freertos] [Compiler] [Index] 5/33 (15%)
+[2026-09-10T15:10:22.411Z] [stm32_freertos] [Compiler] I[08:10:22.405] --> $/progress
+I[08:10:22.405] --> $/progress
+[2026-09-10T15:10:22.412Z] [stm32_freertos] [Compiler] [Index] 6/33 (18%)
+[2026-09-10T15:10:22.419Z] [stm32_freertos] [Compiler] I[08:10:22.419] --> $/progress
+I[08:10:22.419] --> $/progress
+[2026-09-10T15:10:22.420Z] [stm32_freertos] [Compiler] [Index] 7/33 (21%)
+[2026-09-10T15:10:22.457Z] [stm32_freertos] [Compiler] I[08:10:22.455] Indexed I:\BackFile\code\stm32_freertos\free_rtos\cmsis_rtos_v2\cmsis_os2.c (226 symbols, 15910 refs, 72 files)
+[2026-09-10T15:10:22.461Z] [stm32_freertos] [Compiler] I[08:10:22.461] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_cortex.c (15 symbols, 14026 refs, 42 files)
+[2026-09-10T15:10:22.496Z] [stm32_freertos] [Compiler] I[08:10:22.495] --> $/progress
+I[08:10:22.496] --> $/progress
+[2026-09-10T15:10:22.496Z] [stm32_freertos] [Compiler] [Index] 8/33 (24%)
+[2026-09-10T15:10:22.507Z] [stm32_freertos] [Compiler] I[08:10:22.507] Indexed I:\BackFile\code\stm32_freertos\free_rtos\portable\gcc\arm_cm3\port.c (16 symbols, 920 refs, 26 files)
+[2026-09-10T15:10:22.523Z] [stm32_freertos] [Compiler] I[08:10:22.523] --> $/progress
+I[08:10:22.523] --> $/progress
+[2026-09-10T15:10:22.524Z] [stm32_freertos] [Compiler] [Index] 9/33 (27%)
+[2026-09-10T15:10:22.525Z] [stm32_freertos] [Compiler] I[08:10:22.525] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_can.c (36 symbols, 14946 refs, 42 files)
+[2026-09-10T15:10:22.526Z] [stm32_freertos] [Compiler] I[08:10:22.527] --> $/progress
+I[08:10:22.527] --> $/progress
+[2026-09-10T15:10:22.527Z] [stm32_freertos] [Compiler] [Index] 10/33 (30%)
+[2026-09-10T15:10:22.532Z] [stm32_freertos] [Compiler] I[08:10:22.532] Indexed I:\BackFile\code\stm32_freertos\free_rtos\timers.c (45 symbols, 2051 refs, 41 files)
+[2026-09-10T15:10:22.532Z] [stm32_freertos] [Compiler] I[08:10:22.532] Indexed I:\BackFile\code\stm32_freertos\core\src\stm32f1xx_hal_msp.c (40 symbols, 14210 refs, 43 files)
+[2026-09-10T15:10:22.554Z] [stm32_freertos] [Compiler] I[08:10:22.554] --> $/progress
+[2026-09-10T15:10:22.556Z] [stm32_freertos] [Compiler] I[08:10:22.557] --> $/progress
+[2026-09-10T15:10:22.557Z] [stm32_freertos] [Compiler] [Index] 11/33 (33%)
+[2026-09-10T15:10:22.573Z] [stm32_freertos] [Compiler] I[08:10:22.573] --> $/progress
+I[08:10:22.573] --> $/progress
+[2026-09-10T15:10:22.573Z] [stm32_freertos] [Compiler] [Index] 12/33 (36%)
+[2026-09-10T15:10:22.585Z] [stm32_freertos] [Compiler] I[08:10:22.585] --> $/progress
+I[08:10:22.586] --> $/progress
+[2026-09-10T15:10:22.586Z] [stm32_freertos] [Compiler] [Index] 13/33 (39%)
+[2026-09-10T15:10:22.664Z] [stm32_freertos] [Compiler] I[08:10:22.664] Indexed I:\BackFile\code\stm32_freertos\core\src\sysmem.c (8 symbols, 625 refs, 28 files)
+[2026-09-10T15:10:22.681Z] [stm32_freertos] [Compiler] I[08:10:22.670] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_gpio_ex.c (3 symbols, 13963 refs, 42 files)
+I[08:10:22.678] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_uart.c (62 symbols, 16134 refs, 42 files)
+[2026-09-10T15:10:22.697Z] [stm32_freertos] [Compiler] I[08:10:22.697] --> $/progress
+I[08:10:22.697] --> $/progress
+[2026-09-10T15:10:22.697Z] [stm32_freertos] [Compiler] [Index] 14/33 (42%)
+[2026-09-10T15:10:22.711Z] [stm32_freertos] [Compiler] I[08:10:22.711] Indexed I:\BackFile\code\stm32_freertos\core\src\syscalls.c (451 symbols, 2467 refs, 55 files)
+[2026-09-10T15:10:22.713Z] [stm32_freertos] [Compiler] I[08:10:22.713] Indexed I:\BackFile\code\stm32_freertos\core\src\led_control.c (216 symbols, 15112 refs, 55 files)
+[2026-09-10T15:10:22.721Z] [stm32_freertos] [Compiler] I[08:10:22.721] --> $/progress
+I[08:10:22.721] --> $/progress
+[2026-09-10T15:10:22.721Z] [stm32_freertos] [Compiler] [Index] 15/33 (45%)
+[2026-09-10T15:10:22.727Z] [stm32_freertos] [Compiler] I[08:10:22.727] --> $/progress
+I[08:10:22.727] --> $/progress
+[2026-09-10T15:10:22.728Z] [stm32_freertos] [Compiler] [Index] 16/33 (48%)
+[2026-09-10T15:10:22.742Z] [stm32_freertos] [Compiler] I[08:10:22.742] Indexed I:\BackFile\code\stm32_freertos\core\src\common.c (238 symbols, 15100 refs, 54 files)
+[2026-09-10T15:10:22.769Z] [stm32_freertos] [Compiler] I[08:10:22.769] --> $/progress
+I[08:10:22.769] --> $/progress
+[2026-09-10T15:10:22.769Z] [stm32_freertos] [Compiler] [Index] 17/33 (51%)
+[2026-09-10T15:10:22.786Z] [stm32_freertos] [Compiler] I[08:10:22.786] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_exti.c (9 symbols, 14182 refs, 42 files)
+[2026-09-10T15:10:22.790Z] [stm32_freertos] [Compiler] I[08:10:22.790] --> $/progress
+I[08:10:22.790] --> $/progress
+[2026-09-10T15:10:22.791Z] [stm32_freertos] [Compiler] [Index] 18/33 (54%)
+[2026-09-10T15:10:22.794Z] [stm32_freertos] [Compiler] I[08:10:22.794] Indexed I:\BackFile\code\stm32_freertos\drivers\cmsis\device\stm32f1xx\src\gcc\startup_stm32f103xe.s (0 symbols, 0 refs, 1 files)
+I[08:10:22.794] Failed to compile I:\BackFile\code\stm32_freertos\drivers\cmsis\device\stm32f1xx\src\gcc\startup_stm32f103xe.s, index may be incomplete
+[2026-09-10T15:10:22.814Z] [stm32_freertos] [Compiler] I[08:10:22.815] --> $/progress
+I[08:10:22.815] --> $/progress
+[2026-09-10T15:10:22.816Z] [stm32_freertos] [Compiler] [Index] 19/33 (57%)
+[2026-09-10T15:10:22.825Z] [stm32_freertos] [Compiler] I[08:10:22.825] --> $/progress
+I[08:10:22.825] Indexed I:\BackFile\code\stm32_freertos\core\src\tm1637_control.c (241 symbols, 15221 refs, 55 files)
+I[08:10:22.825] --> $/progress
+[2026-09-10T15:10:22.826Z] [stm32_freertos] [Compiler] [Index] 20/33 (60%)
+[2026-09-10T15:10:22.846Z] [stm32_freertos] [Compiler] I[08:10:22.846] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_rcc_ex.c (3 symbols, 14150 refs, 42 files)
+[2026-09-10T15:10:22.873Z] [stm32_freertos] [Compiler] I[08:10:22.873] --> $/progress
+[2026-09-10T15:10:22.876Z] [stm32_freertos] [Compiler] I[08:10:22.876] --> $/progress
+[2026-09-10T15:10:22.876Z] [stm32_freertos] [Compiler] [Index] 21/33 (63%)
+[2026-09-10T15:10:22.880Z] [stm32_freertos] [Compiler] I[08:10:22.880] --> $/progress
+I[08:10:22.881] --> $/progress
+[2026-09-10T15:10:22.881Z] [stm32_freertos] [Compiler] [Index] 22/33 (66%)
+[2026-09-10T15:10:22.904Z] [stm32_freertos] [Compiler] I[08:10:22.893] Indexed I:\BackFile\code\stm32_freertos\free_rtos\croutine.c (13 symbols, 828 refs, 27 files)
+[2026-09-10T15:10:22.928Z] [stm32_freertos] [Compiler] I[08:10:22.925] Indexed I:\BackFile\code\stm32_freertos\core\src\freertos.c (1 symbols, 14541 refs, 52 files)
+[2026-09-10T15:10:22.933Z] [stm32_freertos] [Compiler] I[08:10:22.933] --> $/progress
+I[08:10:22.933] --> $/progress
+[2026-09-10T15:10:22.934Z] [stm32_freertos] [Compiler] [Index] 23/33 (69%)
+[2026-09-10T15:10:22.959Z] [stm32_freertos] [Compiler] I[08:10:22.959] --> $/progress
+[2026-09-10T15:10:22.959Z] [stm32_freertos] [Compiler] [Index] 24/33 (72%)
+[2026-09-10T15:10:22.974Z] [stm32_freertos] [Compiler] I[08:10:22.974] Indexed I:\BackFile\code\stm32_freertos\free_rtos\queue.c (67 symbols, 2810 refs, 44 files)
+[2026-09-10T15:10:22.993Z] [stm32_freertos] [Compiler] I[08:10:22.993] Indexed I:\BackFile\code\stm32_freertos\core\src\main.c (0 symbols, 14706 refs, 58 files)
+[2026-09-10T15:10:22.995Z] [stm32_freertos] [Compiler] I[08:10:22.995] --> $/progress
+[2026-09-10T15:10:22.996Z] [stm32_freertos] [Compiler] [Index] 25/33 (75%)
+[2026-09-10T15:10:23.007Z] [stm32_freertos] [Compiler] I[08:10:23.007] --> $/progress
+[2026-09-10T15:10:23.008Z] [stm32_freertos] [Compiler] [Index] 26/33 (78%)
+[2026-09-10T15:10:23.022Z] [stm32_freertos] [Compiler] I[08:10:23.022] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_usart.c (44 symbols, 15538 refs, 42 files)
+[2026-09-10T15:10:23.050Z] [stm32_freertos] [Compiler] I[08:10:23.050] --> $/progress
+[2026-09-10T15:10:23.051Z] [stm32_freertos] [Compiler] [Index] 27/33 (81%)
+[2026-09-10T15:10:23.074Z] [stm32_freertos] [Compiler] I[08:10:23.074] Indexed I:\BackFile\code\stm32_freertos\free_rtos\tasks.c (83 symbols, 3445 refs, 45 files)
+[2026-09-10T15:10:23.090Z] [stm32_freertos] [Compiler] I[08:10:23.090] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_pwr.c (18 symbols, 14144 refs, 42 files)
+[2026-09-10T15:10:23.114Z] [stm32_freertos] [Compiler] I[08:10:23.114] --> $/progress
+[2026-09-10T15:10:23.115Z] [stm32_freertos] [Compiler] I[08:10:23.115] --> $/progress
+[2026-09-10T15:10:23.115Z] [stm32_freertos] [Compiler] [Index] 28/33 (84%)
+[2026-09-10T15:10:23.116Z] [stm32_freertos] [Compiler] [Index] 29/33 (87%)
+[2026-09-10T15:10:23.125Z] [stm32_freertos] [Compiler] I[08:10:23.125] --> $/progress
+[2026-09-10T15:10:23.126Z] [stm32_freertos] [Compiler] I[08:10:23.125] Indexed I:\BackFile\code\stm32_freertos\drivers\cmsis\device\stm32f1xx\src\system_stm32f1xx.c (11 symbols, 14078 refs, 42 files)
+[2026-09-10T15:10:23.126Z] [stm32_freertos] [Compiler] [Index] 30/33 (90%)
+[2026-09-10T15:10:23.151Z] [stm32_freertos] [Compiler] I[08:10:23.151] --> $/progress
+[2026-09-10T15:10:23.151Z] [stm32_freertos] [Compiler] [Index] 31/33 (93%)
+[2026-09-10T15:10:23.158Z] [stm32_freertos] [Compiler] I[08:10:23.158] Indexed I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_i2c.c (82 symbols, 20005 refs, 42 files)
+[2026-09-10T15:10:23.190Z] [stm32_freertos] [Compiler] I[08:10:23.190] --> $/progress
+[2026-09-10T15:10:23.191Z] [stm32_freertos] [Compiler] [Index] 32/33 (96%)
+[2026-09-10T15:10:23.197Z] [stm32_freertos] [Compiler] I[08:10:23.197] Indexed I:\BackFile\code\stm32_freertos\core\src\beep_control.c (4 symbols, 14748 refs, 55 files)
+[2026-09-10T15:10:23.296Z] [stm32_freertos] [Compiler] I[08:10:23.296] --> $/progress
+[2026-09-10T15:10:23.297Z] [stm32_freertos] [Compiler] [Index] Background indexing finished; waiting for pending work
+[2026-09-10T15:10:24.060Z] [stm32_freertos] [Compiler] [Index] Background indexing finished; waiting for pending work
+[2026-09-10T15:10:24.813Z] [stm32_freertos] [Compiler] Index ready: 38 source files (cached for next startup)
+[2026-09-10T15:10:24.813Z] [stm32_freertos] [Compiler] [Index] Index ready: 38 source files (cached for next startup) (100%)
+[2026-09-10T15:10:24.839Z] [stm32_freertos] [Compiler] I[08:10:24.839] <-- textDocument/didOpen
+[2026-09-10T15:10:24.839Z] [stm32_freertos] [Compiler] I[08:10:24.839] ASTWorker building file I:\BackFile\code\stm32_freertos\core\src\main.c version 1 with command 
+[I:\BackFile\code\stm32_freertos\build\Debug]
+"C:\\Users\\LiXueqiang\\AppData\\Local\\stm32cube\\bundles\\gnu-tools-for-stm32\\14.3.1+st.2\\bin\\arm-none-eabi-gcc.exe" --target=arm-none-eabi -DDEBUG -DSTM32F103xE -DUSE_HAL_DRIVER -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../core/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include/legacy -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/cmsis_rtos_v2 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/portable/gcc/arm_cm3 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/device/stm32f1xx/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/include -mcpu=cortex-m3 -Wall -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o "CMakeFiles\\stm32f103_freertos.dir\\core\\src\\main.c.obj" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\stm32_freertos\\core\\src\\main.c"
+[2026-09-10T15:10:24.881Z] [stm32_freertos] [Compiler] I[08:10:24.881] <-- textDocument/codeAction(3)
+[2026-09-10T15:10:24.881Z] [stm32_freertos] [Compiler] I[08:10:24.881] <-- textDocument/documentSymbol(4)
+[2026-09-10T15:10:24.947Z] [stm32_freertos] [Compiler] I[08:10:24.947] Built preamble of size 2479996 for file I:\BackFile\code\stm32_freertos\core\src\main.c version 1 in 0.10 seconds
+[2026-09-10T15:10:24.972Z] [stm32_freertos] [Compiler] I[08:10:24.972] --> textDocument/publishDiagnostics
+[2026-09-10T15:10:24.973Z] [stm32_freertos] [Compiler] I[08:10:24.973] --> reply:textDocument/codeAction(3) 91 ms
+[2026-09-10T15:10:24.974Z] [stm32_freertos] [Compiler] I[08:10:24.973] --> reply:textDocument/documentSymbol(4) 91 ms
+[2026-09-10T15:10:25.021Z] [stm32_freertos] [Compiler] I[08:10:25.021] <-- textDocument/codeAction(5)
+[2026-09-10T15:10:25.021Z] [stm32_freertos] [Compiler] I[08:10:25.021] --> reply:textDocument/codeAction(5) 0 ms
+I[08:10:25.021] <-- textDocument/prepareCallHierarchy(6)
+[2026-09-10T15:10:25.021Z] [stm32_freertos] [Compiler] I[08:10:25.021] --> reply:textDocument/prepareCallHierarchy(6) 0 ms
+[2026-09-10T15:10:25.056Z] [stm32_freertos] [Compiler] I[08:10:25.056] <-- textDocument/inlayHint(7)
+[2026-09-10T15:10:25.056Z] [stm32_freertos] [Compiler] I[08:10:25.057] --> reply:textDocument/inlayHint(7) 0 ms
+[2026-09-10T15:10:25.176Z] [stm32_freertos] [Compiler] I[08:10:25.176] <-- textDocument/documentSymbol(8)
+[2026-09-10T15:10:25.177Z] [stm32_freertos] [Compiler] I[08:10:25.177] --> reply:textDocument/documentSymbol(8) 0 ms
+[2026-09-10T15:10:25.177Z] [stm32_freertos] [Compiler] I[08:10:25.178] <-- textDocument/references(9)
+[2026-09-10T15:10:25.178Z] [stm32_freertos] [Compiler] I[08:10:25.178] --> reply:textDocument/references(9) 0 ms
+[2026-09-10T15:10:25.179Z] [stm32_freertos] [Compiler] I[08:10:25.179] <-- callHierarchy/incomingCalls(10)
+[2026-09-10T15:10:25.179Z] [stm32_freertos] [Compiler] I[08:10:25.180] --> reply:callHierarchy/incomingCalls(10) 0 ms
+[2026-09-10T15:10:25.226Z] [stm32_freertos] [Compiler] I[08:10:25.226] <-- textDocument/foldingRange(11)
+I[08:10:25.226] <-- textDocument/foldingRange(12)
+[2026-09-10T15:10:25.228Z] [stm32_freertos] [Compiler] I[08:10:25.228] --> reply:textDocument/foldingRange(11) 1 ms
+[2026-09-10T15:10:25.228Z] [stm32_freertos] [Compiler] I[08:10:25.228] --> reply:textDocument/foldingRange(12) 1 ms
+[2026-09-10T15:10:25.236Z] [stm32_freertos] [Compiler] I[08:10:25.236] <-- textDocument/documentSymbol(13)
+[2026-09-10T15:10:25.237Z] [stm32_freertos] [Compiler] I[08:10:25.237] --> reply:textDocument/documentSymbol(13) 0 ms
+[2026-09-10T15:10:25.238Z] [stm32_freertos] [Compiler] I[08:10:25.238] <-- callHierarchy/outgoingCalls(14)
+[2026-09-10T15:10:25.238Z] [stm32_freertos] [Compiler] I[08:10:25.239] --> reply:callHierarchy/outgoingCalls(14) 0 ms
+[2026-09-10T15:10:25.243Z] [stm32_freertos] [Compiler] I[08:10:25.243] <-- textDocument/prepareCallHierarchy(15)
+[2026-09-10T15:10:25.243Z] [stm32_freertos] [Compiler] I[08:10:25.243] --> reply:textDocument/prepareCallHierarchy(15) 0 ms
+[2026-09-10T15:10:25.321Z] [stm32_freertos] [Compiler] I[08:10:25.321] <-- textDocument/documentSymbol(16)
+[2026-09-10T15:10:25.321Z] [stm32_freertos] [Compiler] I[08:10:25.321] <-- textDocument/documentSymbol(17)
+[2026-09-10T15:10:25.321Z] [stm32_freertos] [Compiler] I[08:10:25.322] --> reply:textDocument/documentSymbol(16) 0 ms
+[2026-09-10T15:10:25.322Z] [stm32_freertos] [Compiler] I[08:10:25.322] --> reply:textDocument/documentSymbol(17) 0 ms
+[2026-09-10T15:10:25.322Z] [stm32_freertos] [Compiler] I[08:10:25.323] <-- textDocument/references(18)
+[2026-09-10T15:10:25.323Z] [stm32_freertos] [Compiler] I[08:10:25.323] --> reply:textDocument/references(18) 0 ms
+[2026-09-10T15:10:25.323Z] [stm32_freertos] [Compiler] I[08:10:25.324] <-- callHierarchy/outgoingCalls(19)
+[2026-09-10T15:10:25.325Z] [stm32_freertos] [Compiler] I[08:10:25.324] --> reply:callHierarchy/outgoingCalls(19) 0 ms
+[2026-09-10T15:10:25.326Z] [stm32_freertos] [Compiler] I[08:10:25.326] <-- callHierarchy/incomingCalls(20)
+[2026-09-10T15:10:25.326Z] [stm32_freertos] [Compiler] I[08:10:25.326] --> reply:callHierarchy/incomingCalls(20) 0 ms
+[2026-09-10T15:10:25.330Z] [stm32_freertos] [Compiler] I[08:10:25.330] <-- textDocument/documentSymbol(21)
+[2026-09-10T15:10:25.331Z] [stm32_freertos] [Compiler] I[08:10:25.331] <-- textDocument/documentSymbol(22)
+[2026-09-10T15:10:25.331Z] [stm32_freertos] [Compiler] I[08:10:25.331] --> reply:textDocument/documentSymbol(21) 1 ms
+[2026-09-10T15:10:25.332Z] [stm32_freertos] [Compiler] I[08:10:25.332] --> reply:textDocument/documentSymbol(22) 1 ms
+[2026-09-10T15:10:25.333Z] [stm32_freertos] [Compiler] I[08:10:25.333] <-- textDocument/didOpen
+[2026-09-10T15:10:25.333Z] [stm32_freertos] [Compiler] I[08:10:25.334] <-- textDocument/documentSymbol(23)
+I[08:10:25.334] <-- textDocument/references(24)
+[2026-09-10T15:10:25.334Z] [stm32_freertos] [Compiler] I[08:10:25.334] <-- callHierarchy/outgoingCalls(25)
+I[08:10:25.334] ASTWorker building file I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_rcc.c version 0 with command 
+[I:\BackFile\code\stm32_freertos\build\Debug]
+"C:\\Users\\LiXueqiang\\AppData\\Local\\stm32cube\\bundles\\gnu-tools-for-stm32\\14.3.1+st.2\\bin\\arm-none-eabi-gcc.exe" --target=arm-none-eabi -DDEBUG -DSTM32F103xE -DUSE_HAL_DRIVER -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../core/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/stm32f1xx_hal_driver/include/legacy -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/cmsis_rtos_v2 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../free_rtos/portable/gcc/arm_cm3 -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/device/stm32f1xx/include -II:/BackFile/code/stm32_freertos/cmake/stm32cubemx/../../drivers/cmsis/include -mcpu=cortex-m3 -Wall -fdata-sections -ffunction-sections -O0 -g3 -std=gnu11 -o "cmake\\stm32cubemx\\CMakeFiles\\STM32_Drivers.dir\\__\\__\\drivers\\stm32f1xx_hal_driver\\src\\stm32f1xx_hal_rcc.c.obj" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\stm32_freertos\\drivers\\stm32f1xx_hal_driver\\src\\stm32f1xx_hal_rcc.c"
+I[08:10:25.334] --> reply:textDocument/references(24) 0 ms
+[2026-09-10T15:10:25.334Z] [stm32_freertos] [Compiler] I[08:10:25.334] --> reply:callHierarchy/outgoingCalls(25) 0 ms
+[2026-09-10T15:10:25.337Z] [stm32_freertos] [Compiler] I[08:10:25.335] <-- callHierarchy/incomingCalls(26)
+I[08:10:25.335] --> reply:callHierarchy/incomingCalls(26) 0 ms
+[2026-09-10T15:10:25.341Z] [stm32_freertos] [Compiler] I[08:10:25.341] <-- textDocument/codeAction(27)
+[2026-09-10T15:10:25.341Z] [stm32_freertos] [Compiler] I[08:10:25.341] --> reply:textDocument/codeAction(27) 0 ms
+[2026-09-10T15:10:25.345Z] [stm32_freertos] [Compiler] I[08:10:25.345] <-- textDocument/inlayHint(28)
+I[08:10:25.345] --> reply:textDocument/inlayHint(28) 0 ms
+[2026-09-10T15:10:25.346Z] [stm32_freertos] [Compiler] I[08:10:25.346] <-- textDocument/semanticTokens/full(29)
+[2026-09-10T15:10:25.347Z] [stm32_freertos] [Compiler] I[08:10:25.347] --> reply:textDocument/semanticTokens/full(29) 1 ms
+[2026-09-10T15:10:25.485Z] [stm32_freertos] [Compiler] I[08:10:25.485] Built preamble of size 2322972 for file I:\BackFile\code\stm32_freertos\drivers\stm32f1xx_hal_driver\src\stm32f1xx_hal_rcc.c version 0 in 0.15 seconds
+[2026-09-10T15:10:25.562Z] [stm32_freertos] [Compiler] I[08:10:25.562] --> textDocument/publishDiagnostics
+[2026-09-10T15:10:25.565Z] [stm32_freertos] [Compiler] I[08:10:25.565] --> reply:textDocument/documentSymbol(23) 231 ms
+[2026-09-10T15:10:25.567Z] [stm32_freertos] [Compiler] I[08:10:25.567] <-- textDocument/documentSymbol(30)
+I[08:10:25.567] <-- textDocument/documentSymbol(31)
+[2026-09-10T15:10:25.567Z] [stm32_freertos] [Compiler] I[08:10:25.567] --> reply:textDocument/documentSymbol(30) 0 ms
+[2026-09-10T15:10:25.568Z] [stm32_freertos] [Compiler] I[08:10:25.568] <-- callHierarchy/outgoingCalls(32)
+I[08:10:25.568] --> reply:textDocument/documentSymbol(31) 1 ms
+[2026-09-10T15:10:25.569Z] [stm32_freertos] [Compiler] I[08:10:25.569] --> reply:callHierarchy/outgoingCalls(32) 0 ms
+I[08:10:25.569] <-- callHierarchy/outgoingCalls(33)
+[2026-09-10T15:10:25.570Z] [stm32_freertos] [Compiler] I[08:10:25.570] --> reply:callHierarchy/outgoingCalls(33) 0 ms

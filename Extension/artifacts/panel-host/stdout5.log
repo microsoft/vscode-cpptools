@@ -1,0 +1,27 @@
+
+[main 2026-09-10T13:19:57.140Z] StorageMainService: creating application shared storage
+[main 2026-09-10T13:19:57.233Z] [shared storage] Creating shared storage database at ':memory:' (wasCreated: true)
+[main 2026-09-10T13:19:57.240Z] [shared storage] Initializing fallback application storage (path: in-memory)
+[main 2026-09-10T13:19:57.276Z] [shared storage] Fallback application storage initialized with 3 items
+[main 2026-09-10T13:19:57.654Z] update#disable - updates are disabled by user preference
+[main 2026-09-10T13:19:57.657Z] update#setState disabled
+[AgentHost:renderer] Acquiring MessagePort to agent host...
+[main 2026-09-10T13:19:57.679Z] AgentHostProcessManager: agent host started
+[ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey=undefined conversationKey=undefined modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+[AgentHost:renderer] MessagePort acquired, creating client...
+[ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NWZiM2Q4MTQtNjhiYS00ZGNlLTk1NzctODRiYmM1YjBjZDY5" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+[AgentHost:renderer] Protocol connection established; clientId=d3402dc1-013f-4b91-a29b-b1e3eaa52a08
+Started local extension host with pid 4536.
+Loading development extension at i:\BackFile\code\hornet-cpptools\Extension
+[AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+Settings Sync: Account status changed from uninitialized to unavailable
+[ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NWZiM2Q4MTQtNjhiYS00ZGNlLTk1NzctODRiYmM1YjBjZDY5" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+[AgentHost] No token resolved for resource: https://api.github.com
+[AgentHost] Clearing authentication for resource: https://api.github.com
+[AgentHost] No token resolved for resource: https://api.github.com/repos
+[AgentHost] Clearing authentication for resource: https://api.github.com/repos
+[AgentHost] No token resolved for resource: https://api.github.com
+[AgentHost] No token resolved for resource: https://api.github.com/repos
+[ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NWZiM2Q4MTQtNjhiYS00ZGNlLTk1NzctODRiYmM1YjBjZDY5" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+[AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+[main 2026-09-10T13:20:34.258Z] Extension host with pid 4536 exited with code: 0, signal: unknown.

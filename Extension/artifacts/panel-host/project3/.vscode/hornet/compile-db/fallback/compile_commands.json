@@ -1,0 +1,32 @@
+[
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3\\a.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3\\a.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3\\b.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3\\b.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3\\new.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project3\\new.cpp"
+    ]
+  }
+]

@@ -1,0 +1,17 @@
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+
+DevTools listening on ws://127.0.0.1:9337/devtools/browser/38f0f884-195e-44c8-a385-7d3bd2f8adbd
+Warning: 'remote-debugging-port' is not in the list of known options, but still passed to Electron/Chromium.
+Warning: 'remote-debugging-address' is not in the list of known options, but still passed to Electron/Chromium.
+[main 2026-09-10T13:22:05.948Z] Error: Error mutex already exists
+    at $s.installMutex (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:561:27488)
+[main 2026-09-10T13:22:07.555Z] [AgentHost:stderr] (node:10800) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `Code --trace-deprecation ...` to show where the warning was created)
+
+Unknown channel: agentHostClientByokLm
+Unknown channel: agentHostClientProxy
+Unknown channel: agentHostClientProxy
+Unknown channel: agentHostClientProxy

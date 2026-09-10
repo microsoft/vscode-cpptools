@@ -1,0 +1,180 @@
+Hornet C/C++ 0.1.5 (i:\BackFile\code\hornet-cpptools\Extension)
+[2026-09-10T13:15:05.955Z] [project2] [Compiler] Compilation database: 0 files from 0 sources
+[2026-09-10T13:15:05.975Z] [project2] [Compiler] No compilation database: inferred browsing commands for 2 source files. Build flags and macros may still be incomplete.
+[2026-09-10T13:15:05.976Z] [project2] [Compiler] Starting D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+[2026-09-10T13:15:06.037Z] [project2] [Compiler] I[06:15:06.036] clangd version 22.1.0 (https://github.com/llvm/llvm-project 4434dabb69916856b824f68a64b029c67175e532)
+I[06:15:06.037] Features: windows+grpc
+I[06:15:06.037] PID: 15984
+I[06:15:06.037] Working directory: i:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2
+I[06:15:06.037] argv[0]: D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+I[06:15:06.037] argv[1]: --background-index
+I[06:15:06.037] argv[2]: --enable-config=0
+I[06:15:06.037] argv[3]: --compile-commands-dir=I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\.vscode\hornet\compile-db\fallback
+I[06:15:06.037] argv[4]: -j=10
+[2026-09-10T13:15:06.040Z] [project2] [Compiler] I[06:15:06.037] Starting LSP over stdin/stdout
+I[06:15:06.037] <-- initialize(0)
+[2026-09-10T13:15:06.062Z] [project2] [Compiler] I[06:15:06.062] --> reply:initialize(0) 24 ms
+[2026-09-10T13:15:06.064Z] [project2] [Compiler] Compiler ready
+[2026-09-10T13:15:06.069Z] [project2] [Compiler] I[06:15:06.064] <-- initialized
+[2026-09-10T13:15:06.070Z] [project2] [Compiler] I[06:15:06.070] <-- textDocument/didOpen
+[2026-09-10T13:15:06.070Z] [project2] [Compiler] I[06:15:06.070] <-- textDocument/documentSymbol(1)
+[2026-09-10T13:15:06.071Z] [project2] [Compiler] I[06:15:06.071] Loaded compilation database from I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\.vscode\hornet\compile-db\fallback\compile_commands.json
+I[06:15:06.071] ASTWorker building file I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\a.cpp version 0 with command 
+[I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2]
+"D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\bin\\clang++" --driver-mode=g++ "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2\\a.cpp"
+[2026-09-10T13:15:06.071Z] [project2] [Compiler] I[06:15:06.071] --> window/workDoneProgress/create(0)
+I[06:15:06.071] Enqueueing 2 commands for indexing
+[2026-09-10T13:15:06.072Z] [project2] [Compiler] I[06:15:06.072] <-- reply(0)
+I[06:15:06.072] --> $/progress
+I[06:15:06.072] --> $/progress
+[2026-09-10T13:15:06.082Z] [project2] [Compiler] I[06:15:06.081] --> $/progress
+I[06:15:06.081] --> $/progress
+I[06:15:06.082] --> $/progress
+I[06:15:06.082] --> $/progress
+[2026-09-10T13:15:06.096Z] [project2] [Compiler] I[06:15:06.096] Indexed I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\b.cpp (2 symbols, 3 refs, 1 files)
+I[06:15:06.096] Indexed I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\a.cpp (1 symbols, 1 refs, 1 files)
+[2026-09-10T13:15:06.104Z] [project2] [Compiler] I[06:15:06.103] Built preamble of size 266880 for file I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\a.cpp version 0 in 0.02 seconds
+[2026-09-10T13:15:06.142Z] [project2] [Compiler] I[06:15:06.106] --> $/progress
+I[06:15:06.106] --> $/progress
+I[06:15:06.131] --> textDocument/publishDiagnostics
+I[06:15:06.132] --> reply:textDocument/documentSymbol(1) 61 ms
+[2026-09-10T13:15:06.154Z] [project2] [Compiler] I[06:15:06.153] <-- textDocument/documentSymbol(2)
+I[06:15:06.153] --> reply:textDocument/documentSymbol(2) 0 ms
+[2026-09-10T13:15:06.195Z] [project2] [Compiler] Compilation database: 0 files from 0 sources
+[2026-09-10T13:15:06.198Z] [project2] [Compiler] I[06:15:06.198] <-- shutdown(3)
+I[06:15:06.198] --> reply:shutdown(3) 0 ms
+[2026-09-10T13:15:06.205Z] [project2] [Compiler] I[06:15:06.198] <-- exit
+I[06:15:06.198] LSP finished, exiting with status 0
+[2026-09-10T13:15:06.216Z] [project2] [Compiler] No compilation database: inferred browsing commands for 3 source files. Build flags and macros may still be incomplete.
+[2026-09-10T13:15:06.217Z] [project2] [Compiler] Starting D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+[2026-09-10T13:15:06.253Z] [project2] [Compiler] Index build: Error: Index build interrupted by a language-service restart.
+[2026-09-10T13:15:06.277Z] [project2] [Compiler] I[06:15:06.276] clangd version 22.1.0 (https://github.com/llvm/llvm-project 4434dabb69916856b824f68a64b029c67175e532)
+I[06:15:06.277] Features: windows+grpc
+I[06:15:06.277] PID: 6512
+I[06:15:06.277] Working directory: i:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2
+I[06:15:06.277] argv[0]: D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+I[06:15:06.277] argv[1]: --background-index
+I[06:15:06.277] argv[2]: --enable-config=0
+I[06:15:06.277] argv[3]: --compile-commands-dir=I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\.vscode\hornet\compile-db\fallback
+I[06:15:06.277] argv[4]: -j=10
+[2026-09-10T13:15:06.277Z] [project2] [Compiler] I[06:15:06.277] Starting LSP over stdin/stdout
+[2026-09-10T13:15:06.277Z] [project2] [Compiler] I[06:15:06.277] <-- initialize(0)
+[2026-09-10T13:15:06.300Z] [project2] [Compiler] I[06:15:06.300] --> reply:initialize(0) 22 ms
+[2026-09-10T13:15:06.300Z] [project2] [Compiler] Compiler ready
+[2026-09-10T13:15:06.304Z] [project2] [Compiler] I[06:15:06.300] <-- initialized
+[2026-09-10T13:15:06.305Z] [project2] [Compiler] I[06:15:06.305] <-- textDocument/didOpen
+[2026-09-10T13:15:06.305Z] [project2] [Compiler] I[06:15:06.305] <-- textDocument/documentSymbol(1)
+[2026-09-10T13:15:06.305Z] [project2] [Compiler] I[06:15:06.305] Loaded compilation database from I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\.vscode\hornet\compile-db\fallback\compile_commands.json
+I[06:15:06.305] --> window/workDoneProgress/create(0)
+I[06:15:06.305] ASTWorker building file I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\a.cpp version 0 with command 
+[I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2]
+"D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\bin\\clang++" --driver-mode=g++ "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2\\a.cpp"
+[2026-09-10T13:15:06.306Z] [project2] [Compiler] I[06:15:06.305] Enqueueing 3 commands for indexing
+[2026-09-10T13:15:06.306Z] [project2] [Compiler] I[06:15:06.306] <-- reply(0)
+I[06:15:06.306] --> $/progress
+[2026-09-10T13:15:06.306Z] [project2] [Compiler] I[06:15:06.306] --> $/progress
+[2026-09-10T13:15:06.315Z] [project2] [Compiler] I[06:15:06.315] --> $/progress
+I[06:15:06.315] --> $/progress
+I[06:15:06.315] --> $/progress
+[2026-09-10T13:15:06.327Z] [project2] [Compiler] I[06:15:06.326] Indexed I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\new.cpp (1 symbols, 1 refs, 1 files)
+[2026-09-10T13:15:06.335Z] [project2] [Compiler] I[06:15:06.332] Built preamble of size 266880 for file I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\a.cpp version 0 in 0.01 seconds
+I[06:15:06.334] --> $/progress
+[2026-09-10T13:15:06.356Z] [project2] [Compiler] I[06:15:06.356] --> textDocument/publishDiagnostics
+I[06:15:06.356] --> reply:textDocument/documentSymbol(1) 51 ms
+[2026-09-10T13:15:06.357Z] [project2] [Compiler] I[06:15:06.357] <-- workspace/didChangeWatchedFiles
+[2026-09-10T13:15:06.358Z] [project2] [Compiler] I[06:15:06.358] <-- workspace/didChangeWatchedFiles
+[2026-09-10T13:15:06.358Z] [project2] [Compiler] I[06:15:06.358] <-- textDocument/documentSymbol(2)
+[2026-09-10T13:15:06.358Z] [project2] [Compiler] I[06:15:06.358] --> reply:textDocument/documentSymbol(2) 0 ms
+[2026-09-10T13:15:07.893Z] [project2] [Compiler] Index ready: 3 source files (cached for next startup)
+[2026-09-10T13:15:07.906Z] [project2] [Compiler] I[06:15:07.906] <-- workspace/symbol(3)
+[2026-09-10T13:15:07.906Z] [project2] [Compiler] I[06:15:07.906] --> reply:workspace/symbol(3) 0 ms
+[2026-09-10T13:15:07.925Z] [project2] [Compiler] I[06:15:07.925] <-- textDocument/didChange
+[2026-09-10T13:15:07.961Z] [project2] [Compiler] I[06:15:07.961] <-- textDocument/documentSymbol(4)
+[2026-09-10T13:15:07.961Z] [project2] [Compiler] I[06:15:07.961] ASTWorker building file I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\a.cpp version 1 with command 
+[I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2]
+"D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\bin\\clang++" --driver-mode=g++ "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2\\a.cpp"
+[2026-09-10T13:15:07.970Z] [project2] [Compiler] I[06:15:07.970] --> reply:textDocument/documentSymbol(4) 9 ms
+[2026-09-10T13:15:07.984Z] [project2] [Compiler] I[06:15:07.985] <-- textDocument/prepareCallHierarchy(5)
+[2026-09-10T13:15:07.985Z] [project2] [Compiler] I[06:15:07.985] --> reply:textDocument/prepareCallHierarchy(5) 0 ms
+[2026-09-10T13:15:08.075Z] [project2] [Compiler] I[06:15:08.075] <-- textDocument/didOpen
+[2026-09-10T13:15:08.075Z] [project2] [Compiler] I[06:15:08.075] ASTWorker building file I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\b.cpp version 0 with command 
+[I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2]
+"D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\bin\\clang++" --driver-mode=g++ "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2\\b.cpp"
+[2026-09-10T13:15:08.075Z] [project2] [Compiler] I[06:15:08.075] <-- textDocument/didOpen
+[2026-09-10T13:15:08.076Z] [project2] [Compiler] I[06:15:08.076] ASTWorker building file I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\new.cpp version 0 with command 
+[I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2]
+"D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\bin\\clang++" --driver-mode=g++ "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2\\new.cpp"
+[2026-09-10T13:15:08.076Z] [project2] [Compiler] I[06:15:08.076] <-- textDocument/documentSymbol(6)
+[2026-09-10T13:15:08.076Z] [project2] [Compiler] I[06:15:08.076] <-- textDocument/documentSymbol(7)
+[2026-09-10T13:15:08.093Z] [project2] [Compiler] I[06:15:08.093] <-- textDocument/inlayHint(8)
+[2026-09-10T13:15:08.093Z] [project2] [Compiler] I[06:15:08.093] --> reply:textDocument/inlayHint(8) 0 ms
+[2026-09-10T13:15:08.103Z] [project2] [Compiler] I[06:15:08.103] Built preamble of size 266880 for file I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\b.cpp version 0 in 0.01 seconds
+I[06:15:08.103] Built preamble of size 266884 for file I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\new.cpp version 0 in 0.01 seconds
+[2026-09-10T13:15:08.134Z] [project2] [Compiler] I[06:15:08.134] --> textDocument/publishDiagnostics
+I[06:15:08.134] --> reply:textDocument/documentSymbol(6) 58 ms
+I[06:15:08.134] --> textDocument/publishDiagnostics
+[2026-09-10T13:15:08.134Z] [project2] [Compiler] I[06:15:08.134] --> reply:textDocument/documentSymbol(7) 57 ms
+[2026-09-10T13:15:08.136Z] [project2] [Compiler] I[06:15:08.136] <-- textDocument/documentSymbol(9)
+[2026-09-10T13:15:08.136Z] [project2] [Compiler] I[06:15:08.136] <-- textDocument/documentSymbol(10)
+I[06:15:08.137] --> reply:textDocument/documentSymbol(9) 0 ms
+[2026-09-10T13:15:08.137Z] [project2] [Compiler] I[06:15:08.137] --> reply:textDocument/documentSymbol(10) 0 ms
+[2026-09-10T13:15:08.137Z] [project2] [Compiler] I[06:15:08.137] <-- textDocument/references(11)
+[2026-09-10T13:15:08.137Z] [project2] [Compiler] I[06:15:08.137] --> reply:textDocument/references(11) 0 ms
+I[06:15:08.137] <-- callHierarchy/outgoingCalls(12)
+[2026-09-10T13:15:08.138Z] [project2] [Compiler] I[06:15:08.137] --> reply:callHierarchy/outgoingCalls(12) 0 ms
+[2026-09-10T13:15:08.138Z] [project2] [Compiler] I[06:15:08.138] <-- callHierarchy/incomingCalls(13)
+I[06:15:08.138] --> reply:callHierarchy/incomingCalls(13) 0 ms
+[2026-09-10T13:15:08.139Z] [project2] [Compiler] I[06:15:08.139] <-- textDocument/documentSymbol(14)
+[2026-09-10T13:15:08.140Z] [project2] [Compiler] I[06:15:08.140] --> reply:textDocument/documentSymbol(14) 0 ms
+[2026-09-10T13:15:08.140Z] [project2] [Compiler] I[06:15:08.140] <-- textDocument/references(15)
+[2026-09-10T13:15:08.140Z] [project2] [Compiler] I[06:15:08.140] --> reply:textDocument/references(15) 0 ms
+[2026-09-10T13:15:08.140Z] [project2] [Compiler] I[06:15:08.140] <-- callHierarchy/incomingCalls(16)
+[2026-09-10T13:15:08.140Z] [project2] [Compiler] I[06:15:08.140] --> reply:callHierarchy/incomingCalls(16) 0 ms
+[2026-09-10T13:15:08.142Z] [project2] [Compiler] I[06:15:08.142] <-- textDocument/documentSymbol(17)
+[2026-09-10T13:15:08.142Z] [project2] [Compiler] I[06:15:08.142] --> reply:textDocument/documentSymbol(17) 0 ms
+[2026-09-10T13:15:08.142Z] [project2] [Compiler] I[06:15:08.142] <-- callHierarchy/outgoingCalls(18)
+[2026-09-10T13:15:08.143Z] [project2] [Compiler] I[06:15:08.142] --> reply:callHierarchy/outgoingCalls(18) 0 ms
+[2026-09-10T13:15:08.285Z] [project2] [Compiler] I[06:15:08.285] <-- textDocument/foldingRange(19)
+[2026-09-10T13:15:08.285Z] [project2] [Compiler] I[06:15:08.285] --> reply:textDocument/foldingRange(19) 0 ms
+[2026-09-10T13:15:08.329Z] [project2] [Compiler] I[06:15:08.329] <-- textDocument/foldingRange(20)
+[2026-09-10T13:15:08.330Z] [project2] [Compiler] I[06:15:08.330] --> reply:textDocument/foldingRange(20) 0 ms
+[2026-09-10T13:15:08.400Z] [project2] [Compiler] I[06:15:08.400] <-- shutdown(21)
+I[06:15:08.400] --> reply:shutdown(21) 0 ms
+[2026-09-10T13:15:08.406Z] [project2] [Compiler] I[06:15:08.400] <-- exit
+I[06:15:08.400] LSP finished, exiting with status 0
+[2026-09-10T13:15:08.415Z] [project2] [Compiler] No compilation database: inferred browsing commands for 3 source files. Build flags and macros may still be incomplete.
+[2026-09-10T13:15:08.416Z] [project2] [Compiler] Starting D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+[2026-09-10T13:15:08.475Z] [project2] [Compiler] I[06:15:08.474] clangd version 22.1.0 (https://github.com/llvm/llvm-project 4434dabb69916856b824f68a64b029c67175e532)
+I[06:15:08.475] Features: windows+grpc
+I[06:15:08.475] PID: 6756
+I[06:15:08.475] Working directory: i:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2
+I[06:15:08.475] argv[0]: D:\Software\Microsoft\.vscode\user_data\User\globalStorage\llvm-vs-code-extensions.vscode-clangd\install\22.1.0\clangd_22.1.0\bin\clangd.exe
+I[06:15:08.475] argv[1]: --background-index
+I[06:15:08.475] argv[2]: --enable-config=0
+I[06:15:08.475] argv[3]: --compile-commands-dir=I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\.vscode\hornet\compile-db\fallback
+I[06:15:08.475] argv[4]: -j=10
+I[06:15:08.475] Starting LSP over stdin/stdout
+[2026-09-10T13:15:08.475Z] [project2] [Compiler] I[06:15:08.475] <-- initialize(0)
+[2026-09-10T13:15:08.498Z] [project2] [Compiler] I[06:15:08.498] --> reply:initialize(0) 22 ms
+[2026-09-10T13:15:08.499Z] [project2] [Compiler] Compiler ready
+[2026-09-10T13:15:08.502Z] [project2] [Compiler] I[06:15:08.499] <-- initialized
+[2026-09-10T13:15:08.502Z] [project2] [Compiler] I[06:15:08.502] <-- textDocument/didOpen
+[2026-09-10T13:15:08.505Z] [project2] [Compiler] I[06:15:08.503] Loaded compilation database from I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\.vscode\hornet\compile-db\fallback\compile_commands.json
+I[06:15:08.503] ASTWorker building file I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\a.cpp version 1 with command 
+[I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2]
+"D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\bin\\clang++" --driver-mode=g++ "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2" -c "-resource-dir=D:\\Software\\Microsoft\\.vscode\\user_data\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.0\\clangd_22.1.0\\lib\\clang\\22" -- "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\panel-host\\project2\\a.cpp"
+I[06:15:08.503] --> window/workDoneProgress/create(0)
+I[06:15:08.504] Enqueueing 3 commands for indexing
+[2026-09-10T13:15:08.505Z] [project2] [Compiler] I[06:15:08.505] <-- textDocument/documentSymbol(1)
+[2026-09-10T13:15:08.505Z] [project2] [Compiler] I[06:15:08.505] <-- textDocument/documentSymbol(2)
+[2026-09-10T13:15:08.505Z] [project2] [Compiler] I[06:15:08.505] <-- reply(0)
+[2026-09-10T13:15:08.505Z] [project2] [Compiler] I[06:15:08.505] --> $/progress
+I[06:15:08.505] --> $/progress
+[2026-09-10T13:15:08.510Z] [project2] [Compiler] I[06:15:08.510] <-- textDocument/inlayHint(3)
+[2026-09-10T13:15:08.512Z] [project2] [Compiler] I[06:15:08.511] --> $/progress
+I[06:15:08.511] --> $/progress
+[2026-09-10T13:15:08.532Z] [project2] [Compiler] I[06:15:08.532] Built preamble of size 266880 for file I:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\project2\a.cpp version 1 in 0.01 seconds
+[2026-09-10T13:15:08.554Z] [project2] [Compiler] I[06:15:08.554] --> textDocument/publishDiagnostics
+[2026-09-10T13:15:08.555Z] [project2] [Compiler] I[06:15:08.554] --> reply:textDocument/documentSymbol(1) 49 ms
+I[06:15:08.554] --> reply:textDocument/documentSymbol(2) 49 ms
+I[06:15:08.554] --> reply:textDocument/inlayHint(3) 44 ms

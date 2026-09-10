@@ -1,0 +1,18 @@
+2026-09-10 06:16:58.203 [info] [main] Log level: Info
+2026-09-10 06:16:58.203 [info] [main] Validating found git in: "C:\Program Files\Git\cmd\git.exe"
+2026-09-10 06:16:58.203 [info] [main] Validating found git in: "C:\Program Files (x86)\Git\cmd\git.exe"
+2026-09-10 06:16:58.203 [info] [main] Validating found git in: "C:\Program Files\Git\cmd\git.exe"
+2026-09-10 06:16:58.203 [info] [main] Validating found git in: "C:\Users\LiXueqiang\AppData\Local\Programs\Git\cmd\git.exe"
+2026-09-10 06:16:58.305 [info] [main] Validating found git in: "D:\Software\Git\cmd\git.exe"
+2026-09-10 06:16:58.374 [info] [askpassManager] Creating content-addressed askpass scripts at i:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\user3\User\globalStorage\vscode.git\askpass\70789581cae28aa7
+2026-09-10 06:16:58.466 [info] [askpassManager] Successfully created content-addressed askpass scripts
+2026-09-10 06:16:58.486 [info] [main] Using git "2.53.0.windows.1" from "D:\Software\Git\cmd\git.exe"
+2026-09-10 06:16:58.486 [info] [Model][doInitialScan] Initial repository scan started
+2026-09-10 06:16:58.596 [info] > git rev-parse --show-toplevel [95ms]
+2026-09-10 06:16:58.676 [info] > git rev-parse --show-toplevel [75ms]
+2026-09-10 06:16:58.679 [info] [Model][doInitialScan] Initial repository scan completed - repositories (0), closed repositories (0), parent repositories (1), unsafe repositories (0)
+2026-09-10 06:16:59.382 [info] > git rev-parse --show-toplevel [63ms]
+2026-09-10 06:16:59.713 [info] > git rev-parse --show-toplevel [69ms]
+2026-09-10 06:16:59.839 [info] > git rev-parse --show-toplevel [72ms]
+2026-09-10 06:17:00.409 [info] > git rev-parse --show-toplevel [58ms]
+2026-09-10 06:17:01.701 [info] > git rev-parse --show-toplevel [68ms]

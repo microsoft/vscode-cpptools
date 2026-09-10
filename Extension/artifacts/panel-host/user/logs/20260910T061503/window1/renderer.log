@@ -1,0 +1,19 @@
+2026-09-10 06:15:04.343 [info] [AgentHost:renderer] Acquiring MessagePort to agent host...
+2026-09-10 06:15:04.532 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey=undefined conversationKey=undefined modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:15:04.777 [info] [AgentHost:renderer] MessagePort acquired, creating client...
+2026-09-10 06:15:04.789 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NWYzNjhmZTEtZDNhNy00YWE4LTg3YzItZWY0ZjY1ZjgxM2Ey" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:15:04.872 [info] [AgentHost:renderer] Protocol connection established; clientId=a8f19e77-f58c-4971-99c7-be824a717734
+2026-09-10 06:15:04.883 [info] Started local extension host with pid 7504.
+2026-09-10 06:15:04.964 [info] [AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+2026-09-10 06:15:05.203 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:15:05.237 [info] [AgentHost] Clearing authentication for resource: https://api.github.com
+2026-09-10 06:15:05.240 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:15:05.241 [info] [AgentHost] Clearing authentication for resource: https://api.github.com/repos
+2026-09-10 06:15:05.241 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-10 06:15:05.242 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-10 06:15:05.329 [info] Loading development extension at i:\BackFile\code\hornet-cpptools\Extension
+2026-09-10 06:15:05.377 [error] [hornet.hornet-cpp]: property `id` is mandatory and must be of type `string` with non-empty value. Only alphanumeric characters, '_', and '-' are allowed.
+2026-09-10 06:15:05.380 [warning] [hornet.hornet-cpp]: View container 'hornet-cpp.graphPanel' does not exist and all views registered to it will be added to 'Explorer'.
+2026-09-10 06:15:05.495 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NWYzNjhmZTEtZDNhNy00YWE4LTg3YzItZWY0ZjY1ZjgxM2Ey" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-10 06:15:05.776 [info] Settings Sync: Account status changed from uninitialized to unavailable
+2026-09-10 06:15:08.111 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NWYzNjhmZTEtZDNhNy00YWE4LTg3YzItZWY0ZjY1ZjgxM2Ey" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"

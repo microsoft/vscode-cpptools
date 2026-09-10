@@ -1,0 +1,20 @@
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+
+DevTools listening on ws://127.0.0.1:9337/devtools/browser/41ff48e9-02fb-4a90-a989-f318bedd10ad
+Warning: 'remote-debugging-port' is not in the list of known options, but still passed to Electron/Chromium.
+Warning: 'remote-debugging-address' is not in the list of known options, but still passed to Electron/Chromium.
+[main 2026-09-10T13:16:56.030Z] Error: Error mutex already exists
+    at $s.installMutex (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:561:27488)
+[main 2026-09-10T13:16:57.260Z] [AgentHost:stderr] (node:26900) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `Code --trace-deprecation ...` to show where the warning was created)
+
+Unknown channel: agentHostClientByokLm
+Unknown channel: agentHostClientProxy
+Unknown channel: agentHostClientProxy
+Unknown channel: agentHostClientProxy
+Error: Timed out: panel screenshot
+	at waitFor (i:\BackFile\code\hornet-cpptools\Extension\test\hornet\index.vscode.cjs:16:15)
+	at async exports.run (i:\BackFile\code\hornet-cpptools\Extension\test\hornet\index.vscode.cjs:46:13)

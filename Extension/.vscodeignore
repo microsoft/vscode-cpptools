@@ -1,55 +1,10 @@
-
-# ignore vscode settings for extension development
-.vscode/**
-
-# ignore binaries
-obj/**
-
-# ignore source files
-tools/**
-notices/**
-test/**
-src/**
-
-# ignore .js files that are webpacked or only used for development
-out/src/**
-out/tools/**
-
-# don't include the local code and tests compiled files
-dist/test/**
-
-# no project scripts
-.scripts/**
-
-# ignore ts files in ui
-ui/*.ts
-
-# ignore Azure-Pipelines files
-jobs/**
-cgmanifest.json
-
-# ignore development files
-eslint.config.js
-.gitattributes
-.gitignore
-gulpfile.js
-localized_string_ids.h
-readme.developer.md
-test.tsconfig.json
-translations_auto_pr.js
-tsconfig.json
-tslint.json
-tscCompileList.txt
-ui.tsconfig.json
-webpack.config.js
-CMakeLists.txt
-debugAdapters/install.lock*
-typings/**
-**/*.map
-*.d.ts
-
-# ignore i18n language files
-i18n/**
-
-# ignore node_modules
-node_modules/
+**
+!package.json
+!README.md
+!LICENSE.txt
+!ThirdPartyNotices.txt
+!LanguageCCPP_color.png
+!dist/hornet.js
+!assets/callGraph/graph.js
+!assets/callGraph/layout.js
+!assets/callGraph/graph.css

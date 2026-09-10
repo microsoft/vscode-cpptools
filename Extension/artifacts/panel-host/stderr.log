@@ -1,0 +1,24 @@
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+libpng warning: tRNS: invalid with alpha channel
+
+DevTools listening on ws://127.0.0.1:9337/devtools/browser/562b008c-9fb0-4aec-b49d-8ab4b0904ed4
+Warning: 'remote-debugging-port' is not in the list of known options, but still passed to Electron/Chromium.
+Warning: 'remote-debugging-address' is not in the list of known options, but still passed to Electron/Chromium.
+[main 2026-09-10T13:13:56.683Z] Error: Error mutex already exists
+    at $s.installMutex (file:///D:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/main.js:561:27488)
+[main 2026-09-10T13:13:58.020Z] [AgentHost:stderr] (node:9732) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `Code --trace-deprecation ...` to show where the warning was created)
+
+[hornet.hornet-cpp]: property `id` is mandatory and must be of type `string` with non-empty value. Only alphanumeric characters, '_', and '-' are allowed.
+[hornet.hornet-cpp]: View container 'hornet-cpp.graphPanel' does not exist and all views registered to it will be added to 'Explorer'.
+Unknown channel: agentHostClientByokLm
+Unknown channel: agentHostClientProxy
+Unknown channel: agentHostClientProxy
+(node:18136) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `Code --trace-deprecation ...` to show where the warning was created)
+Unknown channel: agentHostClientProxy
+Error: command 'workbench.view.extension.hornet-cpp.graphPanel' not found
+    at qgt._tryExecuteCommand (vscode-file://vscode-app/d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/workbench.desktop.main.js:2003:4832)
+    at qgt.executeCommand (vscode-file://vscode-app/d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/workbench.desktop.main.js:2003:4732)

@@ -1,0 +1,37 @@
+2026-09-10 06:22:08.446 [info] Extension host with pid 28800 started
+2026-09-10 06:22:08.447 [info] Skipping acquiring lock for i:\BackFile\code\hornet-cpptools\Extension\artifacts\panel-host\user3\User\workspaceStorage\adb8f8f8206fefe28670869c53f33f9d.
+2026-09-10 06:22:08.508 [info] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2026-09-10 06:22:08.586 [info] ExtensionService#_doActivateExtension vscode.github-authentication, startup: false, activationEvent: 'onAuthenticationRequest:github'
+2026-09-10 06:22:08.817 [info] ExtensionService#_doActivateExtension vscode.git-base, startup: true, activationEvent: '*', root cause: vscode.git
+2026-09-10 06:22:08.958 [info] ExtensionService#_doActivateExtension vscode.git, startup: true, activationEvent: '*'
+2026-09-10 06:22:09.081 [info] ExtensionService#_doActivateExtension vscode.github, startup: true, activationEvent: '*'
+2026-09-10 06:22:09.169 [info] ExtensionService#_doActivateExtension hornet.hornet-cpp, startup: true, activationEvent: 'workspaceContains:**/CMakeLists.txt,**/*.{c,cc,cpp,cxx,h,hh,hpp,hxx,cu,cuh}'
+2026-09-10 06:22:09.590 [warning] [vscode.git] Accessing a resource scoped configuration without providing a resource is not expected. To get the effective value for 'git.openRepositoryInParentFolders', provide the URI of a resource or 'null' for any resource.
+2026-09-10 06:22:09.590 [warning] [vscode.git] Accessing a resource scoped configuration without providing a resource is not expected. To get the effective value for 'git.showProgress', provide the URI of a resource or 'null' for any resource.
+2026-09-10 06:22:09.645 [info] Eager extensions activated
+2026-09-10 06:22:09.803 [info] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2026-09-10 06:22:09.809 [info] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2026-09-10 06:22:14.434 [warning] hornet.hornet-cpp created a webview without a content security policy: https://aka.ms/vscode-webview-missing-csp
+2026-09-10 06:22:16.657 [info] Extension host terminating: received terminate message from renderer
+2026-09-10 06:22:16.678 [error] Unable to refresh tree view hornet-cpp.callGraph: Canceled
+2026-09-10 06:22:16.681 [error] Error: Channel has been closed
+	at o (file:///d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3524)
+	at Object.appendLine (file:///d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3663)
+	at Object.log (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:14048:24)
+	at Socket.<anonymous> (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:12032:52)
+	at Socket.emit (node:events:509:28)
+	at addChunk (node:internal/streams/readable:563:12)
+	at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+	at Readable.push (node:internal/streams/readable:394:5)
+	at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+2026-09-10 06:22:16.682 [error] Error: Channel has been closed
+	at o (file:///d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3524)
+	at Object.appendLine (file:///d:/Software/Microsoft/Visual%20Studio%20Code/88e44fa0e0/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:549:3663)
+	at Object.log (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:14048:24)
+	at Socket.<anonymous> (i:\BackFile\code\hornet-cpptools\Extension\dist\hornet.js:12032:52)
+	at Socket.emit (node:events:509:28)
+	at addChunk (node:internal/streams/readable:563:12)
+	at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+	at Readable.push (node:internal/streams/readable:394:5)
+	at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+2026-09-10 06:22:16.711 [info] Extension host with pid 28800 exiting with code 0

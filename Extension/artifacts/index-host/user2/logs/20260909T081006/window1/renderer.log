@@ -1,0 +1,17 @@
+2026-09-09 08:10:07.182 [info] [AgentHost:renderer] Acquiring MessagePort to agent host...
+2026-09-09 08:10:07.350 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey=undefined conversationKey=undefined modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-09 08:10:07.533 [info] [AgentHost:renderer] MessagePort acquired, creating client...
+2026-09-09 08:10:07.572 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/MGQ1NWE2NzYtM2NjZC00YjhlLWE5YmEtNzcxY2I0NTFkYTM4" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+2026-09-09 08:10:07.615 [info] Started local extension host with pid 27744.
+2026-09-09 08:10:07.621 [info] [AgentHost:renderer] Protocol connection established; clientId=74392238-a2c8-4ae0-8b45-b180b0c8b01e
+2026-09-09 08:10:07.639 [info] Loading development extension at i:\BackFile\code\hornet-cpptools\Extension
+2026-09-09 08:10:07.645 [error] [hornet.hornet-cpp]: 'configuration.semanticTokenType.description' must be defined and can not be empty
+2026-09-09 08:10:08.134 [info] [AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+2026-09-09 08:10:08.235 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-09 08:10:08.238 [info] [AgentHost] Clearing authentication for resource: https://api.github.com
+2026-09-09 08:10:08.278 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-09 08:10:08.312 [info] [AgentHost] Clearing authentication for resource: https://api.github.com/repos
+2026-09-09 08:10:08.343 [info] [AgentHost] No token resolved for resource: https://api.github.com
+2026-09-09 08:10:08.348 [info] [AgentHost] No token resolved for resource: https://api.github.com/repos
+2026-09-09 08:10:08.356 [info] Settings Sync: Account status changed from uninitialized to unavailable
+2026-09-09 08:10:08.398 [info] [ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/MGQ1NWE2NzYtM2NjZC00YjhlLWE5YmEtNzcxY2I0NTFkYTM4" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"

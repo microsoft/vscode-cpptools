@@ -1,0 +1,24 @@
+
+[main 2026-09-09T15:10:06.730Z] StorageMainService: creating application shared storage
+[main 2026-09-09T15:10:06.791Z] [shared storage] Creating shared storage database at ':memory:' (wasCreated: true)
+[main 2026-09-09T15:10:06.794Z] [shared storage] Initializing fallback application storage (path: in-memory)
+[main 2026-09-09T15:10:06.816Z] [shared storage] Fallback application storage initialized with 3 items
+[main 2026-09-09T15:10:07.160Z] update#setState idle
+[AgentHost:renderer] Acquiring MessagePort to agent host...
+[main 2026-09-09T15:10:07.187Z] AgentHostProcessManager: agent host started
+[ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey=undefined conversationKey=undefined modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+[AgentHost:renderer] MessagePort acquired, creating client...
+[ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/MGQ1NWE2NzYtM2NjZC00YjhlLWE5YmEtNzcxY2I0NTFkYTM4" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+Started local extension host with pid 27744.
+[AgentHost:renderer] Protocol connection established; clientId=74392238-a2c8-4ae0-8b45-b180b0c8b01e
+Loading development extension at i:\BackFile\code\hornet-cpptools\Extension
+[AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+[AgentHost] No token resolved for resource: https://api.github.com
+[AgentHost] Clearing authentication for resource: https://api.github.com
+[AgentHost] No token resolved for resource: https://api.github.com/repos
+[AgentHost] Clearing authentication for resource: https://api.github.com/repos
+[AgentHost] No token resolved for resource: https://api.github.com
+[AgentHost] No token resolved for resource: https://api.github.com/repos
+Settings Sync: Account status changed from uninitialized to unavailable
+[ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/MGQ1NWE2NzYtM2NjZC00YjhlLWE5YmEtNzcxY2I0NTFkYTM4" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+[main 2026-09-09T15:10:10.220Z] Extension host with pid 27744 exited with code: 0, signal: unknown.

@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "out/hornet",
+    "rootDir": ".",
+    "types": ["node", "vscode"]
+  },
+  "include": ["src/hornet/**/*.ts", "test/hornet/**/*.ts"]
+}

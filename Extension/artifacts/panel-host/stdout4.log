@@ -1,0 +1,27 @@
+
+[main 2026-09-10T13:18:26.465Z] StorageMainService: creating application shared storage
+[main 2026-09-10T13:18:26.571Z] [shared storage] Creating shared storage database at ':memory:' (wasCreated: true)
+[main 2026-09-10T13:18:26.575Z] [shared storage] Initializing fallback application storage (path: in-memory)
+[main 2026-09-10T13:18:26.608Z] [shared storage] Fallback application storage initialized with 3 items
+[main 2026-09-10T13:18:27.002Z] update#disable - updates are disabled by user preference
+[main 2026-09-10T13:18:27.005Z] update#setState disabled
+[AgentHost:renderer] Acquiring MessagePort to agent host...
+[main 2026-09-10T13:18:27.027Z] AgentHostProcessManager: agent host started
+[ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey=undefined conversationKey=undefined modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+[AgentHost:renderer] MessagePort acquired, creating client...
+[ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NzM4NGIzMWYtNDlhNi00MmVjLTkwOGUtNzAzYjE0MmM1MGQw" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+[AgentHost:renderer] Protocol connection established; clientId=ef05cfb1-6b4c-49e8-a6ad-929054893c6b
+Started local extension host with pid 13948.
+[AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+Loading development extension at i:\BackFile\code\hornet-cpptools\Extension
+[AgentHost] No token resolved for resource: https://api.github.com
+[AgentHost] Clearing authentication for resource: https://api.github.com
+[AgentHost] No token resolved for resource: https://api.github.com/repos
+[AgentHost] Clearing authentication for resource: https://api.github.com/repos
+[AgentHost] No token resolved for resource: https://api.github.com
+[AgentHost] No token resolved for resource: https://api.github.com/repos
+Settings Sync: Account status changed from uninitialized to unavailable
+[ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NzM4NGIzMWYtNDlhNi00MmVjLTkwOGUtNzAzYjE0MmM1MGQw" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+[ChatModelSelection] event=no-model-at-toolbar-build surface="workbench" sessionKey="local" conversationKey="vscode-chat-session://local/NzM4NGIzMWYtNDlhNi00MmVjLTkwOGUtNzAzYjE0MmM1MGQw" modelTarget=undefined storageKey="chat.currentLanguageModel.panel" widgetViewKind="view"
+[AccountPolicyGate] apply: state=inactive, reason=undefined, isRestricted=false
+[main 2026-09-10T13:19:02.861Z] Extension host with pid 13948 exited with code: 0, signal: unknown.

@@ -1,0 +1,32 @@
+[
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\a.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\a.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\b.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\b.cpp"
+    ]
+  },
+  {
+    "directory": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project",
+    "file": "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\new.cpp",
+    "arguments": [
+      "clang++",
+      "-II:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project",
+      "-c",
+      "I:\\BackFile\\code\\hornet-cpptools\\Extension\\artifacts\\index-host\\project\\new.cpp"
+    ]
+  }
+]

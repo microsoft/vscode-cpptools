@@ -1,0 +1,52 @@
+2026-09-10 08:10:20.886 [info] [main] Log level: Info
+2026-09-10 08:10:20.886 [info] [main] Validating found git in: "C:\Program Files\Git\cmd\git.exe"
+2026-09-10 08:10:20.886 [info] [main] Validating found git in: "C:\Program Files (x86)\Git\cmd\git.exe"
+2026-09-10 08:10:20.886 [info] [main] Validating found git in: "C:\Program Files\Git\cmd\git.exe"
+2026-09-10 08:10:20.886 [info] [main] Validating found git in: "C:\Users\LiXueqiang\AppData\Local\Programs\Git\cmd\git.exe"
+2026-09-10 08:10:21.113 [info] [main] Validating found git in: "D:\Software\Git\cmd\git.exe"
+2026-09-10 08:10:21.189 [info] [askpassManager] Creating content-addressed askpass scripts at i:\BackFile\code\hornet-cpptools\Extension\artifacts\stm32-host\user\User\globalStorage\vscode.git\askpass\70789581cae28aa7
+2026-09-10 08:10:21.332 [info] [askpassManager] Successfully created content-addressed askpass scripts
+2026-09-10 08:10:21.369 [info] [main] Using git "2.53.0.windows.1" from "D:\Software\Git\cmd\git.exe"
+2026-09-10 08:10:21.369 [info] [Model][doInitialScan] Initial repository scan started
+2026-09-10 08:10:21.492 [info] > git rev-parse --show-toplevel [103ms]
+2026-09-10 08:10:21.637 [info] > git rev-parse --git-dir --git-common-dir --show-superproject-working-tree [138ms]
+2026-09-10 08:10:21.653 [info] [Model][openRepository] Opened repository (path): i:\BackFile\code\stm32_freertos
+2026-09-10 08:10:21.653 [info] [Model][openRepository] Opened repository (real path): i:\BackFile\code\stm32_freertos
+2026-09-10 08:10:21.653 [info] [Model][openRepository] Opened repository (kind): repository
+2026-09-10 08:10:21.766 [info] > git config --get --local core.virtualfilesystem [103ms]
+2026-09-10 08:10:21.766 [warning] [Git][config] git config failed: Failed to execute git
+2026-09-10 08:10:21.769 [info] > git config --get commit.template [99ms]
+2026-09-10 08:10:21.782 [info] > git rev-parse --show-toplevel [102ms]
+2026-09-10 08:10:21.801 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) --ignore-case refs/heads/master refs/remotes/master [112ms]
+2026-09-10 08:10:21.882 [info] > git rev-parse --show-toplevel [92ms]
+2026-09-10 08:10:21.923 [info] > git for-each-ref --sort -committerdate --format %(refname)%00%(objectname)%00%(*objectname) [107ms]
+2026-09-10 08:10:21.938 [info] > git status -z -uall [129ms]
+2026-09-10 08:10:21.997 [info] > git rev-parse --show-toplevel [111ms]
+2026-09-10 08:10:22.067 [info] > git config --get commit.template [101ms]
+2026-09-10 08:10:22.070 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) --ignore-case refs/heads/master refs/remotes/master [97ms]
+2026-09-10 08:10:22.071 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) --ignore-case refs/heads/master refs/remotes/master [116ms]
+2026-09-10 08:10:22.094 [info] > git rev-parse --show-toplevel [90ms]
+2026-09-10 08:10:22.170 [info] > git config --get --local branch.master.vscode-merge-base [94ms]
+2026-09-10 08:10:22.176 [info] > git for-each-ref --sort -committerdate --format %(refname)%00%(objectname)%00%(*objectname) [90ms]
+2026-09-10 08:10:22.180 [info] > git rev-parse --show-toplevel [82ms]
+2026-09-10 08:10:22.192 [info] > git status -z -uall [110ms]
+2026-09-10 08:10:22.276 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) --ignore-case refs/heads/origin/master refs/remotes/origin/master [101ms]
+2026-09-10 08:10:22.304 [info] > git rev-parse --show-toplevel [113ms]
+2026-09-10 08:10:22.313 [info] > git check-ignore -v -z --stdin [127ms]
+2026-09-10 08:10:22.425 [info] > git merge-base refs/heads/master refs/remotes/origin/master [131ms]
+2026-09-10 08:10:22.434 [info] > git merge-base refs/heads/master refs/remotes/origin/master [148ms]
+2026-09-10 08:10:22.481 [info] > git rev-parse --show-toplevel [170ms]
+2026-09-10 08:10:22.616 [info] > git diff --raw --numstat --diff-filter=ADMR -z --find-renames=50% 489329a85e79d0d721c96d2160e8404b9391c7a7...refs/remotes/origin/master -- [174ms]
+2026-09-10 08:10:22.631 [info] > git diff --raw --numstat --diff-filter=ADMR -z --find-renames=50% 489329a85e79d0d721c96d2160e8404b9391c7a7...refs/remotes/origin/master -- [197ms]
+2026-09-10 08:10:22.664 [info] > git rev-parse --show-toplevel [173ms]
+2026-09-10 08:10:22.892 [info] > git rev-parse --show-toplevel [213ms]
+2026-09-10 08:10:23.134 [info] > git rev-parse --show-toplevel [230ms]
+2026-09-10 08:10:23.320 [info] > git rev-parse --show-toplevel [173ms]
+2026-09-10 08:10:23.324 [info] [Model][doInitialScan] Initial repository scan completed - repositories (1), closed repositories (0), parent repositories (0), unsafe repositories (0)
+2026-09-10 08:10:24.462 [info] > git config --get commit.template [96ms]
+2026-09-10 08:10:24.467 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) --ignore-case refs/heads/master refs/remotes/master [96ms]
+2026-09-10 08:10:24.583 [info] > git for-each-ref --sort -committerdate --format %(refname)%00%(objectname)%00%(*objectname) [105ms]
+2026-09-10 08:10:24.602 [info] > git status -z -uall [129ms]
+2026-09-10 08:10:25.320 [info] > git check-ignore -v -z --stdin [121ms]
+2026-09-10 08:10:25.516 [info] > git show --textconv :core/src/main.c [148ms]
+2026-09-10 08:10:25.521 [info] > git ls-files --stage -- core/src/main.c [146ms]
