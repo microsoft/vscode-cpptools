@@ -15,6 +15,7 @@
     "c_cpp.command.installCompiler.title": "Install a C++ Compiler",
     "c_cpp.command.rescanCompilers.title": "Rescan for Compilers",
     "c_cpp.command.switchHeaderSource.title": "Switch Header/Source",
+    "c_cpp.command.selectTranslationUnit.title": "Select a Translation Unit...",
     "c_cpp.command.enableErrorSquiggles.title": "Enable Error Squiggles",
     "c_cpp.command.disableErrorSquiggles.title": "Disable Error Squiggles",
     "c_cpp.command.toggleDimInactiveRegions.title": "Toggle Inactive Region Colorization",
@@ -728,12 +729,6 @@
     },
     "c_cpp.configuration.default.dotConfig.markdownDescription": {
         "message": "The value to use in a configuration if `dotConfig` is either not specified or set to `${default}`.",
-        "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
-        ]
-    },
-    "c_cpp.configuration.default.recursiveIncludes.reduce.markdownDescription": {
-        "message": "The value to use in a configuration if `recursiveIncludes.reduce` is either not specified or set to `${default}`.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]

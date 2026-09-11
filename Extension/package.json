@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.35.0-main",
+    "version": "1.35.1-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -1357,17 +1357,6 @@
                     "C_Cpp.default.dotConfig": {
                         "type": "string",
                         "markdownDescription": "%c_cpp.configuration.default.dotConfig.markdownDescription%",
-                        "scope": "resource"
-                    },
-                    "C_Cpp.default.recursiveIncludes.reduce": {
-                        "type": "string",
-                        "enum": [
-                            "",
-                            "always",
-                            "never",
-                            "default"
-                        ],
-                        "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.reduce.markdownDescription%",
                         "scope": "resource"
                     },
                     "C_Cpp.default.recursiveIncludes.priority": {
@@ -3991,6 +3980,11 @@
                 "category": "C/C++"
             },
             {
+                "command": "C_Cpp.SelectTranslationUnit",
+                "title": "%c_cpp.command.selectTranslationUnit.title%",
+                "category": "C/C++"
+            },
+            {
                 "command": "C_Cpp.EnableErrorSquiggles",
                 "title": "%c_cpp.command.enableErrorSquiggles.title%",
                 "category": "C/C++"
@@ -6543,6 +6537,10 @@
                     "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
                 },
                 {
+                    "command": "C_Cpp.SelectTranslationUnit",
+                    "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
                     "command": "C_Cpp.EnableErrorSquiggles",
                     "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
                 },
@@ -7170,6 +7168,7 @@
         "show": "ts-node -T .scripts/clean.ts show",
         "clean": "ts-node -T .scripts/clean.ts",
         "test-lldb-mi-component-manifest": "node --test .scripts/verifyLldbMiComponentManifest.test.mjs",
+        "test-vscode-acquisition": "node --test .scripts/vscode.test.mjs",
         "test-yarn-lock": "node --test .scripts/verifyYarnLock.test.mjs",
         "verify-lldb-mi-component-manifest": "node .scripts/verifyLldbMiComponentManifest.mjs",
         "verify-yarn-lock": "node .scripts/verifyYarnLock.mjs",
