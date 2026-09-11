@@ -294,7 +294,7 @@ def metadata_responses(artifacts, jobs, build=BUILD_ID, collection=COLLECTION, p
 def powershell_executable():
     executable = os.environ.get("PWSH") or shutil.which("pwsh") or shutil.which("pwsh.exe")
     if not executable:
-        raise RuntimeError("PowerShell 7 is required: install pwsh, or set PWSH to its executable path")
+        raise RuntimeError("PowerShell is required: install pwsh, or set PWSH to PowerShell 7 or Windows PowerShell 5.1")
     return executable
 
 
