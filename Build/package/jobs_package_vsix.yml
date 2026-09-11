@@ -48,9 +48,9 @@ jobs:
       script: |
         export SRC_DIR=$(echo $BUILD_SOURCESDIRECTORY | sed 's|\\|/|g')
         cd "$SRC_DIR/${{ parameters.srcDir }}"
-        npm install
+        npm ci --include=dev --include=optional
         if [ $? -ne 0 ]; then
-          echo "npm install failed, sleeping for 30s before retrying..."
+          echo "npm ci failed, sleeping for 30s before retrying..."
           sleep 30
           exit 1
         fi
@@ -58,10 +58,6 @@ jobs:
 
   - script: mkdir $(Build.ArtifactStagingDirectory)\vsix
     displayName: Create Staging Directory
-
-  - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.9.2
-    displayName: Install vsce
-    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
 
   - script: npm rebuild @vscode/vsce-sign --ignore-scripts=false
     displayName: Rebuild vsce-sign binary
@@ -93,3 +89,7 @@ jobs:
     inputs:
       solution: $(Build.SourcesDirectory)\Build\signing\SignVsix.proj
       msbuildArguments: /p:SignType=${{ parameters.signType }}
+
+  - script: npx vsce verify-signature -i $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -m $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest -s $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
+    displayName: Verify VSIX signature
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}

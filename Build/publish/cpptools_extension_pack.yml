@@ -40,4 +40,5 @@ extends:
       - template: /Build/publish/jobs_publish_vsix.yml@self
         parameters:
           vsixName: cpptools-extension-pack
+          srcDir: ExtensionPack
 
