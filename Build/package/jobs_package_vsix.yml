@@ -28,7 +28,7 @@ jobs:
     - output: pipelineArtifact
       displayName: '${{ parameters.vsixName }}.vsix'
       targetPath: $(Build.ArtifactStagingDirectory)\vsix
-      artifactName: vsix
+      artifactName: vsix_attempt$(System.JobAttempt)
 
   steps:
   - checkout: self
