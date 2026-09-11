@@ -270,6 +270,10 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Add environment variables from .env file
         this.resolveEnvFile(config, folder);
 
+        // Debug adapters consume the legacy `environment` array, not `env`.
+        // Convert here so both syntaxes work while preserving `env` precedence.
+        this.resolveEnvObject(config);
+
         await this.expand(config, folder);
 
         this.resolveSourceFileMapVariables(config);
@@ -698,6 +702,37 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 throw new Error(localize("envfile.failed", "Failed to use {0}. Reason: {1}", "envFile", e.message));
             }
         }
+    }
+
+    private resolveEnvObject(config: CppDebugConfiguration): void {
+        if ((config.type !== DebuggerType.cppdbg && config.type !== DebuggerType.cppvsdbg) || config.request !== 'launch') {
+            return;
+        }
+
+        const envObject = config.env;
+        if (!util.isObject(envObject)) {
+            return;
+        }
+
+        const environment: Environment[] = util.isArray(config.environment) ? config.environment : [];
+        const mergedEnvironment = new Map<string, Environment>();
+        const isCaseInsensitiveTarget = config.type === DebuggerType.cppvsdbg || (isWindows && !config.pipeTransport && !config.miDebuggerServerAddress && !config.useExtendedRemote);
+        const getEnvironmentKey = (name: string): string => isCaseInsensitiveTarget ? name.toLowerCase() : name;
+
+        for (const entry of environment) {
+            if (util.isString(entry?.name) && util.isString(entry?.value)) {
+                mergedEnvironment.set(getEnvironmentKey(entry.name), { name: entry.name, value: entry.value });
+            }
+        }
+
+        for (const [name, value] of Object.entries(envObject)) {
+            if (util.isString(value)) {
+                mergedEnvironment.set(getEnvironmentKey(name), { name, value });
+            }
+        }
+
+        config.environment = Array.from(mergedEnvironment.values());
+        delete config.env;
     }
 
     private resolveSourceFileMapVariables(config: CppDebugConfiguration): void {

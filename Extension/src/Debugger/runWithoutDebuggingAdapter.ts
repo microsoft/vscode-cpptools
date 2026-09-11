@@ -13,6 +13,32 @@ import { isWindows } from '../constants';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize = nls.loadMessageBundle();
+type TerminalEnvironment = NonNullable<vscode.TerminalOptions['env']>;
+const managedTerminals = new Map<string, vscode.Terminal>();
+const terminalEnvironments = new WeakMap<vscode.Terminal, TerminalEnvironment>();
+const activeTerminals = new WeakSet<vscode.Terminal>();
+
+vscode.window.onDidCloseTerminal(closedTerminal => {
+    activeTerminals.delete(closedTerminal);
+    for (const [terminalName, terminal] of managedTerminals) {
+        if (terminal === closedTerminal) {
+            managedTerminals.delete(terminalName);
+            return;
+        }
+    }
+});
+
+type LaunchEnvironmentEntry = { name: string; value: string | null; };
+
+type LaunchConfiguration = {
+    program?: string;
+    args?: string[];
+    cwd?: string;
+    environment?: LaunchEnvironmentEntry[];
+    env?: Record<string, string | null>;
+    console?: string;
+    externalConsole?: boolean;
+};
 
 /**
  * A minimal inline Debug Adapter that runs the target program directly without a debug adapter
@@ -27,6 +53,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     private childProcess?: cp.ChildProcess;
     private terminal?: vscode.Terminal;
     private terminalExecution?: vscode.TerminalShellExecution;
+    private releaseTerminalOnTerminate: boolean = false;
     private hasTerminated: boolean = false;
 
     public handleMessage(message: vscode.DebugProtocolMessage): void {
@@ -59,33 +86,32 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     }
 
     private async launch(request: { command: string; seq: number; arguments?: any; }): Promise<void> {
-        const config = request.arguments as {
-            program?: string;
-            args?: string[];
-            cwd?: string;
-            environment?: { name: string; value: string; }[];
-            console?: string;
-            externalConsole?: boolean;
-        };
+        const config = request.arguments as LaunchConfiguration;
 
         const program: string = config.program ?? '';
         const args: string[] = config.args ?? [];
         const cwd: string | undefined = config.cwd;
-        const environment: { name: string; value: string; }[] = config.environment ?? [];
+        const environment: LaunchEnvironmentEntry[] = config.environment ?? [];
+        const envObject: Record<string, string | null> = config.env ?? {};
         const consoleMode: string = config.console ?? (config.externalConsole ? 'externalTerminal' : 'integratedTerminal');
 
-        // Merge the launch config's environment variables on top of the inherited process environment.
+        // Merge environment values in this order: inherited process environment, legacy
+        // `environment` entries, then shorthand `env` values (higher precedence).
         const env: NodeJS.ProcessEnv = { ...process.env };
+        const terminalEnv: TerminalEnvironment = {};
         for (const e of environment) {
-            env[e.name] = e.value;
+            this.applyEnvironmentValue(env, terminalEnv, e.name, e.value);
+        }
+        for (const [key, value] of Object.entries(envObject)) {
+            this.applyEnvironmentValue(env, terminalEnv, key, value);
         }
 
         this.sendResponse(request, {});
 
         if (consoleMode === 'integratedTerminal' || consoleMode === 'internalConsole') {
-            await this.launchIntegratedTerminal(program, args, cwd, env);
+            await this.launchIntegratedTerminal(program, args, cwd, terminalEnv);
         } else if (consoleMode === 'externalTerminal') {
-            this.launchExternalTerminal(program, args, cwd, env);
+            this.launchExternalTerminal(program, args, cwd, env, terminalEnv);
         }
     }
 
@@ -93,14 +119,28 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
      * Launch the program in a VS Code integrated terminal.
      * The terminal will remain open after the program exits and be reused for the next session, if applicable.
      */
-    private async launchIntegratedTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv): Promise<void> {
+    private async launchIntegratedTerminal(program: string, args: string[], cwd: string | undefined, env: TerminalEnvironment): Promise<void> {
         const terminalName = path.normalize(program);
-        const existingTerminal = vscode.window.terminals.find(t => t.name === terminalName);
+        const managedTerminal = managedTerminals.get(terminalName);
+        let existingTerminal = managedTerminal && vscode.window.terminals.includes(managedTerminal) ? managedTerminal : undefined;
+        if (!existingTerminal) {
+            managedTerminals.delete(terminalName);
+        }
+        if (existingTerminal && activeTerminals.has(existingTerminal)) {
+            existingTerminal = undefined;
+        } else if (existingTerminal && !this.environmentsEqual(terminalEnvironments.get(existingTerminal), env)) {
+            existingTerminal.dispose();
+            existingTerminal = undefined;
+            managedTerminals.delete(terminalName);
+        }
         this.terminal = existingTerminal ?? vscode.window.createTerminal({
             name: terminalName,
             cwd,
-            env: env as Record<string, string>
+            env
         });
+        managedTerminals.set(terminalName, this.terminal);
+        terminalEnvironments.set(this.terminal, env);
+        activeTerminals.add(this.terminal);
         this.terminal.show(true);
 
         const shellIntegration: vscode.TerminalShellIntegration | undefined =
@@ -108,6 +148,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
 
         // Not all terminals support shell integration. If it's not available, we'll just send the command as text though we won't be able to monitor its execution.
         if (shellIntegration) {
+            this.releaseTerminalOnTerminate = true;
             this.monitorIntegratedTerminal(this.terminal);
             let executable: string = program;
             let executableArgs: string[] = args;
@@ -126,6 +167,9 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             // buildShellCommandLine quotes the path, and PowerShell evaluates a quoted path as a string
             // literal instead of running it, so the call operator is required to invoke it.
             this.terminal.sendText(this.isPowerShellTerminal() ? `& ${cmdLine}` : cmdLine);
+            if (managedTerminals.get(terminalName) === this.terminal) {
+                managedTerminals.delete(terminalName);
+            }
 
             // The terminal manages its own lifecycle; notify VS Code the "debug" session is done.
             this.sendEvent('terminated');
@@ -155,13 +199,14 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     /**
      * Launch the program in an external terminal. We do not keep track of this terminal or the spawned process.
      */
-    private launchExternalTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv): void {
+    private launchExternalTerminal(program: string, args: string[], cwd: string | undefined, env: NodeJS.ProcessEnv, terminalEnv: TerminalEnvironment): void {
         const cmdLine: string = buildShellCommandLine('', program, args, true);
         const platform: string = os.platform();
         if (platform === 'win32') {
             cp.spawn('cmd.exe', ['/c', 'start', 'cmd.exe', '/K', `"${cmdLine}"`], { cwd, env, windowsVerbatimArguments: true, detached: true, stdio: 'ignore' }).unref();
         } else if (platform === 'darwin') {
-            cp.spawn('osascript', ['-e', `tell application "Terminal" to do script "${this.escapeQuotes(cmdLine)}"`], { cwd, env, detached: true, stdio: 'ignore' }).unref();
+            const terminalCommand = this.buildMacOSExternalTerminalCommand(cmdLine, terminalEnv);
+            cp.spawn('osascript', ['-e', `tell application "Terminal" to do script "${this.escapeQuotes(terminalCommand)}"`], { cwd, env, detached: true, stdio: 'ignore' }).unref();
         } else if (platform === 'linux' && sessionIsWsl()) {
             cp.spawn('/mnt/c/Windows/System32/cmd.exe', ['/c', 'start', 'bash', '-c', `${cmdLine};read -p 'Press enter to continue...'`], { env, detached: true, stdio: 'ignore' }).unref();
         } else { // platform === 'linux'
@@ -208,8 +253,58 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
         vscode.window.showErrorMessage(message);
     }
 
+    private buildMacOSExternalTerminalCommand(cmdLine: string, env: TerminalEnvironment): string {
+        const envArgs = Object.entries(env).flatMap(([name, value]) => {
+            if (value === null) {
+                return ['-u', this.escapeShellArg(name)];
+            }
+
+            return value === undefined ? [] : [this.escapeShellArg(`${name}=${value}`)];
+        });
+
+        return envArgs.length === 0 ? cmdLine : `/usr/bin/env ${envArgs.join(' ')} ${cmdLine}`;
+    }
+
+    private escapeShellArg(arg: string): string {
+        return `'${arg.replace(/'/g, `'\\''`)}'`;
+    }
+
     private escapeQuotes(arg: string): string {
         return arg.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    }
+
+    private applyEnvironmentValue(processEnv: NodeJS.ProcessEnv, terminalEnv: TerminalEnvironment, name: string, value: string | null): void {
+        const matchingKeys = isWindows
+            ? new Set([...Object.keys(processEnv), ...Object.keys(terminalEnv)].filter(key => key.toLowerCase() === name.toLowerCase()))
+            : new Set([name]);
+
+        for (const key of matchingKeys) {
+            delete processEnv[key];
+            if (key !== name || value === null) {
+                terminalEnv[key] = null;
+            }
+        }
+
+        if (value === null) {
+            terminalEnv[name] = null;
+        } else {
+            processEnv[name] = value;
+            terminalEnv[name] = value;
+        }
+    }
+
+    private environmentsEqual(first: TerminalEnvironment | undefined, second: TerminalEnvironment): boolean {
+        if (!first) {
+            return false;
+        }
+
+        const firstKeys = Object.keys(first);
+        const secondKeys = Object.keys(second);
+        if (firstKeys.length !== secondKeys.length) {
+            return false;
+        }
+
+        return firstKeys.every(key => first[key] === second[key]);
     }
 
     private waitForShellIntegration(terminal: vscode.Terminal, timeoutMs: number): Promise<vscode.TerminalShellIntegration | undefined> {
@@ -289,6 +384,9 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             }
 
             this.hasTerminated = true;
+            if (this.releaseTerminalOnTerminate && this.terminal) {
+                activeTerminals.delete(this.terminal);
+            }
             this.disposeTerminalListeners();
         }
 
@@ -302,6 +400,9 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
 
     public dispose(): void {
         this.terminateProcess();
+        if (this.releaseTerminalOnTerminate && this.terminal) {
+            activeTerminals.delete(this.terminal);
+        }
         this.disposeTerminalListeners();
         this.sendMessageEmitter.dispose();
     }
