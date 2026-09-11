@@ -107,6 +107,16 @@ class PipelineArtifactTests(unittest.TestCase):
                 with self.subTest(path=path, artifact=name):
                     self.assertNotIn(name, bases)
 
+    def test_resolver_calls_in_extends_parameters_use_the_source_repository(self):
+        for path, document in self.documents.items():
+            if not isinstance(document, dict) or not isinstance(document.get("extends"), dict):
+                continue
+            for node in mappings(document["extends"].get("parameters", {})):
+                template = str(node.get("template", ""))
+                if template.split("@", 1)[0].endswith("/resolve_artifact.yml"):
+                    with self.subTest(path=path, template=template):
+                        self.assertTrue(template.startswith("/") and template.endswith("@self"), template)
+
     def test_resolver_calls_use_declared_parameters(self):
         helper = self.documents["templates/resolve_artifact.yml"]
         parameters = {parameter["name"] for parameter in helper["parameters"]}
