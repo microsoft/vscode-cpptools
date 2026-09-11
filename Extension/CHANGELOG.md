@@ -1,5 +1,26 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.35.1: September 14, 2026
+### New Feature
+* Add the 'Select a Translation Unit...' command to choose which source file provides IntelliSense context for the active header file. [PR #14688](https://github.com/microsoft/vscode-cpptools/pull/14688)
+
+### Enhancements
+* Improve IntelliSense configuration lookup performance for symbolic links to `compile_commands.json`.
+* Update the bundled `clang-tidy` and `clang-format` from 23.1.0 to 23.1.1.
+* Improve performance when pruning large IntelliSense caches.
+
+### Bug Fixes
+* Fix `/U` and `-U` compiler arguments not undefining macros for IntelliSense and code analysis. [#13786](https://github.com/microsoft/vscode-cpptools/issues/13786)
+* Fix excessive CPU usage by idle parser workers while workspace parsing is still running. [#14757](https://github.com/microsoft/vscode-cpptools/issues/14757)
+* Remove the obsolete `C_Cpp.default.recursiveIncludes.reduce` setting and its configuration UI control. [PR #14761](https://github.com/microsoft/vscode-cpptools/pull/14761)
+* Fix missing or stale IntelliSense configurations when `compile_commands.json` is created after startup, changed, deleted, or accessed through symbolic links, including in multi-root workspaces.
+* Fix missing `cp1125` support on all platforms, unsupported file encodings on Linux, and incorrect GB18030 decoding on Linux and macOS.
+* Fix recursive include lookup sometimes selecting the wrong header when directories are reached through multiple symbolic links.
+* Fix a potential language server deadlock during workspace initialization and concurrent document edits.
+* Fix an IntelliSense crash when parsing templates in Clang mode.
+* Fix a `cpptools` crash during shutdown on macOS.
+* Update dependencies.
+
 ## Version 1.35.0: September 10, 2026
 ### Enhancement
 * Improve workspace indexing performance.
