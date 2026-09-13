@@ -434,5 +434,7 @@
 	"check_timed_out": "při čekání na dokončení analýzy souboru {0} vypršel časový limit",
 	"failed_to_open_browse_db_lock_file": "Nepodařilo se otevřít soubor zámku databáze procházení: {0} (errno={1})",
 	"failed_to_lock_browse_db_lock_file": "Nepodařilo se uzamknout soubor zámku databáze procházení: {0} (errno={1})",
-	"browse_database_disabled_incompatible_storage": "Databáze procházení byla zakázána, protože její umístění úložiště nepodporuje sdílenou paměť SQLite WAL. Nastavte browse.databaseFilename na místní cestu."
+	"browse_database_disabled_incompatible_storage": "Databáze procházení byla zakázána, protože její umístění úložiště nepodporuje sdílenou paměť SQLite WAL. Nastavte browse.databaseFilename na místní cestu.",
+	"selected_translation_unit_not_include_file_previous": "Vybraná jednotka překladu '{0}' nezahrnuje '{1}'. IntelliSense obnoví předchozí jednotku překladu, pokud je stále k dispozici. V opačném případě použije '{1}' jako překladovou jednotku pouze pro záhlaví.",
+	"selected_translation_unit_not_include_file_header_only": "Vybraná jednotka překladu {0} neobsahuje {1}. Není k dispozici žádná předchozí jednotka překladu, takže IntelliSense použije {1} jako jednotku překladu jen pro hlavičku."
 }
