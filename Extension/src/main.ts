@@ -178,11 +178,13 @@ export async function deactivate(): Promise<void> {
     DebuggerExtension.dispose();
     void Telemetry.deactivate().catch(returns.undefined);
     disposables.forEach(d => d.dispose());
-    if (languageServiceDisabled) {
-        return;
+    try {
+        if (!languageServiceDisabled) {
+            await LanguageServer.deactivate();
+        }
+    } finally {
+        disposeOutputChannels();
     }
-    await LanguageServer.deactivate();
-    disposeOutputChannels();
 }
 
 async function makeBinariesExecutable(): Promise<void> {

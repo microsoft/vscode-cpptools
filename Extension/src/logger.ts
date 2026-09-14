@@ -11,6 +11,7 @@ import { getLoggingLevel } from './common';
 import { sendInstrumentation } from './instrumentation';
 import { CppSourceStr } from './LanguageServer/extension';
 import { getLocalizedString, LocalizeStringParams } from './LanguageServer/localization';
+import { BatchedWriter } from './Utility/Async/batchedWriter';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -88,7 +89,11 @@ export let debugChannel: vscode.OutputChannel | undefined;
 export let warningChannel: vscode.OutputChannel | undefined;
 export let sshChannel: vscode.OutputChannel | undefined;
 
+let nativeDebugLogWriter: BatchedWriter | undefined;
+
 export function getOutputChannel(): vscode.OutputChannel {
+    // Keep buffered native diagnostics ahead of other writes or operations on this channel.
+    nativeDebugLogWriter?.flush();
     if (!outputChannel) {
         outputChannel = vscode.window.createOutputChannel(CppSourceStr);
         // Do not use CppSettings to avoid circular require()
@@ -176,10 +181,16 @@ export function showWarning(params: ShowWarningParams): void {
 
 export function logLocalized(params: LocalizeStringParams): void {
     const output: string = getLocalizedString(params);
-    log(output);
+    if (!nativeDebugLogWriter) {
+        const channel = getOutputChannel();
+        nativeDebugLogWriter = new BatchedWriter(text => channel.append(text));
+    }
+    // OutputChannel.appendLine adds LF on every platform, independently of os.EOL.
+    nativeDebugLogWriter.append(`${output}\n`);
 }
 
 export function disposeOutputChannels(): void {
+    nativeDebugLogWriter?.dispose();
     if (outputChannel) {
         outputChannel.dispose();
     }
