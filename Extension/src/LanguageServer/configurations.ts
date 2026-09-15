@@ -113,7 +113,6 @@ export interface Browse {
 }
 
 export interface RecursiveIncludes {
-    reduce?: string;
     priority?: string;
     order?: string;
 }

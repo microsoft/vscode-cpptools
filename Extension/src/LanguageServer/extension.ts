@@ -383,6 +383,7 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.forEach(d => d.dispose());
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectTranslationUnit', enabled ? onSelectTranslationUnit : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', enabled ? onResetDatabase : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectIntelliSenseConfiguration', enabled ? selectIntelliSenseConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.InstallCompiler', enabled ? installCompiler : onDisabledCommand));
@@ -468,6 +469,107 @@ async function onRestartIntelliSenseForFile() {
     return clients.ActiveClient.restartIntelliSenseForFile(activeEditor.document);
 }
 
+function getEditorPath(fileName: string): string {
+    let bestRealRoot: string | undefined;
+    let bestRootPath: string | undefined;
+    clients.forEach(client => {
+        if (!client.RootRealPath) {
+            return;
+        }
+        const relativePath: string = path.relative(client.RootRealPath, fileName);
+        const isUnderRoot: boolean = relativePath === "" ||
+            (relativePath !== ".." && !relativePath.startsWith(`..${path.sep}`) && !path.isAbsolute(relativePath));
+        if (isUnderRoot && (!bestRealRoot || client.RootRealPath.length > bestRealRoot.length)) {
+            bestRealRoot = client.RootRealPath;
+            bestRootPath = client.RootPath;
+        }
+    });
+    return bestRealRoot && bestRootPath ? path.join(bestRootPath, path.relative(bestRealRoot, fileName)) : fileName;
+}
+
+interface TranslationUnitQuickPickItem extends vscode.QuickPickItem {
+    translationUnit: string;
+}
+
+async function onSelectTranslationUnit(): Promise<void> {
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!activeEditor || !util.isCpp(activeEditor.document)) {
+        return;
+    }
+
+    const client: Client = clients.ActiveClient;
+    const result = await (async () => {
+        const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+        try {
+            const candidatesPromise = client.getTranslationUnitSourceCandidates(activeEditor.document.uri, tokenSource.token);
+            const showProgress: boolean = await new Promise<boolean>((resolve, reject) => {
+                const timer: NodeJS.Timeout = global.setTimeout(() => resolve(true), 2000);
+                void candidatesPromise.then(() => {
+                    clearTimeout(timer);
+                    resolve(false);
+                }, (e) => {
+                    clearTimeout(timer);
+                    reject(e);
+                });
+            });
+
+            if (!showProgress) {
+                return await candidatesPromise;
+            }
+
+            return await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: localize('find.translation.units', 'Finding Translation Units...'),
+                cancellable: true
+            }, async (_progress, token) => {
+                const cancellationListener: vscode.Disposable = token.onCancellationRequested(() => tokenSource.cancel());
+                try {
+                    return await candidatesPromise;
+                } finally {
+                    cancellationListener.dispose();
+                }
+            });
+        } catch (e) {
+            if (e instanceof vscode.CancellationError) {
+                return undefined;
+            }
+            throw e;
+        } finally {
+            tokenSource.dispose();
+        }
+    })();
+    if (result === undefined) {
+        return;
+    }
+    if (result.candidates.length === 0) {
+        void vscode.window.showInformationMessage(localize('no.translation.units.found', 'No translation units were found for the active file.'));
+        return;
+    }
+    const currentTranslationUnit: string = getEditorPath(result.currentTranslationUnit);
+    const items: TranslationUnitQuickPickItem[] = result.candidates.map(candidate => {
+        const editorPath: string = getEditorPath(candidate);
+        const relativePath: string = vscode.workspace.asRelativePath(vscode.Uri.file(editorPath));
+        const directory: string = path.dirname(relativePath);
+        const isCurrent: boolean = editorPath === currentTranslationUnit;
+        return {
+            label: `${isCurrent ? "$(check) " : ""}${path.basename(relativePath)}`,
+            description: isCurrent ? localize('current.translation.unit', 'Current translation unit') :
+                directory === "." ? undefined : directory,
+            detail: editorPath,
+            translationUnit: editorPath
+        };
+    });
+    const selection: TranslationUnitQuickPickItem | undefined = await vscode.window.showQuickPick(items, {
+        title: localize('select.translation.unit', 'Select a Translation Unit'),
+        placeHolder: localize('select.translation.unit.placeholder', 'Select a source file to use as the translation unit'),
+        matchOnDescription: true,
+        matchOnDetail: true
+    });
+    if (selection !== undefined) {
+        await client.selectTranslationUnit(activeEditor.document.uri, selection.translationUnit);
+    }
+}
+
 async function onSwitchHeaderSource(): Promise<void> {
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !util.isCpp(activeEditor.document)) {
@@ -487,16 +589,7 @@ async function onSwitchHeaderSource(): Promise<void> {
             if (!targetFileName) {
                 return;
             }
-            // If the targetFileName has a path that is a symlink target of a workspace folder,
-            // then replace the RootRealPath with the RootPath (the symlink path).
-            let targetFileNameReplaced: boolean = false;
-            clients.forEach(client => {
-                if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
-                    && targetFileName.startsWith(client.RootRealPath)) {
-                    targetFileName = client.RootPath + targetFileName.substring(client.RootRealPath.length);
-                    targetFileNameReplaced = true;
-                }
-            });
+            targetFileName = getEditorPath(targetFileName);
             const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
             await vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
         } catch (e) {
