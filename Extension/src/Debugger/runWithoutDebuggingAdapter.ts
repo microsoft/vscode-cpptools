@@ -28,6 +28,10 @@ vscode.window.onDidCloseTerminal(closedTerminal => {
     }
 });
 
+vscode.window.onDidEndTerminalShellExecution(event => {
+    activeTerminals.delete(event.terminal);
+});
+
 type LaunchEnvironmentEntry = { name: string; value: string | null; };
 
 type LaunchConfiguration = {
@@ -170,6 +174,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
             if (managedTerminals.get(terminalName) === this.terminal) {
                 managedTerminals.delete(terminalName);
             }
+            activeTerminals.delete(this.terminal);
 
             // The terminal manages its own lifecycle; notify VS Code the "debug" session is done.
             this.sendEvent('terminated');
@@ -404,7 +409,7 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
 
     public dispose(): void {
         this.terminateProcess();
-        if (this.releaseTerminalOnTerminate && this.terminal) {
+        if (this.hasTerminated && this.releaseTerminalOnTerminate && this.terminal) {
             activeTerminals.delete(this.terminal);
         }
         this.disposeTerminalListeners();
