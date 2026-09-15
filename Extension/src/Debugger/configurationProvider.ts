@@ -716,7 +716,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         const environment: Environment[] = util.isArray(config.environment) ? config.environment : [];
         const mergedEnvironment = new Map<string, Environment>();
-        const isCaseInsensitiveTarget = config.type === DebuggerType.cppvsdbg || (isWindows && !config.pipeTransport && !config.miDebuggerServerAddress && !config.useExtendedRemote);
+        const isCaseInsensitiveTarget = this.isCaseInsensitiveTarget(config);
         const getEnvironmentKey = (name: string): string => isCaseInsensitiveTarget ? name.toLowerCase() : name;
 
         for (const entry of environment) {
@@ -733,6 +733,42 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         config.environment = Array.from(mergedEnvironment.values());
         delete config.env;
+    }
+
+    private isCaseInsensitiveTarget(config: CppDebugConfiguration): boolean {
+        if (config.type === DebuggerType.cppvsdbg) {
+            return true;
+        }
+
+        if (!isWindows) {
+            return false;
+        }
+
+        if (config.pipeTransport || config.miDebuggerServerAddress || config.useExtendedRemote) {
+            return false;
+        }
+
+        if (util.isArray(config.postRemoteConnectCommands) && config.postRemoteConnectCommands.length > 0) {
+            return false;
+        }
+
+        if (util.isArray(config.customLaunchSetupCommands) && config.customLaunchSetupCommands.length > 0) {
+            return false;
+        }
+
+        if (util.isArray(config.setupCommands) && this.hasRemoteCommands(config.setupCommands)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private hasRemoteCommands(commands: any[]): boolean {
+        const remoteCommandPattern = /(?:^|\b)(?:-?target-select\b|target\s+(?:remote|extended-remote)\b|gdb-remote\b|process\s+connect\b|platform\s+connect\b)/i;
+        return commands.some(cmd => {
+            const text = util.isString(cmd) ? cmd : (util.isString(cmd?.text) ? cmd.text : '');
+            return remoteCommandPattern.test(text);
+        });
     }
 
     private resolveSourceFileMapVariables(config: CppDebugConfiguration): void {
