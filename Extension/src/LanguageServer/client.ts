@@ -293,6 +293,7 @@ interface IntelliSenseDiagnostic {
     severity: vscode.DiagnosticSeverity;
     localizeStringParams: LocalizeStringParams;
     relatedInformation?: IntelliSenseDiagnosticRelatedInformation[];
+    tags?: vscode.DiagnosticTag[];
 }
 
 interface RefactorDiagnostic {
@@ -2684,6 +2685,7 @@ export class DefaultClient implements Client {
             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
             diagnostic.code = d.code;
             diagnostic.source = CppSourceStr;
+            diagnostic.tags = d.tags;
             if (d.relatedInformation) {
                 diagnostic.relatedInformation = [];
                 for (const info of d.relatedInformation) {
