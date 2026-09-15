@@ -28,7 +28,6 @@
 	"disable.warnings.button": "Uyarıları Devre Dışı Bırak",
 	"unable.to.provide.configuration": "{0}, IntelliSense yapılandırma bilgilerini sağlayamıyor. Bunun yerine '{1}' yapılandırmasındaki ayarlar kullanılacak.",
 	"config.not.found": "İstenen yapılandırma adı bulunamadı: {0}",
-	"unsupported.client": "Desteklenmeyen istemci",
 	"timed.out": "{0} ms'de zaman aşımına uğradı.",
 	"parsing.stats.large.project": "{1} C/C++ kaynak dosyası algılanan {0} dosya listelendi. Daha iyi performans için bazı dosyaları hariç tutmayı düşünebilirsiniz.",
 	"learn.more": "Daha Fazla Bilgi Edinin",

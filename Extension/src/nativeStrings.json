@@ -777,5 +777,13 @@
     "browse_database_disabled_incompatible_storage": {
         "text": "The browse database was disabled because its storage location does not support SQLite WAL shared memory. Set browse.databaseFilename to a local path.",
         "hint": "browse.databaseFilename is a setting name. {Locked=\"SQLite WAL\"} {Locked=\"browse.databaseFilename\"}"
+    },
+    "selected_translation_unit_not_include_file_previous": {
+        "text": "The selected translation unit '{0}' does not include '{1}'. IntelliSense will restore the previous translation unit if it is still available; otherwise, it will use '{1}' as a header-only translation unit.",
+        "hint": "{0} is the selected translation unit path. {1} is the active file path. {Locked=\"IntelliSense\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
+    },
+    "selected_translation_unit_not_include_file_header_only": {
+        "text": "The selected translation unit '{0}' does not include '{1}'. No previous translation unit is available, so IntelliSense will use '{1}' as a header-only translation unit.",
+        "hint": "{0} is the selected translation unit path. {1} is the active file path. {Locked=\"IntelliSense\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
     }
 }

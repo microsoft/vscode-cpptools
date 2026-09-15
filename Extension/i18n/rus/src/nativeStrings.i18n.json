@@ -13,8 +13,8 @@
 	"disable_error_squiggles": "Отключить волнистые линии для ошибок",
 	"enable_error_squiggles": "Включить все волнистые линии для ошибок",
 	"include_errors_update_include_path_squiggles_disabled2": "Обнаружены ошибки #include. Обновите includePath. Синтаксические ошибки для этого файла не будут сообщаться, пока не будут найдены включаемые файлы.",
-	"include_errors_update_include_path_intellisense_disabled": "Обнаружены ошибки #include. Измените includePath. Функции IntelliSense для этой единицы трансляции ({0}) будет предоставлены анализатором тегов.",
-	"include_errors_update_compile_commands_or_include_path_intellisense_disabled": "Обнаружены ошибки #include. Рекомендуется изменить compile_commands.json или includePath. Функции IntelliSense для этой единицы трансляции ({0}) будет предоставлены анализатором тегов.",
+	"include_errors_update_include_path_intellisense_disabled": "Обнаружены ошибки #include. Измените includePath. Функции IntelliSense для этой единицы трансляции ({0}) будут предоставлены анализатором тегов.",
+	"include_errors_update_compile_commands_or_include_path_intellisense_disabled": "Обнаружены ошибки #include. Рекомендуется изменить compile_commands.json или includePath. Функции IntelliSense для этой единицы трансляции ({0}) будут предоставлены анализатором тегов.",
 	"could_not_parse_compile_commands": "Не удалось проанализировать \"{0}\". Вместо этого будет использоваться \"includePath\" из файла c_cpp_properties.json в папке \"{1}\".",
 	"could_not_find_compile_commands": "Не удалось найти \"{0}\". Вместо этого будет использоваться \"includePath\" из файла c_cpp_properties.json в папке \"{1}\".",
 	"file_not_found_in_path": "Не удалось найти \"{0}\" в \"{1}\". Вместо него для этого файла будет использоваться \"includePath\" из файла c_cpp_properties.json в папке \"{2}\".",
@@ -159,7 +159,7 @@
 	"fallback_to_64_bit_mode2": "Не удалось запросить сведения от компилятора. Возврат к 64-разрядному режиму IntelliSenseMode.",
 	"fallback_to_no_bitness": "Не удалось запросить сведения от компилятора. Возврат к режиму без использования разрядности.",
 	"intellisense_client_creation_aborted": "Создание клиента IntelliSense прервано: {0}",
-	"include_errors_config_provider_intellisense_disabled": "обнаружены ошибки #include на основе сведений, предоставленных параметром configurationProvider. Функции IntelliSense для этой записи преобразования ({0}) будут предоставлены анализатором тегов.",
+	"include_errors_config_provider_intellisense_disabled": "Обнаружены ошибки #include на основе сведений, предоставленных параметром configurationProvider. Функции IntelliSense для этой единицы трансляции ({0}) будут предоставлены анализатором тегов.",
 	"include_errors_config_provider_squiggles_disabled2": "Обнаружены ошибки #include на основе сведений, предоставленных параметром configurationProvider. Синтаксические ошибки для этого файла не будут сообщаться, пока не будут найдены включаемые файлы.",
 	"preprocessor_keyword": "ключевое слово препроцессора",
 	"c_keyword": "Ключевое слово C",
@@ -433,5 +433,6 @@
 	"check_open_failed": "не удалось открыть {0} для анализа",
 	"check_timed_out": "истекло время ожидания завершения анализа {0}",
 	"failed_to_open_browse_db_lock_file": "Не удалось открыть файл блокировки базы данных просмотра: {0} (errno={1})",
-	"failed_to_lock_browse_db_lock_file": "Не удалось заблокировать файл блокировки базы данных просмотра: {0} (errno={1})"
+	"failed_to_lock_browse_db_lock_file": "Не удалось заблокировать файл блокировки базы данных просмотра: {0} (errno={1})",
+	"browse_database_disabled_incompatible_storage": "База данных просмотра была отключена, так как ее место хранения не поддерживает общую память SQLite WAL. Настройте для browse.databaseFilename локальный путь."
 }

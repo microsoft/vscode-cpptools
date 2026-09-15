@@ -28,7 +28,6 @@
 	"disable.warnings.button": "Deshabilitar advertencias",
 	"unable.to.provide.configuration": "{0} no puede proporcionar información de configuración de IntelliSense. Se utilizará la configuración de \"{1}\" en su lugar.",
 	"config.not.found": "No se encuentra el nombre de la configuración que se ha solicitado: {0}",
-	"unsupported.client": "Cliente no admitido",
 	"timed.out": "Se agotó el tiempo de espera a los {0} ms.",
 	"parsing.stats.large.project": "{0} archivos enumerados con {1} archivos de origen de C/C++ detectados. Puede que desee considerar la exclusión de algunos archivos para mejorar el rendimiento.",
 	"learn.more": "Obtener más información",

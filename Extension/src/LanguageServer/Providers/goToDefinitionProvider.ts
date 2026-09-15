@@ -47,8 +47,9 @@ export async function sendGoToDefinitionRequest(client: DefaultClient, uri: vsco
         return undefined;
     }
 
+    const protocol2CodeConverter = await client.languageClient.getProtocol2CodeConverter();
     const result: vscode.Definition | vscode.DefinitionLink[] | undefined =
-        await client.languageClient.protocol2CodeConverter.asDefinitionResult(response, token);
+        await protocol2CodeConverter.asDefinitionResult(response, token);
     if (token.isCancellationRequested) {
         return undefined;
     }

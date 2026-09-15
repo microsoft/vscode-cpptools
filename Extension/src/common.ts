@@ -16,6 +16,7 @@ import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import { ManualPromise } from './Utility/Async/manualPromise';
 import { isWindows } from './constants';
+import { classifyFilePath, FileTypeMapping } from './fileType';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
@@ -157,34 +158,26 @@ export function getVcpkgRoot(): string {
     return vcpkgRoot;
 }
 
-/**
- * This is a fuzzy determination of whether a uri represents a header file.
- * For the purposes of this function, a header file has no extension, or an extension that begins with the letter 'h'.
- * @param document The document to check.
- */
 export function isHeaderFile(uri: vscode.Uri): boolean {
-    const fileExt: string = path.extname(uri.fsPath);
-    const fileExtLower: string = fileExt.toLowerCase();
-    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".inl", ".ipp", ".tcc", ".txx", ".tpp", ".tlh", ".tli", ""].some(ext => fileExtLower === ext);
+    return classifyFilePath(uri.fsPath)?.kind === 'header';
 }
 
-export function isCppFile(uri: vscode.Uri): boolean {
-    const fileExt: string = path.extname(uri.fsPath);
-    const fileExtLower: string = fileExt.toLowerCase();
-    return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ii", ".ino"].some(ext => fileExtLower === ext);
+export function isCppFile(uri: vscode.Uri, languageId?: string): boolean {
+    const fileType: FileTypeMapping | undefined = classifyFilePath(uri.fsPath, languageId);
+    return fileType?.kind === 'source' && (fileType.language === 'cpp' || fileType.language === 'cuda');
 }
 
-export function isCFile(uri: vscode.Uri): boolean {
-    const fileExt: string = path.extname(uri.fsPath);
-    const fileExtLower: string = fileExt.toLowerCase();
-    return fileExt === ".c" || fileExtLower === ".i";
+export function isCFile(uri: vscode.Uri, languageId?: string): boolean {
+    const fileType: FileTypeMapping | undefined = classifyFilePath(uri.fsPath, languageId);
+    return fileType?.kind === 'source' && fileType.language === 'c';
 }
 
-export function isCppOrCFile(uri: vscode.Uri | undefined): boolean {
+export function isCppOrCFile(uri: vscode.Uri | undefined, languageId?: string): boolean {
     if (!uri) {
         return false;
     }
-    return isCppFile(uri) || isCFile(uri);
+    const fileType: FileTypeMapping | undefined = classifyFilePath(uri.fsPath, languageId);
+    return fileType?.kind === 'source' && fileType.language !== undefined;
 }
 
 export function isFolderOpen(uri: vscode.Uri): boolean {

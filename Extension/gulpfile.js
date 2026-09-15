@@ -12,7 +12,6 @@ const nls = require('vscode-nls-dev');
 const path = require('path');
 const minimist = require('minimist');
 const es = require('event-stream');
-const sourcemaps = require('gulp-sourcemaps');
 const ts = require('gulp-typescript');
 const typescript = require('typescript');
 const tsProject = ts.createProject('./tsconfig.json', { typescript });
@@ -216,7 +215,6 @@ gulp.task("translations-export", (done) => {
 
     // Transpile the TS to JS, and let vscode-nls-dev scan the files for calls to localize.
     let jsStream = tsProject.src()
-        .pipe(sourcemaps.init())
         .pipe(tsProject()).js
         .pipe(nls.createMetaDataFiles());
 
@@ -308,7 +306,6 @@ const generateAdditionalLocFiles = () => {
 const generateSrcLocBundle = () => {
     // Transpile the TS to JS, and let vscode-nls-dev scan the files for calls to localize.
     return tsProject.src()
-        .pipe(sourcemaps.init())
         .pipe(tsProject()).js
         .pipe(nls.createMetaDataFiles())
         .pipe(nls.createAdditionalLanguageFiles(languages, "i18n"))

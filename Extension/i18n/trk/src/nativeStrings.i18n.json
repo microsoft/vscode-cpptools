@@ -433,5 +433,6 @@
 	"check_open_failed": "{0} analiz için açılamadı",
 	"check_timed_out": "{0} analizinin tamamlanması beklenirken zaman aşımına uğradı",
 	"failed_to_open_browse_db_lock_file": "Gözatma veritabanı kilit dosyası açılamadı: {0} (errno={1})",
-	"failed_to_lock_browse_db_lock_file": "Gözatma veritabanı kilit dosyası kilitlenemedi: {0} (errno={1})"
+	"failed_to_lock_browse_db_lock_file": "Gözatma veritabanı kilit dosyası kilitlenemedi: {0} (errno={1})",
+	"browse_database_disabled_incompatible_storage": "Gözatma veritabanının depolama konumu SQLite WAL paylaşılan belleğini desteklemediğinden, bu veritabanı devre dışı bırakıldı. browse.databaseFilename öğesini yerel bir yola ayarlayın."
 }

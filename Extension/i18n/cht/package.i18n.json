@@ -389,7 +389,7 @@
 	"c_cpp.taskDefinitions.detail.description": "工作的其他詳細資料。",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "相同來源樹狀的目前路徑和編譯時間路徑。在顯示 stacktrace 位置時，在 EditorPath 下找到的檔案會對應到 CompileTimePath 路徑，以進行中斷點必對，並會從 CompileTimePath 對應到 EditorPath。",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "編輯器要使用的來源樹狀路徑。",
-	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "若此項目只用於堆疊框架位置對應，則為 False; 若在指定中斷點位置時也應該使用此項目，則為 True。",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "若此項目只用於堆疊框架位置對應，請將其設定為 false。若在指定中斷點位置時也應該使用此項目，請將其設定為 true。",
 	"c_cpp.debuggers.symbolOptions.description": "控制如何找到並載入符號 (.pdb 檔案) 的選項。",
 	"c_cpp.debuggers.unknownBreakpointHandling.description": "控制叫用時如何處理在外部設定的中斷點 (通常是透過原始 GDB 命令)。\n允許的值為 \"throw\"，其作用就像應用程式擲出例外，以及 \"stop\"，其只會暫停偵錯工作階段。預設值為 \"throw\"。",
 	"c_cpp.debuggers.debuginfod.description": "控制從 debuginfod 伺服器下載偵錯符號的 GDB debuginfod 行為。",

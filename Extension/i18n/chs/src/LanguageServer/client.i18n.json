@@ -28,7 +28,6 @@
 	"disable.warnings.button": "禁用警告",
 	"unable.to.provide.configuration": "{0} 无法提供 IntelliSense 配置信息。将改为使用“{1}”配置中的设置。",
 	"config.not.found": "找不到请求的配置名称: {0}",
-	"unsupported.client": "不支持的客户端",
 	"timed.out": "将在 {0} 毫秒后超时。",
 	"parsing.stats.large.project": "已枚举 {0} 个文件，检测到 {1} 个 C/C++ 源文件。你可能需要考虑排除某些文件以获得更好的性能。",
 	"learn.more": "了解详细信息",
