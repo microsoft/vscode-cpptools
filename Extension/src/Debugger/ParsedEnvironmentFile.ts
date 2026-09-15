@@ -11,7 +11,7 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface Environment {
     name: string;
-    value: string | null;
+    value: string;
 }
 
 export class ParsedEnvironmentFile {
