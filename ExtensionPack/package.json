@@ -43,8 +43,5 @@
     ],
     "devDependencies": {
         "@vscode/vsce": "4.0.0"
-    },
-    "overrides": {
-        "@azure/msal-browser": "^4.29.1"
     }
 }

@@ -91,17 +91,12 @@
     "@typespec/ts-http-runtime" "^0.3.0"
     tslib "^2.6.2"
 
-"@azure/msal-browser@^4.29.1", "@azure/msal-browser@^5.5.0":
-  version "4.29.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-browser/-/msal-browser-4.29.1.tgz#01dc1d2f6ed325e32c03d3939c171f4f4d20a56d"
-  integrity "sha1-AdwdL27TJeMsA9OTnBcfT00gpW0= sha512-1Vrt27du1cl4QHkzLc6L4aeXqliPIDIs5l/1I4hWWMXkXccY/EznJT1+pBdoVze0azTAI8sCyq5B4cBVYG1t9w=="
+"@azure/msal-browser@^5.5.0":
+  version "5.21.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-browser/-/msal-browser-5.21.0.tgz#db15c4975d921f3fec712e159c9696c0751d853c"
+  integrity sha1-2xXEl12SHz/scS4VnJaWwHUdhTw=
   dependencies:
-    "@azure/msal-common" "15.16.1"
-
-"@azure/msal-common@15.16.1":
-  version "15.16.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-common/-/msal-common-15.16.1.tgz#5df3697ec0d53d08278f2536d53bd52214e52c39"
-  integrity "sha1-XfNpfsDVPQgnjyU21TvVIhTlLDk= sha512-qxUG9TCl+TVSSX58onVDHDWrvT5CE0+NeeUAbkQqaESpSm79u5IePLnPWMMjCUnUR2zJd4+Bt9vioVRzLmJb2g=="
+    "@azure/msal-common" "16.14.0"
 
 "@azure/msal-common@16.14.0":
   version "16.14.0"
