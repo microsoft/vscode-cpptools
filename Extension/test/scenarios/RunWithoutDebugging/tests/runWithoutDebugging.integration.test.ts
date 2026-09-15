@@ -281,9 +281,11 @@ suite('Run Without Debugging Test', function (): void {
         });
         const appleScriptCommand = adapter.escapeQuotes(terminalCommand);
 
-        assert.ok(terminalCommand.startsWith('/usr/bin/env '), 'Expected macOS external terminal command to use /usr/bin/env.');
-        assert.ok(terminalCommand.includes(`'QUOTE_VAR=it'\\''s "fine"'`), 'Expected shell-escaped quoted environment value.');
-        assert.ok(terminalCommand.includes(`-u 'REMOVE_ME'`), 'Expected null environment values to be unset.');
+        assert.strictEqual(
+            terminalCommand,
+            `/usr/bin/env -u 'REMOVE_ME' 'QUOTE_VAR=it'\\''s "fine"' "/tmp/test app" "arg value"`,
+            'Expected macOS external terminal command to place -u options before assignments and use /usr/bin/env.'
+        );
         assert.ok(!terminalCommand.includes('SKIP_ME'), 'Expected undefined environment values to be omitted.');
         assert.ok(appleScriptCommand.includes('\\\\'), 'Expected shell escape backslashes to be escaped for AppleScript.');
         assert.ok(appleScriptCommand.includes('\\"fine\\"'), 'Expected double quotes to be escaped for AppleScript.');

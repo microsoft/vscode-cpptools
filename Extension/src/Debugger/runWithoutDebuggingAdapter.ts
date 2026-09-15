@@ -254,14 +254,18 @@ export class RunWithoutDebuggingAdapter implements vscode.DebugAdapter {
     }
 
     private buildMacOSExternalTerminalCommand(cmdLine: string, env: TerminalEnvironment): string {
-        const envArgs = Object.entries(env).flatMap(([name, value]) => {
+        const unsetArgs: string[] = [];
+        const setArgs: string[] = [];
+
+        for (const [name, value] of Object.entries(env)) {
             if (value === null) {
-                return ['-u', this.escapeShellArg(name)];
+                unsetArgs.push('-u', this.escapeShellArg(name));
+            } else if (value !== undefined) {
+                setArgs.push(this.escapeShellArg(`${name}=${value}`));
             }
+        }
 
-            return value === undefined ? [] : [this.escapeShellArg(`${name}=${value}`)];
-        });
-
+        const envArgs = [...unsetArgs, ...setArgs];
         return envArgs.length === 0 ? cmdLine : `/usr/bin/env ${envArgs.join(' ')} ${cmdLine}`;
     }
 
