@@ -532,6 +532,7 @@ interface CppInitializationParams {
     vcpkgRoot: string;
     intelliSenseCacheDisabled: boolean;
     caseSensitiveFileSupport: boolean;
+    supportsDiagnosticTags: boolean;
     resetDatabase: boolean;
     edgeMessagesDirectory: string;
     localizedStrings: string[];
@@ -1746,6 +1747,7 @@ export class DefaultClient implements Client {
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
             caseSensitiveFileSupport: workspaceSettings.isCaseSensitiveFileSupportEnabled,
+            supportsDiagnosticTags: true,
             resetDatabase: resetDatabase,
             edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", getLocaleId()),
             localizedStrings: localizedStrings,
