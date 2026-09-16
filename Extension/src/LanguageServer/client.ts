@@ -350,6 +350,7 @@ export interface GetDocumentSymbolResult {
 }
 
 export interface FormatParams extends SelectionParams {
+    ranges?: Range[];
     character: string;
     insertSpaces: boolean;
     tabSize: number;
