@@ -8,7 +8,6 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 // Start provider imports
-import { CallHierarchyProvider } from './Providers/callHierarchyProvider';
 import { CodeActionProvider } from './Providers/codeActionProvider';
 import { DocumentFormattingEditProvider } from './Providers/documentFormattingEditProvider';
 import { DocumentRangeFormattingEditProvider } from './Providers/documentRangeFormattingEditProvider';
@@ -19,7 +18,6 @@ import { CppInlayHint, InlayHintsProvider } from './Providers/inlayHintProvider'
 import { OnTypeFormattingEditProvider } from './Providers/onTypeFormattingEditProvider';
 import { RenameProvider } from './Providers/renameProvider';
 import { SemanticToken, SemanticTokensProvider } from './Providers/semanticTokensProvider';
-import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 // End provider imports
 
 import { CodeSnippet, Trait } from '@github/copilot-language-server';
@@ -332,10 +330,6 @@ export interface GetDocumentSymbolRequestParams {
     uri: string;
 }
 
-export interface WorkspaceSymbolParams extends WorkspaceFolderParams {
-    query: string;
-}
-
 export enum SymbolScope {
     Public = 0,
     Protected = 1,
@@ -354,15 +348,6 @@ export interface LocalizeDocumentSymbol {
 
 export interface GetDocumentSymbolResult {
     symbols: LocalizeDocumentSymbol[];
-}
-
-export interface LocalizeSymbolInformation {
-    name: string;
-    kind: vscode.SymbolKind;
-    scope: SymbolScope;
-    location: Location;
-    containerName: string;
-    suffix: LocalizeStringParams;
 }
 
 export interface FormatParams extends SelectionParams {
@@ -640,7 +625,6 @@ const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, v
 const GetTranslationUnitSourceCandidatesRequest: RequestType<TextDocumentIdentifier, GetTranslationUnitSourceCandidatesResult, void> = new RequestType<TextDocumentIdentifier, GetTranslationUnitSourceCandidatesResult, void>('cpptools/getTranslationUnitSourceCandidates');
 const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void> = new RequestType<void, GetDiagnosticsResult, void>('cpptools/getDiagnostics');
 export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void> = new RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void>('cpptools/getDocumentSymbols');
-export const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void>('cpptools/getWorkspaceSymbols');
 export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void>('cpptools/getFoldingRanges');
 export const FormatDocumentRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatRange');
@@ -1445,10 +1429,8 @@ export class DefaultClient implements Client {
                 this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, instrument(this.inlayHintsProvider)));
                 this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, instrument(new RenameProvider(this))));
                 this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, instrument(new FindAllReferencesProvider(this))));
-                this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(instrument(new WorkspaceSymbolProvider(this))));
                 this.disposables.push(vscode.languages.registerDocumentSymbolProvider(util.documentSelector, instrument(new DocumentSymbolProvider()), undefined));
                 this.disposables.push(vscode.languages.registerCodeActionsProvider(util.documentSelector, instrument(new CodeActionProvider(this)), undefined));
-                this.disposables.push(vscode.languages.registerCallHierarchyProvider(util.documentSelector, instrument(new CallHierarchyProvider(this))));
 
                 // Because formatting and codeFolding can vary per folder, we need to register these providers once
                 // and leave them registered. The decision of whether to provide results needs to be made on a per folder basis,
