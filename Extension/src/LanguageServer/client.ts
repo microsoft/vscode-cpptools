@@ -293,6 +293,7 @@ interface IntelliSenseDiagnostic {
     severity: vscode.DiagnosticSeverity;
     localizeStringParams: LocalizeStringParams;
     relatedInformation?: IntelliSenseDiagnosticRelatedInformation[];
+    tags?: vscode.DiagnosticTag[];
 }
 
 interface RefactorDiagnostic {
@@ -531,6 +532,7 @@ interface CppInitializationParams {
     vcpkgRoot: string;
     intelliSenseCacheDisabled: boolean;
     caseSensitiveFileSupport: boolean;
+    supportsDiagnosticTags: boolean;
     resetDatabase: boolean;
     edgeMessagesDirectory: string;
     localizedStrings: string[];
@@ -1745,6 +1747,7 @@ export class DefaultClient implements Client {
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
             caseSensitiveFileSupport: workspaceSettings.isCaseSensitiveFileSupportEnabled,
+            supportsDiagnosticTags: true,
             resetDatabase: resetDatabase,
             edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", getLocaleId()),
             localizedStrings: localizedStrings,
@@ -2684,6 +2687,7 @@ export class DefaultClient implements Client {
             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
             diagnostic.code = d.code;
             diagnostic.source = CppSourceStr;
+            diagnostic.tags = d.tags;
             if (d.relatedInformation) {
                 diagnostic.relatedInformation = [];
                 for (const info of d.relatedInformation) {
