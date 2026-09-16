@@ -187,6 +187,9 @@ export function createProtocolFilter(): Middleware {
                 throw new vscode.CancellationError();
             }
             if (requestError) {
+                if (requestError instanceof vscode.CancellationError) {
+                    logCallHierarchyTelemetry("CallHierarchyCallsTo", CallHierarchyRequestStatus.Canceled, progressBarDuration);
+                }
                 throw requestError;
             }
 
