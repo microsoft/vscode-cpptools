@@ -15,7 +15,7 @@ import { Client, DefaultClient, SymbolScope, workspaceReferences } from './clien
 import { clients } from './extension';
 import { getLocalizedString, getLocalizedSymbolScope, LocalizeStringParams } from './localization';
 import { CancellationSender } from './references';
-import { hasFileAssociation } from './settings';
+import { CppSettings, hasFileAssociation } from './settings';
 import { shouldChangeFromCToCpp } from './utils';
 
 export const RequestCancelled: number = -32800;
@@ -226,6 +226,10 @@ export function createProtocolFilter(): Middleware {
             }
             logCallHierarchyTelemetry("CallHierarchyCallsFrom", CallHierarchyRequestStatus.Succeeded);
             return result && result.length !== 0 ? result : undefined;
+        },
+        provideFoldingRanges: (document, context, token, next) => {
+            const settings: CppSettings = new CppSettings();
+            return settings.codeFolding ? next(document, context, token) : [];
         },
         provideWorkspaceSymbols: async (query, token, next) => {
             if (!query) {

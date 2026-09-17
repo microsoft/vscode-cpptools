@@ -13,7 +13,6 @@ import { DocumentFormattingEditProvider } from './Providers/documentFormattingEd
 import { DocumentRangeFormattingEditProvider } from './Providers/documentRangeFormattingEditProvider';
 import { DocumentSymbolProvider } from './Providers/documentSymbolProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
-import { FoldingRangeProvider } from './Providers/foldingRangeProvider';
 import { CppInlayHint, InlayHintsProvider } from './Providers/inlayHintProvider';
 import { OnTypeFormattingEditProvider } from './Providers/onTypeFormattingEditProvider';
 import { RenameProvider } from './Providers/renameProvider';
@@ -228,11 +227,6 @@ interface FileChangedParams extends WorkspaceFolderParams {
     uri: string;
 }
 
-interface InputLineRange {
-    startLine: number;
-    endLine: number;
-}
-
 interface InputRegion {
     startLine: number;
     startColumn: number;
@@ -360,26 +354,6 @@ export interface FormatParams extends SelectionParams {
 
 export interface FormatResult {
     edits: TextEdit[];
-}
-
-export interface GetFoldingRangesParams {
-    uri: string;
-}
-
-export enum FoldingRangeKind {
-    None = 0,
-    Comment = 1,
-    Imports = 2,
-    Region = 3
-}
-
-export interface CppFoldingRange {
-    kind: FoldingRangeKind;
-    range: InputLineRange;
-}
-
-export interface GetFoldingRangesResult {
-    ranges: CppFoldingRange[];
 }
 
 export interface IntelliSenseResult {
@@ -623,7 +597,6 @@ const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, v
 const GetTranslationUnitSourceCandidatesRequest: RequestType<TextDocumentIdentifier, GetTranslationUnitSourceCandidatesResult, void> = new RequestType<TextDocumentIdentifier, GetTranslationUnitSourceCandidatesResult, void>('cpptools/getTranslationUnitSourceCandidates');
 const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void> = new RequestType<void, GetDiagnosticsResult, void>('cpptools/getDiagnostics');
 export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void> = new RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void>('cpptools/getDocumentSymbols');
-export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void>('cpptools/getFoldingRanges');
 export const FormatDocumentRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatOnType');
@@ -901,8 +874,6 @@ export class DefaultClient implements Client {
     private documentFormattingProviderDisposable: vscode.Disposable | undefined;
     private formattingRangeProviderDisposable: vscode.Disposable | undefined;
     private onTypeFormattingProviderDisposable: vscode.Disposable | undefined;
-    private codeFoldingProvider: FoldingRangeProvider | undefined;
-    private codeFoldingProviderDisposable: vscode.Disposable | undefined;
     private inlayHintsProvider: InlayHintsProvider | undefined;
     private semanticTokensProvider: SemanticTokensProvider | undefined;
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
@@ -1429,15 +1400,11 @@ export class DefaultClient implements Client {
                 this.disposables.push(vscode.languages.registerDocumentSymbolProvider(util.documentSelector, instrument(new DocumentSymbolProvider()), undefined));
                 this.disposables.push(vscode.languages.registerCodeActionsProvider(util.documentSelector, instrument(new CodeActionProvider(this)), undefined));
 
-                // Because formatting and codeFolding can vary per folder, we need to register these providers once
-                // and leave them registered. The decision of whether to provide results needs to be made on a per folder basis,
-                // within the providers themselves.
+                // Because formatting can vary per folder, we need to register these providers once and leave them registered.
+                // The decision of whether to provide results needs to be made on a per folder basis, within the providers themselves.
                 this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(util.documentSelector, instrument(new DocumentFormattingEditProvider(this)));
                 this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(util.documentSelector, instrument(new DocumentRangeFormattingEditProvider(this)));
                 this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(util.documentSelector, instrument(new OnTypeFormattingEditProvider(this)), ";", "}", "\n");
-
-                this.codeFoldingProvider = new FoldingRangeProvider(this);
-                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, instrument(this.codeFoldingProvider));
 
                 const settings: CppSettings = new CppSettings();
                 if (settings.isEnhancedColorizationEnabled && semanticTokensLegend) {
@@ -2645,7 +2612,7 @@ export class DefaultClient implements Client {
             this.inlayHintsProvider.deliverInlayHints(intelliSenseResult.uri, intelliSenseResult.inlayHints, intelliSenseResult.clearExistingInlayHint);
         }
 
-        this.updateInactiveRegions(intelliSenseResult.uri, intelliSenseResult.inactiveRegions, intelliSenseResult.clearExistingInactiveRegions, intelliSenseResult.isCompletePass);
+        this.updateInactiveRegions(intelliSenseResult.uri, intelliSenseResult.inactiveRegions, intelliSenseResult.clearExistingInactiveRegions);
         if (intelliSenseResult.clearExistingDiagnostics || intelliSenseResult.diagnostics.length > 0) {
             this.updateSquiggles(intelliSenseResult.uri, intelliSenseResult.diagnostics, intelliSenseResult.clearExistingDiagnostics);
         }
@@ -2956,11 +2923,7 @@ export class DefaultClient implements Client {
         this.model.isParsingWorkspacePaused.Value = tagParseStatus.isPaused;
     }
 
-    private updateInactiveRegions(uriString: string, inactiveRegions: InputRegion[], startNewSet: boolean, updateFoldingRanges: boolean): void {
-        if (this.codeFoldingProvider && updateFoldingRanges) {
-            this.codeFoldingProvider.refresh();
-        }
-
+    private updateInactiveRegions(uriString: string, inactiveRegions: InputRegion[], startNewSet: boolean): void {
         const client: Client = clients.getClientFor(vscode.Uri.parse(uriString));
         if (!(client instanceof DefaultClient) || (!startNewSet && inactiveRegions.length === 0)) {
             return;
@@ -4286,10 +4249,6 @@ export class DefaultClient implements Client {
         if (this.onTypeFormattingProviderDisposable) {
             this.onTypeFormattingProviderDisposable.dispose();
             this.onTypeFormattingProviderDisposable = undefined;
-        }
-        if (this.codeFoldingProviderDisposable) {
-            this.codeFoldingProviderDisposable.dispose();
-            this.codeFoldingProviderDisposable = undefined;
         }
         if (this.semanticTokensProviderDisposable) {
             this.semanticTokensProviderDisposable.dispose();
