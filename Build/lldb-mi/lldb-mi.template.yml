@@ -27,11 +27,34 @@ jobs:
 - job: LLDB_MI_${{ parameters.llvm_arch }}
   timeoutInMinutes: 360
   pool:
-    ${{if eq(parameters['llvm_arch'], 'arm64')}}:
-      name: cpptoolsMacM1pool
+    name: Azure Pipelines
+    ${{ if eq(parameters['llvm_arch'], 'arm64') }}:
+      vmImage: macOS-15-arm64
     ${{ else }}:
-      vmImage: macOS-latest
+      vmImage: macOS-15
   steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.11'
+    inputs:
+      versionSpec: '3.11'
+      ${{ if eq(parameters['llvm_arch'], 'arm64') }}:
+        architecture: arm64
+      ${{ else }}:
+        architecture: x64
+
+  - task: CmdLine@2
+    displayName: 'Verify Python 3.11'
+    inputs:
+      script: |
+        set -euo pipefail
+        python_executable="$(command -v python3)"
+        python_architecture="$("$python_executable" -c 'import platform; print(platform.machine())')"
+        if [[ "$python_architecture" != '${{ parameters.llvm_arch }}' ]]; then
+          echo "##[error]Expected Python architecture ${{ parameters.llvm_arch }}, found $python_architecture."
+          exit 1
+        fi
+        "$python_executable" -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib(True, False, ''))"
+
   - task: CmdLine@2
     displayName: 'Install Dependencies'
     inputs:
@@ -53,6 +76,9 @@ jobs:
           $1
         }
 
+        python_executable="$(command -v python3)"
+        python_home="$("$python_executable" -c 'import sys; print(sys.prefix)')"
+
         log_and_exec_cmd "sudo rm -rf /Library/Developer/CommandLineTools"
         log_and_exec_cmd "sudo xcode-select --switch /Applications/XCode.app"
 
@@ -62,6 +88,86 @@ jobs:
         log_and_exec_cmd "git clone ${{ parameters.llvm_repo }} llvm-project"
         log_and_exec_cmd "cd llvm-project"
         log_and_exec_cmd "git checkout ${{ parameters.llvm_commit }}"
+        if ! log_and_exec_cmd "git cherry-pick --no-commit 81fc5f7909a4ef5a8d4b5da2a10f77f7cb01ba63 73e15b5edb4fa4a77e68c299a6e3b21e610d351f f0a25fe0b746f56295d5c02116ba28d2f965c175"
+        then
+          echo "##[error] applying LLVM compatibility fixes failed"
+          exit 1
+        fi
+
+        # SWIG 4.5 does not provide Python 2 PyInt aliases; normalize the pinned bindings before generating wrappers.
+        "$python_executable" - <<'PY'
+        from pathlib import Path
+
+        bindings = Path("lldb/bindings")
+        typemaps = bindings / "python/python-typemaps.swig"
+        source = typemaps.read_text()
+        replacements = (
+          (
+            "   if (!PyInt_Check($input)) {\n"
+            "       PyErr_SetString(PyExc_ValueError, \"Expecting an integer\");\n"
+            "       return NULL;\n"
+            "   }\n"
+            "   $2 = PyInt_AsLong($input);",
+            "   if (!PyLong_Check($input)) {\n"
+            "       PyErr_SetString(PyExc_ValueError, \"Expecting an integer\");\n"
+            "       return NULL;\n"
+            "   }\n"
+            "   $2 = PyLong_AsLong($input);",
+            2,
+          ),
+          (
+            "   if (PyInt_Check($input)) {\n"
+            "      $2 = PyInt_AsLong($input);\n"
+            "   } else if (PyLong_Check($input)) {\n"
+            "      $2 = PyLong_AsLong($input);",
+            "   if (PyLong_Check($input)) {\n"
+            "      $2 = PyLong_AsLong($input);",
+            1,
+          ),
+          (
+            "  if (PyInt_Check(obj))\n"
+            "    number = static_cast<T>(PyInt_AsLong(obj));\n"
+            "  else if (PyLong_Check(obj))\n"
+            "    number = PyLongAsT<T>(obj);",
+            "  if (PyLong_Check(obj))\n"
+            "    number = PyLongAsT<T>(obj);",
+            1,
+          ),
+          (
+            "        PyObject* item = PyInt_FromLong($1[j]);",
+            "        PyObject* item = PyLong_FromLong($1[j]);",
+            1,
+          ),
+        )
+        for old, new, expected_count in replacements:
+          if source.count(old) != expected_count:
+            raise SystemExit(f"expected {expected_count} occurrences of {old!r}")
+          source = source.replace(old, new)
+        typemaps.write_text(source)
+
+        safe_cast = bindings / "python/python-swigsafecast.swig"
+        source = safe_cast.read_text()
+        old = "    return PyInt_FromLong(*c_int);"
+        if source.count(old) != 1:
+          raise SystemExit("expected exactly one PyInt_FromLong safe-cast use")
+        safe_cast.write_text(source.replace(old, "    return PyLong_FromLong(*c_int);"))
+
+        remaining = []
+        for path in bindings.rglob("*"):
+          if not path.is_file():
+            continue
+          try:
+            lines = path.read_text().splitlines()
+          except UnicodeDecodeError:
+            continue
+          remaining.extend(
+            f"{path}:{line_number}:{line.strip()}"
+            for line_number, line in enumerate(lines, 1)
+            if "PyInt_" in line
+          )
+        if remaining:
+          raise SystemExit("unsupported Python 2 APIs remain:\n" + "\n".join(remaining))
+        PY
 
         log_and_exec_cmd "./lldb/scripts/macos-setup-codesign.sh"
 
@@ -70,7 +176,7 @@ jobs:
         log_and_exec_cmd "mkdir $(Build.StagingDirectory)/buildspace/llvm-build"
         log_and_exec_cmd "cd $(Build.StagingDirectory)/buildspace/llvm-build"
 
-        log_and_exec_cmd "cmake -DLLVM_ENABLE_PROJECTS=clang;lldb -DCMAKE_BUILD_TYPE=${{ parameters.llvm_build_type }} -DCMAKE_INSTALL_PREFIX=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=${{ parameters.llvm_arch }} ${{ parameters.llvm_additional_parameters }} -GNinja $(Build.StagingDirectory)/llvm-project/llvm"
+        log_and_exec_cmd "cmake -DLLVM_ENABLE_PROJECTS=clang;lldb -DCMAKE_BUILD_TYPE=${{ parameters.llvm_build_type }} -DCMAKE_INSTALL_PREFIX=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=${{ parameters.llvm_arch }} -DPYTHON_HOME=$python_home -DPython3_EXECUTABLE=$python_executable ${{ parameters.llvm_additional_parameters }} -GNinja $(Build.StagingDirectory)/llvm-project/llvm"
         if [[ $? -ne 0 ]]
         then
           echo "##[error] cmake llvm failed"
@@ -112,7 +218,11 @@ jobs:
         # Create a separate build directory for building lldb-mi.
         log_and_exec_cmd "mkdir build"
         log_and_exec_cmd "cd build"
-        log_and_exec_cmd "cmake -DCMAKE_PREFIX_PATH=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=${{ parameters.llvm_arch }} ${{ parameters.lldb_mi_additional_parameters }} -GNinja .."
+        if ! log_and_exec_cmd "cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_PREFIX_PATH=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=${{ parameters.llvm_arch }} ${{ parameters.lldb_mi_additional_parameters }} -GNinja .."
+        then
+          echo "##[error] cmake lldb-mi failed"
+          exit 1
+        fi
         log_and_exec_cmd "ninja"
         if [[ $? -ne 0 ]]
         then
