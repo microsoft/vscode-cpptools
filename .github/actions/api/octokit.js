@@ -163,7 +163,7 @@ class OctoKit {
             throw Error('Found directory at config path when expecting file' + JSON.stringify(data));
         }
         catch (e) {
-            throw Error('Error with config file at ' + repoPath + ': ' + JSON.stringify(e));
+            throw Error('Error with config file at ' + repoPath + ': ' + JSON.stringify(e), { cause: e });
         }
     }
     async releaseContainsCommit(release, commit) {
@@ -200,8 +200,8 @@ class OctoKit {
         const currentDate = new Date();
         const possibleMilestones = allMilestones
             .filter((milestone) => new Date(milestone.due_on === null ? currentDate : milestone.due_on) > currentDate &&
-            currentDate > new Date(milestone.created_at) &&
-            !milestone.title.includes('Recovery'))
+                currentDate > new Date(milestone.created_at) &&
+                !milestone.title.includes('Recovery'))
             .sort((a, b) => { var _a, _b; return +new Date((_a = a.due_on) !== null && _a !== void 0 ? _a : currentDate) - +new Date((_b = b.due_on) !== null && _b !== void 0 ? _b : currentDate); });
         if (possibleMilestones.length === 0) {
             return undefined;
@@ -255,14 +255,14 @@ class OctoKitIssue extends OctoKit {
             }
             await this.octokit.rest.issues
                 .update({
-                ...this.params,
-                issue_number: this.issueData.number,
-                state: 'closed',
-                state_reason: reason,
-            })
+                    ...this.params,
+                    issue_number: this.issueData.number,
+                    state: 'closed',
+                    state_reason: reason,
+                })
                 .catch((e) => {
-                (0, utils_1.safeLog)('error closing issue:', e);
-            });
+                    (0, utils_1.safeLog)('error closing issue:', e);
+                });
         }
     }
     async reopenIssue() {
