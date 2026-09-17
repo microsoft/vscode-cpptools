@@ -33,4 +33,4 @@ class AddCommentAction extends Action {
 	}
 }
 
-new AddCommentAction().run(); // eslint-disable-line
+new AddCommentAction().run();
