@@ -285,6 +285,7 @@ interface IntelliSenseDiagnostic {
     severity: vscode.DiagnosticSeverity;
     localizeStringParams: LocalizeStringParams;
     relatedInformation?: IntelliSenseDiagnosticRelatedInformation[];
+    tags?: vscode.DiagnosticTag[];
 }
 
 interface RefactorDiagnostic {
@@ -344,6 +345,7 @@ export interface GetDocumentSymbolResult {
 }
 
 export interface FormatParams extends SelectionParams {
+    ranges?: Range[];
     character: string;
     insertSpaces: boolean;
     tabSize: number;
@@ -1566,6 +1568,7 @@ export class DefaultClient implements Client {
             editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
             editorInlayHintsEnabled: otherSettings.editorInlayHintsEnabled,
             editorParameterHintsEnabled: otherSettings.editorParameterHintsEnabled,
+            showUnused: otherSettings.showUnused,
             refactoringIncludeHeader: settings.refactoringIncludeHeader
         };
         return result;
@@ -2632,6 +2635,7 @@ export class DefaultClient implements Client {
             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
             diagnostic.code = d.code;
             diagnostic.source = CppSourceStr;
+            diagnostic.tags = d.tags;
             if (d.relatedInformation) {
                 diagnostic.relatedInformation = [];
                 for (const info of d.relatedInformation) {
