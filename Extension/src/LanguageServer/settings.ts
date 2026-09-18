@@ -64,6 +64,7 @@ export interface WorkspaceFolderSettingsParams {
     clangTidyConfig: string | undefined;
     clangTidyFallbackConfig: string | undefined;
     clangTidyHeaderFilter: string | null;
+    clangTidyIncludeCleanerMappings: Associations;
     clangTidyArgs: string[];
     clangTidyUseBuildPath: boolean;
     clangTidyChecksEnabled: string[] | undefined;
@@ -347,6 +348,15 @@ export class CppSettings extends Settings {
     public get clangTidyConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.config")); }
     public get clangTidyFallbackConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.fallbackConfig")); }
     public get clangTidyHeaderFilter(): string | null { return this.getAsString("codeAnalysis.clangTidy.headerFilter", true); }
+    public get clangTidyIncludeCleanerMappings(): Associations {
+        const mappings: Associations = this.getAsAssociations("codeAnalysis.clangTidy.includeCleanerMappings");
+        return Object.fromEntries(Object.entries(mappings).filter(([symbol, header]) =>
+            symbol.length > 0
+            && !/[\u0000-\u001f\u007f-\u009f]/.test(symbol)
+            && header.length > 2
+            && ((header.startsWith("<") && header.endsWith(">")) || (header.startsWith('"') && header.endsWith('"')))
+            && !/[<>"\u0000-\u001f\u007f-\u009f]/.test(header.slice(1, -1))));
+    }
     public get clangTidyArgs(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.args"); }
     public get clangTidyUseBuildPath(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath"); }
     public get clangTidyChecksEnabled(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.checks.enabled", true); }

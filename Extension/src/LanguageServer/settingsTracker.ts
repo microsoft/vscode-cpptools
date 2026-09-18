@@ -198,6 +198,7 @@ export class SettingsTracker {
                         || key === "codeAnalysis.clangTidy.path"
                         || key === "codeAnalysis.clangTidy.headerFilter" || key === "codeAnalysis.clangTidy.args"
                         || key === "codeAnalysis.clangTidy.config" || key === "codeAnalysis.clangTidy.fallbackConfig"
+                        || key === "codeAnalysis.clangTidy.includeCleanerMappings"
 
                         // Note: An existing bug prevents these settings of type "object" from getting processed here,
                         // so these checks are here just in case that bug gets fixed later on.
