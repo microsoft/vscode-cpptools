@@ -291,6 +291,7 @@ interface IntelliSenseDiagnostic {
     severity: vscode.DiagnosticSeverity;
     localizeStringParams: LocalizeStringParams;
     relatedInformation?: IntelliSenseDiagnosticRelatedInformation[];
+    tags?: vscode.DiagnosticTag[];
 }
 
 interface RefactorDiagnostic {
@@ -676,7 +677,6 @@ const RemoveCodeAnalysisProblemsNotification: NotificationType<RemoveCodeAnalysi
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void> = new NotificationType<void>('cpptools/reloadWindow');
 const UpdateTrustedCompilersNotification: NotificationType<UpdateTrustedCompilerPathsResult> = new NotificationType<UpdateTrustedCompilerPathsResult>('cpptools/updateTrustedCompilersList');
-const LogTelemetryNotification: NotificationType<TelemetryPayload> = new NotificationType<TelemetryPayload>('cpptools/logTelemetry');
 const ReportTagParseStatusNotification: NotificationType<TagParseStatus> = new NotificationType<TagParseStatus>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody> = new NotificationType<ReportStatusNotificationBody>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<DebugProtocolParams> = new NotificationType<DebugProtocolParams>('cpptools/debugProtocol');
@@ -1601,6 +1601,7 @@ export class DefaultClient implements Client {
             editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
             editorInlayHintsEnabled: otherSettings.editorInlayHintsEnabled,
             editorParameterHintsEnabled: otherSettings.editorParameterHintsEnabled,
+            showUnused: otherSettings.showUnused,
             refactoringIncludeHeader: settings.refactoringIncludeHeader
         };
         return result;
@@ -1826,7 +1827,7 @@ export class DefaultClient implements Client {
         const client = new rpc.LanguageClient(`cpptools`, serverOptions, clientOptions);
         client.onNotification(DebugProtocolNotification, logDebugProtocol);
         client.onNotification(DebugLogNotification, logLocalized);
-        client.onNotification(LogTelemetryNotification, (e) => void this.logTelemetry(e));
+        client.onTelemetry((e: TelemetryPayload) => void this.logTelemetry(e));
         client.onNotification(ShowMessageWindowNotification, showMessageWindow);
         client.registerProposedFeatures();
         await client.start();
@@ -2667,6 +2668,7 @@ export class DefaultClient implements Client {
             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
             diagnostic.code = d.code;
             diagnostic.source = CppSourceStr;
+            diagnostic.tags = d.tags;
             if (d.relatedInformation) {
                 diagnostic.relatedInformation = [];
                 for (const info of d.relatedInformation) {
