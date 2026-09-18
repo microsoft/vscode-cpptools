@@ -4,15 +4,29 @@ parameters:
   default: ''
 
 jobs:
+- job: resolve_vsix_artifact
+  displayName: Resolve VSIX artifact
+  steps:
+  - checkout: none
+  - template: ../templates/resolve_artifact.yml
+    parameters:
+      artifactName: vsix
+      buildId: $(resources.pipeline.vsixBuild.runID)
+      project: $(resources.pipeline.vsixBuild.projectID)
+      stepName: resolve
+
 - job: Publish
   displayName: Publish to Marketplace
+  dependsOn: resolve_vsix_artifact
+  variables:
+    ResolvedVsixArtifactName: $[ dependencies.resolve_vsix_artifact.outputs['resolve.Name'] ]
   templateContext:
     type: releaseJob
     isProduction: true
     inputs:
     - input: pipelineArtifact
       pipeline: vsixBuild
-      artifactName: vsix
+      artifactName: $(ResolvedVsixArtifactName)
       targetPath: $(Build.StagingDirectory)\vsix
 
   steps:
