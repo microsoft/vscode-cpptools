@@ -184,7 +184,7 @@ export class OctoKit implements GitHub {
 			}
 			throw Error('Found directory at config path when expecting file' + JSON.stringify(data));
 		} catch (e) {
-			throw Error('Error with config file at ' + repoPath + ': ' + JSON.stringify(e));
+			throw Error('Error with config file at ' + repoPath + ': ' + JSON.stringify(e), { cause: e });
 		}
 	}
 

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { OctoKit } from '../api/octokit';
-import { getInput, getRequiredInput } from '../common/utils';
+import { getInput } from '../common/utils';
 import { Reopener } from './Reopener';
 import { Action } from '../common/Action';
 
@@ -32,4 +32,4 @@ class ReopenerAction extends Action {
 	}
 }
 
-new ReopenerAction().run(); // eslint-disable-line
+new ReopenerAction().run();

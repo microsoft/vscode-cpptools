@@ -28,4 +28,4 @@ class LockerAction extends Action {
 	}
 }
 
-new LockerAction().run(); // eslint-disable-line
+new LockerAction().run();
