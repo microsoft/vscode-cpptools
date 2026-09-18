@@ -112,6 +112,31 @@ for (const [name, source] of [
         assert.equal(result.title, 'title');
     });
 
+    test(`${name}: removes comments after unrelated closing markers`, () => {
+        const { utils } = loadUtils(source);
+        const result = utils.normalizeIssue({
+            body: 'Start --> keep <!-- first note --> middle --> text <!-- second note --> end',
+            title: 'Title --> <!-- note --> text',
+        });
+        assert.equal(result.body, 'start --> keep  middle --> text  end');
+        assert.equal(result.title, 'title -->  text');
+    });
+
+    test(`${name}: preserves incomplete comment text`, () => {
+        const { utils } = loadUtils(source);
+        for (const [text, expected] of [
+            ['Start --> end', 'start --> end'],
+            ['Start <!-- note', 'start <!-- note'],
+            ['Start --> text <!-- note', 'start --> text <!-- note'],
+            ['Start <!-- complete --> tail <!-- note', 'start  tail <!-- note'],
+            ['Start <!----><!-- note --> end', 'start  end'],
+        ]) {
+            const result = utils.normalizeIssue({ body: text, title: text });
+            assert.equal(result.body, expected);
+            assert.equal(result.title, expected);
+        }
+    });
+
     test(`${name}: preserves issue classification`, () => {
         const { utils } = loadUtils(source);
         for (const [body, issueType] of [
