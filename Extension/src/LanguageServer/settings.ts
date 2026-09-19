@@ -140,6 +140,7 @@ export interface WorkspaceFolderSettingsParams {
     editorAutoClosingBrackets: string;
     editorInlayHintsEnabled: boolean;
     editorParameterHintsEnabled: boolean;
+    showUnused: boolean;
     refactoringIncludeHeader: string;
 }
 
@@ -1090,6 +1091,7 @@ export class OtherSettings {
     public get filesAutoSaveAfterDelay(): boolean { return this.getAsString("files", "autoSave", this.resource, "off") === "afterDelay"; }
     public get editorInlayHintsEnabled(): boolean { return this.getAsString("editor.inlayHints", "enabled", this.resource, "on") !== "off"; }
     public get editorParameterHintsEnabled(): boolean { return this.getAsBoolean("editor.parameterHints", "enabled", this.resource, true); }
+    public get showUnused(): boolean { return this.getAsBoolean("editor", "showUnused", { uri: this.resource, languageId: "cpp" }, true); }
     private readonly defaultSearchExcludes = {
         "**/node_modules": true,
         "**/bower_components": true,
