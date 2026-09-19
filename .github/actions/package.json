@@ -5,6 +5,8 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint --fix .",
+    "test": "node --test",
+    "typecheck": "tsc --noEmit",
     "watch": "tsc --watch"
   },
   "keywords": [],
