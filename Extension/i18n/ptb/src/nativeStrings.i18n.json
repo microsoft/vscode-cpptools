@@ -434,5 +434,7 @@
 	"check_timed_out": "tempo limite esgotado enquanto aguardava a conclusão da análise de {0}",
 	"failed_to_open_browse_db_lock_file": "Não foi possível abrir o arquivo de bloqueio do banco de dados de navegação: {0} (errno={1})",
 	"failed_to_lock_browse_db_lock_file": "Não foi possível bloquear o arquivo de bloqueio do banco de dados de navegação: {0} (errno={1})",
-	"browse_database_disabled_incompatible_storage": "O banco de dados de navegação foi desabilitado porque seu local de armazenamento não dá suporte à memória compartilhada do SQLite WAL. Defina browse.databaseFilename como um caminho local."
+	"browse_database_disabled_incompatible_storage": "O banco de dados de navegação foi desabilitado porque seu local de armazenamento não dá suporte à memória compartilhada do SQLite WAL. Defina browse.databaseFilename como um caminho local.",
+	"selected_translation_unit_not_include_file_previous": "A unidade de tradução selecionada '{0}' não inclui '{1}'. O IntelliSense restaurará a unidade de tradução anterior se ela ainda estiver disponível; caso contrário, ele usará '{1}' como uma unidade de tradução somente de cabeçalho.",
+	"selected_translation_unit_not_include_file_header_only": "A unidade de tradução selecionada '{0}' não inclui '{1}'. Nenhuma unidade de tradução anterior está disponível, portanto, o IntelliSense usará '{1}' como uma unidade de tradução somente de cabeçalho."
 }
