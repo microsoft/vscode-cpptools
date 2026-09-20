@@ -29,6 +29,10 @@ jobs:
       displayName: '${{ parameters.vsixName }}.vsix'
       targetPath: $(Build.ArtifactStagingDirectory)\vsix
       artifactName: vsix
+    - output: pipelineArtifact
+      displayName: Locked VSCE dependencies
+      targetPath: $(Build.ArtifactStagingDirectory)\vsce
+      artifactName: vsce
 
   steps:
   - checkout: self
@@ -58,6 +62,16 @@ jobs:
 
   - script: mkdir $(Build.ArtifactStagingDirectory)\vsix
     displayName: Create Staging Directory
+
+  - task: CopyFiles@2
+    displayName: Stage locked VSCE dependencies for publishing
+    inputs:
+      SourceFolder: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+      Contents: |
+        package.json
+        package-lock.json
+        .npmrc
+      TargetFolder: $(Build.ArtifactStagingDirectory)\vsce
 
   - script: npm rebuild @vscode/vsce-sign --ignore-scripts=false
     displayName: Rebuild vsce-sign binary
