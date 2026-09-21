@@ -434,5 +434,7 @@
 	"check_timed_out": "{0}에 대한 분석이 완료되기를 기다리는 동안 시간이 초과되었습니다.",
 	"failed_to_open_browse_db_lock_file": "찾아보기 데이터베이스 잠금 파일을 열지 못했습니다. {0} (errno={1})",
 	"failed_to_lock_browse_db_lock_file": "찾아보기 데이터베이스 잠금 파일을 잠그지 못했습니다. {0} (errno={1})",
-	"browse_database_disabled_incompatible_storage": "저장소 위치에서 SQLite WAL 공유 메모리를 지원하지 않으므로 찾아보기 데이터베이스를 사용할 수 없습니다. browse.databaseFilename을 로컬 경로로 설정하세요."
+	"browse_database_disabled_incompatible_storage": "저장소 위치에서 SQLite WAL 공유 메모리를 지원하지 않으므로 찾아보기 데이터베이스를 사용할 수 없습니다. browse.databaseFilename을 로컬 경로로 설정하세요.",
+	"selected_translation_unit_not_include_file_previous": "선택한 변환 단위 '{0}'에는 '{1}'이(가) 포함되어 있지 않습니다. IntelliSense는 이전 변환 단위를 사용할 수 있으면 복원하며, 그렇지 않으면 '{1}'을(를) 헤더 전용 변환 단위로 사용합니다.",
+	"selected_translation_unit_not_include_file_header_only": "선택한 변환 단위 '{0}'에 '{1}'이(가) 포함되어 있지 않습니다. 이전 변환 단위를 사용할 수 없으므로 IntelliSense는 '{1}'을(를) 헤더 전용 변환 단위로 사용합니다."
 }
