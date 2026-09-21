@@ -368,7 +368,9 @@ class OctoKitIssue extends OctoKit {
             numRequests++;
             const timelineEvents = event.data;
             for (const timelineEvent of timelineEvents) {
-                if (timelineEvent.event === 'assigned' && ((_a = timelineEvent.assignee) === null || _a === void 0 ? void 0 : _a.login) === assignee) {
+                if (timelineEvent.event === 'assigned' &&
+                    'assignee' in timelineEvent &&
+                    ((_a = timelineEvent.assignee) === null || _a === void 0 ? void 0 : _a.login) === assignee) {
                     assigner = (_b = timelineEvent.actor) === null || _b === void 0 ? void 0 : _b.login;
                 }
             }
@@ -401,7 +403,7 @@ class OctoKitIssue extends OctoKit {
         }
     }
     async getClosingInfo(alreadyChecked = []) {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e, _f, _g;
         if (alreadyChecked.includes(this.issueData.number)) {
             return undefined;
         }
@@ -421,6 +423,7 @@ class OctoKitIssue extends OctoKit {
             const timelineEvents = event.data;
             for (const timelineEvent of timelineEvents) {
                 if ((timelineEvent.event === 'closed' || timelineEvent.event === 'merged') &&
+                    'commit_url' in timelineEvent &&
                     timelineEvent.created_at &&
                     timelineEvent.commit_id &&
                     ((_a = timelineEvent.commit_url) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes(`/${this.params.owner}/${this.params.repo}/`.toLowerCase()))) {
@@ -432,9 +435,12 @@ class OctoKitIssue extends OctoKit {
                 if (timelineEvent.event === 'reopened') {
                     closingCommit = undefined;
                 }
-                if (timelineEvent.created_at &&
-                    timelineEvent.event === 'commented' &&
-                    !((_b = timelineEvent.body) === null || _b === void 0 ? void 0 : _b.includes('UNABLE_TO_LOCATE_COMMIT_MESSAGE')) &&
+                if (timelineEvent.event === 'commented' &&
+                    'created_at' in timelineEvent &&
+                    timelineEvent.created_at &&
+                    'body' in timelineEvent &&
+                    timelineEvent.body &&
+                    !timelineEvent.body.includes('UNABLE_TO_LOCATE_COMMIT_MESSAGE') &&
                     closingHashComment.test(timelineEvent.body)) {
                     closingCommit = {
                         hash: closingHashComment.exec(timelineEvent.body)[1],
@@ -442,8 +448,8 @@ class OctoKitIssue extends OctoKit {
                     };
                 }
                 if (timelineEvent.event === 'cross-referenced' &&
-                    ((_d = (_c = timelineEvent.source) === null || _c === void 0 ? void 0 : _c.issue) === null || _d === void 0 ? void 0 : _d.number) &&
-                    ((_g = (_f = (_e = timelineEvent.source) === null || _e === void 0 ? void 0 : _e.issue) === null || _f === void 0 ? void 0 : _f.pull_request) === null || _g === void 0 ? void 0 : _g.url.includes(`/${this.params.owner}/${this.params.repo}/`.toLowerCase()))) {
+                    ((_c = (_b = timelineEvent.source) === null || _b === void 0 ? void 0 : _b.issue) === null || _c === void 0 ? void 0 : _c.number) &&
+                    ((_f = (_e = (_d = timelineEvent.source) === null || _d === void 0 ? void 0 : _d.issue) === null || _e === void 0 ? void 0 : _e.pull_request) === null || _f === void 0 ? void 0 : _f.url.includes(`/${this.params.owner}/${this.params.repo}/`.toLowerCase()))) {
                     crossReferencing.push(timelineEvent.source.issue.number);
                 }
             }
@@ -456,7 +462,7 @@ class OctoKitIssue extends OctoKit {
                     number: id,
                 }).getClosingInfo(alreadyChecked);
                 if (closed) {
-                    if (Math.abs(closed.timestamp - ((_h = (await this.getIssue()).closedAt) !== null && _h !== void 0 ? _h : 0)) < 5000) {
+                    if (Math.abs(closed.timestamp - ((_g = (await this.getIssue()).closedAt) !== null && _g !== void 0 ? _g : 0)) < 5000) {
                         closingCommit = closed;
                         break;
                     }
