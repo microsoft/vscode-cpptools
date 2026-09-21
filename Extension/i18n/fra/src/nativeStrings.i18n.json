@@ -436,5 +436,5 @@
 	"failed_to_lock_browse_db_lock_file": "Échec du verrouillage du fichier de verrouillage de la base de données de navigation : {0} (errno={1})",
 	"browse_database_disabled_incompatible_storage": "La base de données de navigation a été désactivée, car son emplacement de stockage ne prend pas en charge la mémoire partagée SQLite WAL. Définissez browse.databaseFilename sur un chemin local.",
 	"selected_translation_unit_not_include_file_previous": "L’unité de traduction sélectionnée « {0} » n’inclut pas « {1} ». IntelliSense restaurera l’unité de traduction précédente si elle est encore disponible. Sinon, il utilisera « {1} » comme unité de traduction d’en-tête uniquement.",
-	"selected_translation_unit_not_include_file_header_only": "L’unité de traduction sélectionnée '{0}' n’inclut pas '{1}'. Aucune unité de traduction précédente n’est disponible, IntelliSense utilisera donc '{1}' comme unité de traduction d’en-tête uniquement."
+	"selected_translation_unit_not_include_file_header_only": "L’unité de traduction sélectionnée '{0}' n’inclut pas '{1}'. Aucune unité de traduction précédente n’est disponible ; IntelliSense utilisera donc '{1}' comme unité de traduction d’en-tête uniquement."
 }

@@ -20,7 +20,7 @@
 	"c_cpp.command.installCompiler.title": "Установка компилятора C++",
 	"c_cpp.command.rescanCompilers.title": "Повторный поиск компиляторов",
 	"c_cpp.command.switchHeaderSource.title": "Переключить заголовок/источник",
-	"c_cpp.command.selectTranslationUnit.title": "Выбор единицы перевода...",
+	"c_cpp.command.selectTranslationUnit.title": "Выбор единицы трансляции...",
 	"c_cpp.command.enableErrorSquiggles.title": "Включить волнистые линии для ошибок",
 	"c_cpp.command.disableErrorSquiggles.title": "Отключить волнистые линии для ошибок",
 	"c_cpp.command.toggleDimInactiveRegions.title": "Переключить раскраску неактивных областей",

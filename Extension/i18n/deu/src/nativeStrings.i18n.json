@@ -435,6 +435,6 @@
 	"failed_to_open_browse_db_lock_file": "Fehler beim Öffnen der Sperrdatei der Browse-Datenbank: {0} (errno={1})",
 	"failed_to_lock_browse_db_lock_file": "Fehler beim Sperren der Sperrdatei der Browse-Datenbank: {0} (errno={1})",
 	"browse_database_disabled_incompatible_storage": "Die Browse-Datenbank wurde deaktiviert, da ihr Speicherort den gemeinsam genutzten Speicher von SQLite WAL nicht unterstützt. Legen Sie browse.databaseFilename auf einen lokalen Pfad fest.",
-	"selected_translation_unit_not_include_file_previous": "Die ausgewählte Übersetzungseinheit '{0}' enthält keine '{1}'. IntelliSense stellt die vorherige Übersetzungseinheit wieder her, wenn sie noch verfügbar ist. Andernfalls wird '{1}' als reine Header-Übersetzungseinheit verwendet.",
-	"selected_translation_unit_not_include_file_header_only": "Die ausgewählte Übersetzungseinheit '{0}' enthält keine '{1}'. Es ist keine vorherige Übersetzungseinheit verfügbar, weshalb IntelliSense '{1}' als reine Headerübersetzungseinheit verwendet."
+	"selected_translation_unit_not_include_file_previous": "Die ausgewählte Übersetzungseinheit '{0}' enthält '{1}' nicht. IntelliSense stellt die vorherige Übersetzungseinheit wieder her, wenn sie noch verfügbar ist. Andernfalls wird '{1}' als reine Header-Übersetzungseinheit verwendet.",
+	"selected_translation_unit_not_include_file_header_only": "Die ausgewählte Übersetzungseinheit '{0}' enthält '{1}' nicht. Es ist keine vorherige Übersetzungseinheit verfügbar, weshalb IntelliSense '{1}' als reine Headerübersetzungseinheit verwendet."
 }
