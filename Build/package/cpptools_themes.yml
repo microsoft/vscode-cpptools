@@ -32,7 +32,9 @@ extends:
         image: 1ESPT-Windows2025
         os: windows
     settings:
-      networkIsolationPolicy: CFSClean,CFSClean2,CFSClean3
+      # CFSClean* supplies deny rules only; a base allow policy is also needed
+      # for Azure DevOps authentication and package downloads.
+      networkIsolationPolicy: Permissive,CFSClean,CFSClean2,CFSClean3
 
     stages:
     - stage: package
