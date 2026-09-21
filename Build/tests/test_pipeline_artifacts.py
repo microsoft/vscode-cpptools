@@ -107,6 +107,38 @@ class PipelineArtifactTests(unittest.TestCase):
                 with self.subTest(path=path, artifact=name):
                     self.assertNotIn(name, bases)
 
+    def test_vsix_release_resolves_package_and_tooling_artifacts(self):
+        jobs = {job["job"]: job for job in self.documents["publish/jobs_publish_vsix.yml"]["jobs"]}
+        resolver = jobs["resolve_vsix_artifact"]
+        calls = {
+            step["parameters"]["artifactName"]: step["parameters"]
+            for step in resolver["steps"] if "template" in step
+        }
+        self.assertEqual(set(calls), {"vsix", "vsce"})
+        publish = jobs["Publish"]
+        self.assertEqual(publish["dependsOn"], resolver["job"])
+        self.assertEqual(publish["templateContext"]["type"], "releaseJob")
+        inputs = {item["artifactName"]: item for item in publish["templateContext"]["inputs"]}
+        self.assertEqual(set(inputs), {"$(ResolvedVsixArtifactName)", "$(ResolvedVsceArtifactName)"})
+        for name, step_name, variable in (
+            ("vsix", "resolve", "ResolvedVsixArtifactName"),
+            ("vsce", "resolveVsce", "ResolvedVsceArtifactName"),
+        ):
+            with self.subTest(artifact=name):
+                self.assertEqual(calls[name]["buildId"], "$(resources.pipeline.vsixBuild.runID)")
+                self.assertEqual(calls[name]["project"], "$(resources.pipeline.vsixBuild.projectID)")
+                self.assertEqual(calls[name]["stepName"], step_name)
+                self.assertEqual(
+                    publish["variables"][variable],
+                    "$[ dependencies.resolve_vsix_artifact.outputs['" + step_name + ".Name'] ]",
+                )
+                self.assertEqual(inputs["$(" + variable + ")"], {
+                    "input": "pipelineArtifact",
+                    "pipeline": "vsixBuild",
+                    "artifactName": "$(" + variable + ")",
+                    "targetPath": "$(Build.StagingDirectory)\\" + name,
+                })
+
     def test_resolver_calls_in_extends_parameters_use_the_source_repository(self):
         for path, document in self.documents.items():
             if not isinstance(document, dict) or not isinstance(document.get("extends"), dict):

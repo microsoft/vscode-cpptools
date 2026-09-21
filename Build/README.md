@@ -8,6 +8,7 @@ retrying a consumer does not change which producer output it needs.
 | --- | --- | --- |
 | `cpptools.vsix` | `cg/cg.yml` | None (diagnostic output) |
 | `vsix` | `package/jobs_package_vsix.yml` | `publish/jobs_publish_vsix.yml` |
+| `vsce` | `package/jobs_package_vsix.yml` | `publish/jobs_publish_vsix.yml` |
 | `unsigned_lldb-mi_<arch>` | `lldb-mi/lldb-mi.template.yml` | `lldb-mi/lldb-mi-sign.template.yml` |
 | `lldb-mi_<arch>_zip` | `lldb-mi/lldb-mi-sign.template.yml` | None |
 

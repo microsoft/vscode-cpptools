@@ -29,6 +29,10 @@ jobs:
       displayName: '${{ parameters.vsixName }}.vsix'
       targetPath: $(Build.ArtifactStagingDirectory)\vsix
       artifactName: vsix_attempt$(System.JobAttempt)
+    - output: pipelineArtifact
+      displayName: Locked VSCE dependencies
+      targetPath: $(Build.ArtifactStagingDirectory)\vsce
+      artifactName: vsce_attempt$(System.JobAttempt)
 
   steps:
   - checkout: self
@@ -48,9 +52,9 @@ jobs:
       script: |
         export SRC_DIR=$(echo $BUILD_SOURCESDIRECTORY | sed 's|\\|/|g')
         cd "$SRC_DIR/${{ parameters.srcDir }}"
-        npm install
+        npm ci --include=dev --include=optional
         if [ $? -ne 0 ]; then
-          echo "npm install failed, sleeping for 30s before retrying..."
+          echo "npm ci failed, sleeping for 30s before retrying..."
           sleep 30
           exit 1
         fi
@@ -59,9 +63,15 @@ jobs:
   - script: mkdir $(Build.ArtifactStagingDirectory)\vsix
     displayName: Create Staging Directory
 
-  - script: npm install --no-save --ignore-scripts=false --include=optional --force @vscode/vsce@3.9.2
-    displayName: Install vsce
-    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+  - task: CopyFiles@2
+    displayName: Stage locked VSCE dependencies for publishing
+    inputs:
+      SourceFolder: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
+      Contents: |
+        package.json
+        package-lock.json
+        .npmrc
+      TargetFolder: $(Build.ArtifactStagingDirectory)\vsce
 
   - script: npm rebuild @vscode/vsce-sign --ignore-scripts=false
     displayName: Rebuild vsce-sign binary
@@ -93,3 +103,7 @@ jobs:
     inputs:
       solution: $(Build.SourcesDirectory)\Build\signing\SignVsix.proj
       msbuildArguments: /p:SignType=${{ parameters.signType }}
+
+  - script: npx vsce verify-signature -i $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.vsix -m $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.manifest -s $(Build.ArtifactStagingDirectory)\vsix\${{ parameters.vsixName }}.signature.p7s
+    displayName: Verify VSIX signature
+    workingDirectory: $(Build.SourcesDirectory)\${{ parameters.srcDir }}
