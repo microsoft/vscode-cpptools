@@ -85,7 +85,7 @@ class Action {
                 (0, utils_1.safeLog)((err === null || err === void 0 ? void 0 : err.stack) || (err === null || err === void 0 ? void 0 : err.message) || String(e));
             }
         }
-        const usage = await (0, utils_1.getRateLimit)(this.token);
+        await (0, utils_1.getRateLimit)(this.token);
     }
     async error(error) {
         var _a;
