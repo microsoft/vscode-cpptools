@@ -8,18 +8,15 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 // Start provider imports
-import { CallHierarchyProvider } from './Providers/callHierarchyProvider';
 import { CodeActionProvider } from './Providers/codeActionProvider';
 import { DocumentFormattingEditProvider } from './Providers/documentFormattingEditProvider';
 import { DocumentRangeFormattingEditProvider } from './Providers/documentRangeFormattingEditProvider';
 import { DocumentSymbolProvider } from './Providers/documentSymbolProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
-import { FoldingRangeProvider } from './Providers/foldingRangeProvider';
 import { CppInlayHint, InlayHintsProvider } from './Providers/inlayHintProvider';
 import { OnTypeFormattingEditProvider } from './Providers/onTypeFormattingEditProvider';
 import { RenameProvider } from './Providers/renameProvider';
 import { SemanticToken, SemanticTokensProvider } from './Providers/semanticTokensProvider';
-import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 // End provider imports
 
 import { CodeSnippet, Trait } from '@github/copilot-language-server';
@@ -216,13 +213,18 @@ interface SwitchHeaderSourceParams extends WorkspaceFolderParams {
     switchHeaderSourceFileName: string;
 }
 
-interface FileChangedParams extends WorkspaceFolderParams {
-    uri: string;
+interface GetTranslationUnitSourceCandidatesResult {
+    candidates: string[];
+    currentTranslationUnit: string;
 }
 
-interface InputLineRange {
-    startLine: number;
-    endLine: number;
+interface SelectTranslationUnitParams {
+    uri: string;
+    translationUnit: string;
+}
+
+interface FileChangedParams extends WorkspaceFolderParams {
+    uri: string;
 }
 
 interface InputRegion {
@@ -283,6 +285,7 @@ interface IntelliSenseDiagnostic {
     severity: vscode.DiagnosticSeverity;
     localizeStringParams: LocalizeStringParams;
     relatedInformation?: IntelliSenseDiagnosticRelatedInformation[];
+    tags?: vscode.DiagnosticTag[];
 }
 
 interface RefactorDiagnostic {
@@ -321,10 +324,6 @@ export interface GetDocumentSymbolRequestParams {
     uri: string;
 }
 
-export interface WorkspaceSymbolParams extends WorkspaceFolderParams {
-    query: string;
-}
-
 export enum SymbolScope {
     Public = 0,
     Protected = 1,
@@ -345,16 +344,8 @@ export interface GetDocumentSymbolResult {
     symbols: LocalizeDocumentSymbol[];
 }
 
-export interface LocalizeSymbolInformation {
-    name: string;
-    kind: vscode.SymbolKind;
-    scope: SymbolScope;
-    location: Location;
-    containerName: string;
-    suffix: LocalizeStringParams;
-}
-
 export interface FormatParams extends SelectionParams {
+    ranges?: Range[];
     character: string;
     insertSpaces: boolean;
     tabSize: number;
@@ -365,26 +356,6 @@ export interface FormatParams extends SelectionParams {
 
 export interface FormatResult {
     edits: TextEdit[];
-}
-
-export interface GetFoldingRangesParams {
-    uri: string;
-}
-
-export enum FoldingRangeKind {
-    None = 0,
-    Comment = 1,
-    Imports = 2,
-    Region = 3
-}
-
-export interface CppFoldingRange {
-    kind: FoldingRangeKind;
-    range: InputLineRange;
-}
-
-export interface GetFoldingRangesResult {
-    ranges: CppFoldingRange[];
 }
 
 export interface IntelliSenseResult {
@@ -625,10 +596,9 @@ const PreInitializationRequest: RequestType<void, string, void> = new RequestTyp
 const InitializationRequest: RequestType<CppInitializationParams, CppInitializationResult, void> = new RequestType<CppInitializationParams, CppInitializationResult, void>('cpptools/initialize');
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
+const GetTranslationUnitSourceCandidatesRequest: RequestType<TextDocumentIdentifier, GetTranslationUnitSourceCandidatesResult, void> = new RequestType<TextDocumentIdentifier, GetTranslationUnitSourceCandidatesResult, void>('cpptools/getTranslationUnitSourceCandidates');
 const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void> = new RequestType<void, GetDiagnosticsResult, void>('cpptools/getDiagnostics');
 export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void> = new RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void>('cpptools/getDocumentSymbols');
-export const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void>('cpptools/getWorkspaceSymbols');
-export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void>('cpptools/getFoldingRanges');
 export const FormatDocumentRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatOnType');
@@ -653,6 +623,7 @@ const PauseParsingNotification: NotificationType<void> = new NotificationType<vo
 const ResumeParsingNotification: NotificationType<void> = new NotificationType<void>('cpptools/resumeParsing');
 const DidChangeActiveEditorNotification: NotificationType<DidChangeActiveEditorParams> = new NotificationType<DidChangeActiveEditorParams>('cpptools/didChangeActiveEditor');
 const RestartIntelliSenseForFileNotification: NotificationType<TextDocumentIdentifier> = new NotificationType<TextDocumentIdentifier>('cpptools/restartIntelliSenseForFile');
+const SelectTranslationUnitNotification: NotificationType<SelectTranslationUnitParams> = new NotificationType<SelectTranslationUnitParams>('cpptools/selectTranslationUnit');
 const DidChangeTextEditorSelectionNotification: NotificationType<Range> = new NotificationType<Range>('cpptools/didChangeTextEditorSelection');
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams> = new NotificationType<FolderSelectedSettingParams>('cpptools/didChangeSelectedSetting');
@@ -679,7 +650,6 @@ const RemoveCodeAnalysisProblemsNotification: NotificationType<RemoveCodeAnalysi
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void> = new NotificationType<void>('cpptools/reloadWindow');
 const UpdateTrustedCompilersNotification: NotificationType<UpdateTrustedCompilerPathsResult> = new NotificationType<UpdateTrustedCompilerPathsResult>('cpptools/updateTrustedCompilersList');
-const LogTelemetryNotification: NotificationType<TelemetryPayload> = new NotificationType<TelemetryPayload>('cpptools/logTelemetry');
 const ReportTagParseStatusNotification: NotificationType<TagParseStatus> = new NotificationType<TagParseStatus>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody> = new NotificationType<ReportStatusNotificationBody>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<DebugProtocolParams> = new NotificationType<DebugProtocolParams>('cpptools/debugProtocol');
@@ -832,6 +802,8 @@ export interface Client {
     takeOwnership(document: vscode.TextDocument): void;
     sendDidOpen(document: vscode.TextDocument): Promise<void>;
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string>;
+    getTranslationUnitSourceCandidates(uri: vscode.Uri, token: vscode.CancellationToken): Promise<GetTranslationUnitSourceCandidatesResult>;
+    selectTranslationUnit(uri: vscode.Uri, translationUnit: string): Promise<void>;
     updateActiveDocumentTextOptions(): void;
     didChangeActiveEditor(editor?: vscode.TextEditor, selection?: Range): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
@@ -904,8 +876,6 @@ export class DefaultClient implements Client {
     private documentFormattingProviderDisposable: vscode.Disposable | undefined;
     private formattingRangeProviderDisposable: vscode.Disposable | undefined;
     private onTypeFormattingProviderDisposable: vscode.Disposable | undefined;
-    private codeFoldingProvider: FoldingRangeProvider | undefined;
-    private codeFoldingProviderDisposable: vscode.Disposable | undefined;
     private inlayHintsProvider: InlayHintsProvider | undefined;
     private semanticTokensProvider: SemanticTokensProvider | undefined;
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
@@ -1429,20 +1399,14 @@ export class DefaultClient implements Client {
                 this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, instrument(this.inlayHintsProvider)));
                 this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, instrument(new RenameProvider(this))));
                 this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, instrument(new FindAllReferencesProvider(this))));
-                this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(instrument(new WorkspaceSymbolProvider(this))));
                 this.disposables.push(vscode.languages.registerDocumentSymbolProvider(util.documentSelector, instrument(new DocumentSymbolProvider()), undefined));
                 this.disposables.push(vscode.languages.registerCodeActionsProvider(util.documentSelector, instrument(new CodeActionProvider(this)), undefined));
-                this.disposables.push(vscode.languages.registerCallHierarchyProvider(util.documentSelector, instrument(new CallHierarchyProvider(this))));
 
-                // Because formatting and codeFolding can vary per folder, we need to register these providers once
-                // and leave them registered. The decision of whether to provide results needs to be made on a per folder basis,
-                // within the providers themselves.
+                // Because formatting can vary per folder, we need to register these providers once and leave them registered.
+                // The decision of whether to provide results needs to be made on a per folder basis, within the providers themselves.
                 this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(util.documentSelector, instrument(new DocumentFormattingEditProvider(this)));
                 this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(util.documentSelector, instrument(new DocumentRangeFormattingEditProvider(this)));
                 this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(util.documentSelector, instrument(new OnTypeFormattingEditProvider(this)), ";", "}", "\n");
-
-                this.codeFoldingProvider = new FoldingRangeProvider(this);
-                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, instrument(this.codeFoldingProvider));
 
                 const settings: CppSettings = new CppSettings();
                 if (settings.isEnhancedColorizationEnabled && semanticTokensLegend) {
@@ -1604,6 +1568,7 @@ export class DefaultClient implements Client {
             editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
             editorInlayHintsEnabled: otherSettings.editorInlayHintsEnabled,
             editorParameterHintsEnabled: otherSettings.editorParameterHintsEnabled,
+            showUnused: otherSettings.showUnused,
             refactoringIncludeHeader: settings.refactoringIncludeHeader
         };
         return result;
@@ -1829,7 +1794,7 @@ export class DefaultClient implements Client {
         const client = new rpc.LanguageClient(`cpptools`, serverOptions, clientOptions);
         client.onNotification(DebugProtocolNotification, logDebugProtocol);
         client.onNotification(DebugLogNotification, logLocalized);
-        client.onNotification(LogTelemetryNotification, (e) => void this.logTelemetry(e));
+        client.onTelemetry((e: TelemetryPayload) => void this.logTelemetry(e));
         client.onNotification(ShowMessageWindowNotification, showMessageWindow);
         client.registerProposedFeatures();
         await client.start();
@@ -2652,7 +2617,7 @@ export class DefaultClient implements Client {
             this.inlayHintsProvider.deliverInlayHints(intelliSenseResult.uri, intelliSenseResult.inlayHints, intelliSenseResult.clearExistingInlayHint);
         }
 
-        this.updateInactiveRegions(intelliSenseResult.uri, intelliSenseResult.inactiveRegions, intelliSenseResult.clearExistingInactiveRegions, intelliSenseResult.isCompletePass);
+        this.updateInactiveRegions(intelliSenseResult.uri, intelliSenseResult.inactiveRegions, intelliSenseResult.clearExistingInactiveRegions);
         if (intelliSenseResult.clearExistingDiagnostics || intelliSenseResult.diagnostics.length > 0) {
             this.updateSquiggles(intelliSenseResult.uri, intelliSenseResult.diagnostics, intelliSenseResult.clearExistingDiagnostics);
         }
@@ -2672,6 +2637,7 @@ export class DefaultClient implements Client {
             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
             diagnostic.code = d.code;
             diagnostic.source = CppSourceStr;
+            diagnostic.tags = d.tags;
             if (d.relatedInformation) {
                 diagnostic.relatedInformation = [];
                 for (const info of d.relatedInformation) {
@@ -2963,11 +2929,7 @@ export class DefaultClient implements Client {
         this.model.isParsingWorkspacePaused.Value = tagParseStatus.isPaused;
     }
 
-    private updateInactiveRegions(uriString: string, inactiveRegions: InputRegion[], startNewSet: boolean, updateFoldingRanges: boolean): void {
-        if (this.codeFoldingProvider && updateFoldingRanges) {
-            this.codeFoldingProvider.refresh();
-        }
-
+    private updateInactiveRegions(uriString: string, inactiveRegions: InputRegion[], startNewSet: boolean): void {
         const client: Client = clients.getClientFor(vscode.Uri.parse(uriString));
         if (!(client instanceof DefaultClient) || (!startNewSet && inactiveRegions.length === 0)) {
             return;
@@ -3098,6 +3060,19 @@ export class DefaultClient implements Client {
             }
             throw e;
         }
+    }
+
+    public async getTranslationUnitSourceCandidates(uri: vscode.Uri, token: vscode.CancellationToken): Promise<GetTranslationUnitSourceCandidatesResult> {
+        const params: TextDocumentIdentifier = { uri: uri.toString() };
+        await withCancellation(this.ready, token);
+        return DefaultClient.withLspCancellationHandling(
+            () => this.languageClient.sendRequest(GetTranslationUnitSourceCandidatesRequest, params, token), token);
+    }
+
+    public async selectTranslationUnit(uri: vscode.Uri, translationUnit: string): Promise<void> {
+        const params: SelectTranslationUnitParams = { uri: uri.toString(), translationUnit };
+        await this.ready;
+        return this.languageClient.sendNotification(SelectTranslationUnitNotification, params).catch(logAndReturn.undefined);
     }
 
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
@@ -4281,10 +4256,6 @@ export class DefaultClient implements Client {
             this.onTypeFormattingProviderDisposable.dispose();
             this.onTypeFormattingProviderDisposable = undefined;
         }
-        if (this.codeFoldingProviderDisposable) {
-            this.codeFoldingProviderDisposable.dispose();
-            this.codeFoldingProviderDisposable = undefined;
-        }
         if (this.semanticTokensProviderDisposable) {
             this.semanticTokensProviderDisposable.dispose();
             this.semanticTokensProviderDisposable = undefined;
@@ -4472,6 +4443,10 @@ class NullClient implements Client {
     takeOwnership(document: vscode.TextDocument): void { }
     sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string, token: vscode.CancellationToken): Thenable<string> { return Promise.resolve(""); }
+    getTranslationUnitSourceCandidates(uri: vscode.Uri, token: vscode.CancellationToken): Promise<GetTranslationUnitSourceCandidatesResult> {
+        return Promise.resolve({ candidates: [], currentTranslationUnit: "" });
+    }
+    selectTranslationUnit(uri: vscode.Uri, translationUnit: string): Promise<void> { return Promise.resolve(); }
     updateActiveDocumentTextOptions(): void { }
     didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }

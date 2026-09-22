@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.34.3-main",
+    "version": "1.35.2-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -1357,17 +1357,6 @@
                     "C_Cpp.default.dotConfig": {
                         "type": "string",
                         "markdownDescription": "%c_cpp.configuration.default.dotConfig.markdownDescription%",
-                        "scope": "resource"
-                    },
-                    "C_Cpp.default.recursiveIncludes.reduce": {
-                        "type": "string",
-                        "enum": [
-                            "",
-                            "always",
-                            "never",
-                            "default"
-                        ],
-                        "markdownDescription": "%c_cpp.configuration.default.recursiveIncludes.reduce.markdownDescription%",
                         "scope": "resource"
                     },
                     "C_Cpp.default.recursiveIncludes.priority": {
@@ -3991,6 +3980,11 @@
                 "category": "C/C++"
             },
             {
+                "command": "C_Cpp.SelectTranslationUnit",
+                "title": "%c_cpp.command.selectTranslationUnit.title%",
+                "category": "C/C++"
+            },
+            {
                 "command": "C_Cpp.EnableErrorSquiggles",
                 "title": "%c_cpp.command.enableErrorSquiggles.title%",
                 "category": "C/C++"
@@ -6543,6 +6537,10 @@
                     "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
                 },
                 {
+                    "command": "C_Cpp.SelectTranslationUnit",
+                    "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
                     "command": "C_Cpp.EnableErrorSquiggles",
                     "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
                 },
@@ -7170,6 +7168,7 @@
         "show": "ts-node -T .scripts/clean.ts show",
         "clean": "ts-node -T .scripts/clean.ts",
         "test-lldb-mi-component-manifest": "node --test .scripts/verifyLldbMiComponentManifest.test.mjs",
+        "test-vscode-acquisition": "node --test .scripts/vscode.test.mjs",
         "test-yarn-lock": "node --test .scripts/verifyYarnLock.test.mjs",
         "verify-lldb-mi-component-manifest": "node .scripts/verifyLldbMiComponentManifest.mjs",
         "verify-yarn-lock": "node .scripts/verifyYarnLock.mjs",
@@ -7196,6 +7195,7 @@
         "build": "yarn prep:dts && echo [Building TypeScript code] && tsc --build tsconfig.json"
     },
     "devDependencies": {
+        "@eslint/js": "^10.0.1",
         "@octokit/rest": "^21.1.1",
         "@types/glob": "^7.2.0",
         "@types/mocha": "^10.0.6",
@@ -7214,13 +7214,13 @@
         "@vscode/debugprotocol": "^1.65.0",
         "@vscode/dts": "^0.4.0",
         "@vscode/test-electron": "^3.1.0",
-        "@vscode/vsce": "^3.9.2",
+        "@vscode/vsce": "4.0.0",
         "async-child-process": "^1.1.1",
         "await-notify": "^1.0.1",
-        "eslint": "^9.39.2",
+        "eslint": "^10.10.0",
         "eslint-plugin-header": "^3.1.1",
-        "eslint-plugin-import": "^2.29.1",
-        "eslint-plugin-jsdoc": "^48.2.8",
+        "eslint-plugin-import-x": "^4.17.1",
+        "eslint-plugin-jsdoc": "^62.9.0",
         "event-stream": "^4.0.1",
         "fs-extra": "^11.2.0",
         "gulp": "^5.0.0",
@@ -7269,10 +7269,6 @@
     "resolutions": {
         "gulp-typescript/**/glob-parent": "^5.1.2",
         "serialize-javascript": "^7.0.5",
-        "@azure/msal-browser": "^4.29.1",
-        "flatted": "^3.4.1",
-        "uuid": "^11.1.1",
-        "undici": "^7.29.0",
         "fast-uri": "^3.1.6",
         "@humanfs/node": "^0.16.8"
     }
