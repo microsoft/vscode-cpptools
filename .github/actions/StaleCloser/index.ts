@@ -35,4 +35,4 @@ class StaleCloserAction extends Action {
 	}
 }
 
-new StaleCloserAction().run(); // eslint-disable-line
+new StaleCloserAction().run();

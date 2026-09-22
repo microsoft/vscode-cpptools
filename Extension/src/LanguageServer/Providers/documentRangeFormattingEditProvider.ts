@@ -16,13 +16,33 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
 
     public async provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range,
         options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+        return this.provideFormattingEdits(document, [range], options, token);
+    }
+
+    public async provideDocumentRangesFormattingEdits(document: vscode.TextDocument, ranges: vscode.Range[],
+        options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+        return this.provideFormattingEdits(document, ranges, options, token);
+    }
+
+    private async provideFormattingEdits(document: vscode.TextDocument, ranges: vscode.Range[],
+        options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
-        if (settings.formattingEngine === "disabled") {
+        if (settings.formattingEngine === "disabled" || ranges.length === 0) {
             return [];
         }
         const filePath: string = document.uri.fsPath;
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
+            const requestRanges = ranges.map(range => ({
+                start: {
+                    character: range.start.character,
+                    line: range.start.line
+                },
+                end: {
+                    character: range.end.character,
+                    line: range.end.line
+                }
+            }));
             const params: FormatParams = {
                 editorConfigSettings: { ...editorConfigSettings },
                 useVcFormat: useVcFormat,
@@ -30,16 +50,8 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
                 insertSpaces: options.insertSpaces,
                 tabSize: options.tabSize,
                 character: "",
-                range: {
-                    start: {
-                        character: range.start.character,
-                        line: range.start.line
-                    },
-                    end: {
-                        character: range.end.character,
-                        line: range.end.line
-                    }
-                },
+                range: requestRanges[0],
+                ranges: requestRanges,
                 onChanges: false
             };
             let response: FormatResult;
@@ -63,12 +75,4 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
             return configCallBack(editorConfigSettings);
         }
     }
-
-    // TODO: This is needed for correct Extract to function formatting.
-    /*
-    public async provideDocumentRangesFormattingEdits(_document: vscode.TextDocument, _ranges: vscode.Range[],
-        _options: vscode.FormattingOptions, _token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
-        return [];
-    }
-    */
 }

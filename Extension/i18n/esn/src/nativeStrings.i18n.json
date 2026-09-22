@@ -425,7 +425,7 @@
 	"check_requires_source": "--check requiere un archivo de origen: --check=<file>",
 	"check_source_not_found": "no se encuentra el archivo de origen: {0}",
 	"check_compile_commands_not_found": "No se encontró compile_commands.json: {0}",
-	"check_compile_commands_not_discovered": "no se pudo encontrar compile_commands.json en ningún directorio padre de {0}; pase --check-compile-commands=<path> para indicarlo explícitamente",
+	"check_compile_commands_not_discovered": "no se pudo encontrar compile_commands.json en ningún directorio padre de {0}; pase --check-compile-commands=<ruta> para indicarlo explícitamente",
 	"check_engine_init_failed": "no se pudo inicializar el motor de lenguaje",
 	"check_no_workspace_folder": "no se resolvió ninguna carpeta del área de trabajo para {0}",
 	"check_not_in_compile_commands": "{0} no se encuentra en {1}",
@@ -434,5 +434,7 @@
 	"check_timed_out": "se agotó el tiempo de espera para finalizar el análisis de {0}",
 	"failed_to_open_browse_db_lock_file": "No se pudo abrir el archivo de bloqueo de la base de datos de exploración: {0} (errno={1})",
 	"failed_to_lock_browse_db_lock_file": "No se pudo bloquear el archivo de bloqueo de la base de datos de exploración: {0} (errno={1})",
-	"browse_database_disabled_incompatible_storage": "La base de datos de exploración se deshabilitó porque su ubicación de almacenamiento no admite la memoria compartida de SQLite WAL. Establezca browse.databaseFilename en una ruta de acceso local."
+	"browse_database_disabled_incompatible_storage": "La base de datos de exploración se deshabilitó porque su ubicación de almacenamiento no admite la memoria compartida de SQLite WAL. Establezca browse.databaseFilename en una ruta de acceso local.",
+	"selected_translation_unit_not_include_file_previous": "La unidad de traducción seleccionada '{0}' no incluye '{1}'. IntelliSense restaurará la unidad de traducción anterior si aún está disponible; de lo contrario, usará '{1}' como una unidad de traducción de solo encabezado.",
+	"selected_translation_unit_not_include_file_header_only": "La unidad de traducción seleccionada '{0}' no incluye '{1}'. No hay ninguna unidad de traducción anterior disponible, por lo que IntelliSense usará '{1}' como unidad de traducción de solo encabezado."
 }
