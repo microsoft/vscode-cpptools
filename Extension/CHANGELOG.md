@@ -1,5 +1,37 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.35.2: September 22, 2026
+### New Feature
+* Dim unused local variables and parameters when `editor.showUnused` is enabled. [#10490](https://github.com/microsoft/vscode-cpptools/issues/10490)
+
+### Enhancements
+* Add support for formatting multiple selections with `clang-format` and `vcFormat`. [#12082](https://github.com/microsoft/vscode-cpptools/issues/12082)
+* Reduce language server memory usage in workspaces with many interconnected symbolic links.
+* Improve responsiveness when deleting source files associated with many open headers.
+* Improve `#include` completion performance in workspaces with many open files.
+
+### Bug Fixes
+* Fix IntelliSense handling of MSVC and clang-cl external include paths and environment variables. [#14186](https://github.com/microsoft/vscode-cpptools/issues/14186), [#14205](https://github.com/microsoft/vscode-cpptools/issues/14205)
+* Fix missing IntelliSense definitions for additional MSVC predefined macros. [#14312](https://github.com/microsoft/vscode-cpptools/issues/14312)
+* Fix lost indentation in displayed documentation comments. [#14567](https://github.com/microsoft/vscode-cpptools/issues/14567)
+* Fix compiler queries failing to find dependencies installed alongside the compiler on Linux and macOS. [#14575](https://github.com/microsoft/vscode-cpptools/issues/14575)
+* Fix an incorrect `class has more than one default constructor` IntelliSense error. [#14746](https://github.com/microsoft/vscode-cpptools/issues/14746)
+* Fix the extension failing to start on Linux ARM64 because `libc.so` is not executable. [#14779](https://github.com/microsoft/vscode-cpptools/issues/14779)
+* Fix incorrect or missing `#include` completion suggestions for nonrecursive paths, frameworks, symbolic links, and extensionless files.
+* Fix `compile_commands.json` handling for symlinked sources, missing working-directory fields, and invalid database roots.
+* Fix stale 'Create Declaration/Definition' diagnostics after cancellation and reduce redundant diagnostic updates.
+* Fix missing IntelliSense errors for duplicate local variables, including redeclarations of function parameters.
+* Fix a language server crash when requesting `#include` completion with certain Unicode prefixes.
+* Fix incorrect undefined-identifier IntelliSense errors for macros using `__COUNTER__` in C++20.
+* Fix recursive header lookup with duplicate include roots or `..` paths through symbolic links.
+* Fix incorrect EUC-JP and GBK source decoding when multibyte characters span read buffers.
+* Fix IntelliSense using strict language modes instead of Clang's default GNU dialect.
+* Fix header lookup for long Windows paths when Windows long-path support is enabled.
+* Fix a Windows tag parser crash when a worker thread cannot be created.
+* Fix intermittent incorrect compiler architecture detection on Linux.
+* Various localization updates.
+* Update dependencies.
+
 ## Version 1.35.1: September 14, 2026
 ### New Feature
 * Add the 'Select a Translation Unit...' command to choose which source file provides IntelliSense context for the active header file. [PR #14688](https://github.com/microsoft/vscode-cpptools/pull/14688)
