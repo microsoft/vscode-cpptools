@@ -62,6 +62,30 @@ suite("Inactive region folding", function (): void {
         }
     });
 
+    test("manual folding does not suppress later automatic folding", async () => {
+        const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", workspaceFolder.uri);
+        const previousAutoFoldValue: boolean | undefined = configuration.inspect<boolean>("autoFoldInactiveRegions")?.globalValue;
+        const previousCodeFoldingValue: string | undefined = configuration.inspect<string>("codeFolding")?.globalValue;
+        await configuration.update("autoFoldInactiveRegions", false, vscode.ConfigurationTarget.Global);
+        await configuration.update("codeFolding", "enabled", vscode.ConfigurationTarget.Global);
+        try {
+            const editor: vscode.TextEditor = await openFileAndWaitForIntelliSense();
+            await vscode.commands.executeCommand("editor.unfoldAll");
+            await vscode.commands.executeCommand("C_Cpp.FoldInactiveRegions");
+            await assertInactiveBranchIsFolded(editor);
+
+            await vscode.commands.executeCommand("editor.unfoldAll");
+            await assertInactiveBranchIsUnfolded(editor);
+            await configuration.update("autoFoldInactiveRegions", true, vscode.ConfigurationTarget.Global);
+
+            await assertInactiveBranchIsFolded(editor);
+        } finally {
+            await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+            await configuration.update("autoFoldInactiveRegions", previousAutoFoldValue, vscode.ConfigurationTarget.Global);
+            await configuration.update("codeFolding", previousCodeFoldingValue, vscode.ConfigurationTarget.Global);
+        }
+    });
+
     test("does not automatically fold inactive regions when code folding is disabled", async () => {
         const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", workspaceFolder.uri);
         const previousAutoFoldValue: boolean | undefined = configuration.inspect<boolean>("autoFoldInactiveRegions")?.globalValue;

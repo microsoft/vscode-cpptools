@@ -9,13 +9,16 @@
 import * as assert from 'assert';
 import { suite } from 'mocha';
 import * as path from 'path';
+import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
+import * as extension from '../../../../src/LanguageServer/extension';
 import * as testHelpers from '../../../common/testHelpers';
 
 suite("Inactive region folding in a multi-root workspace", function (): void {
     let testHook: apit.CppToolsTestHook;
+    let firstWorkspaceFolder: vscode.WorkspaceFolder;
     let workspaceFolder: vscode.WorkspaceFolder;
 
     suiteSetup(async function (): Promise<void> {
@@ -23,6 +26,8 @@ suite("Inactive region folding in a multi-root workspace", function (): void {
         const cpptools: apit.CppToolsTestApi = await apit.getCppToolsTestApi(api.Version.latest)
             ?? assert.fail("Could not get CppToolsTestApi");
         testHook = cpptools.getTestHook();
+        firstWorkspaceFolder = vscode.workspace.workspaceFolders?.[0]
+            ?? assert.fail("First workspace folder is unavailable");
         workspaceFolder = vscode.workspace.workspaceFolders?.[1]
             ?? assert.fail("Second workspace folder is unavailable");
     });
@@ -31,17 +36,38 @@ suite("Inactive region folding in a multi-root workspace", function (): void {
         testHook.dispose();
     });
 
-    test("folds inactive regions owned by a secondary workspace client", async () => {
+    test("routes manual folding by URI during a workspace client switch", async () => {
         const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", workspaceFolder.uri);
         const previousCodeFoldingValue: string | undefined = configuration.inspect<string>("codeFolding")?.globalValue;
         await configuration.update("codeFolding", "enabled", vscode.ConfigurationTarget.Global);
+        let releaseEditorChange: (() => void) | undefined;
+        let editorChangeStub: sinon.SinonStub | undefined;
+        let editorChangePromise: Promise<void> | undefined;
         try {
             const editor: vscode.TextEditor = await openFileAndWaitForIntelliSense();
             await vscode.commands.executeCommand("editor.unfoldAll");
+
+            const firstDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(
+                path.join(firstWorkspaceFolder.uri.fsPath, "test.cpp"));
+            const firstEditor: vscode.TextEditor = await vscode.window.showTextDocument(firstDocument);
+            await extension.clients.didChangeActiveEditor(firstEditor);
+            const firstClient = extension.clients.ActiveClient;
+            const owner = extension.clients.getClientFor(editor.document.uri);
+            assert.notStrictEqual(firstClient, owner);
+
+            const pendingEditorChange: Promise<void> = new Promise(resolve => releaseEditorChange = resolve);
+            editorChangeStub = sinon.stub(owner, "didChangeActiveEditor").returns(pendingEditorChange);
+            const activeEditor: vscode.TextEditor = await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
+            editorChangePromise = extension.clients.didChangeActiveEditor(activeEditor);
+            assert.strictEqual(extension.clients.ActiveClient, firstClient);
+
             await vscode.commands.executeCommand("C_Cpp.FoldInactiveRegions");
 
             await assertInactiveBranchIsFolded(editor);
         } finally {
+            releaseEditorChange?.();
+            await editorChangePromise;
+            editorChangeStub?.restore();
             await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
             await configuration.update("codeFolding", previousCodeFoldingValue, vscode.ConfigurationTarget.Global);
         }

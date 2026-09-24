@@ -3015,20 +3015,24 @@ export class DefaultClient implements Client {
         }
 
         this.pendingInactiveRegionFolds.delete(uri);
-        this.autoFoldedEditors.add(editor);
 
         const selectionLines: number[] = getInactiveRegionStartLines(inactiveRegions);
         if (selectionLines.length === 0) {
             return;
         }
 
+        if (autoFold) {
+            this.autoFoldedEditors.add(editor);
+        }
         try {
             await vscode.commands.executeCommand('editor.fold', {
                 selectionLines,
                 direction: 'down'
             });
         } catch (error) {
-            this.autoFoldedEditors.delete(editor);
+            if (autoFold) {
+                this.autoFoldedEditors.delete(editor);
+            }
             if (manualFold) {
                 this.pendingInactiveRegionFolds.add(uri);
             }

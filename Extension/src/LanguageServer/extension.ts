@@ -927,7 +927,8 @@ function onToggleDimInactiveRegions(): void {
 }
 
 function onFoldInactiveRegions(): Promise<void> {
-    return clients.ActiveClient.foldInactiveRegions();
+    const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    return editor ? clients.getClientFor(editor.document.uri).foldInactiveRegions() : Promise.resolve();
 }
 
 function onPauseParsing(): void {
