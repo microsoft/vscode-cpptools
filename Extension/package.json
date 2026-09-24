@@ -1072,6 +1072,12 @@
                         "description": "%c_cpp.configuration.dimInactiveRegions.description%",
                         "scope": "resource"
                     },
+                    "C_Cpp.autoFoldInactiveRegions": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "%c_cpp.configuration.autoFoldInactiveRegions.description%",
+                        "scope": "resource"
+                    },
                     "C_Cpp.inactiveRegionOpacity": {
                         "type": "number",
                         "default": 0.55,
@@ -4000,6 +4006,11 @@
                 "category": "C/C++"
             },
             {
+                "command": "C_Cpp.FoldInactiveRegions",
+                "title": "%c_cpp.command.foldInactiveRegions.title%",
+                "category": "C/C++"
+            },
+            {
                 "command": "C_Cpp.ResetDatabase",
                 "title": "%c_cpp.command.resetDatabase.title%",
                 "category": "C/C++"
@@ -6551,6 +6562,10 @@
                 {
                     "command": "C_Cpp.ToggleDimInactiveRegions",
                     "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.FoldInactiveRegions",
+                    "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/ && config.C_Cpp.codeFolding =~ /^[eE]nabled$/"
                 },
                 {
                     "command": "C_Cpp.ResetDatabase",
