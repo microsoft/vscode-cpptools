@@ -7,18 +7,18 @@
 /// <reference path="../../../../vscode.d.ts" />
 
 import * as assert from 'assert';
-import * as path from 'path';
 import { suite } from 'mocha';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import * as testHelpers from '../../../common/testHelpers';
 
-suite("Inactive region folding in a multi-root workspace", function(): void {
+suite("Inactive region folding in a multi-root workspace", function (): void {
     let testHook: apit.CppToolsTestHook;
     let workspaceFolder: vscode.WorkspaceFolder;
 
-    suiteSetup(async function(): Promise<void> {
+    suiteSetup(async function (): Promise<void> {
         await testHelpers.activateCppExtension();
         const cpptools: apit.CppToolsTestApi = await apit.getCppToolsTestApi(api.Version.latest)
             ?? assert.fail("Could not get CppToolsTestApi");
@@ -27,7 +27,7 @@ suite("Inactive region folding in a multi-root workspace", function(): void {
             ?? assert.fail("Second workspace folder is unavailable");
     });
 
-    suiteTeardown(function(): void {
+    suiteTeardown(function (): void {
         testHook.dispose();
     });
 

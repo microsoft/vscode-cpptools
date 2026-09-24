@@ -55,7 +55,7 @@ import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderE
 import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, isWritingCrashCallStack, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
-import { getInactiveRegionStartLines, InactiveRegion, InactiveRegionStore } from './inactiveRegions';
+import { InactiveRegion, InactiveRegionStore, getInactiveRegionStartLines } from './inactiveRegions';
 import { LanguageClient } from './languageClient';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
