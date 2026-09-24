@@ -785,5 +785,9 @@
     "selected_translation_unit_not_include_file_header_only": {
         "text": "The selected translation unit '{0}' does not include '{1}'. No previous translation unit is available, so IntelliSense will use '{1}' as a header-only translation unit.",
         "hint": "{0} is the selected translation unit path. {1} is the active file path. {Locked=\"IntelliSense\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
+    },
+    "quick_info_size_and_alignment": {
+        "text": "**Size:** %s bytes\n\n**Alignment:** %s bytes",
+        "hint": "Size and alignment of a C or C++ type. The first %s is the size in bytes. The second %s is the alignment in bytes. {Locked=\"**\"} {Locked=\"%s\"}"
     }
 }
