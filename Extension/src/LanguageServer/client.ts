@@ -2942,7 +2942,7 @@ export class DefaultClient implements Client {
         if (!(client instanceof DefaultClient) || (!startNewSet && inactiveRegions.length === 0 && !isCompletePass)) {
             return;
         }
-        this.inactiveRegions.update(uriString, inactiveRegions, startNewSet, isCompletePass);
+        client.inactiveRegions.update(uriString, inactiveRegions, startNewSet, isCompletePass);
 
         const settings: CppSettings = new CppSettings(client.RootUri);
         const dimInactiveRegions: boolean = settings.dimInactiveRegions;
@@ -2981,7 +2981,7 @@ export class DefaultClient implements Client {
 
         const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (isCompletePass && activeEditor?.document.uri.toString() === uriString) {
-            void this.tryFoldInactiveRegions(activeEditor).catch(logAndReturn.undefined);
+            void client.tryFoldInactiveRegions(activeEditor).catch(logAndReturn.undefined);
         }
     }
 
@@ -3006,7 +3006,8 @@ export class DefaultClient implements Client {
             return;
         }
 
-        const autoFold: boolean = new CppSettings(editor.document.uri).autoFoldInactiveRegions
+        const settings: CppSettings = new CppSettings(editor.document.uri);
+        const autoFold: boolean = settings.autoFoldInactiveRegions && settings.codeFolding
             && !this.autoFoldedEditors.has(editor);
         const manualFold: boolean = this.pendingInactiveRegionFolds.has(uri);
         if (!autoFold && !manualFold) {
