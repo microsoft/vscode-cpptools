@@ -786,6 +786,10 @@
         "text": "The selected translation unit '{0}' does not include '{1}'. No previous translation unit is available, so IntelliSense will use '{1}' as a header-only translation unit.",
         "hint": "{0} is the selected translation unit path. {1} is the active file path. {Locked=\"IntelliSense\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
     },
+    "check_analysis_process_unavailable": {
+        "text": "The C++ analysis process was unavailable while checking \"{0}\".",
+        "hint": "{0} is the source file path. {Locked=\"C++\"} {Locked=\"{0}\"}"
+    },
     "quick_info_size_one": {
         "text": "**Size:** %s byte",
         "hint": "Size of a C or C++ type when the size is one byte. %s is the size. {Locked=\"**\"} {Locked=\"%s\"}"
