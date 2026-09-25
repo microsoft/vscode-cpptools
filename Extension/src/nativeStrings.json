@@ -786,8 +786,20 @@
         "text": "The selected translation unit '{0}' does not include '{1}'. No previous translation unit is available, so IntelliSense will use '{1}' as a header-only translation unit.",
         "hint": "{0} is the selected translation unit path. {1} is the active file path. {Locked=\"IntelliSense\"} {Locked=\"{0}\"} {Locked=\"{1}\"}"
     },
-    "quick_info_size_and_alignment": {
-        "text": "**Size:** %s bytes\n\n**Alignment:** %s bytes",
-        "hint": "Size and alignment of a C or C++ type. The first %s is the size in bytes. The second %s is the alignment in bytes. {Locked=\"**\"} {Locked=\"%s\"}"
+    "quick_info_size_one": {
+        "text": "**Size:** %s byte",
+        "hint": "Size of a C or C++ type when the size is one byte. %s is the size. {Locked=\"**\"} {Locked=\"%s\"}"
+    },
+    "quick_info_size_many": {
+        "text": "**Size:** %s bytes",
+        "hint": "Size of a C or C++ type when the size is not one byte. %s is the size. {Locked=\"**\"} {Locked=\"%s\"}"
+    },
+    "quick_info_alignment_one": {
+        "text": "**Alignment:** %s byte",
+        "hint": "Alignment of a C or C++ type when the alignment is one byte. %s is the alignment. {Locked=\"**\"} {Locked=\"%s\"}"
+    },
+    "quick_info_alignment_many": {
+        "text": "**Alignment:** %s bytes",
+        "hint": "Alignment of a C or C++ type when the alignment is not one byte. %s is the alignment. {Locked=\"**\"} {Locked=\"%s\"}"
     }
 }
