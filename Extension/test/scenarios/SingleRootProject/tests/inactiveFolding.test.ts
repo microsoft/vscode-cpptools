@@ -38,7 +38,7 @@ suite("Inactive region folding", function (): void {
         try {
             const editor: vscode.TextEditor = await openFileAndWaitForIntelliSense();
             await vscode.commands.executeCommand("editor.unfoldAll");
-            await vscode.commands.executeCommand("C_Cpp.FoldInactiveRegions");
+            await vscode.commands.executeCommand("C_Cpp.FoldAllInactiveRegions");
 
             await assertInactiveBranchIsFolded(editor);
         } finally {
@@ -71,7 +71,7 @@ suite("Inactive region folding", function (): void {
         try {
             const editor: vscode.TextEditor = await openFileAndWaitForIntelliSense();
             await vscode.commands.executeCommand("editor.unfoldAll");
-            await vscode.commands.executeCommand("C_Cpp.FoldInactiveRegions");
+            await vscode.commands.executeCommand("C_Cpp.FoldAllInactiveRegions");
             await assertInactiveBranchIsFolded(editor);
 
             await vscode.commands.executeCommand("editor.unfoldAll");
@@ -83,6 +83,19 @@ suite("Inactive region folding", function (): void {
             await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
             await configuration.update("autoFoldInactiveRegions", previousAutoFoldValue, vscode.ConfigurationTarget.Global);
             await configuration.update("codeFolding", previousCodeFoldingValue, vscode.ConfigurationTarget.Global);
+        }
+    });
+
+    test("unfolds all inactive regions", async () => {
+        const editor: vscode.TextEditor = await openFileAndWaitForIntelliSense();
+        try {
+            await vscode.commands.executeCommand("C_Cpp.FoldAllInactiveRegions");
+            await assertInactiveBranchIsFolded(editor);
+
+            await vscode.commands.executeCommand("C_Cpp.UnfoldAllInactiveRegions");
+            await assertInactiveBranchIsUnfolded(editor);
+        } finally {
+            await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
         }
     });
 

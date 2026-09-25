@@ -233,6 +233,8 @@ interface DecorationRangesPair {
     ranges: vscode.Range[];
 }
 
+type InactiveRegionFoldingOperation = 'fold' | 'unfold';
+
 interface InternalSourceFileConfiguration extends SourceFileConfiguration {
     compilerArgsLegacy?: string[];
 }
@@ -800,7 +802,8 @@ export interface Client {
     selectTranslationUnit(uri: vscode.Uri, translationUnit: string): Promise<void>;
     updateActiveDocumentTextOptions(): void;
     didChangeActiveEditor(editor?: vscode.TextEditor, selection?: Range): Promise<void>;
-    foldInactiveRegions(): Promise<void>;
+    foldAllInactiveRegions(): Promise<void>;
+    unfoldAllInactiveRegions(): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
     activate(): void;
     selectionChanged(selection: Range): Promise<void>;
@@ -882,7 +885,7 @@ export class DefaultClient implements Client {
     private trackedDocuments = new Map<string, vscode.TextDocument>();
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private inactiveRegions = new InactiveRegionStore();
-    private pendingInactiveRegionFolds = new Set<string>();
+    private pendingInactiveRegionFoldingOperations = new Map<string, InactiveRegionFoldingOperation>();
     private autoFoldedEditors = new WeakSet<vscode.TextEditor>();
     private settingsTracker: SettingsTracker;
     private loggingLevel: number = 1;
@@ -1904,7 +1907,7 @@ export class DefaultClient implements Client {
             }
             if (changedSettings.autoFoldInactiveRegions !== undefined && vscode.window.activeTextEditor
                 && clients.getClientFor(vscode.window.activeTextEditor.document.uri) === this) {
-                void this.tryFoldInactiveRegions(vscode.window.activeTextEditor).catch(logAndReturn.undefined);
+                void this.tryApplyInactiveRegionFolding(vscode.window.activeTextEditor).catch(logAndReturn.undefined);
             }
             if (changedSettings.legacyCompilerArgsBehavior !== undefined) {
                 this.configuration.handleConfigurationChange();
@@ -2012,7 +2015,7 @@ export class DefaultClient implements Client {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
             this.inactiveRegions.delete(uri);
-            this.pendingInactiveRegionFolds.delete(uri);
+            this.pendingInactiveRegionFoldingOperations.delete(uri);
         }
     }
 
@@ -2025,7 +2028,7 @@ export class DefaultClient implements Client {
             this.inlayHintsProvider.removeFile(uri);
         }
         this.inactiveRegions.delete(uri);
-        this.pendingInactiveRegionFolds.delete(uri);
+        this.pendingInactiveRegionFoldingOperations.delete(uri);
         this.inactiveRegionsDecorations.delete(uri);
         if (diagnosticsCollectionIntelliSense) {
             diagnosticsCollectionIntelliSense.delete(document.uri);
@@ -2981,21 +2984,29 @@ export class DefaultClient implements Client {
 
         const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (isCompletePass && activeEditor?.document.uri.toString() === uriString) {
-            void client.tryFoldInactiveRegions(activeEditor).catch(logAndReturn.undefined);
+            void client.tryApplyInactiveRegionFolding(activeEditor).catch(logAndReturn.undefined);
         }
     }
 
-    public async foldInactiveRegions(): Promise<void> {
+    public foldAllInactiveRegions(): Promise<void> {
+        return this.applyInactiveRegionFolding('fold');
+    }
+
+    public unfoldAllInactiveRegions(): Promise<void> {
+        return this.applyInactiveRegionFolding('unfold');
+    }
+
+    private async applyInactiveRegionFolding(operation: InactiveRegionFoldingOperation): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor || !util.isCpp(editor.document)) {
             return;
         }
 
-        this.pendingInactiveRegionFolds.add(editor.document.uri.toString());
-        await this.tryFoldInactiveRegions(editor);
+        this.pendingInactiveRegionFoldingOperations.set(editor.document.uri.toString(), operation);
+        await this.tryApplyInactiveRegionFolding(editor);
     }
 
-    private async tryFoldInactiveRegions(editor: vscode.TextEditor): Promise<void> {
+    private async tryApplyInactiveRegionFolding(editor: vscode.TextEditor): Promise<void> {
         if (vscode.window.activeTextEditor !== editor || !util.isCpp(editor.document)) {
             return;
         }
@@ -3009,12 +3020,14 @@ export class DefaultClient implements Client {
         const settings: CppSettings = new CppSettings(editor.document.uri);
         const autoFold: boolean = settings.autoFoldInactiveRegions && settings.codeFolding
             && !this.autoFoldedEditors.has(editor);
-        const manualFold: boolean = this.pendingInactiveRegionFolds.has(uri);
-        if (!autoFold && !manualFold) {
+        const pendingOperation: InactiveRegionFoldingOperation | undefined =
+            this.pendingInactiveRegionFoldingOperations.get(uri);
+        const operation: InactiveRegionFoldingOperation | undefined = pendingOperation ?? (autoFold ? 'fold' : undefined);
+        if (operation === undefined) {
             return;
         }
 
-        this.pendingInactiveRegionFolds.delete(uri);
+        this.pendingInactiveRegionFoldingOperations.delete(uri);
 
         const selectionLines: number[] = getInactiveRegionStartLines(inactiveRegions);
         if (selectionLines.length === 0) {
@@ -3025,7 +3038,7 @@ export class DefaultClient implements Client {
             this.autoFoldedEditors.add(editor);
         }
         try {
-            await vscode.commands.executeCommand('editor.fold', {
+            await vscode.commands.executeCommand(`editor.${operation}`, {
                 selectionLines,
                 direction: 'down'
             });
@@ -3033,8 +3046,8 @@ export class DefaultClient implements Client {
             if (autoFold) {
                 this.autoFoldedEditors.delete(editor);
             }
-            if (manualFold) {
-                this.pendingInactiveRegionFolds.add(uri);
+            if (pendingOperation) {
+                this.pendingInactiveRegionFoldingOperations.set(uri, pendingOperation);
             }
             throw error;
         }
@@ -3207,7 +3220,7 @@ export class DefaultClient implements Client {
             return;
         }
 
-        void this.tryFoldInactiveRegions(editor).catch(logAndReturn.undefined);
+        void this.tryApplyInactiveRegionFolding(editor).catch(logAndReturn.undefined);
         this.updateActiveDocumentTextOptions();
 
         const params: DidChangeActiveEditorParams = {
@@ -4519,7 +4532,8 @@ class NullClient implements Client {
     selectTranslationUnit(uri: vscode.Uri, translationUnit: string): Promise<void> { return Promise.resolve(); }
     updateActiveDocumentTextOptions(): void { }
     didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> { return Promise.resolve(); }
-    foldInactiveRegions(): Promise<void> { return Promise.resolve(); }
+    foldAllInactiveRegions(): Promise<void> { return Promise.resolve(); }
+    unfoldAllInactiveRegions(): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
     selectionChanged(selection: Range): Promise<void> { return Promise.resolve(); }

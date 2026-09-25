@@ -36,7 +36,7 @@ suite("Inactive region folding in a multi-root workspace", function (): void {
         testHook.dispose();
     });
 
-    test("routes manual folding by URI during a workspace client switch", async () => {
+    test("routes manual folding operations by URI during a workspace client switch", async () => {
         const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", workspaceFolder.uri);
         const previousCodeFoldingValue: string | undefined = configuration.inspect<string>("codeFolding")?.globalValue;
         await configuration.update("codeFolding", "enabled", vscode.ConfigurationTarget.Global);
@@ -61,9 +61,11 @@ suite("Inactive region folding in a multi-root workspace", function (): void {
             editorChangePromise = extension.clients.didChangeActiveEditor(activeEditor);
             assert.strictEqual(extension.clients.ActiveClient, firstClient);
 
-            await vscode.commands.executeCommand("C_Cpp.FoldInactiveRegions");
-
+            await vscode.commands.executeCommand("C_Cpp.FoldAllInactiveRegions");
             await assertInactiveBranchIsFolded(editor);
+
+            await vscode.commands.executeCommand("C_Cpp.UnfoldAllInactiveRegions");
+            await assertInactiveBranchIsUnfolded(editor);
         } finally {
             releaseEditorChange?.();
             await editorChangePromise;
@@ -87,6 +89,13 @@ suite("Inactive region folding in a multi-root workspace", function (): void {
         }
 
         assert.strictEqual(line, 28);
+    }
+
+    async function assertInactiveBranchIsUnfolded(editor: vscode.TextEditor): Promise<void> {
+        const activeEditor: vscode.TextEditor = await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
+        activeEditor.selection = new vscode.Selection(24, 0, 24, 0);
+        await vscode.commands.executeCommand("cursorMove", { to: "down", by: "wrappedLine", value: 1 });
+        assert.strictEqual(activeEditor.selection.active.line, 25);
     }
 
     function waitForIntelliSenseReady(fileName: string): Promise<void> {

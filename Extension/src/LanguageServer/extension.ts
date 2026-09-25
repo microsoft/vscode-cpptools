@@ -396,7 +396,8 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', enabled ? onEnableSquiggles : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', enabled ? onDisableSquiggles : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', enabled ? onToggleDimInactiveRegions : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.FoldInactiveRegions', enabled ? onFoldInactiveRegions : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.FoldAllInactiveRegions', enabled ? onFoldAllInactiveRegions : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.UnfoldAllInactiveRegions', enabled ? onUnfoldAllInactiveRegions : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', enabled ? onPauseParsing : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', enabled ? onResumeParsing : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseCodeAnalysis', enabled ? onPauseCodeAnalysis : onDisabledCommand));
@@ -926,9 +927,14 @@ function onToggleDimInactiveRegions(): void {
     settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
 }
 
-function onFoldInactiveRegions(): Promise<void> {
+function onFoldAllInactiveRegions(): Promise<void> {
     const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    return editor ? clients.getClientFor(editor.document.uri).foldInactiveRegions() : Promise.resolve();
+    return editor ? clients.getClientFor(editor.document.uri).foldAllInactiveRegions() : Promise.resolve();
+}
+
+function onUnfoldAllInactiveRegions(): Promise<void> {
+    const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    return editor ? clients.getClientFor(editor.document.uri).unfoldAllInactiveRegions() : Promise.resolve();
 }
 
 function onPauseParsing(): void {
