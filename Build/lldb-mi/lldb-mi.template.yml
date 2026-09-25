@@ -151,7 +151,7 @@ jobs:
     displayName: 'Publish LLDB-MI'
     inputs:
       targetPath: '$(Build.StagingDirectory)/lldb-mi_${{ parameters.llvm_arch }}.zip'
-      artifactName: 'unsigned_lldb-mi_${{ parameters.llvm_arch }}'
+      artifactName: 'unsigned_lldb-mi_${{ parameters.llvm_arch }}_attempt$(System.JobAttempt)'
 
   - task: CmdLine@2
     displayName: 'Clean up'
