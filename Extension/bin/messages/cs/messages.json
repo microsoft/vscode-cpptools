@@ -3782,5 +3782,6 @@
     "Typ není podobný jazyku C kvůli této deklaraci členu",
     "Typ není podobný jazyku C kvůli tomuto lambda výrazu",
     "Kvalifikátor názvu výčtového typu je funkce jazyka C++11",
-    "Neomezené sjednocení je funkce jazyka C++11"
+    "Neomezené sjednocení je funkce jazyka C++11",
+    "%sq už je v aktuálním rozsahu deklarovaný"
 ]

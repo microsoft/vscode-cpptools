@@ -3782,5 +3782,6 @@
     "el tipo no es similar a C debido a esta declaración de miembro",
     "el tipo no es similar a C debido a esta expresión lambda",
     "un calificador de nombre de tipo de enumeración es una característica de C++11",
-    "las uniones sin restricciones son una característica de C++11"
+    "las uniones sin restricciones son una característica de C++11",
+    "%sq ya se ha declarado en el ámbito actual"
 ]

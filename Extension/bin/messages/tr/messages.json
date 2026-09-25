@@ -3782,5 +3782,6 @@
     "bu üye bildirimi nedeniyle tür C benzeri değil",
     "bu lambda ifadesi nedeniyle tür C benzeri değil",
     "sabit listesi türü ad niteleyicisi bir C++11 özelliğidir",
-    "kısıtlanmamış birleşimler bir C++11 özelliğidir"
+    "kısıtlanmamış birleşimler bir C++11 özelliğidir",
+    "geçerli kapsamda, %sq önceden de tanımlanmış"
 ]

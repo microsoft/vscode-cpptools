@@ -3782,5 +3782,6 @@
     "Der Typ ist aufgrund dieser Memberdeklaration nicht C-ähnlich.",
     "Der Typ ist aufgrund dieses Lambdaausdrucks nicht C-ähnlich.",
     "Ein Namensqualifizierer für einen Enumerationstyp ist ein C++11-Feature.",
-    "Unbeschränkte Unions sind ein C++11-Feature."
+    "Unbeschränkte Unions sind ein C++11-Feature.",
+    "%sq wurde bereits im aktuellen Bereich deklariert."
 ]

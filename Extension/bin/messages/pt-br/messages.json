@@ -3782,5 +3782,6 @@
     "o tipo não é semelhante a C devido a esta declaração de membro",
     "o tipo não é semelhante a C devido a esta expressão lambda",
     "um qualificador de nome de tipo de enumeração é um recurso do C++11",
-    "uniões irrestritas são um recurso do C++11"
+    "uniões irrestritas são um recurso do C++11",
+    "%sq já foi declarado no escopo atual"
 ]

@@ -3782,5 +3782,6 @@
     "il tipo non è simile a C a causa di questa dichiarazione di membro",
     "il tipo non è simile a C a causa di questa espressione lambda",
     "un qualificatore del nome di tipo enumerazione è una funzionalità di C++11",
-    "le unioni senza restrizioni sono una funzionalità di C++11"
+    "le unioni senza restrizioni sono una funzionalità di C++11",
+    "%sq già dichiarato nell'ambito corrente"
 ]
