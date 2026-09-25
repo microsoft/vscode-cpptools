@@ -1492,6 +1492,7 @@ export class DefaultClient implements Client {
             clangTidyConfig: settings.clangTidyConfig,
             clangTidyFallbackConfig: settings.clangTidyFallbackConfig,
             clangTidyHeaderFilter: settings.clangTidyHeaderFilter !== null ? util.resolveVariables(settings.clangTidyHeaderFilter, this.AdditionalEnvironment) : null,
+            clangTidyIncludeCleanerMappings: settings.clangTidyIncludeCleanerMappings,
             clangTidyArgs: util.resolveVariablesArray(settings.clangTidyArgs, this.AdditionalEnvironment),
             clangTidyUseBuildPath: settings.clangTidyUseBuildPath,
             clangTidyChecksEnabled: settings.clangTidyChecksEnabled,

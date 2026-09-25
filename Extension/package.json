@@ -2275,6 +2275,20 @@
                         "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.headerFilter.markdownDescription%",
                         "scope": "resource"
                     },
+                    "C_Cpp.codeAnalysis.clangTidy.includeCleanerMappings": {
+                        "type": "object",
+                        "default": {},
+                        "propertyNames": {
+                            "minLength": 1,
+                            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+(?![\\s\\S])"
+                        },
+                        "additionalProperties": {
+                            "type": "string",
+                            "pattern": "^(?:<[^<>\"\\u0000-\\u001f\\u007f-\\u009f]+>|\"[^<>\"\\u0000-\\u001f\\u007f-\\u009f]+\")(?![\\s\\S])"
+                        },
+                        "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.includeCleanerMappings.markdownDescription%",
+                        "scope": "resource"
+                    },
                     "C_Cpp.codeAnalysis.clangTidy.args": {
                         "type": "array",
                         "items": {

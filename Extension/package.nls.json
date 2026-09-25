@@ -199,6 +199,12 @@
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
+    "c_cpp.configuration.codeAnalysis.clangTidy.includeCleanerMappings.markdownDescription": {
+        "message": "Opt-in mappings from exact `misc-include-cleaner` symbol names to public headers. Keys must be nonempty. Values use `<path>` or `\"path\"` with a nonempty path and no embedded delimiters. Keys and values cannot contain control characters. Diagnostics are kept unless a direct include of the mapped header is proven; public-header insertion is offered when available.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription": {
         "message": "Additional command line arguments to pass to `clang-tidy`. These take precedence over the equivalent `C_Cpp.codeAnalysis.clangTidy.*` settings.",
         "comment": [
