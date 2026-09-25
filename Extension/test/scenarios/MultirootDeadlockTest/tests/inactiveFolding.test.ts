@@ -43,13 +43,15 @@ suite("Inactive region folding in a multi-root workspace", function (): void {
         let releaseEditorChange: (() => void) | undefined;
         let editorChangeStub: sinon.SinonStub | undefined;
         let editorChangePromise: Promise<void> | undefined;
+        let editor: vscode.TextEditor | undefined;
+        let firstEditor: vscode.TextEditor | undefined;
         try {
-            const editor: vscode.TextEditor = await openFileAndWaitForIntelliSense();
+            editor = await openFileAndWaitForIntelliSense();
             await vscode.commands.executeCommand("editor.unfoldAll");
 
             const firstDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(
                 path.join(firstWorkspaceFolder.uri.fsPath, "test.cpp"));
-            const firstEditor: vscode.TextEditor = await vscode.window.showTextDocument(firstDocument);
+            firstEditor = await vscode.window.showTextDocument(firstDocument);
             await extension.clients.didChangeActiveEditor(firstEditor);
             const firstClient = extension.clients.ActiveClient;
             const owner = extension.clients.getClientFor(editor.document.uri);
@@ -70,10 +72,21 @@ suite("Inactive region folding in a multi-root workspace", function (): void {
             releaseEditorChange?.();
             await editorChangePromise;
             editorChangeStub?.restore();
-            await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+            if (editor) {
+                await closeEditor(editor);
+            }
+            if (firstEditor) {
+                await closeEditor(firstEditor);
+            }
+            await testHelpers.delay(150);
             await configuration.update("codeFolding", previousCodeFoldingValue, vscode.ConfigurationTarget.Global);
         }
     });
+
+    async function closeEditor(editor: vscode.TextEditor): Promise<void> {
+        await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
+        await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+    }
 
     async function assertInactiveBranchIsFolded(editor: vscode.TextEditor): Promise<void> {
         let line: number = 24;

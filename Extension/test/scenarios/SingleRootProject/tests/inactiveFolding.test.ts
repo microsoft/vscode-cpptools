@@ -99,6 +99,36 @@ suite("Inactive region folding", function (): void {
         }
     });
 
+    test("applies a fold command queued before IntelliSense is ready", async () => {
+        const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
+        const previousUpdateDelay: number | undefined = configuration.inspect<number>("intelliSenseUpdateDelay")?.globalValue;
+        await configuration.update("intelliSenseUpdateDelay", 3000, vscode.ConfigurationTarget.Global);
+        const editor: vscode.TextEditor = await openFileAndWaitForIntelliSense();
+        try {
+            await vscode.commands.executeCommand("editor.unfoldAll");
+            let intelliSenseReady: boolean = false;
+            const ready: Promise<void> = waitForIntelliSenseReady(path.basename(editor.document.fileName))
+                .then(() => {
+                    intelliSenseReady = true;
+                });
+            const editApplied: boolean = await editor.edit(editBuilder =>
+                editBuilder.insert(new vscode.Position(0, 0), " "));
+            assert.strictEqual(editApplied, true);
+            assert.strictEqual(intelliSenseReady, false);
+
+            await vscode.commands.executeCommand("C_Cpp.FoldAllInactiveRegions");
+            await ready;
+            await assertInactiveBranchIsFolded(editor);
+        } finally {
+            if (editor.document.isDirty) {
+                await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
+                await vscode.commands.executeCommand("undo");
+            }
+            await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+            await configuration.update("intelliSenseUpdateDelay", previousUpdateDelay, vscode.ConfigurationTarget.Global);
+        }
+    });
+
     test("does not automatically fold inactive regions when code folding is disabled", async () => {
         const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", workspaceFolder.uri);
         const previousAutoFoldValue: boolean | undefined = configuration.inspect<boolean>("autoFoldInactiveRegions")?.globalValue;
@@ -113,6 +143,8 @@ suite("Inactive region folding", function (): void {
 
             await assertInactiveBranchIsUnfolded(editor);
         } finally {
+            await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+            await testHelpers.delay(150);
             await configuration.update("autoFoldInactiveRegions", previousAutoFoldValue, vscode.ConfigurationTarget.Global);
             await configuration.update("codeFolding", previousCodeFoldingValue, vscode.ConfigurationTarget.Global);
         }
