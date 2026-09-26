@@ -1905,9 +1905,13 @@ export class DefaultClient implements Client {
                     void ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, showButtonSender);
                 }
             }
-            if (changedSettings.autoFoldInactiveRegions !== undefined && vscode.window.activeTextEditor
+            if ((changedSettings.autoFoldInactiveRegions !== undefined || changedSettings.codeFolding !== undefined)
+                && vscode.window.activeTextEditor
                 && clients.getClientFor(vscode.window.activeTextEditor.document.uri) === this) {
-                void this.tryApplyInactiveRegionFolding(vscode.window.activeTextEditor).catch(logAndReturn.undefined);
+                if (changedSettings.codeFolding !== undefined) {
+                    await this.languageClient.refreshFoldingRanges(vscode.window.activeTextEditor.document);
+                }
+                await this.tryApplyInactiveRegionFolding(vscode.window.activeTextEditor);
             }
             if (changedSettings.legacyCompilerArgsBehavior !== undefined) {
                 this.configuration.handleConfigurationChange();
