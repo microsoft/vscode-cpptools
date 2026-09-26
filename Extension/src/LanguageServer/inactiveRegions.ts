@@ -39,6 +39,10 @@ export class InactiveRegionStore {
         return regionSet?.isComplete ? regionSet.regions : undefined;
     }
 
+    public forEach(callback: (regions: readonly InactiveRegion[], uri: string) => void): void {
+        this.regionSets.forEach((regionSet, uri) => callback(regionSet.regions, uri));
+    }
+
     public delete(uri: string): void {
         this.regionSets.delete(uri);
     }

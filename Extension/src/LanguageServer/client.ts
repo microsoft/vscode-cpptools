@@ -1913,6 +1913,12 @@ export class DefaultClient implements Client {
                 }
                 await this.tryApplyInactiveRegionFolding(vscode.window.activeTextEditor);
             }
+            if (["dimInactiveRegions",
+                "inactiveRegionOpacity",
+                "inactiveRegionForegroundColor",
+                "inactiveRegionBackgroundColor"].some(setting => setting in changedSettings)) {
+                this.refreshInactiveRegionDecorations();
+            }
             if (changedSettings.legacyCompilerArgsBehavior !== undefined) {
                 this.configuration.handleConfigurationChange();
             }
@@ -2033,6 +2039,7 @@ export class DefaultClient implements Client {
         }
         this.inactiveRegions.delete(uri);
         this.pendingInactiveRegionFoldingOperations.delete(uri);
+        this.inactiveRegionsDecorations.get(uri)?.decoration.dispose();
         this.inactiveRegionsDecorations.delete(uri);
         if (diagnosticsCollectionIntelliSense) {
             diagnosticsCollectionIntelliSense.delete(document.uri);
@@ -2952,6 +2959,16 @@ export class DefaultClient implements Client {
         client.inactiveRegions.update(uriString, inactiveRegions, startNewSet, isCompletePass);
 
         const settings: CppSettings = new CppSettings(client.RootUri);
+        client.updateInactiveRegionDecorations(uriString, inactiveRegions, startNewSet, settings);
+
+        const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (isCompletePass && activeEditor?.document.uri.toString() === uriString) {
+            void client.tryApplyInactiveRegionFolding(activeEditor).catch(logAndReturn.undefined);
+        }
+    }
+
+    private updateInactiveRegionDecorations(uriString: string, inactiveRegions: readonly InactiveRegion[],
+        startNewSet: boolean, settings: CppSettings): void {
         const dimInactiveRegions: boolean = settings.dimInactiveRegions;
         let currentSet: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(uriString);
         if (startNewSet || !dimInactiveRegions) {
@@ -2985,11 +3002,18 @@ export class DefaultClient implements Client {
                 e.setDecorations(currentSet.decoration, currentSet.ranges);
             }
         }
+    }
 
-        const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        if (isCompletePass && activeEditor?.document.uri.toString() === uriString) {
-            void client.tryApplyInactiveRegionFolding(activeEditor).catch(logAndReturn.undefined);
+    private refreshInactiveRegionDecorations(): void {
+        const settings: CppSettings = new CppSettings(this.RootUri);
+        if (!settings.dimInactiveRegions) {
+            this.inactiveRegionsDecorations.forEach(currentSet => currentSet.decoration.dispose());
+            this.inactiveRegionsDecorations.clear();
+            return;
         }
+
+        this.inactiveRegions.forEach((inactiveRegions, uriString) =>
+            this.updateInactiveRegionDecorations(uriString, inactiveRegions, true, settings));
     }
 
     public foldAllInactiveRegions(): Promise<void> {
@@ -4322,6 +4346,8 @@ export class DefaultClient implements Client {
     }
 
     public dispose(): void {
+        this.inactiveRegionsDecorations.forEach(currentSet => currentSet.decoration.dispose());
+        this.inactiveRegionsDecorations.clear();
         this.pendingTagParsingCalls.forEach(pendingCall => {
             if (pendingCall.timer) {
                 clearTimeout(pendingCall.timer);
