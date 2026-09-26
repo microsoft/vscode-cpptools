@@ -19,6 +19,8 @@
     "c_cpp.command.enableErrorSquiggles.title": "Enable Error Squiggles",
     "c_cpp.command.disableErrorSquiggles.title": "Disable Error Squiggles",
     "c_cpp.command.toggleDimInactiveRegions.title": "Toggle Inactive Region Colorization",
+    "c_cpp.command.foldAllInactiveRegions.title": "Fold All Inactive Regions",
+    "c_cpp.command.unfoldAllInactiveRegions.title": "Unfold All Inactive Regions",
     "c_cpp.command.resetDatabase.title": "Reset IntelliSense Database",
     "c_cpp.command.takeSurvey.title": "Take Survey",
     "c_cpp.command.restartIntelliSenseForFile.title": "Restart IntelliSense for Active File",
@@ -486,6 +488,7 @@
     "c_cpp.configuration.autocomplete.disabled.description": "Uses the word-based completion provided by Visual Studio Code.",
     "c_cpp.configuration.errorSquiggles.description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. It also controls whether code analysis warnings are reported if includes can't be found. This setting is ignored by the Tag Parser engine.",
     "c_cpp.configuration.dimInactiveRegions.description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting has no effect if IntelliSense is disabled or if using the Default High Contrast theme.",
+    "c_cpp.configuration.autoFoldInactiveRegions.description": "Controls whether inactive preprocessor blocks are automatically folded when a file is opened. This setting requires IntelliSense and code folding to be enabled.",
     "c_cpp.configuration.inactiveRegionOpacity.markdownDescription": {
         "message": "Controls the opacity of inactive preprocessor blocks. Scales between `0.1` and `1.0`. This setting only applies when inactive region dimming is enabled.",
         "comment": [

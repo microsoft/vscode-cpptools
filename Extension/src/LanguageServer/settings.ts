@@ -377,6 +377,7 @@ export class CppSettings extends Settings {
     public get inactiveRegionOpacity(): number { return this.getAsNumber("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("inactiveRegionForegroundColor")); }
     public get inactiveRegionBackgroundColor(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("inactiveRegionBackgroundColor")); }
+    public get autoFoldInactiveRegions(): boolean { return this.getAsBoolean("autoFoldInactiveRegions"); }
     public get autocomplete(): string { return this.getAsString("autocomplete"); }
     public get autocompleteAddParentheses(): boolean { return this.getAsBoolean("autocompleteAddParentheses"); }
     public get loggingLevel(): string { return this.getAsString("loggingLevel"); }
