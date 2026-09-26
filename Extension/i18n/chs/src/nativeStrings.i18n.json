@@ -436,5 +436,6 @@
 	"failed_to_lock_browse_db_lock_file": "未能锁定浏览数据库锁定文件: {0} (errno={1})",
 	"browse_database_disabled_incompatible_storage": "浏览数据库已禁用，因为其存储位置不支持 SQLite WAL 共享内存。将 browse.databaseFilename 设置为本地路径。",
 	"selected_translation_unit_not_include_file_previous": "所选翻译单元“{0}”不包含“{1}”。如果之前的翻译单元仍然可用，IntelliSense 将还原它；否则，将使用“{1}”作为仅包含头文件的翻译单元。",
-	"selected_translation_unit_not_include_file_header_only": "所选翻译单元“{0}”不包含“{1}”。没有可用的之前的翻译单元，因此 IntelliSense 将使用“{1}”作为仅包含头文件的翻译单元。"
+	"selected_translation_unit_not_include_file_header_only": "所选翻译单元“{0}”不包含“{1}”。没有可用的之前的翻译单元，因此 IntelliSense 将使用“{1}”作为仅包含头文件的翻译单元。",
+	"check_analysis_process_unavailable": "The C++ analysis process was unavailable while checking \"{0}\"."
 }
