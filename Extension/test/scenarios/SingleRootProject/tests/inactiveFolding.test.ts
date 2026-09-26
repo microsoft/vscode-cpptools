@@ -154,6 +154,37 @@ suite("Inactive region folding", function (): void {
         }
     });
 
+    test("does not automatically fold regions introduced after an empty initial result", async () => {
+        const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", workspaceFolder.uri);
+        const previousAutoFoldValue: boolean | undefined = configuration.inspect<boolean>("autoFoldInactiveRegions")?.globalValue;
+        const previousCodeFoldingValue: string | undefined = configuration.inspect<string>("codeFolding")?.globalValue;
+        await configuration.update("autoFoldInactiveRegions", true, vscode.ConfigurationTarget.Global);
+        await configuration.update("codeFolding", "enabled", vscode.ConfigurationTarget.Global);
+        const editor: vscode.TextEditor = await openFileAndWaitForIntelliSense("main.cpp");
+        try {
+            const ready: Promise<void> = waitForIntelliSenseReady(path.basename(editor.document.fileName));
+            const editApplied: boolean = await editor.edit(editBuilder => editBuilder.insert(
+                new vscode.Position(0, 0),
+                "#if 0\nint inactive()\n{\n    return 0;\n}\n#endif\n\n"));
+            assert.strictEqual(editApplied, true);
+            await ready;
+            await testHelpers.delay(100);
+
+            const activeEditor: vscode.TextEditor = await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
+            activeEditor.selection = new vscode.Selection(0, 0, 0, 0);
+            await vscode.commands.executeCommand("cursorMove", { to: "down", by: "wrappedLine", value: 1 });
+            assert.strictEqual(activeEditor.selection.active.line, 1);
+        } finally {
+            if (editor.document.isDirty) {
+                await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
+                await vscode.commands.executeCommand("undo");
+            }
+            await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+            await configuration.update("autoFoldInactiveRegions", previousAutoFoldValue, vscode.ConfigurationTarget.Global);
+            await configuration.update("codeFolding", previousCodeFoldingValue, vscode.ConfigurationTarget.Global);
+        }
+    });
+
     test("does not automatically fold inactive regions when code folding is disabled", async () => {
         const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", workspaceFolder.uri);
         const previousAutoFoldValue: boolean | undefined = configuration.inspect<boolean>("autoFoldInactiveRegions")?.globalValue;
@@ -214,8 +245,7 @@ suite("Inactive region folding", function (): void {
         });
     }
 
-    async function openFileAndWaitForIntelliSense(): Promise<vscode.TextEditor> {
-        const fileName: string = "code_folding.cpp";
+    async function openFileAndWaitForIntelliSense(fileName: string = "code_folding.cpp"): Promise<vscode.TextEditor> {
         const filePath: string = path.join(workspaceFolder.uri.fsPath, fileName);
         const ready: Promise<void> = waitForIntelliSenseReady(fileName);
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(filePath);
