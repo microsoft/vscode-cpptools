@@ -870,6 +870,7 @@ export function createNullClient(): Client {
 }
 
 export class DefaultClient implements Client {
+    private static readonly autoFoldedEditors = new WeakSet<vscode.TextEditor>();
     private disposables: vscode.Disposable[] = [];
     private documentFormattingProviderDisposable: vscode.Disposable | undefined;
     private formattingRangeProviderDisposable: vscode.Disposable | undefined;
@@ -886,7 +887,6 @@ export class DefaultClient implements Client {
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private inactiveRegions = new InactiveRegionStore();
     private pendingInactiveRegionFoldingOperations = new Map<string, InactiveRegionFoldingOperation>();
-    private autoFoldedEditors = new WeakSet<vscode.TextEditor>();
     private settingsTracker: SettingsTracker;
     private loggingLevel: number = 1;
     private configurationProvider?: string;
@@ -3019,7 +3019,7 @@ export class DefaultClient implements Client {
 
         const settings: CppSettings = new CppSettings(editor.document.uri);
         const autoFold: boolean = settings.autoFoldInactiveRegions && settings.codeFolding
-            && !this.autoFoldedEditors.has(editor);
+            && !DefaultClient.autoFoldedEditors.has(editor);
         const pendingOperation: InactiveRegionFoldingOperation | undefined =
             this.pendingInactiveRegionFoldingOperations.get(uri);
         const operation: InactiveRegionFoldingOperation | undefined = pendingOperation ?? (autoFold ? 'fold' : undefined);
@@ -3035,7 +3035,7 @@ export class DefaultClient implements Client {
         }
 
         if (autoFold) {
-            this.autoFoldedEditors.add(editor);
+            DefaultClient.autoFoldedEditors.add(editor);
         }
         try {
             await vscode.commands.executeCommand(`editor.${operation}`, {
@@ -3044,7 +3044,7 @@ export class DefaultClient implements Client {
             });
         } catch (error) {
             if (autoFold) {
-                this.autoFoldedEditors.delete(editor);
+                DefaultClient.autoFoldedEditors.delete(editor);
             }
             if (pendingOperation) {
                 this.pendingInactiveRegionFoldingOperations.set(uri, pendingOperation);

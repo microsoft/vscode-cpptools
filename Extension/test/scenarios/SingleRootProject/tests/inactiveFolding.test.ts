@@ -12,6 +12,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
+import * as extension from '../../../../src/LanguageServer/extension';
 import * as testHelpers from '../../../common/testHelpers';
 
 suite("Inactive region folding", function (): void {
@@ -126,6 +127,30 @@ suite("Inactive region folding", function (): void {
             }
             await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
             await configuration.update("intelliSenseUpdateDelay", previousUpdateDelay, vscode.ConfigurationTarget.Global);
+        }
+    });
+
+    test("does not automatically refold an editor after client recovery", async () => {
+        const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", workspaceFolder.uri);
+        const previousAutoFoldValue: boolean | undefined = configuration.inspect<boolean>("autoFoldInactiveRegions")?.globalValue;
+        const previousCodeFoldingValue: string | undefined = configuration.inspect<string>("codeFolding")?.globalValue;
+        await configuration.update("autoFoldInactiveRegions", true, vscode.ConfigurationTarget.Global);
+        await configuration.update("codeFolding", "enabled", vscode.ConfigurationTarget.Global);
+        const editor: vscode.TextEditor = await openFileAndWaitForIntelliSense();
+        try {
+            await assertInactiveBranchIsFolded(editor);
+            await vscode.commands.executeCommand("editor.unfoldAll");
+            await assertInactiveBranchIsUnfolded(editor);
+
+            const ready: Promise<void> = waitForIntelliSenseReady(path.basename(editor.document.fileName));
+            await extension.clients.recreateClients();
+            await ready;
+
+            await assertInactiveBranchIsUnfolded(editor);
+        } finally {
+            await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+            await configuration.update("autoFoldInactiveRegions", previousAutoFoldValue, vscode.ConfigurationTarget.Global);
+            await configuration.update("codeFolding", previousCodeFoldingValue, vscode.ConfigurationTarget.Global);
         }
     });
 
