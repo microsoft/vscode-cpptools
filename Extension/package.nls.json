@@ -770,6 +770,12 @@
     "c_cpp.configuration.markdownInComments.enabled.description": "Enable all markdown features in the hover tooltip.",
     "c_cpp.configuration.markdownInComments.disabled.description": "Disable all markdown features in the hover tooltip.",
     "c_cpp.configuration.hover.description": "If disabled, hover details are no longer provided by the language server.",
+    "c_cpp.configuration.hover.showIntegralValuesInHexadecimal.markdownDescription": {
+        "message": "Displays integral constant values in hexadecimal in IntelliSense hovers. This setting only applies if `#C_Cpp.intelliSenseEngine#` is set to `default`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (it represents literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.vcpkg.enabled.markdownDescription": {
         "message": "Enable integration services for the [vcpkg dependency manager](https://aka.ms/vcpkg/).",
         "comment": [

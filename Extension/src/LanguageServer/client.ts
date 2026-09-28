@@ -1498,6 +1498,7 @@ export class DefaultClient implements Client {
             clangTidyChecksDisabled: settings.clangTidyChecksDisabled,
             markdownInComments: settings.markdownInComments,
             hover: settings.hover,
+            hoverShowIntegralValuesInHexadecimal: settings.hoverShowIntegralValuesInHexadecimal,
             vcFormatIndentBraces: settings.vcFormatIndentBraces,
             vcFormatIndentMultiLineRelativeTo: settings.vcFormatIndentMultiLineRelativeTo,
             vcFormatIndentWithinParentheses: settings.vcFormatIndentWithinParentheses,
