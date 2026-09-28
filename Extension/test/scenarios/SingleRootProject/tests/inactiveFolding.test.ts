@@ -255,10 +255,7 @@ suite("Inactive region folding", function (): void {
     async function assertInactiveBranchIsFolded(editor: vscode.TextEditor): Promise<void> {
         let line: number = 24;
         for (let i: number = 0; i < 20; ++i) {
-            const activeEditor: vscode.TextEditor = await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
-            activeEditor.selection = new vscode.Selection(24, 0, 24, 0);
-            await vscode.commands.executeCommand("cursorMove", { to: "down", by: "wrappedLine", value: 1 });
-            line = activeEditor.selection.active.line;
+            line = await moveCursorDown(editor);
             if (line === 28) {
                 return;
             }
@@ -269,10 +266,24 @@ suite("Inactive region folding", function (): void {
     }
 
     async function assertInactiveBranchIsUnfolded(editor: vscode.TextEditor): Promise<void> {
+        let line: number = 24;
+        for (let i: number = 0; i < 20; ++i) {
+            line = await moveCursorDown(editor);
+            if (line === 25) {
+                return;
+            }
+            await testHelpers.delay(50);
+        }
+
+        assert.strictEqual(line, 25);
+    }
+
+    async function moveCursorDown(editor: vscode.TextEditor): Promise<number> {
         const activeEditor: vscode.TextEditor = await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
+        await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
         activeEditor.selection = new vscode.Selection(24, 0, 24, 0);
         await vscode.commands.executeCommand("cursorMove", { to: "down", by: "wrappedLine", value: 1 });
-        assert.strictEqual(activeEditor.selection.active.line, 25);
+        return activeEditor.selection.active.line;
     }
 
     async function closeEditor(editor: vscode.TextEditor): Promise<void> {
