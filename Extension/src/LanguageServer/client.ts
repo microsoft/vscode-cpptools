@@ -886,7 +886,7 @@ export class DefaultClient implements Client {
     private trackedDocuments = new Map<string, vscode.TextDocument>();
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private inactiveRegions = new InactiveRegionStore();
-    private pendingInactiveRegionFoldingOperations = new Map<string, InactiveRegionFoldingOperation>();
+    private pendingInactiveRegionFoldingOperations = new WeakMap<vscode.TextEditor, InactiveRegionFoldingOperation>();
     private settingsTracker: SettingsTracker;
     private loggingLevel: number = 1;
     private configurationProvider?: string;
@@ -2025,7 +2025,6 @@ export class DefaultClient implements Client {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
             this.inactiveRegions.delete(uri);
-            this.pendingInactiveRegionFoldingOperations.delete(uri);
         }
     }
 
@@ -2038,7 +2037,6 @@ export class DefaultClient implements Client {
             this.inlayHintsProvider.removeFile(uri);
         }
         this.inactiveRegions.delete(uri);
-        this.pendingInactiveRegionFoldingOperations.delete(uri);
         this.inactiveRegionsDecorations.get(uri)?.decoration.dispose();
         this.inactiveRegionsDecorations.delete(uri);
         if (diagnosticsCollectionIntelliSense) {
@@ -3030,7 +3028,7 @@ export class DefaultClient implements Client {
             return;
         }
 
-        this.pendingInactiveRegionFoldingOperations.set(editor.document.uri.toString(), operation);
+        this.pendingInactiveRegionFoldingOperations.set(editor, operation);
         await this.tryApplyInactiveRegionFolding(editor);
     }
 
@@ -3049,13 +3047,13 @@ export class DefaultClient implements Client {
         const autoFold: boolean = settings.autoFoldInactiveRegions && settings.codeFolding
             && !DefaultClient.autoFoldedEditors.has(editor);
         const pendingOperation: InactiveRegionFoldingOperation | undefined =
-            this.pendingInactiveRegionFoldingOperations.get(uri);
+            this.pendingInactiveRegionFoldingOperations.get(editor);
         const operation: InactiveRegionFoldingOperation | undefined = pendingOperation ?? (autoFold ? 'fold' : undefined);
         if (operation === undefined) {
             return;
         }
 
-        this.pendingInactiveRegionFoldingOperations.delete(uri);
+        this.pendingInactiveRegionFoldingOperations.delete(editor);
 
         if (autoFold) {
             DefaultClient.autoFoldedEditors.add(editor);
@@ -3076,7 +3074,7 @@ export class DefaultClient implements Client {
                 DefaultClient.autoFoldedEditors.delete(editor);
             }
             if (pendingOperation) {
-                this.pendingInactiveRegionFoldingOperations.set(uri, pendingOperation);
+                this.pendingInactiveRegionFoldingOperations.set(editor, pendingOperation);
             }
             throw error;
         }

@@ -130,6 +130,51 @@ suite("Inactive region folding", function (): void {
         }
     });
 
+    test("applies a queued fold only to the editor that requested it", async () => {
+        const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
+        const previousAutoFoldValue: boolean | undefined = configuration.inspect<boolean>("autoFoldInactiveRegions")?.globalValue;
+        const previousCodeFoldingValue: string | undefined = configuration.inspect<string>("codeFolding")?.globalValue;
+        const previousUpdateDelay: number | undefined = configuration.inspect<number>("intelliSenseUpdateDelay")?.globalValue;
+        await configuration.update("autoFoldInactiveRegions", false, vscode.ConfigurationTarget.Global);
+        await configuration.update("codeFolding", "enabled", vscode.ConfigurationTarget.Global);
+        await configuration.update("intelliSenseUpdateDelay", 3000, vscode.ConfigurationTarget.Global);
+        const firstEditor: vscode.TextEditor = await openFileAndWaitForIntelliSense();
+        const secondEditor: vscode.TextEditor = await vscode.window.showTextDocument(firstEditor.document, {
+            viewColumn: vscode.ViewColumn.Beside,
+            preserveFocus: false,
+            preview: false
+        });
+        try {
+            await vscode.window.showTextDocument(firstEditor.document, firstEditor.viewColumn, false);
+            await vscode.commands.executeCommand("editor.unfoldAll");
+            await vscode.window.showTextDocument(secondEditor.document, secondEditor.viewColumn, false);
+            await vscode.commands.executeCommand("editor.unfoldAll");
+            await vscode.window.showTextDocument(firstEditor.document, firstEditor.viewColumn, false);
+
+            const ready: Promise<void> = waitForIntelliSenseReady(path.basename(firstEditor.document.fileName));
+            const editApplied: boolean = await firstEditor.edit(editBuilder =>
+                editBuilder.insert(new vscode.Position(0, 0), " "));
+            assert.strictEqual(editApplied, true);
+            await vscode.commands.executeCommand("C_Cpp.FoldAllInactiveRegions");
+            await vscode.window.showTextDocument(secondEditor.document, secondEditor.viewColumn, false);
+
+            await ready;
+            await assertInactiveBranchIsUnfolded(secondEditor);
+            await assertInactiveBranchIsFolded(firstEditor);
+        } finally {
+            if (firstEditor.document.isDirty) {
+                await vscode.window.showTextDocument(firstEditor.document, firstEditor.viewColumn, false);
+                await vscode.commands.executeCommand("undo");
+            }
+            await closeEditor(firstEditor);
+            await closeEditor(secondEditor);
+            await testHelpers.delay(150);
+            await configuration.update("autoFoldInactiveRegions", previousAutoFoldValue, vscode.ConfigurationTarget.Global);
+            await configuration.update("codeFolding", previousCodeFoldingValue, vscode.ConfigurationTarget.Global);
+            await configuration.update("intelliSenseUpdateDelay", previousUpdateDelay, vscode.ConfigurationTarget.Global);
+        }
+    });
+
     test("does not automatically refold an editor after client recovery", async () => {
         const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", workspaceFolder.uri);
         const previousAutoFoldValue: boolean | undefined = configuration.inspect<boolean>("autoFoldInactiveRegions")?.globalValue;
@@ -228,6 +273,11 @@ suite("Inactive region folding", function (): void {
         activeEditor.selection = new vscode.Selection(24, 0, 24, 0);
         await vscode.commands.executeCommand("cursorMove", { to: "down", by: "wrappedLine", value: 1 });
         assert.strictEqual(activeEditor.selection.active.line, 25);
+    }
+
+    async function closeEditor(editor: vscode.TextEditor): Promise<void> {
+        await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
+        await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
     }
 
     function waitForIntelliSenseReady(fileName: string): Promise<void> {
