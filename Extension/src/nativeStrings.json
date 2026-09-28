@@ -792,10 +792,10 @@
     },
     "quick_info_size": {
         "text": "**Size:** %s B",
-        "hint": "Size of a C or C++ type in bytes. %s is the numeric size. B is the byte unit symbol. {Locked=\"**\"} {Locked=\"%s\"} {Locked=\"B\"}"
+        "hint": "Size of a C or C++ type in bytes. %s is the numeric size. Translate B to a count-invariant byte unit symbol or abbreviation. {Locked=\"**\"} {Locked=\"%s\"}"
     },
     "quick_info_alignment": {
         "text": "**Alignment:** %s B",
-        "hint": "Alignment of a C or C++ type in bytes. %s is the numeric alignment. B is the byte unit symbol. {Locked=\"**\"} {Locked=\"%s\"} {Locked=\"B\"}"
+        "hint": "Alignment of a C or C++ type in bytes. %s is the numeric alignment. Translate B to a count-invariant byte unit symbol or abbreviation. {Locked=\"**\"} {Locked=\"%s\"}"
     }
 }
