@@ -147,8 +147,12 @@ suite("Inactive region folding", function (): void {
         try {
             await vscode.window.showTextDocument(firstEditor.document, firstEditor.viewColumn, false);
             await vscode.commands.executeCommand("editor.unfoldAll");
+            firstEditor.revealRange(new vscode.Range(24, 0, 25, 0), vscode.TextEditorRevealType.InCenter);
             await vscode.window.showTextDocument(secondEditor.document, secondEditor.viewColumn, false);
             await vscode.commands.executeCommand("editor.unfoldAll");
+            secondEditor.revealRange(new vscode.Range(24, 0, 25, 0), vscode.TextEditorRevealType.InCenter);
+            await assertLineVisibility(firstEditor, 25, true);
+            await assertLineVisibility(secondEditor, 25, true);
             await vscode.window.showTextDocument(firstEditor.document, firstEditor.viewColumn, false);
 
             const ready: Promise<void> = waitForIntelliSenseReady(path.basename(firstEditor.document.fileName));
@@ -159,8 +163,10 @@ suite("Inactive region folding", function (): void {
             await vscode.window.showTextDocument(secondEditor.document, secondEditor.viewColumn, false);
 
             await ready;
-            await assertInactiveBranchIsUnfolded(secondEditor);
-            await assertInactiveBranchIsFolded(firstEditor);
+            await assertLineVisibility(secondEditor, 25, true);
+            await vscode.window.showTextDocument(firstEditor.document, firstEditor.viewColumn, false);
+            await assertLineVisibility(firstEditor, 25, false);
+            await assertLineVisibility(secondEditor, 25, true);
         } finally {
             if (firstEditor.document.isDirty) {
                 await vscode.window.showTextDocument(firstEditor.document, firstEditor.viewColumn, false);
@@ -284,6 +290,20 @@ suite("Inactive region folding", function (): void {
         activeEditor.selection = new vscode.Selection(24, 0, 24, 0);
         await vscode.commands.executeCommand("cursorMove", { to: "down", by: "wrappedLine", value: 1 });
         return activeEditor.selection.active.line;
+    }
+
+    async function assertLineVisibility(editor: vscode.TextEditor, line: number, expected: boolean): Promise<void> {
+        const position: vscode.Position = new vscode.Position(line, 0);
+        let visible: boolean = false;
+        for (let i: number = 0; i < 20; ++i) {
+            visible = editor.visibleRanges.some(range => range.contains(position));
+            if (visible === expected) {
+                return;
+            }
+            await testHelpers.delay(50);
+        }
+
+        assert.strictEqual(visible, expected);
     }
 
     async function closeEditor(editor: vscode.TextEditor): Promise<void> {
