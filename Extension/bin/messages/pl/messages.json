@@ -3782,5 +3782,6 @@
     "typ nie jest C-podobny z powodu tej deklaracji składowej",
     "typ nie jest C-podobny z powodu tego wyrażenia lambda",
     "kwalifikator nazwy typu wyliczeniowego jest funkcją języka C++11",
-    "nieograniczone unie są funkcją języka C++11"
+    "nieograniczone unie są funkcją języka C++11",
+    "element %sq został już zadeklarowany w bieżącym zakresie"
 ]
