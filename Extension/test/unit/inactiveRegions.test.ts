@@ -60,6 +60,15 @@ suite("InactiveRegionStore", () => {
         assert.deepStrictEqual(entries, [[uri, [firstRegion, secondRegion]]]);
     });
 
+    test("clears all cached regions", () => {
+        const store: InactiveRegionStore = new InactiveRegionStore();
+        store.update(uri, [firstRegion], true, true);
+
+        store.clear();
+
+        assert.strictEqual(store.getComplete(uri), undefined);
+    });
+
     test("returns sorted unique start lines", () => {
         assert.deepStrictEqual(getInactiveRegionStartLines([secondRegion, firstRegion, secondRegion]), [2, 8]);
     });

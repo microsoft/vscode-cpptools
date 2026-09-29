@@ -887,6 +887,7 @@ export class DefaultClient implements Client {
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private inactiveRegions = new InactiveRegionStore();
     private pendingInactiveRegionFoldingOperations = new WeakMap<vscode.TextEditor, InactiveRegionFoldingOperation>();
+    private inactiveRegionReportingEnabled: boolean;
     private settingsTracker: SettingsTracker;
     private loggingLevel: number = 1;
     private configurationProvider?: string;
@@ -1328,6 +1329,7 @@ export class DefaultClient implements Client {
         }
 
         const rootUri: vscode.Uri | undefined = this.RootUri;
+        this.inactiveRegionReportingEnabled = new CppSettings(rootUri).inactiveRegionReportingEnabled;
         this.settingsTracker = new SettingsTracker(rootUri);
 
         try {
@@ -1477,8 +1479,8 @@ export class DefaultClient implements Client {
             intelliSenseCachePath: util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment),
             intelliSenseCacheSize: settings.intelliSenseCacheSize,
             intelliSenseMemoryLimit: settings.intelliSenseMemoryLimit,
-            // Native uses this flag to decide whether to report inactive ranges.
-            dimInactiveRegions: settings.dimInactiveRegions || settings.autoFoldInactiveRegions || settings.codeFolding,
+            dimInactiveRegions: settings.dimInactiveRegions,
+            codeFolding: settings.codeFolding,
             suggestSnippets: settings.suggestSnippets,
             legacyCompilerArgsBehavior: settings.legacyCompilerArgsBehavior,
             defaultSystemIncludePath: settings.defaultSystemIncludePath,
@@ -1851,6 +1853,11 @@ export class DefaultClient implements Client {
         await this.ready;
 
         if (Object.keys(changedSettings).length > 0) {
+            const inactiveRegionReportingEnabled: boolean = new CppSettings(this.RootUri).inactiveRegionReportingEnabled;
+            if (inactiveRegionReportingEnabled !== this.inactiveRegionReportingEnabled) {
+                this.inactiveRegionReportingEnabled = inactiveRegionReportingEnabled;
+                this.inactiveRegions.clear();
+            }
             if (this === defaultClient) {
                 if (changedSettings.commentContinuationPatterns2 !== undefined) {
                     updateLanguageConfigurations();
@@ -3044,8 +3051,7 @@ export class DefaultClient implements Client {
         }
 
         const settings: CppSettings = new CppSettings(editor.document.uri);
-        const autoFold: boolean = settings.autoFoldInactiveRegions && settings.codeFolding
-            && !DefaultClient.autoFoldedEditors.has(editor);
+        const autoFold: boolean = settings.autoFoldInactiveRegions && !DefaultClient.autoFoldedEditors.has(editor);
         const pendingOperation: InactiveRegionFoldingOperation | undefined =
             this.pendingInactiveRegionFoldingOperations.get(editor);
         const operation: InactiveRegionFoldingOperation | undefined = pendingOperation ?? (autoFold ? 'fold' : undefined);
@@ -3065,6 +3071,7 @@ export class DefaultClient implements Client {
         }
 
         try {
+            await this.languageClient.refreshFoldingRanges(editor.document);
             await vscode.commands.executeCommand(`editor.${operation}`, {
                 selectionLines,
                 direction: 'down'

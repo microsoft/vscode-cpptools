@@ -43,6 +43,10 @@ export class InactiveRegionStore {
         this.regionSets.forEach((regionSet, uri) => callback(regionSet.regions, uri));
     }
 
+    public clear(): void {
+        this.regionSets.clear();
+    }
+
     public delete(uri: string): void {
         this.regionSets.delete(uri);
     }

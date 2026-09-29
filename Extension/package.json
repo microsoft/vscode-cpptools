@@ -1075,7 +1075,7 @@
                     "C_Cpp.autoFoldInactiveRegions": {
                         "type": "boolean",
                         "default": false,
-                        "description": "%c_cpp.configuration.autoFoldInactiveRegions.description%",
+                        "markdownDescription": "%c_cpp.configuration.autoFoldInactiveRegions.description%",
                         "scope": "resource"
                     },
                     "C_Cpp.inactiveRegionOpacity": {
