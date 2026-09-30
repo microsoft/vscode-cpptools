@@ -9,7 +9,8 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"lib": [
-			"es2020"
+			"es2020",
+			"es2022.error"
 		]
 	},
 	"exclude": [

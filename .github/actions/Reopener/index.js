@@ -17,5 +17,5 @@ class ReopenerAction extends Action_1.Action {
         await new Reopener_1.Reopener(github, alsoApplyToOpenIssues != undefined && alsoApplyToOpenIssues.toLowerCase() == 'true', (0, utils_1.getInput)('addLabels') || undefined, (0, utils_1.getInput)('removeLabels') || undefined, (0, utils_1.getInput)('reopenComment') || '', (0, utils_1.getInput)('setMilestoneId') || undefined, (0, utils_1.getInput)('labels') || undefined, (0, utils_1.getInput)('milestoneName') || undefined, (0, utils_1.getInput)('milestoneId') || undefined, (0, utils_1.getInput)('ignoreLabels') || undefined, (0, utils_1.getInput)('ignoreMilestoneNames') || undefined, (0, utils_1.getInput)('ignoreMilestoneIds') || undefined, +((0, utils_1.getInput)('minimumVotes') || 0), +((0, utils_1.getInput)('maximumVotes') || 9999999)).run();
     }
 }
-new ReopenerAction().run(); // eslint-disable-line
+new ReopenerAction().run();
 //# sourceMappingURL=index.js.map

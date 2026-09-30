@@ -16,5 +16,5 @@ class AddCommentAction extends Action_1.Action {
         await new AddComment_1.AddComment(github, (0, utils_1.getInput)('createdAfter') || undefined, +((0, utils_1.getInput)('afterDays') || 0), (0, utils_1.getRequiredInput)('labels'), (0, utils_1.getInput)('addComment') || '', (0, utils_1.getInput)('addLabels') || undefined, (0, utils_1.getInput)('removeLabels') || undefined, (0, utils_1.getInput)('setMilestoneId') || undefined, (0, utils_1.getInput)('milestoneName') || undefined, (0, utils_1.getInput)('milestoneId') || undefined, (0, utils_1.getInput)('ignoreLabels') || undefined, (0, utils_1.getInput)('ignoreMilestoneNames') || undefined, (0, utils_1.getInput)('ignoreMilestoneIds') || undefined, +((0, utils_1.getInput)('minimumVotes') || 0), +((0, utils_1.getInput)('maximumVotes') || 9999999), (0, utils_1.getInput)('involves') || undefined).run();
     }
 }
-new AddCommentAction().run(); // eslint-disable-line
+new AddCommentAction().run();
 //# sourceMappingURL=index.js.map

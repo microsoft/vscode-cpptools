@@ -442,7 +442,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             }
 
             for await (const data of e.execution.read()) {
-                void handleTerminalOutput(data);
+                await handleTerminalOutput(data);
             }
         });
         terminal = systemInteractor.createTerminal(options);

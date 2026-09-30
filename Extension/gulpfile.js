@@ -12,7 +12,6 @@ const nls = require('vscode-nls-dev');
 const path = require('path');
 const minimist = require('minimist');
 const es = require('event-stream');
-const sourcemaps = require('gulp-sourcemaps');
 const ts = require('gulp-typescript');
 const typescript = require('typescript');
 const tsProject = ts.createProject('./tsconfig.json', { typescript });
@@ -216,7 +215,6 @@ gulp.task("translations-export", (done) => {
 
     // Transpile the TS to JS, and let vscode-nls-dev scan the files for calls to localize.
     let jsStream = tsProject.src()
-        .pipe(sourcemaps.init())
         .pipe(tsProject()).js
         .pipe(nls.createMetaDataFiles());
 
@@ -270,6 +268,18 @@ gulp.task("translations-import", (done) => {
         let id = language.transifexId || language.id;
         return gulp.src(path.join(options.location, id, translationProjectName, `${translationExtensionName}.xlf`))
             .pipe(nls.prepareJsonFiles())
+            .pipe(es.map((file, cb) => {
+                // vscode-nls-dev emits .i18n.json files without a trailing newline. Append one so the
+                // checked-in files match the repo convention (files.insertFinalNewline for [json]) and
+                // don't produce churn the next time they're opened and saved in VS Code.
+                if (file.isBuffer()) {
+                    const contents = file.contents;
+                    if (contents.length > 0 && contents[contents.length - 1] !== 0x0A) {
+                        file.contents = Buffer.concat([contents, Buffer.from("\n")]);
+                    }
+                }
+                cb(null, file);
+            }))
             .pipe(gulp.dest(path.join("./i18n", language.folderName)))
             .pipe(es.wait()); // This is required or it gives `this.pipeTo.end is not a function`.
     }))
@@ -296,7 +306,6 @@ const generateAdditionalLocFiles = () => {
 const generateSrcLocBundle = () => {
     // Transpile the TS to JS, and let vscode-nls-dev scan the files for calls to localize.
     return tsProject.src()
-        .pipe(sourcemaps.init())
         .pipe(tsProject()).js
         .pipe(nls.createMetaDataFiles())
         .pipe(nls.createAdditionalLanguageFiles(languages, "i18n"))

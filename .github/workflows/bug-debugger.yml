@@ -8,6 +8,9 @@ on:
        description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
        default: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -15,9 +18,9 @@ jobs:
       issues: write
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@v2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Actions
-        run: cd ./.github/actions && npm install --production && cd ../..
+        run: cd ./.github/actions && npm ci --omit=dev && cd ../..
       - name: Add Comment
         uses: ./.github/actions/AddComment
         with:
@@ -27,3 +30,4 @@ jobs:
           createdAfter: "2024-07-22"
           addComment: "Thank you for reporting this issue. We’ll let you know if we need more information to investigate it. Additionally, if you're working with GDB/LLDB, please note that the code is open source at https://github.com/microsoft/MIEngine/wiki/Contributing-Code . Your contributions are always welcome and appreciated."
           addLabels: help wanted
+

@@ -116,7 +116,6 @@ export function parse(triggerExpression: string, sourceToBindTo: ArbitraryObject
         if (token.kind !== Kind.Slash) {
             throw new Error(`unexpected token ${JSON.stringify(token)}`);
         }
-    // eslint-disable-next-line no-constant-condition
     } while (true);
 
     // for each discriminator[filter]

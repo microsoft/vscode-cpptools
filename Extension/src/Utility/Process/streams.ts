@@ -13,8 +13,6 @@ import { finalize } from '../System/finalize';
 import { is } from '../System/guards';
 import { verbose } from '../Text/streams';
 
-/* eslint-disable no-constant-condition */
-
 /** An iterator/iterable wrapper to process a stream of lines. */
 export class LineIterator implements AsyncIterable<string>, AsyncIterator<string> {
     #current = 0;

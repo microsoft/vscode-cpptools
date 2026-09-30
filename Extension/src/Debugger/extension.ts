@@ -14,13 +14,15 @@ import { SshTargetsProvider, getActiveSshTarget, initializeSshTargets, selectSsh
 import { TargetLeafNode, setActiveSshTarget } from '../SSH/TargetsView/targetNodes';
 import { sshCommandToConfig } from '../SSH/sshCommandToConfig';
 import { getSshConfiguration, getSshConfigurationFiles, parseFailures, writeSshConfiguration } from '../SSH/sshHosts';
-import { pathAccessible } from '../common';
+import { documentSelector, isCpp, isCppOrCFile, pathAccessible } from '../common';
 import { instrument } from '../instrumentation';
 import { getSshChannel } from '../logger';
+import { SessionState } from '../sessionState';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, DebugConfigurationProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { DebuggerType } from './configurations';
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
+import { EvaluatableExpressionProvider } from './evaluatableExpressionProvider';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensionContext.subscriptions.
@@ -82,6 +84,9 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppvsdbg, new CppvsdbgDebugAdapterDescriptorFactory(context)));
     disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppdbg, new CppdbgDebugAdapterDescriptorFactory(context)));
 
+    // Supplies the expression evaluated by debug data-tips when hovering C/C++ source.
+    disposables.push(vscode.languages.registerEvaluatableExpressionProvider(documentSelector, instrument(new EvaluatableExpressionProvider())));
+
     // SSH Targets View
     await initializeSshTargets();
     const sshTargetsProvider: SshTargetsProvider = new SshTargetsProvider();
@@ -125,6 +130,28 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
             }
         }
     }));
+
+    // Track active editor changes so "Run and Debug" button session state is kept up to date
+    // even if the language server (IntelliSense) is disabled.
+    updateBuildAndDebugSessionState(vscode.window.activeTextEditor);
+    disposables.push(vscode.window.onDidChangeActiveTextEditor(editor => updateBuildAndDebugSessionState(editor)));
+    disposables.push(vscode.workspace.onDidOpenTextDocument(document => {
+        const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (activeEditor?.document.uri.toString() === document.uri.toString()) {
+            updateBuildAndDebugSessionState(activeEditor);
+        }
+    }));
+    disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(() => updateBuildAndDebugSessionState(vscode.window.activeTextEditor)));
+}
+
+export function updateBuildAndDebugSessionState(editor?: vscode.TextEditor): void {
+    if (editor && isCpp(editor.document)) {
+        void SessionState.buildAndDebugIsFolderOpen.set(vscode.workspace.getWorkspaceFolder(editor.document.uri) !== undefined);
+        void SessionState.buildAndDebugIsSourceFile.set(isCppOrCFile(editor.document.uri, editor.document.languageId));
+    } else {
+        void SessionState.buildAndDebugIsFolderOpen.set(vscode.workspace.workspaceFolders !== undefined);
+        void SessionState.buildAndDebugIsSourceFile.set(false);
+    }
 }
 
 export function dispose(): void {

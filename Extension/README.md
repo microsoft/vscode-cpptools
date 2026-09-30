@@ -61,7 +61,7 @@ File questions, issues, or feature requests for the extension.
 If someone has already filed an issue that encompasses your feedback, please leave a 👍 or 👎 reaction on the issue to upvote or downvote it to help us prioritize the issue.
 <br>
 
-**[Quick survey](https://www.research.net/r/VBVV6C6)**
+**[Quick survey](https://aka.ms/vcvscodesurvey)**
 <br>
 Let us know what you think of the extension by taking the quick survey.
 
@@ -75,4 +75,4 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Data and telemetry
 
-This extension collects usage data and sends it to Microsoft to help improve our products and services. Collection of telemetry is controlled via the same setting provided by Visual Studio Code: `"telemetry.enableTelemetry"`. Read our [privacy statement](https://privacy.microsoft.com/en-us/privacystatement) to learn more.
+This extension collects usage data and sends it to Microsoft to help improve our products and services. Collection of telemetry is controlled via the same setting provided by Visual Studio Code: `"telemetry.enableTelemetry"`. Read our [privacy statement](https://go.microsoft.com/fwlink/?LinkId=521839) to learn more.

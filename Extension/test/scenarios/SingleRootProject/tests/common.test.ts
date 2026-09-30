@@ -62,7 +62,6 @@ suite("resolveVariables", () => {
             process.env[processKey] = "bar";
             actual = resolveVariables(input, {});
         } finally {
-            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             delete process.env[processKey];
         }
         assert.equal(actual, "foobar");
@@ -198,6 +197,23 @@ suite("resolveVariables", () => {
     test("input contains env:", () => {
         resolveVariablesWithInput("${env:Root}")
             .shouldLookupSymbol("Root");
+    });
+
+    test("${env:X} expands to empty when unset", () => {
+        const processKey: string = `cpptoolstests_unset_${Date.now()}`;
+        delete process.env[processKey];
+        resolveVariablesWithInput("${env:" + processKey + "}")
+            .withEnvironment({})
+            .shouldResolveTo("");
+    });
+
+    test("${X} left unexpanded when unset", () => {
+        const processKey: string = `cpptoolstests_unset_${Date.now()}`;
+        delete process.env[processKey];
+        const token: string = "${" + processKey + "}";
+        resolveVariablesWithInput(token)
+            .withEnvironment({})
+            .shouldResolveTo(token);
     });
 
     test("escapeForSquiggles:", () => {

@@ -20,9 +20,18 @@ import { verbose } from '../src/Utility/Text/streams';
 export const $root = resolve(`${__dirname}/..`);
 export let $cmd = 'main';
 export let $scenario = '';
+export const $scenarioArgs: string[] = [];
 
 // loop through the args and pick out --scenario=... and remove it from the $args and set $scenario
 process.argv.slice(2).filter(each => !(each.startsWith('--scenario=') && ($scenario = each.substring('--scenario='.length))));
+// parse out the scenario arguments.
+process.argv.slice(2).reduce<string[]>((acc, arg) => {
+    if (arg.startsWith('--scenario-arg=')) {
+        acc.push(arg.substring('--scenario-arg='.length));
+    }
+    return acc;
+}, $scenarioArgs);
+
 export const $args = process.argv.slice(2).filter(each => !each.startsWith('--'));
 export const $switches = process.argv.slice(2).filter(each => each.startsWith('--'));
 
@@ -39,7 +48,7 @@ chdir($root);
 
 // dump unhandled async errors to the console and exit.
 process.on('unhandledRejection', (reason: any, _promise) => {
-    error(`${reason?.stack?.split(/\r?\n/).filter(l => !l.includes('node:internal') && !l.includes('node_modules')).join('\n')}`);
+    error(`${reason?.stack?.split(/\r?\n/).filter((l: string) => !l.includes('node:internal') && !l.includes('node_modules')).join('\n')}`);
     process.exit(1);
 });
 
@@ -54,11 +63,12 @@ export async function getModifiedIgnoredFiles() {
     }
 
     // return the full path of files that would be removed.
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     return Promise.all(stdio.filter("Would remove").map((s) => filepath.exists(s.replace(/^Would remove /, ''), $root)).filter(p => p));
 }
 
 export async function rimraf(...paths: string[]) {
-    const all = [];
+    const all: Promise<void>[] = [];
     for (const each of paths) {
         if (!each) {
             continue;
@@ -81,6 +91,9 @@ export async function mkdir(filePath: string) {
             return fullPath;
         }
         throw new Error(`Cannot create directory '${filePath}' because there is a file there.`);
+    }
+    if (!fullPath) {
+        throw new Error(`Cannot create directory '${filePath}' because the path is invalid.`);
     }
 
     await md(fullPath, { recursive: true });
@@ -258,7 +271,7 @@ export function position(text: string) {
     return gray(`${text}`);
 }
 
-export async function assertAnyFolder(oneOrMoreFolders: string | string[], errorMessage?: string): Promise<string> {
+export async function assertAnyFolder(oneOrMoreFolders: string | string[], errorMessage?: string): Promise<string | undefined> {
     oneOrMoreFolders = is.array(oneOrMoreFolders) ? oneOrMoreFolders : [oneOrMoreFolders];
     for (const each of oneOrMoreFolders) {
         const result = await filepath.isFolder(each, $root);
@@ -275,7 +288,7 @@ export async function assertAnyFolder(oneOrMoreFolders: string | string[], error
     }
 }
 
-export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMessage?: string): Promise<string> {
+export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMessage?: string): Promise<string | undefined> {
     oneOrMoreFiles = is.array(oneOrMoreFiles) ? oneOrMoreFiles : [oneOrMoreFiles];
     for (const each of oneOrMoreFiles) {
         const result = await filepath.isFile(each, $root);

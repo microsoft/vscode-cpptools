@@ -7,6 +7,7 @@
 import * as fs from 'fs';
 import { Minimatch } from 'minimatch';
 import * as path from 'path';
+import * as util from '../common';
 import { isWindows } from '../constants';
 
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
@@ -144,7 +145,7 @@ function getEditorConfig(filePath: string): any {
     // Traverse from the file's directory to the root directory.
     for (; ;) {
         const editorConfigPath: string = path.join(currentDir, '.editorconfig');
-        if (fs.existsSync(editorConfigPath)) {
+        if (util.checkFileExistsSync(editorConfigPath)) {
             const configFileContent: string = fs.readFileSync(editorConfigPath, 'utf-8');
             const configData = parseEditorConfigContent(configFileContent);
 

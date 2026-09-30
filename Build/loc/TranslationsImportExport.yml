@@ -30,12 +30,12 @@ extends:
   parameters:
     pool:
       name: AzurePipelines-EO
-      image: AzurePipelinesWindows2022compliantGPT
+      image: 1ESPT-Windows2025
       os: windows
     sdl:
       sourceAnalysisPool: 
         name: AzurePipelines-EO
-        image: AzurePipelinesWindows2022compliantGPT
+        image: 1ESPT-Windows2025
         os: windows
     stages:
     - stage: stage
@@ -56,6 +56,7 @@ extends:
         - task: CmdLine@2
           inputs:
             script: 'cd Extension && yarn install'
+          retryCountOnTaskFailure: 3
 
         - task: CmdLine@2
           inputs:

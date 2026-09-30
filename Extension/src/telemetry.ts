@@ -70,7 +70,7 @@ export function activate(): void {
                 initializationPromise = getExperimentationServiceAsync(packageInfo.name, packageInfo.version, targetPopulation, experimentationTelemetry, util.extensionContext.globalState);
             }
         }
-    } catch (e) {
+    } catch {
         // Handle error with a try/catch, but do nothing for errors.
     }
 }

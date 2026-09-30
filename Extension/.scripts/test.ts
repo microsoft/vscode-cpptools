@@ -14,7 +14,7 @@ import { filepath } from '../src/Utility/Filesystem/filepath';
 import { is } from '../src/Utility/System/guards';
 import { verbose } from '../src/Utility/Text/streams';
 import { getTestInfo } from '../test/common/selectTests';
-import { $args, $root, $scenario, assertAnyFile, assertAnyFolder, brightGreen, checkBinaries, cmdSwitch, cyan, error, gray, green, readJson, red, writeJson } from './common';
+import { $args, $root, $scenario, $scenarioArgs, assertAnyFile, assertAnyFolder, brightGreen, checkBinaries, cmdSwitch, cyan, error, gray, green, readJson, red, writeJson } from './common';
 import { install, isolated, options } from './vscode';
 
 export { install, reset } from './vscode';
@@ -27,6 +27,7 @@ const filters = [
     /^Unexpected token A/,
     /Cannot register 'cmake.cmakePath'/,
     /\[DEP0005\] DeprecationWarning/,
+    /\[DEP0169\] DeprecationWarning/,
     /--trace-deprecation/,
     /Iconv-lite warning/,
     /^Extension '/,
@@ -75,7 +76,7 @@ filterStdio();
 async function unitTests() {
     await assertAnyFolder('dist/test/unit', `The folder '${$root}/dist/test/unit is missing. You should run ${brightGreen("yarn compile")}\n\n`);
     const mocha = await assertAnyFile(["node_modules/.bin/mocha.cmd", "node_modules/.bin/mocha"], `Can't find the mocha testrunner. You might need to run ${brightGreen("yarn install")}\n\n`);
-    const result = spawnSync(mocha, [`${$root}/dist/test/unit/**/*.test.js`, '--timeout', '30000'], { stdio:'inherit', shell: true });
+    const result = spawnSync(mocha, [`${$root}/dist/test/unit/**/*.test.js`, '--timeout', '30000'], { stdio: 'inherit', shell: true });
     verbose(`\n${green("NOTE:")} If you want to run a scenario test (end-to-end) use ${cmdSwitch('scenario=<NAME>')} \n\n`);
     return result.status;
 }
@@ -90,7 +91,8 @@ async function scenarioTests(assets: string, name: string, workspace: string) {
         extensionTestsPath: resolve($root, 'dist/test/common/selectTests'),
         launchArgs: workspace ? [...options.launchArgs, workspace] : options.launchArgs,
         extensionTestsEnv: {
-            SCENARIO: assets
+            SCENARIO: assets,
+            SCENARIO_ARGS: $scenarioArgs.join(',')
         }
     });
 }
@@ -161,23 +163,24 @@ interface Input {
     id: string;
     type: string;
     description: string;
-    options: CommentArray<{label: string; value: string}>;
+    options: CommentArray<{ label: string; value: string }>;
 }
 
 export async function getScenarioNames() {
     return (await readdir(`${$root}/test/scenarios`).catch(returns.none)).filter(each => each !== 'Debugger');
 }
 
-export async function getScenarioFolder(scenarioName: string) {
+export async function getScenarioFolder(scenarioName: string | undefined) {
     return scenarioName ? resolve(`${$root}/test/scenarios/${(await getScenarioNames()).find(each => each.toLowerCase() === scenarioName.toLowerCase())}`) : undefined;
 }
 
 export async function list() {
     console.log(`\n${cyan("Scenarios: ")}\n`);
     const names = await getScenarioNames();
-    const max = names.reduce((max, each) => Math.max(max, each), 0);
+    const max = names.reduce((max, each) => Math.max(max, each.length), 0);
     for (const each of names) {
-        console.log(`  ${green(each.padEnd(max))}: ${gray(await getScenarioFolder(each))}`);
+        const folder = await getScenarioFolder(each);
+        console.log(`  ${green(each.padEnd(max))}: ${gray(folder || '')}`);
     }
 }
 

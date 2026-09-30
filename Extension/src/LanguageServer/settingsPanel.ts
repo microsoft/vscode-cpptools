@@ -52,7 +52,6 @@ const elementId: { [key: string]: string } = {
     mergeConfigurations: "mergeConfigurations",
     configurationProvider: "configurationProvider",
     forcedInclude: "forcedInclude",
-    recursiveIncludesReduce: "recursiveIncludes.reduce",
     recursiveIncludesPriority: "recursiveIncludes.priority",
     recursiveIncludesOrder: "recursiveIncludes.order",
 
@@ -121,6 +120,7 @@ export class SettingsPanel {
             {
                 enableCommandUris: true,
                 enableScripts: true,
+                retainContextWhenHidden: true,
 
                 // Restrict the webview to only loading content from these directories
                 localResourceRoots: [
@@ -353,12 +353,6 @@ export class SettingsPanel {
                 break;
             case elementId.forcedInclude:
                 this.configValues.forcedInclude = splitEntries(message.value);
-                break;
-            case elementId.recursiveIncludesReduce:
-                if (!this.configValues.recursiveIncludes) {
-                    this.configValues.recursiveIncludes = {};
-                }
-                this.configValues.recursiveIncludes.reduce = message.value;
                 break;
             case elementId.recursiveIncludesPriority:
                 if (!this.configValues.recursiveIncludes) {

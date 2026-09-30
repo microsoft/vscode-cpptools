@@ -5,7 +5,7 @@ These steps will allow you to debug the TypeScript code that is part of the Micr
 Prerequisite steps:
   * Clone the release branch of [this](https://github.com/Microsoft/vscode-cpptools) repository.
       * git clone -b release https://github.com/Microsoft/vscode-cpptools
-  * Install [node](https://nodejs.org).
+  * Install the [required Node.js version](../Extension/readme.developer.md#required-tools).
   * Install [yarn](https://yarnpkg.com).
   * From a command line, run the following commands from the **Extension** folder in the root of the repository:
       * `yarn install` will install the dependencies needed to build the extension.

@@ -45,6 +45,27 @@ suite("multiline comment setting tests", function(): void {
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         }
     ];
+    const multipleMLRules: vscode.OnEnterRule[] = [
+        defaultMLRules[0], // e.g. /** | */
+        defaultMLRules[1], // e.g. /** ...|
+        { // e.g. /*! | */
+            beforeText: /^\s*\/\*\!(?!\/)([^\*]|\*(?!\/))*$/,
+            afterText: /^\s*\*\/$/,
+            action: { indentAction: vscode.IndentAction.IndentOutdent, appendText: ' * ' }
+        },
+        { // e.g. /*! ...|
+            beforeText: /^\s*\/\*\!(?!\/)([^\*]|\*(?!\/))*$/,
+            action: { indentAction: vscode.IndentAction.None, appendText: ' * ' }
+        },
+        defaultMLRules[2], // e.g.  * ...|
+        { // e.g.  * ...|
+            beforeText: /^(\t|[ ])*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
+            previousLineText: /(?=^(\s*(\/\*\!|\*)).*)(?=(?!(\s*\*\/)))/,
+            action: { indentAction: vscode.IndentAction.None, appendText: '* ' }
+        },
+        defaultMLRules[3], // e.g.  */|
+        defaultMLRules[4] // e.g.  *-----*/|
+    ];
     const defaultSLRules: vscode.OnEnterRule[] = [
         {
             beforeText: /^\s*\/\/\/.+$/,
@@ -70,6 +91,11 @@ suite("multiline comment setting tests", function(): void {
     test("Check the default OnEnterRules for C++", () => {
         const rules = getLanguageConfigFromPatterns('cpp', [ "/**" ]).onEnterRules;
         assert.deepStrictEqual(rules, defaultMLRules);
+    });
+
+    test("Check the OnEnterRules for C++ with an additional option", () => {
+        const rules = getLanguageConfigFromPatterns('cpp', [ "/**", "/*!" ]).onEnterRules;
+        assert.deepStrictEqual(rules, multipleMLRules);
     });
 
     test("Make sure duplicate rules are removed", () => {
@@ -107,6 +133,8 @@ async function changeCppProperties(cppProperties: config.ConfigurationJson, _dis
 suite("extensibility tests v3", function(): void {
     let cpptools: apit.CppToolsTestApi;
     let lastResult: api.SourceFileConfigurationItem[];
+    let configurationProvidedBeforeCanProvide: boolean = false;
+    const supportedUris: Set<string> = new Set<string>();
     const defaultConfig: api.SourceFileConfiguration = {
         includePath: [ "${workspaceFolder}", "/v3/folder" ],
         defines: [ "${workspaceFolder}" ],
@@ -130,14 +158,19 @@ suite("extensibility tests v3", function(): void {
     const provider: api.CustomConfigurationProvider = {
         name: "cpptoolsTest-v3",
         extensionId: "ms-vscode.cpptools-test3",
-        canProvideConfiguration(_document: vscode.Uri): Thenable<boolean> {
+        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+            supportedUris.add(document.toString());
             return Promise.resolve(true);
         },
         provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
             const result: api.SourceFileConfigurationItem[] = [];
             uris.forEach(uri => {
+                const uriString: string = uri.toString();
+                if (!supportedUris.has(uriString)) {
+                    configurationProvidedBeforeCanProvide = true;
+                }
                 result.push({
-                    uri: uri.toString(),
+                    uri: uriString,
                     configuration: defaultConfig
                 });
             });
@@ -194,10 +227,15 @@ suite("extensibility tests v3", function(): void {
             disposables.push(testHook.IntelliSenseStatusChanged(result => {
                 result = result as apit.IntelliSenseStatus;
                 if (result.filename === "main3.cpp" && result.status === apit.Status.IntelliSenseReady) {
-                    const expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
-                    assert.deepEqual(lastResult, expected);
-                    assert.deepEqual(lastBrowseResult, defaultFolderBrowseConfig);
-                    resolve();
+                    try {
+                        const expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
+                        assert.strictEqual(configurationProvidedBeforeCanProvide, false);
+                        assert.deepEqual(lastResult, expected);
+                        assert.deepEqual(lastBrowseResult, defaultFolderBrowseConfig);
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
                 }
             }));
             setTimeout(() => { reject(new Error("timeout")); }, testHelpers.defaultTimeout);

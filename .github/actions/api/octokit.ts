@@ -6,7 +6,7 @@
 import { getOctokit } from '@actions/github';
 import type { RequestError } from '@octokit/request-error';
 import { exec } from 'child_process';
-import { IssueGetResponse, IssuesGetResponseMilestone } from '../common/OctokitTypings';
+import { IssueGetResponse, IssueSearchResult, IssuesGetResponseMilestone } from '../common/OctokitTypings';
 import { safeLog } from '../common/utils';
 import { Comment, GitHub, GitHubIssue, Issue, Milestone, Query, User } from './api';
 
@@ -83,7 +83,7 @@ export class OctoKit implements GitHub {
 		if (!this.options.readonly) await this.octokit.rest.issues.create({ owner, repo, title, body });
 	}
 
-	protected octokitIssueToIssue(issue: IssueGetResponse): Issue {
+	protected octokitIssueToIssue(issue: IssueGetResponse | IssueSearchResult): Issue {
 		return {
 			author: { name: issue.user?.login ?? 'unkown', isGitHubApp: issue.user?.type === 'Bot' },
 			body: issue.body ?? '',
@@ -95,8 +95,8 @@ export class OctoKit implements GitHub {
 			locked: (issue as any).locked,
 			numComments: issue.comments,
 			reactions: (issue as any).reactions,
-			assignee: issue.assignee?.login ?? (issue as IssueGetResponse).assignees?.[0]?.login,
-			assignees: (issue as IssueGetResponse).assignees?.map((assignee) => assignee.login) ?? [],
+			assignee: issue.assignee?.login ?? issue.assignees?.[0]?.login,
+			assignees: issue.assignees?.map((assignee) => assignee.login) ?? [],
 			milestone: issue.milestone ? this.octokitMilestoneToMilestone(issue.milestone) : null,
 			createdAt: +new Date(issue.created_at),
 			updatedAt: +new Date(issue.updated_at),
@@ -184,7 +184,7 @@ export class OctoKit implements GitHub {
 			}
 			throw Error('Found directory at config path when expecting file' + JSON.stringify(data));
 		} catch (e) {
-			throw Error('Error with config file at ' + repoPath + ': ' + JSON.stringify(e));
+			throw Error('Error with config file at ' + repoPath + ': ' + JSON.stringify(e), { cause: e });
 		}
 	}
 
@@ -417,7 +417,11 @@ export class OctoKitIssue extends OctoKit implements GitHubIssue {
 			numRequests++;
 			const timelineEvents = event.data;
 			for (const timelineEvent of timelineEvents) {
-				if (timelineEvent.event === 'assigned' && timelineEvent.assignee?.login === assignee) {
+				if (
+					timelineEvent.event === 'assigned' &&
+					'assignee' in timelineEvent &&
+					timelineEvent.assignee?.login === assignee
+				) {
 					assigner = timelineEvent.actor?.login;
 				}
 			}
@@ -483,6 +487,7 @@ export class OctoKitIssue extends OctoKit implements GitHubIssue {
 			for (const timelineEvent of timelineEvents) {
 				if (
 					(timelineEvent.event === 'closed' || timelineEvent.event === 'merged') &&
+					'commit_url' in timelineEvent &&
 					timelineEvent.created_at &&
 					timelineEvent.commit_id &&
 					timelineEvent.commit_url
@@ -498,13 +503,16 @@ export class OctoKitIssue extends OctoKit implements GitHubIssue {
 					closingCommit = undefined;
 				}
 				if (
-					timelineEvent.created_at &&
 					timelineEvent.event === 'commented' &&
-					!((timelineEvent as any).body as string)?.includes('UNABLE_TO_LOCATE_COMMIT_MESSAGE') &&
-					closingHashComment.test((timelineEvent as any).body)
+					'created_at' in timelineEvent &&
+					timelineEvent.created_at &&
+					'body' in timelineEvent &&
+					timelineEvent.body &&
+					!timelineEvent.body.includes('UNABLE_TO_LOCATE_COMMIT_MESSAGE') &&
+					closingHashComment.test(timelineEvent.body)
 				) {
 					closingCommit = {
-						hash: closingHashComment.exec((timelineEvent as any).body)![1],
+						hash: closingHashComment.exec(timelineEvent.body)![1],
 						timestamp: +new Date(timelineEvent.created_at),
 					};
 				}

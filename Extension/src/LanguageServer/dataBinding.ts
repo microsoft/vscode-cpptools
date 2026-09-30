@@ -3,23 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-
-class Deferral {
-    private timer?: NodeJS.Timeout;
-
-    constructor(callback: () => void, timeout: number) {
-        this.timer = setTimeout(() => {
-            this.timer = undefined;
-            callback();
-        }, timeout);
-    }
-    public cancel() {
-        if (this.timer) {
-            clearTimeout(this.timer);
-            this.timer = undefined;
-        }
-    }
-}
+import { Deferral } from './utils';
 
 export class DataBinding<T> {
     private valueChanged = new vscode.EventEmitter<T>();
