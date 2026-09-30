@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -38,6 +38,49 @@ function createInstaller() {
         './vscodeTestPath': { getVSCodeTestIsolate: () => join(tmpdir(), 'cpptools-acquisition-unit') }
     });
     return { ...installer, download, resolveCli, wait, mkdir, write, warn };
+}
+
+for (const clangToolsFolder of ['bin', join('LLVM', 'bin')]) {
+    test(`copies installed clang tools from ${clangToolsFolder} into bin`, async () => {
+        const testRoot = mkdtempSync(join(tmpdir(), 'cpptools-binary-copy-'));
+        const installedExtension = join(testRoot, 'vscode', 'extensions', 'ms-vscode.cpptools-1.2.3');
+        const destination = join(testRoot, 'workspace');
+        mkdirSync(join(installedExtension, 'bin'), { recursive: true });
+        mkdirSync(join(installedExtension, 'debugAdapters'), { recursive: true });
+        mkdirSync(join(installedExtension, clangToolsFolder), { recursive: true });
+        writeFileSync(join(installedExtension, 'bin', 'cpptools'), 'cpptools');
+        writeFileSync(join(installedExtension, 'debugAdapters', 'OpenDebugAD7'), 'debug adapter');
+        writeFileSync(join(installedExtension, clangToolsFolder, 'clang-format'), 'clang-format');
+        writeFileSync(join(installedExtension, clangToolsFolder, 'clang-tidy'), 'clang-tidy');
+        mkdirSync(join(destination, 'LLVM', 'bin'), { recursive: true });
+        writeFileSync(join(destination, 'LLVM', 'bin', 'stale-clang-format'), 'stale');
+
+        const Git = sinon.stub().resolves({ code: 0, stdio: { all: () => [] } });
+        const copy = proxyquire(fileURLToPath(new URL('copyExtensionBinaries.ts', import.meta.url)), {
+            '../src/Utility/Text/streams': { verbose: sinon.stub() },
+            'node:os': { homedir: () => join(testRoot, 'home') },
+            './common': {
+                $args: [],
+                $root: destination,
+                Git,
+                green: value => value,
+                heading: value => value,
+                note: sinon.stub(),
+                warn: sinon.stub()
+            }
+        });
+
+        try {
+            assert.equal(await copy.main(testRoot), '1.2.3');
+            assert.equal(readFileSync(join(destination, 'bin', 'cpptools'), 'utf8'), 'cpptools');
+            assert.equal(readFileSync(join(destination, 'bin', 'clang-format'), 'utf8'), 'clang-format');
+            assert.equal(readFileSync(join(destination, 'bin', 'clang-tidy'), 'utf8'), 'clang-tidy');
+            assert.equal(readFileSync(join(destination, 'debugAdapters', 'OpenDebugAD7'), 'utf8'), 'debug adapter');
+            assert.equal(existsSync(join(destination, 'LLVM')), false);
+        } finally {
+            rmSync(testRoot, { recursive: true, force: true });
+        }
+    });
 }
 
 test('successful acquisition preserves the version, cache and CLI arguments without retries', async () => {

@@ -193,8 +193,8 @@ async function makeBinariesExecutable(): Promise<void> {
             "./bin/cpptools-srv",
             "./bin/cpptools-srv2",
             "./bin/cpptools-wordexp",
-            "./LLVM/bin/clang-format",
-            "./LLVM/bin/clang-tidy",
+            "./bin/clang-format",
+            "./bin/clang-tidy",
             "./debugAdapters/bin/OpenDebugAD7"
         ];
         commonBinaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
