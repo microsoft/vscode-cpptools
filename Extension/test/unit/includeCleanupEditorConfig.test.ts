@@ -17,7 +17,7 @@ describe('Include Cleanup editorconfig settings', () => {
         });
     });
 
-    it('ignores unset and non-string values', () => {
+    it('maps unset and non-string values to empty strings', () => {
         deepStrictEqual(getIncludeCleanupPreferences({
             cpp_include_cleanup_alternate_files: 'unset',
             cpp_include_cleanup_excluded_files: true,

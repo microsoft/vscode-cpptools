@@ -7,7 +7,10 @@ export interface IncludeCleanupPreferences {
 
 function getStringSetting(settings: any, key: string): string {
     const value: unknown = settings?.[key];
-    return typeof value === 'string' && value.toLowerCase() !== 'unset' ? value : '';
+    if (typeof value !== 'string' || value.toLowerCase() === 'unset') {
+        return '';
+    }
+    return value;
 }
 
 export function getIncludeCleanupPreferences(settings: any): IncludeCleanupPreferences {
