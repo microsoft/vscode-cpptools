@@ -789,5 +789,13 @@
     "check_analysis_process_unavailable": {
         "text": "The C++ analysis process was unavailable while checking \"{0}\".",
         "hint": "{0} is the source file path. {Locked=\"C++\"} {Locked=\"{0}\"}"
+    },
+    "quick_info_size": {
+        "text": "**Size:** %s B",
+        "hint": "Size of a C or C++ type in bytes. %s is the numeric size. Translate B to a count-invariant byte unit symbol or abbreviation. {Locked=\"**\"} {Locked=\"%s\"}"
+    },
+    "quick_info_alignment": {
+        "text": "**Alignment:** %s B",
+        "hint": "Alignment of a C or C++ type in bytes. %s is the numeric alignment. Translate B to a count-invariant byte unit symbol or abbreviation. {Locked=\"**\"} {Locked=\"%s\"}"
     }
 }
