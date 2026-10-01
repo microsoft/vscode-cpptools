@@ -10,11 +10,15 @@ jobs:
   - checkout: none
 
   - ${{ each arch in parameters.archs }}:
+    - template: ../templates/resolve_artifact.yml
+      parameters:
+        artifactName: 'unsigned_lldb-mi_${{ arch }}'
+
     - task: DownloadPipelineArtifact@1
       displayName: 'Downloading unsigned_lldb-mi_${{ arch }}'
       inputs:
         targetPath: '$(Pipeline.Workspace)/Artifacts' 
-        artifactName: 'unsigned_lldb-mi_${{ arch }}'
+        artifactName: $(ResolvedArtifactName)
 
     - task: MicroBuildSignMacFiles@1
       displayName: 'ESRP Sign'
@@ -26,5 +30,5 @@ jobs:
       displayName: 'Publish signed LLDB-MI'
       inputs:
         targetPath: '$(Pipeline.Workspace)\Artifacts\lldb-mi_${{ arch }}.zip'
-        artifactName: 'lldb-mi_${{ arch }}_zip'
+        artifactName: 'lldb-mi_${{ arch }}_zip_attempt$(System.JobAttempt)'
 ...

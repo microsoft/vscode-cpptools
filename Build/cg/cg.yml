@@ -76,7 +76,7 @@ extends:
             displayName: 'cpptools.vsix'
             condition: succeeded()
             targetPath: $(Build.ArtifactStagingDirectory)\Extension
-            artifactName: cpptools.vsix
+            artifactName: cpptools.vsix_attempt$(System.JobAttempt)
 
         steps:
         - checkout: self
