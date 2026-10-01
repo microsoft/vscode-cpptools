@@ -434,5 +434,7 @@
 	"check_timed_out": "{0} の分析が完了するのを待機中にタイムアウトしました",
 	"failed_to_open_browse_db_lock_file": "参照データベースのロック ファイルを開けませんでした: {0} (errno={1})",
 	"failed_to_lock_browse_db_lock_file": "参照データベースのロック ファイルをロックできませんでした: {0} (errno={1})",
-	"browse_database_disabled_incompatible_storage": "参照データベースは、保存場所が SQLite WAL の共有メモリをサポートしていないため、無効になりました。browse.databaseFilename をローカル パスに設定してください。"
+	"browse_database_disabled_incompatible_storage": "参照データベースは、保存場所が SQLite WAL の共有メモリをサポートしていないため、無効になりました。browse.databaseFilename をローカル パスに設定してください。",
+	"selected_translation_unit_not_include_file_previous": "選択された翻訳単位 '{0}' には '{1}' が含まれていません。IntelliSense は、以前の翻訳単位がまだ使用できる場合はそれを復元します。そうでない場合は、'{1}' をヘッダーのみの翻訳単位として使用します。",
+	"selected_translation_unit_not_include_file_header_only": "選択された翻訳単位 '{0}' には '{1}' が含まれていません。以前の翻訳単位を使用できないため、IntelliSense は '{1}' をヘッダーのみの翻訳単位として使用します。"
 }
