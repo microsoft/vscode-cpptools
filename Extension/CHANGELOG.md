@@ -1,5 +1,34 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.35.3: October 2, 2026
+### New Features
+* Add 'Fold All Inactive Regions' and 'Unfold All Inactive Regions' commands and the opt-in `C_Cpp.autoFoldInactiveRegions` setting. [#8992](https://github.com/microsoft/vscode-cpptools/issues/8992)
+* Dim unreachable code when `editor.showUnused` is enabled. [#12902](https://github.com/microsoft/vscode-cpptools/issues/12902)
+* Show C++ type size and alignment in hovers. [#13034](https://github.com/microsoft/vscode-cpptools/issues/13034)
+
+### Enhancements
+* Increase the per-file IntelliSense diagnostic limit from 250 to 1,000, prioritize errors over unused-code hints, and reduce processing of over-limit diagnostics.
+* Improve IntelliSense performance in large include graphs and classes with many inherited constructors.
+* Reduce custom-configuration processing overhead and memory retained from `compile_commands.json`.
+* Improve code folding performance in files with many inactive preprocessor regions.
+* Improve loading performance for Windows-1255 and Windows-1258 source files.
+* Reduce CPU usage when resolving headers in large Windows workspaces.
+
+### Bug Fixes
+* Fix 'Go to Declaration' and 'Go to Definition' returning the current location instead of an available counterpart. [#14509](https://github.com/microsoft/vscode-cpptools/issues/14509)
+* Update MIEngine to fix debugger failures with synthetic GDB stack frames. [#14741](https://github.com/microsoft/vscode-cpptools/issues/14741)
+  * Thanks for the contribution. [@tzcnt](https://github.com/tzcnt) [PR MIEngine#1605](https://github.com/microsoft/MIEngine/pull/1605)
+* Fix incorrect IntelliSense errors for alias-template deduction guides using C++26 pack indexing. [#14794](https://github.com/microsoft/vscode-cpptools/issues/14794)
+* Fix incorrect unused-parameter warnings and dimming for assignments through reference parameters. [#14801](https://github.com/microsoft/vscode-cpptools/issues/14801)
+* Fix missing IntelliSense headers with Clang `-cxx-isystem` and `-stdlib++-isystem` options and split clang-cl `-imsvc` and `/imsvc` arguments.
+* Fix IntelliSense crashes involving deduction guides, user-defined conversions, and lambdas in macros.
+* Fix IntelliSense handling of GCC `--embed-directory=<dir>` and `--embed-directory <dir>` arguments.
+* Fix a tag parser stack-overflow crash when loading cyclic or excessively deep cached symbol data.
+* Fix unwanted completion popups when typing incomplete floating-point exponents.
+* Fix configuration-provider requests delaying language server shutdown.
+* Various localization updates.
+* Update dependencies.
+
 ## Version 1.35.2: September 22, 2026
 ### New Feature
 * Dim unused local variables and parameters when `editor.showUnused` is enabled. [#10490](https://github.com/microsoft/vscode-cpptools/issues/10490)
