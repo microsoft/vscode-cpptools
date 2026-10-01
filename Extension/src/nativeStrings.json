@@ -797,5 +797,21 @@
     "quick_info_alignment": {
         "text": "**Alignment:** %s B",
         "hint": "Alignment of a C or C++ type in bytes. %s is the numeric alignment. Translate B to a count-invariant byte unit symbol or abbreviation. {Locked=\"**\"} {Locked=\"%s\"}"
+    },
+    "browse_database_relocated_incompatible_storage": {
+        "text": "The browse database was moved to local storage because its original location does not support SQLite WAL shared memory. To choose another local location, set browse.databaseFilename.",
+        "hint": "browse.databaseFilename is a setting name. {Locked=\"SQLite WAL\"} {Locked=\"browse.databaseFilename\"}"
+    },
+    "browse_database_disabled_insufficient_fallback_space": {
+        "text": "The browse database was disabled because compatible fallback storage has {0} MB available, but the existing database requires at least {1} MB. Set browse.databaseFilename to a local path with sufficient space.",
+        "hint": "{0} is the available storage size in megabytes. {1} is the existing database size in megabytes. browse.databaseFilename is a setting name. {Locked=\"{0}\"} {Locked=\"MB\"} {Locked=\"{1}\"} {Locked=\"browse.databaseFilename\"}"
+    },
+    "browse_database_disabled_cleanup_guard_unavailable": {
+        "text": "The browse database was disabled because its storage directory could not be protected from temporary-file cleanup. Set browse.databaseFilename to a persistent local path.",
+        "hint": "browse.databaseFilename is a setting name. {Locked=\"browse.databaseFilename\"}"
+    },
+    "browse_database_removed_while_open": {
+        "text": "The active browse database was removed while it was in use. Close all VS Code windows connected to this workspace to release its disk space, and then reopen the workspace.",
+        "hint": "VS Code is a product name. {Locked=\"VS Code\"}"
     }
 }
