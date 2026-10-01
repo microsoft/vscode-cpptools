@@ -8,7 +8,7 @@
 	"copy.vcpkg.command": "Copier la commande vcpkg pour installer '{0}' dans le Presse-papiers",
 	"on.disabled.command": "Les commandes liées à IntelliSense ne peuvent pas être exécutées quand `C_Cpp.intelliSenseEngine` a la valeur `disabled`.",
 	"find.translation.units": "Recherche des unités de traduction en cours…",
-	"no.translation.units.found": "Aucune unité de traduction n’a été trouvée pour le fichier actif.",
+	"no.translation.units.found": "Nous n’avons trouvé aucune unité de traduction n’a été pour le fichier actif.",
 	"current.translation.unit": "Unité de traduction actuelle",
 	"select.translation.unit": "Sélectionner une unité de traduction",
 	"select.translation.unit.placeholder": "Sélectionner un fichier source à utiliser comme unité de traduction",
