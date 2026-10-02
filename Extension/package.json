@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.35.2-main",
+    "version": "1.35.3-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -1070,6 +1070,12 @@
                         "type": "boolean",
                         "default": true,
                         "description": "%c_cpp.configuration.dimInactiveRegions.description%",
+                        "scope": "resource"
+                    },
+                    "C_Cpp.autoFoldInactiveRegions": {
+                        "type": "boolean",
+                        "default": false,
+                        "markdownDescription": "%c_cpp.configuration.autoFoldInactiveRegions.description%",
                         "scope": "resource"
                     },
                     "C_Cpp.inactiveRegionOpacity": {
@@ -4000,6 +4006,16 @@
                 "category": "C/C++"
             },
             {
+                "command": "C_Cpp.FoldAllInactiveRegions",
+                "title": "%c_cpp.command.foldAllInactiveRegions.title%",
+                "category": "C/C++"
+            },
+            {
+                "command": "C_Cpp.UnfoldAllInactiveRegions",
+                "title": "%c_cpp.command.unfoldAllInactiveRegions.title%",
+                "category": "C/C++"
+            },
+            {
                 "command": "C_Cpp.ResetDatabase",
                 "title": "%c_cpp.command.resetDatabase.title%",
                 "category": "C/C++"
@@ -6553,6 +6569,14 @@
                     "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
                 },
                 {
+                    "command": "C_Cpp.FoldAllInactiveRegions",
+                    "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/ && config.C_Cpp.codeFolding =~ /^[eE]nabled$/"
+                },
+                {
+                    "command": "C_Cpp.UnfoldAllInactiveRegions",
+                    "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/ && config.C_Cpp.codeFolding =~ /^[eE]nabled$/"
+                },
+                {
                     "command": "C_Cpp.ResetDatabase",
                     "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
                 },
@@ -7269,7 +7293,7 @@
     "resolutions": {
         "gulp-typescript/**/glob-parent": "^5.1.2",
         "serialize-javascript": "^7.0.5",
-        "fast-uri": "^3.1.6",
+        "fast-uri": "^3.1.8",
         "@humanfs/node": "^0.16.8"
     }
 }
