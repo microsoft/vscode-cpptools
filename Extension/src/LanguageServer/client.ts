@@ -55,6 +55,7 @@ import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderE
 import { DataBinding } from './dataBinding';
 import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, isWritingCrashCallStack, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
+import { IncludeCleanupPreferences, getIncludeCleanupPreferences } from './includeCleanupEditorConfig';
 import { InactiveRegion, InactiveRegionStore, getInactiveRegionStartLines } from './inactiveRegions';
 import { LanguageClient } from './languageClient';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
@@ -507,6 +508,7 @@ interface TagParseStatus {
 interface VisibleEditorInfo {
     visibleRanges: Range[];
     originalEncoding: string;
+    includeCleanupPreferences: IncludeCleanupPreferences;
 }
 
 interface DidChangeVisibleTextEditorsParams {
@@ -1952,9 +1954,11 @@ export class DefaultClient implements Client {
             // First, we just concat all ranges for the same file.
             const uri: string = editor.document.uri.toString();
             if (!visibileEditorInfo[uri]) {
+                const editorConfigSettings: any = getEditorConfigSettings(editor.document.uri.fsPath);
                 visibileEditorInfo[uri] = {
                     visibleRanges: [],
-                    originalEncoding: editor.document.encoding
+                    originalEncoding: editor.document.encoding,
+                    includeCleanupPreferences: getIncludeCleanupPreferences(editorConfigSettings)
                 };
             }
             visibileEditorInfo[uri].visibleRanges = visibileEditorInfo[uri].visibleRanges.concat(editor.visibleRanges.map(makeLspRange));
@@ -2713,6 +2717,15 @@ export class DefaultClient implements Client {
 
     private associations_for_did_change?: Set<string>;
 
+    private refreshEditorConfigSettings(): void {
+        cachedEditorConfigSettings.clear();
+        cachedEditorConfigLookups.clear();
+        this.updateActiveDocumentTextOptions();
+
+        const cppEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(editor => util.isCpp(editor.document));
+        void this.onDidChangeVisibleTextEditors(cppEditors).catch(logAndReturn.undefined);
+    }
+
     /**
      * listen for file created/deleted events under the ${workspaceFolder} folder
      */
@@ -2733,9 +2746,7 @@ export class DefaultClient implements Client {
                 }
                 const fileName: string = path.basename(uri.fsPath).toLowerCase();
                 if (fileName === ".editorconfig") {
-                    cachedEditorConfigSettings.clear();
-                    cachedEditorConfigLookups.clear();
-                    this.updateActiveDocumentTextOptions();
+                    this.refreshEditorConfigSettings();
                 }
                 if (fileName === ".clang-format" || fileName === "_clang-format") {
                     cachedEditorConfigLookups.clear();
@@ -2761,9 +2772,7 @@ export class DefaultClient implements Client {
                 const dotIndex: number = uri.fsPath.lastIndexOf('.');
                 const fileName: string = path.basename(uri.fsPath).toLowerCase();
                 if (fileName === ".editorconfig") {
-                    cachedEditorConfigSettings.clear();
-                    cachedEditorConfigLookups.clear();
-                    this.updateActiveDocumentTextOptions();
+                    this.refreshEditorConfigSettings();
                 }
                 const ext: string | undefined = dotIndex !== -1 ? uri.fsPath.substring(dotIndex + 1) : undefined;
                 const isTrackedFile: boolean = hasNativeFileTypeMappings()
@@ -2788,8 +2797,7 @@ export class DefaultClient implements Client {
                 }
                 const fileName: string = path.basename(uri.fsPath).toLowerCase();
                 if (fileName === ".editorconfig") {
-                    cachedEditorConfigSettings.clear();
-                    cachedEditorConfigLookups.clear();
+                    this.refreshEditorConfigSettings();
                 }
                 if (fileName === ".clang-format" || fileName === "_clang-format") {
                     cachedEditorConfigLookups.clear();
