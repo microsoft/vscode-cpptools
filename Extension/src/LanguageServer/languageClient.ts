@@ -4,8 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { Disposable } from 'vscode';
-import { CancellationToken, NotificationHandler, NotificationType, RequestType } from 'vscode-languageclient';
+import { Disposable, TextDocument } from 'vscode';
+import { CancellationToken, FoldingRangeRequest, NotificationHandler, NotificationType, RequestType } from 'vscode-languageclient';
 import * as rpc from 'vscode-languageclient/node';
 import { ManualSignal } from '../Utility/Async/manualSignal';
 
@@ -69,6 +69,11 @@ export class LanguageClient {
     public async getCode2ProtocolConverter(): Promise<rpc.LanguageClient["code2ProtocolConverter"]> {
         await this.ready;
         return this.rpcClient.code2ProtocolConverter;
+    }
+
+    public async refreshFoldingRanges(document: TextDocument): Promise<void> {
+        await this.ready;
+        this.rpcClient.getFeature(FoldingRangeRequest.method).getProvider(document)?.onDidChangeFoldingRange.fire();
     }
 
     public async sendRequest<P, R, E>(type: RequestType<P, R, E>, params: P, token?: CancellationToken): Promise<R> {
