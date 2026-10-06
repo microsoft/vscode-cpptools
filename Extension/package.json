@@ -1055,10 +1055,10 @@
                         "description": "%c_cpp.configuration.hover.description%",
                         "scope": "resource"
                     },
-                    "C_Cpp.hover.showIntegralValuesInHexadecimal": {
+                    "C_Cpp.hoverShowIntegralValuesInHexadecimal": {
                         "type": "boolean",
                         "default": false,
-                        "markdownDescription": "%c_cpp.configuration.hover.showIntegralValuesInHexadecimal.markdownDescription%",
+                        "markdownDescription": "%c_cpp.configuration.hoverShowIntegralValuesInHexadecimal.markdownDescription%",
                         "scope": "resource"
                     },
                     "C_Cpp.errorSquiggles": {
