@@ -1,3 +1,8 @@
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All Rights Reserved.
+ * See 'LICENSE' in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
+
 import { deepStrictEqual } from 'assert';
 import { describe, it } from 'mocha';
 import { getIncludeCleanupPreferences } from '../../src/LanguageServer/includeCleanupEditorConfig';
