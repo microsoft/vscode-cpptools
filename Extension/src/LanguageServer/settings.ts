@@ -70,6 +70,7 @@ export interface WorkspaceFolderSettingsParams {
     clangTidyChecksEnabled: string[] | undefined;
     clangTidyChecksDisabled: string[] | undefined;
     hover: string;
+    hoverShowIntegralValuesInHexadecimal: boolean;
     markdownInComments: string;
     vcFormatIndentBraces: boolean;
     vcFormatIndentMultiLineRelativeTo: string;
@@ -478,6 +479,7 @@ export class CppSettings extends Settings {
     public get isCaseSensitiveFileSupportEnabled(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport").toLowerCase() === "enabled"; }
     public get doxygenSectionTags(): string[] { return this.getAsArrayOfStrings("doxygen.sectionTags"); }
     public get hover(): string { return this.getAsString("hover"); }
+    public get hoverShowIntegralValuesInHexadecimal(): boolean { return this.getAsBoolean("hoverShowIntegralValuesInHexadecimal"); }
     public get markdownInComments(): string { return this.getAsString("markdownInComments"); }
     public get legacyCompilerArgsBehavior(): boolean { return this.getAsBoolean("legacyCompilerArgsBehavior"); }
     public get inlayHintsAutoDeclarationTypes(): boolean { return this.getAsBoolean("inlayHints.autoDeclarationTypes.enabled"); }
