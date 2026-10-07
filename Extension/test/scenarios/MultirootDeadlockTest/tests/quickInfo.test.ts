@@ -7,6 +7,7 @@ import * as os from 'os';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
+import { CppSettings } from '../../../../src/LanguageServer/settings';
 import { timeout } from '../../../../src/Utility/Async/timeout';
 import * as testHelpers from '../../../common/testHelpers';
 
@@ -103,5 +104,55 @@ suite("[Quick info test]", function(): void {
         const expected: string = `\`\`\`cpp\nint intVar\n\`\`\``;
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         assert.strictEqual(actual, expected);
+    });
+
+    test("[Hover settings coexist in the same scope]", async () => {
+        const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", fileUri);
+        const originalHover: string | undefined = configuration.inspect<string>("hover")?.workspaceFolderValue;
+        const originalShowIntegralValuesInHexadecimal: boolean | undefined =
+            configuration.inspect<boolean>("hoverShowIntegralValuesInHexadecimal")?.workspaceFolderValue;
+
+        try {
+            await configuration.update("hover", "disabled", vscode.ConfigurationTarget.WorkspaceFolder);
+            await configuration.update("hoverShowIntegralValuesInHexadecimal", true, vscode.ConfigurationTarget.WorkspaceFolder);
+
+            const settings: CppSettings = new CppSettings(fileUri);
+            assert.strictEqual(settings.hover, "disabled");
+            assert.strictEqual(settings.hoverShowIntegralValuesInHexadecimal, true);
+        } finally {
+            await configuration.update(
+                "hoverShowIntegralValuesInHexadecimal",
+                originalShowIntegralValuesInHexadecimal,
+                vscode.ConfigurationTarget.WorkspaceFolder);
+            await configuration.update("hover", originalHover, vscode.ConfigurationTarget.WorkspaceFolder);
+        }
+    });
+
+    test("[Folder hexadecimal setting preserves global disabled hover]", async () => {
+        const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", fileUri);
+        const originalGlobalHover: string | undefined = configuration.inspect<string>("hover")?.globalValue;
+        const originalWorkspaceHover: string | undefined = configuration.inspect<string>("hover")?.workspaceValue;
+        const originalWorkspaceFolderHover: string | undefined = configuration.inspect<string>("hover")?.workspaceFolderValue;
+        const originalShowIntegralValuesInHexadecimal: boolean | undefined =
+            configuration.inspect<boolean>("hoverShowIntegralValuesInHexadecimal")?.workspaceFolderValue;
+
+        try {
+            await configuration.update("hover", "disabled", vscode.ConfigurationTarget.Global);
+            await configuration.update("hover", undefined, vscode.ConfigurationTarget.Workspace);
+            await configuration.update("hover", undefined, vscode.ConfigurationTarget.WorkspaceFolder);
+            await configuration.update("hoverShowIntegralValuesInHexadecimal", true, vscode.ConfigurationTarget.WorkspaceFolder);
+
+            const settings: CppSettings = new CppSettings(fileUri);
+            assert.strictEqual(settings.hover, "disabled");
+            assert.strictEqual(settings.hoverShowIntegralValuesInHexadecimal, true);
+        } finally {
+            await configuration.update(
+                "hoverShowIntegralValuesInHexadecimal",
+                originalShowIntegralValuesInHexadecimal,
+                vscode.ConfigurationTarget.WorkspaceFolder);
+            await configuration.update("hover", originalWorkspaceFolderHover, vscode.ConfigurationTarget.WorkspaceFolder);
+            await configuration.update("hover", originalWorkspaceHover, vscode.ConfigurationTarget.Workspace);
+            await configuration.update("hover", originalGlobalHover, vscode.ConfigurationTarget.Global);
+        }
     });
 });
