@@ -291,13 +291,19 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  */
 async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
+    let settingsChanged: boolean = false;
     clients.forEach(client => {
         if (client instanceof DefaultClient) {
             if (trackedSections.some(section => event.affectsConfiguration(section, client.RootUri))) {
+                settingsChanged = true;
                 void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
             }
         }
     });
+    if (settingsChanged) {
+        // Send the updated settings once through the default client because the payload includes all workspace folders.
+        void clients.getDefaultClient().sendDidChangeSettings().catch(logAndReturn.undefined);
+    }
 }
 
 function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): void {

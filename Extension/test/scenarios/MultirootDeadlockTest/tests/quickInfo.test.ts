@@ -58,6 +58,32 @@ suite("[Quick info test]", function(): void {
         disposables.forEach(d => d.dispose());
     });
 
+    async function getTypeHoverText(): Promise<string> {
+        const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand(
+            'vscode.executeHoverProvider',
+            fileUri,
+            new vscode.Position(39, 8)));
+        assert.ok(result.length > 0, "Expected a hover for HoverType.");
+        return result.flatMap(hover => hover.contents)
+            .map(content => typeof content === "string" ? content : content.value)
+            .join("\n");
+    }
+
+    async function waitForTypeHover(showSizeAndAlignment: boolean): Promise<string> {
+        const deadline: number = Date.now() + 5000;
+        let hoverText: string = "";
+        while (Date.now() < deadline) {
+            hoverText = await getTypeHoverText();
+            const hasSizeAndAlignment: boolean =
+                hoverText.includes("**Size:**") && hoverText.includes("**Alignment:**");
+            if (hoverText.includes("struct HoverType") && hasSizeAndAlignment === showSizeAndAlignment) {
+                return hoverText;
+            }
+            await testHelpers.delay(50);
+        }
+        assert.fail(`Timed out waiting for type size and alignment to be ${showSizeAndAlignment ? "shown" : "hidden"}. Last hover:\n${hoverText}`);
+    }
+
     test("[Hover over function call - normal comment]", async () => {
         const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(35, 23)));
         const expected_full_comment: string = `\`\`\`cpp\nbool isEven(int value)\n\`\`\`  \nVerifies if input is even number or not`;
@@ -136,19 +162,24 @@ suite("[Quick info test]", function(): void {
         }
     });
 
-    test("[Toggle type size and alignment command]", async () => {
+    test("[Toggle type size and alignment command updates hover]", async () => {
         const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", fileUri);
         const originalShowTypeSizeAndAlignment: boolean | undefined =
             configuration.inspect<boolean>("hoverShowTypeSizeAndAlignment")?.workspaceFolderValue;
 
         try {
             await configuration.update("hoverShowTypeSizeAndAlignment", true, vscode.ConfigurationTarget.WorkspaceFolder);
+            await waitForTypeHover(true);
 
             await vscode.commands.executeCommand("C_Cpp.ToggleTypeSizeAndAlignment");
             assert.strictEqual(configuration.inspect<boolean>("hoverShowTypeSizeAndAlignment")?.workspaceFolderValue, false);
+            const hiddenHover: string = await waitForTypeHover(false);
+            assert.ok(hiddenHover.includes("struct HoverType"));
 
             await vscode.commands.executeCommand("C_Cpp.ToggleTypeSizeAndAlignment");
             assert.strictEqual(configuration.inspect<boolean>("hoverShowTypeSizeAndAlignment")?.workspaceFolderValue, true);
+            const shownHover: string = await waitForTypeHover(true);
+            assert.ok(shownHover.includes("struct HoverType"));
         } finally {
             await configuration.update(
                 "hoverShowTypeSizeAndAlignment",
