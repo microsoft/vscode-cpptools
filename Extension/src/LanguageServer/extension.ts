@@ -302,7 +302,11 @@ async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Prom
     });
     if (settingsChanged) {
         // Send the updated settings once through the default client because the payload includes all workspace folders.
-        void clients.getDefaultClient().sendDidChangeSettings().catch(logAndReturn.undefined);
+        const defaultClient: Client = clients.getDefaultClient();
+        void defaultClient.sendDidChangeSettings().catch(logAndReturn.undefined);
+        if (event.affectsConfiguration("C_Cpp.hoverShowTypeSizeAndAlignment")) {
+            defaultClient.getCopilotHoverProvider()?.reset();
+        }
     }
 }
 
