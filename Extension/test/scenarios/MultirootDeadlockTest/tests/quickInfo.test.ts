@@ -74,9 +74,11 @@ suite("[Quick info test]", function(): void {
         let hoverText: string = "";
         while (Date.now() < deadline) {
             hoverText = await getTypeHoverText();
-            const hasSizeAndAlignment: boolean =
-                hoverText.includes("**Size:**") && hoverText.includes("**Alignment:**");
-            if (hoverText.includes("struct HoverType") && hasSizeAndAlignment === showSizeAndAlignment) {
+            const showsSize: boolean = hoverText.includes("**Size:**");
+            const showsAlignment: boolean = hoverText.includes("**Alignment:**");
+            if (hoverText.includes("struct HoverType")
+                && showsSize === showSizeAndAlignment
+                && showsAlignment === showSizeAndAlignment) {
                 return hoverText;
             }
             await testHelpers.delay(50);
