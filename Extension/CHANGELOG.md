@@ -7,6 +7,7 @@
 * Show C++ type size and alignment in hovers. [#13034](https://github.com/microsoft/vscode-cpptools/issues/13034)
 
 ### Enhancements
+* Add the `C_Cpp.hoverShowTypeSizeAndAlignment` setting and a command to toggle C++ type size and alignment in hovers. [#14820](https://github.com/microsoft/vscode-cpptools/issues/14820)
 * Increase the per-file IntelliSense diagnostic limit from 250 to 1,000, prioritize errors over unused-code hints, and reduce processing of over-limit diagnostics.
 * Improve IntelliSense performance in large include graphs and classes with many inherited constructors.
 * Reduce custom-configuration processing overhead and memory retained from `compile_commands.json`.

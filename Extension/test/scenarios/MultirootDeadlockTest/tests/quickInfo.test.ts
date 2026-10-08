@@ -111,20 +111,49 @@ suite("[Quick info test]", function(): void {
         const originalHover: string | undefined = configuration.inspect<string>("hover")?.workspaceFolderValue;
         const originalShowIntegralValuesInHexadecimal: boolean | undefined =
             configuration.inspect<boolean>("hoverShowIntegralValuesInHexadecimal")?.workspaceFolderValue;
+        const originalShowTypeSizeAndAlignment: boolean | undefined =
+            configuration.inspect<boolean>("hoverShowTypeSizeAndAlignment")?.workspaceFolderValue;
 
         try {
             await configuration.update("hover", "disabled", vscode.ConfigurationTarget.WorkspaceFolder);
             await configuration.update("hoverShowIntegralValuesInHexadecimal", true, vscode.ConfigurationTarget.WorkspaceFolder);
+            await configuration.update("hoverShowTypeSizeAndAlignment", false, vscode.ConfigurationTarget.WorkspaceFolder);
 
             const settings: CppSettings = new CppSettings(fileUri);
             assert.strictEqual(settings.hover, "disabled");
             assert.strictEqual(settings.hoverShowIntegralValuesInHexadecimal, true);
+            assert.strictEqual(settings.hoverShowTypeSizeAndAlignment, false);
         } finally {
+            await configuration.update(
+                "hoverShowTypeSizeAndAlignment",
+                originalShowTypeSizeAndAlignment,
+                vscode.ConfigurationTarget.WorkspaceFolder);
             await configuration.update(
                 "hoverShowIntegralValuesInHexadecimal",
                 originalShowIntegralValuesInHexadecimal,
                 vscode.ConfigurationTarget.WorkspaceFolder);
             await configuration.update("hover", originalHover, vscode.ConfigurationTarget.WorkspaceFolder);
+        }
+    });
+
+    test("[Toggle type size and alignment command]", async () => {
+        const configuration: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", fileUri);
+        const originalShowTypeSizeAndAlignment: boolean | undefined =
+            configuration.inspect<boolean>("hoverShowTypeSizeAndAlignment")?.workspaceFolderValue;
+
+        try {
+            await configuration.update("hoverShowTypeSizeAndAlignment", true, vscode.ConfigurationTarget.WorkspaceFolder);
+
+            await vscode.commands.executeCommand("C_Cpp.ToggleTypeSizeAndAlignment");
+            assert.strictEqual(configuration.inspect<boolean>("hoverShowTypeSizeAndAlignment")?.workspaceFolderValue, false);
+
+            await vscode.commands.executeCommand("C_Cpp.ToggleTypeSizeAndAlignment");
+            assert.strictEqual(configuration.inspect<boolean>("hoverShowTypeSizeAndAlignment")?.workspaceFolderValue, true);
+        } finally {
+            await configuration.update(
+                "hoverShowTypeSizeAndAlignment",
+                originalShowTypeSizeAndAlignment,
+                vscode.ConfigurationTarget.WorkspaceFolder);
         }
     });
 

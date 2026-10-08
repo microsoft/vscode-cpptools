@@ -1061,6 +1061,12 @@
                         "markdownDescription": "%c_cpp.configuration.hoverShowIntegralValuesInHexadecimal.markdownDescription%",
                         "scope": "resource"
                     },
+                    "C_Cpp.hoverShowTypeSizeAndAlignment": {
+                        "type": "boolean",
+                        "default": true,
+                        "markdownDescription": "%c_cpp.configuration.hoverShowTypeSizeAndAlignment.markdownDescription%",
+                        "scope": "resource"
+                    },
                     "C_Cpp.errorSquiggles": {
                         "type": "string",
                         "enum": [
@@ -4012,6 +4018,11 @@
                 "category": "C/C++"
             },
             {
+                "command": "C_Cpp.ToggleTypeSizeAndAlignment",
+                "title": "%c_cpp.command.toggleTypeSizeAndAlignment.title%",
+                "category": "C/C++"
+            },
+            {
                 "command": "C_Cpp.FoldAllInactiveRegions",
                 "title": "%c_cpp.command.foldAllInactiveRegions.title%",
                 "category": "C/C++"
@@ -6572,6 +6583,10 @@
                 },
                 {
                     "command": "C_Cpp.ToggleDimInactiveRegions",
+                    "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.ToggleTypeSizeAndAlignment",
                     "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
                 },
                 {

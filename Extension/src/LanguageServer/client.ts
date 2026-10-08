@@ -1505,6 +1505,7 @@ export class DefaultClient implements Client {
             markdownInComments: settings.markdownInComments,
             hover: settings.hover,
             hoverShowIntegralValuesInHexadecimal: settings.hoverShowIntegralValuesInHexadecimal,
+            hoverShowTypeSizeAndAlignment: settings.hoverShowTypeSizeAndAlignment,
             vcFormatIndentBraces: settings.vcFormatIndentBraces,
             vcFormatIndentMultiLineRelativeTo: settings.vcFormatIndentMultiLineRelativeTo,
             vcFormatIndentWithinParentheses: settings.vcFormatIndentWithinParentheses,
