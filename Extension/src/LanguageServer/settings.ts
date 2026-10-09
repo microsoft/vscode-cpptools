@@ -72,6 +72,7 @@ export interface WorkspaceFolderSettingsParams {
     clangTidyChecksDisabled: string[] | undefined;
     hover: string;
     hoverShowIntegralValuesInHexadecimal: boolean;
+    hoverShowTypeSizeAndAlignment: boolean;
     markdownInComments: string;
     vcFormatIndentBraces: boolean;
     vcFormatIndentMultiLineRelativeTo: string;
@@ -490,6 +491,7 @@ export class CppSettings extends Settings {
     public get doxygenSectionTags(): string[] { return this.getAsArrayOfStrings("doxygen.sectionTags"); }
     public get hover(): string { return this.getAsString("hover"); }
     public get hoverShowIntegralValuesInHexadecimal(): boolean { return this.getAsBoolean("hoverShowIntegralValuesInHexadecimal"); }
+    public get hoverShowTypeSizeAndAlignment(): boolean { return this.getAsBoolean("hoverShowTypeSizeAndAlignment"); }
     public get markdownInComments(): string { return this.getAsString("markdownInComments"); }
     public get legacyCompilerArgsBehavior(): boolean { return this.getAsBoolean("legacyCompilerArgsBehavior"); }
     public get inlayHintsAutoDeclarationTypes(): boolean { return this.getAsBoolean("inlayHints.autoDeclarationTypes.enabled"); }
@@ -777,8 +779,8 @@ export class CppSettings extends Settings {
         void super.Section.update(name, value?.toLowerCase() === value1.toLowerCase() ? value2 : value1, getTarget());
     }
 
-    public update<T>(name: string, value: T): void {
-        void super.Section.update(name, value);
+    public update<T>(name: string, value: T): Thenable<void> {
+        return super.Section.update(name, value);
     }
 
     public populateEditorConfig(document: vscode.TextDocument): void {

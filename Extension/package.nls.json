@@ -19,6 +19,7 @@
     "c_cpp.command.enableErrorSquiggles.title": "Enable Error Squiggles",
     "c_cpp.command.disableErrorSquiggles.title": "Disable Error Squiggles",
     "c_cpp.command.toggleDimInactiveRegions.title": "Toggle Inactive Region Colorization",
+    "c_cpp.command.toggleTypeSizeAndAlignment.title": "Toggle Type Size and Alignment in Hovers",
     "c_cpp.command.foldAllInactiveRegions.title": "Fold All Inactive Regions",
     "c_cpp.command.unfoldAllInactiveRegions.title": "Unfold All Inactive Regions",
     "c_cpp.command.resetDatabase.title": "Reset IntelliSense Database",
@@ -781,6 +782,12 @@
     "c_cpp.configuration.hover.description": "If disabled, hover details are no longer provided by the language server.",
     "c_cpp.configuration.hoverShowIntegralValuesInHexadecimal.markdownDescription": {
         "message": "Displays integral constant values in hexadecimal in IntelliSense hovers. This setting only applies if `#C_Cpp.intelliSenseEngine#` is set to `default`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (it represents literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.hoverShowTypeSizeAndAlignment.markdownDescription": {
+        "message": "Displays the size and alignment of types in IntelliSense hovers. This setting only applies if `#C_Cpp.intelliSenseEngine#` is set to `default`.",
         "comment": [
             "Markdown text between `` should not be translated or localized (it represents literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]

@@ -1506,6 +1506,7 @@ export class DefaultClient implements Client {
             markdownInComments: settings.markdownInComments,
             hover: settings.hover,
             hoverShowIntegralValuesInHexadecimal: settings.hoverShowIntegralValuesInHexadecimal,
+            hoverShowTypeSizeAndAlignment: settings.hoverShowTypeSizeAndAlignment,
             vcFormatIndentBraces: settings.vcFormatIndentBraces,
             vcFormatIndentMultiLineRelativeTo: settings.vcFormatIndentMultiLineRelativeTo,
             vcFormatIndentWithinParentheses: settings.vcFormatIndentWithinParentheses,
@@ -1848,10 +1849,6 @@ export class DefaultClient implements Client {
 
     public async onDidChangeSettings(_event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> {
         const defaultClient: Client = clients.getDefaultClient();
-        if (this === defaultClient) {
-            // Only send the updated settings information once, as it includes values for all folders.
-            void this.sendDidChangeSettings().catch(logAndReturn.undefined);
-        }
         const changedSettings: Record<string, string> = this.settingsTracker.getChangedSettings();
 
         await this.ready;
