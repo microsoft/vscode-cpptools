@@ -28,11 +28,11 @@ jobs:
     - output: pipelineArtifact
       displayName: '${{ parameters.vsixName }}.vsix'
       targetPath: $(Build.ArtifactStagingDirectory)\vsix
-      artifactName: vsix
+      artifactName: vsix_attempt$(System.JobAttempt)
     - output: pipelineArtifact
       displayName: Locked VSCE dependencies
       targetPath: $(Build.ArtifactStagingDirectory)\vsce
-      artifactName: vsce
+      artifactName: vsce_attempt$(System.JobAttempt)
 
   steps:
   - checkout: self
