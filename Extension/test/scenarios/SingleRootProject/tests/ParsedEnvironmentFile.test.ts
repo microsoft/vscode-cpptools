@@ -100,4 +100,31 @@ MyName2=Value2
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
         assertEnvironmentEqual(result.Env, "MyName2", "Value2");
     });
+
+    test("Resolve a reference to a variable defined earlier in the file", () => {
+        const content: string = `USER=admin
+EMAIL=\${USER}@example.org`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "USER", "admin");
+        assertEnvironmentEqual(result.Env, "EMAIL", "admin@example.org");
+    });
+
+    test("Resolve a reference from the initial environment", () => {
+        const initialEnv: Environment[] = [{ name: "USER", value: "admin" }];
+        const content: string = `EMAIL=\${USER}@example.org`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", initialEnv);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "EMAIL", "admin@example.org");
+    });
+
+    test("Leave an unknown reference untouched", () => {
+        const content: string = `EMAIL=\${UNKNOWN_USER}@example.org`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "EMAIL", "${UNKNOWN_USER}@example.org");
+    });
 });
