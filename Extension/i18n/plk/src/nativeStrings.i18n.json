@@ -436,5 +436,13 @@
 	"failed_to_lock_browse_db_lock_file": "Nie można zablokować pliku blokady bazy danych przeglądania: {0} (errno={1})",
 	"browse_database_disabled_incompatible_storage": "Baza danych przeglądania została wyłączona, ponieważ jej lokalizacja przechowywania nie obsługuje współużytkowanej pamięci SQLite WAL. Ustaw parametr browse.databaseFilename na ścieżkę lokalną.",
 	"selected_translation_unit_not_include_file_previous": "Wybrana jednostka translacji „{0}” nie zawiera elementu „{1}”. Funkcja IntelliSense przywróci poprzednią jednostkę translacji, jeśli jest nadal dostępna; w przeciwnym razie użyje elementu „{1}” jako jednostki translacji zawierającej tylko nagłówek.",
-	"selected_translation_unit_not_include_file_header_only": "Wybrana jednostka translacji „{0}” nie zawiera elementu „{1}”. Żadna poprzednia jednostka translacji nie jest dostępna, więc funkcja IntelliSense będzie używać elementu „{1}” jako jednostki translacji zawierającej tylko nagłówek."
+	"selected_translation_unit_not_include_file_header_only": "Wybrana jednostka translacji „{0}” nie zawiera elementu „{1}”. Żadna poprzednia jednostka tłumaczenia nie jest dostępna, więc funkcja IntelliSense będzie używać elementu „{1}” jako jednostki translacji zawierającej tylko nagłówek.",
+	"check_analysis_process_unavailable": "Proces analizy języka C++ był niedostępny podczas sprawdzania \"{0}\".",
+	"quick_info_size": "**Size:** %s B",
+	"quick_info_alignment": "**Alignment:** %s B",
+	"help_allow_missing_workspace_config": "Zezwalaj na uruchamianie serwera nawet wtedy, gdy określony plik konfiguracji obszaru roboczego nie istnieje.",
+	"help_deprecated_lsp_config": "Deprecated alias for --workspace-config.",
+	"help_deprecated_allow_missing_lsp_config": "Deprecated alias for --allow-missing-workspace-config.",
+	"error_conflicting_config_args": "--workspace-config cannot be combined with --lsp-config.",
+	"error_config_arg_requires_path": "{0} requires a path."
 }
