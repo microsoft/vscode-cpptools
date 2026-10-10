@@ -59,6 +59,17 @@ export class ParsedEnvironmentFile {
 
                 value = value.replace(/(^['"]|['"]$)/g, "");
 
+                // Resolve ${VAR} references against the variables defined so far in the file
+                // (and the process environment), following the dotenv interpolation rules.
+                // A reference to a name we don't know is left as-is instead of being dropped.
+                value = value.replace(/\$\{([\w\.\-]+)\}/g, (full: string, name: string): string => {
+                    if (env.has(name)) {
+                        return env.get(name);
+                    }
+                    const processValue: string | undefined = process.env[name];
+                    return processValue !== undefined ? processValue : full;
+                });
+
                 env.set(key, value);
             } else {
                 // Blank lines and lines starting with # are no parse errors
