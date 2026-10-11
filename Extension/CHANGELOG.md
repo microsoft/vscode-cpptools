@@ -15,6 +15,7 @@
 * Reduce CPU usage when resolving headers in large Windows workspaces.
 
 ### Bug Fixes
+* Fix clang-tidy check documentation links pointing at the bundled LLVM release instead of the clang-tidy version in use. [#12804](https://github.com/microsoft/vscode-cpptools/issues/12804)
 * Fix 'Go to Declaration' and 'Go to Definition' returning the current location instead of an available counterpart. [#14509](https://github.com/microsoft/vscode-cpptools/issues/14509)
 * Update MIEngine to fix debugger failures with synthetic GDB stack frames. [#14741](https://github.com/microsoft/vscode-cpptools/issues/14741)
   * Thanks for the contribution. [@tzcnt](https://github.com/tzcnt) [PR MIEngine#1605](https://github.com/microsoft/MIEngine/pull/1605)
