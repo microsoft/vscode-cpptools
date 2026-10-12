@@ -35,11 +35,12 @@ export const normalizeIssue = (issue: {
 			.replace(/\s+/gu, ' ')
 			.replace(/```[^`]*?```/gu, '');
 
-		while (
-			out.includes('<!--') &&
-			out.includes('-->') &&
-			out.indexOf('-->') > out.indexOf('<!--')) {
-			out = out.slice(0, out.indexOf('<!--')) + out.slice(out.indexOf('-->') + 3);
+		for (let start = out.indexOf('<!--'); start !== -1; start = out.indexOf('<!--')) {
+			const end = out.indexOf('-->', start + 4);
+			if (end === -1) {
+				break;
+			}
+			out = out.slice(0, start) + out.slice(end + 3);
 		}
 		while (
 			out.includes(`<details>`) &&

@@ -49,6 +49,7 @@ export interface WorkspaceFolderSettingsParams {
     intelliSenseCacheSize: number;
     intelliSenseMemoryLimit: number;
     dimInactiveRegions: boolean;
+    codeFolding: boolean;
     suggestSnippets: boolean;
     legacyCompilerArgsBehavior: boolean;
     defaultSystemIncludePath: string[] | undefined;
@@ -64,11 +65,14 @@ export interface WorkspaceFolderSettingsParams {
     clangTidyConfig: string | undefined;
     clangTidyFallbackConfig: string | undefined;
     clangTidyHeaderFilter: string | null;
+    clangTidyIncludeCleanerMappings: Associations;
     clangTidyArgs: string[];
     clangTidyUseBuildPath: boolean;
     clangTidyChecksEnabled: string[] | undefined;
     clangTidyChecksDisabled: string[] | undefined;
     hover: string;
+    hoverShowIntegralValuesInHexadecimal: boolean;
+    hoverShowTypeSizeAndAlignment: boolean;
     markdownInComments: string;
     vcFormatIndentBraces: boolean;
     vcFormatIndentMultiLineRelativeTo: string;
@@ -140,6 +144,7 @@ export interface WorkspaceFolderSettingsParams {
     editorAutoClosingBrackets: string;
     editorInlayHintsEnabled: boolean;
     editorParameterHintsEnabled: boolean;
+    showUnused: boolean;
     refactoringIncludeHeader: string;
 }
 
@@ -346,6 +351,15 @@ export class CppSettings extends Settings {
     public get clangTidyConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.config")); }
     public get clangTidyFallbackConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.fallbackConfig")); }
     public get clangTidyHeaderFilter(): string | null { return this.getAsString("codeAnalysis.clangTidy.headerFilter", true); }
+    public get clangTidyIncludeCleanerMappings(): Associations {
+        const mappings: Associations = this.getAsAssociations("codeAnalysis.clangTidy.includeCleanerMappings");
+        return Object.fromEntries(Object.entries(mappings).filter(([symbol, header]) =>
+            symbol.length > 0
+            && !/[\u0000-\u001f\u007f-\u009f]/.test(symbol)
+            && header.length > 2
+            && ((header.startsWith("<") && header.endsWith(">")) || (header.startsWith('"') && header.endsWith('"')))
+            && !/[<>"\u0000-\u001f\u007f-\u009f]/.test(header.slice(1, -1))));
+    }
     public get clangTidyArgs(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.args"); }
     public get clangTidyUseBuildPath(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath"); }
     public get clangTidyChecksEnabled(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.checks.enabled", true); }
@@ -376,6 +390,15 @@ export class CppSettings extends Settings {
     public get inactiveRegionOpacity(): number { return this.getAsNumber("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("inactiveRegionForegroundColor")); }
     public get inactiveRegionBackgroundColor(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("inactiveRegionBackgroundColor")); }
+    public get autoFoldInactiveRegions(): boolean {
+        return this.getAsBoolean("autoFoldInactiveRegions")
+            && this.codeFolding
+            && this.intelliSenseEngine.toLowerCase() === "default";
+    }
+    public get inactiveRegionReportingEnabled(): boolean {
+        return this.dimInactiveRegions
+            || (this.codeFolding && this.intelliSenseEngine.toLowerCase() === "default");
+    }
     public get autocomplete(): string { return this.getAsString("autocomplete"); }
     public get autocompleteAddParentheses(): boolean { return this.getAsBoolean("autocompleteAddParentheses"); }
     public get loggingLevel(): string { return this.getAsString("loggingLevel"); }
@@ -467,6 +490,8 @@ export class CppSettings extends Settings {
     public get isCaseSensitiveFileSupportEnabled(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport").toLowerCase() === "enabled"; }
     public get doxygenSectionTags(): string[] { return this.getAsArrayOfStrings("doxygen.sectionTags"); }
     public get hover(): string { return this.getAsString("hover"); }
+    public get hoverShowIntegralValuesInHexadecimal(): boolean { return this.getAsBoolean("hoverShowIntegralValuesInHexadecimal"); }
+    public get hoverShowTypeSizeAndAlignment(): boolean { return this.getAsBoolean("hoverShowTypeSizeAndAlignment"); }
     public get markdownInComments(): string { return this.getAsString("markdownInComments"); }
     public get legacyCompilerArgsBehavior(): boolean { return this.getAsBoolean("legacyCompilerArgsBehavior"); }
     public get inlayHintsAutoDeclarationTypes(): boolean { return this.getAsBoolean("inlayHints.autoDeclarationTypes.enabled"); }
@@ -754,8 +779,8 @@ export class CppSettings extends Settings {
         void super.Section.update(name, value?.toLowerCase() === value1.toLowerCase() ? value2 : value1, getTarget());
     }
 
-    public update<T>(name: string, value: T): void {
-        void super.Section.update(name, value);
+    public update<T>(name: string, value: T): Thenable<void> {
+        return super.Section.update(name, value);
     }
 
     public populateEditorConfig(document: vscode.TextDocument): void {
@@ -1090,6 +1115,7 @@ export class OtherSettings {
     public get filesAutoSaveAfterDelay(): boolean { return this.getAsString("files", "autoSave", this.resource, "off") === "afterDelay"; }
     public get editorInlayHintsEnabled(): boolean { return this.getAsString("editor.inlayHints", "enabled", this.resource, "on") !== "off"; }
     public get editorParameterHintsEnabled(): boolean { return this.getAsBoolean("editor.parameterHints", "enabled", this.resource, true); }
+    public get showUnused(): boolean { return this.getAsBoolean("editor", "showUnused", { uri: this.resource, languageId: "cpp" }, true); }
     private readonly defaultSearchExcludes = {
         "**/node_modules": true,
         "**/bower_components": true,
