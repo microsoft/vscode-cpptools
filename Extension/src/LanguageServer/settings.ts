@@ -280,7 +280,11 @@ export class CppSettings extends Settings {
     }
 
     public get clangTidyVersion(): string | undefined {
-        return getCachedClangTidyVersion();
+        // The cached version comes from an auto-discovered binary, so it says nothing about the
+        // clang-tidy a resource carrying its own path is running. Reporting it would point that
+        // resource's documentation links at the wrong release, so leave the version unknown and
+        // let the caller fall back.
+        return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.path")) ? undefined : getCachedClangTidyVersion();
     }
 
     public get clangFormatPath(): string | undefined {
