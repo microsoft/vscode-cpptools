@@ -57,18 +57,29 @@ export class ParsedEnvironmentFile {
                     value = value.replace(/\\n/gm, "\n");
                 }
 
+                // A single-quoted value is literal, so a reference inside it must not be
+                // expanded. The quotes come off on the next line, so this has to be read here.
+                const singleQuoted: boolean = (value.length > 1) && (value.charAt(0) === "'") && (value.charAt(value.length - 1) === "'");
+
                 value = value.replace(/(^['"]|['"]$)/g, "");
 
-                // Resolve ${VAR} references against the variables defined so far in the file
-                // (and the process environment), following the dotenv interpolation rules.
-                // A reference to a name we don't know is left as-is instead of being dropped.
-                value = value.replace(/\$\{([\w\.\-]+)\}/g, (full: string, name: string): string => {
-                    if (env.has(name)) {
-                        return env.get(name);
-                    }
-                    const processValue: string | undefined = process.env[name];
-                    return processValue !== undefined ? processValue : full;
-                });
+                // Resolve ${VAR} references against the variables defined so far in the file,
+                // then the process environment. A single-quoted value and a reference written
+                // with a backslash both stay literal; the backslash itself is dropped, so
+                // \${VAR} ends up as the text ${VAR}. A name we don't know is left as-is
+                // instead of being dropped.
+                if (!singleQuoted) {
+                    value = value.replace(/(\\)?\$\{([\w\.\-]+)\}/g, (full: string, escape: string | undefined, name: string): string => {
+                        if (escape) {
+                            return full.substring(1);
+                        }
+                        if (env.has(name)) {
+                            return env.get(name);
+                        }
+                        const processValue: string | undefined = process.env[name];
+                        return processValue !== undefined ? processValue : full;
+                    });
+                }
 
                 env.set(key, value);
             } else {
