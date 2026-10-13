@@ -16,5 +16,5 @@ class LockerAction extends Action_1.Action {
         await new Locker_1.Locker(github, +(0, utils_1.getRequiredInput)('daysSinceClose'), +(0, utils_1.getRequiredInput)('daysSinceUpdate'), (0, utils_1.getInput)('labels') || undefined, (0, utils_1.getInput)('milestoneName') || undefined, (0, utils_1.getInput)('milestoneId') || undefined, (0, utils_1.getInput)('ignoreLabels') || undefined, (0, utils_1.getInput)('ignoreMilestoneNames') || undefined, (0, utils_1.getInput)('ignoreMilestoneIds') || undefined, +((0, utils_1.getInput)('minimumVotes') || 0), +((0, utils_1.getInput)('maximumVotes') || 9999999)).run();
     }
 }
-new LockerAction().run(); // eslint-disable-line
+new LockerAction().run();
 //# sourceMappingURL=index.js.map

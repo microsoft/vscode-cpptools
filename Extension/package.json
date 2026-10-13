@@ -2,7 +2,7 @@
     "name": "cpptools",
     "displayName": "C/C++",
     "description": "C/C++ IntelliSense, debugging, and code browsing.",
-    "version": "1.35.1-main",
+    "version": "1.35.3-main",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -1055,6 +1055,18 @@
                         "description": "%c_cpp.configuration.hover.description%",
                         "scope": "resource"
                     },
+                    "C_Cpp.hoverShowIntegralValuesInHexadecimal": {
+                        "type": "boolean",
+                        "default": false,
+                        "markdownDescription": "%c_cpp.configuration.hoverShowIntegralValuesInHexadecimal.markdownDescription%",
+                        "scope": "resource"
+                    },
+                    "C_Cpp.hoverShowTypeSizeAndAlignment": {
+                        "type": "boolean",
+                        "default": true,
+                        "markdownDescription": "%c_cpp.configuration.hoverShowTypeSizeAndAlignment.markdownDescription%",
+                        "scope": "resource"
+                    },
                     "C_Cpp.errorSquiggles": {
                         "type": "string",
                         "enum": [
@@ -1070,6 +1082,12 @@
                         "type": "boolean",
                         "default": true,
                         "description": "%c_cpp.configuration.dimInactiveRegions.description%",
+                        "scope": "resource"
+                    },
+                    "C_Cpp.autoFoldInactiveRegions": {
+                        "type": "boolean",
+                        "default": false,
+                        "markdownDescription": "%c_cpp.configuration.autoFoldInactiveRegions.description%",
                         "scope": "resource"
                     },
                     "C_Cpp.inactiveRegionOpacity": {
@@ -2273,6 +2291,20 @@
                         ],
                         "default": null,
                         "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.headerFilter.markdownDescription%",
+                        "scope": "resource"
+                    },
+                    "C_Cpp.codeAnalysis.clangTidy.includeCleanerMappings": {
+                        "type": "object",
+                        "default": {},
+                        "propertyNames": {
+                            "minLength": 1,
+                            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+(?![\\s\\S])"
+                        },
+                        "additionalProperties": {
+                            "type": "string",
+                            "pattern": "^(?:<[^<>\"\\u0000-\\u001f\\u007f-\\u009f]+>|\"[^<>\"\\u0000-\\u001f\\u007f-\\u009f]+\")(?![\\s\\S])"
+                        },
+                        "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.includeCleanerMappings.markdownDescription%",
                         "scope": "resource"
                     },
                     "C_Cpp.codeAnalysis.clangTidy.args": {
@@ -3997,6 +4029,21 @@
             {
                 "command": "C_Cpp.ToggleDimInactiveRegions",
                 "title": "%c_cpp.command.toggleDimInactiveRegions.title%",
+                "category": "C/C++"
+            },
+            {
+                "command": "C_Cpp.ToggleTypeSizeAndAlignment",
+                "title": "%c_cpp.command.toggleTypeSizeAndAlignment.title%",
+                "category": "C/C++"
+            },
+            {
+                "command": "C_Cpp.FoldAllInactiveRegions",
+                "title": "%c_cpp.command.foldAllInactiveRegions.title%",
+                "category": "C/C++"
+            },
+            {
+                "command": "C_Cpp.UnfoldAllInactiveRegions",
+                "title": "%c_cpp.command.unfoldAllInactiveRegions.title%",
                 "category": "C/C++"
             },
             {
@@ -6553,6 +6600,18 @@
                     "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
                 },
                 {
+                    "command": "C_Cpp.ToggleTypeSizeAndAlignment",
+                    "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.FoldAllInactiveRegions",
+                    "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/ && config.C_Cpp.codeFolding =~ /^[eE]nabled$/"
+                },
+                {
+                    "command": "C_Cpp.UnfoldAllInactiveRegions",
+                    "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/ && config.C_Cpp.codeFolding =~ /^[eE]nabled$/"
+                },
+                {
                     "command": "C_Cpp.ResetDatabase",
                     "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
                 },
@@ -7269,7 +7328,7 @@
     "resolutions": {
         "gulp-typescript/**/glob-parent": "^5.1.2",
         "serialize-javascript": "^7.0.5",
-        "fast-uri": "^3.1.6",
+        "fast-uri": "^3.1.8",
         "@humanfs/node": "^0.16.8"
     }
 }

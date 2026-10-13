@@ -5,7 +5,7 @@
 
 import { GitHub } from '../api/api';
 import { ActionBase } from '../common/ActionBase';
-import { daysAgoToHumanReadbleDate, daysAgoToTimestamp, safeLog } from '../common/utils';
+import { daysAgoToHumanReadbleDate, safeLog } from '../common/utils';
 
 export class AddComment extends ActionBase {
 	constructor(
