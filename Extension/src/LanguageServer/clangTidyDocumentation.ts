@@ -4,16 +4,23 @@
  * ------------------------------------------------------------------------------------------ */
 
 /**
- * The clang-tidy documentation is published for every LLVM release, so the URL of a check's
- * page depends on the release the clang-tidy binary in use comes from. Checks added in a
- * newer release have no page at all in an older one. When the version in use could not be
- * determined, fall back to the release bundled with the extension.
+ * The clang-tidy documentation is published per major LLVM release, so a check's page lives
+ * under the .1.0 release of the major the binary in use comes from: 23.1.0 and 22.1.0 have
+ * pages, 23.1.1 and 22.1.3 do not. Checks added in a newer major have no page in an older one,
+ * so the URL follows the binary in use rather than the release bundled with the extension.
+ * When the version in use could not be determined, fall back to the bundled release.
  */
 export const fallbackClangTidyDocVersion: string = '23.1.0';
 
-const versionPattern: RegExp = /^[0-9]+\.[0-9]+\.[0-9]+$/;
+const versionPattern: RegExp = /^([0-9]+)\.[0-9]+\.[0-9]+$/;
+
+/** The release a clang-tidy version's documentation was published under. */
+function documentationRelease(clangTidyVersion: string): string | undefined {
+    const match: RegExpMatchArray | null = clangTidyVersion.match(versionPattern);
+    return match ? `${match[1]}.1.0` : undefined;
+}
 
 export function getClangTidyDocumentationUrl(docPage: string, clangTidyVersion?: string): string {
-    const version: string = clangTidyVersion && versionPattern.test(clangTidyVersion) ? clangTidyVersion : fallbackClangTidyDocVersion;
-    return `https://releases.llvm.org/${version}/tools/clang/tools/extra/docs/clang-tidy/${docPage}`;
+    const release: string | undefined = clangTidyVersion ? documentationRelease(clangTidyVersion) : undefined;
+    return `https://releases.llvm.org/${release ?? fallbackClangTidyDocVersion}/tools/clang/tools/extra/docs/clang-tidy/${docPage}`;
 }

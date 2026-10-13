@@ -380,7 +380,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                     const checksPage: string = dashIndex > 0 ? primaryCode.substring(dashIndex + 1) : primaryCode;
                     docPage = `checks${checksGroup}/${checksPage}.html`;
                 }
-                const primaryDocUri: vscode.Uri = vscode.Uri.parse(getClangTidyDocumentationUrl(docPage, new CppSettings().clangTidyVersion));
+                const primaryDocUri: vscode.Uri = vscode.Uri.parse(getClangTidyDocumentationUrl(docPage, new CppSettings(realUri).clangTidyVersion));
                 diagnostic.code = { value: identifier.code, target: primaryDocUri };
 
                 if (new CppSettings().clangTidyCodeActionShowDocumentation) {
