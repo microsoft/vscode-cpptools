@@ -127,4 +127,39 @@ EMAIL=\${USER}@example.org`;
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "EMAIL", "${UNKNOWN_USER}@example.org");
     });
+
+    test("Resolve a reference from the process environment", () => {
+        const name: string = "CPPTOOLS_ENVFILE_INTERPOLATION_TEST";
+        const previous: string | undefined = process.env[name];
+        process.env[name] = "from-process";
+        try {
+            const content: string = `EMAIL=\${${name}}@example.org`;
+            const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+            assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+            assertEnvironmentEqual(result.Env, "EMAIL", "from-process@example.org");
+        } finally {
+            if (previous === undefined) {
+                delete process.env[name];
+            } else {
+                process.env[name] = previous;
+            }
+        }
+    });
+
+    test("Leave a reference inside a single-quoted value alone", () => {
+        const content: string = `USER=admin\nEMAIL='\${USER}@example.org'`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "EMAIL", "${USER}@example.org");
+    });
+
+    test("Leave an escaped reference alone, without the backslash", () => {
+        const content: string = `USER=admin\nEMAIL=\\\${USER}@example.org`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "EMAIL", "${USER}@example.org");
+    });
 });
