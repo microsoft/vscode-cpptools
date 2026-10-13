@@ -84,7 +84,7 @@
 * Fix a `cpptools` crash during shutdown on macOS.
 * Various localization updates.
 * Update dependencies.
-* Fix `${VAR}` interpolation in `.env` files used by `envFile`: references to variables defined earlier in the same file (or in the OS environment) are now resolved. [#13781](https://github.com/microsoft/vscode-cpptools/issues/13781)
+* Fix `${VAR}` interpolation in `.env` files used by `envFile`: references to variables defined earlier in the same file (or in the OS environment) are now resolved. Single-quoted values and `\${VAR}` are left as written. [#13781](https://github.com/microsoft/vscode-cpptools/issues/13781)
 
 ## Version 1.34.4: September 9, 2026
 ### Enhancements
