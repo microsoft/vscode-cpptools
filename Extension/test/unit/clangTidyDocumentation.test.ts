@@ -16,6 +16,15 @@ describe('clang-tidy documentation URLs', () => {
             'https://releases.llvm.org/19.1.0/tools/clang/tools/extra/docs/clang-tidy/checks/readability/use-std-min-max.html');
     });
 
+    it('uses the .1.0 release of that major, since patch releases have no page', () => {
+        strictEqual(
+            getClangTidyDocumentationUrl('checks/readability/use-std-min-max.html', '23.1.1'),
+            'https://releases.llvm.org/23.1.0/tools/clang/tools/extra/docs/clang-tidy/checks/readability/use-std-min-max.html');
+        strictEqual(
+            getClangTidyDocumentationUrl('checks/misc/include-cleaner.html', '22.1.3'),
+            'https://releases.llvm.org/22.1.0/tools/clang/tools/extra/docs/clang-tidy/checks/misc/include-cleaner.html');
+    });
+
     it('falls back to the bundled version when the version in use is unknown', () => {
         strictEqual(getClangTidyDocumentationUrl('checks/misc/include-cleaner.html'), `${bundledDocUrl}/checks/misc/include-cleaner.html`);
         strictEqual(getClangTidyDocumentationUrl('checks/misc/include-cleaner.html', ''), `${bundledDocUrl}/checks/misc/include-cleaner.html`);
