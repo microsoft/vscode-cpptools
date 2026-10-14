@@ -191,6 +191,7 @@ async function makeBinariesExecutable(): Promise<void> {
         const commonBinaries: string[] = [
             "./bin/cpptools",
             "./bin/cpptools-srv",
+            "./bin/cpptools-srv2",
             "./bin/cpptools-wordexp",
             "./LLVM/bin/clang-format",
             "./LLVM/bin/clang-tidy",
@@ -211,7 +212,7 @@ async function makeBinariesExecutable(): Promise<void> {
                 ];
                 oldMacBinaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
             }
-        } else if (os.arch() === "x64") {
+        } else {
             promises.push(util.allowExecution(util.getExtensionFilePath("./bin/libc.so")));
         }
     }

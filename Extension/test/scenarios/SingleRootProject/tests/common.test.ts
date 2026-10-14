@@ -199,6 +199,23 @@ suite("resolveVariables", () => {
             .shouldLookupSymbol("Root");
     });
 
+    test("${env:X} expands to empty when unset", () => {
+        const processKey: string = `cpptoolstests_unset_${Date.now()}`;
+        delete process.env[processKey];
+        resolveVariablesWithInput("${env:" + processKey + "}")
+            .withEnvironment({})
+            .shouldResolveTo("");
+    });
+
+    test("${X} left unexpanded when unset", () => {
+        const processKey: string = `cpptoolstests_unset_${Date.now()}`;
+        delete process.env[processKey];
+        const token: string = "${" + processKey + "}";
+        resolveVariablesWithInput(token)
+            .withEnvironment({})
+            .shouldResolveTo(token);
+    });
+
     test("escapeForSquiggles:", () => {
         const testEscapeForSquigglesScenario: any = (input: string, expectedOutput: string) => {
             const result: string = escapeForSquiggles(input);

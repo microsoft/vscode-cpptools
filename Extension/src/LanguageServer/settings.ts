@@ -4,11 +4,10 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
@@ -33,6 +32,10 @@ export interface Associations {
     [key: string]: string;
 }
 
+// The settings sections that we provide accessors for.
+// This is used to filter out settings changed events that do not impact the extension.
+export const trackedSections: string[] = ['C_Cpp', 'editor', 'files', 'search', 'workbench'];
+
 // Settings that can be undefined have default values assigned in the native code or are meant to return undefined.
 export interface WorkspaceFolderSettingsParams {
     uri: string | undefined;
@@ -46,6 +49,7 @@ export interface WorkspaceFolderSettingsParams {
     intelliSenseCacheSize: number;
     intelliSenseMemoryLimit: number;
     dimInactiveRegions: boolean;
+    codeFolding: boolean;
     suggestSnippets: boolean;
     legacyCompilerArgsBehavior: boolean;
     defaultSystemIncludePath: string[] | undefined;
@@ -61,11 +65,14 @@ export interface WorkspaceFolderSettingsParams {
     clangTidyConfig: string | undefined;
     clangTidyFallbackConfig: string | undefined;
     clangTidyHeaderFilter: string | null;
+    clangTidyIncludeCleanerMappings: Associations;
     clangTidyArgs: string[];
     clangTidyUseBuildPath: boolean;
     clangTidyChecksEnabled: string[] | undefined;
     clangTidyChecksDisabled: string[] | undefined;
     hover: string;
+    hoverShowIntegralValuesInHexadecimal: boolean;
+    hoverShowTypeSizeAndAlignment: boolean;
     markdownInComments: string;
     vcFormatIndentBraces: boolean;
     vcFormatIndentMultiLineRelativeTo: string;
@@ -126,6 +133,7 @@ export interface WorkspaceFolderSettingsParams {
     vcFormatSpaceAroundTernaryOperator: string;
     vcFormatWrapPreserveBlocks: string;
     doxygenGenerateOnType: boolean;
+    doxygenGenerateOnCodeAction: boolean;
     doxygenGeneratedStyle: string;
     doxygenSectionTags: string[];
     filesExclude: Excludes;
@@ -136,6 +144,7 @@ export interface WorkspaceFolderSettingsParams {
     editorAutoClosingBrackets: string;
     editorInlayHintsEnabled: boolean;
     editorParameterHintsEnabled: boolean;
+    showUnused: boolean;
     refactoringIncludeHeader: string;
 }
 
@@ -296,7 +305,7 @@ export class CppSettings extends Settings {
                 let bundledVersion: string;
                 try {
                     const bundledPath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
-                    const output: string = execSync(quote([bundledPath, '--version'])).toString();
+                    const output: string = execFileSync(bundledPath, ['--version']).toString();
                     bundledVersion = output.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
                     if (!semver.valid(bundledVersion)) {
                         return path;
@@ -308,7 +317,7 @@ export class CppSettings extends Settings {
 
                 // Invoke the version on the system to compare versions.  Use ours if it's more recent.
                 try {
-                    const output: string = execSync(`"${path}" --version`).toString();
+                    const output: string = execFileSync(path, ['--version']).toString();
                     const userVersion = output.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
                     if (semver.ltr(userVersion, bundledVersion)) {
                         path = "";
@@ -342,6 +351,15 @@ export class CppSettings extends Settings {
     public get clangTidyConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.config")); }
     public get clangTidyFallbackConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.fallbackConfig")); }
     public get clangTidyHeaderFilter(): string | null { return this.getAsString("codeAnalysis.clangTidy.headerFilter", true); }
+    public get clangTidyIncludeCleanerMappings(): Associations {
+        const mappings: Associations = this.getAsAssociations("codeAnalysis.clangTidy.includeCleanerMappings");
+        return Object.fromEntries(Object.entries(mappings).filter(([symbol, header]) =>
+            symbol.length > 0
+            && !/[\u0000-\u001f\u007f-\u009f]/.test(symbol)
+            && header.length > 2
+            && ((header.startsWith("<") && header.endsWith(">")) || (header.startsWith('"') && header.endsWith('"')))
+            && !/[<>"\u0000-\u001f\u007f-\u009f]/.test(header.slice(1, -1))));
+    }
     public get clangTidyArgs(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.args"); }
     public get clangTidyUseBuildPath(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath"); }
     public get clangTidyChecksEnabled(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.checks.enabled", true); }
@@ -372,6 +390,15 @@ export class CppSettings extends Settings {
     public get inactiveRegionOpacity(): number { return this.getAsNumber("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("inactiveRegionForegroundColor")); }
     public get inactiveRegionBackgroundColor(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("inactiveRegionBackgroundColor")); }
+    public get autoFoldInactiveRegions(): boolean {
+        return this.getAsBoolean("autoFoldInactiveRegions")
+            && this.codeFolding
+            && this.intelliSenseEngine.toLowerCase() === "default";
+    }
+    public get inactiveRegionReportingEnabled(): boolean {
+        return this.dimInactiveRegions
+            || (this.codeFolding && this.intelliSenseEngine.toLowerCase() === "default");
+    }
     public get autocomplete(): string { return this.getAsString("autocomplete"); }
     public get autocompleteAddParentheses(): boolean { return this.getAsBoolean("autocompleteAddParentheses"); }
     public get loggingLevel(): string { return this.getAsString("loggingLevel"); }
@@ -383,6 +410,7 @@ export class CppSettings extends Settings {
     public get simplifyStructuredComments(): boolean { return this.getAsBoolean("simplifyStructuredComments"); }
     public get doxygenGeneratedCommentStyle(): string { return this.getAsString("doxygen.generatedStyle"); }
     public get doxygenGenerateOnType(): boolean { return this.getAsBoolean("doxygen.generateOnType"); }
+    public get doxygenGenerateOnCodeAction(): boolean { return this.getAsBoolean("doxygen.generateOnCodeAction"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] {
         const value: any = super.Section.get<any>("commentContinuationPatterns");
         if (this.isArrayOfCommentContinuationPatterns(value)) {
@@ -452,7 +480,6 @@ export class CppSettings extends Settings {
     public get defaultBrowsePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.browse.path"); }
     public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("default.browse.databaseFilename")); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return this.getAsBoolean("default.browse.limitSymbolsToIncludedHeaders"); }
-    public get defaultRecursiveIncludesReduce(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.reduce"); }
     public get defaultRecursiveIncludesPriority(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.priority"); }
     public get defaultRecursiveIncludesOrder(): string | undefined { return this.getAsStringOrUndefined("default.recursiveIncludes.order"); }
     public get defaultSystemIncludePath(): string[] | undefined { return this.getArrayOfStringsWithUndefinedDefault("default.systemIncludePath"); }
@@ -463,6 +490,8 @@ export class CppSettings extends Settings {
     public get isCaseSensitiveFileSupportEnabled(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport").toLowerCase() === "enabled"; }
     public get doxygenSectionTags(): string[] { return this.getAsArrayOfStrings("doxygen.sectionTags"); }
     public get hover(): string { return this.getAsString("hover"); }
+    public get hoverShowIntegralValuesInHexadecimal(): boolean { return this.getAsBoolean("hoverShowIntegralValuesInHexadecimal"); }
+    public get hoverShowTypeSizeAndAlignment(): boolean { return this.getAsBoolean("hoverShowTypeSizeAndAlignment"); }
     public get markdownInComments(): string { return this.getAsString("markdownInComments"); }
     public get legacyCompilerArgsBehavior(): boolean { return this.getAsBoolean("legacyCompilerArgsBehavior"); }
     public get inlayHintsAutoDeclarationTypes(): boolean { return this.getAsBoolean("inlayHints.autoDeclarationTypes.enabled"); }
@@ -750,8 +779,8 @@ export class CppSettings extends Settings {
         void super.Section.update(name, value?.toLowerCase() === value1.toLowerCase() ? value2 : value1, getTarget());
     }
 
-    public update<T>(name: string, value: T): void {
-        void super.Section.update(name, value);
+    public update<T>(name: string, value: T): Thenable<void> {
+        return super.Section.update(name, value);
     }
 
     public populateEditorConfig(document: vscode.TextDocument): void {
@@ -1086,6 +1115,7 @@ export class OtherSettings {
     public get filesAutoSaveAfterDelay(): boolean { return this.getAsString("files", "autoSave", this.resource, "off") === "afterDelay"; }
     public get editorInlayHintsEnabled(): boolean { return this.getAsString("editor.inlayHints", "enabled", this.resource, "on") !== "off"; }
     public get editorParameterHintsEnabled(): boolean { return this.getAsBoolean("editor.parameterHints", "enabled", this.resource, true); }
+    public get showUnused(): boolean { return this.getAsBoolean("editor", "showUnused", { uri: this.resource, languageId: "cpp" }, true); }
     private readonly defaultSearchExcludes = {
         "**/node_modules": true,
         "**/bower_components": true,

@@ -42,7 +42,6 @@ const elementId: { [key: string]: string } = {
     mergeConfigurations: "mergeConfigurations",
     dotConfig: "dotConfig",
     dotConfigInvalid: "dotConfigInvalid",
-    recursiveIncludesReduce: "recursiveIncludes.reduce",
     recursiveIncludesPriority: "recursiveIncludes.priority",
     recursiveIncludesOrder: "recursiveIncludes.order",
 
@@ -304,7 +303,6 @@ class SettingsApp {
             (<HTMLInputElement>document.getElementById(elementId.forcedInclude)).value = joinEntries(config.forcedInclude);
             (<HTMLInputElement>document.getElementById(elementId.dotConfig)).value = config.dotConfig ?? "";
             if (config.recursiveIncludes) {
-                (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesReduce)).value = config.recursiveIncludes.reduce ?? "${default}";
                 (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesPriority)).value = config.recursiveIncludes.priority ?? "${default}";
                 (<HTMLInputElement>document.getElementById(elementId.recursiveIncludesOrder)).value = config.recursiveIncludes.order ?? "${default}";
             }

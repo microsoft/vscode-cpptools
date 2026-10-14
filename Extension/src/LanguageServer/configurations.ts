@@ -14,6 +14,7 @@ import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
 import { logAndReturn, returns } from '../Utility/Async/returns';
+import { escapePathForSquiggles, getTextMatchOffsets } from '../Utility/Text/escape';
 import * as util from '../common';
 import { isWindows } from '../constants';
 import { getOutputChannelLogger } from '../logger';
@@ -88,7 +89,6 @@ export interface Configuration {
     browse?: Browse;
     recursiveIncludes?: RecursiveIncludes;
     customConfigurationVariables?: { [key: string]: string };
-    recursiveIncludesReduceIsExplicit?: boolean;
     recursiveIncludesPriorityIsExplicit?: boolean;
     recursiveIncludesOrderIsExplicit?: boolean;
 }
@@ -113,7 +113,6 @@ export interface Browse {
 }
 
 export interface RecursiveIncludes {
-    reduce?: string;
     priority?: string;
     order?: string;
 }
@@ -136,7 +135,7 @@ export interface CompilerDefaults {
     trustedCompilerFound: boolean;
 }
 
-export class CppProperties {
+export class CppProperties implements vscode.Disposable {
     private client: DefaultClient;
     private rootUri: vscode.Uri | undefined;
     private propertiesFile: vscode.Uri | undefined | null = undefined; // undefined and null values are handled differently
@@ -688,9 +687,9 @@ export class CppProperties {
         if (!this.propertiesFile) {
             const settings: CppSettings = new CppSettings(this.rootUri);
             if (providerId) {
-                settings.update("default.configurationProvider", providerId);
+                void settings.update("default.configurationProvider", providerId);
             } else {
-                settings.update("default.configurationProvider", undefined); // delete the setting
+                void settings.update("default.configurationProvider", undefined); // delete the setting
             }
             const config: Configuration | undefined = this.CurrentConfiguration;
             if (config) {
@@ -978,8 +977,6 @@ export class CppProperties {
             if (!configuration.recursiveIncludes) {
                 configuration.recursiveIncludes = {};
             }
-            configuration.recursiveIncludes.reduce = this.updateConfigurationString(configuration.recursiveIncludes.reduce, settings.defaultRecursiveIncludesReduce);
-            configuration.recursiveIncludesReduceIsExplicit = configuration.recursiveIncludesReduceIsExplicit || settings.defaultRecursiveIncludesReduce !== "";
             configuration.recursiveIncludes.priority = this.updateConfigurationString(configuration.recursiveIncludes.priority, settings.defaultRecursiveIncludesPriority);
             configuration.recursiveIncludesPriorityIsExplicit = configuration.recursiveIncludesPriorityIsExplicit || settings.defaultRecursiveIncludesPriority !== "";
             configuration.recursiveIncludes.order = this.updateConfigurationString(configuration.recursiveIncludes.order, settings.defaultRecursiveIncludesOrder);
@@ -1560,7 +1557,6 @@ export class CppProperties {
                     || (this.configurationJson.configurations[i].cStandardIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].cppStandardIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].intelliSenseModeIsExplicit !== undefined)
-                    || (this.configurationJson.configurations[i].recursiveIncludesReduceIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].recursiveIncludesPriorityIsExplicit !== undefined)
                     || (this.configurationJson.configurations[i].recursiveIncludesOrderIsExplicit !== undefined)) {
                     dirty = true;
@@ -1583,7 +1579,6 @@ export class CppProperties {
                 e.cStandardIsExplicit = e.cStandard !== undefined;
                 e.cppStandardIsExplicit = e.cppStandard !== undefined;
                 e.intelliSenseModeIsExplicit = e.intelliSenseMode !== undefined;
-                e.recursiveIncludesReduceIsExplicit = e.recursiveIncludes?.reduce !== undefined;
                 e.recursiveIncludesPriorityIsExplicit = e.recursiveIncludes?.priority !== undefined;
                 e.recursiveIncludesOrderIsExplicit = e.recursiveIncludes?.order !== undefined;
             });
@@ -2124,10 +2119,8 @@ export class CppProperties {
                 continue;
             }
 
-            // Escape the path string for literal use in a regular expression
-            // Need to escape any quotes to match the original text
-            let escapedPath: string = curPath.replace(/"/g, '\\"');
-            escapedPath = escapedPath.replace(/[-\"\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            // Escape the parsed path for a literal regex match against its JSON spelling.
+            const escapedPath: string = escapePathForSquiggles(curPath);
 
             // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
             // and extend that pattern to the next quote before and next quote after it.
@@ -2140,8 +2133,7 @@ export class CppProperties {
                 expandedPaths = result ?? [];
                 if (duration > 10 && configMatches) {
                     newSquiggleMetrics.SlowPathResolution++;
-                    const curOffset = curText.indexOf(configMatches[0]);
-                    const endOffset = curOffset + curPath.length;
+                    const [curOffset, endOffset] = getTextMatchOffsets(curText, configMatches[0]);
                     const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(curTextStartOffset + curOffset), document.positionAt(curTextStartOffset + endOffset)),
                         localize('resolve.path.took.too.long', "Path took {0}s to evaluate", duration),
@@ -2151,8 +2143,7 @@ export class CppProperties {
             } catch (e) {
                 expandedPaths = [];
                 if (configMatches) {
-                    const curOffset = curText.indexOf(configMatches[0]);
-                    const endOffset = curOffset + curPath.length;
+                    const [curOffset, endOffset] = getTextMatchOffsets(curText, configMatches[0]);
                     const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(curTextStartOffset + curOffset), document.positionAt(curTextStartOffset + endOffset)),
                         localize('resolve.path.failed', "Failed to resolve path {0}. Error: {1}", curPath, (e as Error).message),
@@ -2408,7 +2399,6 @@ export class CppProperties {
         const savedCStandardIsExplicit: boolean[] = [];
         const savedCppStandardIsExplicit: boolean[] = [];
         const savedIntelliSenseModeIsExplicit: boolean[] = [];
-        const savedRecursiveIncludesReduceIsExplicit: boolean[] = [];
         const savedRecursiveIncludesPriorityIsExplicit: boolean[] = [];
         const savedRecursiveIncludesOrderIsExplicit: boolean[] = [];
 
@@ -2429,10 +2419,6 @@ export class CppProperties {
                 savedIntelliSenseModeIsExplicit.push(!!e.intelliSenseModeIsExplicit);
                 if (e.intelliSenseModeIsExplicit !== undefined) {
                     delete e.intelliSenseModeIsExplicit;
-                }
-                savedRecursiveIncludesReduceIsExplicit.push(!!e.recursiveIncludesReduceIsExplicit);
-                if (e.recursiveIncludesReduceIsExplicit !== undefined) {
-                    delete e.recursiveIncludesReduceIsExplicit;
                 }
                 savedRecursiveIncludesPriorityIsExplicit.push(!!e.recursiveIncludesPriorityIsExplicit);
                 if (e.recursiveIncludesPriorityIsExplicit !== undefined) {
@@ -2456,7 +2442,6 @@ export class CppProperties {
                 this.configurationJson.configurations[i].cStandardIsExplicit = savedCStandardIsExplicit[i];
                 this.configurationJson.configurations[i].cppStandardIsExplicit = savedCppStandardIsExplicit[i];
                 this.configurationJson.configurations[i].intelliSenseModeIsExplicit = savedIntelliSenseModeIsExplicit[i];
-                this.configurationJson.configurations[i].recursiveIncludesReduceIsExplicit = savedRecursiveIncludesReduceIsExplicit[i];
                 this.configurationJson.configurations[i].recursiveIncludesPriorityIsExplicit = savedRecursiveIncludesPriorityIsExplicit[i];
                 this.configurationJson.configurations[i].recursiveIncludesOrderIsExplicit = savedRecursiveIncludesOrderIsExplicit[i];
             }

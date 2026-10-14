@@ -6,7 +6,7 @@
 {
 	"walkthrough.windows.install.compiler": "Instalace kompilátoru jazyka C++ v systému Windows",
 	"walkthrough.windows.text1": "Pokud provádíte vývoj C++ pro Windows, doporučujeme nainstalovat kompilátor Microsoft Visual C++ (MSVC).",
-	"walkthrough.windows.text2": "Pokud chcete nainstalovat MSVC, otevřete terminál VS Code (CTRL + `) a vložte následující příkaz:\n",
+	"walkthrough.windows.text2": "Pokud chcete nainstalovat MSVC, otevřete terminál VS Code (CTRL + `) a vložte následující příkaz:",
 	"walkthrough.windows.note1": "Poznámka",
 	"walkthrough.windows.note1.text": "Můžete použít sadu nástrojů C++ z Visual Studio Build Tools spolu s Visual Studio Code ke kompilaci, sestavení a ověření jakékoli kódové báze C++, pokud máte také platnou licenci Visual Studio (buď Community, Pro nebo Enterprise), kterou aktivně používáte k vývoji kódové báze C++.",
 	"walkthrough.windows.verify.compiler": "Ověřování instalace kompilátoru",

@@ -16,7 +16,6 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class CopilotHoverProvider implements vscode.HoverProvider {
-    private client: DefaultClient;
     private currentDocument: vscode.TextDocument | undefined;
     private currentPosition: vscode.Position | undefined;
     private currentCancellationToken: vscode.CancellationToken | undefined;
@@ -27,10 +26,11 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
     private cancelledPosition: vscode.Position | undefined;
     private content: string | undefined;
     private chatModel: vscode.LanguageModelChat | undefined;
+    private chatModelId: string | undefined; // Save the selected model ID to avoid trying the same unavailable model repeatedly.
     // Flag to avoid querying the LanguageModelChat repeatedly if no model is found
     private checkedChatModel: boolean = false;
-    constructor(client: DefaultClient) {
-        this.client = client;
+
+    constructor(private client: DefaultClient) {
     }
 
     public async getCachedChatModel(): Promise<vscode.LanguageModelChat | undefined> {
@@ -41,12 +41,29 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
         const vscodelm = getVSCodeLanguageModel();
         if (vscodelm) {
             try {
-                // First look for GPT-5-mini which should be available to all
-                // users and have a 0x multiplier on paid plans.
-                let [model] = await vscodelm.selectChatModels({ ...modelSelector, id: 'gpt-5-mini' });
-                if (!model) {
-                    // If GPT-5-mini is not available, fall back to the first available model
-                    [model] = await vscodelm.selectChatModels(modelSelector);
+                let model: vscode.LanguageModelChat | undefined;
+                if (this.chatModelId === undefined) {
+                    // First look for GPT-4o which should be available to all
+                    // users and have a 0x multiplier on paid plans.
+                    // GPT-4o is faster than the x0 GPT-5-mini (which seems too slow for hover, e.g. 10+ seconds).
+                    this.chatModelId = 'gpt-4o';
+                    [model] = await vscodelm.selectChatModels({ ...modelSelector, id: this.chatModelId });
+                    if (!model) {
+                        // If GPT-4o is not available, fallback to GPT-5.4-mini (x0.33 and fast).
+                        this.chatModelId = 'gpt-5.4-mini';
+                        [model] = await vscodelm.selectChatModels({ ...modelSelector, id: this.chatModelId });
+                    }
+                    if (!model) {
+                        // If GPT-5.4-mini is not available, fallback to the first available model.
+                        this.chatModelId = 'default';
+                        [model] = await vscodelm.selectChatModels(modelSelector);
+                    }
+                } else {
+                    if (this.chatModelId === 'default') {
+                        [model] = await vscodelm.selectChatModels(modelSelector);
+                    } else {
+                        [model] = await vscodelm.selectChatModels({ ...modelSelector, id: this.chatModelId });
+                    }
                 }
                 if (!model) {
                     telemetry.logLanguageServerEvent('CopilotHoverNoModelSelected', { remoteName: vscode.env.remoteName || 'local' });
@@ -153,7 +170,6 @@ export class CopilotHoverProvider implements vscode.HoverProvider {
             position: Position.create(position.line, position.character)
         };
 
-        await this.client.ready;
         if (this.currentCancellationToken?.isCancellationRequested) {
             throw new vscode.CancellationError();
         }

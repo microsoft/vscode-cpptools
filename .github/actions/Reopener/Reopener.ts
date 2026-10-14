@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { GitHub, Issue } from '../api/api';
-import { daysAgoToHumanReadbleDate, safeLog } from '../common/utils';
+import { GitHub } from '../api/api';
+import { safeLog } from '../common/utils';
 import { ActionBase } from '../common/ActionBase';
 
 export class Reopener extends ActionBase {
@@ -23,8 +23,7 @@ export class Reopener extends ActionBase {
 		ignoreMilestoneIds?: string,
 		minimumVotes?: number,
 		maximumVotes?: number
-	)
-	{
+	) {
 		super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes);
 	}
 
@@ -34,7 +33,7 @@ export class Reopener extends ActionBase {
 
 		safeLog(`alsoApplyToOpenIssues: ${this.alsoApplyToOpenIssues}`);
 
-		const query = this.buildQuery((this.alsoApplyToOpenIssues ? "": "is:closed ") + "is:unlocked");
+		const query = this.buildQuery((this.alsoApplyToOpenIssues ? "" : "is:closed ") + "is:unlocked");
 
 		for await (const page of this.github.query({ q: query })) {
 			await Promise.all(

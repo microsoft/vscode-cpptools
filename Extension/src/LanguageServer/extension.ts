@@ -23,6 +23,9 @@ import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
 import { CopilotHoverProvider } from './Providers/CopilotHoverProvider';
+import { sendFindAllReferencesRequest } from './Providers/findAllReferencesProvider';
+import { sendCallHierarchyCallsFromRequest, sendCallHierarchyCallsToRequest, sendPrepareCallHierarchyRequest } from './callHierarchy';
+import { sendGoToDefinitionRequest } from './goToDefinition';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
@@ -35,7 +38,7 @@ import { CppConfigurationLanguageModelTool } from './lmTool';
 import { getLocaleId } from './localization';
 import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
-import { CppSettings } from './settings';
+import { CppSettings, trackedSections } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
 import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
 
@@ -45,7 +48,7 @@ export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
 
 let prevMacCrashFile: string;
-let prevCppCrashFile: string;
+const pendingCppCrashPaths: Set<string> = new Set<string>();
 let prevCppCrashCallStackData: string = "";
 export let clients: ClientCollection;
 let activeDocument: vscode.TextDocument | undefined;
@@ -182,11 +185,11 @@ export async function activate(): Promise<void> {
     disposables.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
-    disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
+    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges(e => onDidChangeTextEditorVisibleRanges(e)));
+    disposables.push(vscode.window.onDidChangeActiveTextEditor(e => onDidChangeActiveTextEditor(e)));
     ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
-    disposables.push(vscode.window.onDidChangeTextEditorSelection((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorSelection(e))));
-    disposables.push(vscode.window.onDidChangeVisibleTextEditors((e) => clients.ActiveClient.enqueue(async () => onDidChangeVisibleTextEditors(e))));
+    disposables.push(vscode.window.onDidChangeTextEditorSelection(e => onDidChangeTextEditorSelection(e)));
+    disposables.push(vscode.window.onDidChangeVisibleTextEditors(e => onDidChangeVisibleTextEditors(e)));
     updateLanguageConfigurations();
 
     reportMacCrashes();
@@ -272,6 +275,7 @@ export async function activate(): Promise<void> {
     }
 
     await registerRelatedFilesProvider();
+    await vscode.commands.executeCommand('setContext', 'cpptools.languageServerActivated', true);
 }
 
 export function updateLanguageConfigurations(): void {
@@ -287,11 +291,23 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  */
 async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
+    let settingsChanged: boolean = false;
     clients.forEach(client => {
         if (client instanceof DefaultClient) {
-            void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
+            if (trackedSections.some(section => event.affectsConfiguration(section, client.RootUri))) {
+                settingsChanged = true;
+                void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
+            }
         }
     });
+    if (settingsChanged) {
+        // Send the updated settings once through the default client because the payload includes all workspace folders.
+        const defaultClient: Client = clients.getDefaultClient();
+        void defaultClient.sendDidChangeSettings().catch(logAndReturn.undefined);
+        if (event.affectsConfiguration("C_Cpp.hoverShowTypeSizeAndAlignment")) {
+            defaultClient.getCopilotHoverProvider()?.reset();
+        }
+    }
 }
 
 function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): void {
@@ -377,6 +393,7 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.forEach(d => d.dispose());
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectTranslationUnit', enabled ? onSelectTranslationUnit : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', enabled ? onResetDatabase : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectIntelliSenseConfiguration', enabled ? selectIntelliSenseConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.InstallCompiler', enabled ? installCompiler : onDisabledCommand));
@@ -389,6 +406,9 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', enabled ? onEnableSquiggles : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', enabled ? onDisableSquiggles : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', enabled ? onToggleDimInactiveRegions : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ToggleTypeSizeAndAlignment', enabled ? onToggleTypeSizeAndAlignment : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.FoldAllInactiveRegions', enabled ? onFoldAllInactiveRegions : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.UnfoldAllInactiveRegions', enabled ? onUnfoldAllInactiveRegions : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', enabled ? onPauseParsing : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', enabled ? onResumeParsing : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseCodeAnalysis', enabled ? onPauseCodeAnalysis : onDisabledCommand));
@@ -397,6 +417,11 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowActiveCodeAnalysisCommands', enabled ? onShowActiveCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowIdleCodeAnalysisCommands', enabled ? onShowIdleCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', enabled ? onShowReferencesProgress : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.FindAllReferences', enabled ? onFindAllReferences : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToDefinition', enabled ? onGoToDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PrepareCallHierarchy', enabled ? onPrepareCallHierarchy : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CallHierarchyCallsTo', enabled ? onCallHierarchyCallsTo : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CallHierarchyCallsFrom', enabled ? onCallHierarchyCallsFrom : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', enabled ? onTakeSurvey : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', enabled ? onLogDiagnostics : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', enabled ? onRescanWorkspace : onDisabledCommand));
@@ -421,6 +446,7 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', enabled ? onGetActiveConfigName : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', enabled ? onGetActiveConfigCustomVariable : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', enabled ? onSetActiveConfigName : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('cpptools.waitForTagParsing', enabled ? onWaitForTagParsing : () => true));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
@@ -456,6 +482,107 @@ async function onRestartIntelliSenseForFile() {
     return clients.ActiveClient.restartIntelliSenseForFile(activeEditor.document);
 }
 
+function getEditorPath(fileName: string): string {
+    let bestRealRoot: string | undefined;
+    let bestRootPath: string | undefined;
+    clients.forEach(client => {
+        if (!client.RootRealPath) {
+            return;
+        }
+        const relativePath: string = path.relative(client.RootRealPath, fileName);
+        const isUnderRoot: boolean = relativePath === "" ||
+            (relativePath !== ".." && !relativePath.startsWith(`..${path.sep}`) && !path.isAbsolute(relativePath));
+        if (isUnderRoot && (!bestRealRoot || client.RootRealPath.length > bestRealRoot.length)) {
+            bestRealRoot = client.RootRealPath;
+            bestRootPath = client.RootPath;
+        }
+    });
+    return bestRealRoot && bestRootPath ? path.join(bestRootPath, path.relative(bestRealRoot, fileName)) : fileName;
+}
+
+interface TranslationUnitQuickPickItem extends vscode.QuickPickItem {
+    translationUnit: string;
+}
+
+async function onSelectTranslationUnit(): Promise<void> {
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!activeEditor || !util.isCpp(activeEditor.document)) {
+        return;
+    }
+
+    const client: Client = clients.ActiveClient;
+    const result = await (async () => {
+        const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+        try {
+            const candidatesPromise = client.getTranslationUnitSourceCandidates(activeEditor.document.uri, tokenSource.token);
+            const showProgress: boolean = await new Promise<boolean>((resolve, reject) => {
+                const timer: NodeJS.Timeout = global.setTimeout(() => resolve(true), 2000);
+                void candidatesPromise.then(() => {
+                    clearTimeout(timer);
+                    resolve(false);
+                }, (e) => {
+                    clearTimeout(timer);
+                    reject(e);
+                });
+            });
+
+            if (!showProgress) {
+                return await candidatesPromise;
+            }
+
+            return await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: localize('find.translation.units', 'Finding Translation Units...'),
+                cancellable: true
+            }, async (_progress, token) => {
+                const cancellationListener: vscode.Disposable = token.onCancellationRequested(() => tokenSource.cancel());
+                try {
+                    return await candidatesPromise;
+                } finally {
+                    cancellationListener.dispose();
+                }
+            });
+        } catch (e) {
+            if (e instanceof vscode.CancellationError) {
+                return undefined;
+            }
+            throw e;
+        } finally {
+            tokenSource.dispose();
+        }
+    })();
+    if (result === undefined) {
+        return;
+    }
+    if (result.candidates.length === 0) {
+        void vscode.window.showInformationMessage(localize('no.translation.units.found', 'No translation units were found for the active file.'));
+        return;
+    }
+    const currentTranslationUnit: string = getEditorPath(result.currentTranslationUnit);
+    const items: TranslationUnitQuickPickItem[] = result.candidates.map(candidate => {
+        const editorPath: string = getEditorPath(candidate);
+        const relativePath: string = vscode.workspace.asRelativePath(vscode.Uri.file(editorPath));
+        const directory: string = path.dirname(relativePath);
+        const isCurrent: boolean = editorPath === currentTranslationUnit;
+        return {
+            label: `${isCurrent ? "$(check) " : ""}${path.basename(relativePath)}`,
+            description: isCurrent ? localize('current.translation.unit', 'Current translation unit') :
+                directory === "." ? undefined : directory,
+            detail: editorPath,
+            translationUnit: editorPath
+        };
+    });
+    const selection: TranslationUnitQuickPickItem | undefined = await vscode.window.showQuickPick(items, {
+        title: localize('select.translation.unit', 'Select a Translation Unit'),
+        placeHolder: localize('select.translation.unit.placeholder', 'Select a source file to use as the translation unit'),
+        matchOnDescription: true,
+        matchOnDetail: true
+    });
+    if (selection !== undefined) {
+        await client.selectTranslationUnit(activeEditor.document.uri, selection.translationUnit);
+    }
+}
+
 async function onSwitchHeaderSource(): Promise<void> {
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !util.isCpp(activeEditor.document)) {
@@ -469,19 +596,57 @@ async function onSwitchHeaderSource(): Promise<void> {
         rootUri = vscode.Uri.file(path.dirname(fileName)); // When switching without a folder open.
     }
 
-    let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootUri, fileName);
-    // If the targetFileName has a path that is a symlink target of a workspace folder,
-    // then replace the RootRealPath with the RootPath (the symlink path).
-    let targetFileNameReplaced: boolean = false;
-    clients.forEach(client => {
-        if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
-            && targetFileName.startsWith(client.RootRealPath)) {
-            targetFileName = client.RootPath + targetFileName.substring(client.RootRealPath.length);
-            targetFileNameReplaced = true;
+    const switchHeaderSource: (token: vscode.CancellationToken) => Promise<void> = async (token: vscode.CancellationToken) => {
+        try {
+            let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootUri, fileName, token);
+            if (!targetFileName) {
+                return;
+            }
+            targetFileName = getEditorPath(targetFileName);
+            const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
+            await vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
+        } catch (e) {
+            if (e instanceof vscode.CancellationError) {
+                return;
+            }
+            throw e;
         }
-    });
-    const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
-    void vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
+    };
+
+    const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+    try {
+        const switchHeaderSourcePromise: Promise<void> = switchHeaderSource(tokenSource.token);
+        const showProgress: boolean = await new Promise<boolean>((resolve, reject) => {
+            const timer: NodeJS.Timeout = global.setTimeout(() => resolve(true), 2000);
+            void switchHeaderSourcePromise.then(() => {
+                clearTimeout(timer);
+                resolve(false);
+            }, (e) => {
+                clearTimeout(timer);
+                reject(e);
+            });
+        });
+
+        if (!showProgress) {
+            await switchHeaderSourcePromise;
+            return;
+        }
+
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: localize('switch.header.source', 'Switching Header/Source...'),
+            cancellable: true
+        }, async (_progress, token) => {
+            const cancellationListener: vscode.Disposable = token.onCancellationRequested(() => tokenSource.cancel());
+            try {
+                await switchHeaderSourcePromise;
+            } finally {
+                cancellationListener.dispose();
+            }
+        });
+    } finally {
+        tokenSource.dispose();
+    }
 }
 
 /**
@@ -506,12 +671,10 @@ async function selectClient(): Promise<Client> {
 }
 
 async function onResetDatabase(): Promise<void> {
-    await clients.ActiveClient.ready;
     return clients.ActiveClient.resetDatabase();
 }
 
 async function onRescanCompilers(sender?: any): Promise<void> {
-    await clients.ActiveClient.ready;
     return clients.ActiveClient.rescanCompilers(sender);
 }
 
@@ -520,7 +683,6 @@ async function onAddMissingInclude(): Promise<void> {
 }
 
 async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
-    await clients.ActiveClient.ready;
     return clients.ActiveClient.promptSelectIntelliSenseConfiguration(sender);
 }
 
@@ -761,19 +923,35 @@ async function onAddToIncludePath(path: string): Promise<void> {
 function onEnableSquiggles(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("errorSquiggles", "enabled");
+    void settings.update<string>("errorSquiggles", "enabled");
 }
 
 function onDisableSquiggles(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("errorSquiggles", "disabled");
+    void settings.update<string>("errorSquiggles", "disabled");
 }
 
 function onToggleDimInactiveRegions(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
+    void settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
+}
+
+function onToggleTypeSizeAndAlignment(): Thenable<void> {
+    // This only applies to the active client.
+    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    return settings.update<boolean>("hoverShowTypeSizeAndAlignment", !settings.hoverShowTypeSizeAndAlignment);
+}
+
+function onFoldAllInactiveRegions(): Promise<void> {
+    const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    return editor ? clients.getClientFor(editor.document.uri).foldAllInactiveRegions() : Promise.resolve();
+}
+
+function onUnfoldAllInactiveRegions(): Promise<void> {
+    const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    return editor ? clients.getClientFor(editor.document.uri).unfoldAllInactiveRegions() : Promise.resolve();
 }
 
 function onPauseParsing(): void {
@@ -808,6 +986,72 @@ function onShowReferencesProgress(): void {
     void clients.ActiveClient.handleReferencesIcon().catch(logAndReturn.undefined);
 }
 
+async function onFindAllReferences(uri: vscode.Uri, position: vscode.Position, token?: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+    if (!uri || !position) {
+        throw new Error("C_Cpp.FindAllReferences requires both a uri and position.");
+    }
+
+    const client: Client = clients.getClientFor(uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    const result = await sendFindAllReferencesRequest(client, uri, position, token ?? CancellationToken.None);
+    return result?.locations;
+}
+
+async function onGoToDefinition(uri: vscode.Uri, position: vscode.Position, token?: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+    if (!uri || !position) {
+        throw new Error("C_Cpp.GoToDefinition requires both a uri and position.");
+    }
+
+    const client: Client = clients.getClientFor(uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    return sendGoToDefinitionRequest(client, uri, position, token ?? CancellationToken.None);
+}
+
+async function onPrepareCallHierarchy(uri: vscode.Uri, position: vscode.Position, token?: vscode.CancellationToken): Promise<vscode.CallHierarchyItem[] | undefined> {
+    if (!uri || !position) {
+        throw new Error("C_Cpp.PrepareCallHierarchy requires both a uri and position.");
+    }
+
+    const client: Client = clients.getClientFor(uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    return sendPrepareCallHierarchyRequest(client, uri, position, token ?? CancellationToken.None);
+}
+
+async function onCallHierarchyCallsTo(item: vscode.CallHierarchyItem, token?: vscode.CancellationToken): Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
+    if (!item) {
+        throw new Error("C_Cpp.CallHierarchyCallsTo requires an item.");
+    }
+
+    const client: Client = clients.getClientFor(item.uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    return sendCallHierarchyCallsToRequest(client, item, token ?? CancellationToken.None);
+}
+
+async function onCallHierarchyCallsFrom(item: vscode.CallHierarchyItem, token?: vscode.CancellationToken): Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {
+    if (!item) {
+        throw new Error("C_Cpp.CallHierarchyCallsFrom requires an item.");
+    }
+
+    const client: Client = clients.getClientFor(item.uri);
+    if (!(client instanceof DefaultClient)) {
+        return undefined;
+    }
+
+    return sendCallHierarchyCallsFromRequest(client, item, token ?? CancellationToken.None);
+}
+
 function onToggleRefGroupView(): void {
     // Set context to switch icons
     const client: Client = getActiveClient();
@@ -816,7 +1060,7 @@ function onToggleRefGroupView(): void {
 
 function onTakeSurvey(): void {
     telemetry.logLanguageServerEvent("onTakeSurvey");
-    const uri: vscode.Uri = vscode.Uri.parse(`https://www.research.net/r/VBVV6C6?o=${os.platform()}&m=${vscode.env.machineId}`);
+    const uri: vscode.Uri = vscode.Uri.parse(`https://aka.ms/vcvscodesurvey`);
     void vscode.commands.executeCommand('vscode.open', uri);
 }
 
@@ -895,6 +1139,10 @@ function onGetActiveConfigName(): Thenable<string | undefined> {
 
 function onGetActiveConfigCustomVariable(variableName: string): Thenable<string> {
     return clients.ActiveClient.getCurrentConfigCustomVariable(variableName);
+}
+
+async function onWaitForTagParsing(timeout: number, token: vscode.CancellationToken): Promise<boolean> {
+    return clients.getDefaultClient().waitForTagParsing(timeout, token);
 }
 
 function onLogDiagnostics(): Promise<void> {
@@ -989,7 +1237,6 @@ export function usesCrashHandler(): boolean {
 
 export function watchForCrashes(crashDirectory: string): void {
     if (crashDirectory !== "") {
-        prevCppCrashFile = "";
         fs.stat(crashDirectory, (err) => {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
@@ -1005,20 +1252,22 @@ export function watchForCrashes(crashDirectory: string): void {
                     if (event !== "change") {
                         return;
                     }
-                    if (!filename || filename === prevCppCrashFile) {
+                    if (!filename || !filename.startsWith("cpptools")) {
                         return;
                     }
-                    prevCppCrashFile = filename;
-                    if (!filename.startsWith("cpptools")) {
+                    const crashPath: string = path.resolve(crashDirectory, filename);
+                    if (pendingCppCrashPaths.has(crashPath)) {
                         return;
                     }
+                    pendingCppCrashPaths.add(crashPath);
                     const crashDate: Date = new Date();
                     isWritingCrashCallStack = true;
 
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
-                        isWritingCrashCallStack = false;
-                        fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
+                        pendingCppCrashPaths.delete(crashPath);
+                        isWritingCrashCallStack = pendingCppCrashPaths.size > 0;
+                        fs.readFile(crashPath, 'utf8', (err, data) => {
                             void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
                         });
                     }, 5000);
@@ -1033,13 +1282,10 @@ export function watchForCrashes(crashDirectory: string): void {
 let previousCrashData: string;
 let previousCrashCount: number = 0;
 
-function logCrashTelemetry(data: string, type: string, offsetData?: string, crashLog?: string): void {
+function logCrashTelemetry(data: string, type: string, crashLog?: string): void {
     const crashObject: Record<string, string> = {};
     const crashCountObject: Record<string, number> = {};
     crashObject.CrashingThreadCallStack = data;
-    if (offsetData !== undefined) {
-        crashObject.CrashingThreadCallStackOffsets = offsetData;
-    }
     if (crashLog !== undefined) {
         crashObject.CrashLog = crashLog;
     }
@@ -1053,8 +1299,8 @@ function logMacCrashTelemetry(data: string): void {
     logCrashTelemetry(data, "MacCrash");
 }
 
-function logCppCrashTelemetry(data: string, offsetData?: string, crashLog?: string): void {
-    logCrashTelemetry(data, "CppCrash", offsetData, crashLog);
+function logCppCrashTelemetry(data: string, crashLog?: string): void {
+    logCrashTelemetry(data, "CppCrash", crashLog);
 }
 
 function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
@@ -1110,7 +1356,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     data = data.replace(/0x1........ \+ 0/g, "");
 
     // Get rid of the process names on each line and just add it to the start.
-    const processNames: string[] = ["cpptools-srv", "cpptools-wordexp", "cpptools",
+    const processNames: string[] = ["cpptools-srv2", "cpptools-srv", "cpptools-wordexp", "cpptools",
         // Since only crash logs that start with "cpptools" are reported, the cases below would only occur
         // if the crash were to happen before the new process had fully started and renamed itself.
         "clang-tidy", "clang-format", "clang", "gcc"];
@@ -1160,6 +1406,39 @@ function containsFilteredTelemetryData(str: string): boolean {
     return regex.test(str);
 }
 
+// Non-null fault addresses are randomized by ASLR (and use-after-free/wild pointers vary run to
+// run), so embedding the raw value in CrashingThreadCallStack would fragment crash buckets and
+// make CrashCount meaningless. Preserve near-null addresses (typical null-pointer dereferences,
+// which are stable and useful for bucketing), but replace arbitrary addresses with a stable
+// placeholder so identical crashes still de-duplicate.
+function bucketSignalAddress(address: string): string {
+    let value: bigint;
+    try {
+        value = BigInt(address.trim());
+    } catch {
+        return address; // Not a parseable address; leave it untouched.
+    }
+    // 0x10000 (64 KB) covers null plus small member/array offsets off a null pointer.
+    return value < 0x10000n ? address : "<non-null>";
+}
+
+// An unsymbolized frame is reported as a raw runtime address. Addresses in the fixed-base main
+// executable (non-PIE on Linux) stay constant across runs and are useful for bucketing, but
+// addresses in the ASLR-randomized shared-library/mmap region (Linux 0x7f..., and on macOS the
+// PIE main image and dyld shared cache) shift every launch and would fragment crash buckets. Keep
+// the low, fixed addresses but replace high (relocated) ones with a stable placeholder. 4 GB is a
+// safe cut: a non-PIE executable's own code loads well below it, while the relocated region is far
+// above it.
+function bucketFrameAddress(address: string): string {
+    let value: bigint;
+    try {
+        value = BigInt(address.trim());
+    } catch {
+        return address; // Not a parseable address; leave it untouched.
+    }
+    return value < 0x100000000n ? address : "<relocated>";
+}
+
 async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
     if (err) {
         if (err.code === "ENOENT") {
@@ -1167,17 +1446,20 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         }
         return logCppCrashTelemetry("readFile: " + err.code);
     }
+    if (data.length === 0) {
+        return;
+    }
 
     const lines: string[] = data.split("\n");
-    let addressData: string;
-    const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
-    const telemetryHeader: string = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
+    let signalInfo: string;
+    const processName: string = (crashFile.startsWith("cpptools-srv2") ? "cpptools-srv2 process" :
+        crashFile.startsWith("cpptools-srv") ? "cpptools-srv process" :
+            crashFile.startsWith("cpptools-wordexp") ? "cpptools-wordexp process" : "cpptools process") + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
     const startStr: string = isMac ? " _" : "<";
     const offsetStr: string = isMac ? " + " : "+";
     const endOffsetStr: string = isMac ? " " : " <";
-    const dotStr: string = "…\n";
     let signalType: string;
     let crashLog: string = "";
     let crashStackStartLine: number = 0;
@@ -1200,16 +1482,29 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
     if (lines[crashStackStartLine].startsWith("SIG")) {
         signalType = `${lines[crashStackStartLine]}\n`;
-        addressData = `${lines[crashStackStartLine + 1]}:${lines[crashStackStartLine + 2]}\n`; // signalCode:signalAddr
-        crashStackStartLine += 3;
+        const siCodeRaw: string | undefined = lines[crashStackStartLine + 1];
+        const siAddrRaw: string | undefined = lines[crashStackStartLine + 2];
+        const siCode: string = siCodeRaw?.trim() ?? "";
+        const siAddr: string = siAddrRaw?.trim() ?? "";
+        const signalInfoParts: string[] = [];
+        if (siCode.length > 0) {
+            signalInfoParts.push(`si_code=${siCode}`);
+        }
+        if (siAddr.length > 0) {
+            signalInfoParts.push(`si_addr=${bucketSignalAddress(siAddr)}`);
+        }
+        signalInfo = signalInfoParts.length > 0 ? `${signalInfoParts.join(", ")}\n` : "";
+        // Only advance past the header lines that actually exist so a missing si_code/si_addr
+        // line does not cause the first stack frame to be skipped.
+        crashStackStartLine += 1 + (siCodeRaw !== undefined ? 1 : 0) + (siAddrRaw !== undefined ? 1 : 0);
     } else {
         // The signal type may fail to be written.
         // Intentionally different from SIGUNKNOWN from cpptools,
         // and not SIG-? to avoid matching the regex in containsFilteredTelemetryData.
         signalType = "SIGMISSING\n";
-        addressData = ".\n";
+        signalInfo = "";
     }
-    data = telemetryHeader + signalType;
+    data = processName + signalType + signalInfo;
     let crashCallStack: string = "";
     let validFrameFound: boolean = false;
     for (let lineNum: number = crashStackStartLine; lineNum < lines.length - 3; ++lineNum) { // skip last lines
@@ -1217,23 +1512,21 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         const startPos: number = line.indexOf(startStr);
         let pendingCallStack: string = "";
         if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
-            pendingCallStack = dotStr;
             const startAddressPos: number = line.indexOf("0x");
             const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
             if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
-                addressData += "Unexpected offset\n";
+                pendingCallStack = "Unexpected offset\n";
             } else {
-                let pendingAddressData: string = line.substring(startAddressPos, endAddressPos) + "\n";
+                let pendingAddressData: string = bucketFrameAddress(line.substring(startAddressPos, endAddressPos)) + "\n";
                 if (containsFilteredTelemetryData(pendingAddressData)) {
                     pendingAddressData = "?\n";
                 }
-                addressData += pendingAddressData;
+                pendingCallStack = pendingAddressData;
             }
         } else {
             const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
             if (offsetPos === -1) {
                 pendingCallStack = "Missing offsetStr\n";
-                addressData += "\n";
             } else {
                 const startPos2: number = startPos + 1;
                 let funcStr: string = line.substring(startPos2, offsetPos);
@@ -1254,7 +1547,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                         funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
                     }
                 }
-                if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
+                if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("terminate_handler(") || funcStr.startsWith("_sigtramp"))) {
                     continue; // Skip these on early frames.
                 }
                 validFrameFound = true;
@@ -1264,18 +1557,6 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 // Compute pendingOffset.
                 if (isMac) {
                     pendingOffset += line.substring(offsetPos2);
-                    const startAddressPos: number = line.indexOf("0x");
-                    if (startAddressPos === -1 || startAddressPos >= startPos) {
-                        // unexpected
-                        pendingOffset += "<Missing 0x>";
-                        addressData += "\n";
-                    } else {
-                        let pendingAddressData: string = line.substring(startAddressPos, startPos) + "\n";
-                        if (containsFilteredTelemetryData(pendingAddressData)) {
-                            pendingAddressData = "?\n";
-                        }
-                        addressData += pendingAddressData;
-                    }
                 } else {
                     const endPos: number = line.indexOf(">", offsetPos2);
                     if (endPos === -1) {
@@ -1283,8 +1564,6 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                     } else {
                         pendingOffset += line.substring(offsetPos2, endPos);
                     }
-                    addressData += "\n";
-                    // TODO: It seems like addressData should be obtained on Linux in case the function is filtered.
                 }
                 pendingOffset += "\n";
                 pendingCallStack = funcStr + pendingOffset;
@@ -1314,19 +1593,18 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     }
 
     crashCallStack = crashCallStack.trimEnd();
-    addressData = addressData.trimEnd();
 
     if (crashCallStack !== prevCppCrashCallStackData) {
         prevCppCrashCallStackData = crashCallStack;
 
         if (lines.length >= 6 && util.getLoggingLevel() >= 1) {
-            getCrashCallStacksChannel().appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}${crashLog.length > 0 ? "\n\n" + crashLog : ""}`);
+            getCrashCallStacksChannel().appendLine(`\n${processName}${crashDate.toLocaleString()}\n${signalType}${signalInfo}${crashCallStack}${crashLog.length > 0 ? "\n\n" + crashLog : ""}`);
         }
     }
 
     data += crashCallStack;
 
-    logCppCrashTelemetry(data, addressData, crashLog);
+    logCppCrashTelemetry(data, crashLog);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
     if (crashFile === "cpptools.txt") {

@@ -81,7 +81,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             throw new Error("Default config not found in provideDebugConfigurations()");
         }
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        if (!editor || !util.isCppOrCFile(editor.document.uri) || configs.length <= 1) {
+        if (!editor || !util.isCppOrCFile(editor.document.uri, editor.document.languageId) || configs.length <= 1) {
             return [defaultTemplateConfig];
         }
 
@@ -147,12 +147,14 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": folder ? ConfigSource.workspaceFolder : ConfigSource.singleFile, "configMode": ConfigMode.noLaunchConfig, "cancelled": "true", "succeeded": "true" });
                 return undefined; // aborts debugging silently
             } else {
+                const noDebug = config.noDebug ?? false; // Preserve the noDebug value from the config if it exists.
                 // Currently, we expect only one debug config to be selected.
                 console.assert(configs.length === 1, "More than one debug config is selected.");
                 config = configs[0];
                 // Keep track of the entry point where the debug config has been selected, for telemetry purposes.
                 config.debuggerEvent = DebuggerEvent.debugPanel;
                 config.configSource = folder ? ConfigSource.workspaceFolder : ConfigSource.singleFile;
+                config.noDebug = noDebug;
             }
         }
 
@@ -544,12 +546,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return;
         }
 
-        const fileExt: string = path.extname(editor.document.fileName);
-        if (!fileExt) {
-            DebugConfigurationProvider.detectedBuildTasks = emptyTasks;
-            return;
-        }
-
         // Don't offer tasks for header files.
         const isHeader: boolean = util.isHeaderFile(editor.document.uri);
         if (isHeader) {
@@ -557,9 +553,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return;
         }
 
-        // Don't offer tasks if the active file's extension is not a recognized C/C++ extension.
-        const fileIsCpp: boolean = util.isCppFile(editor.document.uri);
-        const fileIsC: boolean = util.isCFile(editor.document.uri);
+        // Don't offer tasks if the active file is not a recognized C/C++ source file.
+        const fileIsCpp: boolean = util.isCppFile(editor.document.uri, editor.document.languageId);
+        const fileIsC: boolean = util.isCFile(editor.document.uri, editor.document.languageId);
         if (!(fileIsCpp || fileIsC)) {
             DebugConfigurationProvider.detectedBuildTasks = emptyTasks;
             return;
@@ -980,7 +976,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
     private async selectConfiguration(textEditor: vscode.TextEditor, pickDefault: boolean = true, onlyWorkspaceFolder: boolean = false): Promise<CppDebugConfiguration | undefined> {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
-        if (!util.isCppOrCFile(textEditor.document.uri)) {
+        if (!util.isCppOrCFile(textEditor.document.uri, textEditor.document.languageId)) {
             void vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
             return;
         }

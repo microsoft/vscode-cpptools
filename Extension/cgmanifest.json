@@ -1,15 +1,25 @@
 {
   "$schema": "https://json.schemastore.org/component-detection-manifest.json",
-  "Registrations": [
+  "registrations": [
     {
-      "Component": {
-        "Type": "git",
-        "Git": {
-          "RepositoryUrl": "https://github.com/lldb-tools/lldb-mi",
-          "CommitHash": "2388bd74133bc21eac59b2e2bf97f2a30770a315"
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/lldb-tools/lldb-mi",
+          "commitHash": "2388bd74133bc21eac59b2e2bf97f2a30770a315"
         }
       }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/llvm/llvm-project",
+          "commitHash": "0d44201451f03ba907cdb268ddddfc3fa38a0ebd"
+        }
+      },
+      "developmentDependency": true
     }
   ],
-  "Version": 1
+  "version": 1
 }

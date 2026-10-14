@@ -18,14 +18,10 @@ const RenameRequest: RequestType<ReferencesParams, ReferencesResult, void> =
     new RequestType<ReferencesParams, ReferencesResult, void>('cpptools/rename');
 
 export class RenameProvider implements vscode.RenameProvider {
-    private client: DefaultClient;
-
-    constructor(client: DefaultClient) {
-        this.client = client;
+    constructor(private client: DefaultClient) {
     }
 
     public async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, _token: vscode.CancellationToken): Promise<vscode.WorkspaceEdit | undefined> {
-        await this.client.ready;
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
         const settings: CppSettings = new CppSettings();

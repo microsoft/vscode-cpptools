@@ -14,12 +14,13 @@ import * as vscode from 'vscode';
 import { DocumentFilter, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
-import * as which from "which";
 import { ManualPromise } from './Utility/Async/manualPromise';
 import { isWindows } from './constants';
+import { classifyFilePath, FileTypeMapping } from './fileType';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
+import which = require('which');
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -157,34 +158,26 @@ export function getVcpkgRoot(): string {
     return vcpkgRoot;
 }
 
-/**
- * This is a fuzzy determination of whether a uri represents a header file.
- * For the purposes of this function, a header file has no extension, or an extension that begins with the letter 'h'.
- * @param document The document to check.
- */
 export function isHeaderFile(uri: vscode.Uri): boolean {
-    const fileExt: string = path.extname(uri.fsPath);
-    const fileExtLower: string = fileExt.toLowerCase();
-    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".inl", ".ipp", ".tcc", ".txx", ".tpp", ".tlh", ".tli", ""].some(ext => fileExtLower === ext);
+    return classifyFilePath(uri.fsPath)?.kind === 'header';
 }
 
-export function isCppFile(uri: vscode.Uri): boolean {
-    const fileExt: string = path.extname(uri.fsPath);
-    const fileExtLower: string = fileExt.toLowerCase();
-    return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ii", ".ino"].some(ext => fileExtLower === ext);
+export function isCppFile(uri: vscode.Uri, languageId?: string): boolean {
+    const fileType: FileTypeMapping | undefined = classifyFilePath(uri.fsPath, languageId);
+    return fileType?.kind === 'source' && (fileType.language === 'cpp' || fileType.language === 'cuda');
 }
 
-export function isCFile(uri: vscode.Uri): boolean {
-    const fileExt: string = path.extname(uri.fsPath);
-    const fileExtLower: string = fileExt.toLowerCase();
-    return fileExt === ".c" || fileExtLower === ".i";
+export function isCFile(uri: vscode.Uri, languageId?: string): boolean {
+    const fileType: FileTypeMapping | undefined = classifyFilePath(uri.fsPath, languageId);
+    return fileType?.kind === 'source' && fileType.language === 'c';
 }
 
-export function isCppOrCFile(uri: vscode.Uri | undefined): boolean {
+export function isCppOrCFile(uri: vscode.Uri | undefined, languageId?: string): boolean {
     if (!uri) {
         return false;
     }
-    return isCppFile(uri) || isCFile(uri);
+    const fileType: FileTypeMapping | undefined = classifyFilePath(uri.fsPath, languageId);
+    return fileType?.kind === 'source' && fileType.language !== undefined;
 }
 
 export function isFolderOpen(uri: vscode.Uri): boolean {
@@ -399,14 +392,12 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     const cycleCache = new Set<string>();
     while (!cycleCache.has(ret)) {
         cycleCache.add(ret);
-        ret = ret.replace(regexp(), (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
-            // Historically, if the variable didn't have anything before the "." or ":"
-            // it was assumed to be an environment variable
-            if (!varType) {
-                varType = "env";
-            }
+        ret = ret.replace(regexp(), (match: string, ignored1: string | undefined, varType: string | undefined, ignored2: string | undefined, name: string) => {
             let newValue: string | undefined;
             switch (varType) {
+                // Historically, if the variable didn't have anything before the "." or ":"
+                // it was assumed to be an environment variable
+                case undefined:
                 case "env": {
                     if (additionalEnvironment) {
                         const v: string | string[] | undefined = additionalEnvironment[name];
@@ -424,6 +415,12 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                     }
                     if (newValue === undefined) {
                         newValue = process.env[name];
+                    }
+
+                    // If the environment variable is not set, we return an empty string. Only do
+                    // this for ${env:X} variables, not ${X} variables.
+                    if (newValue === undefined && varType !== undefined) {
+                        newValue = "";
                     }
                     break;
                 }
@@ -1524,7 +1521,7 @@ export interface ISshLocalForwardInfo {
 
 export function whichAsync(name: string, path?: string): Promise<string | undefined> {
     return new Promise<string | undefined>(resolve => {
-        which(name, path ? { path } : {}, (err, resolved) => {
+        which(name, path ? { path } : {}, (err: Error | null, resolved: string | undefined) => {
             if (err) {
                 resolve(undefined);
             } else {
@@ -1564,6 +1561,34 @@ export function hasMsvcEnvironment(): boolean {
     return msvcEnvVars.every(envVarName =>
         (process.env[envVarName] !== undefined && process.env[envVarName] !== '') ||
         extensionContext?.environmentVariableCollection?.get(envVarName) !== undefined
+    );
+}
+
+export function getMissingMsvcEnvironmentVariables(): string[] {
+    const msvcEnvVars: string[] = [
+        'DevEnvDir',
+        'Framework40Version',
+        'FrameworkDir',
+        'FrameworkVersion',
+        'INCLUDE',
+        'LIB',
+        'LIBPATH',
+        'UCRTVersion',
+        'UniversalCRTSdkDir',
+        'VCIDEInstallDir',
+        'VCINSTALLDIR',
+        'VCToolsRedistDir',
+        'VisualStudioVersion',
+        'VSINSTALLDIR',
+        'WindowsLibPath',
+        'WindowsSdkBinPath',
+        'WindowsSdkDir',
+        'WindowsSDKLibVersion',
+        'WindowsSDKVersion'
+    ];
+    return msvcEnvVars.filter(envVarName =>
+        (process.env[envVarName] === undefined || process.env[envVarName] === '') &&
+        extensionContext?.environmentVariableCollection?.get(envVarName) === undefined
     );
 }
 
@@ -1667,7 +1692,7 @@ export interface IQuotedString {
 
 export type CommandString = string | IQuotedString;
 
-export function buildShellCommandLine(originalCommand: CommandString, command: CommandString, args: CommandString[]): string {
+export function buildShellCommandLine(originalCommand: CommandString, command: CommandString, args: CommandString[], singleCommandOnly: boolean = false): string {
 
     let shellQuoteOptions: IShellQuotingOptions;
     const isWindows: boolean = os.platform() === 'win32';
@@ -1781,7 +1806,7 @@ export function buildShellCommandLine(originalCommand: CommandString, command: C
 
     let commandLine = result.join(' ');
     // There are special rules quoted command line in cmd.exe
-    if (isWindows) {
+    if (isWindows && !singleCommandOnly) {
         commandLine = `chcp 65001>nul && ${commandLine}`;
         if (commandQuoted && argQuoted) {
             commandLine = '"' + commandLine + '"';
@@ -1848,4 +1873,15 @@ export function getVSCodeLanguageModel(): any | undefined {
         return undefined;
     }
     return vscodelm;
+}
+
+export function sessionIsWsl(): boolean {
+    if (process.env.WSL_DISTRO_NAME) {
+        return true;
+    }
+    try {
+        return fs.readFileSync('/proc/version', 'utf8').toLowerCase().includes('microsoft');
+    } catch {
+        return false;
+    }
 }
