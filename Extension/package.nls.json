@@ -19,6 +19,7 @@
     "c_cpp.command.enableErrorSquiggles.title": "Enable Error Squiggles",
     "c_cpp.command.disableErrorSquiggles.title": "Disable Error Squiggles",
     "c_cpp.command.toggleDimInactiveRegions.title": "Toggle Inactive Region Colorization",
+    "c_cpp.command.toggleTypeSizeAndAlignment.title": "Toggle Type Size and Alignment in Hovers",
     "c_cpp.command.foldAllInactiveRegions.title": "Fold All Inactive Regions",
     "c_cpp.command.unfoldAllInactiveRegions.title": "Unfold All Inactive Regions",
     "c_cpp.command.resetDatabase.title": "Reset IntelliSense Database",
@@ -197,6 +198,12 @@
     },
     "c_cpp.configuration.codeAnalysis.clangTidy.headerFilter.markdownDescription": {
         "message": "A POSIX extended regular expression (ERE) matching the names of the headers to output diagnostics from. Diagnostics from the main file of each translation unit are always displayed. The `${workspaceFolder}` variable is supported (and is used as the default fallback value if no `.clang-tidy` file exists). If this option is not `null` (empty), it overrides the `HeaderFilterRegex` option in a `.clang-tidy` file, if any.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.includeCleanerMappings.markdownDescription": {
+        "message": "Opt-in mappings from exact `misc-include-cleaner` symbol names to public headers. Keys must be nonempty. Values use `<path>` or `\"path\"` with a nonempty path and no embedded delimiters. Keys and values cannot contain control characters. Diagnostics are kept unless a direct include of the mapped header is proven; public-header insertion is offered when available.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -773,6 +780,18 @@
     "c_cpp.configuration.markdownInComments.enabled.description": "Enable all markdown features in the hover tooltip.",
     "c_cpp.configuration.markdownInComments.disabled.description": "Disable all markdown features in the hover tooltip.",
     "c_cpp.configuration.hover.description": "If disabled, hover details are no longer provided by the language server.",
+    "c_cpp.configuration.hoverShowIntegralValuesInHexadecimal.markdownDescription": {
+        "message": "Displays integral constant values in hexadecimal in IntelliSense hovers. This setting only applies if `#C_Cpp.intelliSenseEngine#` is set to `default`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (it represents literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.hoverShowTypeSizeAndAlignment.markdownDescription": {
+        "message": "Displays the size and alignment of types in IntelliSense hovers. This setting only applies if `#C_Cpp.intelliSenseEngine#` is set to `default`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (it represents literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.vcpkg.enabled.markdownDescription": {
         "message": "Enable integration services for the [vcpkg dependency manager](https://aka.ms/vcpkg/).",
         "comment": [

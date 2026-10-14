@@ -797,5 +797,25 @@
     "quick_info_alignment": {
         "text": "**Alignment:** %s B",
         "hint": "Alignment of a C or C++ type in bytes. %s is the numeric alignment. Translate B to a count-invariant byte unit symbol or abbreviation. {Locked=\"**\"} {Locked=\"%s\"}"
+    },
+    "help_allow_missing_workspace_config": {
+        "text": "Allow the server to start even when the specified workspace config file does not exist.",
+        "hint": "Describes the --allow-missing-workspace-config command-line option."
+    },
+    "help_deprecated_lsp_config": {
+        "text": "Deprecated alias for --workspace-config.",
+        "hint": "{Locked=\"--workspace-config\"}"
+    },
+    "help_deprecated_allow_missing_lsp_config": {
+        "text": "Deprecated alias for --allow-missing-workspace-config.",
+        "hint": "{Locked=\"--allow-missing-workspace-config\"}"
+    },
+    "error_conflicting_config_args": {
+        "text": "--workspace-config cannot be combined with --lsp-config.",
+        "hint": "Error shown when both configuration arguments are supplied. {Locked=\"--workspace-config\"} {Locked=\"--lsp-config\"}"
+    },
+    "error_config_arg_requires_path": {
+        "text": "{0} requires a path.",
+        "hint": "Error shown when a configuration argument is not followed by a path. {0} is the command-line option name. {Locked=\"{0}\"}"
     }
 }

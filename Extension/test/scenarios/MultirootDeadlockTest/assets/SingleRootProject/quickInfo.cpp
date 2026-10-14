@@ -36,3 +36,8 @@ int main()
     bool result = isEven(1);
     testDoxygen(2, 3);
 }
+
+struct HoverType
+{
+    int value;
+};

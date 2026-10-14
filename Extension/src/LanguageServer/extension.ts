@@ -291,13 +291,23 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  */
 async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
+    let settingsChanged: boolean = false;
     clients.forEach(client => {
         if (client instanceof DefaultClient) {
             if (trackedSections.some(section => event.affectsConfiguration(section, client.RootUri))) {
+                settingsChanged = true;
                 void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
             }
         }
     });
+    if (settingsChanged) {
+        // Send the updated settings once through the default client because the payload includes all workspace folders.
+        const defaultClient: Client = clients.getDefaultClient();
+        void defaultClient.sendDidChangeSettings().catch(logAndReturn.undefined);
+        if (event.affectsConfiguration("C_Cpp.hoverShowTypeSizeAndAlignment")) {
+            defaultClient.getCopilotHoverProvider()?.reset();
+        }
+    }
 }
 
 function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): void {
@@ -396,6 +406,7 @@ export async function registerCommands(enabled: boolean): Promise<void> {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', enabled ? onEnableSquiggles : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', enabled ? onDisableSquiggles : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', enabled ? onToggleDimInactiveRegions : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ToggleTypeSizeAndAlignment', enabled ? onToggleTypeSizeAndAlignment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.FoldAllInactiveRegions', enabled ? onFoldAllInactiveRegions : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.UnfoldAllInactiveRegions', enabled ? onUnfoldAllInactiveRegions : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', enabled ? onPauseParsing : onDisabledCommand));
@@ -912,19 +923,25 @@ async function onAddToIncludePath(path: string): Promise<void> {
 function onEnableSquiggles(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("errorSquiggles", "enabled");
+    void settings.update<string>("errorSquiggles", "enabled");
 }
 
 function onDisableSquiggles(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("errorSquiggles", "disabled");
+    void settings.update<string>("errorSquiggles", "disabled");
 }
 
 function onToggleDimInactiveRegions(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
+    void settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
+}
+
+function onToggleTypeSizeAndAlignment(): Thenable<void> {
+    // This only applies to the active client.
+    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    return settings.update<boolean>("hoverShowTypeSizeAndAlignment", !settings.hoverShowTypeSizeAndAlignment);
 }
 
 function onFoldAllInactiveRegions(): Promise<void> {

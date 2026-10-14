@@ -65,11 +65,14 @@ export interface WorkspaceFolderSettingsParams {
     clangTidyConfig: string | undefined;
     clangTidyFallbackConfig: string | undefined;
     clangTidyHeaderFilter: string | null;
+    clangTidyIncludeCleanerMappings: Associations;
     clangTidyArgs: string[];
     clangTidyUseBuildPath: boolean;
     clangTidyChecksEnabled: string[] | undefined;
     clangTidyChecksDisabled: string[] | undefined;
     hover: string;
+    hoverShowIntegralValuesInHexadecimal: boolean;
+    hoverShowTypeSizeAndAlignment: boolean;
     markdownInComments: string;
     vcFormatIndentBraces: boolean;
     vcFormatIndentMultiLineRelativeTo: string;
@@ -348,6 +351,15 @@ export class CppSettings extends Settings {
     public get clangTidyConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.config")); }
     public get clangTidyFallbackConfig(): string | undefined { return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.fallbackConfig")); }
     public get clangTidyHeaderFilter(): string | null { return this.getAsString("codeAnalysis.clangTidy.headerFilter", true); }
+    public get clangTidyIncludeCleanerMappings(): Associations {
+        const mappings: Associations = this.getAsAssociations("codeAnalysis.clangTidy.includeCleanerMappings");
+        return Object.fromEntries(Object.entries(mappings).filter(([symbol, header]) =>
+            symbol.length > 0
+            && !/[\u0000-\u001f\u007f-\u009f]/.test(symbol)
+            && header.length > 2
+            && ((header.startsWith("<") && header.endsWith(">")) || (header.startsWith('"') && header.endsWith('"')))
+            && !/[<>"\u0000-\u001f\u007f-\u009f]/.test(header.slice(1, -1))));
+    }
     public get clangTidyArgs(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.args"); }
     public get clangTidyUseBuildPath(): boolean { return this.getAsBoolean("codeAnalysis.clangTidy.useBuildPath"); }
     public get clangTidyChecksEnabled(): string[] | undefined { return this.getAsArrayOfStringsOrUndefined("codeAnalysis.clangTidy.checks.enabled", true); }
@@ -478,6 +490,8 @@ export class CppSettings extends Settings {
     public get isCaseSensitiveFileSupportEnabled(): boolean { return !isWindows || this.getAsString("caseSensitiveFileSupport").toLowerCase() === "enabled"; }
     public get doxygenSectionTags(): string[] { return this.getAsArrayOfStrings("doxygen.sectionTags"); }
     public get hover(): string { return this.getAsString("hover"); }
+    public get hoverShowIntegralValuesInHexadecimal(): boolean { return this.getAsBoolean("hoverShowIntegralValuesInHexadecimal"); }
+    public get hoverShowTypeSizeAndAlignment(): boolean { return this.getAsBoolean("hoverShowTypeSizeAndAlignment"); }
     public get markdownInComments(): string { return this.getAsString("markdownInComments"); }
     public get legacyCompilerArgsBehavior(): boolean { return this.getAsBoolean("legacyCompilerArgsBehavior"); }
     public get inlayHintsAutoDeclarationTypes(): boolean { return this.getAsBoolean("inlayHints.autoDeclarationTypes.enabled"); }
@@ -765,8 +779,8 @@ export class CppSettings extends Settings {
         void super.Section.update(name, value?.toLowerCase() === value1.toLowerCase() ? value2 : value1, getTarget());
     }
 
-    public update<T>(name: string, value: T): void {
-        void super.Section.update(name, value);
+    public update<T>(name: string, value: T): Thenable<void> {
+        return super.Section.update(name, value);
     }
 
     public populateEditorConfig(document: vscode.TextDocument): void {
