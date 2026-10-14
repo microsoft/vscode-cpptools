@@ -64,14 +64,22 @@ export class ParsedEnvironmentFile {
                 value = value.replace(/(^['"]|['"]$)/g, "");
 
                 // Resolve ${VAR} references against the variables defined so far in the file,
-                // then the process environment. A single-quoted value and a reference written
-                // with a backslash both stay literal; the backslash itself is dropped, so
-                // \${VAR} ends up as the text ${VAR}. A name we don't know is left as-is
-                // instead of being dropped.
-                if (!singleQuoted) {
+                // then the process environment. A name we don't know is left as-is rather than
+                // dropped, so ${workspaceFolder} and the other launch variables still resolve
+                // from the debug configuration.
+                //
+                // A reference that has to stay literal is written back as ${dollar}{VAR}. This
+                // parser's output goes on to expandAllStrings (configurationProvider.expand),
+                // which substitutes every remaining ${...} it knows and warns about the rest, so
+                // a bare ${VAR} would be replaced or reported instead of reaching the debuggee.
+                // ${dollar} is the one form that expansion leaves alone and collapses to a plain
+                // $ once it is done, which is what makes the literal survive the trip.
+                if (singleQuoted) {
+                    value = value.replace(/\$\{([\w\.\-]+)\}/g, (_full: string, name: string): string => `\${dollar}{${name}}`);
+                } else {
                     value = value.replace(/(\\)?\$\{([\w\.\-]+)\}/g, (full: string, escape: string | undefined, name: string): string => {
                         if (escape) {
-                            return full.substring(1);
+                            return `\${dollar}{${name}}`;
                         }
                         if (env.has(name)) {
                             return env.get(name);

@@ -147,19 +147,29 @@ EMAIL=\${USER}@example.org`;
         }
     });
 
-    test("Leave a reference inside a single-quoted value alone", () => {
+    test("Protect a reference inside a single-quoted value from the launch expansion", () => {
         const content: string = `USER=admin\nEMAIL='\${USER}@example.org'`;
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
-        assertEnvironmentEqual(result.Env, "EMAIL", "${USER}@example.org");
+        // ${dollar} is the one form expandAllStrings leaves alone, and it collapses to a plain $
+        // when that expansion finishes (expand.ts), so the debuggee still receives the literal.
+        assertEnvironmentEqual(result.Env, "EMAIL", "${dollar}{USER}@example.org");
     });
 
-    test("Leave an escaped reference alone, without the backslash", () => {
+    test("Protect an escaped reference the same way, without the backslash", () => {
         const content: string = `USER=admin\nEMAIL=\\\${USER}@example.org`;
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
-        assertEnvironmentEqual(result.Env, "EMAIL", "${USER}@example.org");
+        assertEnvironmentEqual(result.Env, "EMAIL", "${dollar}{USER}@example.org");
+    });
+
+    test("Leave a resolved reference bare, so the expansion can still see it", () => {
+        const content: string = `USER=admin\nEMAIL=\${USER}@example.org`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "EMAIL", "admin@example.org");
     });
 });
