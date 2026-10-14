@@ -1,34 +1,37 @@
 {
-  "version": "2.0.0",
-  "tasks": []
-}
-```jsonc
-{
-    "version": "2.0.0",
-    "tasks": []
-}
-```
-{
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
-    // The explicit "build" task was removed because the sample now uses a direct g++ command
-    // (the Makefile was removed). If you prefer a build task, add one that runs the
-    // appropriate g++ command for your platform or call `build.cmd` on Windows.
-    "tasks": []
-}
-{
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
-    "version": "2.0.0",
-    {
-        // See https://go.microsoft.com/fwlink/?LinkId=733558
-        // for the documentation about the tasks.json format
-        "version": "2.0.0",
-        // The explicit "build" task was removed because the sample now uses a direct g++ command
-        // (the Makefile was removed). If you prefer a build task, add one that runs the
-        // appropriate g++ command for your platform or call `build.cmd` on Windows.
-        "tasks": []
-    }
-                "echo": true,
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-g",
+                "*.cpp",
+                "-std=c++11",
+                "-o",
+                "${workspaceFolder}/fib.out"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "windows": {
+                "command": "g++",
+                "args": [
+                    "-g",
+                    "*.cpp",
+                    "-std=c++11",
+                    "-o",
+                    "${workspaceFolder}/fib.exe"
+                ]
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        }
+    ]
 }
