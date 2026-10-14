@@ -1,5 +1,31 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.35.4: October 14, 2026
+### New Features
+* Add the opt-in `C_Cpp.hoverShowIntegralValuesInHexadecimal` setting to display integral constants in hexadecimal in IntelliSense hovers. [#7281](https://github.com/microsoft/vscode-cpptools/issues/7281)
+* Add the opt-in `C_Cpp.codeAnalysis.clangTidy.includeCleanerMappings` setting to map `misc-include-cleaner` symbols to public headers. [PR #14788](https://github.com/microsoft/vscode-cpptools/pull/14788)
+* Dim unused `#include` directives when `editor.showUnused` is enabled, respecting per-file Include Cleanup preferences from `.editorconfig` files. [PR #14808](https://github.com/microsoft/vscode-cpptools/pull/14808)
+
+### Enhancements
+* Add the `C_Cpp.hoverShowTypeSizeAndAlignment` setting and 'Toggle Type Size and Alignment in Hovers' command to hide or show type size and alignment in IntelliSense hovers. [#14820](https://github.com/microsoft/vscode-cpptools/issues/14820)
+* Improve IntelliSense responsiveness in multi-root workspaces that use independent `compile_commands.json` databases.
+* Improve processing performance for long multiline documentation comments.
+
+### Bug Fixes
+* Fix incorrect IntelliSense constructibility results and diagnostics for inherited constructors with unusable base constructors or destructors and abstract classes with virtual bases.
+* Fix IntelliSense crashes involving precompiled headers, `constexpr` evaluation, C++20 `requires` expressions, SFINAE, and incomplete nested class declarations.
+* Fix false IntelliSense errors for nested C++20 `requires` expressions and fold-expression constraints in MSVC module templates.
+* Fix stale IntelliSense diagnostics and inconsistent document snapshots during concurrent edits and requests.
+* Fix tag parsing of user-defined literal operator suffixes when macro expansion is involved.
+* Fix completion for declarations imported from standard-library modules when using MSVC.
+* Fix 'Create Declaration/Definition' matching for functions in the global namespace.
+* Fix IntelliSense lookup for scoped enumerations defined inside class templates.
+* Fix inconsistent fuzzy completion matching caused by reused candidate buffers.
+* Fix IntelliSense language-standard detection for MSVC `/std:c++23`.
+* Fix a potential data race in include-path resolution.
+* Various localization updates.
+* Update dependencies.
+
 ## Version 1.35.3: October 2, 2026
 ### New Features
 * Add 'Fold All Inactive Regions' and 'Unfold All Inactive Regions' commands and the opt-in `C_Cpp.autoFoldInactiveRegions` setting. [#8992](https://github.com/microsoft/vscode-cpptools/issues/8992)
