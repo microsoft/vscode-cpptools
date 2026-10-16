@@ -346,6 +346,7 @@ export class ReferencesManager {
     }
 
     private handleProgressStarted(referencesProgress: ReferencesProgress): void {
+        this.resetProgressBar();
         this.referencesStartedWhileTagParsing = this.client.IsTagParsing;
 
         let mode: ReferencesCommandMode = ReferencesCommandMode.None;
@@ -436,18 +437,18 @@ export class ReferencesManager {
     public resetProgressBar(): void {
         if (this.referencesDelayProgress) {
             clearInterval(this.referencesDelayProgress);
+            this.referencesDelayProgress = undefined;
         }
         if (this.currentUpdateProgressTimer) {
-            if (this.currentUpdateProgressTimer) {
-                clearInterval(this.currentUpdateProgressTimer);
-            }
-            if (this.currentUpdateProgressResolve) {
-                this.currentUpdateProgressResolve(undefined);
-            }
-            this.currentUpdateProgressResolve = undefined;
+            clearInterval(this.currentUpdateProgressTimer);
             this.currentUpdateProgressTimer = undefined;
         }
+        if (this.currentUpdateProgressResolve) {
+            this.currentUpdateProgressResolve(undefined);
+            this.currentUpdateProgressResolve = undefined;
+        }
         this.referencesProgressBarStartTime = 0;
+        this.referencesCurrentProgress = undefined;
     }
 
     public startRename(): void {
