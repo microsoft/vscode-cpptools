@@ -24,6 +24,7 @@
 
 import * as assert from 'assert';
 import { suite } from 'mocha';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
@@ -51,12 +52,15 @@ function fakeGccPath(): string {
     return toPosixPath(`${workspacePath()}/bin/${process.platform === 'win32' ? 'gcc.exe' : 'gcc'}`);
 }
 
+// The directories of these files are created on demand by util.writeFileText,
+// but only when the path uses native separators, hence path.join here. The
+// contents written to the JSON files use posix paths (see toPosixPath).
 function compileCommandsPath(): string {
-    return `${workspacePath()}/build/compile_commands.json`;
+    return path.join(workspacePath(), 'build', 'compile_commands.json');
 }
 
 function cppPropertiesPath(): string {
-    return workspacePath() + "/.vscode/c_cpp_properties.json";
+    return path.join(workspacePath(), '.vscode', 'c_cpp_properties.json');
 }
 
 async function changeCppProperties(cppProperties: config.ConfigurationJson, _disposables: vscode.Disposable[]): Promise<void> {
@@ -69,7 +73,7 @@ async function changeCppProperties(cppProperties: config.ConfigurationJson, _dis
 }
 
 async function openAndAwaitIntelliSenseReady(cpptools: apit.CppToolsTestApi, disposables: vscode.Disposable[], filename: string): Promise<vscode.TextDocument> {
-    const path: string = workspacePath() + "/" + filename;
+    const filePath: string = workspacePath() + "/" + filename;
 
     const testHook: apit.CppToolsTestHook = cpptools.getTestHook();
     const testResult: Promise<void> = new Promise<void>((resolve, reject) => {
@@ -81,9 +85,8 @@ async function openAndAwaitIntelliSenseReady(cpptools: apit.CppToolsTestApi, dis
         }));
         setTimeout(() => { reject(new Error(`timeout waiting for IntelliSenseReady: ${filename}`)); }, testHelpers.defaultTimeout);
     });
-    disposables.push(testHook);
 
-    const document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+    const document: vscode.TextDocument = await vscode.workspace.openTextDocument(filePath);
     await vscode.window.showTextDocument(document);
     await testResult;
     return document;
@@ -255,13 +258,13 @@ suite("custom configuration provider with module compiler args", function(): voi
             return Promise.resolve(false);
         },
         provideBrowseConfiguration(): Thenable<api.WorkspaceBrowseConfiguration> {
-            return Promise.reject(new Error("no browse configuration"));
+            return Promise.resolve({ browsePath: [] });
         },
         canProvideBrowseConfigurationsPerFolder(): Thenable<boolean> {
             return Promise.resolve(false);
         },
         provideFolderBrowseConfiguration(_uri: vscode.Uri): Thenable<api.WorkspaceBrowseConfiguration> {
-            return Promise.reject(new Error("no folder browse configuration"));
+            return Promise.resolve({ browsePath: [] });
         }
     };
 
