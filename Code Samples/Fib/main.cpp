@@ -1,30 +1,25 @@
 #include <iostream>
-#include <unistd.h>
-#include <sys/types.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
+#include <thread>
+#include <atomic>
+#include <string>
+#include <cstring>
 
 #include "thread.h"
 
 #define THREAD_COUNT 10
 
 static char block[] = "--block";
-int test = 0;
+std::atomic<int> test(0);
 
 int main(int argc, char **argv)
 {
-    srand(time(NULL));
-
     static char pidText[] = "PID: ";
     std::string helpText = "Attach a debugger and execute 'set foo=0' to continue";
     char helloText[] = "Hello World!";
 
     std::cout << helloText << std::endl;
 
-    pthread_t threads[THREAD_COUNT];
+    std::thread threads[THREAD_COUNT];
 
     if (argc == 2 && !strcmp(block, argv[1]))
     {
@@ -43,16 +38,16 @@ int main(int argc, char **argv)
     for (int i = 0; i < THREAD_COUNT; i++)
     {
         std::cout << "Test " << i << std::endl;
-        pthread_create(&threads[i], NULL, &thread_proc, NULL);
+        threads[i] = std::thread(thread_proc, i);
     }
 
     for (int i = 0; i < THREAD_COUNT; i++)
     {
-        pthread_join(threads[i], NULL);
+        threads[i].join();
         test++;
     }
 
     std::cout << "All threads exited!" << std::endl;
 
-    return 1;
+    return 0;
 }
