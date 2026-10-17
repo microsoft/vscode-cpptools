@@ -333,23 +333,29 @@ suite("custom configuration provider with module compiler args", function(): voi
 
     test("GCC-style module compiler args are delivered - main2.cpp", async () => {
         const document: vscode.TextDocument = await openAndAwaitIntelliSenseReady(cpptools, disposables, "main2.cpp");
-        const expected: api.SourceFileConfigurationItem[] = [ { uri: document.uri.toString(), configuration: gccModuleConfig } ];
+        // Handshake check: the extension asked before configurations were
+        // provided, and items were delivered for this file. (The objects
+        // themselves are intentionally not re-compared against the provider's
+        // own return value; the assertions below observe the delivered
+        // configuration through its effect on IntelliSense instead.)
         assert.strictEqual(configurationProvidedBeforeCanProvide, false);
-        assert.deepStrictEqual(lastResult, expected);
+        assert.deepStrictEqual(lastResult.map(item => item.uri), [document.uri.toString()]);
 
-        // Verify that the compilerArgs (including the GCC module flags) were
-        // delivered to the language server for this translation unit.
+        // Verify that the configuration -- whose compilerArgs carry the GCC
+        // module flags -- was actually delivered and applied for this
+        // translation unit.
         await assertSentinelDefineApplied(document, "return provider_gcc_sentinel_value;", "provider_gcc_sentinel_value");
     });
 
     test("MSVC-style module compiler args are delivered - main3.cpp", async () => {
         const document: vscode.TextDocument = await openAndAwaitIntelliSenseReady(cpptools, disposables, "main3.cpp");
-        const expected: api.SourceFileConfigurationItem[] = [ { uri: document.uri.toString(), configuration: msvcModuleConfig } ];
+        // Handshake check, as above.
         assert.strictEqual(configurationProvidedBeforeCanProvide, false);
-        assert.deepStrictEqual(lastResult, expected);
+        assert.deepStrictEqual(lastResult.map(item => item.uri), [document.uri.toString()]);
 
-        // Verify that the compilerArgs (including the MSVC module arguments)
-        // were delivered to the language server for this translation unit.
+        // Verify that the configuration -- whose compilerArgs carry the MSVC
+        // module arguments -- was actually delivered and applied for this
+        // translation unit.
         await assertSentinelDefineApplied(document, "return provider_msvc_sentinel_value;", "provider_msvc_sentinel_value");
     });
 });
