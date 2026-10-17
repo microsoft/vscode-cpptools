@@ -14,8 +14,11 @@
 //  * module interface files (.cppm/.ixx) are recognized as C++ sources,
 //  * a compile_commands.json that contains GCC module related flags does not
 //    prevent the language server from providing IntelliSense for the project,
+//    and its entries are actually applied to the translation units (verified
+//    through a sentinel define and a hover assertion, not just readiness),
 //  * module related compiler arguments (both GCC and MSVC spellings) are
-//    accepted and delivered through the custom configuration provider path.
+//    accepted and delivered through the custom configuration provider path,
+//    verified the same way.
 //
 // No statement is made about the semantic understanding of module imports by
 // the language server itself: that support is still in development and is
@@ -92,6 +95,33 @@ async function openAndAwaitIntelliSenseReady(cpptools: apit.CppToolsTestApi, dis
     return document;
 }
 
+// Verifies, through IntelliSense, that a sentinel define reached the language
+// server for the given document: hovering over a use of a symbol that is only
+// declared under "#ifdef <sentinel>" resolves if and only if the define was
+// applied to the translation unit. This observes the *effect* of the delivered
+// configuration instead of merely re-checking what a provider returned.
+async function assertSentinelDefineApplied(document: vscode.TextDocument, useStatement: string, symbol: string): Promise<void> {
+    const text: string = document.getText();
+    const useIndex: number = text.indexOf(useStatement);
+    assert.ok(useIndex >= 0, `use statement not found in document: ${useStatement}`);
+    const symbolOffsetInUse: number = useStatement.indexOf(symbol);
+    assert.ok(symbolOffsetInUse >= 0, `symbol not found in use statement: ${symbol}`);
+
+    // +1 to hover from inside the token.
+    const position: vscode.Position = document.positionAt(useIndex + symbolOffsetInUse + 1);
+
+    // The hover can lag slightly behind IntelliSenseReady; retry for a while.
+    const deadline: number = Date.now() + testHelpers.defaultTimeout;
+    while (Date.now() < deadline) {
+        const hovers: vscode.Hover[] = <vscode.Hover[]> await vscode.commands.executeCommand('vscode.executeHoverProvider', document.uri, position);
+        if (hovers.length > 0) {
+            return;
+        }
+        await testHelpers.delay(500);
+    }
+    assert.fail(`hover did not resolve '${symbol}' -- the sentinel define was not applied to ${document.uri.fsPath}`);
+}
+
 /* **************************************************************************** */
 
 interface CompileCommandEntry {
@@ -111,12 +141,12 @@ function gccModuleArgs(cmiDir: string): string[] {
     ];
 }
 
-function compileCommandEntry(file: string): CompileCommandEntry {
+function compileCommandEntry(file: string, extraArgs: string[] = []): CompileCommandEntry {
     const root: string = toPosixPath(workspacePath());
     const objectFile: string = `${root}/build/${file.replace(/\.[^.]+$/, "")}.o`;
     return {
         directory: root,
-        arguments: [fakeGccPath(), ...gccModuleArgs(`${root}/build/cmi`), "-c", "-o", objectFile, file],
+        arguments: [fakeGccPath(), ...gccModuleArgs(`${root}/build/cmi`), ...extraArgs, "-c", "-o", objectFile, file],
         file: file
     };
 }
@@ -175,7 +205,11 @@ suite("compile_commands.json with GCC C++20 module flags", function(): void {
         disposables.push(cpptools);
 
         await writeCompileCommands([
-            compileCommandEntry("main.cpp"),
+            // The sentinel define carried by main.cpp's entry lets the test
+            // verify through IntelliSense (hover) that the database entry was
+            // applied, rather than IntelliSense falling back to a default
+            // configuration.
+            compileCommandEntry("main.cpp", ["-DCPPMODULES_COMPILE_COMMANDS_SENTINEL=1"]),
             compileCommandEntry("math.cppm"),
             compileCommandEntry("math.ixx")
         ]);
@@ -199,7 +233,12 @@ suite("compile_commands.json with GCC C++20 module flags", function(): void {
     });
 
     test("IntelliSense is provided for the module importer (main.cpp)", async () => {
-        await openAndAwaitIntelliSenseReady(cpptools, disposables, "main.cpp");
+        const document: vscode.TextDocument = await openAndAwaitIntelliSenseReady(cpptools, disposables, "main.cpp");
+
+        // Verify that the compile_commands.json entry for this file -- the one
+        // carrying the module related flags -- was actually applied to the
+        // translation unit (and not a fallback configuration).
+        await assertSentinelDefineApplied(document, "return compile_database_sentinel_value;", "compile_database_sentinel_value");
     });
 });
 
@@ -213,16 +252,21 @@ suite("custom configuration provider with module compiler args", function(): voi
     const disposables: vscode.Disposable[] = [];
 
     // gcc-style module args for main2.cpp, MSVC-style module args for main3.cpp.
+    // Each config also carries a sentinel define -- through the provider API's
+    // `defines` channel, which is the documented way to deliver defines -- so
+    // the tests can verify through IntelliSense (hover) that the configuration
+    // was actually delivered and applied for the translation unit, not merely
+    // returned by the provider. The module flags stay in `compilerArgs`.
     const gccModuleConfig: api.SourceFileConfiguration = {
         includePath: [ "${workspaceFolder}" ],
-        defines: [],
+        defines: [ "PROVIDER_GCC_SENTINEL=1" ],
         intelliSenseMode: "gcc-x64",
         standard: "c++20",
         compilerArgs: gccModuleArgs(`${toPosixPath(workspacePath())}/build/cmi`)
     };
     const msvcModuleConfig: api.SourceFileConfiguration = {
         includePath: [ "${workspaceFolder}" ],
-        defines: [],
+        defines: [ "PROVIDER_MSVC_SENTINEL=1" ],
         intelliSenseMode: "msvc-x64",
         standard: "c++20",
         compilerArgs: msvcModuleArgs()
@@ -292,6 +336,10 @@ suite("custom configuration provider with module compiler args", function(): voi
         const expected: api.SourceFileConfigurationItem[] = [ { uri: document.uri.toString(), configuration: gccModuleConfig } ];
         assert.strictEqual(configurationProvidedBeforeCanProvide, false);
         assert.deepStrictEqual(lastResult, expected);
+
+        // Verify that the compilerArgs (including the GCC module flags) were
+        // delivered to the language server for this translation unit.
+        await assertSentinelDefineApplied(document, "return provider_gcc_sentinel_value;", "provider_gcc_sentinel_value");
     });
 
     test("MSVC-style module compiler args are delivered - main3.cpp", async () => {
@@ -299,5 +347,9 @@ suite("custom configuration provider with module compiler args", function(): voi
         const expected: api.SourceFileConfigurationItem[] = [ { uri: document.uri.toString(), configuration: msvcModuleConfig } ];
         assert.strictEqual(configurationProvidedBeforeCanProvide, false);
         assert.deepStrictEqual(lastResult, expected);
+
+        // Verify that the compilerArgs (including the MSVC module arguments)
+        // were delivered to the language server for this translation unit.
+        await assertSentinelDefineApplied(document, "return provider_msvc_sentinel_value;", "provider_msvc_sentinel_value");
     });
 });
