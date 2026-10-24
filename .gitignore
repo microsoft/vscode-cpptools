@@ -15,3 +15,7 @@ OneLocBuild
 vscode-translations-import
 
 .vscode/settings.json
+
+# Ignore Fib sample build artifacts
+Code Samples/Fib/fib.out
+Code Samples/Fib/fib.out.dSYM/
