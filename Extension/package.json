@@ -41,7 +41,6 @@
         "Snippets"
     ],
     "enabledApiProposals": [
-        "terminalDataWriteEvent",
         "chatParticipantAdditions"
     ],
     "capabilities": {
