@@ -10,7 +10,7 @@ import { verbose } from '../src/Utility/Text/streams';
 import { $args, $root, Git, green, heading, note, warn } from './common';
 
 const extensionPrefix = 'ms-vscode.cpptools-';
-const foldersToCopy = ['bin', 'debugAdapters', 'LLVM'] as const;
+const foldersToCopy = ['bin', 'debugAdapters'] as const;
 
 type InstalledExtension = {
     path: string;
@@ -166,6 +166,14 @@ export async function main(sourcePath = $args[0]): Promise<string | undefined> {
         await rm(destination, { recursive: true, force: true });
         await cp(source, destination, { recursive: true, force: true });
     }
+
+    const legacyLLVMBin: string = join(installedExtensionPath, 'LLVM', 'bin');
+    const legacyLLVMInfo = await stat(legacyLLVMBin).catch(() => undefined);
+    if (legacyLLVMInfo?.isDirectory()) {
+        console.log(`Copying ${green('LLVM/bin')} from ${legacyLLVMBin}`);
+        await cp(legacyLLVMBin, join($root, 'bin'), { recursive: true, force: true });
+    }
+    await rm(join($root, 'LLVM'), { recursive: true, force: true });
 
     note(`Copied installed binaries into ${$root}`);
 
