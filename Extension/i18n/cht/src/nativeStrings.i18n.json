@@ -436,5 +436,13 @@
 	"failed_to_lock_browse_db_lock_file": "無法鎖定瀏覽資料庫鎖定檔案: {0} (errno={1})",
 	"browse_database_disabled_incompatible_storage": "瀏覽資料庫已停用，因為其儲存位置不支援 SQLite WAL 共用記憶體。請將 browse.databaseFilename 設定為本機路徑。",
 	"selected_translation_unit_not_include_file_previous": "選取的編譯單位 '{0}' 不包含 '{1}'。如果先前的編譯單位仍然可用，IntelliSense 將會還原；否則，它會使用 '{1}' 作為僅標頭的編譯單位。",
-	"selected_translation_unit_not_include_file_header_only": "所選的編譯單位 '{0}' 不包含 '{1}'。沒有可用的先前編譯單位，因此 IntelliSense 會將 '{1}' 當做僅標頭的編譯單位使用。"
+	"selected_translation_unit_not_include_file_header_only": "所選的編譯單位 '{0}' 不包含 '{1}'。沒有可用的先前編譯單位，因此 IntelliSense 會將 '{1}' 當做僅標頭的編譯單位使用。",
+	"check_analysis_process_unavailable": "檢查 \"{0}\" 時無法使用 C++ 分析處理序。",
+	"quick_info_size": "**大小:** %s B",
+	"quick_info_alignment": "**對齊:** %s B",
+	"help_allow_missing_workspace_config": "即使指定的工作區組態檔不存在，也允許伺服器啟動。",
+	"help_deprecated_lsp_config": "--workspace-config 的已棄用別名。",
+	"help_deprecated_allow_missing_lsp_config": "--allow-missing-workspace-config 的已棄用別名。",
+	"error_conflicting_config_args": "--workspace-config 不能與 --lsp-config 結合。",
+	"error_config_arg_requires_path": "{0} 需要路徑。"
 }

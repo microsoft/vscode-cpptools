@@ -1,5 +1,18 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.35.5: October 27, 2026
+### Bug Fixes
+* Fix false IntelliSense errors after rapidly replacing a file with a code snippet. [#14807](https://github.com/microsoft/vscode-cpptools/issues/14807)
+* Fix false IntelliSense redeclaration errors for class template deduction guides. [#14824](https://github.com/microsoft/vscode-cpptools/issues/14824)
+* Fix incorrect IntelliSense types after including `stdatomic.h` with MSVC C11 atomics enabled. [#14825](https://github.com/microsoft/vscode-cpptools/issues/14825)
+* Make parameter-name inlay hint suppression case-insensitive. [#14829](https://github.com/microsoft/vscode-cpptools/issues/14829)
+* Fix workspace symbol navigation using resolved paths instead of symlinked workspace paths, and preserve path casing.
+* Fix Doxygen commands inside literal and diagram blocks being misinterpreted as documentation tags.
+* Fix an IntelliSense crash when processing macro arguments in member-function declarations.
+* Fix workspace indexing for C11 atomics and other valid C language tokens.
+* Fix a language server crash when browse database initialization fails.
+* Various localization updates.
+
 ## Version 1.35.4: October 14, 2026
 ### New Features
 * Add the opt-in `C_Cpp.hoverShowIntegralValuesInHexadecimal` setting to display integral constants in hexadecimal in IntelliSense hovers. [#7281](https://github.com/microsoft/vscode-cpptools/issues/7281)
