@@ -31,7 +31,7 @@
     "chai": "^4.3.6",
     "eslint": "^10.10.0",
     "husky": "^8.0.1",
-    "mocha": "^10.0.0",
+    "mocha": "^12.0.3",
     "mongodb": "^4.17.0",
     "nock": "^13.2.9",
     "prettier": "2.7.1",
@@ -40,6 +40,6 @@
     "yargs": "^17.5.1"
   },
   "overrides": {
-    "serialize-javascript": "^7.0.5"
+    "serialize-javascript": "^7.1.2"
   }
 }

@@ -7326,8 +7326,9 @@
         "which": "^2.0.2"
     },
     "resolutions": {
+        "@azure/msal-node": "7.1.1",
         "gulp-typescript/**/glob-parent": "^5.1.2",
-        "serialize-javascript": "^7.0.5",
+        "serialize-javascript": "^7.1.2",
         "fast-uri": "^3.1.9",
         "@humanfs/node": "^0.16.8"
     }

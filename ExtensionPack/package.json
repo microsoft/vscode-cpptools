@@ -9,7 +9,7 @@
         "name": "Microsoft Corporation"
     },
     "license": "SEE LICENSE IN LICENSE.txt",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "engines": {
         "vscode": "^1.48.0"
     },
@@ -43,5 +43,8 @@
     ],
     "devDependencies": {
         "@vscode/vsce": "4.0.0"
+    },
+    "overrides": {
+        "@azure/msal-node": "7.1.1"
     }
 }
