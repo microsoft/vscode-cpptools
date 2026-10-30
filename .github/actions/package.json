@@ -40,6 +40,6 @@
     "yargs": "^17.5.1"
   },
   "overrides": {
-    "serialize-javascript": "^7.1.2"
+    "serialize-javascript": "^7.1.3"
   }
 }
