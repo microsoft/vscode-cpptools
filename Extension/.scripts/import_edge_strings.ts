@@ -47,7 +47,7 @@ export async function main() {
     for (const locFolderName of locFolderNames) {
         const languageInfo = languages.find(l => l.folderName === locFolderName);
         if (!languageInfo) {
-            return;
+            continue;
         }
         const localePath = path.join(localizeRepoPath, locFolderName);
         const lclPaths = await glob("vc/vc/cpfeui.dll.lcl", { cwd: localePath, nocase: true, nodir: true });

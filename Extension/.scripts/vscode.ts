@@ -5,8 +5,9 @@
 
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
 import { resolve } from 'path';
+import { setTimeout as delay } from 'timers/promises';
 import { verbose } from '../src/Utility/Text/streams';
-import { mkdir, readJson, rimraf, write } from './common';
+import { mkdir, readJson, rimraf, warn, write } from './common';
 import { getVSCodeTestIsolate } from './vscodeTestPath';
 
 export const isolated = getVSCodeTestIsolate(__dirname);
@@ -24,6 +25,43 @@ export const options = {
     launchArgs: ['--no-sandbox', '--disable-updates', '--skip-welcome', '--skip-release-notes', '--disable-extensions', `--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`, '--disable-workspace-trust']
 };
 
+const transientNetworkErrors = new Set(['EAI_AGAIN', 'ECONNREFUSED', 'ECONNRESET', 'EHOSTUNREACH', 'ENETUNREACH', 'EPIPE', 'ETIMEDOUT']);
+
+function isRetryableAcquisitionError(err: unknown): boolean {
+    if (err instanceof AggregateError) {
+        return err.errors.length > 0 && err.errors.every(isRetryableAcquisitionError);
+    }
+    return err instanceof Error && (err.constructor.name === 'TimeoutError'
+        || ('code' in err && typeof err.code === 'string' && transientNetworkErrors.has(err.code)));
+}
+
+function describeAcquisitionError(err: unknown): string {
+    if (err instanceof AggregateError) {
+        return err.errors.map(describeAcquisitionError).join('; ') || err.message;
+    }
+    if (err instanceof Error) {
+        return 'code' in err ? `${err.code}: ${err.message}` : err.message;
+    }
+    return String(err);
+}
+
+async function downloadVSCode(): Promise<string> {
+    const maxAttempts = 3;
+    for (let attempt = 1; ; attempt++) {
+        try {
+            return await downloadAndUnzipVSCode(options);
+        } catch (err: unknown) {
+            const details = describeAcquisitionError(err);
+            if (attempt === maxAttempts || !isRetryableAcquisitionError(err)) {
+                throw new Error(`VS Code ${options.version} acquisition failed after ${attempt} ${attempt === 1 ? 'attempt' : 'attempts'}: ${details}`, { cause: err });
+            }
+            const delayMs = 1000 * 2 ** (attempt - 1);
+            warn(`VS Code acquisition attempt ${attempt}/${maxAttempts} failed: ${details}. Retrying in ${delayMs} ms.`);
+            await delay(delayMs);
+        }
+    }
+}
+
 export async function install() {
     try {
         // Create a new isolated directory for VS Code instance in the test folder, and make it specific to the extension folder so we can avoid collisions.
@@ -32,7 +70,7 @@ export async function install() {
         verbose(`Isolated VSCode test folder: ${isolated}`);
         await mkdir(isolated);
 
-        const vscodeExecutablePath = await downloadAndUnzipVSCode(options);
+        const vscodeExecutablePath = await downloadVSCode();
         const [cli, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath).filter(each => !each.startsWith('--extensions-dir=') && !each.startsWith('--user-data-dir='));
 
         args.push(`--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`);
@@ -54,7 +92,7 @@ export async function install() {
         };
 
     } catch (err: unknown) {
-        console.log(err);
+        throw new Error(`Failed to install VS Code: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
     }
 
 }

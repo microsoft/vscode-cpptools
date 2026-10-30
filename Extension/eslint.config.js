@@ -2,7 +2,7 @@ const js = require("@eslint/js");
 const tseslint = require("@typescript-eslint/eslint-plugin");
 const tsparser = require("@typescript-eslint/parser");
 const jsdoc = require("eslint-plugin-jsdoc");
-const eslintImport = require("eslint-plugin-import");
+const { importX: eslintImport } = require("eslint-plugin-import-x");
 
 module.exports = [
     {

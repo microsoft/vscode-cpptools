@@ -434,5 +434,15 @@
 	"check_timed_out": "{0} の分析が完了するのを待機中にタイムアウトしました",
 	"failed_to_open_browse_db_lock_file": "参照データベースのロック ファイルを開けませんでした: {0} (errno={1})",
 	"failed_to_lock_browse_db_lock_file": "参照データベースのロック ファイルをロックできませんでした: {0} (errno={1})",
-	"browse_database_disabled_incompatible_storage": "参照データベースは、保存場所が SQLite WAL の共有メモリをサポートしていないため、無効になりました。browse.databaseFilename をローカル パスに設定してください。"
+	"browse_database_disabled_incompatible_storage": "参照データベースは、保存場所が SQLite WAL の共有メモリをサポートしていないため、無効になりました。browse.databaseFilename をローカル パスに設定してください。",
+	"selected_translation_unit_not_include_file_previous": "選択された翻訳単位 '{0}' には '{1}' が含まれていません。IntelliSense は、以前の翻訳単位がまだ使用できる場合はそれを復元します。そうでない場合は、'{1}' をヘッダーのみの翻訳単位として使用します。",
+	"selected_translation_unit_not_include_file_header_only": "選択された翻訳単位 '{0}' には '{1}' が含まれていません。以前の翻訳単位を使用できないため、IntelliSense は '{1}' をヘッダーのみの翻訳単位として使用します。",
+	"check_analysis_process_unavailable": "\"{0}\" の確認中に C++ 分析プロセスを使用できませんでした。",
+	"quick_info_size": "**サイズ:** %s B",
+	"quick_info_alignment": "**配置:** %s B",
+	"help_allow_missing_workspace_config": "指定したワークスペース構成ファイルが存在しない場合でも、サーバーの起動を許可します。",
+	"help_deprecated_lsp_config": "--workspace-config の非推奨のエイリアスです。",
+	"help_deprecated_allow_missing_lsp_config": "--allow-missing-workspace-config の非推奨のエイリアスです。",
+	"error_conflicting_config_args": "--workspace-config を --lsp-config と組み合わせることはできません。",
+	"error_config_arg_requires_path": "{0} にはパスが必要です。"
 }

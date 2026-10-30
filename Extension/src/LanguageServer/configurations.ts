@@ -113,7 +113,6 @@ export interface Browse {
 }
 
 export interface RecursiveIncludes {
-    reduce?: string;
     priority?: string;
     order?: string;
 }
@@ -688,9 +687,9 @@ export class CppProperties implements vscode.Disposable {
         if (!this.propertiesFile) {
             const settings: CppSettings = new CppSettings(this.rootUri);
             if (providerId) {
-                settings.update("default.configurationProvider", providerId);
+                void settings.update("default.configurationProvider", providerId);
             } else {
-                settings.update("default.configurationProvider", undefined); // delete the setting
+                void settings.update("default.configurationProvider", undefined); // delete the setting
             }
             const config: Configuration | undefined = this.CurrentConfiguration;
             if (config) {

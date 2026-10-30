@@ -6,17 +6,13 @@
 import { runVSCodeCommand } from '@vscode/test-electron';
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { $root, error, heading, note, warn } from './common';
+import { $root, heading, note, warn } from './common';
 import * as copy from './copyExtensionBinaries';
 import { install, isolated, options } from "./vscode";
 
 export async function main() {
     console.log(heading(`Install VS Code`));
     const vscode = await install();
-    if (!vscode) {
-        error('Failed to install VS Code');
-        return;
-    }
 
     console.log(heading('Install latest C/C++ Extension'));
     const result = await runVSCodeCommand([...vscode.args ?? [], '--install-extension', 'ms-vscode.cpptools', '--pre-release'], options);

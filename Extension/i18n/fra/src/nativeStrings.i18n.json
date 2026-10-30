@@ -434,5 +434,15 @@
 	"check_timed_out": "Délai d’attente dépassé en attendant la fin de l’analyse de {0}",
 	"failed_to_open_browse_db_lock_file": "Échec de l’ouverture du fichier de verrouillage de la base de données de navigation : {0} (errno={1})",
 	"failed_to_lock_browse_db_lock_file": "Échec du verrouillage du fichier de verrouillage de la base de données de navigation : {0} (errno={1})",
-	"browse_database_disabled_incompatible_storage": "La base de données de navigation a été désactivée, car son emplacement de stockage ne prend pas en charge la mémoire partagée SQLite WAL. Définissez browse.databaseFilename sur un chemin local."
+	"browse_database_disabled_incompatible_storage": "La base de données de navigation a été désactivée, car son emplacement de stockage ne prend pas en charge la mémoire partagée SQLite WAL. Définissez browse.databaseFilename sur un chemin local.",
+	"selected_translation_unit_not_include_file_previous": "L’unité de traduction sélectionnée « {0} » n’inclut pas « {1} ». IntelliSense restaurera l’unité de traduction précédente si elle est encore disponible. Sinon, il utilisera « {1} » comme unité de traduction d’en-tête uniquement.",
+	"selected_translation_unit_not_include_file_header_only": "L’unité de traduction sélectionnée '{0}' n’inclut pas '{1}'. Aucune unité de traduction précédente n’est disponible ; IntelliSense utilisera donc '{1}' comme unité de traduction d’en-tête uniquement.",
+	"check_analysis_process_unavailable": "Le processus d’analyse C++ n’était pas disponible lors de la vérification de \"{0}\".",
+	"quick_info_size": "**Taille :** %s B",
+	"quick_info_alignment": "**Alignement :** %s B",
+	"help_allow_missing_workspace_config": "Autoriser le serveur à démarrer même si le fichier config de l’espace de travail spécifié n’existe pas.",
+	"help_deprecated_lsp_config": "Alias ​​obsolète pour --workspace-config.",
+	"help_deprecated_allow_missing_lsp_config": "Alias ​​obsolète pour --allow-missing-workspace-config.",
+	"error_conflicting_config_args": "--workspace-config ne peut pas être combiné avec --lsp-config.",
+	"error_config_arg_requires_path": "{0} nécessite un chemin d’accès."
 }

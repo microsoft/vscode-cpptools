@@ -7,6 +7,9 @@
             "ES2022",
             "dom"
         ],
+        "types": [
+            "node"
+        ],
         "sourceMap": true,
         "rootDir": ".",
         "removeComments": true,
@@ -21,7 +24,6 @@
         "src/types/*.d.ts"
     ],
     "exclude": [
-        "node_modules/@types/eslint-scope/node_modules/@types/eslint/index.d.ts",
         "node_modules/**"
     ]
 }

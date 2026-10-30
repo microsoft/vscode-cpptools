@@ -4,8 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { Definition, DefinitionLink, DefinitionRequest, Position, ResponseError, TextDocumentPositionParams } from 'vscode-languageclient';
-import { DefaultClient } from '../client';
-import { RequestCancelled, ServerCancelled } from '../protocolFilter';
+import { DefaultClient } from './client';
+import { RequestCancelled, ServerCancelled } from './protocolFilter';
 
 function convertDefinitionsToLocations(definitionsResult: vscode.Definition | vscode.DefinitionLink[] | undefined): vscode.Location[] {
     if (!definitionsResult) {

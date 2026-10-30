@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { OctoKit, OctoKitIssue, getNumRequests } from '../api/octokit';
+import { OctoKit, OctoKitIssue } from '../api/octokit';
 import { context, getOctokit } from '@actions/github';
 import { getRequiredInput, logErrorToIssue, getRateLimit, errorLoggingIssue, safeLog } from './utils';
 import { getInput, setFailed } from '@actions/core';
@@ -98,7 +98,7 @@ export abstract class Action {
 			}
 		}
 
-		const usage = await getRateLimit(this.token);
+		await getRateLimit(this.token);
 	}
 
 	private async error(error: Error) {
