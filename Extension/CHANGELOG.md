@@ -1,136 +1,89 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.35.5: October 27, 2026
-### Bug Fixes
-* Fix false IntelliSense errors after rapidly replacing a file with a code snippet. [#14807](https://github.com/microsoft/vscode-cpptools/issues/14807)
-* Fix false IntelliSense redeclaration errors for class template deduction guides. [#14824](https://github.com/microsoft/vscode-cpptools/issues/14824)
-* Fix incorrect IntelliSense types after including `stdatomic.h` with MSVC C11 atomics enabled. [#14825](https://github.com/microsoft/vscode-cpptools/issues/14825)
-* Make parameter-name inlay hint suppression case-insensitive. [#14829](https://github.com/microsoft/vscode-cpptools/issues/14829)
-* Fix workspace symbol navigation using resolved paths instead of symlinked workspace paths, and preserve path casing.
-* Fix Doxygen commands inside literal and diagram blocks being misinterpreted as documentation tags.
-* Fix an IntelliSense crash when processing macro arguments in member-function declarations.
-* Fix workspace indexing for C11 atomics and other valid C language tokens.
-* Fix a language server crash when browse database initialization fails.
-* Various localization updates.
-
-## Version 1.35.4: October 14, 2026
+## Version 1.35.6: November 2, 2026
 ### New Features
 * Add the opt-in `C_Cpp.hoverShowIntegralValuesInHexadecimal` setting to display integral constants in hexadecimal in IntelliSense hovers. [#7281](https://github.com/microsoft/vscode-cpptools/issues/7281)
+* Add 'Fold All Inactive Regions' and 'Unfold All Inactive Regions' commands and the opt-in `C_Cpp.autoFoldInactiveRegions` setting. [#8992](https://github.com/microsoft/vscode-cpptools/issues/8992)
+* Dim unused local variables and parameters when `editor.showUnused` is enabled. [#10490](https://github.com/microsoft/vscode-cpptools/issues/10490)
+* Dim unreachable code when `editor.showUnused` is enabled. [#12902](https://github.com/microsoft/vscode-cpptools/issues/12902)
+* Show C++ type size and alignment in hovers, with the `C_Cpp.hoverShowTypeSizeAndAlignment` setting and 'Toggle Type Size and Alignment in Hovers' command to control them. [#13034](https://github.com/microsoft/vscode-cpptools/issues/13034), [#14820](https://github.com/microsoft/vscode-cpptools/issues/14820)
+* Add the 'Select a Translation Unit...' command to choose which source file provides IntelliSense context for the active header file. [PR #14688](https://github.com/microsoft/vscode-cpptools/pull/14688)
 * Add the opt-in `C_Cpp.codeAnalysis.clangTidy.includeCleanerMappings` setting to map `misc-include-cleaner` symbols to public headers. [PR #14788](https://github.com/microsoft/vscode-cpptools/pull/14788)
 * Dim unused `#include` directives when `editor.showUnused` is enabled, respecting per-file Include Cleanup preferences from `.editorconfig` files. [PR #14808](https://github.com/microsoft/vscode-cpptools/pull/14808)
 
 ### Enhancements
-* Add the `C_Cpp.hoverShowTypeSizeAndAlignment` setting and 'Toggle Type Size and Alignment in Hovers' command to hide or show type size and alignment in IntelliSense hovers. [#14820](https://github.com/microsoft/vscode-cpptools/issues/14820)
-* Improve IntelliSense responsiveness in multi-root workspaces that use independent `compile_commands.json` databases.
-* Improve processing performance for long multiline documentation comments.
-
-### Bug Fixes
-* Fix incorrect IntelliSense constructibility results and diagnostics for inherited constructors with unusable base constructors or destructors and abstract classes with virtual bases.
-* Fix IntelliSense crashes involving precompiled headers, `constexpr` evaluation, C++20 `requires` expressions, SFINAE, and incomplete nested class declarations.
-* Fix false IntelliSense errors for nested C++20 `requires` expressions and fold-expression constraints in MSVC module templates.
-* Fix stale IntelliSense diagnostics and inconsistent document snapshots during concurrent edits and requests.
-* Fix tag parsing of user-defined literal operator suffixes when macro expansion is involved.
-* Fix completion for declarations imported from standard-library modules when using MSVC.
-* Fix 'Create Declaration/Definition' matching for functions in the global namespace.
-* Fix IntelliSense lookup for scoped enumerations defined inside class templates.
-* Fix inconsistent fuzzy completion matching caused by reused candidate buffers.
-* Fix IntelliSense language-standard detection for MSVC `/std:c++23`.
-* Fix a potential data race in include-path resolution.
-* Various localization updates.
-* Update dependencies.
-
-## Version 1.35.3: October 2, 2026
-### New Features
-* Add 'Fold All Inactive Regions' and 'Unfold All Inactive Regions' commands and the opt-in `C_Cpp.autoFoldInactiveRegions` setting. [#8992](https://github.com/microsoft/vscode-cpptools/issues/8992)
-* Dim unreachable code when `editor.showUnused` is enabled. [#12902](https://github.com/microsoft/vscode-cpptools/issues/12902)
-* Show C++ type size and alignment in hovers. [#13034](https://github.com/microsoft/vscode-cpptools/issues/13034)
-
-### Enhancements
-* Increase the per-file IntelliSense diagnostic limit from 250 to 1,000, prioritize errors over unused-code hints, and reduce processing of over-limit diagnostics.
-* Improve IntelliSense performance in large include graphs and classes with many inherited constructors.
-* Reduce custom-configuration processing overhead and memory retained from `compile_commands.json`.
-* Improve code folding performance in files with many inactive preprocessor regions.
-* Improve loading performance for Windows-1255 and Windows-1258 source files.
-* Reduce CPU usage when resolving headers in large Windows workspaces.
-
-### Bug Fixes
-* Fix 'Go to Declaration' and 'Go to Definition' returning the current location instead of an available counterpart. [#14509](https://github.com/microsoft/vscode-cpptools/issues/14509)
-* Update MIEngine to fix debugger failures with synthetic GDB stack frames. [#14741](https://github.com/microsoft/vscode-cpptools/issues/14741)
-  * Thanks for the contribution. [@tzcnt](https://github.com/tzcnt) [PR MIEngine#1605](https://github.com/microsoft/MIEngine/pull/1605)
-* Fix incorrect IntelliSense errors for alias-template deduction guides using C++26 pack indexing. [#14794](https://github.com/microsoft/vscode-cpptools/issues/14794)
-* Fix incorrect unused-parameter warnings and dimming for assignments through reference parameters. [#14801](https://github.com/microsoft/vscode-cpptools/issues/14801)
-* Fix missing IntelliSense headers with Clang `-cxx-isystem` and `-stdlib++-isystem` options and split clang-cl `-imsvc` and `/imsvc` arguments.
-* Fix IntelliSense crashes involving deduction guides, user-defined conversions, and lambdas in macros.
-* Fix IntelliSense handling of GCC `--embed-directory=<dir>` and `--embed-directory <dir>` arguments.
-* Fix a tag parser stack-overflow crash when loading cyclic or excessively deep cached symbol data.
-* Fix unwanted completion popups when typing incomplete floating-point exponents.
-* Fix configuration-provider requests delaying language server shutdown.
-* Various localization updates.
-* Update dependencies.
-
-## Version 1.35.2: September 22, 2026
-### New Feature
-* Dim unused local variables and parameters when `editor.showUnused` is enabled. [#10490](https://github.com/microsoft/vscode-cpptools/issues/10490)
-
-### Enhancements
 * Add support for formatting multiple selections with `clang-format` and `vcFormat`. [#12082](https://github.com/microsoft/vscode-cpptools/issues/12082)
-* Reduce language server memory usage in workspaces with many interconnected symbolic links.
-* Improve responsiveness when deleting source files associated with many open headers.
-* Improve `#include` completion performance in workspaces with many open files.
-
-### Bug Fixes
-* Fix IntelliSense handling of MSVC and clang-cl external include paths and environment variables. [#14186](https://github.com/microsoft/vscode-cpptools/issues/14186), [#14205](https://github.com/microsoft/vscode-cpptools/issues/14205)
-* Fix missing IntelliSense definitions for additional MSVC predefined macros. [#14312](https://github.com/microsoft/vscode-cpptools/issues/14312)
-* Fix lost indentation in displayed documentation comments. [#14567](https://github.com/microsoft/vscode-cpptools/issues/14567)
-* Fix compiler queries failing to find dependencies installed alongside the compiler on Linux and macOS. [#14575](https://github.com/microsoft/vscode-cpptools/issues/14575)
-* Fix an incorrect `class has more than one default constructor` IntelliSense error. [#14746](https://github.com/microsoft/vscode-cpptools/issues/14746)
-* Fix the extension failing to start on Linux ARM64 because `libc.so` is not executable. [#14779](https://github.com/microsoft/vscode-cpptools/issues/14779)
-* Fix incorrect or missing `#include` completion suggestions for nonrecursive paths, frameworks, symbolic links, and extensionless files.
-* Fix `compile_commands.json` handling for symlinked sources, missing working-directory fields, and invalid database roots.
-* Fix stale 'Create Declaration/Definition' diagnostics after cancellation and reduce redundant diagnostic updates.
-* Fix missing IntelliSense errors for duplicate local variables, including redeclarations of function parameters.
-* Fix a language server crash when requesting `#include` completion with certain Unicode prefixes.
-* Fix incorrect undefined-identifier IntelliSense errors for macros using `__COUNTER__` in C++20.
-* Fix recursive header lookup with duplicate include roots or `..` paths through symbolic links.
-* Fix incorrect EUC-JP and GBK source decoding when multibyte characters span read buffers.
-* Fix IntelliSense using strict language modes instead of Clang's default GNU dialect.
-* Fix header lookup for long Windows paths when Windows long-path support is enabled.
-* Fix a Windows tag parser crash when a worker thread cannot be created.
-* Fix intermittent incorrect compiler architecture detection on Linux.
-* Various localization updates.
-* Update dependencies.
-
-## Version 1.35.1: September 14, 2026
-### New Feature
-* Add the 'Select a Translation Unit...' command to choose which source file provides IntelliSense context for the active header file. [PR #14688](https://github.com/microsoft/vscode-cpptools/pull/14688)
-
-### Enhancements
+* Improve IntelliSense responsiveness in multi-root workspaces that use independent `compile_commands.json` databases.
+* Increase the per-file IntelliSense diagnostic limit from 250 to 1,000 and prioritize errors over unused-code hints.
 * Improve IntelliSense configuration lookup performance for symbolic links to `compile_commands.json`.
+* Reduce language server memory usage in workspaces with many interconnected symbolic links.
+* Reduce custom-configuration processing overhead in workspaces with many requested files.
+* Improve workspace indexing performance by reducing repeated language-mode processing.
+* Improve code folding performance in files with many inactive preprocessor regions.
 * Update the bundled `clang-tidy` and `clang-format` from 23.1.0 to 23.1.1.
+* Reduce CPU usage when resolving headers in large Windows workspaces.
 * Improve performance when pruning large IntelliSense caches.
 
 ### Bug Fixes
 * Fix `/U` and `-U` compiler arguments not undefining macros for IntelliSense and code analysis. [#13786](https://github.com/microsoft/vscode-cpptools/issues/13786)
+* Fix IntelliSense handling of MSVC and clang-cl external include paths and environment variables. [#14186](https://github.com/microsoft/vscode-cpptools/issues/14186), [#14205](https://github.com/microsoft/vscode-cpptools/issues/14205)
+* Fix missing IntelliSense definitions for additional MSVC predefined macros. [#14312](https://github.com/microsoft/vscode-cpptools/issues/14312)
+* Fix 'Go to Declaration' and 'Go to Definition' returning the current location instead of an available counterpart. [#14509](https://github.com/microsoft/vscode-cpptools/issues/14509)
+* Fix lost indentation in displayed documentation comments. [#14567](https://github.com/microsoft/vscode-cpptools/issues/14567)
+* Fix compiler queries failing to find dependencies installed alongside the compiler on Linux and macOS. [#14575](https://github.com/microsoft/vscode-cpptools/issues/14575)
+* Fix false IntelliSense errors when initializing a variable with a value from the same unnamed enum. [#14726](https://github.com/microsoft/vscode-cpptools/issues/14726)
+* Update MIEngine to fix debugger failures with synthetic GDB stack frames. [#14741](https://github.com/microsoft/vscode-cpptools/issues/14741)
+  * Thanks for the contribution. [@tzcnt](https://github.com/tzcnt) [PR MIEngine#1605](https://github.com/microsoft/MIEngine/pull/1605)
+* Fix an incorrect `class has more than one default constructor` IntelliSense error. [#14746](https://github.com/microsoft/vscode-cpptools/issues/14746)
 * Fix excessive CPU usage by idle parser workers while workspace parsing is still running. [#14757](https://github.com/microsoft/vscode-cpptools/issues/14757)
 * Remove the obsolete `C_Cpp.default.recursiveIncludes.reduce` setting and its configuration UI control. [PR #14761](https://github.com/microsoft/vscode-cpptools/pull/14761)
-* Fix missing or stale IntelliSense configurations when `compile_commands.json` is created after startup, changed, deleted, or accessed through symbolic links, including in multi-root workspaces.
+* Fix incorrect IntelliSense errors for alias-template deduction guides using C++26 pack indexing. [#14794](https://github.com/microsoft/vscode-cpptools/issues/14794)
+* Fix false IntelliSense errors after rapidly replacing a file with a code snippet. [#14807](https://github.com/microsoft/vscode-cpptools/issues/14807)
+* Fix false IntelliSense redeclaration errors for class template deduction guides. [#14824](https://github.com/microsoft/vscode-cpptools/issues/14824)
+* Fix incorrect IntelliSense types after including `stdatomic.h` with MSVC C11 atomics enabled. [#14825](https://github.com/microsoft/vscode-cpptools/issues/14825)
+* Make parameter-name inlay hint suppression case-insensitive. [#14829](https://github.com/microsoft/vscode-cpptools/issues/14829)
+* Fix incorrect IntelliSense constructibility results and diagnostics for inherited constructors with unusable base constructors or destructors and abstract classes with virtual bases.
+* Fix missing or stale IntelliSense configurations when `compile_commands.json` files are created, changed, or deleted, or when database or source paths use symbolic links.
+* Fix IntelliSense crashes involving precompiled headers, `constexpr` evaluation, C++20 `requires` expressions, templates, user-defined conversions, and lambdas in macros.
+* Fix missing related headers in Copilot context when headers are also included through precompiled headers, forced includes, or earlier includes.
+* Fix missing IntelliSense headers with Clang `-cxx-isystem` and `-stdlib++-isystem` options and split clang-cl `-imsvc` and `/imsvc` arguments.
+* Fix incorrect or missing `#include` completion suggestions for nonrecursive paths, frameworks, symbolic links, and extensionless files.
 * Fix missing `cp1125` support on all platforms, unsupported file encodings on Linux, and incorrect GB18030 decoding on Linux and macOS.
-* Fix recursive include lookup sometimes selecting the wrong header when directories are reached through multiple symbolic links.
-* Fix a potential language server deadlock during workspace initialization and concurrent document edits.
-* Fix an IntelliSense crash when parsing templates in Clang mode.
-* Fix a `cpptools` crash during shutdown on macOS.
-* Update dependencies.
-
-## Version 1.35.0: September 10, 2026
-### Enhancement
-* Improve workspace indexing performance.
-
-### Bug Fixes
-* Fix false IntelliSense errors when initializing a variable with a value from the same unnamed enum. [#14726](https://github.com/microsoft/vscode-cpptools/issues/14726)
-* Fix the workspace parsing status briefly reporting completion while a newer parse is still running.
+* Fix false IntelliSense errors for nested C++20 `requires` expressions and fold-expression constraints in MSVC module templates.
+* Fix missing or incorrect recursive header lookup with duplicate include roots, multiple symbolic links, or `..` paths.
+* Fix workspace symbol navigation using resolved paths instead of symlinked workspace paths, and preserve path casing.
+* Fix a potential language server deadlock during workspace initialization and a data race in include-path resolution.
+* Fix stale 'Create Declaration/Definition' diagnostics after cancellation and reduce redundant diagnostic updates.
+* Fix missing IntelliSense errors for duplicate local variables, including redeclarations of function parameters.
+* Fix stale IntelliSense diagnostics and inconsistent document snapshots during concurrent edits and requests.
+* Fix a language server stack-overflow crash when loading cyclic or excessively deep browse database data.
+* Fix `compile_commands.json` handling for missing working-directory fields and invalid database roots.
 * Fix 'Create Declaration/Definition' incorrectly being offered for explicit template instantiations.
-* Fix tag parser hangs when database initialization fails or shutdown interrupts a pending request.
+* Fix the workspace parsing status briefly reporting completion while a newer parse is still running.
+* Fix IntelliSense handling of GCC `--embed-directory=<dir>` and `--embed-directory <dir>` arguments.
+* Fix Doxygen commands inside literal and diagram blocks being misinterpreted as documentation tags.
+* Fix a language server crash when requesting `#include` completion with certain Unicode prefixes.
+* Fix incorrect undefined-identifier IntelliSense errors for macros using `__COUNTER__` in C++20.
+* Fix tag parsing of user-defined literal operator suffixes when macro expansion is involved.
+* Fix incorrect EUC-JP and GBK source decoding when multibyte characters span read buffers.
+* Fix delayed error reporting when a language server worker cannot start on Linux or macOS.
+* Fix a language server crash when cleaning up after browse database initialization fails.
+* Fix completion for declarations imported from standard-library modules when using MSVC.
+* Fix IntelliSense using strict language modes instead of Clang's default GNU dialect.
+* Fix header lookup for long Windows paths when Windows long-path support is enabled.
+* Fix 'Create Declaration/Definition' matching for functions in the global namespace.
+* Fix IntelliSense lookup for scoped enumerations defined inside class templates.
+* Fix unwanted completion popups when typing incomplete floating-point exponents.
+* Fix inconsistent fuzzy completion matching caused by reused candidate buffers.
+* Fix workspace indexing for C11 atomics and other valid C language tokens.
+* Fix a Windows tag parser crash when a worker thread cannot be created.
+* Fix configuration-provider requests delaying language server shutdown.
+* Fix intermittent incorrect compiler architecture detection on Linux.
+* Fix a tag parser hang when its symbol database fails to initialize.
+* Fix IntelliSense language-standard detection for MSVC `/std:c++23`.
+* Fix a `cpptools` crash during shutdown on macOS.
 * Various localization updates.
+* Update dependencies.
 
 ## Version 1.34.4: September 9, 2026
 ### Enhancements
