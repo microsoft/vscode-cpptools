@@ -5,7 +5,7 @@
 
 import { describe, it } from 'mocha';
 import { strictEqual } from 'node:assert';
-import { fallbackClangTidyDocVersion, getClangTidyDocumentationUrl } from '../../src/LanguageServer/clangTidyDocumentation';
+import { bundledClangTidyVersion, fallbackClangTidyDocVersion, getClangTidyDocumentationUrl } from '../../src/LanguageServer/clangTidyDocumentation';
 
 const bundledDocUrl: string = `https://releases.llvm.org/${fallbackClangTidyDocVersion}/tools/clang/tools/extra/docs/clang-tidy`;
 
@@ -29,5 +29,13 @@ describe('clang-tidy documentation URLs', () => {
         strictEqual(getClangTidyDocumentationUrl('checks/misc/include-cleaner.html'), `${bundledDocUrl}/checks/misc/include-cleaner.html`);
         strictEqual(getClangTidyDocumentationUrl('checks/misc/include-cleaner.html', ''), `${bundledDocUrl}/checks/misc/include-cleaner.html`);
         strictEqual(getClangTidyDocumentationUrl('checks/misc/include-cleaner.html', '23.1'), `${bundledDocUrl}/checks/misc/include-cleaner.html`);
+    });
+
+    it('keeps the fallback on the release the bundled binary belongs to', () => {
+        // The fallback is only correct while it matches what the bundled clang-tidy would produce,
+        // which is the point of deriving it from the bundled version instead of a literal URL.
+        strictEqual(
+            getClangTidyDocumentationUrl('checks/misc/include-cleaner.html', bundledClangTidyVersion),
+            getClangTidyDocumentationUrl('checks/misc/include-cleaner.html'));
     });
 });
