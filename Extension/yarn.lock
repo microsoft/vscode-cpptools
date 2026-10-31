@@ -103,17 +103,12 @@
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-common/-/msal-common-16.14.0.tgz#cdddb38d832be0e1be6227ea64d4eb119997227c"
   integrity sha1-zd2zjYMr4OG+YifqZNTrEZmXInw=
 
-"@azure/msal-common@16.14.3":
-  version "16.14.3"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-common/-/msal-common-16.14.3.tgz#dbf1a58a8635ca5900d8f89b20a7e032f59e3f61"
-  integrity sha512-tz3GvMrR9V/plb2lDdW8qaO8CPpfZevdExBKjltzzbAtyhK0eB2UIvji1aU+gkyHj3fxQ2ie+LNHyMXdmo8wOg==
-
-"@azure/msal-node@7.1.1", "@azure/msal-node@^6.0.0":
-  version "7.1.1"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-node/-/msal-node-7.1.1.tgz#fe0ee4e69e2361fdb89b9003a7e233d9ef4aa783"
-  integrity sha512-zHXTJB38XVrsNaXrPBCMqEUjeyQysFfgmKtUHRDsEKTRjNIPckJ/w6fE5wBXrmJXBim1D3C7O7LOag0msPTrgw==
+"@azure/msal-node@^6.0.0":
+  version "6.0.0"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@azure/msal-node/-/msal-node-6.0.0.tgz#581a95682a41456c26f3dbd5329891fbd3eb102e"
+  integrity sha1-WBqVaCpBRWwm89vVMpiR+9PrEC4=
   dependencies:
-    "@azure/msal-common" "16.14.3"
+    "@azure/msal-common" "16.14.0"
     jsonwebtoken "^9.0.0"
 
 "@cacheable/memory@^2.2.0":
