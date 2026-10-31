@@ -63,7 +63,7 @@
     ]
   },
   "devDependencies": {
-      "@vscode/vsce": "4.0.0"
+    "@vscode/vsce": "4.0.0"
   },
   "overrides": {
     "fast-uri": "^3.1.6"
