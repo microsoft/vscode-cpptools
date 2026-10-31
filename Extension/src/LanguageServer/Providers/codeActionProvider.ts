@@ -122,6 +122,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 const disableCodeActions: vscode.CodeAction[] = [];
                 const removeCodeActions: vscode.CodeAction[] = [];
                 const docCodeActions: vscode.CodeAction[] = [];
+                const docTargets: Set<string> = new Set<string>();
                 const showClear: string = new CppSettings().clangTidyCodeActionShowClear;
 
                 // Check which code actions to show.  This can get called a lot
@@ -174,10 +175,16 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                         }
                     }
 
-                    if (codeActionCodeInfo === undefined || codeActionCodeInfo.docCodeAction === undefined) {
+                    if (codeAction.docCodeAction === undefined) {
                         continue;
                     }
-                    docCodeActions.push(codeActionCodeInfo.docCodeAction);
+                    // Same check code can show up for several folders, and the target depends on
+                    // the clang-tidy release each folder runs, so keep the URLs distinct.
+                    const docTarget: string | undefined = codeAction.docCodeAction.command?.arguments?.[0]?.toString();
+                    if (docTarget !== undefined && !docTargets.has(docTarget)) {
+                        docTargets.add(docTarget);
+                        docCodeActions.push(codeAction.docCodeAction);
+                    }
                 }
                 if (fixCodeActions.length > 0) {
                     resultCodeActions.push(...fixCodeActions);
