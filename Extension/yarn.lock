@@ -324,6 +324,11 @@
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@humanwhocodes/retry/-/retry-0.4.3.tgz#c2b9d2e374ee62c586d3adbea87199b1d7a7a6ba"
   integrity "sha1-wrnS43TuYsWG062+qHGZsdenpro= sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ=="
 
+"@isaacs/nonrecursive-glob-match@^1.0.3":
+  version "1.0.3"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@isaacs/nonrecursive-glob-match/-/nonrecursive-glob-match-1.0.3.tgz#7f6724fd8a6ca315d6bb7f63f0e4d079060da246"
+  integrity sha512-SI7kyKHq4XXDRozw+r9GlRZkia1ZkFrpLW98r2IC2Bpr8YkFGE3fvjzmxCG0x78A++69HmDNrDvSMYBZmHGpKA==
+
 "@jridgewell/gen-mapping@^0.3.5":
   version "0.3.13"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz#6342a19f44347518c93e43b1ac69deb3c4656a1f"
@@ -1728,7 +1733,7 @@ brace-expansion@^2.0.1:
   dependencies:
     balanced-match "^1.0.0"
 
-brace-expansion@^5.0.2, brace-expansion@^5.0.8:
+brace-expansion@^5.0.12, brace-expansion@^5.0.8:
   version "5.0.12"
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/brace-expansion/-/brace-expansion-5.0.12.tgz#995fbb4750a77c4d16a7dc942ff2ca6ef8e675ec"
   integrity sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==
@@ -3610,19 +3615,13 @@ mimic-function@^5.0.0:
   resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/mimic-function/-/mimic-function-5.0.1.tgz#acbe2b3349f99b9deaca7fb70e48b83e94e67076"
   integrity "sha1-rL4rM0n5m53qyn+3Dki4PpTmcHY= sha512-VP79XUPxV2CigYP3jWwAUFSku2aKqBH7uTAapFWCBqutsbmDo96KY5o8uh6U+/YSIn5OxJnXp73beVkpqMIGhA=="
 
-minimatch@^10.2.2:
-  version "10.2.4"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/minimatch/-/minimatch-10.2.4.tgz#465b3accbd0218b8281f5301e27cedc697f96fde"
-  integrity "sha1-Rls6zL0CGLgoH1MB4nztxpf5b94= sha512-oRjTw/97aTBN0RHbYCdtF1MQfvusSIBQM0IZEgzl6426+8jSC0nF1a/GmnVLpfB9yyr6g6FTqWqiZVbxrtaCIg=="
+minimatch@11.0.3, minimatch@^10.2.2, minimatch@^10.2.4, minimatch@^10.2.5, minimatch@^10.2.6:
+  version "11.0.3"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/minimatch/-/minimatch-11.0.3.tgz#d794539f77c0a98ea4adca473768d1e1357204f5"
+  integrity sha512-iny/40PEGkNJQ5/Pv6z3nm6FbRAby32GeZRjCUJk2WnNDbgPSTcdI+DDvLqsgBdD4cD5sMtMheqPPnehCCa8Nw==
   dependencies:
-    brace-expansion "^5.0.2"
-
-minimatch@^10.2.4, minimatch@^10.2.5, minimatch@^10.2.6, "minimatch@^9.0.3 || ^10.1.2":
-  version "10.2.6"
-  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/minimatch/-/minimatch-10.2.6.tgz#fd956bbe0b77241e9f15ac5dccb1c638060968ef"
-  integrity sha1-/ZVrvgt3JB6fFaxdzLHGOAYJaO8=
-  dependencies:
-    brace-expansion "^5.0.8"
+    "@isaacs/nonrecursive-glob-match" "^1.0.3"
+    brace-expansion "^5.0.12"
 
 minimatch@^3.0.4, minimatch@^3.1.1:
   version "3.1.5"
@@ -3644,6 +3643,13 @@ minimatch@^5.0.1, minimatch@^5.1.0, minimatch@^5.1.6:
   integrity "sha1-EpPvFdsAmLOUVA6Pn3RPn9qN7ks= sha512-7o1wEA2RyMP7Iu7GNba9vc0RWWGACJOCZBJX2GJWip0ikV+wcOsgVuY9uE8CPiyQhkGFSlhuSkZPavN7u1c2Fw=="
   dependencies:
     brace-expansion "^2.0.1"
+
+"minimatch@^9.0.3 || ^10.1.2":
+  version "10.2.6"
+  resolved "https://pkgs.dev.azure.com/azure-public/VisualCpp/_packaging/cpp_PublicPackages/npm/registry/minimatch/-/minimatch-10.2.6.tgz#fd956bbe0b77241e9f15ac5dccb1c638060968ef"
+  integrity sha1-/ZVrvgt3JB6fFaxdzLHGOAYJaO8=
+  dependencies:
+    brace-expansion "^5.0.8"
 
 minimist@^1.2.8:
   version "1.2.8"

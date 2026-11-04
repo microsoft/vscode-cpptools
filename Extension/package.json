@@ -7326,6 +7326,10 @@
         "which": "^2.0.2"
     },
     "resolutions": {
+        "**/@eslint/config-array/minimatch": "11.0.3",
+        "**/@typescript-eslint/typescript-estree/minimatch": "11.0.3",
+        "**/@vscode/vsce/minimatch": "11.0.3",
+        "**/eslint/minimatch": "11.0.3",
         "gulp-typescript/**/glob-parent": "^5.1.2",
         "serialize-javascript": "^7.1.3",
         "fast-uri": "^3.1.9",
