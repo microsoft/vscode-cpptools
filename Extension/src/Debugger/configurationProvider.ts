@@ -1115,9 +1115,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
                 let scpResult: util.ProcessReturnType;
                 if (isScp) {
-                    scpResult = await scp(files, host, step.targetDir, config.scpPath, config.recursive, jumpHosts, cancellationToken);
+                    scpResult = await scp(files, host, step.targetDir, step.recursive, step.scpPath, jumpHosts, cancellationToken);
                 } else {
-                    scpResult = await rsync(files, host, step.targetDir, config.scpPath, config.recursive, jumpHosts, cancellationToken);
+                    scpResult = await rsync(files, host, step.targetDir, step.recursive, step.rsyncPath, jumpHosts, cancellationToken);
                 }
 
                 if (!scpResult.succeeded || cancellationToken?.isCancellationRequested) {
@@ -1134,7 +1134,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
                 const localForwards: util.ISshLocalForwardInfo[] = step.host.localForwards;
                 const continueOn: string = step.continueOn;
-                const sshResult: util.ProcessReturnType = await ssh(host, step.command, config.sshPath, jumpHosts, localForwards, continueOn, cancellationToken);
+                const sshResult: util.ProcessReturnType = await ssh(host, step.command, step.sshPath, jumpHosts, localForwards, continueOn, cancellationToken);
                 if (!sshResult.succeeded || cancellationToken?.isCancellationRequested) {
                     return false;
                 }
