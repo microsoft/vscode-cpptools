@@ -1,0 +1,242 @@
+# Resolve artifact identities without downloading their contents. Release jobs
+# consume the result through their normal, validated templateContext.inputs.
+parameters:
+- name: artifactName
+  type: string
+  default: ''
+- name: artifactNames
+  type: object
+  default: []
+- name: artifactNamesJson
+  type: string
+  default: ''
+- name: buildId
+  type: string
+  default: '$(Build.BuildId)'
+- name: project
+  type: string
+  default: '$(System.TeamProjectId)'
+- name: definition
+  type: string
+  default: ''
+- name: branch
+  type: string
+  default: ''
+- name: tags
+  type: string
+  default: ''
+- name: allowPartiallySucceededBuilds
+  type: boolean
+  default: false
+- name: allowFailedBuilds
+  type: boolean
+  default: false
+- name: allowMissing
+  type: boolean
+  default: false
+- name: variablePrefix
+  type: string
+  default: ResolvedArtifact
+- name: stepName
+  type: string
+  default: ''
+
+steps:
+- powershell: |
+    $ErrorActionPreference = 'Stop'
+
+    function Get-BuildMetadata([string] $path) {
+      # Never send the job token to an artifact download URL or a redirect.
+      try {
+        Invoke-RestMethod -Uri "$api/$path" -Headers $headers -Method Get -MaximumRedirection 0 -TimeoutSec 60
+      } catch {
+        throw 'Unable to read Azure Pipelines build metadata; no artifact was selected.'
+      }
+    }
+
+    function Set-ArtifactVariable([string] $name, [string] $value) {
+      $escaped = $value.Replace('%', '%AZP25').Replace("`r", '%0D').Replace("`n", '%0A')
+      Write-Host "##vso[task.setvariable variable=$($env:ARTIFACT_VARIABLE_PREFIX)$name]$escaped"
+      if ($env:ARTIFACT_STEP_NAME) {
+        Write-Host "##vso[task.setvariable variable=$name;isOutput=true]$escaped"
+      }
+    }
+
+    function Select-Artifact([string] $baseName) {
+      $pattern = '^' + [regex]::Escape($baseName) + '_attempt([1-9][0-9]*)\z'
+      $candidates = @($artifacts | Where-Object { $_.name -ceq $baseName -or $_.name -cmatch $pattern })
+      if ($candidates.Count -eq 0) {
+        return $null
+      }
+
+      # A retry has a new job ID. previousAttempts connects artifacts left by
+      # earlier attempts to the current producer, even if it published nothing.
+      $owners = @($jobs | Where-Object {
+        $ids = @($_.id) + @($_.previousAttempts | ForEach-Object { $_.recordId })
+        @($candidates | Where-Object { $_.source -and $_.source -in $ids }).Count -gt 0
+      })
+      if ($owners.Count -ne 1) {
+        throw "Cannot identify exactly one producing job for '$baseName'."
+      }
+      $producer = $owners[0]
+      $attempt = 0
+      if (-not [int]::TryParse([string]$producer.attempt, [ref]$attempt) -or $attempt -lt 1) {
+        throw "Invalid producing job attempt for '$baseName'."
+      }
+      $historyIds = @($producer.id)
+      $historyAttempts = @($attempt)
+      foreach ($previous in $producer.previousAttempts) {
+        $previousAttempt = 0
+        $recordId = [guid]::Empty
+        $timelineId = [guid]::Empty
+        if (-not [int]::TryParse([string]$previous.attempt, [ref]$previousAttempt) -or
+            $previousAttempt -lt 1 -or $previousAttempt -ge $attempt -or
+            -not [guid]::TryParse([string]$previous.recordId, [ref]$recordId) -or
+            -not [guid]::TryParse([string]$previous.timelineId, [ref]$timelineId) -or
+            $previous.recordId -in $historyIds -or $previousAttempt -in $historyAttempts) {
+          throw "Invalid or conflicting producing job history for '$baseName'."
+        }
+        $historyIds += $previous.recordId
+        $historyAttempts += $previousAttempt
+      }
+      $knownIds = @($producer.id) + @($producer.previousAttempts | ForEach-Object { $_.recordId })
+      if (@($candidates | Where-Object { -not $_.source -or $_.source -notin $knownIds }).Count -gt 0) {
+        throw "Unrecognized artifact provenance for '$baseName'."
+      }
+      if ($producer.state -ne 'completed') {
+        throw "The producing job for '$baseName' has not completed."
+      }
+      $allowedResults = @('succeeded', 'succeededWithIssues')
+      if ($env:ARTIFACT_ALLOW_FAILED -eq 'true') {
+        $allowedResults += 'failed'
+      }
+      if ($producer.result -notin $allowedResults) {
+        return $null
+      }
+
+      $attemptArtifacts = @($candidates | Where-Object { $_.name -cmatch $pattern })
+      if ($attemptArtifacts.Count -gt 0) {
+        $expectedName = "${baseName}_attempt$attempt"
+      } else {
+        # Historical runs can still be selected, but only if their fixed-name
+        # artifact belongs to the current attempt of the producing job.
+        $expectedName = $baseName
+      }
+      $selected = @($candidates | Where-Object { $_.name -ceq $expectedName -and $_.source -eq $producer.id })
+      if ($selected.Count -gt 1) {
+        throw "Duplicate artifact metadata for '$expectedName'."
+      }
+      if ($selected.Count -eq 1) {
+        return $selected[0].name
+      }
+      return $null
+    }
+
+    $collection = [uri]$env:SYSTEM_COLLECTIONURI
+    $validCollection = ($collection.Host -eq 'dev.azure.com' -and $collection.AbsolutePath -match '^/[^/]+/?$') -or
+      ($collection.Host -match '^[a-z0-9-]+\.visualstudio\.com\z' -and $collection.AbsolutePath -in @('/', '/DefaultCollection/'))
+    if (-not $validCollection -or $collection.Scheme -ne 'https' -or -not $collection.IsDefaultPort -or
+        $collection.UserInfo -or $collection.Query -or $collection.Fragment) {
+      throw 'Expected an Azure DevOps collection URL.'
+    }
+    if (-not $env:SYSTEM_ACCESSTOKEN) {
+      throw 'The job access token is required to resolve artifact attempts.'
+    }
+    if ($env:ARTIFACT_VARIABLE_PREFIX -notmatch '^[A-Za-z_][A-Za-z0-9_]*\z') {
+      throw 'Invalid artifact variable prefix.'
+    }
+    # Windows PowerShell emits a JSON array as one pipeline object.
+    $names = @($env:ARTIFACT_NAMES | ConvertFrom-Json | ForEach-Object { $_ })
+    if ($env:ARTIFACT_NAMES_JSON) {
+      if ($env:ARTIFACT_NAME -or $names.Count -ne 0 -or -not $env:ARTIFACT_NAMES_JSON.TrimStart().StartsWith('[')) {
+        throw 'Specify exactly one logical artifact name, list, or JSON array.'
+      }
+      $names = @($env:ARTIFACT_NAMES_JSON | ConvertFrom-Json | ForEach-Object { $_ })
+    }
+    if ($env:ARTIFACT_NAME) {
+      if ($names.Count -ne 0) {
+        throw 'Specify artifactName or artifactNames, not both.'
+      }
+      $names = @($env:ARTIFACT_NAME)
+    }
+    if ($names.Count -eq 0 -or @($names | Where-Object { $_ -isnot [string] -or $_ -notmatch '^[A-Za-z0-9_.() -]+\z' }).Count -gt 0 -or
+        @($names | Select-Object -Unique).Count -ne $names.Count) {
+      throw 'Expected distinct logical artifact names without wildcards or path separators.'
+    }
+
+    $api = $collection.AbsoluteUri.TrimEnd('/') + '/' + [uri]::EscapeDataString($env:ARTIFACT_PROJECT) + '/_apis/build'
+    $headers = @{ Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN" }
+    $buildId = $env:ARTIFACT_BUILD_ID
+    if ($env:ARTIFACT_DEFINITION) {
+      $definition = 0
+      if (-not [int]::TryParse($env:ARTIFACT_DEFINITION, [ref]$definition) -or $definition -lt 1 -or -not $env:ARTIFACT_BRANCH) {
+        throw 'Selecting the latest build requires a definition ID and an exact branch.'
+      }
+      $results = @('succeeded')
+      if ($env:ARTIFACT_ALLOW_PARTIAL -eq 'true') { $results += 'partiallySucceeded' }
+      if ($env:ARTIFACT_ALLOW_FAILED -eq 'true') { $results += 'failed' }
+      $query = 'builds?api-version=7.1&statusFilter=completed&queryOrder=finishTimeDescending&$top=1' +
+        "&definitions=$definition&branchName=$([uri]::EscapeDataString($env:ARTIFACT_BRANCH))" +
+        "&resultFilter=$($results -join ',')"
+      if ($env:ARTIFACT_TAGS) {
+        $query += '&tagFilters=' + [uri]::EscapeDataString($env:ARTIFACT_TAGS)
+      }
+      $builds = @((Get-BuildMetadata $query).value)
+      if ($builds.Count -ne 1) {
+        throw 'No build matches the requested definition, branch, tags, and result filters.'
+      }
+      $buildId = [string]$builds[0].id
+    }
+    $id = 0
+    if (-not [int]::TryParse($buildId, [ref]$id) -or $id -lt 1) {
+      throw 'A positive, resolved build ID is required.'
+    }
+    $artifactMetadata = Get-BuildMetadata "builds/$id/artifacts?api-version=7.1"
+    if ($artifactMetadata.value -isnot [array] -or $artifactMetadata.count -ne $artifactMetadata.value.Count) {
+      throw 'Invalid artifact-list metadata for the selected build.'
+    }
+    $artifacts = @($artifactMetadata.value)
+    $timeline = Get-BuildMetadata "builds/$id/timeline?api-version=7.1"
+    if ($timeline.records -isnot [array]) {
+      throw 'Invalid producing-job timeline metadata for the selected build.'
+    }
+    $jobs = @($timeline.records | Where-Object { $_.type -eq 'Job' })
+    $oldJobIds = @($jobs | ForEach-Object { $_.previousAttempts } | ForEach-Object { $_.recordId })
+    $jobs = @($jobs | Where-Object { $_.id -notin $oldJobIds })
+    if ($jobs.Count -eq 0) {
+      throw 'The selected build has no producing-job timeline metadata.'
+    }
+
+    $selectedNames = @()
+    foreach ($name in $names) {
+      $selected = Select-Artifact $name
+      if ($selected) {
+        Write-Host "Build ${id}: $name -> $selected"
+        $selectedNames += $selected
+      } elseif ($env:ARTIFACT_ALLOW_MISSING -eq 'true') {
+        Write-Host "Build ${id}: no usable artifact for '$name' from its current producing attempt."
+      } else {
+        throw "No usable artifact for '$name' from its current producing attempt in build $id."
+      }
+    }
+    Set-ArtifactVariable 'BuildId' ([string]$id)
+    Set-ArtifactVariable 'Patterns' (($selectedNames | ForEach-Object { "$_/**" }) -join "`n")
+    Set-ArtifactVariable 'Name' $(if ($names.Count -eq 1 -and $selectedNames.Count -eq 1) { $selectedNames[0] } else { '' })
+  displayName: 'Resolve artifact producer attempts'
+  ${{ if ne(parameters.stepName, '') }}:
+    name: ${{ parameters.stepName }}
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    ARTIFACT_NAME: ${{ parameters.artifactName }}
+    ARTIFACT_NAMES: ${{ convertToJson(parameters.artifactNames) }}
+    ARTIFACT_NAMES_JSON: ${{ parameters.artifactNamesJson }}
+    ARTIFACT_BUILD_ID: ${{ parameters.buildId }}
+    ARTIFACT_PROJECT: ${{ parameters.project }}
+    ARTIFACT_DEFINITION: ${{ parameters.definition }}
+    ARTIFACT_BRANCH: ${{ parameters.branch }}
+    ARTIFACT_TAGS: ${{ parameters.tags }}
+    ARTIFACT_ALLOW_PARTIAL: ${{ parameters.allowPartiallySucceededBuilds }}
+    ARTIFACT_ALLOW_FAILED: ${{ parameters.allowFailedBuilds }}
+    ARTIFACT_ALLOW_MISSING: ${{ parameters.allowMissing }}
+    ARTIFACT_VARIABLE_PREFIX: ${{ parameters.variablePrefix }}
+    ARTIFACT_STEP_NAME: ${{ parameters.stepName }}
