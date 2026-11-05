@@ -372,11 +372,11 @@ export class ComposedInteractor implements IInteractor {
 export interface ISystemInteractor {
     createTerminal(options: vscode.TerminalOptions): vscode.Terminal;
     onDidCloseTerminal: typeof vscode.window.onDidCloseTerminal;
-    onDidWriteTerminalData: typeof vscode.window.onDidWriteTerminalData;
+    onDidStartTerminalShellExecution: typeof vscode.window.onDidStartTerminalShellExecution;
 }
 
 export const defaultSystemInteractor: ISystemInteractor = {
     createTerminal: vscode.window.createTerminal,
     onDidCloseTerminal: vscode.window.onDidCloseTerminal,
-    onDidWriteTerminalData: vscode.window.onDidWriteTerminalData
+    onDidStartTerminalShellExecution: vscode.window.onDidStartTerminalShellExecution
 };
