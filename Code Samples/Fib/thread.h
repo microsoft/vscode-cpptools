@@ -1,1 +1,1 @@
-void * thread_proc(void* ctx);
+void thread_proc(int tid);

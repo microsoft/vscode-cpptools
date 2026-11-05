@@ -3,7 +3,6 @@
     "configurations": [
         {
             "name": "(gdb) Launch",
-            "preLaunchTask": "build",
             "type": "cppdbg",
             "request": "launch",
             "args": [],
@@ -11,6 +10,7 @@
             "cwd": "${workspaceRoot}",
             "environment": [],
             "externalConsole": true,
+            "preLaunchTask": "build",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
