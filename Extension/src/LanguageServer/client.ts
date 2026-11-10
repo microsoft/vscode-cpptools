@@ -53,7 +53,7 @@ import * as configs from './configurations';
 import { CopilotCompletionContextFeatures, CopilotCompletionContextProvider } from './copilotCompletionContextProvider';
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from './customProviders';
 import { DataBinding } from './dataBinding';
-import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
+import { cachedEditorConfigSettings, EditorConfigWatcher, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, isWritingCrashCallStack, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { IncludeCleanupPreferences, getIncludeCleanupPreferences } from './includeCleanupEditorConfig';
 import { InactiveRegion, InactiveRegionStore, getInactiveRegionStartLines } from './inactiveRegions';
@@ -882,6 +882,7 @@ export class DefaultClient implements Client {
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
     private innerConfiguration?: configs.CppProperties;
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
+    private readonly editorConfigWatcher: EditorConfigWatcher = new EditorConfigWatcher(() => this.refreshEditorConfigSettings());
     private rootFolder?: vscode.WorkspaceFolder;
     private rootRealPath: string;
     private workspaceStoragePath: string;
@@ -1947,6 +1948,10 @@ export class DefaultClient implements Client {
     }
 
     private prepareVisibleEditorInfo(editors: readonly vscode.TextEditor[]): { [uri: string]: VisibleEditorInfo } {
+        if (this.editorConfigWatcher.update(editors.filter(editor => editor.document.uri.scheme === 'file')
+            .map(editor => editor.document.uri.fsPath))) {
+            cachedEditorConfigLookups.clear();
+        }
         const visibileEditorInfo: { [uri: string]: VisibleEditorInfo } = {};
         editors.forEach(editor => {
             // Use a map, to account for multiple editors for the same file.
@@ -4358,6 +4363,7 @@ export class DefaultClient implements Client {
     }
 
     public dispose(): void {
+        this.editorConfigWatcher.dispose();
         this.inactiveRegionsDecorations.forEach(currentSet => currentSet.decoration.dispose());
         this.inactiveRegionsDecorations.clear();
         this.pendingTagParsingCalls.forEach(pendingCall => {
