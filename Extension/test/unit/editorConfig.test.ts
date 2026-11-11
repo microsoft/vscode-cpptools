@@ -122,6 +122,34 @@ describe('EditorConfig resolution and refresh', () => {
         strictEqual(getLevel(), 'none');
     });
 
+    it('removes winning unset values for formatting and Include Cleanup', () => {
+        writeConfig('', 'root = true\n[*.cpp]\nend_of_line = lf\nindent_size = 4\n' +
+            'cpp_include_cleanup_remove_unused_error_tag_type = warning\n' +
+            '[sample.cpp]\nend_of_line = unset\nindent_size = UnSeT\ncpp_include_cleanup_remove_unused_error_tag_type = unset\n');
+        const settings = editorConfig.getEditorConfigSettings(join(directory, 'sample.cpp'));
+        strictEqual(Object.hasOwn(settings, 'end_of_line'), false);
+        strictEqual(Object.hasOwn(settings, 'indent_size'), false);
+        strictEqual(Object.hasOwn(settings, 'cpp_include_cleanup_remove_unused_error_tag_type'), false);
+        strictEqual(getIncludeCleanupPreferences(settings).removeUnusedErrorTagType, 'none');
+    });
+
+    it('does not restore ancestor values after a closer config unsets them', () => {
+        writeConfig('', 'root = true\n[*]\nend_of_line = crlf\nindent_style = tab\nindent_size = 8\n');
+        writeConfig('nested', '[*.cpp]\nend_of_line = unset\nindent_size = unset\n');
+        const settings = editorConfig.getEditorConfigSettings(join(directory, 'nested/sample.cpp'));
+        strictEqual(Object.hasOwn(settings, 'end_of_line'), false);
+        strictEqual(Object.hasOwn(settings, 'indent_size'), false);
+        strictEqual(settings.indent_style, 'tab');
+    });
+
+    it('preserves a concrete value that overrides an earlier unset', () => {
+        writeConfig('', 'root = true\n[*]\nend_of_line = unset\nindent_size = unset\n' +
+            '[*.cpp]\nend_of_line = lf\nindent_size = 4\n');
+        const settings = editorConfig.getEditorConfigSettings(join(directory, 'sample.cpp'));
+        strictEqual(settings.end_of_line, 'lf');
+        strictEqual(settings.indent_size, 4);
+    });
+
     it('preserves formatting inheritance and stops at root true', () => {
         writeConfig('', 'root = true\n[*]\nindent_style = tab\nindent_size = 8\n');
         writeConfig('nested', '[*.cpp]\nindent_size = 4\n');

@@ -1,9 +1,5 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Unreleased
-### Bug Fixes
-* Honor later and closer EditorConfig sections, and refresh settings when applicable configs outside workspace folders change.
-
 ## Version 1.35.6: November 2, 2026
 ### New Features
 * Add the opt-in `C_Cpp.hoverShowIntegralValuesInHexadecimal` setting to display integral constants in hexadecimal in IntelliSense hovers. [#7281](https://github.com/microsoft/vscode-cpptools/issues/7281)

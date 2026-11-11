@@ -92,7 +92,7 @@ export function createProtocolFilter(): Middleware {
                     client.takeOwnership(document);
                     void sendMessage(document);
                     const cppEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => util.isCpp(e.document));
-                    void client.onDidChangeVisibleTextEditors(cppEditors).catch(logAndReturn.undefined);
+                    void clients.getDefaultClient().onDidChangeVisibleTextEditors(cppEditors).catch(logAndReturn.undefined);
                 }
             }
         },

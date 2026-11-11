@@ -179,6 +179,11 @@ function getEditorConfig(filePath: string): EditorConfigSettings {
         currentDir = path.dirname(currentDir);
     }
 
+    for (const [key, value] of Object.entries(combinedConfig)) {
+        if (typeof value === 'string' && value.toLowerCase() === 'unset') {
+            delete combinedConfig[key];
+        }
+    }
     return combinedConfig;
 }
 
