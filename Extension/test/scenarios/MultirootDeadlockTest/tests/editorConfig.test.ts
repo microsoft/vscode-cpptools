@@ -12,6 +12,7 @@ import * as vscode from 'vscode';
 import { EditorConfigWatcher } from '../../../../src/LanguageServer/editorConfig';
 import * as extension from '../../../../src/LanguageServer/extension';
 import { createProtocolFilter } from '../../../../src/LanguageServer/protocolFilter';
+import { timeout } from '../../../../src/Utility/Async/timeout';
 import * as testHelpers from '../../../common/testHelpers';
 
 suite("EditorConfig in a multi-root workspace", () => {
@@ -30,7 +31,7 @@ suite("EditorConfig in a multi-root workspace", () => {
         await closeDocuments();
         await extension.clients.getDefaultClient().onDidChangeVisibleTextEditors([]);
         for (const directory of directories.splice(0)) {
-            await rm(directory, { recursive: true, force: true });
+            await rm(directory, { recursive: true, force: true, maxRetries: 5 });
         }
     });
 
@@ -140,6 +141,73 @@ suite("EditorConfig in a multi-root workspace", () => {
             if (trackedDocument) {
                 owner.TrackedDocuments.set(document.uri.toString(), trackedDocument);
             }
+            sandbox.restore();
+        }
+    });
+
+    test("restores ancestor watches when a visible document's workspace folder is removed", async () => {
+        const document = await createDocument(secondFolder);
+        const editor = await vscode.window.showTextDocument(document, { preview: false });
+        await extension.clients.getDefaultClient().onDidChangeVisibleTextEditors([editor]);
+        const workspaceFile = vscode.workspace.workspaceFile ?? assert.fail("Workspace file is unavailable");
+        const workspaceContents = await readFile(workspaceFile.fsPath);
+        const sandbox = sinon.createSandbox();
+        const creations = sandbox.spy(vscode.workspace, "createFileSystemWatcher");
+
+        async function changeFolder(remove: boolean): Promise<void> {
+            let subscription: vscode.Disposable | undefined;
+            const changed = new Promise<void>(resolve => {
+                subscription = vscode.workspace.onDidChangeWorkspaceFolders(event => {
+                    if ((remove ? event.removed : event.added).some(folder => folder.uri.toString() === secondFolder.uri.toString())) {
+                        resolve();
+                    }
+                });
+            });
+            try {
+                assert.ok(vscode.workspace.updateWorkspaceFolders(secondFolder.index, remove ? 1 : 0,
+                    ...remove ? [] : [{ uri: secondFolder.uri }]), "Workspace folder update should be accepted");
+                await timeout(10000, changed);
+            } finally {
+                subscription?.dispose();
+            }
+        }
+
+        try {
+            await changeFolder(true);
+            assert.ok(vscode.window.visibleTextEditors.some(visible => visible.document === document),
+                "The document should remain visible after its workspace folder is removed");
+            assert.ok(creations.getCalls().some(call => {
+                const pattern = call.args[0];
+                return pattern instanceof vscode.RelativePattern && pattern.pattern === '.editorconfig'
+                    && pattern.baseUri.fsPath === path.dirname(document.uri.fsPath);
+            }), "The visible document's newly external EditorConfig should be watched");
+        } finally {
+            await closeDocuments();
+            sandbox.restore();
+            if (!vscode.workspace.getWorkspaceFolder(document.uri)) {
+                await changeFolder(false);
+            }
+            await writeFile(workspaceFile.fsPath, workspaceContents);
+        }
+    });
+
+    test("restores ancestor watches after client recreation without a visibility change", async () => {
+        const document = await createDocument(firstFolder);
+        const editor = await vscode.window.showTextDocument(document, { preview: false });
+        const oldDefaultClient = extension.clients.getDefaultClient();
+        await oldDefaultClient.onDidChangeVisibleTextEditors([editor]);
+        const sandbox = sinon.createSandbox();
+        const creations = sandbox.spy(vscode.workspace, "createFileSystemWatcher");
+        try {
+            await extension.clients.recreateClients();
+            assert.notStrictEqual(extension.clients.getDefaultClient(), oldDefaultClient,
+                "Crash recovery should replace the default client");
+            assert.ok(vscode.window.visibleTextEditors.some(visible => visible.document === document),
+                "The document should remain visible during client recreation");
+            assert.ok(creations.getCalls().some(call =>
+                call.args[0] instanceof vscode.RelativePattern && call.args[0].pattern === '.editorconfig'),
+                "The replacement default client should restore ancestor EditorConfig watches");
+        } finally {
             sandbox.restore();
         }
     });
