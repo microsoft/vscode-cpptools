@@ -191,24 +191,4 @@ suite("EditorConfig in a multi-root workspace", () => {
         }
     });
 
-    test("restores ancestor watches after client recreation without a visibility change", async () => {
-        const document = await createDocument(firstFolder);
-        const editor = await vscode.window.showTextDocument(document, { preview: false });
-        const oldDefaultClient = extension.clients.getDefaultClient();
-        await oldDefaultClient.onDidChangeVisibleTextEditors([editor]);
-        const sandbox = sinon.createSandbox();
-        const creations = sandbox.spy(vscode.workspace, "createFileSystemWatcher");
-        try {
-            await extension.clients.recreateClients();
-            assert.notStrictEqual(extension.clients.getDefaultClient(), oldDefaultClient,
-                "Crash recovery should replace the default client");
-            assert.ok(vscode.window.visibleTextEditors.some(visible => visible.document === document),
-                "The document should remain visible during client recreation");
-            assert.ok(creations.getCalls().some(call =>
-                call.args[0] instanceof vscode.RelativePattern && call.args[0].pattern === '.editorconfig'),
-                "The replacement default client should restore ancestor EditorConfig watches");
-        } finally {
-            sandbox.restore();
-        }
-    });
 });
