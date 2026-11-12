@@ -817,5 +817,13 @@
     "error_config_arg_requires_path": {
         "text": "{0} requires a path.",
         "hint": "Error shown when a configuration argument is not followed by a path. {0} is the command-line option name. {Locked=\"{0}\"}"
+    },
+    "include_is_not_used": {
+        "text": "Include is not used",
+        "hint": "Diagnostic on a C or C++ include directive whose header is unused."
+    },
+    "include_is_duplicated": {
+        "text": "Include is duplicated",
+        "hint": "Diagnostic on a C or C++ include directive that repeats an earlier include of the same header."
     }
 }

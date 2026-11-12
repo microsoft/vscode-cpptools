@@ -53,7 +53,7 @@ import * as configs from './configurations';
 import { CopilotCompletionContextFeatures, CopilotCompletionContextProvider } from './copilotCompletionContextProvider';
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from './customProviders';
 import { DataBinding } from './dataBinding';
-import { cachedEditorConfigSettings, getEditorConfigSettings } from './editorConfig';
+import { cachedEditorConfigSettings, EditorConfigWatcher, getEditorConfigSettings } from './editorConfig';
 import { CppSourceStr, clients, configPrefix, initializeIntervalTimer, isWritingCrashCallStack, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { IncludeCleanupPreferences, getIncludeCleanupPreferences } from './includeCleanupEditorConfig';
 import { InactiveRegion, InactiveRegionStore, getInactiveRegionStartLines } from './inactiveRegions';
@@ -882,6 +882,7 @@ export class DefaultClient implements Client {
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
     private innerConfiguration?: configs.CppProperties;
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
+    private editorConfigWatcher?: EditorConfigWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
     private rootRealPath: string;
     private workspaceStoragePath: string;
@@ -1947,6 +1948,11 @@ export class DefaultClient implements Client {
     }
 
     private prepareVisibleEditorInfo(editors: readonly vscode.TextEditor[]): { [uri: string]: VisibleEditorInfo } {
+        this.editorConfigWatcher ??= new EditorConfigWatcher(() => this.refreshEditorConfigSettings());
+        if (this.editorConfigWatcher.update(editors.filter(editor => editor.document.uri.scheme === 'file')
+            .map(editor => editor.document.uri.fsPath))) {
+            cachedEditorConfigLookups.clear();
+        }
         const visibileEditorInfo: { [uri: string]: VisibleEditorInfo } = {};
         editors.forEach(editor => {
             // Use a map, to account for multiple editors for the same file.
@@ -1975,6 +1981,10 @@ export class DefaultClient implements Client {
     // Handles changes to visible files/ranges, changes to current selection/position,
     // and changes to the active text editor. Should only be called on the primary client.
     public async onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): Promise<void> {
+        const defaultClient: Client = clients.getDefaultClient();
+        if (this !== defaultClient) {
+            return defaultClient.onDidChangeVisibleTextEditors(editors);
+        }
         const params: DidChangeVisibleTextEditorsParams = {
             visibleEditorInfo: this.prepareVisibleEditorInfo(editors)
         };
@@ -2719,10 +2729,11 @@ export class DefaultClient implements Client {
     private refreshEditorConfigSettings(): void {
         cachedEditorConfigSettings.clear();
         cachedEditorConfigLookups.clear();
-        this.updateActiveDocumentTextOptions();
+        const defaultClient: Client = clients.getDefaultClient();
+        defaultClient.updateActiveDocumentTextOptions();
 
         const cppEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(editor => util.isCpp(editor.document));
-        void this.onDidChangeVisibleTextEditors(cppEditors).catch(logAndReturn.undefined);
+        void defaultClient.onDidChangeVisibleTextEditors(cppEditors).catch(logAndReturn.undefined);
     }
 
     /**
@@ -3215,7 +3226,7 @@ export class DefaultClient implements Client {
             void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(editor.document.uri, editor.document.languageId));
             void SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
-            const settings: CppSettings = new CppSettings(this.RootUri);
+            const settings: CppSettings = new CppSettings(editor.document.uri);
             if (settings.useVcFormat(editor.document)) {
                 const editorConfigSettings: any = getEditorConfigSettings(editor.document.uri.fsPath);
                 if (editorConfigSettings.indent_style === "tab") {
@@ -4358,6 +4369,7 @@ export class DefaultClient implements Client {
     }
 
     public dispose(): void {
+        this.editorConfigWatcher?.dispose();
         this.inactiveRegionsDecorations.forEach(currentSet => currentSet.decoration.dispose());
         this.inactiveRegionsDecorations.clear();
         this.pendingTagParsingCalls.forEach(pendingCall => {
