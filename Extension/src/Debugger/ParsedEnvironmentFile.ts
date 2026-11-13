@@ -57,7 +57,37 @@ export class ParsedEnvironmentFile {
                     value = value.replace(/\\n/gm, "\n");
                 }
 
+                // A single-quoted value is literal, so a reference inside it must not be
+                // expanded. The quotes come off on the next line, so this has to be read here.
+                const singleQuoted: boolean = (value.length > 1) && (value.charAt(0) === "'") && (value.charAt(value.length - 1) === "'");
+
                 value = value.replace(/(^['"]|['"]$)/g, "");
+
+                // Resolve ${VAR} references against the variables defined so far in the file,
+                // then the process environment. A name we don't know is left as-is rather than
+                // dropped, so ${workspaceFolder} and the other launch variables still resolve
+                // from the debug configuration.
+                //
+                // A reference that has to stay literal is written back as ${dollar}{VAR}. This
+                // parser's output goes on to expandAllStrings (configurationProvider.expand),
+                // which substitutes every remaining ${...} it knows and warns about the rest, so
+                // a bare ${VAR} would be replaced or reported instead of reaching the debuggee.
+                // ${dollar} is the one form that expansion leaves alone and collapses to a plain
+                // $ once it is done, which is what makes the literal survive the trip.
+                if (singleQuoted) {
+                    value = value.replace(/\$\{([\w\.\-]+)\}/g, (_full: string, name: string): string => `\${dollar}{${name}}`);
+                } else {
+                    value = value.replace(/(\\)?\$\{([\w\.\-]+)\}/g, (full: string, escape: string | undefined, name: string): string => {
+                        if (escape) {
+                            return `\${dollar}{${name}}`;
+                        }
+                        if (env.has(name)) {
+                            return env.get(name);
+                        }
+                        const processValue: string | undefined = process.env[name];
+                        return processValue !== undefined ? processValue : full;
+                    });
+                }
 
                 env.set(key, value);
             } else {
