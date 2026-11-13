@@ -60,6 +60,15 @@ export function setCachedClangTidyPath(path: string): void {
     cachedClangTidyPath = path;
 }
 
+let cachedClangTidyVersion: string | undefined;
+export function getCachedClangTidyVersion(): string | undefined {
+    return cachedClangTidyVersion;
+}
+
+export function setCachedClangTidyVersion(version: string): void {
+    cachedClangTidyVersion = version;
+}
+
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools")?.packageJSON;
 
