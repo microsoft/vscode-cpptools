@@ -8,6 +8,7 @@ export interface IncludeCleanupPreferences {
     excludedFiles: string;
     replacementFiles: string;
     requiredFiles: string;
+    removeUnusedErrorTagType: string;
 }
 
 function normalizeSettingKeys(settings: any): Record<string, unknown> {
@@ -28,6 +29,7 @@ export function getIncludeCleanupPreferences(settings: any): IncludeCleanupPrefe
         alternateFiles: getStringSetting(normalizedSettings, 'cpp_include_cleanup_alternate_files'),
         excludedFiles: getStringSetting(normalizedSettings, 'cpp_include_cleanup_excluded_files'),
         replacementFiles: getStringSetting(normalizedSettings, 'cpp_include_cleanup_replacement_files'),
-        requiredFiles: getStringSetting(normalizedSettings, 'cpp_include_cleanup_required_files')
+        requiredFiles: getStringSetting(normalizedSettings, 'cpp_include_cleanup_required_files'),
+        removeUnusedErrorTagType: getStringSetting(normalizedSettings, 'cpp_include_cleanup_remove_unused_error_tag_type').toLowerCase() || 'none'
     };
 }

@@ -7,6 +7,7 @@
 import * as vscode from 'vscode';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
+import { logAndReturn } from '../Utility/Async/returns';
 import * as cpptools from './client';
 import { getCustomConfigProviders } from './customProviders';
 import { TimeTelemetryCollector } from './timeTelemetryCollector';
@@ -63,7 +64,8 @@ export class ClientCollection {
         this.defaultClient = this.activeClient;
         this.languageClients.set(key, this.activeClient);
 
-        this.disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(e => this.onDidChangeWorkspaceFolders(e)));
+        this.disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(e =>
+            this.onDidChangeWorkspaceFolders(e).catch(logAndReturn.undefined)));
     }
 
     public async didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> {
@@ -144,6 +146,9 @@ export class ClientCollection {
             this.activeClient.activate();
             await this.activeClient.didChangeActiveEditor(vscode.window.activeTextEditor);
         }
+
+        await this.defaultClient.onDidChangeVisibleTextEditors(
+            vscode.window.visibleTextEditors.filter(editor => util.isCpp(editor.document)));
     }
 
     private async onDidChangeWorkspaceFolders(e?: vscode.WorkspaceFoldersChangeEvent): Promise<void> {
@@ -205,6 +210,9 @@ export class ClientCollection {
                     this.activeClient.activate();
                 }
             }
+
+            await this.defaultClient.onDidChangeVisibleTextEditors(
+                vscode.window.visibleTextEditors.filter(editor => util.isCpp(editor.document)));
         }
     }
 

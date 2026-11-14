@@ -7,10 +7,23 @@
 import * as fs from 'fs';
 import { Minimatch } from 'minimatch';
 import * as path from 'path';
+import * as vscode from 'vscode';
 import * as util from '../common';
 import { isWindows } from '../constants';
 
-export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
+type EditorConfigSettings = Record<string, string | number | boolean>;
+
+interface EditorConfigSection {
+    pattern: string;
+    settings: EditorConfigSettings;
+}
+
+interface ParsedEditorConfig {
+    global: EditorConfigSettings;
+    sections: EditorConfigSection[];
+}
+
+export const cachedEditorConfigSettings: Map<string, EditorConfigSettings> = new Map<string, EditorConfigSettings>();
 
 export function mapIndentationReferenceToEditorConfig(value: string | undefined): string {
     if (value !== undefined) {
@@ -85,10 +98,10 @@ export function matchesSection(pathPrefix: string, filePath: string, section: st
     return matcher.match(filePath);
 }
 
-function parseEditorConfigContent(content: string): Record<string, any> {
+function parseEditorConfigContent(content: string): ParsedEditorConfig {
     const lines = content.split(/\r?\n/);
-    const config: Record<string, any> = {};
-    let currentSection: string | null = '*'; // Use '*' for sectionless (global) settings.
+    const config: ParsedEditorConfig = { global: {}, sections: [] };
+    let currentSettings: EditorConfigSettings = config.global;
 
     lines.forEach(line => {
         line = line.trim();
@@ -99,32 +112,25 @@ function parseEditorConfigContent(content: string): Record<string, any> {
         }
 
         if (line.startsWith('[') && line.endsWith(']')) {
-            // New section (e.g., [*.js])
-            currentSection = line.slice(1, -1).trim();
-            config[currentSection] = config[currentSection] || {};
+            currentSettings = {};
+            config.sections.push({ pattern: line.slice(1, -1).trim(), settings: currentSettings });
         } else {
             // Key-value pair (e.g., indent_style = space).
             const [key, ...values] = line.split('=');
             if (key && values.length > 0) {
-                const trimmedKey = key.trim();
-                let value: any = values.join('=').trim();
+                const trimmedKey = key.trim().toLowerCase();
+                let value: string | number | boolean = values.join('=').trim();
 
                 // Convert boolean-like and numeric values.
-                if (value === 'true') {
+                if (value.toLowerCase() === 'true') {
                     value = true;
-                } else if (value === 'false') {
+                } else if (value.toLowerCase() === 'false') {
                     value = false;
                 } else if (!isNaN(Number(value))) {
                     value = Number(value);
                 }
 
-                if (currentSection) {
-                    // Ensure the current section is initialized.
-                    if (!config[currentSection]) {
-                        config[currentSection] = {};
-                    }
-                    config[currentSection][trimmedKey] = value;
-                }
+                currentSettings[trimmedKey] = value;
             }
         }
     });
@@ -132,9 +138,8 @@ function parseEditorConfigContent(content: string): Record<string, any> {
     return config;
 }
 
-function getEditorConfig(filePath: string): any {
-    let combinedConfig: any = {};
-    let globalConfig: any = {};
+function getEditorConfig(filePath: string): EditorConfigSettings {
+    let combinedConfig: EditorConfigSettings = {};
     let currentDir: string = path.dirname(filePath);
     const rootDir: string = path.parse(currentDir).root;
 
@@ -147,33 +152,24 @@ function getEditorConfig(filePath: string): any {
         const editorConfigPath: string = path.join(currentDir, '.editorconfig');
         if (util.checkFileExistsSync(editorConfigPath)) {
             const configFileContent: string = fs.readFileSync(editorConfigPath, 'utf-8');
-            const configData = parseEditorConfigContent(configFileContent);
-
-            // Extract global (sectionless) entries.
-            if (configData['*']) {
-                globalConfig = {
-                    ...globalConfig,
-                    ...configData['*']
-                };
-            }
+            const configData: ParsedEditorConfig = parseEditorConfigContent(configFileContent);
+            const currentConfig: EditorConfigSettings = { ...configData.global };
 
             let currentDirForwardSlashes: string = currentDir;
             if (isWindows) {
                 currentDirForwardSlashes = currentDir.replace(/\\/g, '/');
             }
 
-            // Match sections and combine configurations.
-            Object.keys(configData).forEach((section: string) => {
-                if (section !== '*' && matchesSection(currentDirForwardSlashes, filePath, section)) {
-                    combinedConfig = {
-                        ...configData[section],
-                        ...combinedConfig
-                    };
+            for (const section of configData.sections) {
+                if (matchesSection(currentDirForwardSlashes, filePath, section.pattern)) {
+                    Object.assign(currentConfig, section.settings);
                 }
-            });
+            }
+            combinedConfig = { ...currentConfig, ...combinedConfig };
 
             // Check if the current .editorconfig is the root.
-            if (configData['*']?.root) {
+            if (configData.global.root === true) {
+                combinedConfig.root = true;
                 break; // Stop searching after processing the root = true file.
             }
         }
@@ -183,20 +179,78 @@ function getEditorConfig(filePath: string): any {
         currentDir = path.dirname(currentDir);
     }
 
-    // Merge global config with section-based config.
-    return {
-        ...globalConfig,
-        ...combinedConfig
-    };
+    for (const [key, value] of Object.entries(combinedConfig)) {
+        if (typeof value === 'string' && value.toLowerCase() === 'unset') {
+            delete combinedConfig[key];
+        }
+    }
+    return combinedConfig;
 }
 
 // Look up the appropriate .editorconfig settings for the specified file.
 // This is intentionally not async to avoid races due to multiple entrancy.
-export function getEditorConfigSettings(fsPath: string): Promise<any> {
-    let editorConfigSettings: any = cachedEditorConfigSettings.get(fsPath);
+export function getEditorConfigSettings(fsPath: string): EditorConfigSettings {
+    let editorConfigSettings: EditorConfigSettings | undefined = cachedEditorConfigSettings.get(fsPath);
     if (!editorConfigSettings) {
         editorConfigSettings = getEditorConfig(fsPath);
         cachedEditorConfigSettings.set(fsPath, editorConfigSettings);
     }
     return editorConfigSettings;
+}
+
+export class EditorConfigWatcher implements vscode.Disposable {
+    private readonly watchers: Map<string, vscode.FileSystemWatcher> = new Map<string, vscode.FileSystemWatcher>();
+
+    constructor(private readonly onChanged: () => void) { }
+
+    public update(filePaths: readonly string[]): boolean {
+        const directories: Set<string> = new Set<string>();
+        for (const filePath of filePaths) {
+            let directory: string = path.dirname(filePath);
+            for (;;) {
+                if (!vscode.workspace.getWorkspaceFolder(vscode.Uri.file(directory))) {
+                    directories.add(directory);
+                }
+                const parent: string = path.dirname(directory);
+                if (parent === directory) {
+                    break;
+                }
+                directory = parent;
+            }
+        }
+
+        for (const [directory, watcher] of this.watchers) {
+            if (!directories.has(directory)) {
+                watcher.dispose();
+                this.watchers.delete(directory);
+            }
+        }
+
+        let addedWatchers: boolean = false;
+        for (const directory of directories) {
+            if (this.watchers.has(directory)) {
+                continue;
+            }
+            const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+                new vscode.RelativePattern(vscode.Uri.file(directory), '.editorconfig'));
+            const onChanged = () => {
+                cachedEditorConfigSettings.clear();
+                this.onChanged();
+            };
+            watcher.onDidCreate(onChanged);
+            watcher.onDidChange(onChanged);
+            watcher.onDidDelete(onChanged);
+            this.watchers.set(directory, watcher);
+            addedWatchers = true;
+        }
+        if (addedWatchers) {
+            cachedEditorConfigSettings.clear();
+        }
+        return addedWatchers;
+    }
+
+    public dispose(): void {
+        this.watchers.forEach(watcher => watcher.dispose());
+        this.watchers.clear();
+    }
 }
