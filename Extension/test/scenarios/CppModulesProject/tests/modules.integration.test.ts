@@ -72,6 +72,12 @@ function cppPropertiesPath(): string {
 }
 
 async function changeCppProperties(cppProperties: config.ConfigurationJson, _disposables: vscode.Disposable[]): Promise<void> {
+    // Close any editors still open (or restored from a previous test run)
+    // before switching configurations: reopening an already parsed document
+    // need not emit another IntelliSenseReady notification, which the tests
+    // below rely on when they open their files fresh.
+    await vscode.commands.executeCommand('workbench.action.closeAllEditors');
+
     await util.writeFileText(cppPropertiesPath(), JSON.stringify(cppProperties));
     const contents: string = await util.readFileText(cppPropertiesPath());
     console.log("    wrote c_cpp_properties.json: " + contents);
@@ -175,7 +181,9 @@ async function writeCompileCommands(entries: CompileCommandEntry[]): Promise<voi
 /* **************************************************************************** */
 
 // MSVC spellings of the C++20 module related compiler arguments, as used by
-// the (currently MSVC-only) modules IntelliSense workaround.
+// the (currently MSVC-only) modules IntelliSense workaround. Note the
+// ":angle" suffix on /headerUnit: header unit mappings require an :angle or
+// :quote suffix in actual MSVC module builds.
 function msvcModuleArgs(): string[] {
     const ifcDir: string = `${toPosixPath(workspacePath())}/build/ifc`;
     return [
@@ -183,7 +191,7 @@ function msvcModuleArgs(): string[] {
         ifcDir,
         "/reference",
         `math=${ifcDir}/math.ifc`,
-        "/headerUnit",
+        "/headerUnit:angle",
         `std=${ifcDir}/std.ifc`,
         "/stdIfcDir",
         ifcDir
@@ -271,8 +279,12 @@ suite("compile_commands.json with GCC and Clang C++20 module flags", function():
 
 suite("custom configuration provider with module compiler args", function(): void {
     let cpptools: apit.CppToolsTestApi;
-    let lastResult: api.SourceFileConfigurationItem[];
     let configurationProvidedBeforeCanProvide: boolean = false;
+    // Accumulated across all provideConfigurations calls: the client may batch
+    // several files into one request or send follow-up requests for already
+    // open files, so assertions must not depend on which request happened to
+    // be the last one.
+    const providedUris: Set<string> = new Set();
     const supportedUris: Set<string> = new Set();
     const disposables: vscode.Disposable[] = [];
 
@@ -320,8 +332,8 @@ suite("custom configuration provider with module compiler args", function(): voi
                     uri: uriString,
                     configuration: configuration
                 });
+                providedUris.add(uriString);
             });
-            lastResult = result;
             return Promise.resolve(result);
         },
         dispose(): void {
@@ -363,12 +375,13 @@ suite("custom configuration provider with module compiler args", function(): voi
     test("GCC-style module compiler args are delivered - main2.cpp", async () => {
         const document: vscode.TextDocument = await openAndAwaitIntelliSenseReady(cpptools, disposables, "main2.cpp");
         // Handshake check: the extension asked before configurations were
-        // provided, and items were delivered for this file. (The objects
-        // themselves are intentionally not re-compared against the provider's
-        // own return value; the assertions below observe the delivered
-        // configuration through its effect on IntelliSense instead.)
+        // provided, and a configuration was provided for this file (the
+        // accumulated set makes this independent of request batching or
+        // follow-up requests). The assertions below observe the delivered
+        // configuration through its effect on IntelliSense instead of re
+        // -checking the provider's own return value.
         assert.strictEqual(configurationProvidedBeforeCanProvide, false);
-        assert.deepStrictEqual(lastResult.map(item => item.uri), [document.uri.toString()]);
+        assert.ok(providedUris.has(document.uri.toString()), "no configuration provided for main2.cpp");
 
         // Verify that the configuration -- whose compilerArgs carry the GCC
         // module flags -- was actually delivered and applied for this
@@ -380,7 +393,7 @@ suite("custom configuration provider with module compiler args", function(): voi
         const document: vscode.TextDocument = await openAndAwaitIntelliSenseReady(cpptools, disposables, "main3.cpp");
         // Handshake check, as above.
         assert.strictEqual(configurationProvidedBeforeCanProvide, false);
-        assert.deepStrictEqual(lastResult.map(item => item.uri), [document.uri.toString()]);
+        assert.ok(providedUris.has(document.uri.toString()), "no configuration provided for main3.cpp");
 
         // Verify that the configuration -- whose compilerArgs carry the MSVC
         // module arguments -- was actually delivered and applied for this
