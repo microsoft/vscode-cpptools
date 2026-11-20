@@ -12,13 +12,16 @@
 // These tests cover the extension-side behavior that module based projects
 // rely on today:
 //  * module interface files (.cppm/.ixx) are recognized as C++ sources,
-//  * a compile_commands.json that contains GCC module related flags does not
-//    prevent the language server from providing IntelliSense for the project,
-//    and its entries are actually applied to the translation units (verified
-//    through a sentinel define and a hover assertion, not just readiness),
-//  * module related compiler arguments (both GCC and MSVC spellings) are
-//    accepted and delivered through the custom configuration provider path,
-//    verified the same way.
+//  * a compile_commands.json that contains GCC and Clang module related flags
+//    does not prevent the language server from providing IntelliSense for the
+//    project, and its entries are actually applied to the translation units
+//    (verified through sentinel defines and hover assertions, not just
+//    readiness),
+//  * module related compiler arguments (GCC, Clang and MSVC spellings) are
+//    accepted and delivered through the custom configuration provider path.
+//    The sentinel defines travel in the same `compilerArgs` array as the
+//    module flags, so the hover assertions verify that these arguments -- not
+//    a separate channel -- reach the language server and take effect.
 //
 // No statement is made about the semantic understanding of module imports by
 // the language server itself: that support is still in development and is
@@ -48,11 +51,13 @@ function toPosixPath(path: string): string {
     return path.replace(/\\/g, '/');
 }
 
-// The (empty) fake gcc binaries are checked in with the scenario assets,
+// The (empty) fake compiler binaries are checked in with the scenario assets,
 // following the SimpleCppProject pattern, so that the language server does not
 // probe a real compiler and the tests stay deterministic across machines.
-function fakeGccPath(): string {
-    return toPosixPath(`${workspacePath()}/bin/${process.platform === 'win32' ? 'gcc.exe' : 'gcc'}`);
+// MSVC-style compilers (cl) use the .exe suffix on every platform.
+function fakeCompilerPath(name: string, exeOnAllPlatforms?: boolean): string {
+    const suffix: string = exeOnAllPlatforms || process.platform === 'win32' ? ".exe" : "";
+    return toPosixPath(`${workspacePath()}/bin/${name}${suffix}`);
 }
 
 // The directories of these files are created on demand by util.writeFileText,
@@ -130,23 +135,34 @@ interface CompileCommandEntry {
     file: string;
 }
 
-// GCC spellings of the C++20 module related compiler flags, as emitted by
-// CMake's C++ module support for GCC targets.
-function gccModuleArgs(cmiDir: string): string[] {
+// GCC spellings of the C++20 module related compiler flags. "-fmodules-ts" is
+// the module flag GCC accepts (verified against g++; GCC 15 rejects
+// "-fmodules-c++20"). Clang-only options such as "-fprebuilt-module-path" and
+// "-fmodule-file" are deliberately NOT included here: GCC rejects the former,
+// and "-fmodule-file" is a D language option in GCC.
+function gccModuleArgs(): string[] {
+    return ["-std=c++20", "-fmodules-ts"];
+}
+
+// Clang spellings of the C++20 module related compiler flags, kept separate
+// from the GCC set because the two compilers accept different options
+// ("-fmodules-ts" does not exist in Clang; "-fprebuilt-module-path" and
+// "-fmodule-file" do not exist in GCC).
+function clangModuleArgs(pcmDir: string): string[] {
     return [
         "-std=c++20",
-        "-fmodules-ts",
-        `-fprebuilt-module-path=${cmiDir}`,
-        `-fmodule-file=math=${cmiDir}/math.gcm`
+        "-fmodules",
+        `-fprebuilt-module-path=${pcmDir}`,
+        `-fmodule-file=math=${pcmDir}/math.pcm`
     ];
 }
 
-function compileCommandEntry(file: string, extraArgs: string[] = []): CompileCommandEntry {
+function compileCommandEntry(file: string, compilerPath: string, moduleArgs: string[], extraArgs: string[] = []): CompileCommandEntry {
     const root: string = toPosixPath(workspacePath());
     const objectFile: string = `${root}/build/${file.replace(/\.[^.]+$/, "")}.o`;
     return {
         directory: root,
-        arguments: [fakeGccPath(), ...gccModuleArgs(`${root}/build/cmi`), ...extraArgs, "-c", "-o", objectFile, file],
+        arguments: [compilerPath, ...moduleArgs, ...extraArgs, "-c", "-o", objectFile, file],
         file: file
     };
 }
@@ -196,7 +212,7 @@ suite("C++20 modules file type tests", function(): void {
 
 /* **************************************************************************** */
 
-suite("compile_commands.json with GCC C++20 module flags", function(): void {
+suite("compile_commands.json with GCC and Clang C++20 module flags", function(): void {
     let cpptools: apit.CppToolsTestApi;
     const disposables: vscode.Disposable[] = [];
 
@@ -205,19 +221,21 @@ suite("compile_commands.json with GCC C++20 module flags", function(): void {
         disposables.push(cpptools);
 
         await writeCompileCommands([
-            // The sentinel define carried by main.cpp's entry lets the test
-            // verify through IntelliSense (hover) that the database entry was
-            // applied, rather than IntelliSense falling back to a default
-            // configuration.
-            compileCommandEntry("main.cpp", ["-DCPPMODULES_COMPILE_COMMANDS_SENTINEL=1"]),
-            compileCommandEntry("math.cppm"),
-            compileCommandEntry("math.ixx")
+            // The sentinel defines carried by the importers' entries let the
+            // tests verify through IntelliSense (hover) that the database
+            // entries were applied, rather than IntelliSense falling back to a
+            // default configuration. GCC and Clang module flag spellings are
+            // exercised through separate importers.
+            compileCommandEntry("main.cpp", fakeCompilerPath("gcc"), gccModuleArgs(), ["-DCPPMODULES_COMPILE_COMMANDS_SENTINEL=1"]),
+            compileCommandEntry("main4.cpp", fakeCompilerPath("clang++"), clangModuleArgs(`${toPosixPath(workspacePath())}/build/pcm`), ["-DCLANG_COMPILE_COMMANDS_SENTINEL=1"]),
+            compileCommandEntry("math.cppm", fakeCompilerPath("gcc"), gccModuleArgs()),
+            compileCommandEntry("math.ixx", fakeCompilerPath("gcc"), gccModuleArgs())
         ]);
 
         await changeCppProperties({
             configurations: [
                 {
-                    name: "GCC C++20 modules",
+                    name: "C++20 modules",
                     compileCommands: [compileCommandsPath()],
                     intelliSenseMode: "gcc-x64",
                     cppStandard: "c++20"
@@ -232,13 +250,20 @@ suite("compile_commands.json with GCC C++20 module flags", function(): void {
         disposables.forEach(d => d.dispose());
     });
 
-    test("IntelliSense is provided for the module importer (main.cpp)", async () => {
+    test("IntelliSense is provided for the gcc module importer (main.cpp)", async () => {
         const document: vscode.TextDocument = await openAndAwaitIntelliSenseReady(cpptools, disposables, "main.cpp");
 
         // Verify that the compile_commands.json entry for this file -- the one
-        // carrying the module related flags -- was actually applied to the
+        // carrying the GCC module related flags -- was actually applied to the
         // translation unit (and not a fallback configuration).
         await assertSentinelDefineApplied(document, "return compile_database_sentinel_value;", "compile_database_sentinel_value");
+    });
+
+    test("IntelliSense is provided for the clang module importer (main4.cpp)", async () => {
+        const document: vscode.TextDocument = await openAndAwaitIntelliSenseReady(cpptools, disposables, "main4.cpp");
+
+        // Same verification for the Clang flag spellings.
+        await assertSentinelDefineApplied(document, "return clang_compile_commands_sentinel_value;", "clang_compile_commands_sentinel_value");
     });
 });
 
@@ -252,24 +277,28 @@ suite("custom configuration provider with module compiler args", function(): voi
     const disposables: vscode.Disposable[] = [];
 
     // gcc-style module args for main2.cpp, MSVC-style module args for main3.cpp.
-    // Each config also carries a sentinel define -- through the provider API's
-    // `defines` channel, which is the documented way to deliver defines -- so
-    // the tests can verify through IntelliSense (hover) that the configuration
-    // was actually delivered and applied for the translation unit, not merely
-    // returned by the provider. The module flags stay in `compilerArgs`.
+    // Each configuration sets a compilerPath and carries its sentinel define
+    // inside `compilerArgs` -- the same array as the module flags -- so the
+    // hover assertions verify that the compilerArgs themselves (not a separate
+    // channel) reach the language server and are applied to the translation
+    // unit. The `defines` field stays empty on purpose: when a sentinel was
+    // delivered through `defines` instead, dropping or rewriting the module
+    // flags in `compilerArgs` would go unnoticed.
     const gccModuleConfig: api.SourceFileConfiguration = {
         includePath: [ "${workspaceFolder}" ],
-        defines: [ "PROVIDER_GCC_SENTINEL=1" ],
+        defines: [],
         intelliSenseMode: "gcc-x64",
         standard: "c++20",
-        compilerArgs: gccModuleArgs(`${toPosixPath(workspacePath())}/build/cmi`)
+        compilerPath: fakeCompilerPath("gcc"),
+        compilerArgs: [...gccModuleArgs(), "-DPROVIDER_GCC_SENTINEL=1"]
     };
     const msvcModuleConfig: api.SourceFileConfiguration = {
         includePath: [ "${workspaceFolder}" ],
-        defines: [ "PROVIDER_MSVC_SENTINEL=1" ],
+        defines: [],
         intelliSenseMode: "msvc-x64",
         standard: "c++20",
-        compilerArgs: msvcModuleArgs()
+        compilerPath: fakeCompilerPath("cl", true),
+        compilerArgs: [...msvcModuleArgs(), "/DPROVIDER_MSVC_SENTINEL=1"]
     };
 
     const provider: api.CustomConfigurationProvider = {
