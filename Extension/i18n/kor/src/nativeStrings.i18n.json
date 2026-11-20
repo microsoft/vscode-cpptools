@@ -436,5 +436,13 @@
 	"failed_to_lock_browse_db_lock_file": "찾아보기 데이터베이스 잠금 파일을 잠그지 못했습니다. {0} (errno={1})",
 	"browse_database_disabled_incompatible_storage": "저장소 위치에서 SQLite WAL 공유 메모리를 지원하지 않으므로 찾아보기 데이터베이스를 사용할 수 없습니다. browse.databaseFilename을 로컬 경로로 설정하세요.",
 	"selected_translation_unit_not_include_file_previous": "선택한 변환 단위 '{0}'에는 '{1}'이(가) 포함되어 있지 않습니다. IntelliSense는 이전 변환 단위를 사용할 수 있으면 복원하며, 그렇지 않으면 '{1}'을(를) 헤더 전용 변환 단위로 사용합니다.",
-	"selected_translation_unit_not_include_file_header_only": "선택한 변환 단위 '{0}'에 '{1}'이(가) 포함되어 있지 않습니다. 이전 변환 단위를 사용할 수 없으므로 IntelliSense는 '{1}'을(를) 헤더 전용 변환 단위로 사용합니다."
+	"selected_translation_unit_not_include_file_header_only": "선택한 변환 단위 '{0}'에 '{1}'이(가) 포함되어 있지 않습니다. 이전 변환 단위를 사용할 수 없으므로 IntelliSense는 '{1}'을(를) 헤더 전용 변환 단위로 사용합니다.",
+	"check_analysis_process_unavailable": "\"{0}\"을(를) 확인하는 동안 C++ 분석 프로세스를 사용할 수 없었습니다.",
+	"quick_info_size": "**크기:** %s B",
+	"quick_info_alignment": "**맞춤:** %s B",
+	"help_allow_missing_workspace_config": "지정된 작업 영역 구성 파일이 없어도 서버를 시작할 수 있도록 허용합니다.",
+	"help_deprecated_lsp_config": "--workspace-config의 더 이상 사용되지 않는 별칭입니다.",
+	"help_deprecated_allow_missing_lsp_config": "--allow-missing-workspace-config의 더 이상 사용되지 않는 별칭입니다.",
+	"error_conflicting_config_args": "--workspace-config는 --lsp-config와 결합할 수 없습니다.",
+	"error_config_arg_requires_path": "{0}에는 경로가 필요합니다."
 }

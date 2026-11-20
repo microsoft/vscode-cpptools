@@ -436,5 +436,13 @@
 	"failed_to_lock_browse_db_lock_file": "No se pudo bloquear el archivo de bloqueo de la base de datos de exploración: {0} (errno={1})",
 	"browse_database_disabled_incompatible_storage": "La base de datos de exploración se deshabilitó porque su ubicación de almacenamiento no admite la memoria compartida de SQLite WAL. Establezca browse.databaseFilename en una ruta de acceso local.",
 	"selected_translation_unit_not_include_file_previous": "La unidad de traducción seleccionada '{0}' no incluye '{1}'. IntelliSense restaurará la unidad de traducción anterior si aún está disponible; de lo contrario, usará '{1}' como una unidad de traducción de solo encabezado.",
-	"selected_translation_unit_not_include_file_header_only": "La unidad de traducción seleccionada '{0}' no incluye '{1}'. No hay ninguna unidad de traducción anterior disponible, por lo que IntelliSense usará '{1}' como unidad de traducción de solo encabezado."
+	"selected_translation_unit_not_include_file_header_only": "La unidad de traducción seleccionada '{0}' no incluye '{1}'. No hay ninguna unidad de traducción anterior disponible, por lo que IntelliSense usará '{1}' como unidad de traducción de solo encabezado.",
+	"check_analysis_process_unavailable": "El proceso de análisis de C++ no estaba disponible al comprobar \"{0}\".",
+	"quick_info_size": "**Tamaño:** %s B",
+	"quick_info_alignment": "**Alineación:** %s B",
+	"help_allow_missing_workspace_config": "Permitir que el servidor se inicie incluso cuando el archivo de configuración del área de trabajo especificado no exista.",
+	"help_deprecated_lsp_config": "Alias en desuso para --workspace-config.",
+	"help_deprecated_allow_missing_lsp_config": "Alias en desuso para --allow-missing-workspace-config.",
+	"error_conflicting_config_args": "--workspace-config no se puede combinar con --lsp-config.",
+	"error_config_arg_requires_path": "{0} requiere una ruta de acceso."
 }
