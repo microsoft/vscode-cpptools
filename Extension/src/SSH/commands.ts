@@ -41,12 +41,15 @@ export async function rsync(files: vscode.Uri[], host: ISshHostInfo, targetDir: 
     if (recursive) {
         args.push('-r');
     }
+    const sshArgs: string[] = [];
     if (jumpHosts && jumpHosts.length > 0) {
-        args.push('-e', `ssh -J ${jumpHosts.map(getFullHostAddress).join(',')}`);
+        sshArgs.push('-J', jumpHosts.map(getFullHostAddress).join(','));
     }
     if (host.port) {
-        // upper case P
-        args.push(`--port=${host.port}`);
+        sshArgs.push('-p', `${host.port}`);
+    }
+    if (sshArgs.length > 0) {
+        args.push('-e', `"ssh ${sshArgs.join(' ')}"`);
     }
     args.push(files.map(uri => `"${uri.fsPath}"`).join(' '), `${getFullHostAddressNoPort(host)}:${targetDir}`);
 
