@@ -1,0 +1,7 @@
+[
+    {
+        "file": "loc/TranslationsImportExport.yml",
+        "name": "drop",
+        "reason": "Keep the localization handoff name until its external service contract has been verified with the owner."
+    }
+]
