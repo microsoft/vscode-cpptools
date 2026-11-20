@@ -11,14 +11,14 @@ import { CppSettings } from '../../../../src/LanguageServer/settings';
 import { timeout } from '../../../../src/Utility/Async/timeout';
 import * as testHelpers from '../../../common/testHelpers';
 
-suite("[Quick info test]", function(): void {
+suite("[Quick info test]", function (): void {
     let cpptools: apit.CppToolsTestApi;
     const disposables: vscode.Disposable[] = [];
     const filePath: string = `${vscode.workspace.workspaceFolders?.[1]?.uri.fsPath}/quickInfo.cpp`;
     const fileUri: vscode.Uri = vscode.Uri.file(filePath);
     let platform: string = "";
 
-    suiteSetup(async function(): Promise<void> {
+    suiteSetup(async function (): Promise<void> {
         await testHelpers.activateCppExtension();
 
         cpptools = await apit.getCppToolsTestApi(api.Version.latest) ?? assert.fail('Could not get CppToolsTestApi');
@@ -54,7 +54,7 @@ suite("[Quick info test]", function(): void {
 
     });
 
-    suiteTeardown(function(): void {
+    suiteTeardown(function (): void {
         disposables.forEach(d => d.dispose());
     });
 
