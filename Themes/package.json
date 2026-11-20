@@ -2,7 +2,7 @@
   "name": "cpptools-themes",
   "displayName": "C/C++ Themes",
   "description": "UI Themes for C/C++ extension.",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "publisher": "ms-vscode",
   "preview": false,
   "icon": "assets/LanguageCCPP_color_128x.png",
@@ -63,7 +63,7 @@
     ]
   },
   "devDependencies": {
-    "@vscode/vsce": "4.0.0"
+    "@vscode/vsce": "4.1.1"
   },
   "overrides": {
     "fast-uri": "^3.1.6",
