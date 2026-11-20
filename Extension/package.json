@@ -7273,7 +7273,7 @@
         "@vscode/debugprotocol": "^1.65.0",
         "@vscode/dts": "^0.4.0",
         "@vscode/test-electron": "^3.1.0",
-        "@vscode/vsce": "4.0.0",
+        "@vscode/vsce": "4.1.1",
         "async-child-process": "^1.1.1",
         "await-notify": "^1.0.1",
         "eslint": "^10.10.0",
