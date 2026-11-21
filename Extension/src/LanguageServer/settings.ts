@@ -12,7 +12,7 @@ import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
 import * as util from '../common';
-import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isObject, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
+import { getCachedClangFormatPath, getCachedClangTidyPath, getCachedClangTidyVersion, getExtensionFilePath, getRawSetting, isArray, isArrayOfString, isBoolean, isNumber, isObject, isString, isValidMapping, setCachedClangFormatPath, setCachedClangTidyPath, setCachedClangTidyVersion } from '../common';
 import { isWindows } from '../constants';
 import * as telemetry from '../telemetry';
 import { cachedEditorConfigLookups, DefaultClient, hasTrustedCompilerPaths } from './client';
@@ -279,6 +279,14 @@ export class CppSettings extends Settings {
         return this.getClangPath(false);
     }
 
+    public get clangTidyVersion(): string | undefined {
+        // The cached version comes from an auto-discovered binary, so it says nothing about the
+        // clang-tidy a resource carrying its own path is running. Reporting it would point that
+        // resource's documentation links at the wrong release, so leave the version unknown and
+        // let the caller fall back.
+        return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.path")) ? undefined : getCachedClangTidyVersion();
+    }
+
     public get clangFormatPath(): string | undefined {
         return this.getClangPath(true);
     }
@@ -303,6 +311,7 @@ export class CppSettings extends Settings {
             } else {
                 // Attempt to invoke both our own version of clang-* to see if we can successfully execute it, and to get its version.
                 let bundledVersion: string;
+                let clangVersion: string | undefined;
                 try {
                     const bundledPath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
                     const output: string = execFileSync(bundledPath, ['--version']).toString();
@@ -322,10 +331,18 @@ export class CppSettings extends Settings {
                     if (semver.ltr(userVersion, bundledVersion)) {
                         path = "";
                         setCachedClangPath(path);
+                        clangVersion = bundledVersion;
+                    } else {
+                        clangVersion = userVersion;
                     }
                 } catch {
                     path = "";
                     setCachedClangPath(path);
+                    clangVersion = bundledVersion;
+                }
+
+                if (!isFormat && clangVersion) {
+                    setCachedClangTidyVersion(clangVersion);
                 }
             }
         }
