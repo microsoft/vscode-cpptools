@@ -100,4 +100,76 @@ MyName2=Value2
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
         assertEnvironmentEqual(result.Env, "MyName2", "Value2");
     });
+
+    test("Resolve a reference to a variable defined earlier in the file", () => {
+        const content: string = `USER=admin
+EMAIL=\${USER}@example.org`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "USER", "admin");
+        assertEnvironmentEqual(result.Env, "EMAIL", "admin@example.org");
+    });
+
+    test("Resolve a reference from the initial environment", () => {
+        const initialEnv: Environment[] = [{ name: "USER", value: "admin" }];
+        const content: string = `EMAIL=\${USER}@example.org`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", initialEnv);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "EMAIL", "admin@example.org");
+    });
+
+    test("Leave an unknown reference untouched", () => {
+        const content: string = `EMAIL=\${UNKNOWN_USER}@example.org`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "EMAIL", "${UNKNOWN_USER}@example.org");
+    });
+
+    test("Resolve a reference from the process environment", () => {
+        const name: string = "CPPTOOLS_ENVFILE_INTERPOLATION_TEST";
+        const previous: string | undefined = process.env[name];
+        process.env[name] = "from-process";
+        try {
+            const content: string = `EMAIL=\${${name}}@example.org`;
+            const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+            assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+            assertEnvironmentEqual(result.Env, "EMAIL", "from-process@example.org");
+        } finally {
+            if (previous === undefined) {
+                delete process.env[name];
+            } else {
+                process.env[name] = previous;
+            }
+        }
+    });
+
+    test("Protect a reference inside a single-quoted value from the launch expansion", () => {
+        const content: string = `USER=admin\nEMAIL='\${USER}@example.org'`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        // ${dollar} is the one form expandAllStrings leaves alone, and it collapses to a plain $
+        // when that expansion finishes (expand.ts), so the debuggee still receives the literal.
+        assertEnvironmentEqual(result.Env, "EMAIL", "${dollar}{USER}@example.org");
+    });
+
+    test("Protect an escaped reference the same way, without the backslash", () => {
+        const content: string = `USER=admin\nEMAIL=\\\${USER}@example.org`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "EMAIL", "${dollar}{USER}@example.org");
+    });
+
+    test("Leave a resolved reference bare, so the expansion can still see it", () => {
+        const content: string = `USER=admin\nEMAIL=\${USER}@example.org`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "EMAIL", "admin@example.org");
+    });
 });
