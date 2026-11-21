@@ -11,6 +11,8 @@ debugAdapters
 LLVM
 bin/assert_dialog.sh
 bin/binaryVersion.json
+bin/clang-format
+bin/clang-tidy
 bin/cpptools*
 bin/edge_cli
 bin/isense_driver
