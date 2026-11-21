@@ -74,12 +74,23 @@ export class ParsedEnvironmentFile {
                 // a bare ${VAR} would be replaced or reported instead of reaching the debuggee.
                 // ${dollar} is the one form that expansion leaves alone and collapses to a plain
                 // $ once it is done, which is what makes the literal survive the trip.
+                //
+                // The dotenv-style names are not the only ones that expansion touches: it also
+                // rewrites ${env:...} and runs ${command:...}, both matched on anything up to the
+                // closing brace. So the protection cannot be limited to [\w\.\-]+ -- every ${ in
+                // a single-quoted value, and every escaped ${ anywhere, is written back, whatever
+                // follows it. Unescaped dotenv-style names are the only ones resolved here; an
+                // unescaped ${env:...} is left for the launch expansion, as before.
                 if (singleQuoted) {
-                    value = value.replace(/\$\{([\w\.\-]+)\}/g, (_full: string, name: string): string => `\${dollar}{${name}}`);
+                    value = value.replace(/\$\{/g, `\${dollar}{`);
                 } else {
-                    value = value.replace(/(\\)?\$\{([\w\.\-]+)\}/g, (full: string, escape: string | undefined, name: string): string => {
+                    value = value.replace(/(\\)?\$\{([\w\.\-]+)\}|\\\$\{/g, (full: string, escape: string | undefined, name: string | undefined): string => {
                         if (escape) {
                             return `\${dollar}{${name}}`;
+                        }
+                        if (name === undefined) {
+                            // Escaped opener that is not a dotenv-style name, e.g. \${env:HOME}.
+                            return `\${dollar}{`;
                         }
                         if (env.has(name)) {
                             return env.get(name);

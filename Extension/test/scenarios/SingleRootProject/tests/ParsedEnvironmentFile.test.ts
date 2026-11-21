@@ -165,6 +165,34 @@ EMAIL=\${USER}@example.org`;
         assertEnvironmentEqual(result.Env, "EMAIL", "${dollar}{USER}@example.org");
     });
 
+    test("Protect a launch reference inside a single-quoted value", () => {
+        // ${env:...} and ${command:...} are matched on anything up to the closing brace, so a
+        // dotenv-style name filter would let them through and the launch expansion would
+        // substitute (or run) them even though the value is single-quoted.
+        const content: string = `HOME_DIR='\${env:HOME}'\nCMD='\${command:workbench.action.files.newUntitledFile}'`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "HOME_DIR", "${dollar}{env:HOME}");
+        assertEnvironmentEqual(result.Env, "CMD", "${dollar}{command:workbench.action.files.newUntitledFile}");
+    });
+
+    test("Protect an escaped launch reference, without the backslash", () => {
+        const content: string = `HOME_DIR=\\\${env:HOME}`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "HOME_DIR", "${dollar}{env:HOME}");
+    });
+
+    test("Leave an unescaped launch reference bare for the expansion", () => {
+        const content: string = `HOME_DIR=\${env:HOME}`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "HOME_DIR", "${env:HOME}");
+    });
+
     test("Leave a resolved reference bare, so the expansion can still see it", () => {
         const content: string = `USER=admin\nEMAIL=\${USER}@example.org`;
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
