@@ -12,6 +12,18 @@
  */
 const versionPattern: RegExp = /^([0-9]+)\.[0-9]+\.[0-9]+$/;
 
+/**
+ * The version token `clang-tidy --version` reports, exactly as written.
+ *
+ * A release prints a plain X.Y.Z, but a development build prints a suffix (24.0.0git) and a
+ * prerelease prints one too (19.1.0-rc1). The suffix is kept so that documentationRelease can
+ * reject those: the .1.0 page for their major is not published until that release exists, so
+ * building a URL from the stripped number points at a 404.
+ */
+export function clangTidyVersionFromOutput(output: string): string | undefined {
+    return output.match(/(\d+\.\d+\.\d+\S*)/)?.[1];
+}
+
 /** The release a clang-tidy version's documentation was published under. */
 function documentationRelease(clangTidyVersion: string): string | undefined {
     const match: RegExpMatchArray | null = clangTidyVersion.match(versionPattern);

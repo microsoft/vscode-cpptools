@@ -16,6 +16,7 @@ import { getCachedClangFormatPath, getCachedClangTidyPath, getCachedClangTidyVer
 import { isWindows } from '../constants';
 import * as telemetry from '../telemetry';
 import { cachedEditorConfigLookups, DefaultClient, hasTrustedCompilerPaths } from './client';
+import { clangTidyVersionFromOutput } from './clangTidyDocumentation';
 import { getEditorConfigSettings, mapIndentationReferenceToEditorConfig, mapIndentToEditorConfig, mapNewOrSameLineToEditorConfig, mapWrapToEditorConfig } from './editorConfig';
 import { clients } from './extension';
 import { CommentPattern } from './languageConfig';
@@ -284,7 +285,27 @@ export class CppSettings extends Settings {
         // clang-tidy a resource carrying its own path is running. Reporting it would point that
         // resource's documentation links at the wrong release, so leave the version unknown and
         // let the caller fall back.
-        return changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.path")) ? undefined : getCachedClangTidyVersion();
+        if (changeBlankStringToUndefined(this.getAsStringOrUndefined("codeAnalysis.clangTidy.path"))) {
+            return undefined;
+        }
+        // A multi-root workspace can mix that: one folder sets an explicit path, another relies on
+        // auto-discovery, and a translation unit from the first can report a header that lives in
+        // the second. The diagnostic only carries the file's URI, so the folder of that URI does
+        // not say which clang-tidy ran. As soon as any folder overrides the path, the cached
+        // auto-discovered version is not trustworthy and the caller has to fall back.
+        if (this.anyWorkspaceFolderOverridesClangTidyPath()) {
+            return undefined;
+        }
+        return getCachedClangTidyVersion();
+    }
+
+    private anyWorkspaceFolderOverridesClangTidyPath(): boolean {
+        const folders: readonly vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
+        if (folders === undefined || folders.length === 0) {
+            return false;
+        }
+        return folders.some((folder: vscode.WorkspaceFolder) =>
+            changeBlankStringToUndefined(new CppSettings(folder.uri).getAsStringOrUndefined("codeAnalysis.clangTidy.path")) !== undefined);
     }
 
     public get clangFormatPath(): string | undefined {
@@ -327,8 +348,11 @@ export class CppSettings extends Settings {
                 // Invoke the version on the system to compare versions.  Use ours if it's more recent.
                 try {
                     const output: string = execFileSync(path, ['--version']).toString();
-                    const userVersion = output.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
-                    if (semver.ltr(userVersion, bundledVersion)) {
+                    const userVersion: string = clangTidyVersionFromOutput(output) ?? "";
+                    // Compare on the plain number: semver rejects 24.0.0git. The cache keeps the
+                    // token as written, so a development build is not mistaken for a release.
+                    const userRelease: string = userVersion.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "";
+                    if (semver.ltr(userRelease, bundledVersion)) {
                         path = "";
                         setCachedClangPath(path);
                         clangVersion = bundledVersion;
