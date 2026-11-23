@@ -16,7 +16,7 @@ let cachedVersion: string | undefined;
 let folderPaths: Map<string, string | undefined>;
 let workspaceFolders: WorkspaceFolder[] | undefined;
 
-const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../../package.json'), 'utf8'));
+const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../../../package.json'), 'utf8'));
 
 function folderOf(resource: unknown): string | undefined {
     const uri: any = resource;
