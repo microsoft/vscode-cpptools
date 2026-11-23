@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import { NotificationType, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
+import { getClangTidyDocumentationUrl } from './clangTidyDocumentation';
 import { Location, WorkspaceEdit } from './commonTypes';
 import { CppSourceStr } from './extension';
 import { LanguageClient } from './languageClient';
@@ -34,6 +35,7 @@ export interface CodeActionDiagnosticInfo {
     fixCodeAction?: vscode.CodeAction;
     // suppressCodeAction?: vscode.CodeAction; // TODO?
     removeCodeAction?: vscode.CodeAction;
+    docCodeAction?: vscode.CodeAction;
 }
 
 // Used to handle fix invalidation after an edit,
@@ -63,7 +65,6 @@ export interface CodeActionCodeInfo {
     fixAllTypeCodeAction?: vscode.CodeAction;
     disableAllTypeCodeAction?: vscode.CodeAction;
     removeAllTypeCodeAction?: vscode.CodeAction;
-    docCodeAction?: vscode.CodeAction;
 }
 
 interface CodeActionAllInfo {
@@ -256,6 +257,11 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
     }
     ++nextVersion;
     const codeActionDiagnosticInfo: CodeActionDiagnosticInfo[] = [];
+    // The clang-tidy version depends on the resource and on the workspace folders, not on the
+    // diagnostic, so resolve it once for the file instead of once per diagnostic code.
+    const clangTidySettings: CppSettings = new CppSettings(realUri);
+    const clangTidyVersion: string | undefined = clangTidySettings.clangTidyVersion;
+    const showDocumentation: boolean = clangTidySettings.clangTidyCodeActionShowDocumentation;
     for (const d of params.diagnostics) {
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range),
             getLocalizedString(d.localizeStringParams), d.severity);
@@ -379,24 +385,22 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                     const checksPage: string = dashIndex > 0 ? primaryCode.substring(dashIndex + 1) : primaryCode;
                     docPage = `checks${checksGroup}/${checksPage}.html`;
                 }
-                // TODO: This should be checking the clang-tidy version used to better support usage of older versions.
-                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/23.1.0/tools/clang/tools/extra/docs/clang-tidy/${docPage}`);
+                const primaryDocUri: vscode.Uri = vscode.Uri.parse(getClangTidyDocumentationUrl(docPage, clangTidyVersion));
                 diagnostic.code = { value: identifier.code, target: primaryDocUri };
 
-                if (new CppSettings().clangTidyCodeActionShowDocumentation) {
-                    if (codeActionCodeInfo.docCodeAction === undefined) {
-                        codeActionCodeInfo.docCodeAction = {
-                            title: localize("show.documentation.for", "Show documentation for {0}", primaryCode),
-                            command: {
-                                title: 'ShowDocumentation',
-                                command: 'C_Cpp.ShowCodeAnalysisDocumentation',
-                                arguments: [primaryDocUri]
-                            },
-                            kind: vscode.CodeActionKind.QuickFix
-                        };
-                    }
-                } else {
-                    codeActionCodeInfo.docCodeAction = undefined;
+                // The target URL follows the clang-tidy version in use for this resource, so the
+                // action belongs to the diagnostic. Caching it per check code instead would keep
+                // whichever folder reported first and reuse its release everywhere.
+                if (showDocumentation) {
+                    codeAction.docCodeAction = {
+                        title: localize("show.documentation.for", "Show documentation for {0}", primaryCode),
+                        command: {
+                            title: 'ShowDocumentation',
+                            command: 'C_Cpp.ShowCodeAnalysisDocumentation',
+                            arguments: [primaryDocUri]
+                        },
+                        kind: vscode.CodeActionKind.QuickFix
+                    };
                 }
             } else {
                 diagnostic.code = d.code;
