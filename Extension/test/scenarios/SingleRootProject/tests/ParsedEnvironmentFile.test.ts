@@ -211,18 +211,15 @@ EMAIL=\${USER}@example.org`;
         assertEnvironmentEqual(result.Env, "USER_DIR", "C:\\Users\\${env:USERNAME}\\project");
     });
 
-    test("Match an initial environment name regardless of case on Windows", function () {
-        if (process.platform !== "win32") {
-            this.skip();
-        }
-
+    test("Match an initial environment name regardless of case on Windows", () => {
         // Path and PATH are the same variable on Windows, and the launch configuration may use
-        // either spelling.
+        // either spelling. Elsewhere the reference stays bare for the launch expansion.
         const content: string = `COPY=\${PATH}`;
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(
             content, "TestEnvFileName", [{ name: "Path", value: "C:\\override" }]);
 
+        const expected: string = process.platform === "win32" ? "C:\\override" : "${PATH}";
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
-        assertEnvironmentEqual(result.Env, "COPY", "C:\\override");
+        assertEnvironmentEqual(result.Env, "COPY", expected);
     });
 });
