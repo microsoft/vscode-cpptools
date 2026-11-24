@@ -200,4 +200,29 @@ EMAIL=\${USER}@example.org`;
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "EMAIL", "admin@example.org");
     });
+
+    test("Keep the separator before a reference in a Windows path", () => {
+        // The backslash in front of ${ here separates path segments, it does not escape the
+        // reference. Dropping it turned C:\Users\Alice\project into C:\Users${env:USERNAME}.
+        const content: string = `USER_DIR=C:\\Users\\\${env:USERNAME}\\project`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "USER_DIR", "C:\\Users\\${env:USERNAME}\\project");
+    });
+
+    test("Match an initial environment name regardless of case on Windows", function () {
+        if (process.platform !== "win32") {
+            this.skip();
+        }
+
+        // Path and PATH are the same variable on Windows, and the launch configuration may use
+        // either spelling.
+        const content: string = `COPY=\${PATH}`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(
+            content, "TestEnvFileName", [{ name: "Path", value: "C:\\override" }]);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "COPY", "C:\\override");
+    });
 });

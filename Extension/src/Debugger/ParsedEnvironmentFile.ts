@@ -84,20 +84,7 @@ export class ParsedEnvironmentFile {
                 if (singleQuoted) {
                     value = value.replace(/\$\{/g, `\${dollar}{`);
                 } else {
-                    value = value.replace(/(\\)?\$\{([\w\.\-]+)\}|\\\$\{/g, (full: string, escape: string | undefined, name: string | undefined): string => {
-                        if (escape) {
-                            return `\${dollar}{${name}}`;
-                        }
-                        if (name === undefined) {
-                            // Escaped opener that is not a dotenv-style name, e.g. \${env:HOME}.
-                            return `\${dollar}{`;
-                        }
-                        if (env.has(name)) {
-                            return env.get(name);
-                        }
-                        const processValue: string | undefined = process.env[name];
-                        return processValue !== undefined ? processValue : full;
-                    });
+                    value = ParsedEnvironmentFile.resolveReferences(value, (name: string) => ParsedEnvironmentFile.lookup(name, env));
                 }
 
                 env.set(key, value);
@@ -126,5 +113,85 @@ export class ParsedEnvironmentFile {
         }
 
         return new ParsedEnvironmentFile(arrayEnv, warning);
+    }
+
+    /**
+     * Resolve the references the file can actually answer, and leave the others untouched so
+     * the launch expansion still sees them.
+     */
+    private static resolveReferences(value: string, known: (name: string) => string | undefined): string {
+        let result: string = "";
+        let i: number = 0;
+        while (i < value.length) {
+            const char: string = value.charAt(i);
+
+            // An escaped reference is literal. ${dollar} is the form the launch expansion leaves
+            // alone and collapses back to a plain $ once it is done, so the debuggee is the only
+            // place that sees the literal.
+            if (char === "\\" && value.charAt(i + 1) === "$" && ParsedEnvironmentFile.isReferenceEscape(value, i)) {
+                const end: number = value.indexOf("}", i + 2);
+                if (end !== -1) {
+                    result += `\${dollar}{${value.substring(i + 3, end)}}`;
+                    i = end + 1;
+                    continue;
+                }
+            }
+
+            if (char === "$" && value.charAt(i + 1) === "{") {
+                const end: number = value.indexOf("}", i + 2);
+                if (end !== -1) {
+                    const name: string = value.substring(i + 2, end);
+                    const resolved: string | undefined = /^[\w\.\-]+$/.test(name) ? known(name) : undefined;
+                    result += resolved !== undefined ? resolved : value.substring(i, end + 1);
+                    i = end + 1;
+                    continue;
+                }
+            }
+
+            result += char;
+            i += 1;
+        }
+
+        return result;
+    }
+
+    /**
+     * A backslash only escapes the reference where it cannot be a path separator instead. In
+     * C:\Users\${env:USERNAME}\project the backslash separates path segments, so the reference
+     * still expands. At the start of a value, or after =, a quote or a space, it is an escape.
+     */
+    private static isReferenceEscape(value: string, index: number): boolean {
+        if (index === 0) {
+            return true;
+        }
+        return !/[A-Za-z0-9_.\-:\/\\]/.test(value.charAt(index - 1));
+    }
+
+    /**
+     * Environment variable names are case-insensitive on Windows, and the launch configuration
+     * may have spelled the name differently than the reference does, so Path and PATH have to
+     * find each other there.
+     */
+    private static lookup(name: string, env: Map<string, any>): string | undefined {
+        if (env.has(name)) {
+            return env.get(name);
+        }
+
+        if (process.platform === "win32") {
+            const folded: string = name.toLowerCase();
+            for (const key of env.keys()) {
+                if (key.toLowerCase() === folded) {
+                    return env.get(key);
+                }
+            }
+            for (const key of Object.keys(process.env)) {
+                if (key.toLowerCase() === folded) {
+                    return process.env[key];
+                }
+            }
+            return undefined;
+        }
+
+        return process.env[name];
     }
 }
