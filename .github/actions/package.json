@@ -40,13 +40,13 @@
   },
   "overrides": {
     "@eslint/config-array": {
-      "minimatch": "11.0.3"
+      "minimatch": "11.0.9"
     },
     "@typescript-eslint/typescript-estree": {
-      "minimatch": "11.0.3"
+      "minimatch": "11.0.9"
     },
     "eslint": {
-      "minimatch": "11.0.3"
+      "minimatch": "11.0.9"
     }
   }
 }

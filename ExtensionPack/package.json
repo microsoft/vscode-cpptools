@@ -9,7 +9,7 @@
         "name": "Microsoft Corporation"
     },
     "license": "SEE LICENSE IN LICENSE.txt",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "engines": {
         "vscode": "^1.48.0"
     },
@@ -46,7 +46,7 @@
     },
     "overrides": {
         "@vscode/vsce": {
-            "minimatch": "11.0.3"
+            "minimatch": "11.0.9"
         }
     }
 }
