@@ -1,5 +1,34 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.36.0: November 19, 2026
+### New Features
+* Add 'Type Hierarchy' support for C++ classes and structs. [#3799](https://github.com/microsoft/vscode-cpptools/issues/3799)
+* Add 'Go to Implementation' support for finding derived C++ classes and structs. [#3941](https://github.com/microsoft/vscode-cpptools/issues/3941)
+
+### Enhancement
+* Reduce unnecessary browse database rescans when unrelated files are created.
+
+### Bug Fixes
+* Fix function hovers showing a macro's documentation instead of the function's documentation. [#14744](https://github.com/microsoft/vscode-cpptools/issues/14744)
+* Respect `files.exclude` when enumerating directories in the workspace. [#14827](https://github.com/microsoft/vscode-cpptools/issues/14827)
+* Fix false IntelliSense redefinition errors for C23 `struct` and `union` declarations. [#14839](https://github.com/microsoft/vscode-cpptools/issues/14839)
+* Update the minimum supported VS Code version to 1.82. [PR #14850](https://github.com/microsoft/vscode-cpptools/pull/14850)
+* Exclude the development-only `.yarn-bootstrap` directory from the extension package. [#14854](https://github.com/microsoft/vscode-cpptools/issues/14854)
+* Fix incomplete unreachable-code dimming around loops. [#14855](https://github.com/microsoft/vscode-cpptools/issues/14855)
+* Default unused-include suggestions to `none` and honor per-file `.editorconfig` diagnostic levels. [PR #14858](https://github.com/microsoft/vscode-cpptools/pull/14858)
+* Fix false unused-include diagnostics for `<stdlib.h>` and `<cstdlib>`. [#14861](https://github.com/microsoft/vscode-cpptools/issues/14861)
+* Fix 'Go to Definition' on `#include` directives resolved through recursive include paths. [#14868](https://github.com/microsoft/vscode-cpptools/issues/14868)
+* Fix `clang-cl` compiler detection when compile-only options and warnings-as-errors are used. [#14875](https://github.com/microsoft/vscode-cpptools/issues/14875)
+* Fix IntelliSense crashes when hovering macro arguments, parsing macro definitions, or analyzing deduction guides with `noexcept`.
+* Fix IntelliSense handling of C11 and later character types when using MSVC 19.44 or later.
+* Fix unused-include attribution for dependent function calls with mismatched arguments.
+* Fix IntelliSense substitution of indirectly read constant template arguments.
+* Fix IntelliSense decay of cv- and ref-qualified function types in Clang mode.
+* Fix an IntelliSense hang when analyzing recursive template conversions.
+* Fix member completion for Unicode prefixes.
+* Various localization updates.
+* Update dependencies.
+
 ## Version 1.35.6: November 2, 2026
 ### New Features
 * Add the opt-in `C_Cpp.hoverShowIntegralValuesInHexadecimal` setting to display integral constants in hexadecimal in IntelliSense hovers. [#7281](https://github.com/microsoft/vscode-cpptools/issues/7281)
