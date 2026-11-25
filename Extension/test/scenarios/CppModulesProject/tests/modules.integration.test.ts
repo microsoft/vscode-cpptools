@@ -17,11 +17,17 @@
 //    project, and its entries are actually applied to the translation units
 //    (verified through sentinel defines and hover assertions, not just
 //    readiness),
-//  * module related compiler arguments (GCC, Clang and MSVC spellings) are
-//    accepted and delivered through the custom configuration provider path.
-//    The sentinel defines travel in the same `compilerArgs` array as the
-//    module flags, so the hover assertions verify that these arguments -- not
-//    a separate channel -- reach the language server and take effect.
+//  * module related compiler arguments are accepted and delivered through the
+//    custom configuration provider path (GCC and MSVC spellings; Clang is
+//    exercised through the compile_commands.json suite above, not the
+//    provider). The verification is effect-based but partial: a sentinel
+//    define travels in the same `compilerArgs` array as the module flags, and
+//    the hover assertions prove that `compilerArgs` reach the language server
+//    and are applied to the translation unit. They do NOT verify each module
+//    switch individually: a module flag dropped selectively (e.g.
+//    `-fmodules-ts` or `/reference` removed while the sentinel define
+//    remains) would not be detected by these tests. Per-flag assertions
+//    would require observing module semantics, which are not available yet.
 //
 // No statement is made about the semantic understanding of module imports by
 // the language server itself: that support is still in development and is
@@ -294,8 +300,9 @@ suite("custom configuration provider with module compiler args", function(): voi
     // hover assertions verify that the compilerArgs themselves (not a separate
     // channel) reach the language server and are applied to the translation
     // unit. The `defines` field stays empty on purpose: when a sentinel was
-    // delivered through `defines` instead, dropping or rewriting the module
-    // flags in `compilerArgs` would go unnoticed.
+    // delivered through `defines` instead, dropping the whole `compilerArgs`
+    // array would go unnoticed. Known limitation, documented in the suite
+    // header: the sentinel proves the array is applied, not each flag in it.
     const gccModuleConfig: api.SourceFileConfiguration = {
         includePath: [ "${workspaceFolder}" ],
         defines: [],
