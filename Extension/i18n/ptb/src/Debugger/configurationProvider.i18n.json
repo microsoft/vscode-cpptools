@@ -40,7 +40,7 @@
 	"select.debug.configuration": "Selecionar uma configuração de depuração",
 	"command.args.must.be.array": "\"args\" na etapa de implantação de comando deve ser uma matriz.",
 	"missing.properties.copyFile": "\"host\", \"arquivos\" e \"targetDir\" são necessários nas etapas {0}.",
-	"incorrect.files.type.copyFile": "\"arquivos\" deve ser uma cadeia de caracteres ou uma matriz de cadeias de caracteres em etapas {0}.",
+	"incorrect.files.type.copyFile": "\"files\" deve ser uma cadeia de caracteres ou uma matriz de cadeias de caracteres em etapas {0}.",
 	"missing.properties.ssh": "\"host\" e \"comando\" são necessários para as etapas ssh.",
 	"missing.properties.shell": "\"comando\" é necessário para as etapas do shell.",
 	"deploy.step.type.not.supported": "Não há suporte {0} tipo de etapa de implantação.",
