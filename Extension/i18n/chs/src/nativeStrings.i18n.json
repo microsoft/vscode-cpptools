@@ -444,5 +444,7 @@
 	"help_deprecated_lsp_config": "--workspace-config 的弃用别名。",
 	"help_deprecated_allow_missing_lsp_config": "--allow-missing-workspace-config 的弃用别名。",
 	"error_conflicting_config_args": "--workspace-config 不能与 --lsp-config 组合使用。",
-	"error_config_arg_requires_path": "{0} 需要路径。"
+	"error_config_arg_requires_path": "{0} 需要路径。",
+	"include_is_not_used": "未使用 Include",
+	"include_is_duplicated": "Include 重复"
 }
