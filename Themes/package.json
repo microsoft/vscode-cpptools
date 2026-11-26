@@ -68,7 +68,7 @@
   "overrides": {
     "fast-uri": "^3.1.6",
     "@vscode/vsce": {
-      "minimatch": "11.0.3"
+      "minimatch": "11.0.9"
     }
   }
 }

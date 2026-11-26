@@ -53,9 +53,9 @@ const vscode = {
 
 const editorConfig: typeof import('../../src/LanguageServer/editorConfig') = proxyquire.noCallThru()(
     '../../src/LanguageServer/editorConfig', {
-        vscode,
-        '../common': { checkFileExistsSync: existsSync }
-    });
+    vscode,
+    '../common': { checkFileExistsSync: existsSync }
+});
 
 describe('EditorConfig resolution and refresh', () => {
     let directory: string;
@@ -101,6 +101,13 @@ describe('EditorConfig resolution and refresh', () => {
         writeConfig('', 'root = true\n[*.cpp]\ncpp_include_cleanup_remove_unused_error_tag_type = warning\n' +
             '[sample.cpp]\ncpp_include_cleanup_remove_unused_error_tag_type = error\n');
         strictEqual(getLevel(), 'error');
+    });
+
+    it('matches recursive sections with brace alternatives', () => {
+        writeConfig('', 'root = true\n[**/*.{cpp,h}]\nindent_size = 2\n');
+        strictEqual(editorConfig.getEditorConfigSettings(join(directory, 'nested/sample.cpp')).indent_size, 2);
+        strictEqual(editorConfig.getEditorConfigSettings(join(directory, 'nested/deep/sample.h')).indent_size, 2);
+        strictEqual(editorConfig.getEditorConfigSettings(join(directory, 'nested/sample.c')).indent_size, undefined);
     });
 
     it('preserves the ordering of repeated wildcard sections', () => {

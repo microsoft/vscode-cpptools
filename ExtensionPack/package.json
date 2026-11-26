@@ -46,7 +46,7 @@
     },
     "overrides": {
         "@vscode/vsce": {
-            "minimatch": "11.0.3"
+            "minimatch": "11.0.9"
         }
     }
 }
