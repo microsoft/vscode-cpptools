@@ -213,13 +213,40 @@ EMAIL=\${USER}@example.org`;
 
     test("Match an initial environment name regardless of case on Windows", () => {
         // Path and PATH are the same variable on Windows, and the launch configuration may use
-        // either spelling. Elsewhere the reference stays bare for the launch expansion.
-        const content: string = `COPY=\${PATH}`;
+        // either spelling. The name is not in the process environment, so off Windows the
+        // reference is left bare for the launch expansion instead of resolving to a host value.
+        const content: string = `COPY=\${TEST_CASE_FOLDER}`;
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(
-            content, "TestEnvFileName", [{ name: "Path", value: "C:\\override" }]);
+            content, "TestEnvFileName", [{ name: "test_case_folder", value: "from-config" }]);
 
-        const expected: string = process.platform === "win32" ? "C:\\override" : "${PATH}";
+        const expected: string = process.platform === "win32" ? "from-config" : "${TEST_CASE_FOLDER}";
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "COPY", expected);
+    });
+
+    test("Keep an escaped reference inside ordinary text literal", () => {
+        // The backslash is only a path separator inside a Windows path. In prose it escapes.
+        const content: string = `USER=admin\nEMAIL=prefix\\\${USER}@example.org`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "EMAIL", "prefix${dollar}{USER}@example.org");
+    });
+
+    test("Leave a lone escaped dollar alone", () => {
+        // There is no reference here, so there is nothing to rewrite.
+        const content: string = `VALUE=\\$USER}`;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "VALUE", "\\$USER}");
+    });
+
+    test("Protect a quoted value with trailing whitespace", () => {
+        const content: string = `USER=admin\nEMAIL='\${USER}@example.org'   `;
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
+
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assertEnvironmentEqual(result.Env, "EMAIL", "${dollar}{USER}@example.org");
     });
 });

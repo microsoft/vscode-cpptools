@@ -59,7 +59,13 @@ export class ParsedEnvironmentFile {
 
                 // A single-quoted value is literal, so a reference inside it must not be
                 // expanded. The quotes come off on the next line, so this has to be read here.
-                const singleQuoted: boolean = (value.length > 1) && (value.charAt(0) === "'") && (value.charAt(value.length - 1) === "'");
+                // Whitespace outside the closing quote is not part of the value, and leaving it
+                // in hid the quote from the check below.
+                const trimmed: string = value.replace(/\s+$/, "");
+                const singleQuoted: boolean = (trimmed.length > 1) && (trimmed.charAt(0) === "'") && (trimmed.charAt(trimmed.length - 1) === "'");
+                if (singleQuoted) {
+                    value = trimmed;
+                }
 
                 value = value.replace(/(^['"]|['"]$)/g, "");
 
@@ -120,6 +126,10 @@ export class ParsedEnvironmentFile {
      * the launch expansion still sees them.
      */
     private static resolveReferences(value: string, known: (name: string) => string | undefined): string {
+        // A backslash in front of a reference escapes it, except inside a Windows path, where it
+        // separates segments instead. Only a drive letter or a UNC prefix makes the value a path:
+        // in ordinary text \${ is an escape, on any platform.
+        const windowsPath: boolean = /^[A-Za-z]:[\\/]/.test(value) || /^\\\\/.test(value);
         let result: string = "";
         let i: number = 0;
         while (i < value.length) {
@@ -127,9 +137,10 @@ export class ParsedEnvironmentFile {
 
             // An escaped reference is literal. ${dollar} is the form the launch expansion leaves
             // alone and collapses back to a plain $ once it is done, so the debuggee is the only
-            // place that sees the literal.
-            if (char === "\\" && value.charAt(i + 1) === "$" && ParsedEnvironmentFile.isReferenceEscape(value, i)) {
-                const end: number = value.indexOf("}", i + 2);
+            // place that sees the literal. The whole opener has to be there: \$USER} is not a
+            // reference and must not be rewritten.
+            if (char === "\\" && value.charAt(i + 1) === "$" && value.charAt(i + 2) === "{" && !windowsPath) {
+                const end: number = value.indexOf("}", i + 3);
                 if (end !== -1) {
                     result += `\${dollar}{${value.substring(i + 3, end)}}`;
                     i = end + 1;
@@ -153,18 +164,6 @@ export class ParsedEnvironmentFile {
         }
 
         return result;
-    }
-
-    /**
-     * A backslash only escapes the reference where it cannot be a path separator instead. In
-     * C:\Users\${env:USERNAME}\project the backslash separates path segments, so the reference
-     * still expands. At the start of a value, or after =, a quote or a space, it is an escape.
-     */
-    private static isReferenceEscape(value: string, index: number): boolean {
-        if (index === 0) {
-            return true;
-        }
-        return !/[A-Za-z0-9_.\-:\/\\]/.test(value.charAt(index - 1));
     }
 
     /**
