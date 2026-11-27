@@ -3,12 +3,14 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from "vscode";
 import * as nls from 'vscode-nls';
 import { getOutputChannel } from '../logger';
 import { logDebuggerEvent } from '../telemetry';
+import { getDebugAdapterEnvironment } from './debugAdapterEnvironment';
 import { RunWithoutDebuggingAdapter } from './runWithoutDebuggingAdapter';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -45,7 +47,17 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
 
             const command: string = path.join(this.context.extensionPath, adapter);
 
-            return new vscode.DebugAdapterExecutable(command, []);
+            let procLimits: string | undefined;
+            if (os.platform() === 'linux') {
+                try {
+                    procLimits = await fs.promises.readFile('/proc/self/limits', 'utf8');
+                } catch {
+                    // Leave procLimits undefined: no environment override.
+                }
+            }
+            const env: { [key: string]: string } | undefined = getDebugAdapterEnvironment(os.platform(), process.env, procLimits);
+
+            return new vscode.DebugAdapterExecutable(command, [], env ? { env } : undefined);
         } finally {
             logDebuggerEvent('createDebugAdapter', properties);
         }
